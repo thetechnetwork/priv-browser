@@ -50,31 +50,19 @@ jobs:
         
     - name: Debug and Initialize
       run: |
-        # Print current directory and contents
-        pwd
-        ls -la
+        # Clean EVERYTHING in workspace first
+        cd ${{ github.workspace }}
+        rm -rf *
         
-        # Create and move to new directory structure
-        rm -rf ${{ github.workspace }}/chromium_build || true
-        mkdir -p ${{ github.workspace }}/chromium_build
-        cd ${{ github.workspace }}/chromium_build
-        
-        # Print new directory and contents
-        pwd
-        ls -la
+        # Create new directory
+        mkdir chromium_build
+        cd chromium_build
         
         # Initialize gclient with config
         gclient config --spec 'solutions = [{"url": "https://chromium.googlesource.com/chromium/src.git","managed": False,"name": "src","custom_vars": {"checkout_android": False,"checkout_chromeos": False,}}]'
-        
-        # Verify gclient file
-        ls -la
-        cat .gclient
-        
+                
         # Now fetch chromium
         fetch --no-history chromium
-        
-        # Run gclient sync to ensure everything is properly synchronized
-        gclient sync --no-history
         
     - name: Generate build files
       working-directory: ${{ github.workspace }}/chromium_build/src
