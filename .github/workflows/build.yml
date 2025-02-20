@@ -15,7 +15,6 @@ jobs:
     - name: Create working directory
       run: |
         mkdir D:\chromium
-        cd D:\chromium
         
     - name: Set up Python
       uses: actions/setup-python@v5
@@ -49,6 +48,7 @@ jobs:
         gclient
     
     - name: Create .gclient file
+      working-directory: D:\chromium
       run: |
         @"
         solutions = [
@@ -73,10 +73,14 @@ jobs:
         
     - name: Generate build files
       working-directory: D:\chromium\src
+      run: |
+        gn gen out/Default --args="is_debug=false is_component_build=true symbol_level=0 enable_nacl=false"
         gn gen out/Default --args="is_debug=false is_component_build=true symbol_level=0 enable_nacl=false"
     
     - name: Build Chromium
       working-directory: D:\chromium\src
+      run: |
+        autoninja -C out/Default chrome
         autoninja -C out/Default chrome
     
     - name: Package artifacts
