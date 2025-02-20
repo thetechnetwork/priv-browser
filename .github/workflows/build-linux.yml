@@ -66,7 +66,7 @@ jobs:
         echo "PATH=/opt/depot_tools:$PATH" >> $GITHUB_ENV
         
     - name: Configure Git
-      working-directory: /opt/chromium
+      working-directory: /mnt/build/chromium
       run: |
         git config --global core.autocrlf false
         git config --global core.filemode false
