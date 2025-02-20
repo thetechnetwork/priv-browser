@@ -53,19 +53,22 @@ jobs:
     - name: Initialize gclient and fetch source
       working-directory: /opt/chromium
       run: |
-        # Initialize gclient with config
-        gclient config --spec 'solutions = [{"url": "https://chromium.googlesource.com/chromium/src.git","managed": False,"name": "src","custom_vars": {"checkout_android": False,"checkout_chromeos": False,}}]'
-        
-        # Try fetch first, if it fails (likely due to existing partial checkout), fall back to sync
-        fetch --no-history chromium || {
-          echo "Fetch failed, likely due to existing checkout. Trying gclient sync instead..."
-          cd src 2>/dev/null || true  # Try to enter src directory if it exists
-          git reset --hard HEAD || true  # Try to reset any local changes
-          cd ..
-          gclient sync --no-history --with_branch_heads
+        # Function to perform clean fetch
+        clean_fetch() {
+          echo "Performing clean fetch..."
+          rm -rf *  # Clean current directory
+          gclient config --spec 'solutions = [{"url": "https://chromium.googlesource.com/chromium/src.git","managed": False,"name": "src","custom_vars": {"checkout_android": False,"checkout_chromeos": False,}}]'
+          fetch --no-history chromium
         }
+
+        # Try initial fetch
+        if ! fetch --no-history chromium; then
+          echo "Initial fetch failed, attempting clean fetch..."
+          clean_fetch
+        fi
         
-        # Always run a final sync to ensure everything is properly synchronized
+        # Final sync to ensure everything is properly synchronized
+        cd src
         gclient sync --no-history --with_branch_heads
         
     - name: Generate build files
