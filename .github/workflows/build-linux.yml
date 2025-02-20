@@ -56,19 +56,36 @@ jobs:
         # Function to perform clean fetch
         clean_fetch() {
           echo "Performing clean fetch..."
-          rm -rf *  # Clean current directory
+          # Safe cleanup of only chromium directory contents
+          cd /opt/chromium
+          rm -rf .gclient .gclient_entries src
+          
+          # Initialize gclient configuration
           gclient config --spec 'solutions = [{"url": "https://chromium.googlesource.com/chromium/src.git","managed": False,"name": "src","custom_vars": {"checkout_android": False,"checkout_chromeos": False,}}]'
+          
+          # Initial fetch of source
           fetch --no-history chromium
+          
+          # Enter src directory and ensure we're on main branch
+          cd src
+          git checkout main
+          
+          # Run vpython3 bootstrap
+          gclient runhooks
         }
 
         # Try initial fetch
         if ! fetch --no-history chromium; then
           echo "Initial fetch failed, attempting clean fetch..."
           clean_fetch
+        else
+          # If initial fetch succeeded, still need to run hooks
+          cd src
+          git checkout main
+          gclient runhooks
         fi
         
         # Final sync to ensure everything is properly synchronized
-        cd src
         gclient sync --no-history --with_branch_heads
         
     - name: Generate build files
