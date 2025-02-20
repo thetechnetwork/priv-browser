@@ -48,20 +48,30 @@ jobs:
         git config --global core.fscache true
         git config --global core.preloadindex true
         
-    - name: Debug and Initialize
+    - name: Setup Environment
       run: |
-        # Clean EVERYTHING in workspace first
+        # First download depot_tools if it doesn't exist
+        if [ ! -d "${{ github.workspace }}/depot_tools" ]; then
+          git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git ${{ github.workspace }}/depot_tools
+        fi
+        
+        # Add depot_tools to PATH
+        echo "${{ github.workspace }}/depot_tools" >> $GITHUB_PATH
+        
+    - name: Initialize and Fetch
+      run: |
+        # Remove everything except depot_tools
         cd ${{ github.workspace }}
-        rm -rf *
+        find . -mindepth 1 -maxdepth 1 ! -name 'depot_tools' -exec rm -rf {} +
         
         # Create new directory
         mkdir chromium_build
         cd chromium_build
         
-        # Initialize gclient with config
+        # Initialize gclient
         gclient config --spec 'solutions = [{"url": "https://chromium.googlesource.com/chromium/src.git","managed": False,"name": "src","custom_vars": {"checkout_android": False,"checkout_chromeos": False,}}]'
                 
-        # Now fetch chromium
+        # Fetch chromium
         fetch --no-history chromium
         
     - name: Generate build files
