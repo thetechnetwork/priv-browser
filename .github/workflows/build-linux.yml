@@ -1,0 +1,88 @@
+name: Build Chromium Linux
+
+on:
+  #push:
+  #  branches: [ main ]
+  #pull_request:
+  #  branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: self-hosted
+    
+    steps:
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+    
+    - name: Create clean working directory
+      run: |
+        sudo rm -rf /opt/chromium || true
+        sudo mkdir -p /opt/chromium
+        sudo chown -R $USER:$USER /opt/chromium
+    
+    - name: Cache depot_tools
+      uses: actions/cache@v4
+      with:
+        path: /opt/depot_tools
+        key: ${{ runner.os }}-depot_tools
+    
+    - name: Install depot_tools
+      if: steps.cache-depot_tools.outputs.cache-hit != 'true'
+      run: |
+        sudo rm -rf /opt/depot_tools || true
+        git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git /opt/depot_tools
+        sudo chown -R $USER:$USER /opt/depot_tools
+    
+    - name: Configure environment
+      run: |
+        echo "PATH=/opt/depot_tools:$PATH" >> $GITHUB_ENV
+        
+    - name: Configure Git
+      working-directory: /opt/chromium
+      run: |
+        git config --global core.autocrlf false
+        git config --global core.filemode false
+        git config --global branch.autosetuprebase always
+        git config --global core.fscache true
+        git config --global core.preloadindex true
+        
+    - name: Initialize gclient and fetch source
+      working-directory: /opt/chromium
+      run: |
+        # Initialize gclient with config
+        gclient config --spec 'solutions = [{"url": "https://chromium.googlesource.com/chromium/src.git","managed": False,"name": "src","custom_vars": {"checkout_android": False,"checkout_chromeos": False,}}]'
+        
+        # Now fetch chromium
+        fetch --no-history chromium
+        
+        # Run gclient sync to ensure everything is properly synchronized
+        gclient sync --no-history
+        
+    - name: Generate build files
+      working-directory: /opt/chromium/src
+      run: |
+        gn gen out/Default --args="is_debug=false is_component_build=true symbol_level=0 enable_nacl=false"
+    
+    - name: Build Chromium
+      working-directory: /opt/chromium/src
+      run: |
+        autoninja -C out/Default chrome
+    
+    - name: Package artifacts
+      working-directory: /opt/chromium/src/out/Default
+      run: |
+        tar -czf chromium-linux.tar.gz chrome *.so *.pak *.dat locales/ MEIPreload/
+    
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: chromium-linux
+        path: /opt/chromium/src/out/Default/chromium-linux.tar.gz
+        
+    - name: Cleanup
+      if: always()
+      run: |
+        sudo rm -rf /opt/chromium || true
