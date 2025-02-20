@@ -8,7 +8,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest-16-core
     
     steps:
     - name: Free up disk space
@@ -55,7 +55,10 @@ jobs:
     - name: Install depot_tools
       if: steps.cache-depot_tools.outputs.cache-hit != 'true'
       run: |
-        sudo rm -rf /mnt/build/depot_tools
+        # Create parent directory with correct permissions first
+        sudo mkdir -p /mnt/build/depot_tools
+        sudo chown -R $USER:$USER /mnt/build/depot_tools
+        sudo rm -rf /mnt/build/depot_tools/*
         git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git /mnt/build/depot_tools
         
     - name: Configure environment
