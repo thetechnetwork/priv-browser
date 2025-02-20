@@ -8,9 +8,29 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest-16-core
     
     steps:
+    - name: Free up disk space
+      run: |
+        # Remove unnecessary large packages
+        sudo apt-get remove -y '^dotnet-.*'
+        sudo apt-get remove -y '^llvm-.*'
+        sudo apt-get remove -y 'php.*'
+        sudo apt-get remove -y azure-cli google-cloud-cli google-chrome-stable firefox powershell mono-devel
+        sudo apt-get autoremove -y
+        sudo apt-get clean
+        
+        # Remove large directories we don't need
+        sudo rm -rf /usr/share/dotnet
+        sudo rm -rf /usr/local/lib/android
+        sudo rm -rf /opt/ghc
+        sudo rm -rf /usr/local/share/boost
+        sudo rm -rf "$AGENT_TOOLSDIRECTORY"
+        
+        # Show available space
+        df -h
+        
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
@@ -23,21 +43,20 @@ jobs:
     
     - name: Create clean working directory
       run: |
-        sudo rm -rf /opt/chromium
-        sudo mkdir -p /opt/chromium
-        sudo chown $USER:$USER /opt/chromium
+        sudo mkdir -p /mnt/build/chromium
+        sudo chown $USER:$USER /mnt/build/chromium
     
     - name: Cache depot_tools
       uses: actions/cache@v4
       with:
-        path: /opt/depot_tools
+        path: /mnt/build/depot_tools
         key: ${{ runner.os }}-depot_tools
     
     - name: Install depot_tools
       if: steps.cache-depot_tools.outputs.cache-hit != 'true'
       run: |
-        sudo rm -rf /opt/depot_tools
-        git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git /opt/depot_tools
+        sudo rm -rf /mnt/build/depot_tools
+        git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git /mnt/build/depot_tools
         
     - name: Configure environment
       run: |
@@ -90,7 +109,8 @@ jobs:
     - name: Generate build files
       working-directory: /opt/chromium/src
       run: |
-        gn gen out/Default --args="is_debug=false is_component_build=true symbol_level=0 enable_nacl=false"
+        # Configure for minimal disk space usage
+        gn gen out/Default --args="is_debug=false is_component_build=true symbol_level=0 enable_nacl=false blink_symbol_level=0 chrome_pgo_phase=0 clang_use_chrome_plugins=false enable_reading_list=false enable_remoting=false enable_reporting=false exclude_unwind_tables=true is_official_build=true remove_webcore_debug_symbols=true use_debug_fission=false use_thin_lto=false"
     
     - name: Build Chromium
       working-directory: /opt/chromium/src
