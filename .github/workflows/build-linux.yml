@@ -56,11 +56,17 @@ jobs:
         # Initialize gclient with config
         gclient config --spec 'solutions = [{"url": "https://chromium.googlesource.com/chromium/src.git","managed": False,"name": "src","custom_vars": {"checkout_android": False,"checkout_chromeos": False,}}]'
         
-        # Now fetch chromium
-        fetch --no-history chromium
+        # Try fetch first, if it fails (likely due to existing partial checkout), fall back to sync
+        fetch --no-history chromium || {
+          echo "Fetch failed, likely due to existing checkout. Trying gclient sync instead..."
+          cd src 2>/dev/null || true  # Try to enter src directory if it exists
+          git reset --hard HEAD || true  # Try to reset any local changes
+          cd ..
+          gclient sync --no-history --with_branch_heads
+        }
         
-        # Run gclient sync to ensure everything is properly synchronized
-        gclient sync --no-history
+        # Always run a final sync to ensure everything is properly synchronized
+        gclient sync --no-history --with_branch_heads
         
     - name: Generate build files
       working-directory: /opt/chromium/src
