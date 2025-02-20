@@ -18,9 +18,11 @@ jobs:
         
     - name: Create clean working directory
       run: |
-        sudo rm -rf /opt/chromium || true
-        sudo mkdir -p /opt/chromium
-        sudo chown -R $USER:$USER /opt/chromium
+        # Create directories in home directory instead
+        rm -rf ~/chromium || true
+        mkdir -p ~/chromium
+        rm -rf ~/depot_tools || true
+        mkdir -p ~/depot_tools
     
     - name: Cache depot_tools
       uses: actions/cache@v4
@@ -31,16 +33,14 @@ jobs:
     - name: Install depot_tools
       if: steps.cache-depot_tools.outputs.cache-hit != 'true'
       run: |
-        sudo rm -rf /opt/depot_tools || true
-        git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git /opt/depot_tools
-        sudo chown -R $USER:$USER /opt/depot_tools
+        git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git ~/depot_tools
     
     - name: Configure environment
       run: |
-        echo "PATH=/opt/depot_tools:$PATH" >> $GITHUB_ENV
+        echo "PATH=$HOME/depot_tools:$PATH" >> $GITHUB_ENV
         
     - name: Configure Git
-      working-directory: /opt/chromium
+      working-directory: ~/chromium
       run: |
         git config --global core.autocrlf false
         git config --global core.filemode false
@@ -49,7 +49,7 @@ jobs:
         git config --global core.preloadindex true
         
     - name: Initialize gclient and fetch source
-      working-directory: /opt/chromium
+      working-directory: ~/chromium
       run: |
         # Initialize gclient with config
         gclient config --spec 'solutions = [{"url": "https://chromium.googlesource.com/chromium/src.git","managed": False,"name": "src","custom_vars": {"checkout_android": False,"checkout_chromeos": False,}}]'
@@ -61,17 +61,17 @@ jobs:
         gclient sync --no-history
         
     - name: Generate build files
-      working-directory: /opt/chromium/src
+      working-directory: ~/chromium/src
       run: |
         gn gen out/Default --args="is_debug=false is_component_build=true symbol_level=0 enable_nacl=false"
     
     - name: Build Chromium
-      working-directory: /opt/chromium/src
+      working-directory: ~/chromium/src
       run: |
         autoninja -C out/Default chrome
     
     - name: Package artifacts
-      working-directory: /opt/chromium/src/out/Default
+      working-directory: ~/chromium/src/out/Default
       run: |
         tar -czf chromium-linux.tar.gz chrome *.so *.pak *.dat locales/ MEIPreload/
     
@@ -84,4 +84,5 @@ jobs:
     - name: Cleanup
       if: always()
       run: |
-        sudo rm -rf /opt/chromium || true
+        rm -rf ~/chromium || true
+        rm -rf ~/depot_tools || true
