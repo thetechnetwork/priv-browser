@@ -12,8 +12,11 @@ jobs:
     runs-on: windows-latest
     
     steps:
-    - uses: actions/checkout@v4
-    
+    - name: Create working directory
+      run: |
+        mkdir D:\chromium
+        cd D:\chromium
+        
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
@@ -62,17 +65,18 @@ jobs:
         "@ | Out-File -FilePath .gclient -Encoding utf8
     
     - name: Fetch Chromium source
+      working-directory: D:\chromium
       run: |
+        git config --global core.fscache true
+        git config --global core.preloadindex true
         fetch --no-history chromium
         
     - name: Generate build files
-      run: |
-        cd src
+      working-directory: D:\chromium\src
         gn gen out/Default --args="is_debug=false is_component_build=true symbol_level=0 enable_nacl=false"
     
     - name: Build Chromium
-      run: |
-        cd src
+      working-directory: D:\chromium\src
         autoninja -C out/Default chrome
     
     - name: Package artifacts
