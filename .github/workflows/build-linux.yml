@@ -51,6 +51,10 @@ jobs:
     - name: Initialize gclient and fetch source
       working-directory: ${{ github.workspace }}/chromium
       run: |
+        # Clean any existing git repositories and config files
+        rm -rf .gclient .gclient_entries src
+        rm -rf .git
+        
         # Initialize gclient with config
         gclient config --spec 'solutions = [{"url": "https://chromium.googlesource.com/chromium/src.git","managed": False,"name": "src","custom_vars": {"checkout_android": False,"checkout_chromeos": False,}}]'
         
