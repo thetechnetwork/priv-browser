@@ -63,15 +63,14 @@ jobs:
           # Initialize gclient configuration
           gclient config --spec 'solutions = [{"url": "https://chromium.googlesource.com/chromium/src.git","managed": False,"name": "src","custom_vars": {"checkout_android": False,"checkout_chromeos": False,}}]'
           
-          # Initial fetch of source
-          fetch --no-history chromium
+          # Do minimal fetch first to get essential files
+          git clone --depth 1 https://chromium.googlesource.com/chromium/src.git
           
-          # Enter src directory and ensure we're on main branch
+          # Now that we have src/.vpython3, we can proceed with full fetch
           cd src
           git checkout main
-          
-          # Run vpython3 bootstrap
-          gclient runhooks
+          cd ..
+          fetch --no-history chromium
         }
 
         # Try initial fetch
@@ -79,14 +78,14 @@ jobs:
           echo "Initial fetch failed, attempting clean fetch..."
           clean_fetch
         else
-          # If initial fetch succeeded, still need to run hooks
           cd src
           git checkout main
-          gclient runhooks
         fi
         
-        # Final sync to ensure everything is properly synchronized
+        # Now that we have a proper checkout, run sync and hooks
+        cd /opt/chromium
         gclient sync --no-history --with_branch_heads
+        gclient runhooks
         
     - name: Generate build files
       working-directory: /opt/chromium/src
