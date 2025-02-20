@@ -12,41 +12,42 @@ jobs:
     runs-on: windows-latest
     
     steps:
-    - name: Create working directory
-      run: |
-        mkdir D:\chromium
-        
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
         python-version: '3.11'
     
-    - name: Configure Git
+    - name: Create clean working directory
       run: |
-        git config --global core.autocrlf false
-        git config --global core.filemode false
-        git config --global branch.autosetuprebase always
+        Remove-Item -Path D:\chromium -Recurse -Force -ErrorAction SilentlyContinue
+        New-Item -Path D:\chromium -ItemType Directory
     
     - name: Cache depot_tools
       uses: actions/cache@v4
       with:
-        path: depot_tools
+        path: D:\depot_tools
         key: ${{ runner.os }}-depot_tools
     
     - name: Install depot_tools
       if: steps.cache-depot_tools.outputs.cache-hit != 'true'
       run: |
-        git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
+        Remove-Item -Path D:\depot_tools -Recurse -Force -ErrorAction SilentlyContinue
+        git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git D:\depot_tools
     
-    - name: Add depot_tools to PATH
-      run: |
-        echo "$(pwd)/depot_tools" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
-    
-    - name: Configure depot_tools
+    - name: Configure environment
       run: |
         echo "DEPOT_TOOLS_WIN_TOOLCHAIN=0" >> $env:GITHUB_ENV
-        gclient
-    
+        echo "D:\depot_tools" >> $env:GITHUB_PATH
+        
+    - name: Configure Git
+      working-directory: D:\chromium
+      run: |
+        git config --global core.autocrlf false
+        git config --global core.filemode false
+        git config --global branch.autosetuprebase always
+        git config --global core.fscache true
+        git config --global core.preloadindex true
+        
     - name: Create .gclient file
       working-directory: D:\chromium
       run: |
@@ -67,37 +68,31 @@ jobs:
     - name: Fetch Chromium source
       working-directory: D:\chromium
       run: |
-        git config --global core.fscache true
-        git config --global core.preloadindex true
+        gclient
         fetch --no-history chromium
         
     - name: Generate build files
       working-directory: D:\chromium\src
       run: |
         gn gen out/Default --args="is_debug=false is_component_build=true symbol_level=0 enable_nacl=false"
-        gn gen out/Default --args="is_debug=false is_component_build=true symbol_level=0 enable_nacl=false"
     
     - name: Build Chromium
       working-directory: D:\chromium\src
       run: |
         autoninja -C out/Default chrome
-        autoninja -C out/Default chrome
     
     - name: Package artifacts
+      working-directory: D:\chromium\src\out\Default
       run: |
-        cd src/out/Default
         Compress-Archive -Path chrome.exe, *.dll, *.pak, *.dat, locales/*, MEIPreload/* -DestinationPath chromium-windows.zip
     
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
         name: chromium-windows
-        path: src/out/Default/chromium-windows.zip
+        path: D:\chromium\src\out\Default\chromium-windows.zip
         
     - name: Cleanup
       if: always()
       run: |
-        cd src
-        ninja -C out/Default -t clean
-        gclient cleanup
-        git gc --aggressive
+        Remove-Item -Path D:\chromium -Recurse -Force -ErrorAction SilentlyContinue
