@@ -48,15 +48,27 @@ jobs:
         git config --global core.fscache true
         git config --global core.preloadindex true
         
-    - name: Initialize gclient and fetch source
-      working-directory: ${{ github.workspace }}/chromium
+    - name: Debug and Initialize
       run: |
-        # Clean any existing git repositories and config files
-        rm -rf .gclient .gclient_entries src
-        rm -rf .git
+        # Print current directory and contents
+        pwd
+        ls -la
+        
+        # Create and move to new directory structure
+        rm -rf ${{ github.workspace }}/chromium_build || true
+        mkdir -p ${{ github.workspace }}/chromium_build
+        cd ${{ github.workspace }}/chromium_build
+        
+        # Print new directory and contents
+        pwd
+        ls -la
         
         # Initialize gclient with config
         gclient config --spec 'solutions = [{"url": "https://chromium.googlesource.com/chromium/src.git","managed": False,"name": "src","custom_vars": {"checkout_android": False,"checkout_chromeos": False,}}]'
+        
+        # Verify gclient file
+        ls -la
+        cat .gclient
         
         # Now fetch chromium
         fetch --no-history chromium
@@ -65,17 +77,17 @@ jobs:
         gclient sync --no-history
         
     - name: Generate build files
-      working-directory: ${{ github.workspace }}/chromium/src
+      working-directory: ${{ github.workspace }}/chromium_build/src
       run: |
         gn gen out/Default --args="is_debug=false is_component_build=true symbol_level=0 enable_nacl=false"
     
     - name: Build Chromium
-      working-directory: ${{ github.workspace }}/chromium/src
+      working-directory: ${{ github.workspace }}/chromium_build/src
       run: |
         autoninja -C out/Default chrome
     
     - name: Package artifacts
-      working-directory: ${{ github.workspace }}/chromium/src/out/Default
+      working-directory: ${{ github.workspace }}/chromium_build/src/out/Default
       run: |
         tar -czf chromium-linux.tar.gz chrome *.so *.pak *.dat locales/ MEIPreload/
     
@@ -83,10 +95,10 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: chromium-linux
-        path: ${{ github.workspace }}/chromium/src/out/Default/chromium-linux.tar.gz
+        path: ${{ github.workspace }}/chromium_build/src/out/Default/chromium-linux.tar.gz
         
     - name: Cleanup
       if: always()
       run: |
-        rm -rf ${{ github.workspace }}/chromium || true
+        rm -rf ${{ github.workspace }}/chromium_build || true
         rm -rf ${{ github.workspace }}/depot_tools || true
