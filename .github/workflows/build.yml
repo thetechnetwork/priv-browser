@@ -42,7 +42,7 @@ jobs:
     
     - name: Configure depot_tools
       run: |
-        Set-Content -Path "$env:DEPOT_TOOLS_WIN_TOOLCHAIN" -Value "0"
+        echo "DEPOT_TOOLS_WIN_TOOLCHAIN=0" >> $env:GITHUB_ENV
         gclient
     
     - name: Create .gclient file
