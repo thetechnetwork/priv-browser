@@ -1,0 +1,95 @@
+name: Build Chromium Windows
+
+on:
+  #push:
+  #  branches: [ main ]
+  #pull_request:
+  #  branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+    
+    - name: Configure Git
+      run: |
+        git config --global core.autocrlf false
+        git config --global core.filemode false
+        git config --global branch.autosetuprebase always
+    
+    - name: Cache depot_tools
+      uses: actions/cache@v4
+      with:
+        path: depot_tools
+        key: ${{ runner.os }}-depot_tools
+    
+    - name: Install depot_tools
+      if: steps.cache-depot_tools.outputs.cache-hit != 'true'
+      run: |
+        git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
+    
+    - name: Add depot_tools to PATH
+      run: |
+        echo "$(pwd)/depot_tools" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+    
+    - name: Configure depot_tools
+      run: |
+        Set-Content -Path "$env:DEPOT_TOOLS_WIN_TOOLCHAIN" -Value "0"
+        gclient
+    
+    - name: Create .gclient file
+      run: |
+        @"
+        solutions = [
+          {
+            "url": "https://chromium.googlesource.com/chromium/src.git",
+            "managed": False,
+            "name": "src",
+            "custom_vars": {
+              "checkout_android": False,
+              "checkout_chromeos": False,
+            },
+          },
+        ]
+        "@ | Out-File -FilePath .gclient -Encoding utf8
+    
+    - name: Fetch Chromium source
+      run: |
+        fetch --no-history chromium
+        
+    - name: Generate build files
+      run: |
+        cd src
+        gn gen out/Default --args="is_debug=false is_component_build=true symbol_level=0 enable_nacl=false"
+    
+    - name: Build Chromium
+      run: |
+        cd src
+        autoninja -C out/Default chrome
+    
+    - name: Package artifacts
+      run: |
+        cd src/out/Default
+        Compress-Archive -Path chrome.exe, *.dll, *.pak, *.dat, locales/*, MEIPreload/* -DestinationPath chromium-windows.zip
+    
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: chromium-windows
+        path: src/out/Default/chromium-windows.zip
+        
+    - name: Cleanup
+      if: always()
+      run: |
+        cd src
+        ninja -C out/Default -t clean
+        gclient cleanup
+        git gc --aggressive
