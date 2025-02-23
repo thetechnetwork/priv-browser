@@ -13,14 +13,13 @@
 #include "chrome/browser/extensions/extension_sync_util.h"
 #include "chrome/browser/profiles/profile.h"
 #include "chrome/browser/signin/identity_manager_factory.h"
-#include "chrome/browser/ui/extensions/extension_install_ui.h"
+#include "chrome/browser/ui/extensions/extension_install_ui_desktop.h"
 #include "chrome/browser/ui/singleton_tabs.h"
 #include "chrome/browser/ui/views/extensions/extension_installed_bubble_view.h"
 #include "components/signin/public/base/signin_switches.h"
 #include "components/signin/public/identity_manager/account_info.h"
 #include "components/signin/public/identity_manager/identity_manager.h"
 #include "components/signin/public/identity_manager/identity_test_utils.h"
-#include "components/sync/base/features.h"
 #include "content/public/test/browser_test.h"
 #include "extensions/common/extension.h"
 #include "testing/gtest/include/gtest/gtest.h"
@@ -33,7 +32,7 @@ class ExtensionInstalledBubbleViewsSignInBrowserTest
  public:
   ExtensionInstalledBubbleViewsSignInBrowserTest() {
     scoped_feature_list_.InitAndDisableFeature(
-        syncer::kSyncEnableExtensionsInTransportMode);
+        switches::kEnableExtensionsExplicitBrowserSignin);
   }
 
   ~ExtensionInstalledBubbleViewsSignInBrowserTest() override = default;
@@ -44,7 +43,7 @@ class ExtensionInstalledBubbleViewsSignInBrowserTest
     views::Widget::Widgets old_widgets =
         views::test::WidgetTest::GetAllWidgets();
 
-    ExtensionInstallUI::ShowBubble(extension, browser(), SkBitmap());
+    ExtensionInstallUIDesktop::ShowBubble(extension, browser(), SkBitmap());
 
     views::Widget::Widgets new_widgets =
         views::test::WidgetTest::GetAllWidgets();
@@ -108,7 +107,7 @@ class ExtensionInstalledBubbleViewsExplicitSignInBrowserTest
  public:
   ExtensionInstalledBubbleViewsExplicitSignInBrowserTest() {
     scoped_feature_list_.InitWithFeatures(
-        {syncer::kSyncEnableExtensionsInTransportMode}, {});
+        {switches::kEnableExtensionsExplicitBrowserSignin}, {});
   }
 
  protected:

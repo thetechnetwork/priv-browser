@@ -40,10 +40,22 @@ const char kCanvasOopRasterizationDescription[] =
     "The rasterization of 2d canvas contents is performed in the GPU process. "
     "Requires that out-of-process rasterization be enabled.";
 
+#if !BUILDFLAG(IS_ANDROID)
 const char kCapturedSurfaceControlName[] = "Captured Surface Control";
 const char kCapturedSurfaceControlDescription[] =
     "Enables an API that allows an application to control scroll and zoom on "
     "the tab which it is capturing.";
+
+const char kCrossTabElementCaptureName[] = "Element Capture cross-tab";
+const char kCrossTabElementCaptureDescription[] =
+    "Allows the Element Capture API to be used cross-tab. (Only has an effect "
+    "if Element Capture is generally enabled.)";
+
+const char kCrossTabRegionCaptureName[] = "Region Capture cross-tab";
+const char kCrossTabRegionCaptureDescription[] =
+    "Allows the Region Capture API to be used cross-tab. (Only has an effect "
+    "if Region Capture is generally enabled.)";
+#endif  // !BUILDFLAG(IS_ANDROID)
 
 const char kAcceleratedVideoDecodeName[] = "Hardware-accelerated video decode";
 const char kAcceleratedVideoDecodeDescription[] =
@@ -116,6 +128,12 @@ const char kAndroidAppIntegrationMultiDataSourceName[] =
 const char kAndroidAppIntegrationMultiDataSourceDescription[] =
     "If enabled, allows Chrome to integrate with the Android App Search with "
     "multiple data sources, e.g. custom Tabs.";
+
+#if BUILDFLAG(IS_ANDROID)
+const char kAndroidAppearanceSettingsName[] = "Appearance Settings";
+const char kAndroidAppearanceSettingsDescription[] =
+    "Enables the Appearance Settings preference screen.";
+#endif  // BUILDFLAG(IS_ANDROID)
 
 const char kAndroidBcivBottomControlsName[] =
     "Browser controls in viz for bottom controls";
@@ -701,23 +719,6 @@ const char kAutofillEnableSaveAndFillDescription[] =
     "When enabled, show an option to offer saving and filling a credit card "
     "with a single click when users don't have any cards saved in Autofill.";
 
-const char kAutofillEnableSaveCardLoadingAndConfirmationName[] =
-    "Enable save card loading and confirmation UX";
-const char kAutofillEnableSaveCardLoadingAndConfirmationDescription[] =
-    "When enabled, a loading spinner will be shown when uploading a card to "
-    "the server and a confirmation screen will be will be shown based on the "
-    "result of the upload. If the upload is unsuccessful in being uploaded to "
-    "the server, it will be saved locally.";
-
-const char kAutofillEnableSaveCardLocalSaveFallbackName[] =
-    "Enable save card local save fallback";
-const char kAutofillEnableSaveCardLocalSaveFallbackDescription[] =
-    "When enabled, if a card fails to be uploaded to the server, the card "
-    "details will be saved locally instead. If a card with the same card "
-    "number and expiration date already exists in the local database, this "
-    "will be a no-op and the existing card will not be updated with any card "
-    "details from the form.";
-
 #if BUILDFLAG(IS_ANDROID)
 const char kAutofillEnableSyncingOfPixBankAccountsName[] =
     "Sync Pix bank accounts from Google Payments";
@@ -738,14 +739,6 @@ const char kAutofillEnableVcnGrayOutForMerchantOptOutName[] =
 const char kAutofillEnableVcnGrayOutForMerchantOptOutDescription[] =
     "When enabled, Chrome will display grayed out virtual card suggestions on "
     "merchant websites where the merchant has opted-out of virtual cards.";
-
-const char kAutofillEnableVcnEnrollLoadingAndConfirmationName[] =
-    "Enable showing loading and confirmation screens for virtual card "
-    "enrollment";
-const char kAutofillEnableVcnEnrollLoadingAndConfirmationDescription[] =
-    "When enabled, the virtual card enrollment screen will present a loading "
-    "spinner while enrolling the card to the server and present a confirmation "
-    "screen with the result when completed.";
 
 const char kAutofillEnableVerveCardSupportName[] =
     "Enable autofill support for Verve cards";
@@ -1470,10 +1463,12 @@ const char kEnableGpuServiceLoggingDescription[] =
     "Enable printing the actual GL driver calls.";
 
 #if !BUILDFLAG(IS_ANDROID)
+#if !BUILDFLAG(IS_CHROMEOS)
 const char kEnableIsolatedWebAppsName[] = "Enable Isolated Web Apps";
 const char kEnableIsolatedWebAppsDescription[] =
     "Enables experimental support for Isolated Web Apps. "
     "See https://github.com/reillyeon/isolated-web-apps for more information.";
+#endif  // !BUILDFLAG(IS_CHROMEOS)
 
 const char kDirectSocketsInServiceWorkersName[] =
     "Direct Sockets API in Service Workers";
@@ -2415,11 +2410,6 @@ const char kLensOverlayName[] = "Lens overlay";
 const char kLensOverlayDescription[] =
     "Enables Lens search via an overlay on any page.";
 
-const char kLensOverlayContextualSearchboxName[] =
-    "Lens overlay contextual search box";
-const char kLensOverlayContextualSearchboxDescription[] =
-    "Enables contextual search box in the Lens overlay.";
-
 const char kLensOverlayImageContextMenuActionsName[] =
     "Lens overlay image context menu actions";
 const char kLensOverlayImageContextMenuActionsDescription[] =
@@ -2546,6 +2536,13 @@ const char kSystemShortcutBehaviorName[] =
 const char kSystemShortcutBehaviorDescription[] =
     "This flag controls the default behavior of ChromeOS system shortcuts "
     "(Launcher key shortcuts).";
+
+#if BUILDFLAG(IS_ANDROID)
+const char kNewEtc1EncoderName[] = "Enable new ETC1 encoder";
+const char kNewEtc1EncoderDescription[] =
+    "Enables the new ETC1 encoder implementation for tab and back/forward "
+    "thumbnails.";
+#endif
 
 const char kNotificationSchedulerName[] = "Notification scheduler";
 const char kNotificationSchedulerDescription[] =
@@ -3793,6 +3790,9 @@ const char kTpcdMetadataGrantsDescription[] =
     "Provides a control for enabling/disabling Third-Party Cookie Deprecation "
     "Metadata Grants (WRT its default state) for testing.";
 
+const char kBlockTpcsIncognitoName[] = "Block TPCs Incognito";
+const char kBlockTpcsIncognitoDescription[] = "Blocks TPCs in Incognito";
+
 const char kTrackingProtection3pcdName[] = "Tracking Protection for 3PCD";
 const char kTrackingProtection3pcdDescription[] =
     "Enables the tracking protection UI + prefs that will be used for the 3PCD "
@@ -3899,6 +3899,15 @@ const char kWallpaperSearchSettingsVisibilityName[] =
     "Wallpaper Search Settings Visibility";
 const char kWallpaperSearchSettingsVisibilityDescription[] =
     "Shows wallpaper search settings in settings UI.";
+
+const char kWebAuthenticationAlignErrorTypeForPaymentCredentialCreateName[] =
+    "Web Authentication Align Error Type for 'payment' credentials";
+
+const char
+    kWebAuthenticationAlignErrorTypeForPaymentCredentialCreateDescription[] =
+        "Throw a 'NotAllowedError' instead of 'SecurityError' when creating "
+        "'payment' credentials in a cross-origin iframe without user "
+        " activation. See https://crbug.com/41484826";
 
 #if !BUILDFLAG(IS_ANDROID)
 const char kWebAuthnUsePasskeyFromAnotherDeviceInContextMenuName[] =

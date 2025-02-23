@@ -3034,23 +3034,6 @@ const FeatureEntry::FeatureVariation kLensOverlayVariations[] = {
 #endif  // !BUILDFLAG(IS_ANDROID)
 
 #if !BUILDFLAG(IS_ANDROID)
-const FeatureEntry::FeatureParam kContextualSearchboxWithPageContent[] = {
-    {"use-pdfs-as-context", "true"},
-    {"use-inner-text-as-context", "true"},
-};
-const FeatureEntry::FeatureParam kContextualSearchboxWithPdfPageContent[] = {
-    {"use-pdfs-as-context", "true"},
-};
-
-const FeatureEntry::FeatureVariation kContextualSearchboxVariations[] = {
-    {"with page content", kContextualSearchboxWithPageContent,
-     std::size(kContextualSearchboxWithPageContent), nullptr},
-    {"with pdf page content", kContextualSearchboxWithPdfPageContent,
-     std::size(kContextualSearchboxWithPdfPageContent), nullptr},
-};
-#endif  // !BUILDFLAG(IS_ANDROID)
-
-#if !BUILDFLAG(IS_ANDROID)
 const FeatureEntry::FeatureParam kLensOverlayImageContextMenuActionsCopy[] = {
     {"enable-copy-as-image", "true"},
     {"enable-save-as-image", "false"},
@@ -4344,6 +4327,11 @@ const FeatureEntry::FeatureVariation kMaliciousApkDownloadCheckChoices[] = {
      std::size(kMaliciousApkDownloadCheckTelemetryOnlyParams), nullptr}};
 #endif  // BUILDFLAG(IS_ANDROID)
 
+#if BUILDFLAG(IS_ANDROID)
+constexpr char kDisableFacilitatedPaymentsMerchantAllowlistInternalName[] =
+    "disable-facilitated-payments-merchant-allowlist";
+#endif  // BUILDFLAG(IS_ANDROID)
+
 // RECORDING USER METRICS FOR FLAGS:
 // -----------------------------------------------------------------------------
 // The first line of the entry is the internal name.
@@ -5173,9 +5161,11 @@ const FeatureEntry kFeatureEntries[] = {
 #endif
 
 #if !BUILDFLAG(IS_ANDROID)
+#if !BUILDFLAG(IS_CHROMEOS)
     {"enable-isolated-web-apps", flag_descriptions::kEnableIsolatedWebAppsName,
      flag_descriptions::kEnableIsolatedWebAppsDescription, kOsDesktop,
      FEATURE_VALUE_TYPE(features::kIsolatedWebApps)},
+#endif  // !BUILDFLAG(IS_CHROMEOS)
     {"direct-sockets-in-service-workers",
      flag_descriptions::kDirectSocketsInServiceWorkersName,
      flag_descriptions::kDirectSocketsInServiceWorkersDescription, kOsDesktop,
@@ -8110,6 +8100,11 @@ const FeatureEntry kFeatureEntries[] = {
     {"element-capture", flag_descriptions::kElementCaptureName,
      flag_descriptions::kElementCaptureDescription, kOsDesktop,
      FEATURE_VALUE_TYPE(blink::features::kElementCapture)},
+
+    {"element-capture-cross-tab",
+     flag_descriptions::kCrossTabElementCaptureName,
+     flag_descriptions::kCrossTabElementCaptureDescription, kOsDesktop,
+     FEATURE_VALUE_TYPE(features::kElementCaptureOfOtherTabs)},
 #endif
 
     {"device-posture", flag_descriptions::kDevicePostureName,
@@ -8310,6 +8305,10 @@ const FeatureEntry kFeatureEntries[] = {
      flag_descriptions::kPageInfoHistoryDesktopDescription, kOsDesktop,
      FEATURE_VALUE_TYPE(page_info::kPageInfoHistoryDesktop)},
 #endif  // !BUILDFLAG(IS_ANDROID)
+
+    {"block-tpcs-incognito", flag_descriptions::kBlockTpcsIncognitoName,
+     flag_descriptions::kBlockTpcsIncognitoDescription, kOsDesktop | kOsAndroid,
+     FEATURE_VALUE_TYPE(privacy_sandbox::kAlwaysBlock3pcsIncognito)},
 
     {"tracking-protection-3pcd", flag_descriptions::kTrackingProtection3pcdName,
      flag_descriptions::kTrackingProtection3pcdDescription,
@@ -9112,13 +9111,15 @@ const FeatureEntry kFeatureEntries[] = {
     {"canvas-oop-rasterization", flag_descriptions::kCanvasOopRasterizationName,
      flag_descriptions::kCanvasOopRasterizationDescription, kOsDesktop,
      FEATURE_VALUE_TYPE(features::kCanvasOopRasterization)},
-#endif
 
-#if !BUILDFLAG(IS_ANDROID)
     {"captured-surface-control", flag_descriptions::kCapturedSurfaceControlName,
      flag_descriptions::kCapturedSurfaceControlDescription, kOsDesktop,
      FEATURE_VALUE_TYPE(blink::features::kCapturedSurfaceControl)},
-#endif
+
+    {"region-capture-cross-tab", flag_descriptions::kCrossTabRegionCaptureName,
+     flag_descriptions::kCrossTabRegionCaptureDescription, kOsDesktop,
+     FEATURE_VALUE_TYPE(features::kRegionCaptureOfOtherTabs)},
+#endif  // !BUILDFLAG(IS_ANDROID)
 
     {"skia-graphite", flag_descriptions::kSkiaGraphiteName,
      flag_descriptions::kSkiaGraphiteDescription, kOsAll,
@@ -10211,27 +10212,11 @@ const FeatureEntry kFeatureEntries[] = {
      FEATURE_VALUE_TYPE(chromeos::features::kPlatformKeysChangesWave1)},
 #endif  // BUILDFLAG(IS_CHROMEOS)
 
-    {"autofill-enable-save-card-loading-and-confirmation",
-     flag_descriptions::kAutofillEnableSaveCardLoadingAndConfirmationName,
-     flag_descriptions::
-         kAutofillEnableSaveCardLoadingAndConfirmationDescription,
-     kOsAll,
-     FEATURE_VALUE_TYPE(
-         autofill::features::kAutofillEnableSaveCardLoadingAndConfirmation)},
-
     {"autofill-enable-loyalty-cards-filling",
      flag_descriptions::kAutofillEnableLoyaltyCardsFillingName,
      flag_descriptions::kAutofillEnableLoyaltyCardsFillingDescription, kOsAll,
      FEATURE_VALUE_TYPE(
          autofill::features::kAutofillEnableLoyaltyCardsFilling)},
-
-    {"autofill-enable-vcn-enroll-loading-and-confirmation",
-     flag_descriptions::kAutofillEnableVcnEnrollLoadingAndConfirmationName,
-     flag_descriptions::
-         kAutofillEnableVcnEnrollLoadingAndConfirmationDescription,
-     kOsAll,
-     FEATURE_VALUE_TYPE(
-         autofill::features::kAutofillEnableVcnEnrollLoadingAndConfirmation)},
 
 #if BUILDFLAG(IS_ANDROID)
     {"boarding-pass-detector", flag_descriptions::kBoardingPassDetectorName,
@@ -10537,13 +10522,6 @@ const FeatureEntry kFeatureEntries[] = {
      FEATURE_VALUE_TYPE(net::features::kReduceIPAddressChangeNotification)},
 #endif  // BUILDFLAG(IS_MAC)
 
-    {"autofill-enable-save-card-local-save-fallback",
-     flag_descriptions::kAutofillEnableSaveCardLocalSaveFallbackName,
-     flag_descriptions::kAutofillEnableSaveCardLocalSaveFallbackDescription,
-     kOsAll,
-     FEATURE_VALUE_TYPE(
-         autofill::features::kAutofillEnableSaveCardLocalSaveFallback)},
-
     {"enable-fingerprinting-protection-blocklist",
      flag_descriptions::kEnableFingerprintingProtectionBlocklistName,
      flag_descriptions::kEnableFingerprintingProtectionBlocklistDescription,
@@ -10574,11 +10552,13 @@ const FeatureEntry kFeatureEntries[] = {
     {"enable-standard-device-bound-session-credentials",
      flag_descriptions::kEnableStandardBoundSessionCredentialsName,
      flag_descriptions::kEnableStandardBoundSessionCredentialsDescription,
-     kOsWin, FEATURE_VALUE_TYPE(net::features::kDeviceBoundSessions)},
+     kOsMac | kOsWin | kOsLinux,
+     FEATURE_VALUE_TYPE(net::features::kDeviceBoundSessions)},
     {"enable-standard-device-bound-session-persistence",
      flag_descriptions::kEnableStandardBoundSessionPersistenceName,
      flag_descriptions::kEnableStandardBoundSessionPersistenceDescription,
-     kOsWin, FEATURE_VALUE_TYPE(net::features::kPersistDeviceBoundSessions)},
+     kOsMac | kOsWin | kOsLinux,
+     FEATURE_VALUE_TYPE(net::features::kPersistDeviceBoundSessions)},
 
 #if BUILDFLAG(IS_CHROMEOS)
     {"cros-soul-gd", flag_descriptions::kCrosSoulGravediggerName,
@@ -11095,16 +11075,6 @@ const FeatureEntry kFeatureEntries[] = {
 #endif  // !BUILDFLAG(IS_ANDROID)
 
 #if !BUILDFLAG(IS_ANDROID)
-    {"enable-lens-overlay-contextual-search-box",
-     flag_descriptions::kLensOverlayContextualSearchboxName,
-     flag_descriptions::kLensOverlayContextualSearchboxDescription, kOsDesktop,
-     FEATURE_WITH_PARAMS_VALUE_TYPE(
-         lens::features::kLensOverlayContextualSearchbox,
-         kContextualSearchboxVariations,
-         "LensOverlayContextualSearchbox")},
-#endif  // !BUILDFLAG(IS_ANDROID)
-
-#if !BUILDFLAG(IS_ANDROID)
     {"enable-lens-overlay-latency-optimizations",
      flag_descriptions::kLensOverlayLatencyOptimizationsName,
      flag_descriptions::kLensOverlayLatencyOptimizationsDescription, kOsDesktop,
@@ -11448,6 +11418,11 @@ const FeatureEntry kFeatureEntries[] = {
                                     "AutofillImprovedLabels")},
 
 #if BUILDFLAG(IS_ANDROID)
+    {"android-appearance-settings",
+     flag_descriptions::kAndroidAppearanceSettingsName,
+     flag_descriptions::kAndroidAppearanceSettingsDescription, kOsAndroid,
+     FEATURE_VALUE_TYPE(chrome::android::kAndroidAppearanceSettings)},
+
     {"android-bookmark-bar", flag_descriptions::kAndroidBookmarkBarName,
      flag_descriptions::kAndroidBookmarkBarDescription, kOsAndroid,
      FEATURE_VALUE_TYPE(chrome::android::kAndroidBookmarkBar)},
@@ -11613,6 +11588,11 @@ const FeatureEntry kFeatureEntries[] = {
      flag_descriptions::kEnableSnackbarInSettingsDescription,
      kOsMac | kOsWin | kOsLinux,
      FEATURE_VALUE_TYPE(switches::kEnableSnackbarInSettings)},
+#if BUILDFLAG(IS_ANDROID)
+    {"new-etc1-encoder", flag_descriptions::kNewEtc1EncoderName,
+     flag_descriptions::kNewEtc1EncoderDescription, kOsAndroid,
+     FEATURE_VALUE_TYPE(ui::kUseNewEtc1Encoder)},
+#endif  // !BUILDFLAG(IS_ANDROID)
 
 #if BUILDFLAG(IS_ANDROID) || BUILDFLAG(IS_LINUX)
     {"automatic-usb-detach", flag_descriptions::kAutomaticUsbDetachName,
@@ -11716,7 +11696,7 @@ const FeatureEntry kFeatureEntries[] = {
 #endif  // BUILDFLAG(IS_ANDROID)
 
 #if BUILDFLAG(IS_ANDROID)
-    {"disable-facilitated-payments-merchant-allowlist",
+    {kDisableFacilitatedPaymentsMerchantAllowlistInternalName,
      flag_descriptions::kDisableFacilitatedPaymentsMerchantAllowlistName,
      flag_descriptions::kDisableFacilitatedPaymentsMerchantAllowlistDescription,
      kOsAndroid,
@@ -11746,6 +11726,16 @@ const FeatureEntry kFeatureEntries[] = {
      flag_descriptions::kAndroidMinimalUiLargeScreenDescription, kOsAndroid,
      FEATURE_VALUE_TYPE(webapps::features::kAndroidMinimalUiLargeScreen)},
 #endif  // BUILDFLAG(IS_ANDROID)
+
+    {"web-authentication-align-error-type-for-payment-credential-create",
+     flag_descriptions::
+         kWebAuthenticationAlignErrorTypeForPaymentCredentialCreateName,
+     flag_descriptions::
+         kWebAuthenticationAlignErrorTypeForPaymentCredentialCreateDescription,
+     kOsAll,
+     FEATURE_VALUE_TYPE(
+         blink::features::
+             kWebAuthenticationAlignErrorTypeForPaymentCredentialCreate)},
 
     // NOTE: Adding a new flag requires adding a corresponding entry to enum
     // "LoginCustomFlags" in tools/metrics/histograms/enums.xml. See "Flag
@@ -11967,6 +11957,19 @@ bool ShouldSkipConditionalFeatureEntry(const flags_ui::FlagsStorage* storage,
            chrome_channel != version_info::Channel::UNKNOWN;
   }
 #endif
+
+#if BUILDFLAG(IS_ANDROID)
+  // Only show the payments test flag to disable merchant allowlists if channel
+  // is one of Beta/Dev/Canary/ Unknown.
+  version_info::Channel channel = chrome::GetChannel();
+  if (!strcmp(kDisableFacilitatedPaymentsMerchantAllowlistInternalName,
+              entry.internal_name)) {
+    return channel != version_info::Channel::BETA &&
+           channel != version_info::Channel::DEV &&
+           channel != version_info::Channel::CANARY &&
+           channel != version_info::Channel::UNKNOWN;
+  }
+#endif  // BUILDFLAG(IS_ANDROID)
   if (flags::IsFlagExpired(storage, entry.internal_name)) {
     return true;
   }

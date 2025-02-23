@@ -14,6 +14,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import org.chromium.base.Callback;
 import org.chromium.base.supplier.ObservableSupplier;
+import org.chromium.chrome.browser.bookmarks.BookmarkManagerOpener;
+import org.chromium.chrome.browser.bookmarks.BookmarkOpener;
 import org.chromium.chrome.browser.bookmarks.R;
 import org.chromium.chrome.browser.browser_controls.BrowserControlsStateProvider;
 import org.chromium.chrome.browser.profiles.Profile;
@@ -38,13 +40,16 @@ public class BookmarkBarCoordinator {
      * @param heightChangeCallback a callback to notify of bookmark bar height change events.
      * @param profileSupplier the supplier for the currently active profile.
      * @param viewStub the stub used to inflate the bookmark bar.
+     * @param bookmarkOpener used to open bookmarks.
      */
     public BookmarkBarCoordinator(
             @NonNull Activity activity,
             @NonNull BrowserControlsStateProvider browserControlsStateProvider,
             @NonNull Callback<Integer> heightChangeCallback,
             @NonNull ObservableSupplier<Profile> profileSupplier,
-            @NonNull ViewStub viewStub) {
+            @NonNull ViewStub viewStub,
+            @NonNull BookmarkOpener bookmarkOpener,
+            @NonNull ObservableSupplier<BookmarkManagerOpener> bookmarkManagerOpenerSupplier) {
         mView = (BookmarkBar) viewStub.inflate();
 
         // Bind view/model for 'All Bookmarks' button.
@@ -82,7 +87,9 @@ public class BookmarkBarCoordinator {
                         itemsModel,
                         itemsLayoutManager.getItemsOverflowSupplier(),
                         model,
-                        profileSupplier);
+                        profileSupplier,
+                        bookmarkOpener,
+                        bookmarkManagerOpenerSupplier);
         PropertyModelChangeProcessor.create(model, mView, BookmarkBarViewBinder::bind);
     }
 

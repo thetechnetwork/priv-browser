@@ -55,8 +55,6 @@
 #include "components/optimization_guide/proto/features/common_quality_data.pb.h"
 #include "components/optimization_guide/proto/hints.pb.h"
 #include "components/strings/grit/components_strings.h"
-#include "components/user_annotations/user_annotations_features.h"
-#include "components/user_annotations/user_annotations_service.h"
 #include "ui/base/l10n/l10n_util.h"
 
 namespace autofill_ai {
@@ -105,10 +103,10 @@ std::vector<autofill::EntityInstance> GetPossibleEntitiesFromSubmittedForm(
       continue;
     }
 
-    section_to_entity_types_attributes[field->section()][field_attribute_type
-                                                             ->entity_type()]
-        .emplace_back(*field_attribute_type, value,
-                      autofill::AttributeInstance::Context{});
+    section_to_entity_types_attributes[field->section()]
+                                      [field_attribute_type->entity_type()]
+                                          .emplace_back(*field_attribute_type,
+                                                        value);
   }
 
   std::vector<autofill::EntityInstance> entities_found_in_form;
@@ -391,7 +389,6 @@ void AutofillAiManager::OnSavePromptAcceptance(
 
 void AutofillAiManager::GetSuggestions(autofill::FormGlobalId form_global_id,
                                        autofill::FieldGlobalId field_global_id,
-                                       bool is_manual_fallback,
                                        GetSuggestionsCallback callback) {
   autofill::EntityDataManager* entity_manager = client_->GetEntityDataManager();
   if (!entity_manager) {
@@ -416,16 +413,6 @@ void AutofillAiManager::GetSuggestions(autofill::FormGlobalId form_global_id,
       form_structure->GetFieldById(field_global_id);
   if (!autofill_field) {
     std::move(callback).Run({});
-    return;
-  }
-
-  if (is_manual_fallback &&
-      !autofill_field->GetAutofillAiServerTypePredictions()) {
-    // TODO(crbug.com/389629573): Store `form`, `field` and trigger LLM.
-    // Once we have LLM responses we need to rebuild the suggestions and
-    // reshow the popup, either via `AutofillClient` or exposing the
-    // update method from `AutofillExternalDelegate.
-    std::move(callback).Run({CreateLoadingSuggestions()});
     return;
   }
 

@@ -66,6 +66,7 @@
 #import "ios/chrome/browser/shared/ui/util/url_with_title.h"
 #import "ios/chrome/browser/side_swipe/ui_bundled/side_swipe_coordinator.h"
 #import "ios/chrome/browser/side_swipe/ui_bundled/side_swipe_mediator.h"
+#import "ios/chrome/browser/side_swipe/ui_bundled/side_swipe_ui_controller_delegate.h"
 #import "ios/chrome/browser/side_swipe/ui_bundled/swipe_view.h"
 #import "ios/chrome/browser/signin/model/identity_manager_factory.h"
 #import "ios/chrome/browser/snapshots/model/snapshot_tab_helper.h"
@@ -167,6 +168,7 @@ enum HeaderBehaviour {
 @interface BrowserViewController () <FullscreenUIElement,
                                      MainContentUI,
                                      SideSwipeMediatorDelegate,
+                                     SideSwipeUIControllerDelegate,
                                      TabStripPresentation,
                                      UIGestureRecognizerDelegate> {
   // Identifier for each animation of an NTP opening.
@@ -357,6 +359,7 @@ enum HeaderBehaviour {
     _keyCommandsProvider = keyCommandsProvider;
     _sideSwipeCoordinator = dependencies.sideSwipeCoordinator;
     [_sideSwipeCoordinator setSwipeDelegate:self];
+    [_sideSwipeCoordinator setSideSwipeUIControllerDelegate:self];
     _bookmarksCoordinator = dependencies.bookmarksCoordinator;
     self.toolbarAccessoryPresenter = dependencies.toolbarAccessoryPresenter;
     self.ntpCoordinator = dependencies.ntpCoordinator;
@@ -476,11 +479,8 @@ enum HeaderBehaviour {
     // Must update _toolbarUIState with current toolbar height state before
     // starting broadcasting.
     [self updateToolbarState];
-    self.fullscreenController->SetToolbarUIState(_toolbarUIState);
+    StartBroadcastingToolbarUI(_toolbarUIState, broadcaster);
 
-    if (!IsRefactorToolbarUI()) {
-      StartBroadcastingToolbarUI(_toolbarUIState, broadcaster);
-    }
     _mainContentUIUpdater = [[MainContentUIStateUpdater alloc]
         initWithState:[[MainContentUIState alloc] init]];
     _webMainContentUIForwarder = [[WebScrollViewMainContentUIForwarder alloc]
@@ -492,9 +492,7 @@ enum HeaderBehaviour {
         std::make_unique<FullscreenUIUpdater>(self.fullscreenController, self);
     [self updateForFullscreenProgress:self.fullscreenController->GetProgress()];
   } else {
-    if (!IsRefactorToolbarUI()) {
-      StopBroadcastingToolbarUI(broadcaster);
-    }
+    StopBroadcastingToolbarUI(broadcaster);
     StopBroadcastingMainContentUI(broadcaster);
     _mainContentUIUpdater = nil;
     _toolbarUIState = nil;
@@ -1996,21 +1994,12 @@ enum HeaderBehaviour {
 // Updates the ToolbarUIState, which broadcasts any changes to registered
 // listeners.
 - (void)updateToolbarState {
-  if (IsRefactorToolbarUI()) {
-    [_toolbarUIState
-        setCollapsedTopToolbarHeight:[self collapsedTopToolbarHeight]
-            expandedTopToolbarHeight:[self expandedTopToolbarHeight]
-         expandedBottomToolbarHeight:[self secondaryToolbarHeightWithInset]
-        collapsedBottomToolbarHeight:[self collapsedBottomToolbarHeight]];
-  } else {
-    _toolbarUIState.collapsedTopToolbarHeight =
-        [self collapsedTopToolbarHeight];
-    _toolbarUIState.expandedTopToolbarHeight = [self expandedTopToolbarHeight];
-    _toolbarUIState.collapsedBottomToolbarHeight =
-        [self collapsedBottomToolbarHeight];
-    _toolbarUIState.expandedBottomToolbarHeight =
-        [self secondaryToolbarHeightWithInset];
-  }
+  _toolbarUIState.collapsedTopToolbarHeight = [self collapsedTopToolbarHeight];
+  _toolbarUIState.expandedTopToolbarHeight = [self expandedTopToolbarHeight];
+  _toolbarUIState.collapsedBottomToolbarHeight =
+      [self collapsedBottomToolbarHeight];
+  _toolbarUIState.expandedBottomToolbarHeight =
+      [self secondaryToolbarHeightWithInset];
 }
 
 // Returns the height difference between the fully expanded and fully collapsed

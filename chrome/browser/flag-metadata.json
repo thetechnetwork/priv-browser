@@ -187,6 +187,11 @@
     "expiry_milestone": 150
   },
   {
+    "name": "android-appearance-settings",
+    "owners": [ "dmblack@google.com", "clank-app-team@google.com" ],
+    "expiry_milestone": 150
+  },
+  {
     "name": "android-bookmark-bar",
     "owners": [ "dmblack@google.com", "clank-large-form-factors@google.com" ],
     "expiry_milestone": 150
@@ -667,19 +672,17 @@
     "name": "autofill-enable-payment-settings-card-promo-and-scan-card",
     "owners": [
       "darwinyang@chromium.org",
-      "icer@chromium.org",
-      "chrome-payments-team@google.com"
+      "chrome-payments-eng@google.com"
     ],
-    "expiry_milestone": 134
+    "expiry_milestone": 136
   },
   {
     "name": "autofill-enable-payment-settings-server-card-save",
     "owners": [
       "darwinyang@chromium.org",
-      "icer@chromium.org",
-      "chrome-payments-team@google.com"
+      "chrome-payments-eng@google.com"
     ],
-    "expiry_milestone": 134
+    "expiry_milestone": 138
   },
   {
     "name": "autofill-enable-prefetching-risk-data-for-retrieval",
@@ -702,22 +705,6 @@
     "expiry_milestone": 145
   },
   {
-    "name": "autofill-enable-save-card-loading-and-confirmation",
-    "owners": [
-      "darwinyang@chromium.org",
-      "chrome-payments-team@google.com"
-    ],
-    "expiry_milestone": 132
-  },
-  {
-    "name": "autofill-enable-save-card-local-save-fallback",
-    "owners": [
-      "darwinyang@chromium.org",
-      "chrome-payments-team@google.com"
-    ],
-    "expiry_milestone": 132
-  },
-  {
     "name": "autofill-enable-syncing-of-pix-bank-accounts",
     "owners": ["siashah@chromium.org", "chrome-payments-team@google.com", "payments-autofill-team@google.com"],
     "expiry_milestone": 140
@@ -726,15 +713,6 @@
     "name": "autofill-enable-vcn-3ds-authentication",
     "owners": ["vinnypersky@google.com", "payments-autofill-team@google.com"],
     "expiry_milestone": 145
-  },
-  {
-    "name": "autofill-enable-vcn-enroll-loading-and-confirmation",
-    "owners": [
-      "kavitasoni@chromium.org",
-      "darwinyang@chromium.org",
-      "chrome-payments-team@google.com"
-    ],
-    "expiry_milestone": 132
   },
   {
     "name": "autofill-enable-vcn-gray-out-for-merchant-opt-out",
@@ -946,6 +924,13 @@
     "name": "block-telephony-device-phone-mute",
     "owners": [ "jingyliang@chromium.org", "chromeos-tango@google.com" ],
     "expiry_milestone": 135
+  },
+  {
+    "name": "block-tpcs-incognito",
+    "owners": [
+      "fmacintosh@google.com"
+    ],
+    "expiry_milestone": 137
   },
   {  "name": "blue-dot-on-tools-menu-button",
      "owners": [ "gayane@google.com", "bling-flags@google.com" ],
@@ -2131,7 +2116,7 @@
       "meiliang@chromium.org",
       "chrome-shopping-eng@google.com"
     ],
-    "expiry_milestone": 134
+    "expiry_milestone": 136
   },
   {
     "name": "display-alignment-assistance",
@@ -2316,6 +2301,15 @@
       "mfoltz@chromium.org"
     ],
     "expiry_milestone": 140
+  },
+  {
+    "name": "element-capture-cross-tab",
+    "owners": [
+      "eladalon@chromium.org",
+      "jophba@chromium.org",
+      "mfoltz@chromium.org"
+    ],
+    "expiry_milestone": 160
   },
   {
     "name": "enable-accessibility-accelerator",
@@ -3394,11 +3388,6 @@
     "expiry_milestone": 135
   },
   {
-    "name": "enable-lens-overlay-contextual-search-box",
-    "owners": [ "mercerd@google.com", "niharm@google.com", "mahmadi@chromium.org", "lens-chrome@google.com" ],
-    "expiry_milestone": 136
-  },
-  {
     "name": "enable-lens-overlay-image-context-menu-actions",
     "owners": [ "nguyenbryan@google.com", "lens-chrome@google.com" ],
     "expiry_milestone": 136
@@ -4056,7 +4045,7 @@
   {
     "name": "enable-unsafe-webgpu",
     "owners": [ "//third_party/blink/renderer/modules/webgpu/OWNERS" ],
-    "expiry_milestone": 135
+    "expiry_milestone": 145
   },
   {
     "name": "enable-user-link-capturing-scope-extensions-pwa",
@@ -6148,6 +6137,15 @@
     "expiry_milestone": 133
   },
   {
+    "name": "new-etc1-encoder",
+    "owners": [
+      "cros-virt-devices-guests@google.com",
+      "uekawa@google.com",
+      "ishitatsuyuki@google.com"
+    ],
+    "expiry_milestone": 138
+  },
+  {
     "name": "new-ntp-omnibox-layout",
     "owners": [ "hujasonx@chromium.org", "schechter@chromium.org" ],
     "expiry_milestone": 116
@@ -7576,6 +7574,15 @@
     "name": "refresh-feed-on-start",
     "owners": ["//chrome/android/feed/OWNERS", "jianli@chromium.org"],
     "expiry_milestone": 140
+  },
+  {
+    "name": "region-capture-cross-tab",
+    "owners": [
+      "eladalon@chromium.org",
+      "jophba@chromium.org",
+      "mfoltz@chromium.org"
+    ],
+    "expiry_milestone": 160
   },
   {
     "name": "related-searches-all-language",
@@ -9298,6 +9305,11 @@
     "name": "web-app-user-display-mode-sync-standalone-mitigation",
     "owners": [ "alancutter@chromium.org", "pwa-team@google.com" ],
     "expiry_milestone": 132
+  },
+  {
+    "name": "web-authentication-align-error-type-for-payment-credential-create",
+    "owners": ["smcgruer@chromium.org", "chrome-payments-team@google.com" ],
+    "expiry_milestone": 140
   },
   {
     "name": "web-authentication-enclave-authenticator",

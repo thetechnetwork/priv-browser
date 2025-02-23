@@ -108,6 +108,7 @@
 #include "third_party/blink/renderer/core/style/filter_operations.h"
 #include "third_party/blink/renderer/core/typed_arrays/array_buffer_view_helpers.h"
 #include "third_party/blink/renderer/core/typed_arrays/dom_typed_array.h"
+#include "third_party/blink/renderer/core/xml_names.h"
 #include "third_party/blink/renderer/modules/canvas/canvas2d/cached_color.h"
 #include "third_party/blink/renderer/modules/canvas/canvas2d/canvas_filter.h"
 #include "third_party/blink/renderer/modules/canvas/canvas2d/canvas_gradient.h"
@@ -251,6 +252,7 @@ BASE_FEATURE(kDisableCanvasOverdrawOptimization,
 constexpr size_t kColorCacheMaxSize = 8;
 
 const char BaseRenderingContext2D::kDefaultFont[] = "10px sans-serif";
+const char BaseRenderingContext2D::kInheritString[] = "inherit";
 
 // Dummy overdraw test for ops that do not support overdraw detection
 const auto kNoOverdraw = [](const SkIRect& clip_bounds) { return false; };
@@ -2331,7 +2333,7 @@ void BaseRenderingContext2D::drawImage(CanvasImageSource* image_source,
   } else {
     image = image_source->GetSourceImageForCanvas(
         FlushReason::kDrawImage, &source_image_status, default_object_size,
-        kPremultiplyAlpha);
+        kDontChangeAlpha);
     if (source_image_status == kUndecodableSourceImageStatus) {
       exception_state.ThrowDOMException(
           DOMExceptionCode::kInvalidStateError,
@@ -2533,7 +2535,7 @@ CanvasPattern* BaseRenderingContext2D::createPattern(
   scoped_refptr<Image> image_for_rendering =
       image_source->GetSourceImageForCanvas(FlushReason::kCreatePattern,
                                             &status, default_object_size,
-                                            kPremultiplyAlpha);
+                                            kDontChangeAlpha);
 
   switch (status) {
     case kNormalSourceImageStatus:
@@ -2660,7 +2662,7 @@ void BaseRenderingContext2D::drawMesh(
   SourceImageStatus source_image_status = kInvalidSourceImageStatus;
   scoped_refptr<Image> image = image_source->GetSourceImageForCanvas(
       FlushReason::kDrawMesh, &source_image_status,
-      gfx::SizeF(Width(), Height()), kPremultiplyAlpha);
+      gfx::SizeF(Width(), Height()), kDontChangeAlpha);
   switch (source_image_status) {
     case kUndecodableSourceImageStatus:
       exception_state.ThrowDOMException(
@@ -3356,7 +3358,8 @@ bool BaseRenderingContext2D::WillSetFont() const {
 }
 
 bool BaseRenderingContext2D::CurrentFontResolvedAndUpToDate() const {
-  return GetState().HasRealizedFont();
+  const CanvasRenderingContext2DState& state = GetState();
+  return state.HasRealizedFont() && !state.LangIsDirty();
 }
 
 void BaseRenderingContext2D::setFont(const String& new_font) {
@@ -3717,10 +3720,43 @@ void BaseRenderingContext2D::SnapshotStateForFilter() {
   GetState().SetFontForFilter(AccessFont(canvas));
 }
 
+String BaseRenderingContext2D::lang() const {
+  return GetState().GetLang();
+}
+
+void BaseRenderingContext2D::setLang(const String& lang_string) {
+  CanvasRenderingContext2DState& state = GetState();
+  if (state.GetLang() == lang_string) {
+    return;
+  }
+
+  // TODO(crbug.com/40191831): Instrument new canvas APIs.
+  identifiability_study_helper_.set_encountered_skipped_ops();
+
+  state.SetLang(lang_string);
+
+  // If the font has been realized, reset it to account for the new lang
+  // setting. When not yet realized, the lang will be accounted for the first
+  // time the font is realized.
+  if (state.HasRealizedFont()) {
+    setFont(font());
+  }
+}
+
+const LayoutLocale* BaseRenderingContext2D::LocaleFromLang() {
+  String lang_string = GetState().GetLang();
+  if (lang_string == kInheritString) {
+    return GetCanvasRenderingContextHost()->GetLocale();
+  }
+
+  return &LayoutLocale::ValueOrDefault(
+      LayoutLocale::Get(AtomicString(lang_string)));
+}
+
 void BaseRenderingContext2D::setLetterSpacing(const String& letter_spacing) {
   UseCounter::Count(GetTopExecutionContext(),
                     WebFeature::kCanvasRenderingContext2DLetterSpacing);
-  // TODO(crbug.com/1234113): Instrument new canvas APIs.
+  // TODO(crbug.com/40191831): Instrument new canvas APIs.
   identifiability_study_helper_.set_encountered_skipped_ops();
   CanvasRenderingContext2DState& state = GetState();
   if (!state.HasRealizedFont()) {

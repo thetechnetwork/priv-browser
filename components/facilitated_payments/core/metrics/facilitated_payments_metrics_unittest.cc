@@ -51,15 +51,19 @@ TEST(FacilitatedPaymentsMetricsTest, LogEwalletPaymentLinkDetected) {
       /*expected_bucket_count=*/1);
 }
 
-TEST(FacilitatedPaymentsMetricsTest, LogFopSelected) {
+TEST(FacilitatedPaymentsMetricsTest, LogPixFopSelectedAndLatency) {
   base::HistogramTester histogram_tester;
 
-  LogPixFopSelected();
+  LogPixFopSelectedAndLatency(base::Milliseconds(10));
 
   histogram_tester.ExpectUniqueSample(
       "FacilitatedPayments.Pix.FopSelector.UserAction",
       /*sample=*/FopSelectorAction::kFopSelected,
       /*expected_bucket_count=*/1);
+  histogram_tester.ExpectBucketCount(
+      "FacilitatedPayments.Pix.FopSelected.Latency",
+      /*sample=*/10,
+      /*expected_count=*/1);
 }
 
 TEST(FacilitatedPaymentsMetricsTest, LogEwalletFopSelected) {
@@ -143,6 +147,22 @@ TEST(FacilitatedPaymentsMetricsTest,
 
     histogram_tester.ExpectBucketCount(
         base::StrCat({"FacilitatedPayments.Pix.InitiatePurchaseAction.",
+                      GetPurchaseActionResultString(result), ".Latency"}),
+        /*sample=*/10,
+        /*expected_count=*/1);
+  }
+}
+
+TEST(FacilitatedPaymentsMetricsTest, LogPixTransactionResultAndLatency) {
+  for (PurchaseActionResult result :
+       {PurchaseActionResult::kResultOk, PurchaseActionResult::kCouldNotInvoke,
+        PurchaseActionResult::kResultCanceled}) {
+    base::HistogramTester histogram_tester;
+
+    LogPixTransactionResultAndLatency(result, base::Milliseconds(10));
+
+    histogram_tester.ExpectBucketCount(
+        base::StrCat({"FacilitatedPayments.Pix.Transaction.",
                       GetPurchaseActionResultString(result), ".Latency"}),
         /*sample=*/10,
         /*expected_count=*/1);

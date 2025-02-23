@@ -146,6 +146,7 @@
 #include "net/base/registry_controlled_domains/registry_controlled_domain.h"
 #include "net/base/url_util.h"
 #include "net/cookies/cookie_access_result.h"
+#include "net/filter/source_stream_type.h"
 #include "net/http/http_request_headers.h"
 #include "net/http/http_status_code.h"
 #include "net/storage_access_api/status.h"
@@ -301,17 +302,6 @@ void UpdateLoadFlagsWithCacheFlags(int* load_flags,
       }
       break;
   }
-}
-
-// TODO(clamy): This should be function in FrameTreeNode.
-bool IsSecureFrame(RenderFrameHostImpl* frame) {
-  while (frame) {
-    if (!network::IsOriginPotentiallyTrustworthy(
-            frame->GetLastCommittedOrigin()))
-      return false;
-    frame = frame->GetParent();
-  }
-  return true;
 }
 
 // This should match blink::ResourceRequest::needsHTTPOrigin.
@@ -5330,7 +5320,7 @@ void NavigationRequest::OnStartChecksComplete(
   // Give DevTools a chance to override begin params (headers, skip SW)
   // before actually loading resource.
   bool report_raw_headers = false;
-  std::optional<std::vector<net::SourceStream::SourceType>>
+  std::optional<std::vector<net::SourceStreamType>>
       devtools_accepted_stream_types;
   devtools_instrumentation::ApplyNetworkRequestOverrides(
       frame_tree_node_, begin_params_.get(), &report_raw_headers,
@@ -5409,7 +5399,7 @@ void NavigationRequest::OnStartChecksComplete(
           frame_tree_node_->current_frame_host()->IsInPrimaryMainFrame(),
           frame_tree_node_->IsOutermostMainFrame(),
           frame_tree_node_->IsMainFrame(),
-          IsSecureFrame(frame_tree_node_->parent()),
+          frame_tree_node_->AreAncestorsSecure(),
           frame_tree_node_->frame_tree_node_id(), report_raw_headers,
           upgrade_if_insecure_,
           blob_url_loader_factory_ ? blob_url_loader_factory_->Clone()
@@ -6010,7 +6000,7 @@ void NavigationRequest::InheritServiceWorkerControllerFromParentIfNeeded() {
       service_worker_context->context()
           ->service_worker_client_owner()
           .CreateServiceWorkerClientForWindow(
-              IsSecureFrame(frame_tree_node_->parent()),
+              frame_tree_node_->AreAncestorsSecure(),
               frame_tree_node_->frame_tree_node_id()),
       GetIsolationInfo());
   service_worker_handle_->service_worker_client()->InheritControllerFrom(
@@ -8043,14 +8033,12 @@ void NavigationRequest::DidCommitNavigation(
   if (keep_alive_url_loader_factory_context_) {
     DCHECK(!IsSameDocument());
 
-    keep_alive_url_loader_factory_context_->OnDidCommitNavigation(
-        GetRenderFrameHost()->GetWeakDocumentPtr());
+    keep_alive_url_loader_factory_context_->OnDidCommitNavigation(this);
   }
   if (fetch_later_loader_factory_context_) {
     DCHECK(!IsSameDocument());
 
-    fetch_later_loader_factory_context_->OnDidCommitNavigation(
-        GetRenderFrameHost()->GetWeakDocumentPtr());
+    fetch_later_loader_factory_context_->OnDidCommitNavigation(this);
   }
 
   // Network status of the entire frame tree needs to be updated once a

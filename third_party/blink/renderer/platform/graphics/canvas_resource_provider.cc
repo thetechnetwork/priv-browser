@@ -230,9 +230,8 @@ class CanvasResourceProviderSharedBitmap : public CanvasResourceProvider,
     TRACE_EVENT0("blink",
                  "CanvasResourceProviderSharedBitmap::CreateSkSurface");
 
-    const auto info = GetSkImageInfo().makeAlphaType(kPremul_SkAlphaType);
     const auto props = GetSkSurfaceProps();
-    return SkSurfaces::Raster(info, &props);
+    return SkSurfaces::Raster(GetSkImageInfo(), &props);
   }
   ~CanvasResourceProviderSharedBitmap() override {
     if (shared_image_interface_provider_) {
@@ -798,7 +797,7 @@ class CanvasResourceProviderSharedImage : public CanvasResourceProvider {
     std::string path = base::StringPrintf("canvas/ResourceProvider_0x%" PRIXPTR,
                                           reinterpret_cast<uintptr_t>(this));
 
-    resource()->OnMemoryDump(pmd, path, GetSkImageInfo().bytesPerPixel());
+    resource()->OnMemoryDump(pmd, path);
 
     std::string cached_path = path + "/cached";
     for (const auto& canvas_resource : CanvasResources()) {
@@ -809,8 +808,7 @@ class CanvasResourceProviderSharedImage : public CanvasResourceProvider {
       if (resource_pointer == resource()) {
         continue;
       }
-      resource_pointer->OnMemoryDump(pmd, cached_path,
-                                     GetSkImageInfo().bytesPerPixel());
+      resource_pointer->OnMemoryDump(pmd, cached_path);
     }
   }
 

@@ -346,6 +346,7 @@ targets.bundle(
 targets.bundle(
     name = "android_desktop_fyi_tests",
     targets = [
+        "android_browsertests",
         "chrome_public_test_apk",
     ],
     mixins = [
@@ -354,6 +355,11 @@ targets.bundle(
         "x86-64",
     ],
     per_test_modifications = {
+        "android_browsertests": targets.mixin(
+            swarming = targets.swarming(
+                shards = 10,
+            ),
+        ),
         "chrome_public_test_apk": targets.mixin(
             swarming = targets.swarming(
                 shards = 15,
@@ -763,16 +769,16 @@ targets.bundle(
     name = "android_rel_isolated_scripts",
     targets = [
         "private_code_failure_test",
-        "android_blink_wpt_tests",
-        "webview_blink_wpt_tests",
+        "android_chrome_wpt_tests",
+        "android_webview_wpt_tests",
     ],
     per_test_modifications = {
-        "android_blink_wpt_tests": targets.mixin(
+        "android_chrome_wpt_tests": targets.mixin(
             swarming = targets.swarming(
                 shards = 4,
             ),
         ),
-        "webview_blink_wpt_tests": targets.mixin(
+        "android_webview_wpt_tests": targets.mixin(
             swarming = targets.swarming(
                 shards = 4,
             ),
@@ -2868,11 +2874,6 @@ targets.bundle(
         "zlib_unittests",
     ],
     per_test_modifications = {
-        "cc_unittests": targets.mixin(
-            swarming = targets.swarming(
-                shards = 2,
-            ),
-        ),
         "components_browsertests": targets.mixin(
             args = [
                 "--test-arg=--disable-gpu",
@@ -2882,7 +2883,7 @@ targets.bundle(
         ),
         "components_unittests": targets.mixin(
             swarming = targets.swarming(
-                shards = 2,
+                shards = 4,
             ),
         ),
         "content_browsertests": targets.mixin(
@@ -2899,9 +2900,6 @@ targets.bundle(
             args = [
                 "--test-launcher-filter-file=../../testing/buildbot/filters/fuchsia.net_unittests.filter",
             ],
-            swarming = targets.swarming(
-                shards = 4,
-            ),
         ),
         "ozone_gl_unittests": targets.mixin(
             args = [
@@ -7274,10 +7272,10 @@ targets.bundle(
 targets.bundle(
     name = "wpt_web_tests_android",
     targets = [
-        "android_blink_wpt_tests",
+        "android_chrome_wpt_tests",
     ],
     per_test_modifications = {
-        "android_blink_wpt_tests": targets.mixin(
+        "android_chrome_wpt_tests": targets.mixin(
             swarming = targets.swarming(
                 shards = 4,
             ),
@@ -7288,10 +7286,10 @@ targets.bundle(
 targets.bundle(
     name = "wpt_web_tests_webview",
     targets = [
-        "webview_blink_wpt_tests",
+        "android_webview_wpt_tests",
     ],
     per_test_modifications = {
-        "webview_blink_wpt_tests": targets.mixin(
+        "android_webview_wpt_tests": targets.mixin(
             swarming = targets.swarming(
                 shards = 4,
             ),

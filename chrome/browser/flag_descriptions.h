@@ -89,6 +89,11 @@ extern const char kAndroidAppIntegrationV2Description[];
 extern const char kAndroidAppIntegrationWithFaviconName[];
 extern const char kAndroidAppIntegrationWithFaviconDescription[];
 
+#if BUILDFLAG(IS_ANDROID)
+extern const char kAndroidAppearanceSettingsName[];
+extern const char kAndroidAppearanceSettingsDescription[];
+#endif  // BUILDFLAG(IS_ANDROID)
+
 extern const char kAndroidBcivBottomControlsName[];
 extern const char kAndroidBcivBottomControlsDescription[];
 
@@ -424,12 +429,6 @@ extern const char kAutofillEnableRankingFormulaCreditCardsDescription[];
 extern const char kAutofillEnableSaveAndFillName[];
 extern const char kAutofillEnableSaveAndFillDescription[];
 
-extern const char kAutofillEnableSaveCardLoadingAndConfirmationName[];
-extern const char kAutofillEnableSaveCardLoadingAndConfirmationDescription[];
-
-extern const char kAutofillEnableSaveCardLocalSaveFallbackName[];
-extern const char kAutofillEnableSaveCardLocalSaveFallbackDescription[];
-
 #if BUILDFLAG(IS_ANDROID)
 extern const char kAutofillEnableSyncingOfPixBankAccountsName[];
 extern const char kAutofillEnableSyncingOfPixBankAccountsDescription[];
@@ -440,9 +439,6 @@ extern const char kAutofillEnableVcn3dsAuthenticationDescription[];
 
 extern const char kAutofillEnableVcnGrayOutForMerchantOptOutName[];
 extern const char kAutofillEnableVcnGrayOutForMerchantOptOutDescription[];
-
-extern const char kAutofillEnableVcnEnrollLoadingAndConfirmationName[];
-extern const char kAutofillEnableVcnEnrollLoadingAndConfirmationDescription[];
 
 extern const char kAutofillEnableVerveCardSupportName[];
 extern const char kAutofillEnableVerveCardSupportDescription[];
@@ -565,8 +561,16 @@ extern const char kCanvasHibernationDescription[];
 extern const char kCanvasOopRasterizationName[];
 extern const char kCanvasOopRasterizationDescription[];
 
+#if !BUILDFLAG(IS_ANDROID)
 extern const char kCapturedSurfaceControlName[];
 extern const char kCapturedSurfaceControlDescription[];
+
+extern const char kCrossTabElementCaptureName[];
+extern const char kCrossTabElementCaptureDescription[];
+
+extern const char kCrossTabRegionCaptureName[];
+extern const char kCrossTabRegionCaptureDescription[];
+#endif  // !BUILDFLAG(IS_ANDROID)
 
 #if BUILDFLAG(IS_LINUX) || BUILDFLAG(IS_MAC) || BUILDFLAG(IS_WIN)
 extern const char kContextualCueingName[];
@@ -886,8 +890,10 @@ extern const char kEnableGamepadMultitouchName[];
 extern const char kEnableGamepadMultitouchDescription[];
 
 #if !BUILDFLAG(IS_ANDROID)
+#if !BUILDFLAG(IS_CHROMEOS)
 extern const char kEnableIsolatedWebAppsName[];
 extern const char kEnableIsolatedWebAppsDescription[];
+#endif  // !BUILDFLAG(IS_CHROMEOS)
 
 extern const char kDirectSocketsInServiceWorkersName[];
 extern const char kDirectSocketsInServiceWorkersDescription[];
@@ -1369,9 +1375,6 @@ extern const char kLegacyTechReportTopLevelUrlDescription[];
 extern const char kLensOverlayName[];
 extern const char kLensOverlayDescription[];
 
-extern const char kLensOverlayContextualSearchboxName[];
-extern const char kLensOverlayContextualSearchboxDescription[];
-
 extern const char kLensOverlayImageContextMenuActionsName[];
 extern const char kLensOverlayImageContextMenuActionsDescription[];
 
@@ -1450,6 +1453,11 @@ extern const char kWebNNCoreMLDescription[];
 
 extern const char kWebNNDirectMLName[];
 extern const char kWebNNDirectMLDescription[];
+
+#if BUILDFLAG(IS_ANDROID)
+extern const char kNewEtc1EncoderName[];
+extern const char kNewEtc1EncoderDescription[];
+#endif
 
 extern const char kNotificationSchedulerName[];
 extern const char kNotificationSchedulerDescription[];
@@ -2193,6 +2201,9 @@ extern const char kTpcdTrialSettingsDescription[];
 extern const char kTopLevelTpcdTrialSettingsName[];
 extern const char kTopLevelTpcdTrialSettingsDescription[];
 
+extern const char kBlockTpcsIncognitoName[];
+extern const char kBlockTpcsIncognitoDescription[];
+
 extern const char kTrackingProtection3pcdName[];
 extern const char kTrackingProtection3pcdDescription[];
 
@@ -2274,6 +2285,11 @@ extern const char kWallpaperGooglePhotosSharedAlbumsDescription[];
 
 extern const char kWallpaperSearchSettingsVisibilityName[];
 extern const char kWallpaperSearchSettingsVisibilityDescription[];
+
+extern const char
+    kWebAuthenticationAlignErrorTypeForPaymentCredentialCreateName[];
+extern const char
+    kWebAuthenticationAlignErrorTypeForPaymentCredentialCreateDescription[];
 
 #if !BUILDFLAG(IS_ANDROID)
 extern const char kWebAuthnUsePasskeyFromAnotherDeviceInContextMenuName[];

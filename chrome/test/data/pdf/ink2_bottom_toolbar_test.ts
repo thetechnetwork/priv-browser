@@ -24,7 +24,9 @@ async function clickColorButton(index: number) {
   const colorSelector = getRequiredElement<InkColorSelectorElement>(
       bottomToolbar, 'ink-color-selector');
   const colorButtons = getColorButtons(colorSelector);
-  colorButtons[index].click();
+  const button = colorButtons[index];
+  chrome.test.assertTrue(!!button);
+  button.click();
   await microtasksFinished();
 }
 
@@ -61,7 +63,7 @@ chrome.test.runTests([
 
     chrome.test.assertTrue(viewer.$.toolbar.annotationMode);
     chrome.test.assertTrue(
-        !!viewer.shadowRoot!.querySelector('viewer-bottom-toolbar'));
+        !!viewer.shadowRoot.querySelector('viewer-bottom-toolbar'));
     mockMetricsPrivate.assertCount(UserAction.OPEN_INK2_SIDE_PANEL, 0);
     mockMetricsPrivate.assertCount(UserAction.OPEN_INK2_BOTTOM_TOOLBAR, 1);
     chrome.test.succeed();
@@ -82,7 +84,7 @@ chrome.test.runTests([
     const sizeButtons = getSizeButtons(sizeSelector);
     assertSelectedSize(sizeButtons, /*buttonIndex=*/ 2);
     assertDropdownSizeIcon('pdf:pen-size-3');
-    sizeButtons[0].click();
+    sizeButtons[0]!.click();
     await microtasksFinished();
 
     assertAnnotationBrush(mockPlugin, {
@@ -128,7 +130,7 @@ chrome.test.runTests([
     const sizeButtons = getSizeButtons(sizeSelector);
     assertSelectedSize(sizeButtons, /*buttonIndex=*/ 2);
 
-    sizeButtons[1].click();
+    sizeButtons[1]!.click();
     await microtasksFinished();
 
     assertAnnotationBrush(mockPlugin, {
@@ -139,7 +141,7 @@ chrome.test.runTests([
 
     // There shouldn't be color options.
     chrome.test.assertTrue(
-        !bottomToolbar.shadowRoot!.querySelector<HTMLElement>('#color'));
+        !bottomToolbar.shadowRoot.querySelector<HTMLElement>('#color'));
     chrome.test.succeed();
   },
 
@@ -170,7 +172,7 @@ chrome.test.runTests([
     assertSelectedSize(sizeButtons, /*buttonIndex=*/ 2);
 
     // Change the highlighter size.
-    sizeButtons[4].click();
+    sizeButtons[4]!.click();
     await microtasksFinished();
 
     assertAnnotationBrush(mockPlugin, {

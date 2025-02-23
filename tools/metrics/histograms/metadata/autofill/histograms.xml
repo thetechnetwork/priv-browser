@@ -1086,6 +1086,19 @@ Called by update_autofill_enums.py. This is a manual comment.-->
   </token>
 </histogram>
 
+<histogram name="Autofill.AmountExtraction.Result"
+    enum="AmountExtractionResult" expires_after="2026-01-01">
+  <owner>yiwenqian@google.com</owner>
+  <owner>payments-autofill-team@google.com</owner>
+  <summary>
+    Records the result of amount extraction process. Amount extraction process
+    is initiated once user clicks on the credit card form on Desktop. The result
+    is recorded upon receiving the response in the browser process. This metric
+    records two types of amount extraction results: success and amount not
+    found.
+  </summary>
+</histogram>
+
 <histogram name="Autofill.AndroidAutofillAvailabilityStatus"
     enum="AndroidAutofillAvailabilityStatus" expires_after="2025-07-27">
   <owner>friedrichh@chromium.org</owner>
@@ -5596,6 +5609,20 @@ Called by update_autofill_enums.py. This is a manual comment.-->
   <summary>
     Records which entry point opened the Autofill Options screen. Recorded on
     Android.
+  </summary>
+</histogram>
+
+<histogram name="Autofill.Settings.AutofillOptionsRestartAccepted"
+    enum="Boolean" expires_after="2025-08-10">
+  <owner>friedrichh@chromium.org</owner>
+  <owner>chrome-autofill-alerts@google.com</owner>
+  <summary>
+    Records true whenever the user confirms changing the third party autofill
+    experience with a restart. Records false whenever the user dismisses the
+    restart prompt. Since a restart is always required, users may be opting in
+    or out of 3P suggestions while they are faced with this restart prompt.
+    Recorded when the user flips the toggle in the autofill options settings.
+    Recorded only on Android.
   </summary>
 </histogram>
 

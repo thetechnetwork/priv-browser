@@ -17,7 +17,7 @@ namespace payments::facilitated {
 namespace {
 
 // Helper to convert `PurchaseActionResult` to a string for logging.
-std::string GetInitiatePurchaseActionResultString(PurchaseActionResult result) {
+std::string GetPurchaseActionResultString(PurchaseActionResult result) {
   switch (result) {
     case PurchaseActionResult::kResultOk:
       return "Succeeded";
@@ -125,12 +125,15 @@ void LogEwalletFopSelectorResultUkm(bool accepted,
       .Record(ukm::UkmRecorder::Get());
 }
 
-void LogPixFopSelected() {
+void LogPixFopSelectedAndLatency(base::TimeDelta duration) {
   // The histogram name should be in sync with
   // `FacilitatedPaymentsPaymentMethodsMediator.PIX_FOP_SELECTOR_USER_ACTION_HISTOGRAM`.
   base::UmaHistogramEnumeration(
       "FacilitatedPayments.Pix.FopSelector.UserAction",
       FopSelectorAction::kFopSelected);
+
+  base::UmaHistogramLongTimes("FacilitatedPayments.Pix.FopSelected.Latency",
+                              duration);
 }
 
 void LogEwalletFopSelected(AvailableEwalletsConfiguration type) {
@@ -299,7 +302,15 @@ void LogPixInitiatePurchaseActionResultAndLatency(PurchaseActionResult result,
                                                   base::TimeDelta duration) {
   base::UmaHistogramLongTimes(
       base::StrCat({"FacilitatedPayments.Pix.InitiatePurchaseAction.",
-                    GetInitiatePurchaseActionResultString(result), ".Latency"}),
+                    GetPurchaseActionResultString(result), ".Latency"}),
+      duration);
+}
+
+void LogPixTransactionResultAndLatency(PurchaseActionResult result,
+                                       base::TimeDelta duration) {
+  base::UmaHistogramLongTimes(
+      base::StrCat({"FacilitatedPayments.Pix.Transaction.",
+                    GetPurchaseActionResultString(result), ".Latency"}),
       duration);
 }
 
@@ -310,12 +321,12 @@ void LogEwalletInitiatePurchaseActionResultAndLatency(
     bool is_device_bound) {
   base::UmaHistogramLongTimes(
       base::StrCat({"FacilitatedPayments.Ewallet.InitiatePurchaseAction.",
-                    GetInitiatePurchaseActionResultString(result), ".Latency",
+                    GetPurchaseActionResultString(result), ".Latency",
                     is_device_bound ? ".DeviceBound" : ".DeviceNotBound"}),
       duration);
   base::UmaHistogramLongTimes(
       base::StrCat({"FacilitatedPayments.Ewallet.InitiatePurchaseAction.",
-                    GetInitiatePurchaseActionResultString(result), ".Latency.",
+                    GetPurchaseActionResultString(result), ".Latency.",
                     SchemeToString(scheme),
                     is_device_bound ? ".DeviceBound" : ".DeviceNotBound"}),
       duration);

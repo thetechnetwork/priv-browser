@@ -61,6 +61,7 @@
 #include "chrome/browser/ui/lens/lens_overlay_colors.h"
 #include "chrome/browser/ui/lens/lens_overlay_entry_point_controller.h"
 #include "chrome/browser/ui/lens/lens_overlay_gen204_controller.h"
+#include "chrome/browser/ui/lens/lens_overlay_query_controller.h"
 #include "chrome/browser/ui/lens/lens_overlay_side_panel_coordinator.h"
 #include "chrome/browser/ui/lens/lens_overlay_untrusted_ui.h"
 #include "chrome/browser/ui/lens/lens_overlay_url_builder.h"
@@ -512,6 +513,7 @@ class LensOverlayControllerFake : public LensOverlayController {
   std::unique_ptr<lens::LensOverlayQueryController> CreateLensQueryController(
       lens::LensOverlayFullImageResponseCallback full_image_callback,
       lens::LensOverlayUrlResponseCallback url_callback,
+      lens::LensOverlayInteractionResponseCallback interaction_callback,
       lens::LensOverlaySuggestInputsCallback suggest_inputs_callback,
       lens::LensOverlayThumbnailCreatedCallback thumbnail_created_callback,
       variations::VariationsClient* variations_client,
@@ -527,9 +529,9 @@ class LensOverlayControllerFake : public LensOverlayController {
             base::BindRepeating(
                 &LensOverlayControllerFake::RecordUrlResponseCallback,
                 base::Unretained(this)),
-            suggest_inputs_callback, thumbnail_created_callback,
-            variations_client, identity_manager, profile, invocation_source,
-            use_dark_mode, gen204_controller);
+            interaction_callback, suggest_inputs_callback,
+            thumbnail_created_callback, variations_client, identity_manager,
+            profile, invocation_source, use_dark_mode, gen204_controller);
     // Set up the fake responses for the query controller.
     fake_query_controller->set_next_full_image_request_should_return_error(
         full_image_request_should_return_error_);
@@ -3568,8 +3570,10 @@ IN_PROC_BROWSER_TEST_F(LensOverlayControllerBrowserTest,
                             first_search_url);
 }
 
-IN_PROC_BROWSER_TEST_F(LensOverlayControllerBrowserTest,
-                       PopAndLoadQueryFromHistoryWithMultimodalRequest) {
+// TODO(https://crbug.com/397600510): Disabled due to excessive flakiness.
+IN_PROC_BROWSER_TEST_F(
+    LensOverlayControllerBrowserTest,
+    DISABLED_PopAndLoadQueryFromHistoryWithMultimodalRequest) {
   WaitForPaint();
 
   // State should start in off.
@@ -7693,11 +7697,10 @@ class LensOverlayControllerOverlaySearchbox
   }
 
   void VerifyContextualSearchQueryParameters(const GURL& url_to_process) {
-    EXPECT_THAT(
-        url_to_process.spec(),
-        testing::MatchesRegex(
-            std::string(kResultsSearchBaseUrl) +
-            ".*source=chrome.cr.menu.*&q=.*&gsc=2&hl=.*&biw=\\d+&bih=\\d+"));
+    EXPECT_THAT(url_to_process.spec(),
+                testing::MatchesRegex(std::string(kResultsSearchBaseUrl) +
+                                      ".*source=chrome.cr.menu.*&vit=.*&gsc=2&"
+                                      "hl=.*&q=.*&biw=\\d+&bih=\\d+"));
   }
 };
 
@@ -7753,6 +7756,12 @@ IN_PROC_BROWSER_TEST_F(LensOverlayControllerOverlaySearchbox,
       "hello", AutocompleteMatchType::Type::SEARCH_WHAT_YOU_TYPED,
       /*is_zero_prefix_suggestion=*/false,
       std::map<std::string, std::string>());
+
+  // Wait for the side panel to open.
+  ASSERT_TRUE(base::test::RunUntil(
+      [&]() { return controller->state() == State::kLivePageAndResults; }));
+  EXPECT_EQ(controller->GetPageClassificationForTesting(),
+            metrics::OmniboxEventProto::CONTEXTUAL_SEARCHBOX);
 
   // Wait for URL to load in side panel.
   EXPECT_TRUE(content::WaitForLoadStop(

@@ -144,8 +144,9 @@ void LogEwalletFopSelectorResultUkm(bool accepted,
                                     ukm::SourceId ukm_source_id,
                                     PaymentLinkValidator::Scheme scheme);
 
-// Log when user selects a Pix FOP to pay with.
-void LogPixFopSelected();
+// Logs that the user has selected a Pix FOP to pay with. Also logs the time
+// taken by the user to select the Pix account after the FOP selector is shown.
+void LogPixFopSelectedAndLatency(base::TimeDelta duration);
 
 // Log when user selects an eWallet FOP to pay with.
 void LogEwalletFopSelected(AvailableEwalletsConfiguration type);
@@ -232,6 +233,12 @@ void LogInitiatePurchaseActionAttempt(
 // payments platform (client) during Pix payflow.
 void LogPixInitiatePurchaseActionResultAndLatency(PurchaseActionResult result,
                                                   base::TimeDelta duration);
+
+// Logs the result and the overall latency for the Pix transaction. The latency
+// is measured between the time when the Pix code was copied to the time when
+// Chrome receives `PurchaseActionResult` from the payments backend.
+void LogPixTransactionResultAndLatency(PurchaseActionResult result,
+                                       base::TimeDelta duration);
 
 // Log the result and latency for the InitiatePurchaseAction call made to the
 // payments platform (client) during eWallet payflow.

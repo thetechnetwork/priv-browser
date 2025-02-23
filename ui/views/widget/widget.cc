@@ -370,22 +370,17 @@ Widget* Widget::GetTopLevelWidgetForNativeView(gfx::NativeView native_view) {
 }
 
 // static
-void Widget::GetAllChildWidgets(gfx::NativeView native_view,
-                                Widgets* children) {
-  if (!native_view) {
-    return;
-  }
-
-  internal::NativeWidgetPrivate::GetAllChildWidgets(native_view, children);
+Widget::Widgets Widget::GetAllChildWidgets(gfx::NativeView native_view) {
+  return native_view
+             ? internal::NativeWidgetPrivate::GetAllChildWidgets(native_view)
+             : Widget::Widgets();
 }
 
 // static
-void Widget::GetAllOwnedWidgets(gfx::NativeView native_view, Widgets* owned) {
-  if (!native_view) {
-    return;
-  }
-
-  internal::NativeWidgetPrivate::GetAllOwnedWidgets(native_view, owned);
+Widget::Widgets Widget::GetAllOwnedWidgets(gfx::NativeView native_view) {
+  return native_view
+             ? internal::NativeWidgetPrivate::GetAllOwnedWidgets(native_view)
+             : Widget::Widgets();
 }
 
 // static
@@ -1139,6 +1134,12 @@ void Widget::Minimize() {
 void Widget::Restore() {
   if (native_widget_) {
     native_widget_->Restore();
+  }
+}
+
+void Widget::ShowWindowControlsMenu(const gfx::Point& point) {
+  if (native_widget_) {
+    native_widget_->ShowWindowControlsMenu(point);
   }
 }
 

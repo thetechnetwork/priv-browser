@@ -1994,6 +1994,15 @@ _BANNED_CPP_FUNCTIONS: Sequence[BanRule] = (
         ),
     ),
     BanRule(
+        pattern=r'subspan(0u,',
+        explanation=
+        ('Prefer first(n) over subspan(0u, n) as it is shorter, and the '
+         'compiler may have to emit a branch for the n == dynamic_extent '
+         'case of subspan().',
+        ),
+        treat_as_error=False,
+    ),
+    BanRule(
         pattern=r'UNSAFE_TODO(',
         explanation=
         ('Do not use UNSAFE_TODO() to write new unsafe code. Use only when '
@@ -2032,6 +2041,16 @@ _BANNED_CPP_FUNCTIONS: Sequence[BanRule] = (
           'to write a test that has both a Browser and a BrowserView, create '
           'a browser_test. If you want to write a unit_test, your code must '
           'not reference Browser*.',
+         ),
+        treat_as_error=False,
+    ),
+    BanRule(
+        pattern='CreateBrowserWithTestWindow',
+        explanation=
+         ('Do not use CreateBrowserWithTestWindow. See '
+          'docs/chrome_browser_design_principles.md for details. If you want '
+          'to write a test that has a Browser, create a browser_test. If you '
+          'want to write a unit_test, your code must not reference Browser*.',
          ),
         treat_as_error=False,
     ),

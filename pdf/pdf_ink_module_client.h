@@ -49,8 +49,12 @@ class PdfInkModuleClient {
 
   // Gets the current scaled and rotated rectangle area of the page in CSS
   // screen coordinates for the 0-based page index.  Must be non-empty for any
-  // non-negative index returned from `VisiblePageIndexFromPoint()`.
-  virtual gfx::Rect GetPageContentsRect(int index) = 0;
+  // non-negative page index returned from `VisiblePageIndexFromPoint()`.
+  virtual gfx::Rect GetPageContentsRect(int page_index) = 0;
+
+  // Gets the thumbnail size for `page_index`. The size must be non-empty for
+  // any valid page index.
+  virtual gfx::Size GetThumbnailSize(int page_index) = 0;
 
   // Gets the offset within the rendering viewport to where the page images
   // will be drawn.  Since the offset is a location within the viewport, it
@@ -102,9 +106,6 @@ class PdfInkModuleClient {
   // `page_index` should update its active state.
   virtual void UpdateStrokeActive(int page_index, InkStrokeId id, bool active) {
   }
-
-  // Asks the client to update the thumbnail for `page_index`.
-  virtual void UpdateThumbnail(int page_index) {}
 
   // Returns the 0-based page index for the given `point` if it is on a
   // visible page, or -1 if `point` is not on a visible page.

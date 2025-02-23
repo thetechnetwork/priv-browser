@@ -17,12 +17,13 @@ import org.chromium.base.supplier.LazyOneshotSupplier;
 import org.chromium.base.supplier.ObservableSupplier;
 import org.chromium.base.supplier.ObservableSupplierImpl;
 import org.chromium.chrome.browser.bookmarks.BookmarkImageFetcher;
+import org.chromium.chrome.browser.bookmarks.BookmarkManagerOpener;
 import org.chromium.chrome.browser.bookmarks.BookmarkModel;
 import org.chromium.chrome.browser.bookmarks.BookmarkOpener;
-import org.chromium.chrome.browser.bookmarks.BookmarkUtils;
 import org.chromium.chrome.browser.bookmarks.R;
 import org.chromium.chrome.browser.browser_controls.BrowserControlsStateProvider;
 import org.chromium.chrome.browser.profiles.Profile;
+import org.chromium.chrome.browser.tab.TabLaunchType;
 import org.chromium.chrome.browser.ui.favicon.FaviconUtils;
 import org.chromium.components.bookmarks.BookmarkItem;
 import org.chromium.components.browser_ui.util.GlobalDiscardableReferencePool;
@@ -53,6 +54,8 @@ class BookmarkBarMediator
     private final PropertyModel mModel;
     private final ObservableSupplier<Profile> mProfileSupplier;
     private final Callback<Profile> mProfileSupplierObserver;
+    private final @NonNull BookmarkOpener mBookmarkOpener;
+    private final @NonNull ObservableSupplier<BookmarkManagerOpener> mBookmarkManagerOpenerSupplier;
 
     private @Nullable BookmarkImageFetcher mImageFetcher;
     private @Nullable BookmarkBarItemsProvider mItemsProvider;
@@ -78,7 +81,9 @@ class BookmarkBarMediator
             @NonNull ModelList itemsModel,
             @NonNull ObservableSupplier<Boolean> itemsOverflowSupplier,
             @NonNull PropertyModel model,
-            @NonNull ObservableSupplier<Profile> profileSupplier) {
+            @NonNull ObservableSupplier<Profile> profileSupplier,
+            @NonNull BookmarkOpener bookmarkOpener,
+            @NonNull ObservableSupplier<BookmarkManagerOpener> bookmarkManagerOpenerSupplier) {
         mActivity = activity;
 
         mAllBookmarksButtonModel = allBookmarksButtonModel;
@@ -119,6 +124,9 @@ class BookmarkBarMediator
         mProfileSupplier = profileSupplier;
         mProfileSupplierObserver = this::onProfileChange;
         mProfileSupplier.addObserver(mProfileSupplierObserver);
+
+        mBookmarkOpener = bookmarkOpener;
+        mBookmarkManagerOpenerSupplier = bookmarkManagerOpenerSupplier;
 
         updateTopMargin();
         updateVisibility();
@@ -236,8 +244,12 @@ class BookmarkBarMediator
         // opening the manager for the wrong profile/model.
         runIfStillRelevantAfterFinishLoadingBookmarkModel(
                 (profileAfterLoading, modelAfterLoading) -> {
-                    BookmarkUtils.showBookmarkManager(
-                            mActivity, modelAfterLoading.getRootFolderId(), profileAfterLoading);
+                    mBookmarkManagerOpenerSupplier
+                            .get()
+                            .showBookmarkManager(
+                                    mActivity,
+                                    profileAfterLoading,
+                                    modelAfterLoading.getRootFolderId());
                 });
     }
 
@@ -247,25 +259,22 @@ class BookmarkBarMediator
 
         // TODO(crbug.com/394614779): Open in popup window instead of bookmark manager.
         if (item.isFolder()) {
-            BookmarkUtils.showBookmarkManager(mActivity, item.getId(), profile);
+            mBookmarkManagerOpenerSupplier
+                    .get()
+                    .showBookmarkManager(mActivity, profile, item.getId());
             return;
         }
 
-        final var opener =
-                new BookmarkOpener(
-                        BookmarkModel.getForProfile(profile),
-                        mActivity,
-                        mActivity.getComponentName(),
-                        /* bookmarkOpenedCallback= */ null);
-
-        // TODO(crbug.com/394614604): Open in new background tab rather than foreground.
         final boolean isCtrlPressed = (metaState & KeyEvent.META_CTRL_ON) != 0;
         if (isCtrlPressed) {
-            opener.openBookmarksInNewTabs(List.of(item.getId()), profile.isOffTheRecord());
+            mBookmarkOpener.openBookmarksInNewTabs(
+                    List.of(item.getId()),
+                    profile.isOffTheRecord(),
+                    Optional.of(TabLaunchType.FROM_BOOKMARK_BAR_BACKGROUND));
             return;
         }
 
-        opener.openBookmarkInCurrentTab(item.getId(), profile.isOffTheRecord());
+        mBookmarkOpener.openBookmarkInCurrentTab(item.getId(), profile.isOffTheRecord());
     }
 
     private void onItemsOverflowChange(boolean itemsOverflow) {
@@ -279,11 +288,14 @@ class BookmarkBarMediator
         // opening the manager for the wrong profile/model.
         runIfStillRelevantAfterFinishLoadingBookmarkModel(
                 (profileAfterLoading, modelAfterLoading) -> {
-                    BookmarkUtils.showBookmarkManager(
-                            mActivity,
-                            Optional.ofNullable(modelAfterLoading.getAccountDesktopFolderId())
-                                    .orElseGet(modelAfterLoading::getDesktopFolderId),
-                            profileAfterLoading);
+                    mBookmarkManagerOpenerSupplier
+                            .get()
+                            .showBookmarkManager(
+                                    mActivity,
+                                    profileAfterLoading,
+                                    Optional.ofNullable(
+                                                    modelAfterLoading.getAccountDesktopFolderId())
+                                            .orElseGet(modelAfterLoading::getDesktopFolderId));
                 });
     }
 

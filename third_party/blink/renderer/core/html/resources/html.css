@@ -1183,7 +1183,12 @@ abbr[title], acronym[title] {
 }
 
 strong, b {
-    font-weight: bold
+    @supports blink-feature(StrongBolder) {
+      font-weight: bolder;
+    }
+    @supports not blink-feature(StrongBolder) {
+     font-weight: bold;
+    }
 }
 
 i, cite, em, var, address, dfn {
@@ -1240,6 +1245,10 @@ nobr {
 
 :focus-visible {
     outline: auto 1px -webkit-focus-ring-color
+}
+
+[interesttarget]:focus-visible {
+  outline: solid 3px -webkit-focus-ring-color;
 }
 
 html:focus-visible, body:focus-visible {

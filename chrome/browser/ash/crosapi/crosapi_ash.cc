@@ -23,7 +23,6 @@
 #include "chrome/browser/ash/crosapi/clipboard_history_ash.h"
 #include "chrome/browser/ash/crosapi/content_protection_ash.h"
 #include "chrome/browser/ash/crosapi/debug_interface_registerer_ash.h"
-#include "chrome/browser/ash/crosapi/desk_ash.h"
 #include "chrome/browser/ash/crosapi/desk_profiles_ash.h"
 #include "chrome/browser/ash/crosapi/desk_template_ash.h"
 #include "chrome/browser/ash/crosapi/device_attributes_ash.h"
@@ -69,9 +68,7 @@
 #include "chrome/browser/ash/crosapi/screen_ai_downloader_ash.h"
 #include "chrome/browser/ash/crosapi/structured_metrics_service_ash.h"
 #include "chrome/browser/ash/crosapi/suggestion_service_ash.h"
-#include "chrome/browser/ash/crosapi/time_zone_service_ash.h"
 #include "chrome/browser/ash/crosapi/virtual_keyboard_ash.h"
-#include "chrome/browser/ash/crosapi/volume_manager_ash.h"
 #include "chrome/browser/ash/crosapi/vpn_service_ash.h"
 #include "chrome/browser/ash/crosapi/web_kiosk_service_ash.h"
 #include "chrome/browser/ash/login/quick_unlock/quick_unlock_factory.h"
@@ -167,7 +164,6 @@ CrosapiAsh::CrosapiAsh()
       content_protection_ash_(std::make_unique<ContentProtectionAsh>()),
       debug_interface_registerer_ash_(
           std::make_unique<DebugInterfaceRegistererAsh>()),
-      desk_ash_(std::make_unique<DeskAsh>()),
       desk_profiles_ash_(std::make_unique<DeskProfilesAsh>()),
       desk_template_ash_(std::make_unique<DeskTemplateAsh>()),
       device_attributes_ash_(std::make_unique<DeviceAttributesAsh>()),
@@ -236,11 +232,9 @@ CrosapiAsh::CrosapiAsh()
       structured_metrics_service_ash_(
           std::make_unique<StructuredMetricsServiceAsh>()),
       suggestion_service_ash_(std::make_unique<SuggestionServiceAsh>()),
-      time_zone_service_ash_(std::make_unique<TimeZoneServiceAsh>()),
       video_conference_manager_ash_(
           std::make_unique<ash::VideoConferenceManagerAsh>()),
       virtual_keyboard_ash_(std::make_unique<VirtualKeyboardAsh>()),
-      volume_manager_ash_(std::make_unique<VolumeManagerAsh>()),
       vpn_service_ash_(std::make_unique<VpnServiceAsh>()),
       web_kiosk_service_ash_(std::make_unique<WebKioskServiceAsh>()) {
   receiver_set_.set_disconnect_handler(base::BindRepeating(
@@ -331,10 +325,6 @@ void CrosapiAsh::BindCrosDisplayConfigController(
 void CrosapiAsh::BindDebugInterfaceRegisterer(
     mojo::PendingReceiver<mojom::DebugInterfaceRegisterer> receiver) {
   debug_interface_registerer_ash_->BindReceiver(std::move(receiver));
-}
-
-void CrosapiAsh::BindDesk(mojo::PendingReceiver<mojom::Desk> receiver) {
-  desk_ash_->BindReceiver(std::move(receiver));
 }
 
 void CrosapiAsh::BindDeskProfileObserver(
@@ -689,11 +679,6 @@ void CrosapiAsh::BindTelemetryProbeService(
   probe_service_ash_->BindReceiver(std::move(receiver));
 }
 
-void CrosapiAsh::BindTimeZoneService(
-    mojo::PendingReceiver<mojom::TimeZoneService> receiver) {
-  time_zone_service_ash_->BindReceiver(std::move(receiver));
-}
-
 void CrosapiAsh::BindVideoCaptureDeviceFactory(
     mojo::PendingReceiver<mojom::VideoCaptureDeviceFactory> receiver) {
   content::GetVideoCaptureService().BindVideoCaptureDeviceFactory(
@@ -703,16 +688,6 @@ void CrosapiAsh::BindVideoCaptureDeviceFactory(
 void CrosapiAsh::BindVirtualKeyboard(
     mojo::PendingReceiver<mojom::VirtualKeyboard> receiver) {
   virtual_keyboard_ash_->BindReceiver(std::move(receiver));
-}
-
-void CrosapiAsh::BindVolumeManager(
-    mojo::PendingReceiver<crosapi::mojom::VolumeManager> receiver) {
-  const user_manager::User* user =
-      user_manager::UserManager::Get()->GetPrimaryUser();
-  Profile* profile = Profile::FromBrowserContext(
-      ash::BrowserContextHelper::Get()->GetBrowserContextByUser(user));
-  volume_manager_ash_->SetProfile(profile);
-  volume_manager_ash_->BindReceiver(std::move(receiver));
 }
 
 void CrosapiAsh::BindVpnService(

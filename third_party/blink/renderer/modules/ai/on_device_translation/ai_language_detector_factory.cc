@@ -4,6 +4,7 @@
 
 #include "third_party/blink/renderer/modules/ai/on_device_translation/ai_language_detector_factory.h"
 
+#include "third_party/blink/public/platform/browser_interface_broker_proxy.h"
 #include "third_party/blink/renderer/bindings/modules/v8/v8_ai_create_monitor_callback.h"
 #include "third_party/blink/renderer/modules/ai/ai.h"
 #include "third_party/blink/renderer/modules/ai/ai_create_monitor.h"
@@ -123,7 +124,7 @@ ScriptPromise<AILanguageDetector> AILanguageDetectorFactory::create(
     AILanguageDetectorCreateOptions* options,
     ExceptionState& exception_state) {
   // TODO(crbug.com/349927087): Take `options` into account.
-  if (!script_state->ContextIsValid()) {
+  if (!script_state->ContextIsValid() || !GetExecutionContext()) {
     exception_state.ThrowDOMException(DOMExceptionCode::kInvalidStateError,
                                       "The execution context is not valid.");
     return EmptyPromise();
@@ -157,7 +158,13 @@ ScriptPromise<AILanguageDetector> AILanguageDetectorFactory::create(
 }
 
 ScriptPromise<AILanguageDetectorCapabilities>
-AILanguageDetectorFactory::capabilities(ScriptState* script_state) {
+AILanguageDetectorFactory::capabilities(ScriptState* script_state,
+                                        ExceptionState& exception_state) {
+  if (!script_state->ContextIsValid() || !GetExecutionContext()) {
+    exception_state.ThrowDOMException(DOMExceptionCode::kInvalidStateError,
+                                      "The execution context is not valid.");
+    return EmptyPromise();
+  }
   auto* resolver = MakeGarbageCollected<
       ScriptPromiseResolver<AILanguageDetectorCapabilities>>(script_state);
   // The call may silently fail on mojo connection errors. The
@@ -179,11 +186,11 @@ AILanguageDetectorFactory::capabilities(ScriptState* script_state) {
 HeapMojoRemote<
     language_detection::mojom::blink::ContentLanguageDetectionDriver>&
 AILanguageDetectorFactory::GetLanguageDetectionDriverRemote() {
+  ExecutionContext* execution_context = GetExecutionContext();
+  CHECK(execution_context);  // Caller should assure this.
   if (!language_detection_driver_.is_bound()) {
-    if (GetExecutionContext()) {
-      GetExecutionContext()->GetBrowserInterfaceBroker().GetInterface(
-          language_detection_driver_.BindNewPipeAndPassReceiver(task_runner_));
-    }
+    execution_context->GetBrowserInterfaceBroker().GetInterface(
+        language_detection_driver_.BindNewPipeAndPassReceiver(task_runner_));
   }
   return language_detection_driver_;
 }

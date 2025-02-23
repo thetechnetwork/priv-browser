@@ -385,6 +385,7 @@ static_library("ui") {
     "//chrome/browser/signin",
     "//chrome/browser/signin:identity_manager_provider",
     "//chrome/browser/signin:impl",
+    "//chrome/browser/status_icons:status_icons",
     "//chrome/browser/storage_access_api",
     "//chrome/browser/sync",
     "//chrome/browser/task_manager:impl",
@@ -475,7 +476,7 @@ static_library("ui") {
     "//components/download/content/factory",
     "//components/download/content/public",
     "//components/embedder_support",
-    "//components/embedder_support:browser_util",
+    "//components/embedder_support:user_agent",
     "//components/encrypted_messages:encrypted_message_proto",
     "//components/enterprise",
     "//components/error_page/content/browser",
@@ -1114,6 +1115,8 @@ static_library("ui") {
       "performance_controls/memory_saver_bubble_delegate.cc",
       "performance_controls/memory_saver_bubble_delegate.h",
       "performance_controls/memory_saver_bubble_observer.h",
+      "performance_controls/memory_saver_chip_controller.cc",
+      "performance_controls/memory_saver_chip_controller.h",
       "performance_controls/memory_saver_chip_tab_helper.cc",
       "performance_controls/memory_saver_chip_tab_helper.h",
       "performance_controls/memory_saver_opt_in_iph_controller.cc",
@@ -1335,8 +1338,6 @@ static_library("ui") {
       "uma_browsing_activity_observer.h",
       "unload_controller.cc",
       "unload_controller.h",
-      "user_education/low_usage_help_controller.cc",
-      "user_education/low_usage_help_controller.h",
       "user_education/polling_idle_observer.cc",
       "user_education/polling_idle_observer.h",
       "user_education/recent_session_observer_impl.cc",
@@ -1674,6 +1675,8 @@ static_library("ui") {
       "//chrome/browser/apps/app_service/app_icon",
       "//chrome/browser/apps/app_service/app_icon:util",
       "//chrome/browser/apps/link_capturing",
+      "//chrome/browser/autofill_ai:util",
+      "//chrome/browser/background:background",
       "//chrome/browser/browsing_data:constants",
       "//chrome/browser/contextual_cueing",
 
@@ -3765,14 +3768,10 @@ static_library("ui") {
       "views/autofill/payments/virtual_card_enroll_bubble_views.h",
       "views/autofill/payments/virtual_card_enroll_icon_view.cc",
       "views/autofill/payments/virtual_card_enroll_icon_view.h",
-      "views/autofill/popup/autofill_ai/autofill_ai_animated_gradient_view.cc",
-      "views/autofill/popup/autofill_ai/autofill_ai_animated_gradient_view.h",
       "views/autofill/popup/autofill_ai/autofill_ai_icon_background.cc",
       "views/autofill/popup/autofill_ai/autofill_ai_icon_background.h",
       "views/autofill/popup/autofill_ai/autofill_ai_icon_image_view.cc",
       "views/autofill/popup/autofill_ai/autofill_ai_icon_image_view.h",
-      "views/autofill/popup/autofill_ai/autofill_ai_loading_state_view.cc",
-      "views/autofill/popup/autofill_ai/autofill_ai_loading_state_view.h",
       "views/autofill/popup/custom_cursor_suppressor.cc",
       "views/autofill/popup/custom_cursor_suppressor.h",
       "views/autofill/popup/lazy_loading_image_view.cc",
@@ -4062,6 +4061,8 @@ static_library("ui") {
       "views/frame/immersive_mode_controller_factory_views.cc",
       "views/frame/immersive_mode_controller_stub.cc",
       "views/frame/immersive_mode_controller_stub.h",
+      "views/frame/multi_contents_resize_area.cc",
+      "views/frame/multi_contents_resize_area.h",
       "views/frame/multi_contents_view.cc",
       "views/frame/multi_contents_view.h",
       "views/frame/native_browser_frame.h",
@@ -5025,13 +5026,6 @@ static_library("ui") {
       "//chrome/browser/ui/commerce:impl",
     ]
 
-    if (is_chrome_branded && !is_android) {
-      sources += [
-        "views/user_education/low_usage_promo.cc",
-        "views/user_education/low_usage_promo.h",
-      ]
-    }
-
     if (is_linux) {
       sources += [
         "views/chrome_views_delegate_linux.cc",
@@ -5269,6 +5263,8 @@ static_library("ui") {
 
   if (enable_extensions_core) {
     sources += [
+      "extensions/extension_install_ui.cc",
+      "extensions/extension_install_ui.h",
       "webui/extensions/extensions_ui.cc",
       "webui/extensions/extensions_ui.h",
       "webui/favicon_source.cc",
@@ -5282,6 +5278,19 @@ static_library("ui") {
     ]
     deps += [ "//chrome/browser/extensions" ]
     allow_circular_includes_from += [ "//chrome/browser/extensions" ]
+
+    if (is_win || is_mac || is_linux || is_chromeos) {
+      sources += [
+        "extensions/extension_install_ui_desktop.cc",
+        "extensions/extension_install_ui_desktop.h",
+      ]
+    }
+    if (is_android) {
+      sources += [
+        "extensions/extension_install_ui_android.cc",
+        "extensions/extension_install_ui_android.h",
+      ]
+    }
   }
 
   if (enable_extensions) {
@@ -5327,8 +5336,6 @@ static_library("ui") {
       "extensions/extension_enable_flow.cc",
       "extensions/extension_enable_flow.h",
       "extensions/extension_enable_flow_delegate.h",
-      "extensions/extension_install_ui.cc",
-      "extensions/extension_install_ui.h",
       "extensions/extension_installed_bubble_model.cc",
       "extensions/extension_installed_bubble_model.h",
       "extensions/extension_installed_waiter.cc",

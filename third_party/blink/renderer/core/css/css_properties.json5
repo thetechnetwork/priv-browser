@@ -4951,6 +4951,16 @@
       invalidate: ["layout", "paint"],
     },
     {
+      name: "scroll-marker-contain",
+      property_methods: ["CSSValueFromComputedStyleInternal"],
+      field_group: "*",
+      field_template: "keyword",
+      keywords: ["none", "auto"],
+      typedom_types: ["Keyword"],
+      default_value: "none",
+      runtime_flag: "CSSScrollMarkerContain",
+    },
+    {
       name: "scroll-marker-group",
       property_methods: ["CSSValueFromComputedStyleInternal"],
       field_group: "*",
@@ -6527,6 +6537,23 @@
       typedom_types: ["Keyword"],
       converter: "ConvertGapDecorationStyleDataList",
       invalidate: ["paint"],
+    },
+    {
+      name: "row-rule-style",
+      property_methods: ["ParseSingleValue", "CSSValueFromComputedStyleInternal"],
+      field_group: "*",
+      field_template: "external",
+      include_paths: ["third_party/blink/renderer/core/style/gap_data_list.h"],
+      keywords: [
+        "none", "hidden", "inset", "groove", "outset", "ridge", "dotted",
+        "dashed", "solid", "double"
+      ],
+      default_value: "GapDataList<EBorderStyle>::DefaultGapStyleDataList()",
+      type_name: "GapDataList<EBorderStyle>",
+      typedom_types: ["Keyword"],
+      converter: "ConvertGapDecorationStyleDataList",
+      invalidate: ["paint"],
+      runtime_flag: "CSSGapDecoration",
     },
     {
       name: "column-rule-width",

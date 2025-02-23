@@ -5989,7 +5989,7 @@ void AXNodeObject::AddChildrenImpl() {
 
   auto* select = DynamicTo<HTMLSelectElement>(GetNode());
   if (RuntimeEnabledFeatures::CustomizableSelectEnabled() && select &&
-      select->UsesMenuList() && !select->IsMultiple()) {
+      select->UsesMenuList()) {
     AddMenuListChildren();
   } else if (RuntimeEnabledFeatures::CustomizableSelectEnabled() &&
              RoleValue() == ax::mojom::blink::Role::kMenuListPopup) {
@@ -6239,7 +6239,7 @@ void AXNodeObject::InsertChild(AXObject* child,
   child->SetParent(this);
 
   if (ChildrenNeedToUpdateCachedValues()) {
-    child->InvalidateCachedValues();
+    child->InvalidateCachedValues(TreeUpdateReason::kChildInserted);
   }
   // Update cached values preemptively, but don't allow children changed to be
   // called on the parent if the ignored state changes, as we are already

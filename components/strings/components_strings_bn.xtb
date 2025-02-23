@@ -34,7 +34,6 @@
 <translation id="1058479211578257048">কার্ড সেভ করা হচ্ছে...</translation>
 <translation id="1060136083665017312">গেম সিস্টেম ও কনসোল</translation>
 <translation id="1060320201901229167">এনভেলপ কাকু ৫</translation>
-<translation id="10614374240317010">কখনও সংরক্ষিত হয়নি</translation>
 <translation id="1062407476771304334">প্রতিস্থাপন করুন</translation>
 <translation id="1064054731605354900">A3x5</translation>
 <translation id="1067029985695494416">সার্চ ইঞ্জিনের বিবরণ</translation>
@@ -263,7 +262,6 @@
 <translation id="1432187715652018471">পৃষ্ঠাটি একটি পরিষেবা নিয়ন্ত্রক ইনস্টল করতে চায়।</translation>
 <translation id="1432581352905426595">সার্চ ইঞ্জিনগুলি পরিচালনা করুন</translation>
 <translation id="1433225466058025572">আপনার ফাইল আবার সরানোর চেষ্টা করে দেখুন</translation>
-<translation id="1435940442311036198">অন্য কোনও ডিভাইসে পাসকী ব্যবহার করুন</translation>
 <translation id="1436185428532214179">আপনার ডিভাইসের ফাইল ও ফোল্ডার এডিট করার অনুমতি চাইতে পারে</translation>
 <translation id="1442386063175183758">ডানদিকে গেট ফোল্ড</translation>
 <translation id="1442987760062738829">পাঞ্চ করুন</translation>
@@ -357,7 +355,6 @@
 <translation id="159274626729231974">চলচ্চিত্র উৎসব</translation>
 <translation id="1593359183944365958">২৭০ ডিগ্রী</translation>
 <translation id="1594030484168838125">বেছে নিন</translation>
-<translation id="1598816256585174656">Windows Hello থেকে পাসকী</translation>
 <translation id="1599199147673445968">নতুন কার্ড? <ph name="BEGIN_LINK" />কার্ডের বিবরণ লিখুন<ph name="END_LINK" /></translation>
 <translation id="1604192142734009334">রূপচর্চা ও ফিটনেস</translation>
 <translation id="160851722280695521">Chrome-এ ডাইনো রান গেম খেলুন</translation>
@@ -469,7 +466,6 @@
 <translation id="1778646502362731194">JIS B0</translation>
 <translation id="1785118555253503473">ওয়েব অ্যাপ ইনস্টল করতে চান?</translation>
 <translation id="1791415068765905273">সব তুলনামূলক টেবিল দেখুন</translation>
-<translation id="1791429645902722292">Google Smart Lock</translation>
 <translation id="1791820510173628507"><ph name="MANAGE_GOOGLE_ACCOUNT_FOCUSED_FRIENDLY_MATCH_TEXT" />, আপনার Google অ্যাকাউন্টে নিজের সম্পর্কে তথ্য, গোপনীয়তা এবং সুরক্ষা ম্যানেজ করতে প্রথমে Tab তারপরে Enter প্রেস করুন</translation>
 <translation id="1793473605302304726">সময়ে সময়ে পেমেন্ট করুন</translation>
 <translation id="1793631236004319016"><ph name="NUM_HOURS_MINUTES_SECONDS" /> আগে শেষবার ব্যবহার করা হয়েছে</translation>
@@ -1159,7 +1155,6 @@
 <translation id="306573536155379004">গেম শুরু হয়েছে।</translation>
 <translation id="3067505415088964188">দাম কম</translation>
 <translation id="3068118691172921711"><ph name="CLOUD_PROVIDER" />-এ আপনার ফাইল আপলোড ১ মিনিটে শুরু হবে</translation>
-<translation id="3068976060094139647">আপনার অ্যাকাউন্ট Google Pay-এর সাথে লিঙ্ক করা আছে তাই এই কার্ড অটোফিল করতে পারবেন।</translation>
 <translation id="3074671422612537810">{ITEMS,plural, =1{{ITEMS}টি আইটেম}one{{ITEMS}টি আইটেম}other{{ITEMS}টি আইটেম}}</translation>
 <translation id="3076865167425975822">অপারেটিং সিস্টেম</translation>
 <translation id="3080254622891793721">গ্রাফিক</translation>
@@ -2128,7 +2123,6 @@
 <translation id="4754461935447132332">শুধুমাত্র সুরক্ষিত সাইটের ক্ষেত্রেই অনুমতি দেওয়া আছে</translation>
 <translation id="4756388243121344051">&amp;ইতিহাস</translation>
 <translation id="4756501505996488486">PRC 16K</translation>
-<translation id="4757022425116568383">আপনার Chrome প্রোফাইল থেকে পাসকী</translation>
 <translation id="4757993714154412917">আপনি এইমাত্র একটি প্রতারণামূলক সাইটে আপনার পাসওয়ার্ড লিখেছেন। আপনার অ্যাকাউন্ট সুরক্ষিত করার জন্য, Chromium আপনার সেভ করা পাসওয়ার্ড চেক করে নিতে সাজেস্ট করছে।</translation>
 <translation id="4758311279753947758">পরিচিতির তথ্য জুড়ুন</translation>
 <translation id="4761326898079498987">আরও বিবরণের জন্য পর্যালোচনা করুন</translation>
@@ -2261,6 +2255,7 @@
 <translation id="4989809363548539747">এই প্লাগ-ইন সমর্থিত নয়</translation>
 <translation id="4990241977441916452">এনভেলপ A2</translation>
 <translation id="4992066212339426712">সশব্দ করুন</translation>
+<translation id="4994095017621319069">১টি ট্যাব গ্রুপ আর উপলভ্য নেই</translation>
 <translation id="4994348767896109801">আপনাকে পছন্দমতো বিজ্ঞাপন দেখানো হবে কিনা তা এই সেটিংস সহ বিভিন্ন জিনিসের উপরে নির্ভর করে, যেমন <ph name="BEGIN_LINK_1" />বিজ্ঞাপনের বিষয়<ph name="END_LINK_1" />, আপনার <ph name="BEGIN_LINK_2" />কুকি সেটিংস<ph name="END_LINK_2" /> এবং আপনি যে সাইট দেখছেন তা পছন্দমতো বিজ্ঞাপন দেখায় কিনা। <ph name="BEGIN_LINK_3" />আপনার বিজ্ঞাপন সংক্রান্ত গোপনীয়তা ম্যানেজ করা<ph name="END_LINK_3" /> সম্পর্কে আরও জানুন।</translation>
 <translation id="4995474875135717171">সংশোধন করার তারিখ:</translation>
 <translation id="4995749490935861684"><ph name="CUSTOMIZE_SEARCH_ENGINES_FOCUSED_FRIENDLY_MATCH_TEXT" />, সাইট সার্চ এবং আপনার ডিফল্ট সার্চ ইঞ্জিন ম্যানেজ করতে Tab প্রেস করে Enter প্রেস করুন</translation>
@@ -2701,7 +2696,6 @@
 <translation id="5764920692828389743"><ph name="EMAIL_ADDRESS" />-এ পাঠান</translation>
 <translation id="5765072501007116331">ডেলিভারির পদ্ধতি এবং প্রয়োজনীয়তাগুলি দেখতে একটি ঠিকানা বেছে নিন</translation>
 <translation id="57689295674415555">ভার্চুয়াল কার্ডের নম্বর দেওয়া হয়নি?</translation>
-<translation id="5772086939108830423">অন্য কোনও ডিভাইসে 'পাসকী' ব্যবহার করুন</translation>
 <translation id="5776313857861697733">অগ্রাধিকার</translation>
 <translation id="577804500166306874">ফলাফল লোড হচ্ছে</translation>
 <translation id="5781136890105823427">এক্সপেরিমেন্ট চালু করা হয়েছে</translation>
@@ -2832,7 +2826,6 @@
 <translation id="6025416945513303461"><ph name="TYPE_1" />, <ph name="TYPE_2" />, <ph name="TYPE_3" /> (সিঙ্ক হয়েছে)</translation>
 <translation id="6028591542479806248">মোবাইল এবং ইমেল বিজ্ঞপ্তি ম্যানেজ করুন</translation>
 <translation id="6028833024483927901">বিশ্বের বিভিন্ন জায়গার রান্না</translation>
-<translation id="6030251660719692307">Google Password Manager থেকে পাসকী</translation>
 <translation id="603068602130820122">ডানদিকে ডুয়াল স্টেপল</translation>
 <translation id="6032524144326295339">মেলবক্স ২</translation>
 <translation id="6032955021262906325">বাঁদিকে বাঁধাই</translation>
@@ -3439,7 +3432,6 @@
 <translation id="7096937462164235847">এই ওয়েবসাইটের পরিচয় যাচাই করা যায়নি।</translation>
 <translation id="7102554173784142865">Chrome ডাইনো গেম খেলুন</translation>
 <translation id="7102760431686146931">রান্না করার ও খাবারের বাসনপত্র</translation>
-<translation id="7105998430540165694">iCloud কী-চেন থেকে পাসকী</translation>
 <translation id="7106762743910369165">আপনার সংস্থা ব্রাউজার ম্যানেজ করছে</translation>
 <translation id="7107249414147762907">এই পিডিএফ অ্যাক্সেস করা যাচ্ছে না। কোনও টেক্সট এক্সট্র্যাক্ট করা হয়নি</translation>
 <translation id="7107427078069498123">SHA-256 ফিঙ্গারপ্রিন্ট</translation>
@@ -3477,6 +3469,7 @@
 <translation id="7153549335910886479">{PAYMENT_METHOD,plural, =0{<ph name="PAYMENT_METHOD_PREVIEW" />}=1{<ph name="PAYMENT_METHOD_PREVIEW" /> এবং আরও <ph name="NUMBER_OF_ADDITIONAL_PAYMENT_METHODS" />টি}one{<ph name="PAYMENT_METHOD_PREVIEW" /> এবং আরও <ph name="NUMBER_OF_ADDITIONAL_PAYMENT_METHODS" />টি}other{<ph name="PAYMENT_METHOD_PREVIEW" /> এবং আরও <ph name="NUMBER_OF_ADDITIONAL_PAYMENT_METHODS" />টি}}</translation>
 <translation id="7153618581592392745">ল্যাভেণ্ডার</translation>
 <translation id="7156870133441232244">সার্ভারটিকে TLS 1.2 বা এর পরবর্তী যেকোনও ভার্সনে আপগ্রেড করতে হবে।</translation>
+<translation id="7156885531105222428">আপনার অনুরোধ করা পৃষ্ঠা অ্যাপ্লিকেশনে পাওয়া যায়নি</translation>
 <translation id="715996170234243096">{NUM_FILES,plural, =1{<ph name="FEATURE_NAME" /> ব্যবহার করে এই ফাইল পাঠাতে, আপনার ডিভাইসে (<ph name="DISK_SPACE_SIZE" />) স্পেস খালি করুন}one{<ph name="FEATURE_NAME" /> ব্যবহার করে এই ফাইল পাঠাতে, আপনার ডিভাইসে (<ph name="DISK_SPACE_SIZE" />) স্পেস খালি করুন}other{<ph name="FEATURE_NAME" /> ব্যবহার করে এই ফাইল পাঠাতে, আপনার ডিভাইসে (<ph name="DISK_SPACE_SIZE" />) স্পেস খালি করুন}}</translation>
 <translation id="7160999678034985039">আপনার কাজ সেভ করুন এবং সেভ করা হয়ে গেলে আপডেট শুরু করুন।</translation>
 <translation id="7162277662076933695">স্মার্ট কার্ড রিডার</translation>
@@ -4264,6 +4257,7 @@
 <translation id="8533411848724153701">Gemini</translation>
 <translation id="8533619373899488139">ব্লক করা ইউআরএলের তালিকা এবং আপনার সিস্টেম অ্যাডমিনিস্ট্রেটরের প্রয়োগ করা অন্যান্য নীতিগুলি দেখার জন্য &lt;strong&gt;chrome://policy&lt;/strong&gt;-এ যান।</translation>
 <translation id="8536234749087605613">এনভেলপ (উইন্ডো)</translation>
+<translation id="8538228968820006247">আপনার ট্যাব গ্রুপে আর জায়গা নেই, নতুন সদস্যরা আর লিঙ্কের সাহায্যে যোগ দিতে পারবেন না</translation>
 <translation id="8539500321752640291">২টি অনুমতি দেবেন?</translation>
 <translation id="8541158209346794904">ব্লুটুথ ডিভাইস</translation>
 <translation id="8541410041357371550">এই সাইটটি আপনাকে আরও প্রাসঙ্গিক বিজ্ঞাপন দেখানোর জন্য Chrome থেকে আপনার বিজ্ঞাপনের বিষয় নেয়</translation>
@@ -4384,7 +4378,6 @@
 <translation id="8757526089434340176">Google Pay অফার উপলভ্য</translation>
 <translation id="8759274551635299824">এই কার্ডটির মেয়াদ শেষ হয়েছে</translation>
 <translation id="87601671197631245">এই সাইটটি পুরনো সিকিউরিটি কনফিগারেশন ব্যবহার করে তাই আপনার তথ্য (যেমন, পাসওয়ার্ড, মেসেজ বা ক্রেডিট কার্ডের নম্বর) এই সাইটে পাঠানোর সময় এইসব তথ্যের নিরাপত্তা বিঘ্নিত হতে পারে।</translation>
-<translation id="8763226176721243078">আপনার <ph name="CARD_ISSUER_NAME" /> অ্যাকাউন্ট Google Pay-এর সাথে লিঙ্ক করা আছে বলে এই কার্ড অটোফিল করতে পারবেন।</translation>
 <translation id="8763927697961133303">USB ডিভাইস</translation>
 <translation id="8763986294015493060">বর্তমানে খোলা আছে এমন সব 'ছদ্মবেশী' উইন্ডো বন্ধ করুন</translation>
 <translation id="8766943070169463815">নিরাপদে পেমেন্ট ক্রেডেনশিয়াল যাচাই করার শিট খোলা হয়েছে</translation>
@@ -4529,7 +4522,6 @@
 <translation id="9040341831873780534">এখানে শর্তাবলী দেখুন</translation>
 <translation id="9042617223719777575">অধিক ক্ষমতা সম্পন্ন</translation>
 <translation id="9042827002460091668">ইন্টারনেট কানেকশন ঠিক আছে কিনা দেখে নিয়ে আবার চেষ্টা করুন</translation>
-<translation id="9044359186343685026">টাচ আইডি ব্যবহার করুন</translation>
 <translation id="9045525010788763347"><ph name="RESULT_MODIFIED_DATE" /> - <ph name="RESULT_PRODUCT_SOURCE" /></translation>
 <translation id="9046864189129893978">মাইক্রোফোন (<ph name="MICS_COUNT" />)</translation>
 <translation id="9048035366624198823"><ph name="POLICY_VALUE" />-এ সেট করার জন্য এই অ্যাকশনের <ph name="POLICY_NAME" /> নীতি প্রয়োজন: <ph name="ACTION_LIST" />।</translation>

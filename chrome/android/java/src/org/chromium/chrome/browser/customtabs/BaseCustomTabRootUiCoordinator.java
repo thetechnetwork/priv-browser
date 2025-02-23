@@ -84,6 +84,7 @@ import org.chromium.chrome.browser.tab.Tab;
 import org.chromium.chrome.browser.tab_ui.TabContentManager;
 import org.chromium.chrome.browser.tabmodel.TabCreatorManager;
 import org.chromium.chrome.browser.tabmodel.TabModelSelector;
+import org.chromium.chrome.browser.toolbar.adaptive.AdaptiveToolbarBehavior;
 import org.chromium.chrome.browser.ui.RootUiCoordinator;
 import org.chromium.chrome.browser.ui.appmenu.AppMenuBlocker;
 import org.chromium.chrome.browser.ui.appmenu.AppMenuDelegate;
@@ -168,9 +169,6 @@ public class BaseCustomTabRootUiCoordinator extends RootUiCoordinator {
      * @param minimizeDelegateSupplier Supplies the {@link CustomTabMinimizeDelegate} used to
      *     minimize the tab.
      * @param featureOverridesManagerSupplier Supplies the {@link CustomTabFeatureOverridesManager}.
-     * @param baseChromeLayout The base view hosting Chrome that certain views (e.g. the omnibox
-     *     suggestion list) will position themselves relative to. If null, the content view will be
-     *     used.
      * @param edgeToEdgeManager Manages core edge-to-edge state and logic.
      */
     public BaseCustomTabRootUiCoordinator(
@@ -208,7 +206,6 @@ public class BaseCustomTabRootUiCoordinator extends RootUiCoordinator {
             @NonNull Supplier<CustomTabActivityTabController> tabController,
             @NonNull Supplier<CustomTabMinimizeDelegate> minimizeDelegateSupplier,
             @NonNull Supplier<CustomTabFeatureOverridesManager> featureOverridesManagerSupplier,
-            @Nullable View baseChromeLayout,
             @NonNull EdgeToEdgeManager edgeToEdgeManager) {
         super(
                 activity,
@@ -249,7 +246,6 @@ public class BaseCustomTabRootUiCoordinator extends RootUiCoordinator {
                 backPressManager,
                 null,
                 /* overviewColorSupplier= */ null,
-                baseChromeLayout,
                 edgeToEdgeManager);
         mToolbarCoordinator = customTabToolbarCoordinator;
         mIntentDataProvider = intentDataProvider;
@@ -420,12 +416,10 @@ public class BaseCustomTabRootUiCoordinator extends RootUiCoordinator {
     }
 
     @Override
-    protected void initializeAdaptiveToolbarButton(Supplier<Tracker> trackerSupplier) {
-        if (!ChromeFeatureList.sCctAdaptiveButton.isEnabled()) return;
-
-        super.initializeAdaptiveToolbarButton(trackerSupplier);
-        // TODO(crbug/391931152): Instantiate CCT-specific ButtonControllers based on
-        //     the feature flag configuration.
+    protected AdaptiveToolbarBehavior createAdaptiveToolbarBehavior(
+            Supplier<Tracker> trackerSupplier) {
+        return new CustomTabAdaptiveToolbarBehavior(
+                () -> addVoiceSearchAdaptiveButton(trackerSupplier));
     }
 
     @Override

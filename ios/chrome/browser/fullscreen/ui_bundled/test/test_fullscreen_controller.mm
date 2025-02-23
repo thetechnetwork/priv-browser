@@ -9,9 +9,9 @@
 #import "ios/chrome/browser/fullscreen/ui_bundled/fullscreen_model.h"
 #import "ios/chrome/browser/fullscreen/ui_bundled/fullscreen_model_observer.h"
 
-TestFullscreenController::TestFullscreenController(FullscreenModel* model)
+TestFullscreenController::TestFullscreenController()
     : FullscreenController(),
-      model_(model),
+      model_(std::make_unique<FullscreenModel>()),
       broadcaster_([[ChromeBroadcaster alloc] init]) {}
 
 TestFullscreenController::~TestFullscreenController() {
@@ -52,15 +52,6 @@ void TestFullscreenController::DecrementDisabledCounter() {
 
 bool TestFullscreenController::ResizesScrollView() const {
   return model_->ResizesScrollView();
-}
-
-ToolbarUIState* TestFullscreenController::GetToolbarUIState() const {
-  return toolbar_ui_state_;
-}
-
-void TestFullscreenController::SetToolbarUIState(
-    ToolbarUIState* toolbar_ui_state) {
-  toolbar_ui_state_ = toolbar_ui_state;
 }
 
 void TestFullscreenController::BrowserTraitCollectionChangedBegin() {}
@@ -158,4 +149,8 @@ void TestFullscreenController::ResizeHorizontalViewport() {
 // static
 const void* TestFullscreenController::UserDataKeyForTesting() {
   return FullscreenController::UserDataKey();
+}
+
+raw_ptr<FullscreenModel> TestFullscreenController::getModel() {
+  return model_.get();
 }

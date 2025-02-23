@@ -185,11 +185,16 @@ TEST_F(PixManagerTest, OnPixAccountSelected) {
   EXPECT_CALL(*client_, ShowProgressScreen());
   EXPECT_CALL(*client_, LoadRiskData(testing::_));
 
-  pix_manager_->OnPixAccountSelected(/*selected_instrument_id=*/0);
+  pix_manager_->OnPixAccountSelected(base::TimeTicks::Now() - base::Seconds(2),
+                                     /*selected_instrument_id=*/0);
 
   histogram_tester.ExpectUniqueSample(
       "FacilitatedPayments.Pix.FopSelector.UserAction",
       /*sample=*/FopSelectorAction::kFopSelected,
+      /*expected_bucket_count=*/1);
+  histogram_tester.ExpectUniqueSample(
+      "FacilitatedPayments.Pix.FopSelected.Latency",
+      /*sample=*/2000,
       /*expected_bucket_count=*/1);
 
   auto ukm_entries = ukm_recorder_.GetEntries(
@@ -908,6 +913,44 @@ TEST_F(PixManagerTest, LogInitiatePurchaseActionResultAndLatency) {
     ASSERT_EQ(ukm_entries.size(), index + 1);
     EXPECT_EQ(ukm_entries[index++].metrics.at("Result"),
               static_cast<uint8_t>(result));
+  }
+}
+
+TEST_F(PixManagerTest, LogTransactionResultAndLatency) {
+  base::HistogramTester histogram_tester;
+
+  // Simulate Pix code being copied. The transaction latency is computed from
+  // this point.
+  pix_manager_->OnPixCodeCopiedToClipboard(GURL("https://example.com/"),
+                                           std::string(),
+                                           ukm::UkmRecorder::GetNewSourceID());
+  // Fully mocked time, does not advance by itself.
+  FastForwardBy(base::Seconds(2));
+
+  for (PurchaseActionResult result :
+       {PurchaseActionResult::kResultOk, PurchaseActionResult::kCouldNotInvoke,
+        PurchaseActionResult::kResultCanceled}) {
+    std::string result_string;
+    switch (result) {
+      case PurchaseActionResult::kResultOk:
+        result_string = "Succeeded";
+        break;
+      case PurchaseActionResult::kCouldNotInvoke:
+        result_string = "Failed";
+        break;
+      case PurchaseActionResult::kResultCanceled:
+        result_string = "Abandoned";
+        break;
+    }
+
+    pix_manager_->OnPurchaseActionResult(
+        /*start_time=*/base::TimeTicks::Now(), result);
+
+    histogram_tester.ExpectBucketCount(
+        base::StrCat({"FacilitatedPayments.Pix.Transaction.", result_string,
+                      ".Latency"}),
+        /*sample=*/2000,
+        /*expected_count=*/1);
   }
 }
 

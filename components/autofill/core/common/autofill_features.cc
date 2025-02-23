@@ -57,6 +57,9 @@ BASE_FEATURE(kAutofillAiWithDataSchema,
              "AutofillAiWithDataSchema",
              base::FEATURE_DISABLED_BY_DEFAULT);
 
+// This parameter enables adding an experiment id to requests to the Autofill
+// to enable Autofill AI predictions. The experiment id is not used for other
+// backends.
 const base::FeatureParam<int> kAutofillAiWithDataSchemaServerExperimentId{
     &kAutofillAiWithDataSchema, "autofill_ai_server_experiment_id", 0};
 
@@ -172,13 +175,6 @@ BASE_FEATURE(kAutofillEnableLoyaltyCardsFilling,
              "AutofillEnableLoyaltyCardsFilling",
              base::FEATURE_DISABLED_BY_DEFAULT);
 
-// When enabled, focusing on a credit card number field that was traditionally
-// autofilled will yield all credit card suggestions.
-// TODO(crbug.com/354175563): Remove when launched.
-BASE_FEATURE(kAutofillEnablePaymentsFieldSwapping,
-             "AutofillEnablePaymentsFieldSwapping",
-             base::FEATURE_DISABLED_BY_DEFAULT);
-
 // If enabled, only non-ad frames are extracted.
 // Otherwise, non-ad frames as well as *visible* ad frames are extracted.
 // "Extracted" means that FormFieldData::child_frames is populated, which is
@@ -239,11 +235,24 @@ BASE_FEATURE(kAutofillFixCurrentValueInImport,
              "AutofillFixCurrentValueInImport",
              base::FEATURE_DISABLED_BY_DEFAULT);
 
+// When enabled, focusing on a credit card number field that was traditionally
+// autofilled will yield all credit card suggestions.
+// TODO(crbug.com/354175563): Remove when launched.
+BASE_FEATURE(kAutofillPaymentsFieldSwapping,
+             "AutofillPaymentsFieldSwapping",
+             base::FEATURE_DISABLED_BY_DEFAULT);
+
 // When enabled, and upon receiving a signal that a select element has been
 // edited by the user, BrowserAutofillManager will record this correction, which
 // will affect many correctness metrics.
 BASE_FEATURE(kAutofillRecordCorrectionOfSelectElements,
              "AutofillRecordCorrectionOfSelectElements",
+             base::FEATURE_DISABLED_BY_DEFAULT);
+
+// When enabled, chrome will support home and work addresses from account.
+// TODO: crbug.com/397940269 - Clean up when launched.
+BASE_FEATURE(kAutofillEnableSupportForHomeAndWork,
+             "AutofillEnableSupportForHomeAndWork",
              base::FEATURE_DISABLED_BY_DEFAULT);
 
 // Gives precedence to local heuristics if they indicate that a field is an
@@ -287,6 +296,19 @@ const base::FeatureParam<bool>
     kAutofillImprovedLabelsParamWithDifferentiatingLabelsInFrontParam{
         &kAutofillImprovedLabels,
         "autofill_improved_labels_with_differentiating_labels_in_front", false};
+
+// If enabled, we include a `FormFieldData`'s maxlength in crowdsourcing votes.
+// TODO(crbug.com/393995180): Clean up when launched.
+BASE_FEATURE(kAutofillIncludeMaxLengthInCrowdsourcing,
+             "AutofillIncludeMaxLengthInCrowdsourcing",
+             base::FEATURE_DISABLED_BY_DEFAULT);
+
+// If enabled, we include a <select>'s first, second, and last <option> in
+// crowdsourcing votes.
+// TODO(crbug.com/393999140): Clean up when launched.
+BASE_FEATURE(kAutofillIncludeSelectOptionsInCrowdsourcing,
+             "AutofillIncludeSelectOptionsInCrowdsourcing",
+             base::FEATURE_DISABLED_BY_DEFAULT);
 
 // If enabled, we include a `FormData`'s URL in crowdsourcing votes.
 // TODO(crbug.com/385043924): Clean up when launched.
@@ -386,7 +408,7 @@ BASE_FEATURE(kAutofillUseINAddressModel,
 // Enables using a custom address model for Italy, overriding the legacy one.
 BASE_FEATURE(kAutofillUseITAddressModel,
              "AutofillUseITAddressModel",
-             base::FEATURE_ENABLED_BY_DEFAULT);
+             base::FEATURE_DISABLED_BY_DEFAULT);
 
 // Enables using a custom address model for Japan, overriding the legacy one.
 BASE_FEATURE(kAutofillSupportPhoneticNameForJP,
@@ -407,7 +429,7 @@ BASE_FEATURE(kAutofillUseNLAddressModel,
 // Enables using a custom address model for Poland, overriding the legacy one.
 BASE_FEATURE(kAutofillUsePLAddressModel,
              "AutofillUsePLAddressModel",
-             base::FEATURE_ENABLED_BY_DEFAULT);
+             base::FEATURE_DISABLED_BY_DEFAULT);
 
 // When enabled, the form field parser won't try to match other attributes if
 // any of the negative patterns matched.

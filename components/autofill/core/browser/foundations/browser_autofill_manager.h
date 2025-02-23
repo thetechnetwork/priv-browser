@@ -128,7 +128,7 @@ class BrowserAutofillManager : public AutofillManager {
   // refreshes the popup.
   virtual bool ShouldShowCardsFromAccountOption(
       const FormData& form,
-      const FormFieldData& field,
+      const FieldGlobalId& field_id,
       AutofillSuggestionTriggerSource trigger_source) const;
   virtual void OnUserAcceptedCardsFromAccountOption();
   virtual void RefetchCardsAndUpdatePopup(const FormData& form,
@@ -197,22 +197,18 @@ class BrowserAutofillManager : public AutofillManager {
       const AutofillProfile& profile,
       AutofillTriggerSource trigger_source);
 
-  /////////////////
-  // DO NOT USE! //
-  /////////////////
-  // See `FormFiller::FillOrPreviewFormWithAutofillAiData()`.
-  // TODO(crbug.com/40227071): Clean up the API and remove this function.
+  // TODO(crbug.com/40227071): Clean up the API.
   void FillOrPreviewFormWithAutofillAiData(
       mojom::ActionPersistence action_persistence,
       const FormData& form,
       const FormFieldData& trigger_field,
-      const base::flat_map<FieldGlobalId, std::u16string>& values_to_fill);
+      const EntityInstance& entity);
 
   // Invoked when the user selected the `suggestion` in a suggestions list from
   // single field filling.
   void OnSingleFieldSuggestionSelected(const Suggestion& suggestion,
-                                       const FormData& form,
-                                       const FormFieldData& field);
+                                       const FormGlobalId& form_id,
+                                       const FieldGlobalId& field_id);
 
   // Update the pending form with |form|, possibly processing the current
   // pending form for upload.

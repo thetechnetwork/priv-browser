@@ -17,7 +17,7 @@
 #include "chrome/browser/extensions/api/autofill_private/autofill_private_event_router_factory.h"
 #include "chrome/browser/extensions/api/bookmark_manager_private/bookmark_manager_private_api.h"
 #include "chrome/browser/extensions/api/bookmarks/bookmarks_api.h"
-#include "chrome/browser/extensions/api/bookmarks/bookmarks_api_watcher.h"
+#include "chrome/browser/extensions/api/bookmarks/bookmarks_api_watcher.h"  // nogncheck
 #include "chrome/browser/extensions/api/braille_display_private/braille_display_private_api.h"
 #include "chrome/browser/extensions/api/developer_private/developer_private_api.h"
 #include "chrome/browser/extensions/api/font_settings/font_settings_api.h"
@@ -25,7 +25,7 @@
 #include "chrome/browser/extensions/api/identity/identity_api.h"
 #include "chrome/browser/extensions/api/image_writer_private/operation_manager.h"
 #include "chrome/browser/extensions/api/language_settings_private/language_settings_private_delegate_factory.h"
-#include "chrome/browser/extensions/api/messaging/incognito_connectability.h"
+#include "chrome/browser/extensions/api/messaging/incognito_connectability.h"  // nogncheck
 #include "chrome/browser/extensions/api/networking_private/networking_private_ui_delegate_factory_impl.h"
 #include "chrome/browser/extensions/api/omnibox/omnibox_api.h"
 #include "chrome/browser/extensions/api/passwords_private/passwords_private_delegate_factory.h"

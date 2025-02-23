@@ -136,7 +136,6 @@ suite('ClearBrowsingDataDesktop', function() {
     assertFalse(!!element.shadowRoot!.querySelector(
         '#clearBrowsingDataDialog [slot=footer]'));
 
-    // The footer is never shown on Lacros.
     // <if expr="not is_chromeos">
     // Syncing: the footer is shown, with the normal sync info.
     webUIListenerCallback('sync-status-changed', {
@@ -189,7 +188,6 @@ suite('ClearBrowsingDataDesktop', function() {
     // </if>
   });
 
-  // The footer is never shown on Lacros.
   // <if expr="not is_chromeos">
   test('ClearBrowsingDataPauseSyncDesktop', function() {
     webUIListenerCallback('sync-status-changed', {
@@ -543,7 +541,7 @@ suite('ClearBrowsingDataAllPlatforms', function() {
     assertFalse(element.$.clearBrowsingDataDialog.open);
     assertTrue(notice1.$.dialog.open);
 
-    const whenNoticeClosed = eventToPromise('close', notice1!);
+    const whenNoticeClosed = eventToPromise('close', notice1);
 
     // Tapping the action button will close the notice.
     noticeActionButton.click();
@@ -591,7 +589,7 @@ suite('ClearBrowsingDataAllPlatforms', function() {
     assertFalse(element.$.clearBrowsingDataDialog.open);
     assertTrue(notice1.$.dialog.open);
 
-    const whenNoticeClosed = eventToPromise('close', notice1!);
+    const whenNoticeClosed = eventToPromise('close', notice1);
 
     // Tapping the action button will close the notice.
     noticeActionButton.click();
@@ -642,7 +640,7 @@ suite('ClearBrowsingDataAllPlatforms', function() {
     assertFalse(element.$.clearBrowsingDataDialog.open);
     assertTrue(notice1.$.dialog.open);
 
-    const whenNoticeClosed1 = eventToPromise('close', notice1!);
+    const whenNoticeClosed1 = eventToPromise('close', notice1);
 
     // Tapping the action button will close the history notice, and
     // display the passwords notice instead.
@@ -668,7 +666,7 @@ suite('ClearBrowsingDataAllPlatforms', function() {
     assertFalse(element.$.clearBrowsingDataDialog.open);
     assertTrue(notice2.$.dialog.open);
 
-    const whenNoticeClosed2 = eventToPromise('close', notice2!);
+    const whenNoticeClosed2 = eventToPromise('close', notice2);
 
     // Tapping the action button will close the notice.
     noticeActionButton2.click();

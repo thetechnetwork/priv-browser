@@ -66,6 +66,7 @@
 #include "net/filter/filter_source_stream.h"
 #include "net/filter/gzip_source_stream.h"
 #include "net/filter/source_stream.h"
+#include "net/filter/source_stream_type.h"
 #include "net/filter/zstd_source_stream.h"
 #include "net/first_party_sets/first_party_set_entry.h"
 #include "net/first_party_sets/first_party_set_metadata.h"
@@ -942,6 +943,10 @@ void URLRequestHttpJob::SetCookieHeaderAndStart(
     // If the request needs to be deferred while waiting for refresh, do not
     // start the transaction at this time. This may also kick off a refresh.
     if (id) {
+      device_bound_session_deferral_count_++;
+      if (device_bound_session_deferral_count_ == 1) {
+        device_bound_session_first_deferral_ = base::TimeTicks::Now();
+      }
       service->DeferRequestForRefresh(
           request_, *id,
           // restart with new cookies callback
@@ -951,6 +956,14 @@ void URLRequestHttpJob::SetCookieHeaderAndStart(
           base::BindOnce(&URLRequestHttpJob::StartTransaction,
                          weak_factory_.GetWeakPtr()));
       return;
+    }
+
+    base::UmaHistogramCounts100("Net.DeviceBoundSessions.RequestDeferralCount",
+                                device_bound_session_deferral_count_);
+    if (device_bound_session_deferral_count_ > 0) {
+      base::UmaHistogramTimes(
+          "Net.DeviceBoundSessions.TotalRequestDeferredDuration",
+          base::TimeTicks::Now() - device_bound_session_first_deferral_);
     }
   }
 #endif  // BUILDFLAG(ENABLE_DEVICE_BOUND_SESSIONS)
@@ -1478,29 +1491,28 @@ std::unique_ptr<SourceStream> URLRequestHttpJob::SetUpSourceStream() {
 
   std::unique_ptr<SourceStream> upstream = URLRequestJob::SetUpSourceStream();
   HttpResponseHeaders* headers = GetResponseHeaders();
-  std::vector<SourceStream::SourceType> types;
+  std::vector<SourceStreamType> types;
   size_t iter = 0;
   while (std::optional<std::string_view> type =
              headers->EnumerateHeader(&iter, "Content-Encoding")) {
-    SourceStream::SourceType source_type =
-        FilterSourceStream::ParseEncodingType(*type);
+    SourceStreamType source_type = FilterSourceStream::ParseEncodingType(*type);
     switch (source_type) {
-      case SourceStream::TYPE_BROTLI:
-      case SourceStream::TYPE_DEFLATE:
-      case SourceStream::TYPE_GZIP:
-      case SourceStream::TYPE_ZSTD:
+      case SourceStreamType::kBrotli:
+      case SourceStreamType::kDeflate:
+      case SourceStreamType::kGzip:
+      case SourceStreamType::kZstd:
         if (request_->accepted_stream_types() &&
             !request_->accepted_stream_types()->contains(source_type)) {
           // If the source type is disabled, we treat it
-          // in the same way as SourceStream::TYPE_UNKNOWN.
+          // in the same way as SourceStreamType::kUnknown.
           return upstream;
         }
         types.push_back(source_type);
         break;
-      case SourceStream::TYPE_NONE:
+      case SourceStreamType::kNone:
         // Identity encoding type. Pass through raw response body.
         return upstream;
-      case SourceStream::TYPE_UNKNOWN:
+      case SourceStreamType::kUnknown:
         // Unknown encoding type. Pass through raw response body.
         // Request will not be canceled; though
         // it is expected that user will see malformed / garbage response.
@@ -1513,23 +1525,23 @@ std::unique_ptr<SourceStream> URLRequestHttpJob::SetUpSourceStream() {
   for (const auto& type : base::Reversed(types)) {
     std::unique_ptr<FilterSourceStream> downstream;
     switch (type) {
-      case SourceStream::TYPE_BROTLI:
+      case SourceStreamType::kBrotli:
         downstream = CreateBrotliSourceStream(std::move(upstream));
         content_encoding_type = ContentEncodingType::kBrotli;
         break;
-      case SourceStream::TYPE_GZIP:
-      case SourceStream::TYPE_DEFLATE:
+      case SourceStreamType::kGzip:
+      case SourceStreamType::kDeflate:
         downstream = GzipSourceStream::Create(std::move(upstream), type);
-        content_encoding_type = type == SourceStream::TYPE_GZIP
+        content_encoding_type = type == SourceStreamType::kGzip
                                     ? ContentEncodingType::kGZip
                                     : ContentEncodingType::kDeflate;
         break;
-      case SourceStream::TYPE_ZSTD:
+      case SourceStreamType::kZstd:
         downstream = CreateZstdSourceStream(std::move(upstream));
         content_encoding_type = ContentEncodingType::kZstd;
         break;
-      case SourceStream::TYPE_NONE:
-      case SourceStream::TYPE_UNKNOWN:
+      case SourceStreamType::kNone:
+      case SourceStreamType::kUnknown:
         NOTREACHED();
     }
     if (downstream == nullptr)

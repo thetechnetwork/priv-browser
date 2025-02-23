@@ -313,6 +313,8 @@ bool CSSPropertyEquality::PropertiesEqual(const PropertyHandle& property,
       return a.GetColumnFill() == b.GetColumnFill();
     case CSSPropertyID::kColumnRuleStyle:
       return a.ColumnRuleStyle() == b.ColumnRuleStyle();
+    case CSSPropertyID::kRowRuleStyle:
+      return a.RowRuleStyle() == b.RowRuleStyle();
     case CSSPropertyID::kColumnSpan:
       return a.GetColumnSpan() == b.GetColumnSpan();
     case CSSPropertyID::kContent:
@@ -632,6 +634,8 @@ bool CSSPropertyEquality::PropertiesEqual(const PropertyHandle& property,
       return a.RubyAlign() == b.RubyAlign();
     case CSSPropertyID::kRubyPosition:
       return a.GetRubyPosition() == b.GetRubyPosition();
+    case CSSPropertyID::kScrollMarkerContain:
+      return a.ScrollMarkerContain() == b.ScrollMarkerContain();
     case CSSPropertyID::kScrollMarkerGroup:
       return a.ScrollMarkerGroup() == b.ScrollMarkerGroup();
     case CSSPropertyID::kScrollbarColor:

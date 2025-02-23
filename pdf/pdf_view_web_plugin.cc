@@ -276,16 +276,24 @@ class PdfViewWebPlugin::PdfInkModuleClientImpl : public PdfInkModuleClient {
   ~PdfInkModuleClientImpl() override = default;
 
   // PdfInkModuleClient:
+  void DiscardStroke(int page_index, InkStrokeId id) override {
+    plugin_->engine_->DiscardStroke(page_index, id);
+  }
+
   PageOrientation GetOrientation() const override {
     return plugin_->engine_->GetCurrentOrientation();
   }
 
-  gfx::Rect GetPageContentsRect(int index) override {
-    if (index < 0 || index >= plugin_->engine_->GetNumberOfPages()) {
+  gfx::Rect GetPageContentsRect(int page_index) override {
+    if (page_index < 0 || page_index >= plugin_->engine_->GetNumberOfPages()) {
       return gfx::Rect();
     }
+    return plugin_->engine_->GetPageContentsRect(page_index);
+  }
 
-    return plugin_->engine_->GetPageContentsRect(index);
+  gfx::Size GetThumbnailSize(int page_index) override {
+    return plugin_->engine_->GetThumbnailSize(page_index,
+                                              plugin_->device_scale_);
   }
 
   gfx::Vector2dF GetViewportOriginOffset() override {
@@ -360,16 +368,6 @@ class PdfViewWebPlugin::PdfInkModuleClientImpl : public PdfInkModuleClient {
                           InkStrokeId id,
                           bool active) override {
     plugin_->engine_->UpdateStrokeActive(page_index, id, active);
-  }
-
-  void DiscardStroke(int page_index, InkStrokeId id) override {
-    plugin_->engine_->DiscardStroke(page_index, id);
-  }
-
-  void UpdateThumbnail(int page_index) override {
-    plugin_->GenerateAndSendInkThumbnail(
-        page_index,
-        plugin_->engine_->GetThumbnailSize(page_index, plugin_->device_scale_));
   }
 
   int VisiblePageIndexFromPoint(const gfx::PointF& point) override {
@@ -2755,7 +2753,8 @@ void PdfViewWebPlugin::SendThumbnail(base::Value::Dict reply,
 
 #if BUILDFLAG(ENABLE_PDF_INK2)
   if (ink_module_) {
-    GenerateAndSendInkThumbnail(page_index, thumbnail.image_size());
+    ink_module_->GenerateAndSendInkThumbnail(page_index,
+                                             thumbnail.image_size());
   }
 #endif
 }
@@ -2777,33 +2776,6 @@ std::unique_ptr<PdfInkModule> PdfViewWebPlugin::MaybeCreatePdfInkModule(
     return nullptr;
   }
   return std::make_unique<PdfInkModule>(*client);
-}
-
-void PdfViewWebPlugin::GenerateAndSendInkThumbnail(int page_index,
-                                                   const gfx::Size& size) {
-  CHECK(!size.IsEmpty());
-  CHECK(ink_module_);
-
-  auto info = SkImageInfo::Make(size.width(), size.height(),
-                                kRGBA_8888_SkColorType, kUnpremul_SkAlphaType);
-  const size_t alloc_size = info.computeMinByteSize();
-  CHECK(!SkImageInfo::ByteSizeOverflowed(alloc_size));
-  std::vector<uint8_t> image_data(alloc_size);
-
-  SkBitmap sk_bitmap;
-  sk_bitmap.installPixels(info, image_data.data(), info.minRowBytes());
-  SkCanvas canvas(sk_bitmap);
-  if (!ink_module_->DrawThumbnail(canvas, page_index)) {
-    return;
-  }
-
-  base::Value::Dict message;
-  message.Set("type", "updateInk2Thumbnail");
-  message.Set("pageNumber", page_index + 1);
-  message.Set("imageData", std::move(image_data));
-  message.Set("width", size.width());
-  message.Set("height", size.height());
-  client_->PostMessage(std::move(message));
 }
 #endif  // BUILDFLAG(ENABLE_PDF_INK2)
 

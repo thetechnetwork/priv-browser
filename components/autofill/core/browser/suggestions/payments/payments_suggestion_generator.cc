@@ -1102,9 +1102,7 @@ std::vector<Suggestion> GetCreditCardOrCvcFieldSuggestions(
   }
 
   const bool allow_payment_swapping =
-      base::FeatureList::IsEnabled(
-          features::kAutofillEnablePaymentsFieldSwapping) &&
-      trigger_field.is_autofilled();
+      IsPaymentsFieldSwappingEnabled() && trigger_field.is_autofilled();
 
   std::map<std::string, const AutofillOfferData*> card_linked_offers_map =
       GetCardLinkedOffers(client);
@@ -1607,8 +1605,6 @@ bool IsCreditCardFooterSuggestion(
     case SuggestionType::kWebauthnCredential:
     case SuggestionType::kWebauthnSignInWithAnotherDevice:
     case SuggestionType::kFillAutofillAi:
-    case SuggestionType::kAutofillAiError:
-    case SuggestionType::kAutofillAiLoadingState:
     case SuggestionType::kBnplEntry:
       return false;
   }

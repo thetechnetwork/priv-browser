@@ -60,6 +60,8 @@ source_set("common") {
   defines = [ "MEDIA_GPU_IMPLEMENTATION" ]
   sources = [
     "chromeos_status.h",
+    "default_video_frame_converter.cc",
+    "default_video_frame_converter.h",
     "dmabuf_video_frame_pool.cc",
     "dmabuf_video_frame_pool.h",
     "frame_registry.cc",
@@ -322,10 +324,12 @@ if (use_v4l2_codec) {
       ":chromeos",
       ":perf_test_utils",
       "//base/test:test_support",
+      "//gpu:test_support",
       "//media:test_support",
       "//media/gpu:video_frame_mapper_common",
       "//media/gpu/test:helpers",
       "//media/gpu/test:video_test_environment",
+      "//testing/gmock",
       "//testing/gtest",
       "//testing/perf",
       "//third_party/libyuv",

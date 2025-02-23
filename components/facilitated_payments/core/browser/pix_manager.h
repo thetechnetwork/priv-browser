@@ -81,6 +81,7 @@ class PixManager {
   FRIEND_TEST_ALL_PREFIXES(PixManagerTest, LogInitiatePurchaseActionAttempt);
   FRIEND_TEST_ALL_PREFIXES(PixManagerTest,
                            LogInitiatePurchaseActionResultAndLatency);
+  FRIEND_TEST_ALL_PREFIXES(PixManagerTest, LogTransactionResultAndLatency);
   FRIEND_TEST_ALL_PREFIXES(PixManagerTest,
                            NoPaymentsDataManager_NoApiClientTriggered);
   FRIEND_TEST_ALL_PREFIXES(PixManagerTest, NoPixAccounts_NoApiClientTriggered);
@@ -191,8 +192,10 @@ class PixManager {
   void OnApiAvailabilityReceived(base::TimeTicks start_time,
                                  bool is_api_available);
 
-  // Called when user selects the Pix bank account to pay with.
-  void OnPixAccountSelected(int64_t selected_instrument_id);
+  // Called when user selects the Pix bank account to pay with. The FOP selector
+  // was shown at `fop_selector_shown_timestamp`.
+  void OnPixAccountSelected(base::TimeTicks fop_selector_shown_timestamp,
+                            int64_t selected_instrument_id);
 
   // Invoked when risk data is fetched. The call to fetch the risk data was made
   // at `start_time`.

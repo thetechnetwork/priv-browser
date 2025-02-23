@@ -52,7 +52,6 @@ class ChromeAppKioskServiceAsh;
 class ClipboardHistoryAsh;
 class ContentProtectionAsh;
 class DebugInterfaceRegistererAsh;
-class DeskAsh;
 class DeskProfilesAsh;
 class DeskTemplateAsh;
 class DeviceAttributesAsh;
@@ -101,11 +100,9 @@ class ResourceManagerAsh;
 class ScreenAIDownloaderAsh;
 class StructuredMetricsServiceAsh;
 class SuggestionServiceAsh;
-class TimeZoneServiceAsh;
 class VpnServiceAsh;
 class WebKioskServiceAsh;
 class VirtualKeyboardAsh;
-class VolumeManagerAsh;
 
 // Implementation of Crosapi in Ash. It provides a set of APIs that
 // crosapi clients, such as lacros-chrome, can call into.
@@ -147,7 +144,6 @@ class CrosapiAsh : public mojom::Crosapi {
       override;
   void BindDebugInterfaceRegisterer(
       mojo::PendingReceiver<mojom::DebugInterfaceRegisterer> receiver) override;
-  void BindDesk(mojo::PendingReceiver<mojom::Desk> receiver) override;
   void BindDeskProfileObserver(
       mojo::PendingReceiver<mojom::DeskProfileObserver> receiver) override;
   void BindDeskTemplate(
@@ -289,15 +285,11 @@ class CrosapiAsh : public mojom::Crosapi {
       override;
   void BindTelemetryProbeService(
       mojo::PendingReceiver<mojom::TelemetryProbeService> receiver) override;
-  void BindTimeZoneService(
-      mojo::PendingReceiver<mojom::TimeZoneService> receiver) override;
   void BindVideoCaptureDeviceFactory(
       mojo::PendingReceiver<mojom::VideoCaptureDeviceFactory> receiver)
       override;
   void BindVirtualKeyboard(
       mojo::PendingReceiver<mojom::VirtualKeyboard> receiver) override;
-  void BindVolumeManager(
-      mojo::PendingReceiver<mojom::VolumeManager> receiver) override;
   void BindVpnService(
       mojo::PendingReceiver<mojom::VpnService> receiver) override;
   void BindWebKioskService(
@@ -321,8 +313,6 @@ class CrosapiAsh : public mojom::Crosapi {
   DebugInterfaceRegistererAsh* debug_interface_registerer_ash() {
     return debug_interface_registerer_ash_.get();
   }
-
-  DeskAsh* desk_ash() { return desk_ash_.get(); }
 
   DeskProfilesAsh* desk_profiles_ash() { return desk_profiles_ash_.get(); }
 
@@ -467,7 +457,6 @@ class CrosapiAsh : public mojom::Crosapi {
   std::unique_ptr<ClipboardHistoryAsh> clipboard_history_ash_;
   std::unique_ptr<ContentProtectionAsh> content_protection_ash_;
   std::unique_ptr<DebugInterfaceRegistererAsh> debug_interface_registerer_ash_;
-  std::unique_ptr<DeskAsh> desk_ash_;
   std::unique_ptr<DeskProfilesAsh> desk_profiles_ash_;
   std::unique_ptr<DeskTemplateAsh> desk_template_ash_;
   std::unique_ptr<DeviceAttributesAsh> device_attributes_ash_;
@@ -532,10 +521,8 @@ class CrosapiAsh : public mojom::Crosapi {
   std::unique_ptr<ScreenAIDownloaderAsh> screen_ai_downloader_ash_;
   std::unique_ptr<StructuredMetricsServiceAsh> structured_metrics_service_ash_;
   std::unique_ptr<SuggestionServiceAsh> suggestion_service_ash_;
-  std::unique_ptr<TimeZoneServiceAsh> time_zone_service_ash_;
   std::unique_ptr<ash::VideoConferenceManagerAsh> video_conference_manager_ash_;
   std::unique_ptr<VirtualKeyboardAsh> virtual_keyboard_ash_;
-  std::unique_ptr<VolumeManagerAsh> volume_manager_ash_;
   std::unique_ptr<VpnServiceAsh> vpn_service_ash_;
   std::unique_ptr<WebKioskServiceAsh> web_kiosk_service_ash_;
 

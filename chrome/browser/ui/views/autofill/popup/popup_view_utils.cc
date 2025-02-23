@@ -195,8 +195,8 @@ bool BoundsOverlapWithAnyOpenPrompt(const gfx::Rect& screen_bounds,
   top_level_view = platform_util::GetParent(top_level_view)
                        ? platform_util::GetParent(top_level_view)
                        : top_level_view;
-  views::Widget::Widgets all_widgets;
-  views::Widget::GetAllChildWidgets(top_level_view, &all_widgets);
+  views::Widget::Widgets all_widgets =
+      views::Widget::GetAllChildWidgets(top_level_view);
   return std::ranges::any_of(
       all_widgets, [&screen_bounds, web_contents_widget](views::Widget* w) {
         return w->IsDialogBox() &&
@@ -455,7 +455,6 @@ bool IsExpandableSuggestionType(SuggestionType type) {
   switch (type) {
     case SuggestionType::kAddressEntry:
     case SuggestionType::kAddressFieldByFieldFilling:
-    case SuggestionType::kAutofillAiError:
     case SuggestionType::kComposeProactiveNudge:
     case SuggestionType::kCreditCardEntry:
     case SuggestionType::kDevtoolsTestAddresses:
@@ -466,7 +465,6 @@ bool IsExpandableSuggestionType(SuggestionType type) {
     case SuggestionType::kAddressEntryOnTyping:
     case SuggestionType::kAllSavedPasswordsEntry:
     case SuggestionType::kAutocompleteEntry:
-    case SuggestionType::kAutofillAiLoadingState:
     case SuggestionType::kBnplEntry:
     case SuggestionType::kComposeDisable:
     case SuggestionType::kComposeGoToSettings:

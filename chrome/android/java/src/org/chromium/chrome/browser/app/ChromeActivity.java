@@ -79,6 +79,8 @@ import org.chromium.chrome.browser.back_press.BackPressManager;
 import org.chromium.chrome.browser.back_press.CloseListenerManager;
 import org.chromium.chrome.browser.banners.AppMenuVerbiage;
 import org.chromium.chrome.browser.base.ColdStartTracker;
+import org.chromium.chrome.browser.bookmarks.BookmarkManagerOpener;
+import org.chromium.chrome.browser.bookmarks.BookmarkManagerOpenerImpl;
 import org.chromium.chrome.browser.bookmarks.BookmarkModel;
 import org.chromium.chrome.browser.bookmarks.PowerBookmarkUtils;
 import org.chromium.chrome.browser.bookmarks.TabBookmarker;
@@ -299,6 +301,8 @@ public abstract class ChromeActivity extends AsyncInitializationActivity
             new ObservableSupplierImpl<>();
     protected ObservableSupplierImpl<TabBookmarker> mTabBookmarkerSupplier =
             new ObservableSupplierImpl<>();
+    protected ObservableSupplierImpl<BookmarkManagerOpener> mBookmarkManagerOpenerSupplier =
+            new ObservableSupplierImpl<>();
     private TabModelOrchestrator mTabModelOrchestrator;
     private TabModelSelectorTabObserver mTabModelSelectorTabObserver;
 
@@ -505,6 +509,7 @@ public abstract class ChromeActivity extends AsyncInitializationActivity
                     BookmarkModel bookmarkModel =
                             profile == null ? null : BookmarkModel.getForProfile(profile);
                     mBookmarkModelSupplier.set(bookmarkModel);
+                    mBookmarkManagerOpenerSupplier.set(new BookmarkManagerOpenerImpl());
                 });
 
         super.performPreInflationStartup();
@@ -2939,15 +2944,5 @@ public abstract class ChromeActivity extends AsyncInitializationActivity
     @Override
     protected int getAutomotiveToolbarImplementation() {
         return AutomotiveToolbarImplementation.WITH_TOOLBAR_VIEW;
-    }
-
-    /**
-     * Returns the base view hosting Chrome that certain views (e.g. the omnibox suggestion list)
-     * will position themselves relative to. If null, the content view can be used.
-     *
-     * @return The base {@link View} hosting Chrome.
-     */
-    protected @Nullable View getBaseChromeLayout() {
-        return mBaseChromeLayout;
     }
 }

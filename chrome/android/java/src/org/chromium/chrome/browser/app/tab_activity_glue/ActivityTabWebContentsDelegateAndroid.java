@@ -219,7 +219,6 @@ public class ActivityTabWebContentsDelegateAndroid extends TabWebContentsDelegat
 
         Tab sourceTab = fromWebContents(sourceWebContents);
         if (sourceTab == null
-                || sourceTab.getTabGroupId() == null
                 || !ChromeFeatureList.isEnabled(ChromeFeatureList.GROUP_NEW_TAB_WITH_PARENT)) {
             return true;
         }
@@ -239,7 +238,9 @@ public class ActivityTabWebContentsDelegateAndroid extends TabWebContentsDelegat
                 == TabWindowManagerSingleton.getInstance().getTabModelForTab(newTab)) {
             TabGroupModelFilter tabGroupModelFilter = getTabGroupModelFilter(sourceTab);
             // Set notify to false so snackbar to undo the grouping will not be shown.
-            if (tabGroupModelFilter != null) {
+            if (tabGroupModelFilter != null
+                    && tabGroupModelFilter.isTabInTabGroup(sourceTab)
+                    && tabGroupModelFilter.isTabModelRestored()) {
                 tabGroupModelFilter.mergeListOfTabsToGroup(
                         Arrays.asList(newTab), sourceTab, /* notify= */ false);
                 if (mChromeActivityNativeDelegate != null) {

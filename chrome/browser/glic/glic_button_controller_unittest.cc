@@ -11,6 +11,7 @@
 #include "chrome/browser/glic/glic_keyed_service.h"
 #include "chrome/browser/glic/glic_pref_names.h"
 #include "chrome/browser/glic/glic_profile_manager.h"
+#include "chrome/browser/glic/glic_test_util.h"
 #include "chrome/browser/glic/glic_vector_icon_manager.h"
 #include "chrome/browser/global_features.h"
 #include "chrome/browser/profiles/profile.h"
@@ -66,6 +67,7 @@ class GlicButtonControllerTest : public testing::Test {
         TestingBrowserProcess::GetGlobal());
     ASSERT_TRUE(testing_profile_manager_->SetUp());
     profile_ = testing_profile_manager_->CreateTestingProfile("profile");
+    ForceSigninAndModelExecutionCapability(profile_);
 
     TestingBrowserProcess::GetGlobal()->CreateGlobalFeaturesForTesting();
 
@@ -104,9 +106,9 @@ class GlicButtonControllerTest : public testing::Test {
   std::unique_ptr<GlicButtonController> glic_button_controller_;
 };
 
-// Test the settings policy state reflects the show state of the
-// the controller delegate.
-TEST_F(GlicButtonControllerTest, GlicSettingsPolicy) {
+// Test that settings changes are reflected in the show state of the controller
+// delegate.
+TEST_F(GlicButtonControllerTest, GlicSettings) {
   PrefService* prefs = profile()->GetPrefs();
 
   prefs->SetInteger(
@@ -134,6 +136,25 @@ TEST_F(GlicButtonControllerTest, GlicSettingsPolicy) {
   EXPECT_FALSE(controller_delegate()->show_state());
 }
 
+// Test that when the glic window is detached, the button is shown regardless of
+// settings state.
+TEST_F(GlicButtonControllerTest, GlicDetachedOverridesSettings) {
+  PrefService* prefs = profile()->GetPrefs();
+  prefs->SetInteger(
+      glic::prefs::kGlicSettingsPolicy,
+      static_cast<int>(glic::prefs::SettingsPolicyState::kDisabled));
+  prefs->SetBoolean(glic::prefs::kGlicPinnedToTabstrip, false);
+
+  mojom::PanelState panel_state;
+  panel_state.kind = mojom::PanelState_Kind::kAttached;
+  controller()->PanelStateChanged(panel_state, nullptr);
+  ASSERT_FALSE(controller_delegate()->show_state());
+
+  panel_state.kind = mojom::PanelState_Kind::kDetached;
+  controller()->PanelStateChanged(panel_state, nullptr);
+  EXPECT_TRUE(controller_delegate()->show_state());
+}
+
 // Test the panel state of the glic window reflects the icon state
 // of the controller delegate.
 TEST_F(GlicButtonControllerTest, GlicWindowPanelState) {
@@ -142,21 +163,21 @@ TEST_F(GlicButtonControllerTest, GlicWindowPanelState) {
   panel_state.kind = mojom::PanelState_Kind::kHidden;
   const auto& hidden_icon =
       GlicVectorIconManager::GetVectorIcon(IDR_GLIC_BUTTON_VECTOR_ICON);
-  controller()->PanelStateChanged(panel_state);
+  controller()->PanelStateChanged(panel_state, nullptr);
   EXPECT_EQ(controller_delegate()->icon()->reps.data(),
             hidden_icon.reps.data());
 
   const auto& attach_icon =
       GlicVectorIconManager::GetVectorIcon(IDR_GLIC_BUTTON_VECTOR_ICON);
   panel_state.kind = mojom::PanelState_Kind::kAttached;
-  controller()->PanelStateChanged(panel_state);
+  controller()->PanelStateChanged(panel_state, nullptr);
   EXPECT_EQ(controller_delegate()->icon()->reps.data(),
             attach_icon.reps.data());
 
   const auto& detach_icon =
       GlicVectorIconManager::GetVectorIcon(IDR_GLIC_ATTACH_BUTTON_VECTOR_ICON);
   panel_state.kind = mojom::PanelState_Kind::kDetached;
-  controller()->PanelStateChanged(panel_state);
+  controller()->PanelStateChanged(panel_state, nullptr);
   EXPECT_EQ(controller_delegate()->icon()->reps.data(),
             detach_icon.reps.data());
 }

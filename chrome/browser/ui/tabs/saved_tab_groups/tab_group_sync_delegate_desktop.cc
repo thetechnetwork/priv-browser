@@ -270,6 +270,21 @@ std::vector<LocalTabID> TabGroupSyncDelegateDesktop::GetLocalTabIdsForTabGroup(
   return std::vector<LocalTabID>();
 }
 
+std::set<LocalTabID> TabGroupSyncDelegateDesktop::GetSelectedTabs() {
+  std::set<LocalTabID> selected_tab_ids;
+  for (Browser* browser : *BrowserList::GetInstance()) {
+    if (browser->tab_strip_model()) {
+      tabs::TabInterface* active_tab =
+          browser->tab_strip_model()->GetActiveTab();
+      if (active_tab) {
+        selected_tab_ids.insert(active_tab->GetHandle().raw_value());
+      }
+    }
+  }
+
+  return selected_tab_ids;
+}
+
 std::u16string TabGroupSyncDelegateDesktop::GetTabTitle(
     const LocalTabID& local_tab_id) {
   for (Browser* browser : *BrowserList::GetInstance()) {

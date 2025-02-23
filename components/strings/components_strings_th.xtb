@@ -34,7 +34,6 @@
 <translation id="1058479211578257048">กำลังบันทึกบัตร...</translation>
 <translation id="1060136083665017312">ระบบเกมและเครื่องเล่นเกม</translation>
 <translation id="1060320201901229167">Envelope Kaku 5</translation>
-<translation id="10614374240317010">ไม่เคยบันทึก</translation>
 <translation id="1062407476771304334">แทนที่</translation>
 <translation id="1064054731605354900">A3x5</translation>
 <translation id="1067029985695494416">รายละเอียดเครื่องมือค้นหา</translation>
@@ -263,7 +262,6 @@
 <translation id="1432187715652018471">หน้าเว็บต้องการติดตั้งเครื่องจัดการบริการ</translation>
 <translation id="1432581352905426595">จัดการเครื่องมือค้นหา</translation>
 <translation id="1433225466058025572">ลองย้ายไฟล์อีกครั้ง</translation>
-<translation id="1435940442311036198">ใช้พาสคีย์ในอุปกรณ์อื่น</translation>
 <translation id="1436185428532214179">สามารถขอแก้ไขไฟล์และโฟลเดอร์ในอุปกรณ์ของคุณได้</translation>
 <translation id="1442386063175183758">พับทบด้านขวา</translation>
 <translation id="1442987760062738829">เจาะรู</translation>
@@ -357,7 +355,6 @@
 <translation id="159274626729231974">เทศกาลภาพยนตร์</translation>
 <translation id="1593359183944365958">270 องศา</translation>
 <translation id="1594030484168838125">เลือก</translation>
-<translation id="1598816256585174656">พาสคีย์จาก Windows Hello</translation>
 <translation id="1599199147673445968">บัตรใหม่ใช่ไหม <ph name="BEGIN_LINK" />ป้อนรายละเอียดบัตร<ph name="END_LINK" /></translation>
 <translation id="1604192142734009334">สุขภาพและความงาม</translation>
 <translation id="160851722280695521">เล่นเกมไดโนเสาร์วิ่งใน Chrome</translation>
@@ -469,7 +466,6 @@
 <translation id="1778646502362731194">JIS B0</translation>
 <translation id="1785118555253503473">ติดตั้งเว็บแอปไหม</translation>
 <translation id="1791415068765905273">แสดงตารางเปรียบเทียบทั้งหมด</translation>
-<translation id="1791429645902722292">Google Smart Lock</translation>
 <translation id="1791820510173628507"><ph name="MANAGE_GOOGLE_ACCOUNT_FOCUSED_FRIENDLY_MATCH_TEXT" /> กด Tab ตามด้วย Enter เพื่อจัดการข้อมูล ความเป็นส่วนตัว และการรักษาความปลอดภัยในบัญชี Google ของคุณ</translation>
 <translation id="1793473605302304726">จ่ายแบบผ่อนชำระ</translation>
 <translation id="1793631236004319016">ใช้ล่าสุดเมื่อ <ph name="NUM_HOURS_MINUTES_SECONDS" />ที่ผ่านมา</translation>
@@ -1158,7 +1154,6 @@
 <translation id="306573536155379004">เกมเริ่มแล้ว</translation>
 <translation id="3067505415088964188">ราคาต่ำ</translation>
 <translation id="3068118691172921711">การอัปโหลดไฟล์ไปยัง <ph name="CLOUD_PROVIDER" /> จะเริ่มในอีก 1 นาที</translation>
-<translation id="3068976060094139647">คุณป้อนข้อมูลบัตรนี้โดยอัตโนมัติได้เนื่องจากบัญชีของคุณลิงก์กับ Google Pay</translation>
 <translation id="3074671422612537810">{ITEMS,plural, =1{{ITEMS} รายการ}other{{ITEMS} รายการ}}</translation>
 <translation id="3076865167425975822">ระบบปฏิบัติการ</translation>
 <translation id="3080254622891793721">กราฟิก</translation>
@@ -2126,7 +2121,6 @@
 <translation id="4754461935447132332">ไม่อนุญาตสำหรับเว็บไซต์ที่ไม่ปลอดภัย</translation>
 <translation id="4756388243121344051">&amp;ประวัติการเข้าชม</translation>
 <translation id="4756501505996488486">PRC 16K</translation>
-<translation id="4757022425116568383">พาสคีย์จากโปรไฟล์ Chrome ของคุณ</translation>
 <translation id="4757993714154412917">คุณเพิ่งใส่รหัสผ่านในเว็บไซต์ที่มีการหลอกลวง Chromium ขอแนะนำให้ตรวจสอบรหัสผ่านที่บันทึกไว้เพื่อรักษาความปลอดภัยของบัญชี</translation>
 <translation id="4758311279753947758">เพิ่มข้อมูลติดต่อ</translation>
 <translation id="4761326898079498987">ตรวจสอบเพื่อดูรายละเอียดเพิ่มเติม</translation>
@@ -2259,6 +2253,7 @@
 <translation id="4989809363548539747">ไม่รองรับปลั๊กอินนี้</translation>
 <translation id="4990241977441916452">Envelope A2</translation>
 <translation id="4992066212339426712">เปิดเสียง</translation>
+<translation id="4994095017621319069">กลุ่มแท็บ 1 กลุ่มใช้งานไม่ได้แล้ว</translation>
 <translation id="4994348767896109801">โฆษณาที่คุณเห็นจะได้รับการปรับตามโปรไฟล์ของคุณหรือไม่นั้นขึ้นอยู่กับหลายอย่าง ซึ่งรวมถึงการตั้งค่านี้ <ph name="BEGIN_LINK_1" />หัวข้อโฆษณา<ph name="END_LINK_1" /> <ph name="BEGIN_LINK_2" />การตั้งค่าคุกกี้<ph name="END_LINK_2" /> และการปรับโฆษณาตามโปรไฟล์ผู้ใช้ของเว็บไซต์ที่คุณดู ดูข้อมูลเพิ่มเติมเกี่ยวกับ<ph name="BEGIN_LINK_3" />การจัดการความเป็นส่วนตัวเกี่ยวกับโฆษณา<ph name="END_LINK_3" /></translation>
 <translation id="4995474875135717171">แก้ไข:</translation>
 <translation id="4995749490935861684"><ph name="CUSTOMIZE_SEARCH_ENGINES_FOCUSED_FRIENDLY_MATCH_TEXT" /> กด Tab ตามด้วย Enter เพื่อจัดการการค้นหาเว็บไซต์และเครื่องมือค้นหาเริ่มต้น</translation>
@@ -2699,7 +2694,6 @@
 <translation id="5764920692828389743">ส่งไปยัง <ph name="EMAIL_ADDRESS" /></translation>
 <translation id="5765072501007116331">หากต้องการดูวิธีการนำส่งสินค้าและข้อกำหนด โปรดเลือกที่อยู่</translation>
 <translation id="57689295674415555">หมายเลขบัตรเสมือนไม่ได้รับการกรอกใช่ไหม</translation>
-<translation id="5772086939108830423">ใช้พาสคีย์ในอุปกรณ์อื่น</translation>
 <translation id="5776313857861697733">ลำดับความสำคัญ</translation>
 <translation id="577804500166306874">กำลังโหลดผลลัพธ์</translation>
 <translation id="5781136890105823427">เปิดใช้การทดสอบอยู่</translation>
@@ -2830,7 +2824,6 @@
 <translation id="6025416945513303461"><ph name="TYPE_1" /> <ph name="TYPE_2" /> <ph name="TYPE_3" /> (ซิงค์แล้ว)</translation>
 <translation id="6028591542479806248">จัดการการแจ้งเตือนในอุปกรณ์เคลื่อนที่และการแจ้งเตือนทางอีเมล</translation>
 <translation id="6028833024483927901">อาหารจากทั่วโลก</translation>
-<translation id="6030251660719692307">พาสคีย์จากเครื่องมือจัดการรหัสผ่านบน Google</translation>
 <translation id="603068602130820122">เย็บด้วยลวดเย็บกระดาษด้านขวา 2 ครั้ง</translation>
 <translation id="6032524144326295339">กล่องจดหมาย 2</translation>
 <translation id="6032955021262906325">เย็บเล่มด้านซ้าย</translation>
@@ -3438,7 +3431,6 @@
 <translation id="7096937462164235847">เว็บไซต์นี้ไม่ได้รับการยืนยันตัวตน</translation>
 <translation id="7102554173784142865">เล่นเกมไดโนเสาร์ Chrome</translation>
 <translation id="7102760431686146931">เครื่องครัวและชุดจานชาม</translation>
-<translation id="7105998430540165694">พาสคีย์จากพวงกุญแจ iCloud</translation>
 <translation id="7106762743910369165">เบราว์เซอร์ได้รับการจัดการโดยองค์กรของคุณ</translation>
 <translation id="7107249414147762907">ไม่สามารถเข้าถึง PDF นี้ ไม่ได้ดึงข้อความมา</translation>
 <translation id="7107427078069498123">ลายนิ้วมือ SHA-256</translation>
@@ -3476,6 +3468,7 @@
 <translation id="7153549335910886479">{PAYMENT_METHOD,plural, =0{<ph name="PAYMENT_METHOD_PREVIEW" />}=1{<ph name="PAYMENT_METHOD_PREVIEW" /> และอีก <ph name="NUMBER_OF_ADDITIONAL_PAYMENT_METHODS" /> รายการ}other{<ph name="PAYMENT_METHOD_PREVIEW" /> และอีก <ph name="NUMBER_OF_ADDITIONAL_PAYMENT_METHODS" /> รายการ}}</translation>
 <translation id="7153618581592392745">ลาเวนเดอร์</translation>
 <translation id="7156870133441232244">ควรอัปเกรดเซิร์ฟเวอร์เป็น TLS 1.2 ขึ้นไป</translation>
+<translation id="7156885531105222428">ไม่พบหน้าที่คุณขอในแอปพลิเคชัน</translation>
 <translation id="715996170234243096">{NUM_FILES,plural, =1{หากต้องการส่งไฟล์นี้โดยใช้<ph name="FEATURE_NAME" /> โปรดเพิ่มพื้นที่ว่าง (<ph name="DISK_SPACE_SIZE" />) ในอุปกรณ์}other{หากต้องการส่งไฟล์เหล่านี้โดยใช้<ph name="FEATURE_NAME" /> โปรดเพิ่มพื้นที่ว่าง (<ph name="DISK_SPACE_SIZE" />) ในอุปกรณ์}}</translation>
 <translation id="7160999678034985039">โปรดบันทึกงานและเริ่มอัปเดตเมื่อพร้อม</translation>
 <translation id="7162277662076933695">เครื่องอ่านสมาร์ทการ์ด</translation>
@@ -4263,6 +4256,7 @@
 <translation id="8533411848724153701">Gemini</translation>
 <translation id="8533619373899488139">ไปที่ &lt;strong&gt;chrome://policy&lt;/strong&gt; เพื่อดูรายการ URL ที่ถูกบล็อกและนโยบายอื่นๆ ที่ผู้ดูแลระบบบังคับใช้</translation>
 <translation id="8536234749087605613">ซอง (มีกรอบใสด้านหน้า)</translation>
+<translation id="8538228968820006247">กลุ่มแท็บเต็มแล้ว สมาชิกใหม่จึงเข้าร่วมโดยใช้ลิงก์ไม่ได้</translation>
 <translation id="8539500321752640291">อนุญาตให้เข้าถึงสิทธิ์ 2 รายการไหม</translation>
 <translation id="8541158209346794904">อุปกรณ์บลูทูธ</translation>
 <translation id="8541410041357371550">เว็บไซต์นี้รับหัวข้อโฆษณาของคุณจาก Chrome เพื่อแสดงโฆษณาที่เกี่ยวข้องมากขึ้นด้วย</translation>
@@ -4384,7 +4378,6 @@
 <translation id="8757526089434340176">มีข้อเสนอจาก Google Pay</translation>
 <translation id="8759274551635299824">บัตรนี้หมดอายุแล้ว</translation>
 <translation id="87601671197631245">เว็บไซต์นี้ใช้การกำหนดค่าความปลอดภัยที่ล้าสมัย ซึ่งอาจเปิดเผยข้อมูลของคุณ (เช่น รหัสผ่าน ข้อความ หรือบัตรเครดิต) เมื่อมีการส่งไปยังเว็บไซต์นี้</translation>
-<translation id="8763226176721243078">คุณป้อนข้อมูลบัตรนี้โดยอัตโนมัติได้เนื่องจากบัญชี <ph name="CARD_ISSUER_NAME" /> ของคุณลิงก์กับ Google Pay</translation>
 <translation id="8763927697961133303">อุปกรณ์ USB</translation>
 <translation id="8763986294015493060">ปิดหน้าต่างที่ไม่ระบุตัวตนทั้งหมดที่เปิดอยู่</translation>
 <translation id="8766943070169463815">ชีตการตรวจสอบสิทธิ์ข้อมูลเข้าสู่ระบบการชำระเงินที่ปลอดภัยเปิดขึ้น</translation>
@@ -4529,7 +4522,6 @@
 <translation id="9040341831873780534">ดูข้อกำหนดที่นี่</translation>
 <translation id="9042617223719777575">ความจุมาก</translation>
 <translation id="9042827002460091668">ตรวจสอบการเชื่อมต่ออินเทอร์เน็ตและลองอีกครั้ง</translation>
-<translation id="9044359186343685026">ใช้ Touch ID</translation>
 <translation id="9045525010788763347"><ph name="RESULT_MODIFIED_DATE" /> - <ph name="RESULT_PRODUCT_SOURCE" /></translation>
 <translation id="9046864189129893978">ไมโครโฟน (<ph name="MICS_COUNT" /> ตัว)</translation>
 <translation id="9048035366624198823">การดำเนินการเหล่านี้กำหนดให้ตั้งค่านโยบาย <ph name="POLICY_NAME" /> เป็น <ph name="POLICY_VALUE" />: <ph name="ACTION_LIST" /></translation>

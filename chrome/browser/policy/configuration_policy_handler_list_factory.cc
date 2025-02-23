@@ -167,6 +167,10 @@
 #include "components/media_router/common/pref_names.h"
 #endif  // BUILDFLAG(IS_ANDROID)
 
+#if BUILDFLAG(IS_MAC)
+#include "chrome/browser/enterprise/platform_auth/extensible_enterprise_sso_policy_handler.h"
+#endif  // BUILDFLAG(IS_MAC)
+
 #if defined(TOOLKIT_VIEWS)
 #include "chrome/browser/ui/side_search/side_search_prefs.h"
 #endif  // BUILDFLAG(TOOLKIT_VIEWS)
@@ -190,7 +194,6 @@
 #include "chrome/browser/ash/policy/handlers/app_launch_automation_policy_handler.h"
 #include "chrome/browser/ash/policy/handlers/configuration_policy_handler_ash.h"
 #include "chrome/browser/ash/policy/handlers/contextual_google_integrations_policies_handler.h"
-#include "chrome/browser/ash/policy/handlers/help_me_read_policy_handler.h"
 #include "chrome/browser/ash/policy/handlers/multi_screen_capture_policy_handler.h"
 #include "chrome/browser/ash/policy/handlers/screen_capture_location_policy_handler.h"
 #include "chrome/browser/ash/policy/reporting/metrics_reporting/metric_reporting_prefs.h"
@@ -864,9 +867,6 @@ const PolicyToPreferenceMapEntry kSimplePolicyMap[] = {
   { key::kWebAuthenticationRemoteProxiedRequestsAllowed,
     webauthn::pref_names::kRemoteProxiedRequestsAllowed,
     base::Value::Type::BOOLEAN },
-  { key::kWebAuthenticationRemoteDesktopAllowedOrigins,
-    webauthn::pref_names::kRemoteDesktopAllowedOrigins,
-    base::Value::Type::LIST },
   { key::kWebHidAllowAllDevicesForUrls,
     prefs::kManagedWebHidAllowAllDevicesForUrls,
     base::Value::Type::LIST },
@@ -898,6 +898,9 @@ const PolicyToPreferenceMapEntry kSimplePolicyMap[] = {
     password_manager::prefs::kCredentialsEnablePasskeys,
     base::Value::Type::BOOLEAN },
 #endif // BUILDFLAG(IS_ANDROID)
+  { key::kWebAuthenticationRemoteDesktopAllowedOrigins,
+    webauthn::pref_names::kRemoteDesktopAllowedOrigins,
+    base::Value::Type::LIST },
   { key::kAlternateErrorPagesEnabled,
     embedder_support::kAlternateErrorPagesEnabled,
     base::Value::Type::BOOLEAN },
@@ -2191,9 +2194,6 @@ const PolicyToPreferenceMapEntry kSimplePolicyMap[] = {
   { key::kCreatePasskeysInICloudKeychain,
     prefs::kCreatePasskeysInICloudKeychain,
     base::Value::Type::BOOLEAN },
-  { key::kExtensibleEnterpriseSSOEnabled,
-    prefs::kExtensibleEnterpriseSSOEnabled,
-    base::Value::Type::INTEGER},
 #endif
   { key::kAccessControlAllowMethodsInCORSPreflightSpecConformant,
     prefs::kAccessControlAllowMethodsInCORSPreflightSpecConformant,
@@ -3139,8 +3139,13 @@ std::unique_ptr<ConfigurationPolicyHandlerList> BuildHandlerList(
       SCHEMA_ALLOW_UNKNOWN,
       SimpleSchemaValidatingPolicyHandler::RECOMMENDED_PROHIBITED,
       SimpleSchemaValidatingPolicyHandler::MANDATORY_ALLOWED));
-  handlers->AddHandler(std::make_unique<HelpMeReadPolicyHandler>());
 #endif  // BUILDFLAG(IS_CHROMEOS)
+
+#if BUILDFLAG(IS_MAC)
+  handlers->AddHandler(
+      std::make_unique<enterprise_auth::ExtensibleEnterpriseSSOPolicyHandler>(
+          chrome_schema));
+#endif  // BUILDFLAG(IS_MAC)
 
 // On most platforms, there is a legacy policy
 // kUnsafelyTreatInsecureOriginAsSecure which has been replaced by

@@ -176,14 +176,19 @@ bool AcceleratedStaticBitmapImage::CopyToTexture(
   auto source_si_texture = shared_image_->CreateGLTexture(dest_gl);
   auto source_scoped_si_access = source_si_texture->BeginAccess(
       mailbox_ref_->sync_token(), /*readonly=*/true);
+  const bool do_alpha_multiply =
+      sk_image_info_.alphaType() == kUnpremul_SkAlphaType &&
+      unpack_premultiply_alpha == true;
+  const bool do_alpha_unmultiply =
+      sk_image_info_.alphaType() == kPremul_SkAlphaType &&
+      unpack_premultiply_alpha == false;
   dest_gl->CopySubTextureCHROMIUM(
       source_scoped_si_access->texture_id(), 0, dest_target, dest_texture_id,
       dest_level, dest_point.x(), dest_point.y(), source_sub_rectangle.x(),
       source_sub_rectangle.y(), source_sub_rectangle.width(),
       source_sub_rectangle.height(), unpack_flip_y,
-      /*unpack_premultiply_alpha=*/GL_FALSE,
-      /*unpack_unmultiply_alpha=*/
-      unpack_premultiply_alpha ? GL_FALSE : GL_TRUE);
+      do_alpha_multiply ? GL_TRUE : GL_FALSE,
+      do_alpha_unmultiply ? GL_TRUE : GL_FALSE);
   auto sync_token = gpu::SharedImageTexture::ScopedAccess::EndAccess(
       std::move(source_scoped_si_access));
 
@@ -333,10 +338,9 @@ void AcceleratedStaticBitmapImage::InitializeTextureBacking(
   texture_info.fID = shared_context_texture_id;
   texture_info.fFormat =
       context_provider_wrapper->ContextProvider().GetGrGLTextureFormat(
-          viz::SkColorTypeToSinglePlaneSharedImageFormat(
-              sk_image_info_.colorType()));
+          GetSharedImageFormat());
   auto backend_texture =
-      GrBackendTextures::MakeGL(sk_image_info_.width(), sk_image_info_.height(),
+      GrBackendTextures::MakeGL(GetSize().width(), GetSize().height(),
                                 skgpu::Mipmapped::kNo, texture_info);
 
   GrSurfaceOrigin origin = IsOriginTopLeft() ? kTopLeft_GrSurfaceOrigin
@@ -349,9 +353,8 @@ void AcceleratedStaticBitmapImage::InitializeTextureBacking(
   release_ctx->context_provider_wrapper = context_provider_wrapper;
 
   sk_sp<SkImage> sk_image = SkImages::BorrowTextureFrom(
-      shared_gr_context, backend_texture, origin, sk_image_info_.colorType(),
-      sk_image_info_.alphaType(), sk_image_info_.refColorSpace(),
-      &ReleaseTexture, release_ctx);
+      shared_gr_context, backend_texture, origin, GetSkColorType(),
+      GetAlphaType(), GetSkColorSpace(), &ReleaseTexture, release_ctx);
 
   if (sk_image) {
     skia_context_provider_wrapper_ = context_provider_wrapper;

@@ -239,8 +239,6 @@ bool AutofillExternalDelegate::IsAutofillAndFirstLayerSuggestionId(
     case SuggestionType::kAccountStoragePasswordEntry:
     case SuggestionType::kAllSavedPasswordsEntry:
     case SuggestionType::kAutocompleteEntry:
-    case SuggestionType::kAutofillAiError:
-    case SuggestionType::kAutofillAiLoadingState:
     case SuggestionType::kBnplEntry:
     case SuggestionType::kComposeDisable:
     case SuggestionType::kComposeGoToSettings:
@@ -659,10 +657,16 @@ void AutofillExternalDelegate::DidSelectSuggestion(
           TriggerSourceFromSuggestionTriggerSource(trigger_source_));
       break;
     case SuggestionType::kFillAutofillAi:
-      manager_->FillOrPreviewFormWithAutofillAiData(
-          mojom::ActionPersistence::kPreview, query_form_, query_field_,
-          suggestion.GetPayload<Suggestion::AutofillAiPayload>()
-              .values_to_fill);
+      if (EntityDataManager* edm = manager_->client().GetEntityDataManager()) {
+        if (base::optional_ref<const EntityInstance> entity =
+                edm->GetEntityInstance(
+                    suggestion.GetPayload<Suggestion::AutofillAiPayload>()
+                        .guid)) {
+          manager_->FillOrPreviewFormWithAutofillAiData(
+              mojom::ActionPersistence::kPreview, query_form_, query_field_,
+              *entity);
+        }
+      }
       break;
     case SuggestionType::kAddressEntryOnTyping:
       CHECK(suggestion.field_by_field_filling_type_used);
@@ -682,7 +686,6 @@ void AutofillExternalDelegate::DidSelectSuggestion(
     case SuggestionType::kDatalistEntry:
     case SuggestionType::kDevtoolsTestAddressByCountry:
     case SuggestionType::kDevtoolsTestAddresses:
-    case SuggestionType::kAutofillAiError:
     case SuggestionType::kInsecureContextPaymentDisabledMessage:
     case SuggestionType::kManageAddress:
     case SuggestionType::kManageAutofillAi:
@@ -691,7 +694,6 @@ void AutofillExternalDelegate::DidSelectSuggestion(
     case SuggestionType::kManagePlusAddress:
     case SuggestionType::kMixedFormMessage:
     case SuggestionType::kPlusAddressError:
-    case SuggestionType::kAutofillAiLoadingState:
     case SuggestionType::kSaveAndFillCreditCardEntry:
     case SuggestionType::kScanCreditCard:
     case SuggestionType::kSeePromoCodeDetails:
@@ -768,8 +770,8 @@ void AutofillExternalDelegate::DidAcceptSuggestion(
           mojom::ActionPersistence::kFill, mojom::FieldActionType::kReplaceAll,
           query_form_, query_field_, suggestion.main_text.value,
           suggestion.type, /*field_type_used=*/std::nullopt);
-      manager_->OnSingleFieldSuggestionSelected(suggestion, query_form_,
-                                                query_field_);
+      manager_->OnSingleFieldSuggestionSelected(
+          suggestion, query_form_.global_id(), query_field_.global_id());
       break;
     case SuggestionType::kFillExistingPlusAddress:
       if (AutofillPlusAddressDelegate* plus_address_delegate =
@@ -844,10 +846,16 @@ void AutofillExternalDelegate::DidAcceptSuggestion(
       }
       break;
     case SuggestionType::kFillAutofillAi:
-      manager_->FillOrPreviewFormWithAutofillAiData(
-          mojom::ActionPersistence::kFill, query_form_, query_field_,
-          suggestion.GetPayload<Suggestion::AutofillAiPayload>()
-              .values_to_fill);
+      if (EntityDataManager* edm = manager_->client().GetEntityDataManager()) {
+        if (base::optional_ref<const EntityInstance> entity =
+                edm->GetEntityInstance(
+                    suggestion.GetPayload<Suggestion::AutofillAiPayload>()
+                        .guid)) {
+          manager_->FillOrPreviewFormWithAutofillAiData(
+              mojom::ActionPersistence::kFill, query_form_, query_field_,
+              *entity);
+        }
+      }
       break;
     case SuggestionType::kInsecureContextPaymentDisabledMessage:
     case SuggestionType::kMixedFormMessage:
@@ -887,8 +895,6 @@ void AutofillExternalDelegate::DidAcceptSuggestion(
     case SuggestionType::kPasswordFieldByFieldFilling:
     case SuggestionType::kFillPassword:
     case SuggestionType::kViewPasswordDetails:
-    case SuggestionType::kAutofillAiLoadingState:
-    case SuggestionType::kAutofillAiError:
       NOTREACHED();  // Should be handled elsewhere.
   }
   // Note that some suggestion types return early.
@@ -1008,9 +1014,7 @@ bool AutofillExternalDelegate::RemoveSuggestion(const Suggestion& suggestion) {
     case SuggestionType::kPasswordFieldByFieldFilling:
     case SuggestionType::kFillPassword:
     case SuggestionType::kViewPasswordDetails:
-    case SuggestionType::kAutofillAiLoadingState:
     case SuggestionType::kFillAutofillAi:
-    case SuggestionType::kAutofillAiError:
       return false;
   }
 }
@@ -1324,8 +1328,8 @@ void AutofillExternalDelegate::DidAcceptPaymentsSuggestion(
                              }
                            },
                            GetWeakPtr()));
-      manager_->OnSingleFieldSuggestionSelected(suggestion, query_form_,
-                                                query_field_);
+      manager_->OnSingleFieldSuggestionSelected(
+          suggestion, query_form_.global_id(), query_field_.global_id());
       break;
     case SuggestionType::kMerchantPromoCodeEntry:
       // User selected an Autocomplete or Merchant Promo Code field, so we fill
@@ -1334,16 +1338,16 @@ void AutofillExternalDelegate::DidAcceptPaymentsSuggestion(
           mojom::ActionPersistence::kFill, mojom::FieldActionType::kReplaceAll,
           query_form_, query_field_, suggestion.main_text.value,
           suggestion.type, MERCHANT_PROMO_CODE);
-      manager_->OnSingleFieldSuggestionSelected(suggestion, query_form_,
-                                                query_field_);
+      manager_->OnSingleFieldSuggestionSelected(
+          suggestion, query_form_.global_id(), query_field_.global_id());
       break;
     case SuggestionType::kSeePromoCodeDetails:
       // Open a new tab and navigate to the offer details page.
       manager_->client()
           .GetPaymentsAutofillClient()
           ->OpenPromoCodeOfferDetailsURL(suggestion.GetPayload<GURL>());
-      manager_->OnSingleFieldSuggestionSelected(suggestion, query_form_,
-                                                query_field_);
+      manager_->OnSingleFieldSuggestionSelected(
+          suggestion, query_form_.global_id(), query_field_.global_id());
       break;
     case SuggestionType::kSaveAndFillCreditCardEntry:
       manager_->client()

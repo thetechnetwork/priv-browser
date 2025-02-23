@@ -420,8 +420,9 @@ TEST_F(FormFillerTest, UndoSavesFormFillingData) {
 
 TEST_F(FormFillerTest, UndoSavesFormFillingDataForAutofillAi) {
   FormData form = FormSeen(
-      {.fields = {{.role = PASSPORT_NAME_TAG, .heuristic_type = NAME_FIRST},
-                  {.role = PASSPORT_NAME_TAG, .heuristic_type = NAME_LAST},
+      {.fields = {{.role = PASSPORT_NAME_TAG, .heuristic_type = NAME_FULL},
+                  {.role = PASSPORT_ISSUING_COUNTRY_TAG,
+                   .heuristic_type = ADDRESS_HOME_COUNTRY},
                   {.role = PASSPORT_NUMBER},
                   {.role = IBAN_VALUE, .heuristic_type = IBAN_VALUE},
                   {.role = UNKNOWN_TYPE, .heuristic_type = UNKNOWN_TYPE}}});
@@ -435,10 +436,7 @@ TEST_F(FormFillerTest, UndoSavesFormFillingDataForAutofillAi) {
   AutofillProfile profile = test::GetFullProfile();
   browser_autofill_manager_->FillOrPreviewFormWithAutofillAiData(
       mojom::ActionPersistence::kFill, form, form.fields()[0],
-      /*values_to_fill=*/
-      {{form.fields()[0].global_id(), u"John"},
-       {form.fields()[1].global_id(), u"Doe"},
-       {form.fields()[2].global_id(), u"123"}});
+      test::GetPassportEntityInstance());
   browser_autofill_manager_->UndoAutofill(mojom::ActionPersistence::kFill, form,
                                           form.fields().front());
 }
@@ -576,6 +574,49 @@ TEST_F(FormFillerTest, FillCreditCardForm_StripCardNumber) {
           .fields();
   EXPECT_THAT(filled_fields[0], AutofilledWith(u"4234567890123456"));
 }
+
+#if !BUILDFLAG(IS_IOS)
+// Tests that when payment form fields are autofilled and payment swapping is
+// enabled, the autofilled values can be replaced with empty values.
+TEST_F(FormFillerTest, PaymentsSwappingWithPartiallyEmptyData) {
+  base::test::ScopedFeatureList scoped_feature_list;
+  scoped_feature_list.InitAndEnableFeature(
+      features::kAutofillPaymentsFieldSwapping);
+
+  FormData form = test::CreateTestCreditCardFormData(/*is_https=*/true,
+                                                     /*use_month_type=*/false);
+  FormsSeen({form});
+
+  CreditCard credit_card_full;
+  test::SetCreditCardInfo(&credit_card_full, "Elvis Presley",
+                          "4234 5678 9012 3456",  // Visa
+                          "04", "2999", "1");
+
+  CreditCard credit_card_with_empty_data;
+  test::SetCreditCardInfo(&credit_card_with_empty_data, "Elvis Presley New",
+                          "4234-5678-9012-3456",  // Visa
+                          "04", "", "1");
+
+  std::vector<FormFieldData> filled_fields =
+      FillAutofillFormData(form, form.fields().front(), &credit_card_full)
+          .fields();
+
+  EXPECT_THAT(filled_fields[0], AutofilledWith(credit_card_full.GetInfo(
+                                    CREDIT_CARD_NAME_FULL, kAppLocale)));
+  EXPECT_THAT(filled_fields[3], AutofilledWith(credit_card_full.GetInfo(
+                                    CREDIT_CARD_EXP_4_DIGIT_YEAR, kAppLocale)));
+  EXPECT_TRUE(filled_fields[3].is_autofilled());
+
+  filled_fields = FillAutofillFormData(form, form.fields().front(),
+                                       &credit_card_with_empty_data)
+                      .fields();
+  EXPECT_THAT(filled_fields[0],
+              AutofilledWith(credit_card_with_empty_data.GetInfo(
+                  CREDIT_CARD_NAME_FULL, kAppLocale)));
+  EXPECT_EQ(filled_fields[3].value(), u"");
+  EXPECT_FALSE(filled_fields[3].is_autofilled());
+}
+#endif  // !BUILDFLAG(IS_IOS)
 
 struct PartialCreditCardDateParams {
   const char* cc_month = "";
@@ -1510,20 +1551,9 @@ TEST_F(FormFillerTest, FillPassportEntity) {
       .expiry_date = u"12/2019",
       .issue_date = u"01/2010",
   });
-  auto values_to_fill = base::MakeFlatMap<FieldGlobalId, std::u16string>(
-      form_structure->fields(), {},
-      [&](const auto& field) -> std::pair<FieldGlobalId, std::u16string> {
-        FieldType field_type = *field->GetAutofillAiServerTypePredictions();
-        AttributeType attribute_type =
-            *AttributeType::FromFieldType(field_type);
-        const AttributeInstance attribute_instance =
-            *passport.attribute(attribute_type);
-        return {field->global_id(), attribute_instance.value()};
-      });
 
   std::vector<FormFieldData> filled_fields =
-      FillAutofillFormData(form, form.fields()[0], std::move(values_to_fill))
-          .fields();
+      FillAutofillFormData(form, form.fields()[0], &passport).fields();
   EXPECT_EQ(filled_fields[0].value(), u"123456");
   EXPECT_EQ(filled_fields[1].value(), u"Pippi Långstrump");
   EXPECT_EQ(filled_fields[2].value(), u"Sweden");
@@ -1727,38 +1757,6 @@ TEST_F(FormFillerTest, PreFilledCCFieldInAddressFormDoesNotCauseCrash) {
   AutofillProfile profile = test::GetFullProfile();
   FillAutofillFormData(form, form.fields().front(), &profile);
   // Expect that this test doesn't cause a crash.
-}
-
-TEST_F(FormFillerTest, FillOrPreviewFormWithAutofillAi) {
-  FormData form = FormSeen(
-      {.fields = {{.role = PASSPORT_NAME_TAG, .heuristic_type = NAME_FIRST},
-                  {.role = PASSPORT_NAME_TAG, .heuristic_type = NAME_LAST},
-                  {.role = PASSPORT_NUMBER},
-                  {.role = IBAN_VALUE, .heuristic_type = IBAN_VALUE},
-                  {.role = UNKNOWN_TYPE, .heuristic_type = UNKNOWN_TYPE}}});
-  base::flat_map<FieldGlobalId, std::u16string> values_to_fill = {
-      // Not filled because the value to fill is empty.
-      {form.fields()[0].global_id(), u""},
-      // Filled.
-      {form.fields()[1].global_id(), u"Doe"},
-      // Filled.
-      {form.fields()[2].global_id(), u"123"},
-      // Not filled because IBANs aren't among the supported types.
-      {form.fields()[3].global_id(), u"DE01234567890123456789"},
-      // Not filled because unclassified fields are not supported.
-      {form.fields()[4].global_id(), u"Hello!"}};
-  std::vector<FormFieldData> filled_fields;
-  EXPECT_CALL(autofill_driver_, ApplyFormAction)
-      .WillOnce(DoAll(SaveArgElementsTo<2>(&filled_fields),
-                      Return(std::vector<FieldGlobalId>())));
-  form_filler().FillOrPreviewForm(
-      mojom::ActionPersistence::kFill, form, values_to_fill,
-      *GetFormStructure(form),
-      *GetAutofillField(form.global_id(), form.fields().front().global_id()),
-      AutofillTriggerSource::kAutofillAi);
-  ASSERT_EQ(filled_fields.size(), 2u);
-  EXPECT_EQ(filled_fields[0].value(), u"Doe");
-  EXPECT_EQ(filled_fields[1].value(), u"123");
 }
 
 // The following Refill Tests ensure that Autofill can handle the situation

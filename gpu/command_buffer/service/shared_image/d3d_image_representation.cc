@@ -208,18 +208,14 @@ OverlayD3DImageRepresentation::~OverlayD3DImageRepresentation() = default;
 bool OverlayD3DImageRepresentation::BeginReadAccess(
     gfx::GpuFenceHandle& acquire_fence) {
   return static_cast<D3DImageBacking*>(backing())->BeginAccessD3D11(
-      d3d11_device_, /*write_access=*/false);
+      d3d11_device_, /*write_access=*/false, /*is_overlay=*/true);
 }
 
 void OverlayD3DImageRepresentation::EndReadAccess(
     gfx::GpuFenceHandle release_fence) {
   DCHECK(release_fence.is_null());
-  static_cast<D3DImageBacking*>(backing())->EndAccessD3D11(d3d11_device_);
-
-#if DCHECK_IS_ON()
-  static_cast<D3DImageBacking*>(backing())
-      ->CheckDCompTextureIsAvailableIfNoReaders();
-#endif
+  static_cast<D3DImageBacking*>(backing())->EndAccessD3D11(d3d11_device_,
+                                                           /*is_overlay=*/true);
 }
 
 std::optional<gl::DCLayerOverlayImage>
@@ -463,6 +459,48 @@ void D3D11VideoImageCopyRepresentation::EndReadAccess() {}
 Microsoft::WRL::ComPtr<ID3D11Texture2D>
 D3D11VideoImageCopyRepresentation::GetD3D11Texture() const {
   return d3d11_texture_;
+}
+
+// D3DSkiaGraphiteDawnImageRepresentation
+
+// static
+std::unique_ptr<D3DSkiaGraphiteDawnImageRepresentation>
+D3DSkiaGraphiteDawnImageRepresentation::Create(
+    std::unique_ptr<DawnImageRepresentation> dawn_representation,
+    scoped_refptr<SharedContextState> context_state,
+    skgpu::graphite::Recorder* recorder,
+    SharedImageManager* manager,
+    SharedImageBacking* backing,
+    MemoryTypeTracker* tracker,
+    int array_slice) {
+  return base::WrapUnique(new D3DSkiaGraphiteDawnImageRepresentation(
+      std::move(dawn_representation), recorder, std::move(context_state),
+      manager, backing, tracker, array_slice));
+}
+
+D3DSkiaGraphiteDawnImageRepresentation::D3DSkiaGraphiteDawnImageRepresentation(
+    std::unique_ptr<DawnImageRepresentation> dawn_representation,
+    skgpu::graphite::Recorder* recorder,
+    scoped_refptr<SharedContextState> context_state,
+    SharedImageManager* manager,
+    SharedImageBacking* backing,
+    MemoryTypeTracker* tracker,
+    int array_slice)
+    : SkiaGraphiteDawnImageRepresentation(std::move(dawn_representation),
+                                          recorder,
+                                          std::move(context_state),
+                                          manager,
+                                          backing,
+                                          tracker,
+                                          array_slice) {}
+
+D3DSkiaGraphiteDawnImageRepresentation::
+    ~D3DSkiaGraphiteDawnImageRepresentation() = default;
+
+bool D3DSkiaGraphiteDawnImageRepresentation::
+    NeedGraphiteContextSubmitBeforeEndAccess() {
+  D3DImageBacking* d3d_image_backing = static_cast<D3DImageBacking*>(backing());
+  return !d3d_image_backing->SupportsDeferredGraphiteSubmit();
 }
 
 }  // namespace gpu

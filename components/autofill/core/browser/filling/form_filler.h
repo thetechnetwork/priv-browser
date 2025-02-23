@@ -12,6 +12,7 @@
 #include "base/time/time.h"
 #include "base/timer/timer.h"
 #include "components/autofill/core/browser/autofill_trigger_source.h"
+#include "components/autofill/core/browser/data_model/autofill_ai/entity_instance.h"
 #include "components/autofill/core/browser/data_model/autofill_profile.h"
 #include "components/autofill/core/browser/data_model/credit_card.h"
 #include "components/autofill/core/browser/filling/field_filling_skip_reason.h"
@@ -35,10 +36,8 @@ enum class RefillTriggerReason {
   kMaxValue = kExpirationDateFormatted
 };
 
-using AutofillAiFillingPayload = base::flat_map<FieldGlobalId, std::u16string>;
-using FillingPayload = absl::variant<const AutofillProfile*,
-                                     const CreditCard*,
-                                     AutofillAiFillingPayload>;
+using FillingPayload = absl::
+    variant<const AutofillProfile*, const CreditCard*, const EntityInstance*>;
 
 // Helper class responsible for [re]filling forms and fields.
 //
@@ -243,6 +242,8 @@ class FormFiller {
   // Fills `field_data` and modifies `autofill_field` given all other states.
   // Returns true if the field has been filled, false otherwise. This is
   // independent of whether the field was filled or autofilled before.
+  // When `allow_suggestion_swapping` is true, the method still returns true if
+  // the `autofill_field` is emptied.
   // TODO(crbug.com/40227071): Cleanup API and logic.
   bool FillField(
       AutofillField& autofill_field,
@@ -250,6 +251,7 @@ class FormFiller {
       const std::map<FieldGlobalId, std::u16string>& forced_fill_values,
       FormFieldData& field_data,
       mojom::ActionPersistence action_persistence,
+      bool allow_suggestion_swapping,
       std::string* failure_to_fill);
 
   LogManager* log_manager();

@@ -215,6 +215,16 @@ export declare interface GlicBrowserHost {
   getPanelState?(): ObservableValue<PanelState>;
 
   /**
+   * Whether the glic panel is in the active state. In the inactive state,
+   * microphone recording should stop, but any playing audio output can
+   * continue.
+   *
+   * Note that the Glic panel is inactive if it is attached to a browser window,
+   * and that browser window is not the current active window.
+   */
+  panelActive(): ObservableValue<boolean>;
+
+  /**
    * Whether the panel can be attached. This is true if there is a browser
    * window suitable for attachment. This state is only meaningful when the
    * panel is in the detached state, and should be not be considered otherwise
@@ -803,10 +813,14 @@ export declare interface UserProfileInfo {
    * image.
    */
   avatarIcon(): Promise<Blob|undefined>;
-  /** The name displayed for this profile. */
+  /** The full name displayed for this profile. */
   displayName: string;
+  /** The given name for this profile. */
+  givenName?: string;
   /** The profile email. */
   email: string;
+  /** Whether the profile or the browser is managed. */
+  isManaged?: boolean;
 }
 
 /** Chrome version data broken down into its numeric components. */

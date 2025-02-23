@@ -60,6 +60,11 @@ public class SafetyHubModuleDelegateImpl implements SafetyHubModuleDelegate {
     }
 
     @Override
+    public void showLocalPasswordCheckUi(Context context) {
+        SafetyHubUtils.showLocalPasswordCheckUi(context, mProfile, mModalDialogManagerSupplier);
+    }
+
+    @Override
     public void openGooglePlayStore(Context context) {
         if (!BuildConfig.IS_CHROME_BRANDED) {
             return;
@@ -99,6 +104,32 @@ public class SafetyHubModuleDelegateImpl implements SafetyHubModuleDelegate {
         }
         // If using split stores is disabled, all passwords reside in the profile store.
         return passwordStoreBridge.getPasswordStoreCredentialsCountForProfileStore();
+    }
+
+    @Override
+    public int getLocalPasswordsCount(@Nullable PasswordStoreBridge passwordStoreBridge) {
+        // TODO(http://crbug.com/397905386): Check isPasswordManagerAvailable.
+        boolean usesSplitStoresAndUpmForLocalPasswords =
+                usesSplitStoresAndUPMForLocal(UserPrefs.get(mProfile));
+        SyncService syncService = SyncServiceFactory.getForProfile(mProfile);
+        boolean isSyncingPasswords = PasswordManagerHelper.hasChosenToSyncPasswords(syncService);
+
+        if (passwordStoreBridge == null) {
+            return INVALID_PASSWORD_COUNT;
+        }
+
+        // There are two cases where a user has local passwords in the profile store:
+        //    1. If split stores are in use for local passwords, then profile store stores local
+        // passwords.
+        //    2. If they're not in use, but the user is not syncing, then profile store stores
+        // local passwords.
+        if (usesSplitStoresAndUpmForLocalPasswords || !isSyncingPasswords) {
+            return passwordStoreBridge.getPasswordStoreCredentialsCountForProfileStore();
+        }
+
+        // If split stores for local passwords are not in use and the user is syncing, then the
+        // profile store doesn't store local passwords.
+        return 0;
     }
 
     @Override

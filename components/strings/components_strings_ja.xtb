@@ -34,7 +34,6 @@
 <translation id="1058479211578257048">カードを保存しています...</translation>
 <translation id="1060136083665017312">ゲーム機</translation>
 <translation id="1060320201901229167">角形 5 号封筒</translation>
-<translation id="10614374240317010">常に保存しない</translation>
 <translation id="1062407476771304334">置換</translation>
 <translation id="1064054731605354900">A3x5</translation>
 <translation id="1067029985695494416">検索エンジンの詳細</translation>
@@ -263,7 +262,6 @@
 <translation id="1432187715652018471">このページはサービス ハンドラのインストールを求めています。</translation>
 <translation id="1432581352905426595">検索エンジンを管理</translation>
 <translation id="1433225466058025572">ファイルをもう一度移動してみてください</translation>
-<translation id="1435940442311036198">別のデバイスのパスキーを使用する</translation>
 <translation id="1436185428532214179">デバイスのファイルやフォルダの編集を要求できる</translation>
 <translation id="1442386063175183758">右観音折り</translation>
 <translation id="1442987760062738829">パンチ</translation>
@@ -357,7 +355,6 @@
 <translation id="159274626729231974">映画祭</translation>
 <translation id="1593359183944365958">270°</translation>
 <translation id="1594030484168838125">選択</translation>
-<translation id="1598816256585174656">Windows Hello のパスキー</translation>
 <translation id="1599199147673445968">カード情報を更新する場合は、<ph name="BEGIN_LINK" />こちらで入力してください<ph name="END_LINK" /></translation>
 <translation id="1604192142734009334">美容、フィットネス</translation>
 <translation id="160851722280695521">Chrome で Dino Run ゲームをプレイします</translation>
@@ -469,7 +466,6 @@
 <translation id="1778646502362731194">JIS B0</translation>
 <translation id="1785118555253503473">ウェブアプリをインストールしますか？</translation>
 <translation id="1791415068765905273">すべての比較表を表示</translation>
-<translation id="1791429645902722292">Google Smart Lock</translation>
 <translation id="1791820510173628507"><ph name="MANAGE_GOOGLE_ACCOUNT_FOCUSED_FRIENDLY_MATCH_TEXT" /> です。Tab キー、Enter キーの順に押すと、Google アカウントで情報、プライバシー、セキュリティを管理します</translation>
 <translation id="1793473605302304726">後払い</translation>
 <translation id="1793631236004319016">前回の使用: <ph name="NUM_HOURS_MINUTES_SECONDS" />前</translation>
@@ -1158,7 +1154,6 @@
 <translation id="306573536155379004">ゲームを開始しました。</translation>
 <translation id="3067505415088964188">低価格</translation>
 <translation id="3068118691172921711"><ph name="CLOUD_PROVIDER" /> へのファイルのアップロードは 1 分後に開始されます</translation>
-<translation id="3068976060094139647">アカウントが Google Pay にリンクされているため、このカードを自動入力できます。</translation>
 <translation id="3074671422612537810">{ITEMS,plural, =1{{ITEMS} 個のアイテム}other{{ITEMS} 個のアイテム}}</translation>
 <translation id="3076865167425975822">オペレーティング システム</translation>
 <translation id="3080254622891793721">グラフィック</translation>
@@ -2127,7 +2122,6 @@
 <translation id="4754461935447132332">セキュアでないサイトでは許可されていません</translation>
 <translation id="4756388243121344051">履歴(&amp;H)</translation>
 <translation id="4756501505996488486">PRC 16K</translation>
-<translation id="4757022425116568383">Chrome プロフィールのパスキー</translation>
 <translation id="4757993714154412917">偽のサイトでパスワードを入力しました。アカウントを保護するため、保存したパスワードをすぐに確認することをおすすめします。</translation>
 <translation id="4758311279753947758">連絡先情報を追加</translation>
 <translation id="4761326898079498987">詳細をご確認ください</translation>
@@ -2260,6 +2254,7 @@
 <translation id="4989809363548539747">このプラグインはサポートされていません</translation>
 <translation id="4990241977441916452">A2 封筒</translation>
 <translation id="4992066212339426712">ミュートを解除</translation>
+<translation id="4994095017621319069">1 個のタブグループが使用できなくなりました</translation>
 <translation id="4994348767896109801">表示される広告がパーソナライズされるかどうかは、この設定、<ph name="BEGIN_LINK_1" />広告のトピック<ph name="END_LINK_1" />、<ph name="BEGIN_LINK_2" />Cookie の設定<ph name="END_LINK_2" />、アクセスしたサイトが広告をパーソナライズしているかどうかなど、さまざまな要素によって決まります。<ph name="BEGIN_LINK_3" />広告のプライバシー管理について<ph name="END_LINK_3" /></translation>
 <translation id="4995474875135717171">更新日時:</translation>
 <translation id="4995749490935861684"><ph name="CUSTOMIZE_SEARCH_ENGINES_FOCUSED_FRIENDLY_MATCH_TEXT" /> です。Tab、Enter キーの順に押すと、サイト内検索とデフォルトの検索エンジンを管理します</translation>
@@ -2700,7 +2695,6 @@
 <translation id="5764920692828389743">送信先: <ph name="EMAIL_ADDRESS" /></translation>
 <translation id="5765072501007116331">配達方法と要件を確認するには、住所を選択してください</translation>
 <translation id="57689295674415555">仮想カード番号が入力されない場合</translation>
-<translation id="5772086939108830423">別のデバイスのパスキーを使用する</translation>
 <translation id="5776313857861697733">優先度</translation>
 <translation id="577804500166306874">結果を読み込んでいます</translation>
 <translation id="5781136890105823427">テスト機能を有効にしました</translation>
@@ -2831,7 +2825,6 @@
 <translation id="6025416945513303461"><ph name="TYPE_1" />、<ph name="TYPE_2" />、<ph name="TYPE_3" />（同期済み）</translation>
 <translation id="6028591542479806248">モバイル通知とメール通知を管理します</translation>
 <translation id="6028833024483927901">各国料理</translation>
-<translation id="6030251660719692307">Google パスワード マネージャーのパスキー</translation>
 <translation id="603068602130820122">2 か所のステープル（右）</translation>
 <translation id="6032524144326295339">用紙受け 2</translation>
 <translation id="6032955021262906325">製本（左綴じ）</translation>
@@ -3439,7 +3432,6 @@
 <translation id="7096937462164235847">このウェブサイトの識別情報は確認されていません。</translation>
 <translation id="7102554173784142865">Chrome Dino ゲームをプレイ</translation>
 <translation id="7102760431686146931">調理器具、食器類</translation>
-<translation id="7105998430540165694">iCloud キーチェーンのパスキー</translation>
 <translation id="7106762743910369165">お使いのブラウザは組織によって管理されています</translation>
 <translation id="7107249414147762907">この PDF にアクセスできません。抽出されたテキストはありません</translation>
 <translation id="7107427078069498123">SHA-256 フィンガープリント</translation>
@@ -3477,6 +3469,7 @@
 <translation id="7153549335910886479">{PAYMENT_METHOD,plural, =0{<ph name="PAYMENT_METHOD_PREVIEW" />}=1{<ph name="PAYMENT_METHOD_PREVIEW" />（他 <ph name="NUMBER_OF_ADDITIONAL_PAYMENT_METHODS" /> 件）}other{<ph name="PAYMENT_METHOD_PREVIEW" />（他 <ph name="NUMBER_OF_ADDITIONAL_PAYMENT_METHODS" /> 件）}}</translation>
 <translation id="7153618581592392745">ラベンダー</translation>
 <translation id="7156870133441232244">サーバーを TLS 1.2 以降にアップグレードする必要があります。</translation>
+<translation id="7156885531105222428">リクエストされたページはアプリケーションに見つかりませんでした</translation>
 <translation id="715996170234243096">{NUM_FILES,plural, =1{<ph name="FEATURE_NAME" /> を使用してこのファイルを送信するには、デバイスの空き容量を増やしてください（<ph name="DISK_SPACE_SIZE" />　必要です）}other{<ph name="FEATURE_NAME" /> を使用してこれらのファイルを送信するには、デバイスの空き容量を増やしてください（<ph name="DISK_SPACE_SIZE" />　必要です）}}</translation>
 <translation id="7160999678034985039">作業内容を保存し、準備ができたら更新を開始してください。</translation>
 <translation id="7162277662076933695">スマート カードリーダー</translation>
@@ -4265,6 +4258,7 @@
 <translation id="8533411848724153701">Gemini</translation>
 <translation id="8533619373899488139">&lt;strong&gt;chrome://policy&lt;/strong&gt; で、ブロックされた URL のリストとシステム管理者が設定した他のポリシーを確認できます。</translation>
 <translation id="8536234749087605613">封筒（窓付き）</translation>
+<translation id="8538228968820006247">タブグループのユーザーが上限に達したため、新しいユーザーはリンクを使用して参加できません</translation>
 <translation id="8539500321752640291">2 つのアイテムの使用を許可しますか？</translation>
 <translation id="8541158209346794904">Bluetooth デバイス</translation>
 <translation id="8541410041357371550">このサイトでは、より関連性の高い広告を表示するために Chrome から広告のトピックを取得します</translation>
@@ -4386,7 +4380,6 @@
 <translation id="8757526089434340176">Google Pay のクーポンをご利用いただけます</translation>
 <translation id="8759274551635299824">このカードは有効期限が切れています</translation>
 <translation id="87601671197631245">このサイトでは古いセキュリティ設定を使用しています。このサイトにパスワード、メッセージ、クレジット カードなどの情報を送信すると流出する恐れがあります。</translation>
-<translation id="8763226176721243078"><ph name="CARD_ISSUER_NAME" /> アカウントと Google Pay の連携により、こちらのカード情報の自動入力が可能です。</translation>
 <translation id="8763927697961133303">USB デバイス</translation>
 <translation id="8763986294015493060">現在開いているすべてのシークレット ウィンドウを閉じます</translation>
 <translation id="8766943070169463815">保護されたお支払い認証情報の認証シートが開いています</translation>
@@ -4531,7 +4524,6 @@
 <translation id="9040341831873780534">利用規約を見る</translation>
 <translation id="9042617223719777575">大容量</translation>
 <translation id="9042827002460091668">インターネット接続を確認してもう一度お試しください</translation>
-<translation id="9044359186343685026">Touch ID を使用</translation>
 <translation id="9045525010788763347"><ph name="RESULT_MODIFIED_DATE" /> - <ph name="RESULT_PRODUCT_SOURCE" /></translation>
 <translation id="9046864189129893978">マイク（<ph name="MICS_COUNT" />）</translation>
 <translation id="9048035366624198823">これらの動作を行うには、<ph name="POLICY_NAME" /> ポリシーを <ph name="POLICY_VALUE" />: <ph name="ACTION_LIST" /> に設定する必要があります。</translation>

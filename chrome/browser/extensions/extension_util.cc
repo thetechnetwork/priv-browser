@@ -304,18 +304,27 @@ base::Value::Dict GetExtensionInfo(const Extension* extension) {
 
   return dict;
 }
+#endif  // !BUILDFLAG(IS_ANDROID)
 
 std::unique_ptr<const PermissionSet> GetInstallPromptPermissionSetForExtension(
     const Extension* extension,
     Profile* profile) {
+#if BUILDFLAG(IS_ANDROID)
+  // TODO(crbug.com/397766259): Implement this when PermissionsUpdater works
+  // on Android.
+  NOTIMPLEMENTED() << "GetInstallPromptPermissionSetForExtension";
+  return std::make_unique<PermissionSet>();
+#else
   // Initialize permissions if they have not already been set so that
   // any transformations are correctly reflected in the install prompt.
   PermissionsUpdater(profile, PermissionsUpdater::INIT_FLAG_TRANSIENT)
       .InitializePermissions(extension);
 
   return extension->permissions_data()->active_permissions().Clone();
+#endif
 }
 
+#if !BUILDFLAG(IS_ANDROID)
 std::vector<content::BrowserContext*> GetAllRelatedProfiles(
     Profile* profile,
     const Extension& extension) {
@@ -338,6 +347,7 @@ std::vector<content::BrowserContext*> GetAllRelatedProfiles(
 
   return related_contexts;
 }
+#endif  // !BUILDFLAG(IS_ANDROID)
 
 void SetDeveloperModeForProfile(Profile* profile, bool in_developer_mode) {
   profile->GetPrefs()->SetBoolean(prefs::kExtensionsUIDeveloperMode,
@@ -374,7 +384,6 @@ std::u16string GetFixupExtensionNameForUIDisplay(
     const std::string& extension_name) {
   return GetFixupExtensionNameForUIDisplay(base::UTF8ToUTF16(extension_name));
 }
-#endif  // !BUILDFLAG(IS_ANDROID)
 
 }  // namespace util
 }  // namespace extensions

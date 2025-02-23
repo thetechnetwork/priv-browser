@@ -25,6 +25,7 @@
 #include "third_party/blink/renderer/core/css/css_cyclic_variable_value.h"
 #include "third_party/blink/renderer/core/css/css_flip_revert_value.h"
 #include "third_party/blink/renderer/core/css/css_font_selector.h"
+#include "third_party/blink/renderer/core/css/css_if_eval.h"
 #include "third_party/blink/renderer/core/css/css_invalid_variable_value.h"
 #include "third_party/blink/renderer/core/css/css_math_function_value.h"
 #include "third_party/blink/renderer/core/css/css_numeric_literal_value.h"
@@ -36,9 +37,10 @@
 #include "third_party/blink/renderer/core/css/css_value.h"
 #include "third_party/blink/renderer/core/css/css_variable_data.h"
 #include "third_party/blink/renderer/core/css/document_style_environment_variables.h"
-#include "third_party/blink/renderer/core/css/if_test.h"
+#include "third_party/blink/renderer/core/css/if_condition.h"
 #include "third_party/blink/renderer/core/css/kleene_value.h"
 #include "third_party/blink/renderer/core/css/media_eval_utils.h"
+#include "third_party/blink/renderer/core/css/media_query_exp.h"
 #include "third_party/blink/renderer/core/css/parser/css_if_parser.h"
 #include "third_party/blink/renderer/core/css/parser/css_parser_fast_paths.h"
 #include "third_party/blink/renderer/core/css/parser/css_parser_local_context.h"
@@ -936,7 +938,8 @@ StyleCascade::TokenSequence::TokenSequence(const CSSVariableData* data)
     : is_animation_tainted_(data->IsAnimationTainted()),
       has_font_units_(data->HasFontUnits()),
       has_root_font_units_(data->HasRootFontUnits()),
-      has_line_height_units_(data->HasLineHeightUnits()) {}
+      has_line_height_units_(data->HasLineHeightUnits()),
+      has_dashed_functions_(data->HasDashedFunctions()) {}
 
 bool StyleCascade::TokenSequence::AppendFallback(const TokenSequence& sequence,
                                                  bool is_attr_tainted,
@@ -965,6 +968,7 @@ bool StyleCascade::TokenSequence::AppendFallback(const TokenSequence& sequence,
   has_font_units_ |= sequence.has_font_units_;
   has_root_font_units_ |= sequence.has_root_font_units_;
   has_line_height_units_ |= sequence.has_line_height_units_;
+  has_dashed_functions_ |= sequence.has_dashed_functions_;
 
   size_t end = original_text_.length();
   if (is_attr_tainted) {
@@ -989,9 +993,9 @@ bool StyleCascade::TokenSequence::Append(StringView str,
   CSSTokenizer tokenizer(str);
   const CSSParserToken first_token = tokenizer.TokenizeSingleWithComments();
   if (first_token.GetType() != kEOFToken) {
-    CSSVariableData::ExtractFeatures(first_token, has_font_units_,
-                                     has_root_font_units_,
-                                     has_line_height_units_);
+    CSSVariableData::ExtractFeatures(
+        first_token, has_font_units_, has_root_font_units_,
+        has_line_height_units_, has_dashed_functions_);
     if (NeedsInsertedComment(last_token_, first_token)) {
       original_text_.Append("/**/");
     }
@@ -1004,9 +1008,9 @@ bool StyleCascade::TokenSequence::Append(StringView str,
       if (token.GetType() == kEOFToken) {
         break;
       } else {
-        CSSVariableData::ExtractFeatures(token, has_font_units_,
-                                         has_root_font_units_,
-                                         has_line_height_units_);
+        CSSVariableData::ExtractFeatures(
+            token, has_font_units_, has_root_font_units_,
+            has_line_height_units_, has_dashed_functions_);
         last_token_ = token.CopyWithoutValue();
         if (IsNonWhitespaceToken(token)) {
           last_non_whitespace_token_ = token;
@@ -1043,7 +1047,8 @@ void StyleCascade::TokenSequence::Append(const CSSParserToken& token,
                                          bool is_attr_tainted,
                                          StringView original_text) {
   CSSVariableData::ExtractFeatures(token, has_font_units_, has_root_font_units_,
-                                   has_line_height_units_);
+                                   has_line_height_units_,
+                                   has_dashed_functions_);
   size_t start = original_text_.length();
   if (NeedsInsertedComment(last_token_, token)) {
     original_text_.Append("/**/");
@@ -1075,7 +1080,7 @@ CSSVariableData* StyleCascade::TokenSequence::BuildVariableData() {
   return CSSVariableData::Create(
       original_text_, is_animation_tainted_, !attr_taint_ranges_.empty(),
       /*needs_variable_resolution=*/false, has_font_units_,
-      has_root_font_units_, has_line_height_units_);
+      has_root_font_units_, has_line_height_units_, has_dashed_functions_);
 }
 
 const CSSValue* StyleCascade::Resolve(const CSSProperty& property,
@@ -2189,35 +2194,33 @@ bool StyleCascade::EvalIfCondition(CSSParserTokenStream& stream,
                                    const CSSParserContext& context,
                                    FunctionContext* function_context,
                                    bool& is_attr_tainted) {
-  if (stream.Peek().Id() == CSSValueID::kElse) {
-    stream.ConsumeIncludingWhitespace();
-    DCHECK_EQ(stream.Peek().GetType(), kColonToken);
-    stream.ConsumeIncludingWhitespace();
-    return true;
-  }
-
   CSSIfParser parser(context);
+  const IfCondition* if_condition = parser.ConsumeIfCondition(stream);
+  DCHECK(if_condition);
+  stream.ConsumeWhitespace();
+  DCHECK_EQ(stream.Peek().GetType(), kColonToken);
+  stream.ConsumeIncludingWhitespace();
 
-  std::optional<IfTest> if_test = parser.ConsumeIfTest(stream);
-  DCHECK(if_test.has_value());
-
-  // style()
-  if (const MediaQueryExpNode* style_test = if_test->GetStyleTest()) {
-    stream.ConsumeWhitespace();
-    DCHECK_EQ(stream.Peek().GetType(), kColonToken);
-    stream.ConsumeIncludingWhitespace();
-
-    return MediaEval(*style_test, [this, &resolver, &context, &function_context,
-                                   &is_attr_tainted](
-                                      const MediaQueryFeatureExpNode& feature) {
-             return EvalIfStyleFeature(feature, resolver, context,
-                                       function_context, is_attr_tainted);
-           }) == KleeneValue::kTrue;
-  }
-
-  // TODO(crbug.com/346977961): Support media() and supports() queries in if()
-  // condition.
-  return false;
+  return IfEval(*if_condition, [this, &resolver, &context, &function_context,
+                                &is_attr_tainted](const IfCondition& node) {
+           if (auto* n = DynamicTo<IfTestStyle>(node)) {
+             return MediaEval(
+                 *n->GetMediaQueryExpNode(),
+                 [this, &resolver, &context, &function_context,
+                  &is_attr_tainted](const MediaQueryFeatureExpNode& feature) {
+                   return EvalIfStyleFeature(feature, resolver, context,
+                                             function_context, is_attr_tainted);
+                 });
+           }
+           if (RuntimeEnabledFeatures::CSSInlineIfForMediaQueriesEnabled() &&
+               DynamicTo<IfTestMedia>(node)) {
+             // TODO(crbug.com/346977961): Support media() queries.
+             return KleeneValue::kFalse;
+           }
+           // Should be either style() or media() query, supports() queries are
+           // invalidated during parse time.
+           NOTREACHED();
+         }) == KleeneValue::kTrue;
 }
 
 bool StyleCascade::ResolveIfInto(CSSParserTokenStream& stream,

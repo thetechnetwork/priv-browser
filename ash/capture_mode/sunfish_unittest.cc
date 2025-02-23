@@ -123,6 +123,10 @@ constexpr int kRegionFocusCount = 9;
 
 constexpr base::TimeDelta kImageSearchRequestStartDelay = base::Seconds(1);
 
+// The length of an edge for a small capture region where the capture label
+// button cannot fit inside.
+constexpr int kSmallRegionEdgeLength = 20;
+
 void WaitForImageCapturedForSearch(PerformCaptureType expected_capture_type) {
   base::test::TestFuture<void> image_captured_future;
   CaptureModeTestApi().SetOnImageCapturedForSearchCallback(
@@ -2593,6 +2597,73 @@ TEST_F(SunfishTest, DoesNotShowScannerDisclaimer) {
       controller->capture_mode_session());
   views::Widget* disclaimer = session_test_api.GetDisclaimerWidget();
   ASSERT_FALSE(disclaimer);
+}
+
+// Tests that the action buttons and the capture label button do not overlap
+// when the capture label button cannot fit inside the region.
+TEST_F(SunfishTest, ActionButtonsCaptureButtonNoOverlap) {
+  UpdateDisplay("2000x1000");
+
+  // Start a regular capture session.
+  auto* controller =
+      StartCaptureSession(CaptureModeSource::kRegion, CaptureModeType::kImage);
+  CaptureModeSessionTestApi session_test_api(
+      controller->capture_mode_session());
+
+  // Select a small capture region in each corner. The action buttons and the
+  // capture button should not intersect (or overlap).
+  std::vector<std::pair<int, int>> corners = {
+      {0, 0}, {1950, 0}, {0, 950}, {1950, 950}};
+  for (auto corner : corners) {
+    SelectCaptureModeRegion(
+        GetEventGenerator(),
+        gfx::Rect(corner.first, corner.second, kSmallRegionEdgeLength,
+                  kSmallRegionEdgeLength),
+        /*release_mouse=*/true, /*verify_region=*/true);
+    const views::Widget* action_container_widget =
+        session_test_api.GetActionContainerWidget();
+    EXPECT_FALSE(action_container_widget->GetWindowBoundsInScreen().Intersects(
+        session_test_api.GetCaptureLabelWidget()->GetWindowBoundsInScreen()));
+  }
+}
+
+// Tests that opening the search results panel while a settings menu is open and
+// observed by the focus cycler does not result in a crash.
+TEST_F(SunfishTest, PanelCreationWithMenuObserved) {
+  using FocusGroup = CaptureModeSessionFocusCycler::FocusGroup;
+
+  // Start a regular capture session and select a region.
+  auto* controller =
+      StartCaptureSession(CaptureModeSource::kRegion, CaptureModeType::kImage);
+  CaptureModeSessionTestApi session_test_api(
+      controller->capture_mode_session());
+  SelectCaptureModeRegion(GetEventGenerator(), gfx::Rect(0, 0, 100, 100),
+                          /*release_mouse=*/true, /*verify_region=*/true);
+
+  // Shift-Tab two times to focus on the settings button.
+  auto* event_generator = GetEventGenerator();
+  SendKey(ui::VKEY_TAB, event_generator, ui::EF_SHIFT_DOWN, /*count=*/2);
+  EXPECT_EQ(FocusGroup::kSettingsClose,
+            session_test_api.GetCurrentFocusGroup());
+  EXPECT_EQ(0u, session_test_api.GetCurrentFocusIndex());
+
+  // Press the enter key to open the settings menu. The current focus group
+  // should be `kPendingSettings`.
+  SendKey(ui::VKEY_RETURN, event_generator);
+  ASSERT_TRUE(session_test_api.GetCaptureModeSettingsView());
+  EXPECT_EQ(FocusGroup::kPendingSettings,
+            session_test_api.GetCurrentFocusGroup());
+
+  // Tab once to enter focus into the settings menu.
+  SendKey(ui::VKEY_TAB, event_generator, ui::EF_NONE);
+  ASSERT_EQ(FocusGroup::kSettingsMenu, session_test_api.GetCurrentFocusGroup());
+
+  // Click on the search button with the menu open to end the session and open
+  // the search results panel.
+  auto* search_button = session_test_api.GetActionButtonByViewId(
+      ActionButtonViewID::kSearchButton);
+  ASSERT_TRUE(search_button);
+  LeftClickOn(search_button);
 }
 
 using SunfishDisplayMetricsTest = SunfishTest;

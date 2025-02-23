@@ -366,6 +366,7 @@ if (current_toolchain == default_toolchain) {
       "//chrome/browser/commerce/price_change/android:java",
       "//chrome/browser/commerce/price_insights/android:java",
       "//chrome/browser/commerce/price_tracking/android:java",
+      "//chrome/browser/commerce/price_tracking/android:price_tracking_bottom_sheet_java",
       "//chrome/browser/commerce/price_tracking/proto:proto_java",
       "//chrome/browser/commerce/subscriptions/android:subscriptions_java",
       "//chrome/browser/consent_auditor/android:java",
@@ -1041,6 +1042,7 @@ if (current_toolchain == default_toolchain) {
       "//chrome/browser/commerce/merchant_viewer/android:junit",
       "//chrome/browser/commerce/price_change/android:junit",
       "//chrome/browser/commerce/price_insights/android:junit",
+      "//chrome/browser/commerce/price_tracking/android:junit",
       "//chrome/browser/creator/android:junit",
       "//chrome/browser/data_sharing:avatar_junit_tests",
       "//chrome/browser/data_sharing:junit",
@@ -1281,6 +1283,7 @@ if (current_toolchain == default_toolchain) {
     deps = [
       "javatests:chrome_test_java_org.chromium.chrome.browser",
       "javatests:chrome_test_java_org.chromium.chrome.browser.app",
+      "javatests:chrome_test_java_org.chromium.chrome.browser.appearance",
       "javatests:chrome_test_java_org.chromium.chrome.browser.autofill",
       "javatests:chrome_test_java_org.chromium.chrome.browser.bookmarks",
       "javatests:chrome_test_java_org.chromium.chrome.browser.browserservices",
@@ -1317,6 +1320,7 @@ if (current_toolchain == default_toolchain) {
       "javatests:chrome_test_java_org.chromium.chrome.browser.signin",
       "javatests:chrome_test_java_org.chromium.chrome.browser.site_settings",
       "javatests:chrome_test_java_org.chromium.chrome.browser.suggestions",
+      "javatests:chrome_test_java_org.chromium.chrome.browser.swiperefresh",
       "javatests:chrome_test_java_org.chromium.chrome.browser.sync",
       "javatests:chrome_test_java_org.chromium.chrome.browser.tab",
       "javatests:chrome_test_java_org.chromium.chrome.browser.tab_group_sync",
@@ -1335,6 +1339,7 @@ if (current_toolchain == default_toolchain) {
       "//chrome/browser/commerce/coupons/android:javatests",
       "//chrome/browser/commerce/merchant_viewer/android:javatests",
       "//chrome/browser/commerce/price_insights/android:javatests",
+      "//chrome/browser/commerce/price_tracking/android:javatests",
       "//chrome/browser/data_sharing:javatests",
       "//chrome/browser/feed/android:javatests",
       "//chrome/browser/image_descriptions:javatests",
@@ -2886,7 +2891,7 @@ if (current_toolchain == default_toolchain) {
                 "${_symbol_dir_for_size}/libmonochrome__combined.so",
               ]
           to_resource_sizes_py = {
-            apk_name = "apks/resource_size_config_trichrome"
+            apk_name = "apks/$target_name"
             trichrome_library = "apks/$_trichrome_library_basename_for_size"
             trichrome_chrome = "apks/$_trichrome_chrome_basename_for_size"
             trichrome_webview = "apks/$_trichrome_webview_basename_for_size"
@@ -2895,6 +2900,19 @@ if (current_toolchain == default_toolchain) {
             apk_name = "apks/TrichromeLibrary64.apk"
           }
           supersize_input_file = "apks/$_ssargs_filename_for_size"
+        }
+
+        # This one is used when arm32 shows no regression, but arm64 does. In
+        # this case supersize is run a second time with this config.
+        android_size_bot_config("arm64_resource_size_config_trichrome") {
+          name = "TrichromeLibrary64"
+          mapping_files = []
+
+          archive_files = [
+            "apks/TrichromeLibrary64.apk",
+            "lib.unstripped/libmonochrome_64__combined.so",
+          ]
+          supersize_input_file = "apks/TrichromeLibrary64.apk"
         }
       }
     }

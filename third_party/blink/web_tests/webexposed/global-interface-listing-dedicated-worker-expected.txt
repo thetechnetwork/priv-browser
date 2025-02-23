@@ -301,8 +301,14 @@ Starting worker: resources/global-interface-listing-worker.js
 [Worker]     method constructor
 [Worker] interface CanvasGradient
 [Worker]     attribute @@toStringTag
+[Worker]     getter colorInterpolationMethod
+[Worker]     getter hueInterpolationMethod
+[Worker]     getter premultipliedAlpha
 [Worker]     method addColorStop
 [Worker]     method constructor
+[Worker]     setter colorInterpolationMethod
+[Worker]     setter hueInterpolationMethod
+[Worker]     setter premultipliedAlpha
 [Worker] interface CanvasPattern
 [Worker]     attribute @@toStringTag
 [Worker]     method constructor
@@ -744,6 +750,9 @@ Starting worker: resources/global-interface-listing-worker.js
 [Worker]     method seek
 [Worker]     method truncate
 [Worker]     method write
+[Worker] interface Float16Array : TypedArray
+[Worker]     attribute BYTES_PER_ELEMENT
+[Worker]     method constructor
 [Worker] interface FontFace
 [Worker]     attribute @@toStringTag
 [Worker]     getter ascentOverride
@@ -1562,6 +1571,7 @@ Starting worker: resources/global-interface-listing-worker.js
 [Worker]     method drop
 [Worker]     method every
 [Worker]     method filter
+[Worker]     method finally
 [Worker]     method find
 [Worker]     method first
 [Worker]     method flatMap
@@ -1604,6 +1614,7 @@ Starting worker: resources/global-interface-listing-worker.js
 [Worker]     getter globalCompositeOperation
 [Worker]     getter imageSmoothingEnabled
 [Worker]     getter imageSmoothingQuality
+[Worker]     getter lang
 [Worker]     getter letterSpacing
 [Worker]     getter lineCap
 [Worker]     getter lineDashOffset
@@ -1685,6 +1696,7 @@ Starting worker: resources/global-interface-listing-worker.js
 [Worker]     setter globalCompositeOperation
 [Worker]     setter imageSmoothingEnabled
 [Worker]     setter imageSmoothingQuality
+[Worker]     setter lang
 [Worker]     setter letterSpacing
 [Worker]     setter lineCap
 [Worker]     setter lineDashOffset
@@ -2067,18 +2079,6 @@ Starting worker: resources/global-interface-listing-worker.js
 [Worker] interface RestrictionTarget
 [Worker]     attribute @@toStringTag
 [Worker]     method constructor
-[Worker] interface Sanitizer
-[Worker]     attribute @@toStringTag
-[Worker]     method allowAttribute
-[Worker]     method allowElement
-[Worker]     method constructor
-[Worker]     method get
-[Worker]     method removeAttribute
-[Worker]     method removeElement
-[Worker]     method removeUnsafe
-[Worker]     method replaceWithChildrenElement
-[Worker]     method setComments
-[Worker]     method setDataAttributes
 [Worker] interface Scheduler
 [Worker]     attribute @@toStringTag
 [Worker]     method constructor

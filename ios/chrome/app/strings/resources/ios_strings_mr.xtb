@@ -153,7 +153,6 @@
 <translation id="1603718000246404895">{COUNT,plural, =1{१ ॲड्रेस}other{# ॲड्रेस}}</translation>
 <translation id="1605405588277479165">बंद - शिफारस केलेले नाही</translation>
 <translation id="1605658421715042784">इमेज कॉपी करा</translation>
-<translation id="1612642630650745968">पॅकेजचा माग ठेवणे बंद केले आहे</translation>
 <translation id="1612754831519568745">तुमचे सुरक्षित ब्राउझिंग सध्या बंद आहे. धोकादायक साइट, डाउनलोड आणि एक्स्टेंशन यांपासून संरक्षण मिळवा.</translation>
 <translation id="1620510694547887537">कॅमेरा</translation>
 <translation id="1622717322707146952">“Google Calendar मध्ये जोडा” किंवा “Apple Calendar मध्ये जोडा” निवडा.</translation>
@@ -978,6 +977,7 @@
 <translation id="5250371859659394278">अज्ञात स्रोताकडून</translation>
 <translation id="5271265092610673171">{count,plural, =1{भरणे आवश्यक असलेले फील्ड रिकामे आहे. सेव्ह करण्याआधी भरा.}other{भरणे आवश्यक असलेली फील्ड रिकामी आहेत. सेव्ह करण्याआधी ती भरा.}}</translation>
 <translation id="5271549068863921519">पासवर्ड सेव्ह करा</translation>
+<translation id="5275912569557792098"><ph name="USER_NAME" /> (<ph name="USER_EMAIL" />) यांना तुम्ही टॅब गटामध्ये सामील व्हावे असे वाटत आहे. लिंक असलेले कोणीही सर्व टॅब संपादित करू शकते, त्यामुळे काळजीपूर्वक सामील व्हा. लिंक ४८ तासांमध्ये एक्स्पायर होते.</translation>
 <translation id="5279214046729249716">होय, तो वेगळा ठेवा</translation>
 <translation id="5279600392753459966">सर्व अवरोधित करा</translation>
 <translation id="5282340693022193851">किमतीचा माग ठेवण्यासंबंधित नोटिफिकेशन मिळवण्यासाठी, तुमच्या iOS सेटिंग्ज मध्ये नोटिफिकेशन सुरू करा.</translation>
@@ -1388,7 +1388,6 @@
 <translation id="6930162026494574854">भाषांतर करा यासंबंधित सेटिंग्ज रीसेट करा</translation>
 <translation id="6930799952781667037">ही भाषा बदलण्यासाठी टॅप करा.</translation>
 <translation id="693761253105515415">पासकोड सेट करा</translation>
-<translation id="6943681254152031826">{COUNT,plural, =1{या पॅकेजचा माग ठेवायचा आहे का?}other{{COUNT} पॅकेजचा माग ठेवायचा आहे का?}}</translation>
 <translation id="6945221475159498467">निवडा</translation>
 <translation id="6950522403736391608">लपवलेली</translation>
 <translation id="6964300328304469089">सध्या <ph name="NAME" />, <ph name="EMAIL" /> ला निवडले आहे. खाते निवडा.</translation>
@@ -1590,7 +1589,6 @@
 <translation id="7859988229622350291">कधीही भाषांतर करू नका</translation>
 <translation id="7863211248337747225">ॲप मिळवा</translation>
 <translation id="7865127013871431856">भाषांतराचे पर्याय</translation>
-<translation id="7866501058614003444">या पॅकेजचा माग ठेवणे यशस्वीरीत्या बंद केले आहे.</translation>
 <translation id="7866872729285243843">तुमच्या सर्व डिव्हाइसवर तुमची वाचन सूची मिळवण्यासाठी, सेटिंग्जमध्ये "वाचन सूची" सुरू करा.</translation>
 <translation id="7874107544081154809"><ph name="CELL_ACCESSIBILITY_LABEL" /> वापरून फॉर्म ऑटोफिल करा</translation>
 <translation id="7883882164760409935">तुमच्याकडे पुन्हा वापरलेले पासवर्ड आहेत.</translation>

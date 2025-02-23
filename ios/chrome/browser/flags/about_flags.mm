@@ -846,6 +846,14 @@ const FeatureEntry::FeatureVariation kContextualPanelEntrypointArmVariations[] =
          std::size(kContextualPanelSmallIPHWithBlueHighlightArm), nullptr},
 };
 
+const FeatureEntry::FeatureParam kIdentityDiscAccountMenuNoEllipsis[] = {
+    {kDisableAccountMenuEllipsisParam, "true"},
+};
+const FeatureEntry::FeatureVariation kIdentityDiscAccountMenuVariations[] = {
+    {" - without account menu ellipsis", kIdentityDiscAccountMenuNoEllipsis,
+     std::size(kIdentityDiscAccountMenuNoEllipsis), nullptr},
+};
+
 const FeatureEntry::FeatureParam kIdentityConfirmationSnackbarTestingConfig[] =
     {{"IdentityConfirmationMinDisplayInterval1", "0"},
      {"IdentityConfirmationMinDisplayInterval2", "0"},
@@ -1974,7 +1982,9 @@ const flags_ui::FeatureEntry kFeatureEntries[] = {
     {"identity-disc-account-menu",
      flag_descriptions::kIdentityDiscAccountMenuName,
      flag_descriptions::kIdentityDiscAccountMenuDescription, flags_ui::kOsIos,
-     FEATURE_VALUE_TYPE(kIdentityDiscAccountMenu)},
+     FEATURE_WITH_PARAMS_VALUE_TYPE(kIdentityDiscAccountMenu,
+                                    kIdentityDiscAccountMenuVariations,
+                                    "IdentityDiscAccountMenu")},
     {"identity-confirmation-snackbar",
      flag_descriptions::kIdentityConfirmationSnackbarName,
      flag_descriptions::kIdentityConfirmationSnackbarDescription,
@@ -2005,26 +2015,6 @@ const flags_ui::FeatureEntry kFeatureEntries[] = {
     {"tab-group-sync", flag_descriptions::kTabGroupSyncName,
      flag_descriptions::kTabGroupSyncDescription, flags_ui::kOsIos,
      FEATURE_VALUE_TYPE(kTabGroupSync)},
-    {"autofill-enable-save-card-loading-and-confirmation",
-     flag_descriptions::kAutofillEnableSaveCardLoadingAndConfirmationName,
-     flag_descriptions::
-         kAutofillEnableSaveCardLoadingAndConfirmationDescription,
-     flags_ui::kOsIos,
-     FEATURE_VALUE_TYPE(
-         autofill::features::kAutofillEnableSaveCardLoadingAndConfirmation)},
-    {"autofill-enable-save-card-local-save-fallback",
-     flag_descriptions::kAutofillEnableSaveCardLocalSaveFallbackName,
-     flag_descriptions::kAutofillEnableSaveCardLocalSaveFallbackDescription,
-     flags_ui::kOsIos,
-     FEATURE_VALUE_TYPE(
-         autofill::features::kAutofillEnableSaveCardLocalSaveFallback)},
-    {"autofill-enable-vcn-enroll-loading-and-confirmation",
-     flag_descriptions::kAutofillEnableVcnEnrollLoadingAndConfirmationName,
-     flag_descriptions::
-         kAutofillEnableVcnEnrollLoadingAndConfirmationDescription,
-     flags_ui::kOsIos,
-     FEATURE_VALUE_TYPE(
-         autofill::features::kAutofillEnableVcnEnrollLoadingAndConfirmation)},
     {"omnibox-suggestion-answer-migration",
      flag_descriptions::kOmniboxSuggestionAnswerMigrationName,
      flag_descriptions::kOmniboxSuggestionAnswerMigrationDescription,

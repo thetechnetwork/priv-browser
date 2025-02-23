@@ -21,6 +21,7 @@
 #import "ios/chrome/browser/settings/ui_bundled/password/password_settings/password_settings_constants.h"
 #import "ios/chrome/browser/shared/public/features/features.h"
 #import "ios/chrome/browser/shared/ui/symbols/symbols.h"
+#import "ios/chrome/browser/shared/ui/table_view/cells/table_view_detail_text_item.h"
 #import "ios/chrome/browser/shared/ui/table_view/cells/table_view_image_item.h"
 #import "ios/chrome/browser/shared/ui/table_view/cells/table_view_info_button_cell.h"
 #import "ios/chrome/browser/shared/ui/table_view/cells/table_view_info_button_item.h"
@@ -149,6 +150,9 @@ BOOL AutomaticPasskeyUpgradeFeatureEnabled() {
 // If managed, the switch controlling this settings should not be displayed.
 @property(nonatomic, assign) BOOL automaticPasskeyUpgradesManagedByPolicy;
 
+// Whether automatic passkey upgrades are enabled.
+@property(nonatomic, assign) BOOL automaticPasskeyUpgradesEnabled;
+
 // Indicates whether or not "Offer to Save Passwords" is set to enabled.
 @property(nonatomic, assign, getter=isSavePasswordsEnabled)
     BOOL savePasswordsEnabled;
@@ -179,7 +183,7 @@ BOOL AutomaticPasskeyUpgradeFeatureEnabled() {
 // The item related to the description of bulk moving passwords to the user's
 // account.
 @property(nonatomic, readonly)
-    TableViewImageItem* bulkMovePasswordsToAccountDescriptionItem;
+    TableViewDetailTextItem* bulkMovePasswordsToAccountDescriptionItem;
 
 // The item related to the button allowing users to bulk move passwords to their
 // account.
@@ -382,7 +386,7 @@ BOOL AutomaticPasskeyUpgradeFeatureEnabled() {
           base::apple::ObjCCastStrict<TableViewSwitchCell>(cell);
       [switchCell.switchView
                  addTarget:self
-                    action:@selector(automaticPasskeyUpgradesSwitchChanged)
+                    action:@selector(automaticPasskeyUpgradesSwitchChanged:)
           forControlEvents:(UIControlEvents)UIControlEventValueChanged];
     }
   }
@@ -495,22 +499,18 @@ BOOL AutomaticPasskeyUpgradeFeatureEnabled() {
 }
 
 // Creates and returns the move passwords to account description item.
-- (TableViewImageItem*)bulkMovePasswordsToAccountDescriptionItem {
+- (TableViewDetailTextItem*)bulkMovePasswordsToAccountDescriptionItem {
   if (_bulkMovePasswordsToAccountDescriptionItem) {
     return _bulkMovePasswordsToAccountDescriptionItem;
   }
 
-  _bulkMovePasswordsToAccountDescriptionItem = [[TableViewImageItem alloc]
+  _bulkMovePasswordsToAccountDescriptionItem = [[TableViewDetailTextItem alloc]
       initWithType:ItemTypeBulkMovePasswordsToAccountDescription];
-  _bulkMovePasswordsToAccountDescriptionItem.title = l10n_util::GetNSString(
+  _bulkMovePasswordsToAccountDescriptionItem.text = l10n_util::GetNSString(
       IDS_IOS_PASSWORD_SETTINGS_BULK_UPLOAD_PASSWORDS_SECTION_TITLE);
-  // TODO(crbug.com/40283775): Without setting the table view image item to
-  // enabled, the accessibility voiceover reads out dimmed.
-  _bulkMovePasswordsToAccountDescriptionItem.enabled = YES;
   _bulkMovePasswordsToAccountDescriptionItem.accessibilityIdentifier =
       kPasswordSettingsBulkMovePasswordsToAccountDescriptionTableViewId;
-  _bulkMovePasswordsToAccountDescriptionItem.accessibilityTraits =
-      UIAccessibilityTraitHeader;
+  _bulkMovePasswordsToAccountDescriptionItem.allowMultilineDetailText = YES;
 
   std::u16string pattern = l10n_util::GetStringUTF16(
       IDS_IOS_PASSWORD_SETTINGS_BULK_UPLOAD_PASSWORDS_SECTION_DESCRIPTION);
@@ -572,6 +572,7 @@ BOOL AutomaticPasskeyUpgradeFeatureEnabled() {
       l10n_util::GetNSString(IDS_IOS_ALLOW_AUTOMATIC_PASSKEY_UPGRADES);
   _automaticPasskeyUpgradesSwitchItem.detailText =
       l10n_util::GetNSString(IDS_IOS_ALLOW_AUTOMATIC_PASSKEY_UPGRADES_SUBTITLE);
+  _automaticPasskeyUpgradesSwitchItem.on = self.automaticPasskeyUpgradesEnabled;
   return _automaticPasskeyUpgradesSwitchItem;
 }
 
@@ -705,11 +706,14 @@ BOOL AutomaticPasskeyUpgradeFeatureEnabled() {
 // The `setCanExportPasswords` method required for the PasswordSettingsConsumer
 // protocol is provided by property synthesis.
 
-- (void)setAutomaticPasskeyUpgradesManagedByPolicy:(BOOL)managed {
-  if (_automaticPasskeyUpgradesManagedByPolicy == managed) {
+- (void)setAutomaticPasskeyUpgradesEnabled:(BOOL)enabled
+                           managedByPolicy:(BOOL)managed {
+  if (_automaticPasskeyUpgradesEnabled == enabled &&
+      _automaticPasskeyUpgradesManagedByPolicy == managed) {
     return;
   }
 
+  _automaticPasskeyUpgradesEnabled = enabled;
   _automaticPasskeyUpgradesManagedByPolicy = managed;
 
   if (self.modelLoadStatus == ModelNotLoaded) {
@@ -891,8 +895,8 @@ BOOL AutomaticPasskeyUpgradeFeatureEnabled() {
 
 // Called when the user changes the state of the automatic passkey upgrades
 // switch.
-- (void)automaticPasskeyUpgradesSwitchChanged {
-  // TODO(crbug.com/358343061): Handle changing the switch value.
+- (void)automaticPasskeyUpgradesSwitchChanged:(UISwitch*)switchView {
+  [self.delegate automaticPasskeyUpgradesSwitchDidChange:switchView.on];
 }
 
 #pragma mark - Private
@@ -1166,6 +1170,15 @@ BOOL AutomaticPasskeyUpgradeFeatureEnabled() {
   return [tableViewModel sectionForSectionIdentifier:previousSection] + 1;
 }
 
+- (void)updateAutomaticPasskeyUpgradesSwitchState {
+  if (self.modelLoadStatus != ModelLoadComplete) {
+    return;
+  }
+  self.automaticPasskeyUpgradesSwitchItem.on =
+      self.automaticPasskeyUpgradesEnabled;
+  [self reconfigureCellsForItems:@[ self.automaticPasskeyUpgradesSwitchItem ]];
+}
+
 // Updates the view to by either adding or removing the automatic passkey
 // upgrades switch section based on whether password manager or saving passkeys
 // is controlled by enterprise policy (in those cases there is no point in
@@ -1177,9 +1190,14 @@ BOOL AutomaticPasskeyUpgradeFeatureEnabled() {
 
   TableViewModel* model = self.tableViewModel;
   BOOL shouldDisplaySwitch = [self shouldDisplayPasskeyUpgradesSwitch];
+  // In this case the whole section doesn't need to be added / removed, just
+  // update the switch state if it should be displayed.
   if ([model hasSectionForSectionIdentifier:
                  SectionIdentifierAutomaticPasskeyUpgradesSwitch] ==
       shouldDisplaySwitch) {
+    if (shouldDisplaySwitch) {
+      [self updateAutomaticPasskeyUpgradesSwitchState];
+    }
     return;
   }
 

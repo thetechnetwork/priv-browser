@@ -174,10 +174,6 @@ BASE_DECLARE_FEATURE(kMoveThemePrefsToSpecifics);
 BASE_DECLARE_FEATURE(kWebApkBackupAndRestoreBackend);
 #endif  // BUILDFLAG(IS_ANDROID)
 
-// Enables syncing for extensions when in transport mode (when a user is signed
-// in but has not turned on full sync).
-BASE_DECLARE_FEATURE(kSyncEnableExtensionsInTransportMode);
-
 #if BUILDFLAG(IS_ANDROID)
 // Flag to test different alternatives for the passwords sync error message
 // content.
@@ -186,6 +182,13 @@ inline constexpr base::FeatureParam<int>
     kSyncEnablePasswordsSyncErrorMessageAlternativeVersion{
         &kSyncEnablePasswordsSyncErrorMessageAlternative, "version", 1};
 #endif  // BUILDFLAG(IS_ANDROID)
+
+// Test-only flag to simulate a ping-pong behavior for bookmarks: two clients
+// sync-ing to the same account, using a different value for this flag, will
+// produce an active ping-pong, where one of them will try to clear the
+// `unique_position` field in BookmarkSpecifics, whereas the other one will try
+// to ensure it is populated.
+BASE_DECLARE_FEATURE(kSyncSimulateBookmarksPingPongForTesting);
 
 }  // namespace syncer
 

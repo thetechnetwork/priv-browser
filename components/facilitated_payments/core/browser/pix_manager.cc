@@ -190,11 +190,14 @@ void PixManager::OnApiAvailabilityReceived(base::TimeTicks start_time,
   ShowPixPaymentPrompt(
       client_->GetPaymentsDataManager()->GetMaskedBankAccounts(),
       base::BindOnce(&PixManager::OnPixAccountSelected,
-                     weak_ptr_factory_.GetWeakPtr()));
+                     weak_ptr_factory_.GetWeakPtr(), base::TimeTicks::Now()));
 }
 
-void PixManager::OnPixAccountSelected(int64_t selected_instrument_id) {
-  LogPixFopSelected();
+void PixManager::OnPixAccountSelected(
+    base::TimeTicks fop_selector_shown_timestamp,
+    int64_t selected_instrument_id) {
+  LogPixFopSelectedAndLatency(base::TimeTicks::Now() -
+                              fop_selector_shown_timestamp);
   LogPixFopSelectorResultUkm(/*accepted=*/true, ukm_source_id_);
   ShowProgressScreen();
 
@@ -308,10 +311,12 @@ void PixManager::OnPurchaseActionResult(base::TimeTicks start_time,
       DismissPrompt();
       break;
   }
-  // Logs the general histograms.
+  // Log the general histograms.
   LogPixInitiatePurchaseActionResultAndLatency(
       result, base::TimeTicks::Now() - start_time);
   LogInitiatePurchaseActionResultUkm(result, ukm_source_id_);
+  LogPixTransactionResultAndLatency(
+      result, base::TimeTicks::Now() - pix_code_copied_timestamp_);
 }
 
 void PixManager::OnUiEvent(UiEvent ui_event_type) {

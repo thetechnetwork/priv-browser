@@ -12,7 +12,6 @@
 #include "base/feature_list.h"
 #include "base/functional/callback_helpers.h"
 #include "build/build_config.h"
-#include "build/chromeos_buildflags.h"
 #include "chrome/browser/download/test_download_shelf.h"
 #include "chrome/browser/ui/autofill/test/test_autofill_bubble_handler.h"
 #include "chrome/browser/ui/browser.h"
@@ -253,6 +252,7 @@ class TestBrowserWindow : public BrowserWindow {
           tab_search::mojom::TabOrganizationFeature::kNone) override {}
   void CloseTabSearchBubble() override {}
 
+  bool IsFeaturePromoQueued(const base::Feature& iph_feature) const override;
   bool IsFeaturePromoActive(const base::Feature& iph_feature) const override;
   user_education::FeaturePromoResult CanShowFeaturePromo(
       const base::Feature& iph_feature) const override;

@@ -99,10 +99,8 @@ const base::Feature* const kFeaturesExposedToJava[] = {
     &autofill::features::kAutofillVirtualViewStructureAndroid,
     &autofill::features::kAutofillDeepLinkAutofillOptions,
     &autofill::features::kAutofillEnableCvcStorageAndFilling,
-    &autofill::features::kAutofillEnableSaveCardLoadingAndConfirmation,
     &autofill::features::kAutofillSyncEwalletAccounts,
     &autofill::features::kAutofillEnableSyncingOfPixBankAccounts,
-    &autofill::features::kAutofillEnableVcnEnrollLoadingAndConfirmation,
     &autofill::features::kAutofillEnableVirtualCardJavaPaymentsDataManager,
     &blink::features::kBackForwardTransitions,
     &blink::features::kDynamicSafeAreaInsets,
@@ -157,7 +155,6 @@ const base::Feature* const kFeaturesExposedToJava[] = {
     &feed::kFeedFollowUiUpdate,
     &feed::kFeedImageMemoryCacheSizePercentage,
     &feed::kFeedLoadingPlaceholder,
-    &feed::kFeedLowMemoryImprovement,
     &feed::kFeedNoViewCache,
     &feed::kFeedPerformanceStudy,
     &feed::kFeedShowSignInCommand,
@@ -180,6 +177,7 @@ const base::Feature* const kFeaturesExposedToJava[] = {
     &kNewTabPageCustomization,
     &kAndroidAppIntegrationWithFavicon,
     &kAndroidAppIntegrationMultiDataSource,
+    &kAndroidAppearanceSettings,
     &kAndroidBookmarkBar,
     &kAndroidBottomToolbar,
     &kAndroidDumpOnScrollWithoutResource,
@@ -490,6 +488,10 @@ BASE_FEATURE(kNewTabPageCustomization,
 
 BASE_FEATURE(kAndroidAppIntegrationWithFavicon,
              "AndroidAppIntegrationWithFavicon",
+             base::FEATURE_DISABLED_BY_DEFAULT);
+
+BASE_FEATURE(kAndroidAppearanceSettings,
+             "AndroidAppearanceSettings",
              base::FEATURE_DISABLED_BY_DEFAULT);
 
 BASE_FEATURE(kAndroidBookmarkBar,

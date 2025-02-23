@@ -396,6 +396,7 @@
 <translation id="2731700343119398978">ದಯವಿಟ್ಟು ನಿರೀಕ್ಷಿಸಿ...</translation>
 <translation id="2740531572673183784">ಸರಿ</translation>
 <translation id="2744221223678373668">ಹಂಚಿಕೊಳ್ಳಲಾಗಿರುವುದು</translation>
+<translation id="2749164457515831917">ಸಲಹೆಗಳ ಸ್ಥಾನ ಬದಲಾಯಿಸಲಾಗಿದೆ</translation>
 <translation id="2751739896257479635">EAP 2 ನೇ ಹಂತದ ಪ್ರಮಾಣೀಕರಣ</translation>
 <translation id="2754757901767760034">ದೀಪ</translation>
 <translation id="2780756493585863768">Google AI ನಿಂದ ಚಾಲಿತವಾದ ಇತ್ತೀಚಿನ ಹಿನ್ನೆಲೆಗಳು</translation>
@@ -472,6 +473,7 @@
 <translation id="3226657629376379887">ಲೇಔಟ್ ಕ್ರಿಯೆಗಳ ಮೆನು</translation>
 <translation id="3227186760713762082"><ph name="CATEGORY_TEXT" /> ನ ಮೌಲ್ಯವನ್ನು <ph name="CONVERSION_RATE" /> ಸಂಖ್ಯೆಯಿಂದ ಭಾಗಿಸಿ</translation>
 <translation id="3246869037381808805">1 ದಿನಕ್ಕಿಂತ ಹಳೆಯದಾದ ಮುದ್ರಣ ಕಾರ್ಯಗಳನ್ನು ತೆಗೆದುಹಾಕಲಾಗುತ್ತದೆ</translation>
+<translation id="3248791727258378769">ಯಾವುದೇ ಟ್ರಾನ್ಸ್‌ಕ್ರಿಪ್ಟ್ ಅನ್ನು ರಚಿಸಲಾಗುವುದಿಲ್ಲ</translation>
 <translation id="324961752321393509">ನಿಮ್ಮ ನಿರ್ವಾಹಕರು ಈ ಆ್ಯಪ್ ಅನ್ನು ಮುಚ್ಚಲು ಅನುಮತಿಸುವುದಿಲ್ಲ</translation>
 <translation id="3263941347294171263">ಅಪ್‌ಡೇಟ್ ಪ್ರಕ್ರಿಯೆಯನ್ನು ಮುಂದುವರಿಸಲು <ph name="DEVICE_NAME" /> ಅನ್ನು ಅನ್‌ಪ್ಲಗ್ ಮಾಡಿ ಮತ್ತು ಮರುಪ್ಲಗ್ ಮಾಡಿ</translation>
 <translation id="3268178239013324452">ವಿಫಲವಾಗಿದೆ - ಡೋರ್ ತೆರೆದಿದೆ</translation>
@@ -558,6 +560,7 @@
 <translation id="3651050199673793219">ತಾಪಮಾನ ಘಟಕವನ್ನು ಆಯ್ಕೆಮಾಡಿ</translation>
 <translation id="3661106764436337772">ವೇಗವಾಗಿ ಮತ್ತು ಹೆಚ್ಚು ವಿಶ್ವಾಸದಿಂದ ಬರೆಯಿರಿ</translation>
 <translation id="3662461537616691585">ಬರ್ಗಂಡಿ ಮತ್ತು ಮರೂನ್ ಬಣ್ಣ</translation>
+<translation id="3664755900672940272">ಸ್ಯಾಂಪಲ್ ಪ್ರಾಂಪ್ಟ್‌ಗಳ ಸ್ಥಾನ ಬದಲಾಯಿಸಲಾಗಿದೆ</translation>
 <translation id="3668449597372804501">ಮೋಡ ತೆಲುತ್ತಿರುವ ವಾಲ್‌ಪೇಪರ್</translation>
 <translation id="3668570675727296296">ಭಾಷೆಯ ಸೆಟ್ಟಿಂಗ್‌ಗಳು</translation>
 <translation id="3675132884790542448">ಹಂದಿಗಳು</translation>
@@ -670,6 +673,7 @@
 <translation id="420283545744377356">ಸ್ಕ್ರೀನ್ ಸೇವರ್ ಆಫ್ ಮಾಡಿ</translation>
 <translation id="4210636113897977670">ಸೇವ್ ಮಾಡಿ ಮತ್ತು ನಿರ್ಗಮಿಸಿ</translation>
 <translation id="4210659479607886331">ಹಿಮನದಿ</translation>
+<translation id="4212169537710712814"><ph name="LANGUAGE_NAME" /> ಟ್ರಾನ್ಸ್‌ಕ್ರಿಪ್ಶನ್ ಮಾಡಲ್ ಡೌನ್‌ಲೋಡ್ ಪೂರ್ಣಗೊಂಡಿದೆ</translation>
 <translation id="42126664696688958">ರಫ್ತು</translation>
 <translation id="4213104098953699324">USB ಕೀಬೋರ್ಡ್</translation>
 <translation id="4227825898293920515"><ph name="TIME" /> ಸಮಯದಲ್ಲಿ ಪಾಸ್‌ವರ್ಡ್‌ನ ಅವಧಿ ಮುಗಿಯಲಿದೆ</translation>
@@ -940,6 +944,7 @@
 <translation id="5431318178759467895">ಬಣ್ಣ</translation>
 <translation id="5457599981699367932">ಅತಿಥಿಯಾಗಿ ಬ್ರೌಸ್ ಮಾಡಿ</translation>
 <translation id="54609108002486618">ನಿರ್ವಹಿಸಲಾಗಿದೆ</translation>
+<translation id="5461608756903394951"><ph name="LANGUAGE_NAME" /> ಟ್ರಾನ್ಸ್‌ಕ್ರಿಪ್ಶನ್ ಮಾಡಲ್ ಡೌನ್‌ಲೋಡ್ ಪ್ರಗತಿಯಲ್ಲಿದೆ</translation>
 <translation id="5470776029649730099">ಬರ್ಲ್ಯಾಪ್</translation>
 <translation id="5478289488939624992">{ATTEMPTS_LEFT,plural, =1{{0} ಪ್ರಯತ್ನ ಬಾಕಿ ಉಳಿದಿದೆ}one{{0} ಪ್ರಯತ್ನಗಳು ಬಾಕಿ ಉಳಿದಿವೆ}other{{0} ಪ್ರಯತ್ನಗಳು ಬಾಕಿ ಉಳಿದಿವೆ}}</translation>
 <translation id="5488280942828718790">ಮೆಜೆಂತಾ</translation>
@@ -1191,6 +1196,7 @@
 <translation id="6595046262780525922">ಟ್ರಾನ್ಸ್‌ಕ್ರಿಪ್ಶನ್ ಅನ್ನು ಆನ್ ಮಾಡಬೇಕೆ ಮತ್ತು ಟ್ರಾನ್ಸ್‌ಕ್ರಿಪ್ಶನ್ ಮಾಡೆಲ್‌ ಅನ್ನು ಡೌನ್‌ಲೋಡ್ ಮಾಡಬೇಕೆ?</translation>
 <translation id="6596816719288285829">IP ವಿಳಾಸ</translation>
 <translation id="6599673642868607614">ನಿಮ್ಮ ಪ್ರತಿಕ್ರಿಯೆಗೆ ಧನ್ಯವಾದಗಳು. ನಿಮ್ಮ ಪ್ರತಿಕ್ರಿಯೆಯು Chromebook ಅನುಭವವನ್ನು ಸುಧಾರಿಸಲು ನಮಗೆ ಸಹಾಯ ಮಾಡುತ್ತದೆ ಹಾಗೂ ಅದನ್ನು ನಮ್ಮ ತಂಡವು ಪರಿಶೀಲಿಸುತ್ತದೆ. ಹೆಚ್ಚಿನ ಸಂಖ್ಯೆಯ ವರದಿಗಳ ಕಾರಣ, ಪ್ರತ್ಯುತ್ತರವನ್ನು ಕಳುಹಿಸಲು ನಮಗೆ ಸಾಧ್ಯವಾಗುವುದಿಲ್ಲ.</translation>
+<translation id="6608043585557830684">ಟ್ರಾನ್ಸ್‌ಕ್ರಿಪ್ಶನ್ ಆಫ್ ಆಗಿದೆ. ಸೆಟ್ಟಿಂಗ್‌ಗಳಲ್ಲಿ ಅಥವಾ <ph name="THREE_DOTS_MENU_ICON" /> ಮೆನುವಿನಲ್ಲಿ ಆನ್ ಮಾಡಿ.</translation>
 <translation id="660846213831377756">ಮೌಸ್ ಕೀಗಳು</translation>
 <translation id="6618744767048954150">ರನ್ ಆಗುತ್ತಿದೆ</translation>
 <translation id="6620487321149975369">ಮುದ್ರಣ ಕಾರ್ಯಗಳನ್ನು ಹಸ್ತಚಾಲಿತವಾಗಿ ತೆಗೆದುಹಾಕದ ಹೊರತು, ಅವು ಇತಿಹಾಸದಲ್ಲಿ ಕಾಣಿಸಿಕೊಳ್ಳುತ್ತವೆ</translation>
@@ -1279,6 +1285,7 @@
 <translation id="6975620886940770104">ಹೊಳೆಯುವ <ph name="GLOWSCAPES_FEATURE" /> ಅನ್ನು ಹೊಂದಿರುವ <ph name="GLOWSCAPES_LANDSCAPE" /></translation>
 <translation id="6975981640379148271">ಕೊವಾಲಾಗಳು</translation>
 <translation id="6977381486153291903">ಫರ್ಮ್‌ವೇರ್ ಮರುಪರಿಶೀಲನೆ</translation>
+<translation id="6978396562261420054">ಜನರೇಟ್ ಮಾಡಲಾದ ಚಿತ್ರ</translation>
 <translation id="6981982820502123353">ಪ್ರವೇಶ</translation>
 <translation id="6982462588253070448">ಮರಳಿನ ದಿಬ್ಬಗಳು</translation>
 <translation id="7005833343836210400">ಸಾಧನ ಆಫ್‌ಲೈನ್ ಆಗಿದೆ</translation>

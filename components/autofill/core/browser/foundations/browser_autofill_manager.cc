@@ -168,9 +168,7 @@ FillDataType GetFillDataTypeFromFillingPayload(
       base::Overloaded{
           [](const AutofillProfile*) { return FillDataType::kAutofillProfile; },
           [](const CreditCard*) { return FillDataType::kCreditCard; },
-          [](const AutofillAiFillingPayload&) {
-            return FillDataType::kAutofillAi;
-          }},
+          [](const EntityInstance*) { return FillDataType::kAutofillAi; }},
       filling_payload);
 }
 
@@ -281,9 +279,7 @@ FillDataType GetEventTypeFromSingleFieldSuggestionType(SuggestionType type) {
     case SuggestionType::kDevtoolsTestAddresses:
     case SuggestionType::kDevtoolsTestAddressByCountry:
     case SuggestionType::kDevtoolsTestAddressEntry:
-    case SuggestionType::kAutofillAiLoadingState:
     case SuggestionType::kFillAutofillAi:
-    case SuggestionType::kAutofillAiError:
       NOTREACHED();
   }
   NOTREACHED();
@@ -689,7 +685,7 @@ bool BrowserAutofillManager::ShouldShowScanCreditCard(
 
 bool BrowserAutofillManager::ShouldShowCardsFromAccountOption(
     const FormData& form,
-    const FormFieldData& field,
+    const FieldGlobalId& field_id,
     AutofillSuggestionTriggerSource trigger_source) const {
   // If `trigger_source` is equal to `kShowCardsFromAccount`, that means that
   // the user accepted "Show cards from account" suggestions and it should not
@@ -699,8 +695,7 @@ bool BrowserAutofillManager::ShouldShowCardsFromAccountOption(
     return false;
   }
   // Check whether we are dealing with a credit card field.
-  AutofillField* autofill_field =
-      GetAutofillField(form.global_id(), field.global_id());
+  AutofillField* autofill_field = GetAutofillField(form.global_id(), field_id);
   if (!autofill_field ||
       autofill_field->Type().group() != FieldTypeGroup::kCreditCard ||
       // Exclude CVC and card type fields, because these will not have
@@ -1184,15 +1179,12 @@ void BrowserAutofillManager::OnAskForValuesToFillImpl(
   // annotations. IMPORTANT NOTE: If there's no data stored in user annotations,
   // `GenerateSuggestionsAndMaybeShowUI()` will be called and Autofill's regular
   // flow will continue.
-  AutofillAiDelegate* delegate = client().GetAutofillAiDelegate();
-
-  if (delegate && form_structure && autofill_field &&
+  if (AutofillAiDelegate* delegate = client().GetAutofillAiDelegate();
+      delegate && form_structure && autofill_field &&
       delegate->IsFormAndFieldEligibleForAutofillAi(*form_structure,
                                                     *autofill_field)) {
     delegate->GetSuggestions(
         form.global_id(), field.global_id(),
-        /*is_manual_fallback=*/trigger_source ==
-            AutofillSuggestionTriggerSource::kAutofillAi,
         base::BindOnce(
             &BrowserAutofillManager::GenerateSuggestionsAndMaybeShowUIPhase1,
             weak_ptr_factory_.GetWeakPtr(), form, field, trigger_source,
@@ -1643,14 +1635,14 @@ void BrowserAutofillManager::FillOrPreviewFormWithAutofillAiData(
     mojom::ActionPersistence action_persistence,
     const FormData& form,
     const FormFieldData& trigger_field,
-    const base::flat_map<FieldGlobalId, std::u16string>& values_to_fill) {
+    const EntityInstance& entity) {
   FormStructure* form_structure = nullptr;
   AutofillField* autofill_trigger_field = nullptr;
   if (!GetCachedFormAndField(form.global_id(), trigger_field.global_id(),
                              &form_structure, &autofill_trigger_field)) {
     return;
   }
-  form_filler_->FillOrPreviewForm(action_persistence, form, values_to_fill,
+  form_filler_->FillOrPreviewForm(action_persistence, form, &entity,
                                   *form_structure, *autofill_trigger_field,
                                   AutofillTriggerSource::kAutofillAi);
 }
@@ -2073,13 +2065,12 @@ void BrowserAutofillManager::OnHidePopupImpl() {
 
 void BrowserAutofillManager::OnSingleFieldSuggestionSelected(
     const Suggestion& suggestion,
-    const FormData& form,
-    const FormFieldData& field) {
+    const FormGlobalId& form_id,
+    const FieldGlobalId& field_id) {
   client().GetSingleFieldFillRouter().OnSingleFieldSuggestionSelected(
       suggestion);
 
-  AutofillField* autofill_trigger_field =
-      GetAutofillField(form.global_id(), field.global_id());
+  AutofillField* autofill_trigger_field = GetAutofillField(form_id, field_id);
   if (!autofill_trigger_field) {
     return;
   }
@@ -2322,7 +2313,7 @@ void BrowserAutofillManager::OnDidFillOrPreviewForm(
                              filled_field_ids, safe_field_ids, *credit_card,
                              trigger_source, is_refill);
                        },
-                       [&](const AutofillAiFillingPayload&) {
+                       [&](const EntityInstance*) {
                          if (AutofillAiDelegate* delegate =
                                  client().GetAutofillAiDelegate()) {
                            delegate->OnDidFillSuggestion(form.global_id());
@@ -2698,7 +2689,8 @@ std::vector<Suggestion> BrowserAutofillManager::GetCreditCardSuggestions(
           FormStructure::CreditCardFormCompleteness::
               kCompleteCreditCardFormIncludingCvcAndName),
       ShouldShowScanCreditCard(form, trigger_field),
-      ShouldShowCardsFromAccountOption(form, trigger_field, trigger_source),
+      ShouldShowCardsFromAccountOption(form, trigger_field.global_id(),
+                                       trigger_source),
       four_digit_combinations_in_dom_,
       /*autofilled_last_four_digits_in_form_for_filtering=*/
       is_card_number_autofilled && card_number_field_value.size() >= 4
