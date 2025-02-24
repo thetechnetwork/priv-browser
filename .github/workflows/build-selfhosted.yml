@@ -44,10 +44,10 @@ jobs:
             GIT_SSH_COMMAND="ssh -i ~/.ssh/priv-browser-patches -p 443" git pull origin main
           fi
 
-      - name: Apply Patches
-        run: |
-          cd ~/priv_browser_build/priv-browser
-          for patch in ~/priv_browser_build/patches/*.patch; do git apply "$patch"; done
+      #- name: Apply Patches
+      #  run: |
+      #    cd ~/priv_browser_build/priv-browser
+      #    for patch in ~/priv_browser_build/patches/*.patch; do git apply "$patch"; done
 
       - name: Configure Priv Browser for Linux
         run: |
