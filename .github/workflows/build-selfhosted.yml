@@ -42,11 +42,11 @@ jobs:
       - name: Sync Dependencies Without Pulling Source
         run: |
           cd ~/priv_browser_build/priv-browser
-          gclient sync --nohooks --shallow
+          gclient sync --nohooks
 
       - name: Run gclient runhooks
         run: |
-          cd ~/priv_browser_build/priv-browser
+          cd ~/priv_browser_build/priv-browser/src  # ✅ FIX: Use `src/` as the root directory
           gclient runhooks
 
       - name: Clone Private Patches Repository
@@ -62,37 +62,37 @@ jobs:
 
       #- name: Apply Patches
       #  run: |
-      #    cd ~/priv_browser_build/priv-browser
+      #    cd ~/priv_browser_build/priv-browser/src
       #    for patch in ~/priv_browser_build/patches/*.patch; do git apply "$patch"; done
 
       - name: Configure Priv Browser for Linux
         run: |
-          cd ~/priv_browser_build/priv-browser
+          cd ~/priv_browser_build/priv-browser/src  # ✅ FIX: Run inside `src/`
           gn gen out/Linux --args="target_os=\"linux\" target_cpu=\"x64\" is_debug=false is_component_build=false enable_nacl=false"
 
       - name: Build Priv Browser for Linux
         run: |
-          cd ~/priv_browser_build/priv-browser
+          cd ~/priv_browser_build/priv-browser/src  # ✅ FIX: Run inside `src/`
           ninja -C out/Linux chrome -j$(nproc)
 
       - name: Configure Priv Browser for Windows
         run: |
-          cd ~/priv_browser_build/priv-browser
+          cd ~/priv_browser_build/priv-browser/src  # ✅ FIX: Run inside `src/`
           gn gen out/Windows --args="target_os=\"win\" target_cpu=\"x64\" is_debug=false is_component_build=false enable_nacl=false"
 
       - name: Build Priv Browser for Windows
         run: |
-          cd ~/priv_browser_build/priv-browser
+          cd ~/priv_browser_build/priv-browser/src  # ✅ FIX: Run inside `src/`
           ninja -C out/Windows chrome -j$(nproc)
 
       - name: Upload Linux Build
         uses: actions/upload-artifact@v4
         with:
           name: priv-browser-linux-build
-          path: ~/priv_browser_build/priv-browser/out/Linux/chrome
+          path: ~/priv_browser_build/priv-browser/src/out/Linux/chrome
 
       - name: Upload Windows Build
         uses: actions/upload-artifact@v4
         with:
           name: priv-browser-windows-build
-          path: ~/priv_browser_build/priv-browser/out/Windows/chrome.exe
+          path: ~/priv_browser_build/priv-browser/src/out/Windows/chrome.exe
