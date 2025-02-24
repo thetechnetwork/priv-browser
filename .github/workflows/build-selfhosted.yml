@@ -9,7 +9,7 @@ jobs:
 
     steps:
       - name: Checkout Priv Browser Repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Install Dependencies
         run: |
@@ -59,13 +59,13 @@ jobs:
           ninja -C out/Windows chrome -j$(nproc)
 
       - name: Upload Linux Build
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: priv-browser-linux-build
           path: ~/priv_browser_build/priv-browser/out/Linux/chrome
 
       - name: Upload Windows Build
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: priv-browser-windows-build
           path: ~/priv_browser_build/priv-browser/out/Windows/chrome.exe
