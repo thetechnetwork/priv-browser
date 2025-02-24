@@ -13,8 +13,8 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          sudo apt update
-          sudo apt install -y build-essential ninja-build clang lld cmake python3 python3-pip git mingw-w64
+          cd ~/priv_browser_build/priv-browser
+          sudo ./build/install-build-deps.sh --no-prompt
 
       - name: Clone Priv Browser Repository
         run: |
