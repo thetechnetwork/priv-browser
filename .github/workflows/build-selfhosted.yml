@@ -11,10 +11,17 @@ jobs:
       - name: Checkout Priv Browser Repo
         uses: actions/checkout@v4
 
-      - name: Install Depot Tools
+      - name: Install or Update Depot Tools
         run: |
           cd ~
-          git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
+          if [ -d "depot_tools" ]; then
+            echo "✅ depot_tools already exists. Updating..."
+            cd depot_tools
+            git pull origin main
+          else
+            echo "📥 Cloning depot_tools..."
+            git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
+          fi
           echo 'export PATH="$HOME/depot_tools:$PATH"' >> ~/.bashrc
           source ~/.bashrc
 
