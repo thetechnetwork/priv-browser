@@ -21,6 +21,7 @@ jobs:
           mkdir -p ~/priv_browser_build
           cd ~/priv_browser_build
           
+          # Clone Priv Browser
           if [ ! -d "priv-browser" ]; then
             git clone --depth=1 https://github.com/TheTechNetwork/priv-browser.git priv-browser
           else
@@ -28,13 +29,15 @@ jobs:
             git pull origin main
           fi
 
+          # Clone Private Patches Repo with Authentication
           if [ ! -d "patches" ]; then
-            git clone https://github.com/TheTechNetwork/priv-browser-patches.git patches
+            git clone https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/TheTechNetwork/priv-browser-patches.git patches
           else
             cd patches
             git pull origin main
           fi
 
+          # Apply Patches
           cd ~/priv_browser_build/priv-browser
           for patch in ~/priv_browser_build/patches/*.patch; do git apply "$patch"; done
 
