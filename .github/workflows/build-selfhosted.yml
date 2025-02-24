@@ -28,15 +28,22 @@ jobs:
             git pull origin main
           fi
 
+      - name: Setup SSH for Private Patches Repo
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.PRIV_BROWSER_PATCHES_SSH }}" > ~/.ssh/priv-browser-patches
+          chmod 600 ~/.ssh/priv-browser-patches
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
+
       - name: Clone Private Patches Repository
         run: |
           cd ~/priv_browser_build
           
           if [ ! -d "patches" ]; then
-            git clone https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/TheTechNetwork/priv-browser-patches.git patches
+            GIT_SSH_COMMAND="ssh -i ~/.ssh/priv-browser-patches" git clone git@github.com:TheTechNetwork/priv-browser-patches.git patches
           else
             cd patches
-            git pull origin main
+            GIT_SSH_COMMAND="ssh -i ~/.ssh/priv-browser-patches" git pull origin main
           fi
 
       - name: Apply Patches
