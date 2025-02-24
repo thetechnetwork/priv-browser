@@ -11,27 +11,36 @@ jobs:
       - name: Checkout Priv Browser Repo
         uses: actions/checkout@v4
 
-      - name: Install Dependencies
+      - name: Install Depot Tools
+        run: |
+          cd ~
+          git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
+          echo 'export PATH="$HOME/depot_tools:$PATH"' >> ~/.bashrc
+          source ~/.bashrc
+
+      - name: Create .gclient Config
         run: |
           cd ~/priv_browser_build/priv-browser
-          sudo ./build/install-build-deps.sh --no-prompt
+          cat <<EOF > .gclient
+          solutions = [
+            {
+              "name": "src",
+              "url": "https://github.com/TheTechNetwork/priv-browser.git",
+              "managed": False,
+              "custom_deps": {},
+            },
+          ]
+          EOF
 
-      - name: Clone Priv Browser Repository
+      - name: Sync Dependencies Without Pulling Source
         run: |
-          mkdir -p ~/priv_browser_build
-          cd ~/priv_browser_build
-          
-          if [ ! -d "priv-browser" ]; then
-            git clone --depth=1 https://github.com/TheTechNetwork/priv-browser.git priv-browser
-          else
-            cd priv-browser
-            git pull origin main
-          fi
+          cd ~/priv_browser_build/priv-browser
+          gclient sync --nohooks --shallow
 
-      - name: Ensure SSH Key Permissions
+      - name: Run gclient runhooks
         run: |
-          chmod 600 ~/.ssh/priv-browser-patches
-          ssh-keyscan github.com >> ~/.ssh/known_hosts
+          cd ~/priv_browser_build/priv-browser
+          gclient runhooks
 
       - name: Clone Private Patches Repository
         run: |
