@@ -38,10 +38,10 @@ jobs:
           cd ~/priv_browser_build
           
           if [ ! -d "patches" ]; then
-            GIT_SSH_COMMAND="ssh -i ~/.ssh/priv-browser-patches" git clone git@github.com:TheTechNetwork/priv-browser-patches.git patches
+            GIT_SSH_COMMAND="ssh -i ~/.ssh/priv-browser-patches -p 443" git clone git@ssh.github.com:TheTechNetwork/priv-browser-patches.git patches
           else
             cd patches
-            GIT_SSH_COMMAND="ssh -i ~/.ssh/priv-browser-patches" git pull origin main
+            GIT_SSH_COMMAND="ssh -i ~/.ssh/priv-browser-patches -p 443" git pull origin main
           fi
 
       - name: Apply Patches
