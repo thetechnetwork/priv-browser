@@ -1,16 +1,14 @@
-name: Build Chromium for Windows & Linux Using Selfhosted Runners
+name: Build Priv Browser for Windows & Linux
 
 on:
-  #push:
-  #  branches:
-  #    - main
-  workflow_dispatch:
-    
+  workflow_dispatch:  # Manual trigger
+
 jobs:
   build:
-    runs-on: [self-hosted, linux]  # Ensures it runs on a self-hosted Linux runner
+    runs-on: [self-hosted, linux, chromium-build]  # Ensure correct runner
+
     steps:
-      - name: Checkout Chromium Repo
+      - name: Checkout Priv Browser Repo
         uses: actions/checkout@v3
 
       - name: Install Dependencies
@@ -20,54 +18,54 @@ jobs:
 
       - name: Clone and Patch Chromium
         run: |
-          mkdir -p ~/chromium_build
-          cd ~/chromium_build
+          mkdir -p ~/priv_browser_build
+          cd ~/priv_browser_build
           
-          if [ ! -d "chromium" ]; then
-            git clone --depth=1 https://github.com/thetechnetwork/priv-browser.git chromium
+          if [ ! -d "priv-browser" ]; then
+            git clone --depth=1 https://github.com/TheTechNetwork/priv-browser.git priv-browser
           else
-            cd chromium
+            cd priv-browser
             git pull origin main
           fi
 
           if [ ! -d "patches" ]; then
-            git clone https://github.com/thetechnetwork/privbrowser-patches.git patches
+            git clone https://github.com/TheTechNetwork/priv-browser-patches.git patches
           else
             cd patches
             git pull origin main
           fi
 
-          cd ~/chromium_build/chromium
-          for patch in ~/chromium_build/patches/*.patch; do git apply "$patch"; done
+          cd ~/priv_browser_build/priv-browser
+          for patch in ~/priv_browser_build/patches/*.patch; do git apply "$patch"; done
 
-      - name: Configure Chromium for Linux
+      - name: Configure Priv Browser for Linux
         run: |
-          cd ~/chromium_build/chromium
+          cd ~/priv_browser_build/priv-browser
           gn gen out/Linux --args="target_os=\"linux\" target_cpu=\"x64\" is_debug=false is_component_build=false enable_nacl=false"
 
-      - name: Build Chromium for Linux
+      - name: Build Priv Browser for Linux
         run: |
-          cd ~/chromium_build/chromium
+          cd ~/priv_browser_build/priv-browser
           ninja -C out/Linux chrome -j$(nproc)
 
-      - name: Configure Chromium for Windows
+      - name: Configure Priv Browser for Windows
         run: |
-          cd ~/chromium_build/chromium
+          cd ~/priv_browser_build/priv-browser
           gn gen out/Windows --args="target_os=\"win\" target_cpu=\"x64\" is_debug=false is_component_build=false enable_nacl=false"
 
-      - name: Build Chromium for Windows
+      - name: Build Priv Browser for Windows
         run: |
-          cd ~/chromium_build/chromium
+          cd ~/priv_browser_build/priv-browser
           ninja -C out/Windows chrome -j$(nproc)
 
       - name: Upload Linux Build
         uses: actions/upload-artifact@v3
         with:
-          name: chromium-linux-build
-          path: ~/chromium_build/chromium/out/Linux/chrome
+          name: priv-browser-linux-build
+          path: ~/priv_browser_build/priv-browser/out/Linux/chrome
 
       - name: Upload Windows Build
         uses: actions/upload-artifact@v3
         with:
-          name: chromium-windows-build
-          path: ~/chromium_build/chromium/out/Windows/chrome.exe
+          name: priv-browser-windows-build
+          path: ~/priv_browser_build/priv-browser/out/Windows/chrome.exe
