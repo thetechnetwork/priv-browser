@@ -28,10 +28,8 @@ jobs:
             git pull origin main
           fi
 
-      - name: Setup SSH for Private Patches Repo
+      - name: Ensure SSH Key Permissions
         run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.PRIV_BROWSER_PATCHES_SSH }}" > ~/.ssh/priv-browser-patches
           chmod 600 ~/.ssh/priv-browser-patches
           ssh-keyscan github.com >> ~/.ssh/known_hosts
 
