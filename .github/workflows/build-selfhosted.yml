@@ -42,12 +42,12 @@ jobs:
       - name: Sync Dependencies Without Pulling Source
         run: |
           cd ~/priv_browser_build/priv-browser
-          gclient sync --nohooks  # ✅ FIX: Removed --shallow to ensure all dependencies are fetched.
+          gclient sync --nohooks --shallow
 
       - name: Run gclient runhooks
         run: |
           cd ~/priv_browser_build/priv-browser
-          gclient runhooks  # ✅ FIX: Ensures `dotfile_settings.gni` and other build files are generated.
+          gclient runhooks
 
       - name: Clone Private Patches Repository
         run: |
