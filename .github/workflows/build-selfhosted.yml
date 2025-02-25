@@ -26,7 +26,7 @@ jobs:
           fi
           echo "PATH=$PATH:/home/user/priv_browser_build/depot_tools" >> $GITHUB_ENV
 
-      - name: Ensure `.gclient` is Correctly Configured
+      - name: Configure `.gclient` for Both Windows & Linux
         run: |
           cat > /home/user/priv_browser_build/priv-browser/.gclient <<EOL
           solutions = [
@@ -40,20 +40,18 @@ jobs:
             },
           ]
           target_os = ["linux", "win"]
-          cache_dir = "/home/user/priv_browser_build/.gclient_cache"
           EOL
 
-      - name: Run `gclient sync` to Fetch Dependencies
+      - name: Sync Chromium Dependencies
         run: |
           cd /home/user/priv_browser_build/priv-browser
           gclient sync --nohooks --shallow
 
-      - name: Use Pre-Downloaded Windows Toolchain
+      - name: Setup Windows Toolchain
         run: |
           TOOLCHAIN_DIR="/home/user/priv_browser_build/win_toolchain"
           mkdir -p "$TOOLCHAIN_DIR"
           
-          # If toolchain is missing, download it from Google Drive
           if [ ! -d "$TOOLCHAIN_DIR/VC" ]; then
             echo "⬇️ Downloading Windows toolchain..."
             wget --no-check-certificate -O win_toolchain.zip "https://drive.usercontent.google.com/download?id=1Z6DcuUdsL0pNCmHSmKA6CxHZlbL-CN1V&export=download&confirm=t"
@@ -63,17 +61,9 @@ jobs:
             echo "✅ Windows toolchain already exists, skipping download."
           fi
 
-          # Force Chromium to use the local toolchain
+          # Set required environment variables
           echo "DEPOT_TOOLS_WIN_TOOLCHAIN_BASE_URL=$TOOLCHAIN_DIR" >> $GITHUB_ENV
           echo "GYP_MSVS_HASH_7393122652=e0b1a90051" >> $GITHUB_ENV
-
-          # Verify toolchain extraction
-          if [ ! -d "$TOOLCHAIN_DIR/VC" ]; then
-            echo "❌ Error: Windows toolchain not found after extraction!"
-            exit 1
-          fi
-          
-          echo "✅ Windows toolchain is ready!"
 
       - name: Set Windows Build Environment Variables
         run: |
@@ -82,40 +72,23 @@ jobs:
           VS_PATH="$TOOLCHAIN_DIR/VC"
           SDK_VERSION=$(ls "$SDK_PATH/10/Include/" | sort -V | tail -n 1)
 
-          # Set environment variables so Chromium finds the Windows toolchain
           echo "WINDOWSSDKDIR=$SDK_PATH/10" >> $GITHUB_ENV
           echo "GYP_MSVS_OVERRIDE_PATH=$VS_PATH" >> $GITHUB_ENV
           echo "DEPOT_TOOLS_WIN_TOOLCHAIN_BASE_URL=$TOOLCHAIN_DIR" >> $GITHUB_ENV
           echo "GYP_MSVS_HASH_7393122652=e0b1a90051" >> $GITHUB_ENV
 
-      - name: Configure Priv Browser for Windows
+      - name: Configure Priv Browser for Multi-Platform Build
         run: |
           cd /home/user/priv_browser_build/priv-browser/src
-          gn gen out/Windows --args="target_os=\"win\" target_cpu=\"x64\" is_debug=false"
+          gn gen out/Default --args="target_os=[\"linux\", \"win\"] target_cpu=\"x64\" is_debug=false"
 
-      - name: Build Priv Browser for Windows
+      - name: Build Priv Browser (Both Windows & Linux)
         run: |
           cd /home/user/priv_browser_build/priv-browser/src
-          ninja -C out/Windows chrome -j$(nproc)
+          ninja -C out/Default chrome -j$(nproc)
 
-      - name: Upload Windows Build
+      - name: Upload Build Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: priv-browser-windows-build
-          path: /home/user/priv_browser_build/priv-browser/src/out/Windows/chrome.exe
-
-      - name: Configure Priv Browser for Linux
-        run: |
-          cd /home/user/priv_browser_build/priv-browser/src
-          gn gen out/Linux --args="target_os=\"linux\" target_cpu=\"x64\" is_debug=false"
-
-      - name: Build Priv Browser for Linux
-        run: |
-          cd /home/user/priv_browser_build/priv-browser/src
-          ninja -C out/Linux chrome -j$(nproc)
-
-      - name: Upload Linux Build
-        uses: actions/upload-artifact@v4
-        with:
-          name: priv-browser-linux-build
-          path: /home/user/priv_browser_build/priv-browser/src/out/Linux/chrome
+          name: priv-browser-build
+          path: /home/user/priv_browser_build/priv-browser/src/out/Default
