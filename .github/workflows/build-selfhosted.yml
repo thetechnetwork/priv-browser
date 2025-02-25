@@ -40,6 +40,7 @@ jobs:
             },
           ]
           target_os = ["linux", "win"]
+          cache_dir = "/home/user/priv_browser_build/.gclient_cache"
           EOL
 
       - name: Run `gclient sync` to Fetch Dependencies
@@ -47,10 +48,32 @@ jobs:
           cd /home/user/priv_browser_build/priv-browser
           gclient sync --nohooks --shallow
 
-      - name: Run Windows Toolchain Setup
+      - name: Use Pre-Downloaded Windows Toolchain
         run: |
-          cd /home/user/priv_browser_build/priv-browser/src
-          python3 build/vs_toolchain.py update --force
+          TOOLCHAIN_DIR="/home/user/priv_browser_build/win_toolchain"
+          mkdir -p "$TOOLCHAIN_DIR"
+          
+          # If toolchain is missing, download it from Google Drive
+          if [ ! -d "$TOOLCHAIN_DIR/VC" ]; then
+            echo "⬇️ Downloading Windows toolchain..."
+            wget --no-check-certificate -O win_toolchain.zip "https://drive.usercontent.google.com/download?id=1Z6DcuUdsL0pNCmHSmKA6CxHZlbL-CN1V&export=download&confirm=t"
+            unzip -o win_toolchain.zip -d "$TOOLCHAIN_DIR"
+            rm win_toolchain.zip
+          else
+            echo "✅ Windows toolchain already exists, skipping download."
+          fi
+
+          # Force Chromium to use the local toolchain
+          echo "DEPOT_TOOLS_WIN_TOOLCHAIN_BASE_URL=$TOOLCHAIN_DIR" >> $GITHUB_ENV
+          echo "GYP_MSVS_HASH_7393122652=e0b1a90051" >> $GITHUB_ENV
+
+          # Verify toolchain extraction
+          if [ ! -d "$TOOLCHAIN_DIR/VC" ]; then
+            echo "❌ Error: Windows toolchain not found after extraction!"
+            exit 1
+          fi
+          
+          echo "✅ Windows toolchain is ready!"
 
       - name: Set Windows Build Environment Variables
         run: |
@@ -59,22 +82,11 @@ jobs:
           VS_PATH="$TOOLCHAIN_DIR/VC"
           SDK_VERSION=$(ls "$SDK_PATH/10/Include/" | sort -V | tail -n 1)
 
-          REAL_SDK_PATH=$(realpath "$SDK_PATH/10")
-          echo "WINDOWSSDKDIR=$REAL_SDK_PATH" >> $GITHUB_ENV
-          echo "✅ Windows SDK found at $REAL_SDK_PATH"
-
-          REAL_VS_PATH=$(realpath "$VS_PATH")
-          echo "GYP_MSVS_OVERRIDE_PATH=$REAL_VS_PATH" >> $GITHUB_ENV
-          echo "✅ Visual Studio toolchain found at $REAL_VS_PATH"
-
-          echo "INCLUDE=$REAL_SDK_PATH/Include:$REAL_SDK_PATH/Include/$SDK_VERSION/um:$REAL_SDK_PATH/Include/$SDK_VERSION/shared:$REAL_SDK_PATH/Include/$SDK_VERSION/ucrt" >> $GITHUB_ENV
-          echo "LIB=$REAL_SDK_PATH/Lib/$SDK_VERSION/um/x64:$REAL_SDK_PATH/Lib/$SDK_VERSION/ucrt/x64" >> $GITHUB_ENV
-
-          echo "DEPOT_TOOLS_WIN_TOOLCHAIN_BASE_URL=file://$TOOLCHAIN_DIR" >> $GITHUB_ENV
-          echo "GYP_MSVS_HASH_2022=local" >> $GITHUB_ENV
-
-          export WINDOWSSDKDIR=$REAL_SDK_PATH
-          echo "✅ Exported WINDOWSSDKDIR: $WINDOWSSDKDIR"
+          # Set environment variables so Chromium finds the Windows toolchain
+          echo "WINDOWSSDKDIR=$SDK_PATH/10" >> $GITHUB_ENV
+          echo "GYP_MSVS_OVERRIDE_PATH=$VS_PATH" >> $GITHUB_ENV
+          echo "DEPOT_TOOLS_WIN_TOOLCHAIN_BASE_URL=$TOOLCHAIN_DIR" >> $GITHUB_ENV
+          echo "GYP_MSVS_HASH_7393122652=e0b1a90051" >> $GITHUB_ENV
 
       - name: Configure Priv Browser for Windows
         run: |
