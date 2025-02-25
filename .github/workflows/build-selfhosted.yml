@@ -20,7 +20,7 @@ jobs:
         id: check_toolchain
         run: |
           TOOLCHAIN_DIR="/home/user/priv_browser_build/win_toolchain"
-          if [ -d "$TOOLCHAIN_DIR" ] && [ "$(ls -A $TOOLCHAIN_DIR 2>/dev/null)" ]; then
+          if [ -d "$TOOLCHAIN_DIR" ] && [ "$(ls -A "$TOOLCHAIN_DIR" 2>/dev/null)" ]; then
             echo "✅ Windows toolchain already exists at $TOOLCHAIN_DIR. Skipping download."
             echo "TOOLCHAIN_EXISTS=true" >> $GITHUB_ENV
           else
@@ -41,14 +41,16 @@ jobs:
       - name: Set Windows Toolchain Environment Variables
         run: |
           TOOLCHAIN_DIR="/home/user/priv_browser_build/win_toolchain"
-          SDK_PATH=$(find $TOOLCHAIN_DIR -type d -name "WindowsKits" | head -n 1)
-          if [ -d "$SDK_PATH" ]; then
+          SDK_PATH=$(find "$TOOLCHAIN_DIR" -type d -name "Windows Kits" | head -n 1)
+
+          if [ -d "$SDK_PATH/10" ]; then
             echo "WINDOWSSDKDIR=$SDK_PATH/10" >> $GITHUB_ENV
             echo "Windows SDK found at $SDK_PATH/10"
           else
             echo "❌ Error: Windows SDK directory not found!"
             exit 1
           fi
+
           echo "DEPOT_TOOLS_WIN_TOOLCHAIN_BASE_URL=file://$TOOLCHAIN_DIR" >> $GITHUB_ENV
           echo "GYP_MSVS_HASH_2022=local" >> $GITHUB_ENV
           echo "Windows toolchain extracted and configured."
