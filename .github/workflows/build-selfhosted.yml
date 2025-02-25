@@ -1,28 +1,107 @@
-un cd /home/user/priv_browser_build/priv-browser/src
-  
-ERROR at //build/config/win/visual_studio_version.gni:29:7: Script returned non-zero exit code.
-      exec_script("../../vs_toolchain.py", [ "get_toolchain_dir" ], "scope")
-      ^----------
-Current dir: /home/user/priv_browser_build/priv-browser/src/out/Windows/
-Command: python3 /home/user/priv_browser_build/priv-browser/src/build/vs_toolchain.py get_toolchain_dir
-Returned 1.
-stderr:
-Traceback (most recent call last):
-  File "/home/user/priv_browser_build/priv-browser/src/build/vs_toolchain.py", line 656, in <module>
-    sys.exit(main())
-             ^^^^^^
-  File "/home/user/priv_browser_build/priv-browser/src/build/vs_toolchain.py", line 652, in main
-    return commands[sys.argv[1]](*sys.argv[2:])
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/user/priv_browser_build/priv-browser/src/build/vs_toolchain.py", line 637, in GetToolchainDir
-    os.environ['GYP_MSVS_OVERRIDE_PATH'])), ToGNString(SDK_VERSION),
-    ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "<frozen os>", line 685, in __getitem__
-KeyError: 'GYP_MSVS_OVERRIDE_PATH'
-See //build/gn_logs.gni:32:3: whence it was imported.
-  import("//build/config/win/visual_studio_version.gni")
-  ^----------------------------------------------------
-See //BUILD.gn:20:1: whence it was imported.
-import("//build/gn_logs.gni")
-^---------------------------
-Error: Process completed with exit code 1.
+name: Build Priv Browser for Windows & Linux
+
+on:
+  workflow_dispatch:  # Manual trigger
+
+jobs:
+  build:
+    runs-on: [self-hosted, linux, chromium-build]  # Ensure correct runner
+
+    steps:
+      - name: Checkout Priv Browser Repo
+        uses: actions/checkout@v4
+
+      - name: Install Dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y build-essential ninja-build clang lld cmake python3 python3-pip git mingw-w64 unzip wget
+
+      - name: Check for Existing Windows Toolchain
+        id: check_toolchain
+        run: |
+          TOOLCHAIN_DIR="/home/user/priv_browser_build/win_toolchain"
+          if [ -d "$TOOLCHAIN_DIR" ] && [ "$(ls -A "$TOOLCHAIN_DIR" 2>/dev/null)" ]; then
+            echo "✅ Windows toolchain already exists at $TOOLCHAIN_DIR. Skipping download."
+            echo "TOOLCHAIN_EXISTS=true" >> $GITHUB_ENV
+          else
+            echo "❌ Windows toolchain not found or empty at $TOOLCHAIN_DIR. Proceeding with download."
+            echo "TOOLCHAIN_EXISTS=false" >> $GITHUB_ENV
+          fi
+
+      - name: Download Windows Toolchain from Google Drive (if missing)
+        if: env.TOOLCHAIN_EXISTS == 'false'
+        run: |
+          TOOLCHAIN_URL="https://drive.usercontent.google.com/download?id=1Z6DcuUdsL0pNCmHSmKA6CxHZlbL-CN1V&export=download&confirm=t"
+          TOOLCHAIN_ZIP="win_toolchain.zip"
+          wget --no-check-certificate -O $TOOLCHAIN_ZIP "$TOOLCHAIN_URL"
+          mkdir -p /home/user/priv_browser_build/win_toolchain
+          unzip -o $TOOLCHAIN_ZIP -d /home/user/priv_browser_build/win_toolchain
+          rm $TOOLCHAIN_ZIP
+
+      - name: Set Windows Toolchain Environment Variables
+        run: |
+          TOOLCHAIN_DIR="/home/user/priv_browser_build/win_toolchain"
+          SDK_PATH=$(find "$TOOLCHAIN_DIR" -type d -name "Windows Kits" | head -n 1)
+          VS_PATH=$(find "$TOOLCHAIN_DIR" -type d -name "Microsoft Visual Studio" | head -n 1)
+
+          if [ -d "$SDK_PATH/10" ]; then
+            echo "WINDOWSSDKDIR=$SDK_PATH/10" >> $GITHUB_ENV
+            echo "Windows SDK found at $SDK_PATH/10"
+          else
+            echo "❌ Error: Windows SDK directory not found!"
+            exit 1
+          fi
+
+          if [ -d "$VS_PATH" ]; then
+            echo "GYP_MSVS_OVERRIDE_PATH=$VS_PATH" >> $GITHUB_ENV
+            echo "Visual Studio toolchain found at $VS_PATH"
+          else
+            echo "❌ Error: Visual Studio toolchain directory not found!"
+            exit 1
+          fi
+
+          echo "DEPOT_TOOLS_WIN_TOOLCHAIN_BASE_URL=file://$TOOLCHAIN_DIR" >> $GITHUB_ENV
+          echo "GYP_MSVS_HASH_2022=local" >> $GITHUB_ENV
+          echo "Windows toolchain extracted and configured."
+
+      - name: Sync Dependencies With Windows Target
+        run: |
+          cd /home/user/priv_browser_build/priv-browser
+          gclient sync
+
+      - name: Run gclient runhooks
+        run: |
+          cd /home/user/priv_browser_build/priv-browser/src
+          gclient runhooks
+
+      - name: Configure Priv Browser for Windows
+        run: |
+          cd /home/user/priv_browser_build/priv-browser/src
+          gn gen out/Windows --args="target_os=\"win\" target_cpu=\"x64\" is_debug=false is_component_build=false enable_nacl=false windows_sdk_path=\"$WINDOWSSDKDIR\" msvs_root=\"$GYP_MSVS_OVERRIDE_PATH\""
+
+      - name: Build Priv Browser for Windows
+        run: |
+          cd /home/user/priv_browser_build/priv-browser/src
+          ninja -C out/Windows chrome -j$(nproc)
+
+      - name: Configure Priv Browser for Linux
+        run: |
+          cd /home/user/priv_browser_build/priv-browser/src
+          gn gen out/Linux --args="target_os=\"linux\" target_cpu=\"x64\" is_debug=false is_component_build=false enable_nacl=false"
+
+      - name: Build Priv Browser for Linux
+        run: |
+          cd /home/user/priv_browser_build/priv-browser/src
+          ninja -C out/Linux chrome -j$(nproc)
+
+      - name: Upload Windows Build
+        uses: actions/upload-artifact@v4
+        with:
+          name: priv-browser-windows-build
+          path: /home/user/priv_browser_build/priv-browser/src/out/Windows/chrome.exe
+
+      - name: Upload Linux Build
+        uses: actions/upload-artifact@v4
+        with:
+          name: priv-browser-linux-build
+          path: /home/user/priv_browser_build/priv-browser/src/out/Linux/chrome
