@@ -45,30 +45,32 @@ jobs:
           VS_PATH="$TOOLCHAIN_DIR/VC"
           SDK_VERSION=$(ls "$SDK_PATH/10/Include/" | sort -V | tail -n 1)  # Detect latest SDK version
 
-          if [ -d "$SDK_PATH/10" ]; then
-            echo "WINDOWSSDKDIR=/home/user/priv_browser_build/win_toolchain/Windows\ Kits/10" >> $GITHUB_ENV
-            echo "✅ Windows SDK found at /home/user/priv_browser_build/win_toolchain/Windows\ Kits/10"
-          else
-            echo "❌ Error: Windows SDK directory not found!"
-            exit 1
-          fi
+          # Use realpath to ensure correct path handling
+          REAL_SDK_PATH=$(realpath "$SDK_PATH/10")
+          echo "WINDOWSSDKDIR=$REAL_SDK_PATH" >> $GITHUB_ENV
+          echo "✅ Windows SDK found at $REAL_SDK_PATH"
 
-          if [ -d "$VS_PATH" ]; then
-            echo "GYP_MSVS_OVERRIDE_PATH=$VS_PATH" >> $GITHUB_ENV
-            echo "✅ Visual Studio toolchain found at $VS_PATH"
-          else
-            echo "❌ Error: Visual Studio toolchain directory not found!"
-            ls -R "$TOOLCHAIN_DIR"  # Debugging output
-            exit 1
-          fi
+          REAL_VS_PATH=$(realpath "$VS_PATH")
+          echo "GYP_MSVS_OVERRIDE_PATH=$REAL_VS_PATH" >> $GITHUB_ENV
+          echo "✅ Visual Studio toolchain found at $REAL_VS_PATH"
 
-          echo "INCLUDE=/home/user/priv_browser_build/win_toolchain/Windows\ Kits/10/Include/$SDK_VERSION/um:/home/user/priv_browser_build/win_toolchain/Windows\ Kits/10/Include/$SDK_VERSION/shared:/home/user/priv_browser_build/win_toolchain/Windows\ Kits/10/Include/$SDK_VERSION/ucrt" >> $GITHUB_ENV
+          echo "INCLUDE=$REAL_SDK_PATH/Include/$SDK_VERSION/um:$REAL_SDK_PATH/Include/$SDK_VERSION/shared:$REAL_SDK_PATH/Include/$SDK_VERSION/ucrt" >> $GITHUB_ENV
+          echo "LIB=$REAL_SDK_PATH/Lib/$SDK_VERSION/um/x64:$REAL_SDK_PATH/Lib/$SDK_VERSION/ucrt/x64" >> $GITHUB_ENV
 
-          echo "LIB=/home/user/priv_browser_build/win_toolchain/Windows\ Kits/10/Lib/$SDK_VERSION/um/x64:/home/user/priv_browser_build/win_toolchain/Windows\ Kits/10/Lib/$SDK_VERSION/ucrt/x64" >> $GITHUB_ENV
-
-          echo "DEPOT_TOOLS_WIN_TOOLCHAIN_BASE_URL=file:///home/user/priv_browser_build/win_toolchain" >> $GITHUB_ENV
+          echo "DEPOT_TOOLS_WIN_TOOLCHAIN_BASE_URL=file://$TOOLCHAIN_DIR" >> $GITHUB_ENV
           echo "GYP_MSVS_HASH_2022=local" >> $GITHUB_ENV
           echo "Windows toolchain extracted and configured."
+
+      - name: Verify Windows SDK (`dcomp.h`)
+        run: |
+          DCOMP_PATH="$WINDOWSSDKDIR/Include/$SDK_VERSION/um/dcomp.h"
+          if [ ! -f "$DCOMP_PATH" ]; then
+            echo "❌ Error: dcomp.h is missing! Windows SDK may be incomplete."
+            echo "⚠️ Please repackage the Windows SDK on a Windows machine."
+            exit 1
+          else
+            echo "✅ dcomp.h found: $DCOMP_PATH"
+          fi
 
       - name: Sync Dependencies With Windows Target
         run: |
