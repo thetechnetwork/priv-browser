@@ -42,11 +42,11 @@ jobs:
         run: |
           TOOLCHAIN_DIR="/home/user/priv_browser_build/win_toolchain"
           SDK_PATH=$(find "$TOOLCHAIN_DIR" -type d -name "Windows Kits" | head -n 1)
-          VS_PATH=$(find "$TOOLCHAIN_DIR" -type d -name "Microsoft Visual Studio" | head -n 1)
+          VS_PATH="$TOOLCHAIN_DIR/VC"
 
           if [ -d "$SDK_PATH/10" ]; then
             echo "WINDOWSSDKDIR=$SDK_PATH/10" >> $GITHUB_ENV
-            echo "Windows SDK found at $SDK_PATH/10"
+            echo "✅ Windows SDK found at $SDK_PATH/10"
           else
             echo "❌ Error: Windows SDK directory not found!"
             exit 1
@@ -54,9 +54,10 @@ jobs:
 
           if [ -d "$VS_PATH" ]; then
             echo "GYP_MSVS_OVERRIDE_PATH=$VS_PATH" >> $GITHUB_ENV
-            echo "Visual Studio toolchain found at $VS_PATH"
+            echo "✅ Visual Studio toolchain found at $VS_PATH"
           else
             echo "❌ Error: Visual Studio toolchain directory not found!"
+            ls -R "$TOOLCHAIN_DIR"  # Debugging output
             exit 1
           fi
 
