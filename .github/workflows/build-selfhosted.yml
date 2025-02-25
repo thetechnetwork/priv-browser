@@ -49,10 +49,15 @@ jobs:
           cd ~/priv_browser_build/priv-browser/src
           gclient runhooks
 
+      - name: Install ciopfs for Windows Cross-Compilation
+        run: |
+          sudo apt update
+          sudo apt install -y ciopfs  # ✅ FIX: Install ciopfs before running vs_toolchain.py
+
       - name: Set Up Windows Toolchain
         run: |
           cd ~/priv_browser_build/priv-browser/src
-          python3 build/vs_toolchain.py update --force  # ✅ FIX: Download Windows SDK & MSVC toolchain
+          python3 build/vs_toolchain.py update --force  # ✅ FIX: Will now succeed with ciopfs installed
 
       - name: Configure Priv Browser for Linux
         run: |
