@@ -11,63 +11,35 @@ jobs:
       - name: Checkout Priv Browser Repo
         uses: actions/checkout@v4
 
-      - name: Install or Update Depot Tools
+      - name: Install Dependencies
         run: |
-          cd ~
-          if [ -d "depot_tools" ]; then
-            echo "✅ depot_tools already exists. Updating..."
-            cd depot_tools
-            git pull origin main
-          else
-            echo "📥 Cloning depot_tools..."
-            git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
-          fi
-          echo 'export PATH="$HOME/depot_tools:$PATH"' >> ~/.bashrc
-          source ~/.bashrc
+          sudo apt update
+          sudo apt install -y build-essential ninja-build clang lld cmake python3 python3-pip git mingw-w64 unzip wget
 
-      - name: Create .gclient Config
+      - name: Download Windows Toolchain from Google Drive
+        run: |
+          TOOLCHAIN_URL="https://drive.usercontent.google.com/download?id=1Z6DcuUdsL0pNCmHSmKA6CxHZlbL-CN1V&export=download&confirm=t"
+          TOOLCHAIN_ZIP="win_toolchain.zip"
+          wget --no-check-certificate -O $TOOLCHAIN_ZIP "$TOOLCHAIN_URL"
+          mkdir -p ~/priv_browser_build/win_toolchain
+          unzip -o $TOOLCHAIN_ZIP -d ~/priv_browser_build/win_toolchain
+          rm $TOOLCHAIN_ZIP
+
+      - name: Set Windows Toolchain Environment Variables
+        run: |
+          echo "DEPOT_TOOLS_WIN_TOOLCHAIN_BASE_URL=file://$HOME/priv_browser_build/win_toolchain" >> $GITHUB_ENV
+          echo "GYP_MSVS_HASH_2022=local" >> $GITHUB_ENV  # Adjust hash as needed
+          echo "Windows toolchain extracted and configured."
+
+      - name: Sync Dependencies With Windows Target
         run: |
           cd ~/priv_browser_build/priv-browser
-          cat <<EOF > .gclient
-          solutions = [
-            {
-              "name": "src",
-              "url": "https://github.com/TheTechNetwork/priv-browser.git",
-              "managed": False,
-              "custom_deps": {},
-            },
-          ]
-          EOF
-
-      - name: Sync Dependencies Without Pulling Source
-        run: |
-          cd ~/priv_browser_build/priv-browser
-          gclient sync --nohooks
+          gclient sync
 
       - name: Run gclient runhooks
         run: |
           cd ~/priv_browser_build/priv-browser/src
           gclient runhooks
-
-      - name: Install ciopfs for Windows Cross-Compilation
-        run: |
-          sudo apt update
-          sudo apt install -y ciopfs  # ✅ FIX: Install ciopfs before running vs_toolchain.py
-
-      - name: Set Up Windows Toolchain
-        run: |
-          cd ~/priv_browser_build/priv-browser/src
-          python3 build/vs_toolchain.py update --force  # ✅ FIX: Will now succeed with ciopfs installed
-
-      - name: Configure Priv Browser for Linux
-        run: |
-          cd ~/priv_browser_build/priv-browser/src
-          gn gen out/Linux --args="target_os=\"linux\" target_cpu=\"x64\" is_debug=false is_component_build=false enable_nacl=false"
-
-      - name: Build Priv Browser for Linux
-        run: |
-          cd ~/priv_browser_build/priv-browser/src
-          ninja -C out/Linux chrome -j$(nproc)
 
       - name: Configure Priv Browser for Windows
         run: |
@@ -79,14 +51,24 @@ jobs:
           cd ~/priv_browser_build/priv-browser/src
           ninja -C out/Windows chrome -j$(nproc)
 
-      - name: Upload Linux Build
-        uses: actions/upload-artifact@v4
-        with:
-          name: priv-browser-linux-build
-          path: ~/priv_browser_build/priv-browser/src/out/Linux/chrome
+      - name: Configure Priv Browser for Linux
+        run: |
+          cd ~/priv_browser_build/priv-browser/src
+          gn gen out/Linux --args="target_os=\"linux\" target_cpu=\"x64\" is_debug=false is_component_build=false enable_nacl=false"
+
+      - name: Build Priv Browser for Linux
+        run: |
+          cd ~/priv_browser_build/priv-browser/src
+          ninja -C out/Linux chrome -j$(nproc)
 
       - name: Upload Windows Build
         uses: actions/upload-artifact@v4
         with:
           name: priv-browser-windows-build
           path: ~/priv_browser_build/priv-browser/src/out/Windows/chrome.exe
+
+      - name: Upload Linux Build
+        uses: actions/upload-artifact@v4
+        with:
+          name: priv-browser-linux-build
+          path: ~/priv_browser_build/priv-browser/src/out/Linux/chrome
