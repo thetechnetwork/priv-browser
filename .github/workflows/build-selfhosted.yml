@@ -45,7 +45,7 @@ jobs:
       - name: Sync Chromium Dependencies
         run: |
           cd /home/user/priv_browser_build/priv-browser
-          gclient sync --nohooks --shallow
+          gclient sync #--nohooks --shallow
 
       - name: Setup Windows Toolchain
         run: |
