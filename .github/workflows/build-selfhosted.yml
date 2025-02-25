@@ -62,8 +62,12 @@ jobs:
             exit 1
           fi
 
-          echo "INCLUDE=$SDK_PATH/10/Include/$SDK_VERSION/um;$SDK_PATH/10/Include/$SDK_VERSION/shared;$SDK_PATH/10/Include/$SDK_VERSION/ucrt;$VS_PATH/Include" >> $GITHUB_ENV
-          echo "LIB=$SDK_PATH/10/Lib/$SDK_VERSION/um/x64;$SDK_PATH/10/Lib/$SDK_VERSION/ucrt/x64;$VS_PATH/Lib/x64" >> $GITHUB_ENV
+          echo "INCLUDE=/home/user/priv_browser_build/win_toolchain/Windows\ Kits/10/Include/$SDK_VERSION/um"\
+":/home/user/priv_browser_build/win_toolchain/Windows\ Kits/10/Include/$SDK_VERSION/shared"\
+":/home/user/priv_browser_build/win_toolchain/Windows\ Kits/10/Include/$SDK_VERSION/ucrt" >> $GITHUB_ENV
+
+          echo "LIB=/home/user/priv_browser_build/win_toolchain/Windows\ Kits/10/Lib/$SDK_VERSION/um/x64"\
+":/home/user/priv_browser_build/win_toolchain/Windows\ Kits/10/Lib/$SDK_VERSION/ucrt/x64" >> $GITHUB_ENV
 
           echo "DEPOT_TOOLS_WIN_TOOLCHAIN_BASE_URL=file://$TOOLCHAIN_DIR" >> $GITHUB_ENV
           echo "GYP_MSVS_HASH_2022=local" >> $GITHUB_ENV
@@ -83,6 +87,13 @@ jobs:
         run: |
           cd /home/user/priv_browser_build/priv-browser/src
           gn gen out/Windows --args="target_os=\"win\" target_cpu=\"x64\" is_debug=false is_component_build=false enable_nacl=false windows_sdk_path=\"$WINDOWSSDKDIR\" msvs_root=\"$GYP_MSVS_OVERRIDE_PATH\""
+
+      - name: Run Windows Toolchain Setup
+        run: |
+          python3 "/home/user/priv_browser_build/priv-browser/src/build/toolchain/win/setup_toolchain.py" \
+            "/home/user/priv_browser_build/win_toolchain/VC" \
+            "/home/user/priv_browser_build/win_toolchain/Windows\ Kits/10" \
+            none win x64 environment.x64
 
       - name: Build Priv Browser for Windows
         run: |
