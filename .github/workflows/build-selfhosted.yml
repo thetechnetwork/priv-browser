@@ -24,11 +24,21 @@ jobs:
           mkdir -p ~/priv_browser_build/win_toolchain
           unzip -o $TOOLCHAIN_ZIP -d ~/priv_browser_build/win_toolchain
           rm $TOOLCHAIN_ZIP
+          
+          # Find the Windows SDK version in extracted files
+          SDK_PATH=$(find ~/priv_browser_build/win_toolchain -type d -name "WindowsKits" | head -n 1)
+          if [ -d "$SDK_PATH" ]; then
+            echo "WINDOWSSDKDIR=$SDK_PATH/10" >> $GITHUB_ENV
+            echo "Windows SDK found at $SDK_PATH/10"
+          else
+            echo "Error: Windows SDK directory not found!"
+            exit 1
+          fi
 
       - name: Set Windows Toolchain Environment Variables
         run: |
           echo "DEPOT_TOOLS_WIN_TOOLCHAIN_BASE_URL=file://$HOME/priv_browser_build/win_toolchain" >> $GITHUB_ENV
-          echo "GYP_MSVS_HASH_2022=local" >> $GITHUB_ENV  # Adjust hash as needed
+          echo "GYP_MSVS_HASH_2022=local" >> $GITHUB_ENV  
           echo "Windows toolchain extracted and configured."
 
       - name: Sync Dependencies With Windows Target
@@ -44,7 +54,7 @@ jobs:
       - name: Configure Priv Browser for Windows
         run: |
           cd ~/priv_browser_build/priv-browser/src
-          gn gen out/Windows --args="target_os=\"win\" target_cpu=\"x64\" is_debug=false is_component_build=false enable_nacl=false"
+          gn gen out/Windows --args="target_os=\"win\" target_cpu=\"x64\" is_debug=false is_component_build=false enable_nacl=false windows_sdk_path=\"$WINDOWSSDKDIR\""
 
       - name: Build Priv Browser for Windows
         run: |
