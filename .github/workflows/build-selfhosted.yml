@@ -19,11 +19,12 @@ jobs:
       - name: Check for Existing Windows Toolchain
         id: check_toolchain
         run: |
-          if [ -d "~/priv_browser_build/win_toolchain" ]; then
-            echo "Windows toolchain already exists. Skipping download."
+          TOOLCHAIN_DIR="/home/user/priv_browser_build/win_toolchain"
+          if [ -d "$TOOLCHAIN_DIR" ] && [ "$(ls -A $TOOLCHAIN_DIR 2>/dev/null)" ]; then
+            echo "✅ Windows toolchain already exists at $TOOLCHAIN_DIR. Skipping download."
             echo "TOOLCHAIN_EXISTS=true" >> $GITHUB_ENV
           else
-            echo "Windows toolchain not found. Proceeding with download."
+            echo "❌ Windows toolchain not found or empty at $TOOLCHAIN_DIR. Proceeding with download."
             echo "TOOLCHAIN_EXISTS=false" >> $GITHUB_ENV
           fi
 
@@ -33,64 +34,63 @@ jobs:
           TOOLCHAIN_URL="https://drive.usercontent.google.com/download?id=1Z6DcuUdsL0pNCmHSmKA6CxHZlbL-CN1V&export=download&confirm=t"
           TOOLCHAIN_ZIP="win_toolchain.zip"
           wget --no-check-certificate -O $TOOLCHAIN_ZIP "$TOOLCHAIN_URL"
-          mkdir -p ~/priv_browser_build/win_toolchain
-          unzip -o $TOOLCHAIN_ZIP -d ~/priv_browser_build/win_toolchain
+          mkdir -p /home/user/priv_browser_build/win_toolchain
+          unzip -o $TOOLCHAIN_ZIP -d /home/user/priv_browser_build/win_toolchain
           rm $TOOLCHAIN_ZIP
-          
-          # Find the Windows SDK version in extracted files
-          SDK_PATH=$(find ~/priv_browser_build/win_toolchain -type d -name "WindowsKits" | head -n 1)
+
+      - name: Set Windows Toolchain Environment Variables
+        run: |
+          TOOLCHAIN_DIR="/home/user/priv_browser_build/win_toolchain"
+          SDK_PATH=$(find $TOOLCHAIN_DIR -type d -name "WindowsKits" | head -n 1)
           if [ -d "$SDK_PATH" ]; then
             echo "WINDOWSSDKDIR=$SDK_PATH/10" >> $GITHUB_ENV
             echo "Windows SDK found at $SDK_PATH/10"
           else
-            echo "Error: Windows SDK directory not found!"
+            echo "❌ Error: Windows SDK directory not found!"
             exit 1
           fi
-
-      - name: Set Windows Toolchain Environment Variables
-        run: |
-          echo "DEPOT_TOOLS_WIN_TOOLCHAIN_BASE_URL=file://$HOME/priv_browser_build/win_toolchain" >> $GITHUB_ENV
-          echo "GYP_MSVS_HASH_2022=local" >> $GITHUB_ENV  
+          echo "DEPOT_TOOLS_WIN_TOOLCHAIN_BASE_URL=file://$TOOLCHAIN_DIR" >> $GITHUB_ENV
+          echo "GYP_MSVS_HASH_2022=local" >> $GITHUB_ENV
           echo "Windows toolchain extracted and configured."
 
       - name: Sync Dependencies With Windows Target
         run: |
-          cd ~/priv_browser_build/priv-browser
+          cd /home/user/priv_browser_build/priv-browser
           gclient sync
 
       - name: Run gclient runhooks
         run: |
-          cd ~/priv_browser_build/priv-browser/src
+          cd /home/user/priv_browser_build/priv-browser/src
           gclient runhooks
 
       - name: Configure Priv Browser for Windows
         run: |
-          cd ~/priv_browser_build/priv-browser/src
+          cd /home/user/priv_browser_build/priv-browser/src
           gn gen out/Windows --args="target_os=\"win\" target_cpu=\"x64\" is_debug=false is_component_build=false enable_nacl=false windows_sdk_path=\"$WINDOWSSDKDIR\""
 
       - name: Build Priv Browser for Windows
         run: |
-          cd ~/priv_browser_build/priv-browser/src
+          cd /home/user/priv_browser_build/priv-browser/src
           ninja -C out/Windows chrome -j$(nproc)
 
       - name: Configure Priv Browser for Linux
         run: |
-          cd ~/priv_browser_build/priv-browser/src
+          cd /home/user/priv_browser_build/priv-browser/src
           gn gen out/Linux --args="target_os=\"linux\" target_cpu=\"x64\" is_debug=false is_component_build=false enable_nacl=false"
 
       - name: Build Priv Browser for Linux
         run: |
-          cd ~/priv_browser_build/priv-browser/src
+          cd /home/user/priv_browser_build/priv-browser/src
           ninja -C out/Linux chrome -j$(nproc)
 
       - name: Upload Windows Build
         uses: actions/upload-artifact@v4
         with:
           name: priv-browser-windows-build
-          path: ~/priv_browser_build/priv-browser/src/out/Windows/chrome.exe
+          path: /home/user/priv_browser_build/priv-browser/src/out/Windows/chrome.exe
 
       - name: Upload Linux Build
         uses: actions/upload-artifact@v4
         with:
           name: priv-browser-linux-build
-          path: ~/priv_browser_build/priv-browser/src/out/Linux/chrome
+          path: /home/user/priv_browser_build/priv-browser/src/out/Linux/chrome
