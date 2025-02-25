@@ -46,43 +46,32 @@ jobs:
 
       - name: Run gclient runhooks
         run: |
-          cd ~/priv_browser_build/priv-browser/src  # ✅ FIX: Use `src/` as the root directory
+          cd ~/priv_browser_build/priv-browser/src
           gclient runhooks
 
-      - name: Clone Private Patches Repository
+      - name: Set Up Windows Toolchain
         run: |
-          cd ~/priv_browser_build
-          
-          if [ ! -d "patches" ]; then
-            GIT_SSH_COMMAND="ssh -i ~/.ssh/priv-browser-patches -p 443" git clone git@ssh.github.com:TheTechNetwork/priv-browser-patches.git patches
-          else
-            cd patches
-            GIT_SSH_COMMAND="ssh -i ~/.ssh/priv-browser-patches -p 443" git pull origin main
-          fi
-
-      #- name: Apply Patches
-      #  run: |
-      #    cd ~/priv_browser_build/priv-browser/src
-      #    for patch in ~/priv_browser_build/patches/*.patch; do git apply "$patch"; done
+          cd ~/priv_browser_build/priv-browser/src
+          python3 build/vs_toolchain.py update --force  # ✅ FIX: Download Windows SDK & MSVC toolchain
 
       - name: Configure Priv Browser for Linux
         run: |
-          cd ~/priv_browser_build/priv-browser/src  # ✅ FIX: Run inside `src/`
+          cd ~/priv_browser_build/priv-browser/src
           gn gen out/Linux --args="target_os=\"linux\" target_cpu=\"x64\" is_debug=false is_component_build=false enable_nacl=false"
 
       - name: Build Priv Browser for Linux
         run: |
-          cd ~/priv_browser_build/priv-browser/src  # ✅ FIX: Run inside `src/`
+          cd ~/priv_browser_build/priv-browser/src
           ninja -C out/Linux chrome -j$(nproc)
 
       - name: Configure Priv Browser for Windows
         run: |
-          cd ~/priv_browser_build/priv-browser/src  # ✅ FIX: Run inside `src/`
+          cd ~/priv_browser_build/priv-browser/src
           gn gen out/Windows --args="target_os=\"win\" target_cpu=\"x64\" is_debug=false is_component_build=false enable_nacl=false"
 
       - name: Build Priv Browser for Windows
         run: |
-          cd ~/priv_browser_build/priv-browser/src  # ✅ FIX: Run inside `src/`
+          cd ~/priv_browser_build/priv-browser/src
           ninja -C out/Windows chrome -j$(nproc)
 
       - name: Upload Linux Build
