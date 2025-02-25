@@ -26,7 +26,7 @@ jobs:
           fi
           echo "PATH=$PATH:/home/user/priv_browser_build/depot_tools" >> $GITHUB_ENV
 
-      - name: Configure `.gclient` for Both Windows & Linux
+      - name: Configure `.gclient`
         run: |
           cat > /home/user/priv_browser_build/priv-browser/.gclient <<EOL
           solutions = [
@@ -61,7 +61,6 @@ jobs:
             echo "✅ Windows toolchain already exists, skipping download."
           fi
 
-          # Set required environment variables
           echo "DEPOT_TOOLS_WIN_TOOLCHAIN_BASE_URL=$TOOLCHAIN_DIR" >> $GITHUB_ENV
           echo "GYP_MSVS_HASH_7393122652=e0b1a90051" >> $GITHUB_ENV
 
@@ -77,18 +76,34 @@ jobs:
           echo "DEPOT_TOOLS_WIN_TOOLCHAIN_BASE_URL=$TOOLCHAIN_DIR" >> $GITHUB_ENV
           echo "GYP_MSVS_HASH_7393122652=e0b1a90051" >> $GITHUB_ENV
 
-      - name: Configure Priv Browser for Multi-Platform Build
+      - name: Configure Priv Browser for Linux
         run: |
           cd /home/user/priv_browser_build/priv-browser/src
-          gn gen out/Default --args="target_os=[\"linux\", \"win\"] target_cpu=\"x64\" is_debug=false"
+          gn gen out/Linux --args="target_os=\"linux\" target_cpu=\"x64\" is_debug=false"
 
-      - name: Build Priv Browser (Both Windows & Linux)
+      - name: Configure Priv Browser for Windows
         run: |
           cd /home/user/priv_browser_build/priv-browser/src
-          ninja -C out/Default chrome -j$(nproc)
+          gn gen out/Windows --args="target_os=\"win\" target_cpu=\"x64\" is_debug=false"
 
-      - name: Upload Build Artifacts
+      - name: Build Priv Browser (Linux)
+        run: |
+          cd /home/user/priv_browser_build/priv-browser/src
+          ninja -C out/Linux chrome -j$(nproc)
+
+      - name: Build Priv Browser (Windows)
+        run: |
+          cd /home/user/priv_browser_build/priv-browser/src
+          ninja -C out/Windows chrome -j$(nproc)
+
+      - name: Upload Linux Build
         uses: actions/upload-artifact@v4
         with:
-          name: priv-browser-build
-          path: /home/user/priv_browser_build/priv-browser/src/out/Default
+          name: priv-browser-linux-build
+          path: /home/user/priv_browser_build/priv-browser/src/out/Linux/chrome
+
+      - name: Upload Windows Build
+        uses: actions/upload-artifact@v4
+        with:
+          name: priv-browser-windows-build
+          path: /home/user/priv_browser_build/priv-browser/src/out/Windows/chrome.exe
