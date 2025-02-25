@@ -39,10 +39,10 @@ jobs:
               "custom_vars": {},
             },
           ]
-          target_os = ["win"]
+          target_os = ["linux", "win"]
           EOL
 
-      - name: Run `gclient sync` to Fetch Windows Dependencies
+      - name: Run `gclient sync` to Fetch Dependencies
         run: |
           cd /home/user/priv_browser_build/priv-browser
           gclient sync --nohooks --shallow
@@ -59,7 +59,6 @@ jobs:
           VS_PATH="$TOOLCHAIN_DIR/VC"
           SDK_VERSION=$(ls "$SDK_PATH/10/Include/" | sort -V | tail -n 1)
 
-          # Ensure SDK path is set correctly
           REAL_SDK_PATH=$(realpath "$SDK_PATH/10")
           echo "WINDOWSSDKDIR=$REAL_SDK_PATH" >> $GITHUB_ENV
           echo "✅ Windows SDK found at $REAL_SDK_PATH"
