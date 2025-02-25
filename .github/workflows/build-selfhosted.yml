@@ -63,11 +63,11 @@ jobs:
           fi
 
           echo "INCLUDE=/home/user/priv_browser_build/win_toolchain/Windows\ Kits/10/Include/$SDK_VERSION/um"\
-":/home/user/priv_browser_build/win_toolchain/Windows\ Kits/10/Include/$SDK_VERSION/shared"\
-":/home/user/priv_browser_build/win_toolchain/Windows\ Kits/10/Include/$SDK_VERSION/ucrt" >> $GITHUB_ENV
+          ":/home/user/priv_browser_build/win_toolchain/Windows\ Kits/10/Include/$SDK_VERSION/shared"\
+          ":/home/user/priv_browser_build/win_toolchain/Windows\ Kits/10/Include/$SDK_VERSION/ucrt" >> $GITHUB_ENV
 
           echo "LIB=/home/user/priv_browser_build/win_toolchain/Windows\ Kits/10/Lib/$SDK_VERSION/um/x64"\
-":/home/user/priv_browser_build/win_toolchain/Windows\ Kits/10/Lib/$SDK_VERSION/ucrt/x64" >> $GITHUB_ENV
+          ":/home/user/priv_browser_build/win_toolchain/Windows\ Kits/10/Lib/$SDK_VERSION/ucrt/x64" >> $GITHUB_ENV
 
           echo "DEPOT_TOOLS_WIN_TOOLCHAIN_BASE_URL=file://$TOOLCHAIN_DIR" >> $GITHUB_ENV
           echo "GYP_MSVS_HASH_2022=local" >> $GITHUB_ENV
