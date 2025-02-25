@@ -43,6 +43,7 @@ jobs:
           TOOLCHAIN_DIR="/home/user/priv_browser_build/win_toolchain"
           SDK_PATH=$(find "$TOOLCHAIN_DIR" -type d -name "Windows Kits" | head -n 1)
           VS_PATH="$TOOLCHAIN_DIR/VC"
+          SDK_VERSION=$(ls "$SDK_PATH/10/Include/" | sort -V | tail -n 1)  # Detect latest SDK version
 
           if [ -d "$SDK_PATH/10" ]; then
             echo "WINDOWSSDKDIR=$SDK_PATH/10" >> $GITHUB_ENV
@@ -60,6 +61,9 @@ jobs:
             ls -R "$TOOLCHAIN_DIR"  # Debugging output
             exit 1
           fi
+
+          echo "INCLUDE=$SDK_PATH/10/Include/$SDK_VERSION/um;$SDK_PATH/10/Include/$SDK_VERSION/shared;$SDK_PATH/10/Include/$SDK_VERSION/ucrt;$VS_PATH/Include" >> $GITHUB_ENV
+          echo "LIB=$SDK_PATH/10/Lib/$SDK_VERSION/um/x64;$SDK_PATH/10/Lib/$SDK_VERSION/ucrt/x64;$VS_PATH/Lib/x64" >> $GITHUB_ENV
 
           echo "DEPOT_TOOLS_WIN_TOOLCHAIN_BASE_URL=file://$TOOLCHAIN_DIR" >> $GITHUB_ENV
           echo "GYP_MSVS_HASH_2022=local" >> $GITHUB_ENV
