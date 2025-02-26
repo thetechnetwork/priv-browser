@@ -258,6 +258,11 @@ extern const char kDevToolsProjectSettingsName[];
 extern const char kDevToolsProjectSettingsDescription[];
 #endif  // !BUILDFLAG(IS_ANDROID)
 
+#if !BUILDFLAG(IS_ANDROID)
+extern const char kDevToolsCSSValueTracingName[];
+extern const char kDevToolsCSSValueTracingDescription[];
+#endif  // !BUILDFLAG(IS_ANDROID)
+
 #if BUILDFLAG(IS_ANDROID)
 extern const char kDisableInstanceLimitName[];
 extern const char kDisableInstanceLimitDescription[];
@@ -3483,9 +3488,6 @@ extern const char kAshNullTopRowFixDescription[];
 extern const char kAssistantIphName[];
 extern const char kAssistantIphDescription[];
 
-extern const char kAudioA2DPAdvancedCodecsName[];
-extern const char kAudioA2DPAdvancedCodecsDescription[];
-
 extern const char kAudioSelectionImprovementName[];
 extern const char kAudioSelectionImprovementDescription[];
 
@@ -4061,23 +4063,8 @@ extern const char kMediaAppPdfMahiDescription[];
 extern const char kMediaAppImageMantisModelName[];
 extern const char kMediaAppImageMantisModelDescription[];
 
-extern const char kMediaAppImageMantisEraseName[];
-extern const char kMediaAppImageMantisEraseDescription[];
-
-extern const char kMediaAppImageMantisExpandBackgroundName[];
-extern const char kMediaAppImageMantisExpandBackgroundDescription[];
-
-extern const char kMediaAppImageMantisMakeAStickerName[];
-extern const char kMediaAppImageMantisMakeAStickerDescription[];
-
 extern const char kMicrophoneMuteSwitchDeviceName[];
 extern const char kMicrophoneMuteSwitchDeviceDescription[];
-
-extern const char kMediaAppImageMantisReimagineName[];
-extern const char kMediaAppImageMantisReimagineDescription[];
-
-extern const char kMediaAppImageMantisRemoveBackgroundName[];
-extern const char kMediaAppImageMantisRemoveBackgroundDescription[];
 
 extern const char kMultiCalendarSupportName[];
 extern const char kMultiCalendarSupportDescription[];

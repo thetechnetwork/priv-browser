@@ -845,6 +845,10 @@
       status: "test",
     },
     {
+      name: "CollapseZeroWidthSpaceWhenReuseItem",
+      status: "stable",
+    },
+    {
       name: "CompositeBGColorAnimation",
       public: true,
       status: "experimental",
@@ -911,6 +915,10 @@
     {
       name: "ContactsManagerExtraProperties",
       status:  {"Android": "stable", "default": "test"},
+    },
+    {
+      name: "ContainerTiming",
+      status: "experimental",
     },
     {
       name: "ContainerTypeNoLayoutContainment",
@@ -3221,6 +3229,10 @@
       // PARAKEET ad serving runtime flag/JS API.
       name: "Parakeet",
       origin_trial_feature_name: "Parakeet",
+    },
+    {
+      name: "PartialCompletionNotAllowedInMoveParagraphs",
+      status: "stable",
     },
     {
       name: "PartitionedPopins",

@@ -379,11 +379,12 @@ const char kDeferRendererTasksAfterInputDescription[] =
 
 #if !BUILDFLAG(IS_ANDROID)
 const char kDevToolsAutomaticWorkspaceFoldersName[] =
-    "DevTools Project Settings";
+    "DevTools Automatic Workspace Folders";
 const char kDevToolsAutomaticWorkspaceFoldersDescription[] =
-    "If enabled, DevTools will try to fetch project settings in the "
-    "form of a `com.chrome.devtools.json` file from a well-known URI "
-    "on local debugging targets.";
+    "When this and the DevTools Project Settings flags are turned on, DevTools "
+    "will automatically add workspace folders based on a workspace "
+    "configuration "
+    "in the project settings.";
 #endif  // !BUILDFLAG(IS_ANDROID)
 
 const char kDevToolsPrivacyUIName[] = "DevTools Privacy UI";
@@ -391,13 +392,17 @@ const char kDevToolsPrivacyUIDescription[] =
     "Enables the Privacy UI in the current 'Security' panel in DevTools.";
 
 #if !BUILDFLAG(IS_ANDROID)
-const char kDevToolsProjectSettingsName[] =
-    "DevTools Automatic Workspace Folders";
+const char kDevToolsProjectSettingsName[] = "DevTools Project Settings";
 const char kDevToolsProjectSettingsDescription[] =
-    "When this and the DevTools Project Settings flags are turned on, DevTools "
-    "will automatically add workspace folders based on a workspace "
-    "configuration "
-    "in the project settings.";
+    "If enabled, DevTools will try to fetch project settings in the "
+    "form of a `com.chrome.devtools.json` file from a well-known URI "
+    "on local debugging targets.";
+#endif  // !BUILDFLAG(IS_ANDROID)
+
+#if !BUILDFLAG(IS_ANDROID)
+const char kDevToolsCSSValueTracingName[] = "DevTools CSS Value Tracing";
+const char kDevToolsCSSValueTracingDescription[] =
+    "Enables the CSS Value Tracing UI in the elements panel.";
 #endif  // !BUILDFLAG(IS_ANDROID)
 
 const char kForceStartupSigninPromoName[] = "Force Start-up Signin Promo";
@@ -5919,10 +5924,6 @@ const char kAssistantIphName[] = "Assistant IPH";
 const char kAssistantIphDescription[] =
     "Enables showing Assistant IPH on ChromeOS.";
 
-const char kAudioA2DPAdvancedCodecsName[] = "BT A2DP advanced codecs support";
-const char kAudioA2DPAdvancedCodecsDescription[] =
-    "Enable BT A2DP advanced codecs support";
-
 const char kAudioSelectionImprovementName[] =
     "Enable audio selection improvement algorithm";
 const char kAudioSelectionImprovementDescription[] =
@@ -6898,33 +6899,10 @@ const char kMediaAppPdfMahiName[] = "Mahi feature on Media App PDF";
 const char kMediaAppPdfMahiDescription[] =
     "Enable Mahi feature on PDF files in Gallery app.";
 
-const char kMediaAppImageMantisEraseName[] = "Erase feature of Mantis";
-const char kMediaAppImageMantisEraseDescription[] =
-    "Enable the Erase feature of Mantis";
-
-const char kMediaAppImageMantisExpandBackgroundName[] =
-    "Expand Background feature of Mantis";
-const char kMediaAppImageMantisExpandBackgroundDescription[] =
-    "Enable the Expand background feature of Mantis";
-
-const char kMediaAppImageMantisMakeAStickerName[] =
-    "Make a sticker feature of Mantis";
-const char kMediaAppImageMantisMakeAStickerDescription[] =
-    "Enable the Make a sticker feature of Mantis";
-
 const char kMediaAppImageMantisModelName[] =
     "The model to use with the Mantis feature";
 const char kMediaAppImageMantisModelDescription[] =
     "This flag controls the model to use with the Mantis feature.";
-
-const char kMediaAppImageMantisReimagineName[] = "Reimagine feature of Mantis";
-const char kMediaAppImageMantisReimagineDescription[] =
-    "Enable the Reimagine feature of Mantis";
-
-const char kMediaAppImageMantisRemoveBackgroundName[] =
-    "Remove Background feature of Mantis";
-const char kMediaAppImageMantisRemoveBackgroundDescription[] =
-    "Enable the Remove Background feature of Mantis";
 
 const char kMicrophoneMuteSwitchDeviceName[] = "Microphone Mute Switch Device";
 const char kMicrophoneMuteSwitchDeviceDescription[] =
