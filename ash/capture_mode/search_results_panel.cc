@@ -26,10 +26,12 @@
 #include "ui/display/tablet_state.h"
 #include "ui/views/background.h"
 #include "ui/views/border.h"
+#include "ui/views/controls/focus_ring.h"
 #include "ui/views/controls/image_view.h"
 #include "ui/views/controls/label.h"
 #include "ui/views/controls/textfield/textfield.h"
 #include "ui/views/controls/textfield/textfield_controller.h"
+#include "ui/views/focus/focus_manager.h"
 #include "ui/views/layout/flex_layout_view.h"
 #include "ui/wm/core/coordinate_conversion.h"
 #include "ui/wm/core/shadow_types.h"
@@ -40,8 +42,8 @@ namespace {
 
 inline constexpr int kPanelCornerRadius = 16;
 const std::u16string kSearchBoxPlaceholderText = u"Add to your search";
-inline constexpr int kPanelPaddingSize = 16;
-inline constexpr gfx::Insets kPanelPadding = gfx::Insets(kPanelPaddingSize);
+inline constexpr gfx::Insets kPanelPadding =
+    gfx::Insets(capture_mode::kPanelPaddingSize);
 inline constexpr int kHeaderIconSize = 20;
 inline constexpr int kSearchBoxHeight = 48;
 inline constexpr int kSearchBoxRadius = 24;
@@ -105,9 +107,8 @@ class SunfishSearchBoxView : public views::View,
     SetBackground(views::CreateThemedRoundedRectBackground(
         cros_tokens::kCrosSysSystemOnBase1, kSearchBoxRadius));
 
-    SetPreferredSize(gfx::Size(
-        capture_mode::kSearchResultsPanelWidth - 2 * kPanelPaddingSize,
-        kSearchBoxHeight));
+    SetPreferredSize(gfx::Size(capture_mode::kSearchResultsPanelWebViewWidth,
+                               kSearchBoxHeight));
 
     image_view_->SetPaintToLayer();
     image_view_->layer()->SetFillsBoundsOpaquely(false);
@@ -133,6 +134,10 @@ class SunfishSearchBoxView : public views::View,
   bool HandleKeyEvent(views::Textfield* sender,
                       const ui::KeyEvent& event) override {
     if (sender->GetText().empty()) {
+      return false;
+    }
+
+    if (!textfield_->HasFocus()) {
       return false;
     }
 
@@ -188,7 +193,7 @@ SearchResultsPanel::SearchResultsPanel() {
                   .SetFontList(
                       TypographyProvider::Get()->ResolveTypographyToken(
                           TypographyToken::kCrosTitle1))
-                  .SetEnabledColorId(cros_tokens::kCrosSysOnSurface),
+                  .SetEnabledColor(cros_tokens::kCrosSysOnSurface),
               // Close Button, aligned to the right by setting a
               // `FlexSpecification` with unbounded maximum flex size and
               // `LayoutAlignment::kEnd`.
@@ -228,6 +233,21 @@ SearchResultsPanel::SearchResultsPanel() {
   layer()->SetIsFastRoundedCorner(true);
   layer()->SetBackgroundBlur(ColorProvider::kBackgroundBlurSigma);
   layer()->SetBackdropFilterQuality(ColorProvider::kBackgroundBlurQuality);
+
+  // Install highlightable views for when a Sunfish session is active and the
+  // `CaptureModeSessionFocusCycler` is handling focus.
+  CaptureModeSessionFocusCycler::HighlightHelper::Install(close_button_);
+  CaptureModeSessionFocusCycler::HighlightHelper::Install(
+      search_box_view_->textfield_);
+
+  // Set up the focus predicate for the focusable views now, so they will have
+  // the correct behavior before `CaptureModeSessionFocusCycler::PseudoFocus()`
+  // is called on them.
+  CaptureModeSessionFocusCycler::HighlightHelper::Get(close_button_)
+      ->SetUpFocusPredicate(close_button_);
+  CaptureModeSessionFocusCycler::HighlightHelper::Get(
+      search_box_view_->textfield_)
+      ->SetUpFocusPredicate(search_box_view_->textfield_);
 }
 
 SearchResultsPanel::~SearchResultsPanel() = default;
@@ -252,6 +272,14 @@ views::Textfield* SearchResultsPanel::GetSearchBoxTextfield() const {
   return search_box_view_->textfield_;
 }
 
+std::vector<CaptureModeSessionFocusCycler::HighlightableView*>
+SearchResultsPanel::GetHighlightableItems() const {
+  return {
+      CaptureModeSessionFocusCycler::HighlightHelper::Get(close_button_.get()),
+      CaptureModeSessionFocusCycler::HighlightHelper::Get(
+          search_box_view_->textfield_.get())};
+}
+
 void SearchResultsPanel::Navigate(const GURL& url) {
   search_results_view_->Navigate(url);
 }
@@ -271,6 +299,20 @@ void SearchResultsPanel::RefreshStackingOrder(aura::Window* new_root) {
   aura::Window* new_parent = GetParentContainer(
       new_root ? new_root : native_window->GetRootWindow(), !!new_root);
   views::Widget::ReparentNativeView(native_window, new_parent);
+}
+
+bool SearchResultsPanel::IsTextfieldPseudoFocused() const {
+  return CaptureModeSessionFocusCycler::HighlightHelper::Get(
+             search_box_view_->textfield_)
+      ->has_focus();
+}
+
+void SearchResultsPanel::AddedToWidget() {
+  GetFocusManager()->AddFocusChangeListener(this);
+}
+
+void SearchResultsPanel::RemovedFromWidget() {
+  GetFocusManager()->RemoveFocusChangeListener(this);
 }
 
 bool SearchResultsPanel::HasFocus() const {
@@ -307,6 +349,26 @@ void SearchResultsPanel::OnDisplayMetricsChanged(
   RefreshPanelBounds();
 }
 
+void SearchResultsPanel::OnWillChangeFocus(View* focused_before,
+                                           View* focused_now) {}
+
+void SearchResultsPanel::OnDidChangeFocus(View* focused_before,
+                                          View* focused_now) {
+  // Update the focus ring of the previously focused view, if available.
+  if (focused_before) {
+    if (views::FocusRing* before_ring = views::FocusRing::Get(focused_before)) {
+      before_ring->SchedulePaint();
+    }
+  }
+
+  // Update the focus ring of the newly focused view, if available.
+  if (focused_now) {
+    if (views::FocusRing* now_ring = views::FocusRing::Get(focused_now)) {
+      now_ring->SchedulePaint();
+    }
+  }
+}
+
 void SearchResultsPanel::OnCloseButtonPressed() {
   CHECK(GetWidget());
   GetWidget()->CloseWithReason(
@@ -321,7 +383,7 @@ void SearchResultsPanel::RefreshPanelBounds() {
   // screen. On zoom out, the widget should return to its preferred size.
   gfx::Rect widget_bounds_in_screen(
       widget->GetWindowBoundsInScreen().origin(),
-      gfx::Size(capture_mode::kSearchResultsPanelWidth,
+      gfx::Size(capture_mode::kSearchResultsPanelTotalWidth,
                 capture_mode::kSearchResultsPanelHeight));
 
   // Adjust the preferred size and bounds based on the current display.

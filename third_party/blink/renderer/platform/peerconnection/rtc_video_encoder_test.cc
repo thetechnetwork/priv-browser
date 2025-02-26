@@ -25,6 +25,7 @@
 #include "base/time/time.h"
 #include "build/build_config.h"
 #include "build/chromeos_buildflags.h"
+#include "gpu/command_buffer/client/test_shared_image_interface.h"
 #include "media/base/media_log.h"
 #include "media/base/media_switches.h"
 #include "media/base/mock_filters.h"
@@ -129,7 +130,10 @@ class FakeNativeBufferI420 : public blink::WebRtcVideoFrameAdapter {
             media::VideoFrame::CreateBlackFrame(gfx::Size(480, 360))),
         width_(width),
         height_(height),
-        allow_to_i420_(allow_to_i420) {}
+        allow_to_i420_(allow_to_i420),
+        test_sii_(base::MakeRefCounted<gpu::TestSharedImageInterface>()) {
+    test_sii_->UseTestGMBInSharedImageCreationWithBufferUsage();
+  }
 
   Type type() const override { return Type::kNative; }
   int width() const override { return width_; }
@@ -154,13 +158,14 @@ class FakeNativeBufferI420 : public blink::WebRtcVideoFrameAdapter {
     return CreateTestFrame(kSize360p, kRect360p, kSize360p,
                            media::VideoFrame::STORAGE_OWNED_MEMORY,
                            media::VideoPixelFormat::PIXEL_FORMAT_NV12,
-                           base::TimeDelta());
+                           base::TimeDelta(), test_sii_.get());
   }
 
  private:
   const int width_;
   const int height_;
   const bool allow_to_i420_;
+  scoped_refptr<gpu::TestSharedImageInterface> test_sii_;
 };
 
 class RTCVideoEncoderWrapper : public webrtc::VideoEncoder {
@@ -1315,7 +1320,7 @@ TEST_F(RTCVideoEncoderEncodeTest, SoftwareFallbackOnBadEncodeInput) {
       gfx::Size(kInputFrameWidth, kInputFrameHeight));
   frame->set_timestamp(base::Milliseconds(1));
   rtc::scoped_refptr<webrtc::VideoFrameBuffer> frame_adapter(
-      new rtc::RefCountedObject<WebRtcVideoFrameAdapter>(
+      new webrtc::RefCountedObject<WebRtcVideoFrameAdapter>(
           frame, base::MakeRefCounted<WebRtcVideoFrameAdapter::SharedResources>(
                      nullptr)));
   std::vector<webrtc::VideoFrameType> frame_types;
@@ -1427,7 +1432,7 @@ TEST_F(RTCVideoEncoderEncodeTest, AcceptsRepeatedWrappedMediaVideoFrame) {
       gfx::Size(kInputFrameWidth, kInputFrameHeight));
   frame->set_timestamp(base::Milliseconds(1));
   rtc::scoped_refptr<webrtc::VideoFrameBuffer> frame_adapter(
-      new rtc::RefCountedObject<WebRtcVideoFrameAdapter>(
+      new webrtc::RefCountedObject<WebRtcVideoFrameAdapter>(
           frame, base::MakeRefCounted<WebRtcVideoFrameAdapter::SharedResources>(
                      nullptr)));
   std::vector<webrtc::VideoFrameType> frame_types;
@@ -2596,7 +2601,7 @@ TEST_F(RTCVideoEncoderEncodeTest, EncodeFrameWithAdapter) {
   auto frame = media::VideoFrame::CreateBlackFrame(
       gfx::Size(kInputFrameWidth, kInputFrameHeight));
   rtc::scoped_refptr<webrtc::VideoFrameBuffer> frame_adapter(
-      new rtc::RefCountedObject<WebRtcVideoFrameAdapter>(
+      new webrtc::RefCountedObject<WebRtcVideoFrameAdapter>(
           frame, base::MakeRefCounted<WebRtcVideoFrameAdapter::SharedResources>(
                      nullptr)));
   std::vector<webrtc::VideoFrameType> frame_types;
@@ -2613,7 +2618,7 @@ TEST_F(RTCVideoEncoderEncodeTest, EncodeFrameWithAdapter) {
   // encoder.
   frame = media::VideoFrame::CreateBlackFrame(
       gfx::Size(kInputFrameWidth * 2, kInputFrameHeight * 2));
-  frame_adapter = new rtc::RefCountedObject<WebRtcVideoFrameAdapter>(
+  frame_adapter = new webrtc::RefCountedObject<WebRtcVideoFrameAdapter>(
       frame,
       base::MakeRefCounted<WebRtcVideoFrameAdapter::SharedResources>(nullptr));
   EXPECT_EQ(WEBRTC_VIDEO_CODEC_OK,

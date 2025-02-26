@@ -29,8 +29,8 @@
 #include "components/autofill/core/browser/data_manager/addresses/address_data_manager.h"
 #include "components/autofill/core/browser/data_manager/payments/payments_data_manager.h"
 #include "components/autofill/core/browser/data_manager/personal_data_manager.h"
-#include "components/autofill/core/browser/data_model/autofill_profile.h"
-#include "components/autofill/core/browser/data_model/autofill_structured_address_constants.h"
+#include "components/autofill/core/browser/data_model/addresses/autofill_profile.h"
+#include "components/autofill/core/browser/data_model/addresses/autofill_structured_address_constants.h"
 #include "components/autofill/core/browser/data_model/bank_account.h"
 #include "components/autofill/core/browser/data_model/ewallet.h"
 #include "components/autofill/core/browser/data_model/payment_instrument.h"
@@ -859,7 +859,7 @@ static std::string JNI_PersonalDataManager_GetBasicCardIssuerNetwork(
       .basic_card_issuer_network;
 }
 
-// Returns an ISO 3166-1-alpha-2 country code for a |country_name| using
+// Returns an ISO 3166-1-alpha-2 country code for a `country_name` using
 // the application locale, or an empty string.
 static std::string JNI_PersonalDataManager_ToCountryCode(
     JNIEnv* env,

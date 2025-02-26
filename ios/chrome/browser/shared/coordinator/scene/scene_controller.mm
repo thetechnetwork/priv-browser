@@ -17,7 +17,7 @@
 #import "base/metrics/user_metrics_action.h"
 #import "base/strings/sys_string_conversions.h"
 #import "base/time/time.h"
-#import "components/autofill/core/browser/data_model/autofill_profile.h"
+#import "components/autofill/core/browser/data_model/addresses/autofill_profile.h"
 #import "components/autofill/core/browser/data_model/credit_card.h"
 #import "components/breadcrumbs/core/breadcrumbs_status.h"
 #import "components/feature_engagement/public/event_constants.h"
@@ -1448,15 +1448,7 @@ void OnListFamilyMembersResponse(
     return;
   }
   self.sceneState.profileState.appState.signinUpgradePromoPresentedOnce = YES;
-  DCHECK(!self.signinCoordinator)
-      << "self.signinCoordinator: "
-      << base::SysNSStringToUTF8([self.signinCoordinator description]);
-  Browser* browser = self.mainInterface.browser;
-  self.signinCoordinator = [SigninCoordinator
-      upgradeSigninPromoCoordinatorWithBaseViewController:self.mainInterface
-                                                              .viewController
-                                                  browser:browser];
-  [self startSigninCoordinatorWithCompletion:nil];
+  [self showSigninUpgradePromoWithCompletion:nil];
 }
 
 - (BOOL)canHandleIntents {
@@ -1568,6 +1560,19 @@ void OnListFamilyMembersResponse(
 }
 
 #pragma mark - ApplicationCommands
+
+- (void)showSigninUpgradePromoWithCompletion:
+    (SigninCoordinatorCompletionCallback)dismissalCompletion {
+  DCHECK(!self.signinCoordinator)
+      << "self.signinCoordinator: "
+      << base::SysNSStringToUTF8([self.signinCoordinator description]);
+  Browser* browser = self.mainInterface.browser;
+  self.signinCoordinator = [SigninCoordinator
+      upgradeSigninPromoCoordinatorWithBaseViewController:self.mainInterface
+                                                              .viewController
+                                                  browser:browser];
+  [self startSigninCoordinatorWithCompletion:dismissalCompletion];
+}
 
 - (void)dismissModalDialogsWithCompletion:(ProceduralBlock)completion {
   [self dismissModalDialogsWithCompletion:completion dismissOmnibox:YES];

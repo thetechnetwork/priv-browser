@@ -542,6 +542,9 @@
       <message name="IDS_IOS_BANDWIDTH_MANAGEMENT_SETTINGS" desc="Title for the bandwidth management panel in settings [Length: 30em] [iOS only]">
         Bandwidth
       </message>
+      <message name="IDS_IOS_BANNER_PROMO_CLOSE_BUTTON_ACCESSIBILITY_LABEL" desc="Accessibility label for the close button on the banner promo [iOS only]">
+        Close banner promo
+      </message>
       <message name="IDS_IOS_BLOCK_POPUPS" desc="Title for the view and option in Settings for blocking pop-ups. [Length: 15em] [iOS only]">
         Block pop-ups
       </message>
@@ -1887,6 +1890,15 @@ See your search engine’s instructions for deleting your search history, if app
       </message>
       <message name="IDS_IOS_DOWNLOAD_RESTRICTION_SNACKBAR_TEXT" desc="The snackbar message to inform users that the download is blocked. [iOS only]">
           Saving files is blocked by your organization
+      </message>
+      <message name="IDS_IOS_DOWNLOAD_WALLET_ORDER_FILE_WARNING_MESSAGE" desc="Warning message displayed inside an alert before downloading a .order file. The file represents an order that can be tracked in Apple Wallet. 'Wallet' should be translated according to the 'Wallet' app title on iOS. [iOS only]">
+          This website wants to download a file and open it in your Wallet.
+      </message>
+      <message name="IDS_IOS_DOWNLOAD_WALLET_ORDER_FILE_WARNING_TITLE" desc="Title of the alert displaying a warning message before downloading a .order file. The file represents an order that can be tracked in Apple Wallet. 'Wallet' should be translated according to the 'Wallet' app title on iOS. [iOS only]">
+          Open in Wallet?
+      </message>
+      <message name="IDS_IOS_DOWNLOAD_WALLET_ORDER_OPEN" desc="Text in the confirmation dialog button that let the user download a .order file.[iOS only]">
+          Open
       </message>
       <message name="IDS_IOS_DRIVE_ADD_ACCOUNT" desc="In Title Case: Title of the context menu entry to add another account to choose drive files from. [iOS only]">
         Add Account
@@ -4797,11 +4809,23 @@ While in Incognito, sites can't use cookies to see your browsing activity across
       <message name="IDS_IOS_RECENT_TABS_SYNC_IN_PROGRESS" desc="Section header subtitle label while loading tabs in other devices. [Length: 30em] [iOS only]">
         Syncing…
       </message>
+      <message name="IDS_IOS_REMINDER_NOTIFICATIONS_CANCEL_BUTTON" desc="Button text to cancel setting a reminder in the reminder notifications half sheet. [iOS only]">
+        Cancel
+      </message>
+      <message name="IDS_IOS_REMINDER_NOTIFICATIONS_DESCRIPTION" desc="Description text explaining the purpose of the reminder notifications half sheet where users can select when they want to be reminded about the current tab. [iOS only]">
+        Choose a date and time to receive a reminder notification to revisit this page
+      </message>
       <message name="IDS_IOS_REMINDER_NOTIFICATIONS_HIDE_SET_A_REMINDER" desc="Text for the context menu item to hide the 'Set a Reminder' overflow menu action. [iOS only]">
         Hide Set a Reminder
       </message>
       <message name="IDS_IOS_REMINDER_NOTIFICATIONS_SET_A_REMINDER" desc="Text for the 'Set a Reminder' overflow menu action. [iOS only]">
         Set a Reminder
+      </message>
+      <message name="IDS_IOS_REMINDER_NOTIFICATIONS_SET_REMINDER_BUTTON" desc="Primary button text to confirm setting a reminder in the reminder notifications half sheet. [iOS only]">
+        Set reminder
+      </message>
+      <message name="IDS_IOS_REMINDER_NOTIFICATIONS_SHEET_TITLE" desc="Title shown at the top of the half sheet where users can set a reminder for the current webpage. [iOS only]">
+        Set a reminder
       </message>
       <message name="IDS_IOS_REMINDER_NOTIFICATIONS_TITLE" desc="Title of a notification reminding the user of a web page that they visited previously.">
         Your reminder to revisit

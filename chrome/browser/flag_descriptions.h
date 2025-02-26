@@ -222,6 +222,9 @@ extern const char kDataSharingDescription[];
 extern const char kDataSharingJoinOnlyName[];
 extern const char kDataSharingJoinOnlyDescription[];
 
+extern const char kDataSharingNonProductionEnvironmentName[];
+extern const char kDataSharingNonProductionEnvironmentDescription[];
+
 extern const char kDbdRevampDesktopName[];
 extern const char kDbdRevampDesktopDescription[];
 
@@ -459,6 +462,9 @@ extern const char kAutofillMoreProminentPopupDescription[];
 extern const char kAutofillSyncEwalletAccountsName[];
 extern const char kAutofillSyncEwalletAccountsDescription[];
 #endif  // BUILDFLAG(IS_ANDROID)
+
+extern const char kAutofillPaymentsFieldSwappingName[];
+extern const char kAutofillPaymentsFieldSwappingDescription[];
 
 extern const char kAutofillUnmaskCardRequestTimeoutName[];
 extern const char kAutofillUnmaskCardRequestTimeoutDescription[];
@@ -2087,6 +2093,9 @@ extern const char kSystemShortcutBehaviorDescription[];
 
 extern const char kTabDragDropName[];
 extern const char kTabDragDropDescription[];
+
+extern const char kTabGroupParityBottomSheetAndroidName[];
+extern const char kTabGroupParityBottomSheetAndroidDescription[];
 
 extern const char kToolbarPhoneCleanupName[];
 extern const char kToolbarPhoneCleanupDescription[];

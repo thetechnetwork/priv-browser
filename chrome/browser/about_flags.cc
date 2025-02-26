@@ -3033,6 +3033,18 @@ const FeatureEntry::FeatureVariation kLensOverlayVariations[] = {
 };
 #endif  // !BUILDFLAG(IS_ANDROID)
 
+#if BUILDFLAG(IS_ANDROID)
+const FeatureEntry::FeatureParam kDeleteLegacyMigratedTabStatesAfterRestore[] =
+    {
+        {"delete_migrated_files_after_restore", "true"},
+};
+
+const FeatureEntry::FeatureVariation kLegacyTabStateDeprecationVariations[] = {
+    {"Delete migrated files", kDeleteLegacyMigratedTabStatesAfterRestore,
+     std::size(kDeleteLegacyMigratedTabStatesAfterRestore), nullptr},
+};
+#endif  // BUILDFLAG(IS_ANDROID)
+
 #if !BUILDFLAG(IS_ANDROID)
 const FeatureEntry::FeatureParam kLensOverlayImageContextMenuActionsCopy[] = {
     {"enable-copy-as-image", "true"},
@@ -4483,6 +4495,10 @@ const FeatureEntry kFeatureEntries[] = {
      flag_descriptions::kAutofillMoreProminentPopupName,
      flag_descriptions::kAutofillMoreProminentPopupDescription, kOsDesktop,
      FEATURE_VALUE_TYPE(autofill::features::kAutofillMoreProminentPopup)},
+    {"autofill-payments-field-swapping",
+     flag_descriptions::kAutofillPaymentsFieldSwappingName,
+     flag_descriptions::kAutofillPaymentsFieldSwappingDescription, kOsAll,
+     FEATURE_VALUE_TYPE(autofill::features::kAutofillPaymentsFieldSwapping)},
     {"backdrop-filter-mirror-edge",
      flag_descriptions::kBackdropFilterMirrorEdgeName,
      flag_descriptions::kBackdropFilterMirrorEdgeDescription, kOsAll,
@@ -8851,7 +8867,9 @@ const FeatureEntry kFeatureEntries[] = {
     {"enable-legacy-tabstate-deprecation",
      flag_descriptions::kLegacyTabStateDeprecationName,
      flag_descriptions::kLegacyTabStateDeprecationDescription, kOsAndroid,
-     FEATURE_VALUE_TYPE(chrome::android::kLegacyTabStateDeprecation)},
+     FEATURE_WITH_PARAMS_VALUE_TYPE(chrome::android::kLegacyTabStateDeprecation,
+                                    kLegacyTabStateDeprecationVariations,
+                                    "LegacyTabStateDeprecation")},
 
     {"biometric-reauth-password-filling",
      flag_descriptions::kBiometricReauthForPasswordFillingName,
@@ -9590,6 +9608,12 @@ const FeatureEntry kFeatureEntries[] = {
     {"tab-group-pane-android", flag_descriptions::kTabGroupPaneAndroidName,
      flag_descriptions::kTabGroupPaneAndroidDescription, kOsAndroid,
      FEATURE_VALUE_TYPE(tab_groups::kTabGroupPaneAndroid)},
+
+    {"tab-group-parity-bottom-sheet-android",
+     flag_descriptions::kTabGroupParityBottomSheetAndroidName,
+     flag_descriptions::kTabGroupParityBottomSheetAndroidDescription,
+     kOsAndroid,
+     FEATURE_VALUE_TYPE(chrome::android::kTabGroupParityBottomSheetAndroid)},
 
     {"tab-strip-context-menu-android",
      flag_descriptions::kTabStripContextMenuAndroidName,
@@ -10957,6 +10981,12 @@ const FeatureEntry kFeatureEntries[] = {
     {"data-sharing-join-only", flag_descriptions::kDataSharingJoinOnlyName,
      flag_descriptions::kDataSharingJoinOnlyDescription, kOsAll,
      FEATURE_VALUE_TYPE(data_sharing::features::kDataSharingJoinOnly)},
+
+    {"data-sharing-non-production-environment",
+     flag_descriptions::kDataSharingNonProductionEnvironmentName,
+     flag_descriptions::kDataSharingNonProductionEnvironmentDescription, kOsAll,
+     FEATURE_VALUE_TYPE(
+         data_sharing::features::kDataSharingNonProductionEnvironment)},
 
     {"history-sync-alternative-illustration",
      flag_descriptions::kHistorySyncAlternativeIllustrationName,

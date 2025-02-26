@@ -32,18 +32,12 @@
 
 #include "third_party/blink/renderer/platform/graphics/image_data_buffer.h"
 
-#include <memory>
-
 #include "base/compiler_specific.h"
 #include "base/memory/ptr_util.h"
-#include "third_party/blink/renderer/platform/graphics/static_bitmap_image.h"
 #include "third_party/blink/renderer/platform/image-encoders/image_encoder.h"
 #include "third_party/blink/renderer/platform/wtf/text/base64.h"
-#include "third_party/blink/renderer/platform/wtf/text/wtf_string.h"
-#include "third_party/blink/renderer/platform/wtf/vector.h"
 #include "third_party/skia/include/core/SkImage.h"
 #include "third_party/skia/include/core/SkSurface.h"
-#include "third_party/skia/include/core/SkSwizzle.h"
 #include "third_party/skia/include/encode/SkJpegEncoder.h"
 #include "third_party/skia/include/encode/SkPngEncoder.h"
 
@@ -103,13 +97,12 @@ ImageDataBuffer::ImageDataBuffer(scoped_refptr<StaticBitmapImage> image) {
     MSAN_CHECK_MEM_IS_INITIALIZED(pixmap_.addr(), pixmap_.computeByteSize());
   }
   is_valid_ = true;
-  size_ = gfx::Size(image->width(), image->height());
 }
 
 ImageDataBuffer::ImageDataBuffer(const SkPixmap& pixmap)
-    : pixmap_(pixmap), size_(gfx::Size(pixmap.width(), pixmap.height())) {
-  is_valid_ = pixmap_.addr() && !size_.IsEmpty();
-}
+    : pixmap_(pixmap),
+      is_valid_(pixmap_.addr() &&
+                !gfx::Size(pixmap.width(), pixmap.height()).IsEmpty()) {}
 
 std::unique_ptr<ImageDataBuffer> ImageDataBuffer::Create(
     scoped_refptr<StaticBitmapImage> image) {
@@ -129,9 +122,12 @@ std::unique_ptr<ImageDataBuffer> ImageDataBuffer::Create(
   return buffer;
 }
 
-const unsigned char* ImageDataBuffer::Pixels() const {
+base::span<const uint8_t> ImageDataBuffer::PixelData() const {
   DCHECK(is_valid_);
-  return static_cast<const unsigned char*>(pixmap_.addr());
+  // SAFETY: The creator of the SkPixmap ensures that pixmap_.addr() points to
+  // at least pixmap_.computeByteSize() bytes.
+  return UNSAFE_BUFFERS({static_cast<const unsigned char*>(pixmap_.addr()),
+                         pixmap_.computeByteSize()});
 }
 
 bool ImageDataBuffer::EncodeImage(const ImageEncodingMimeType mime_type,

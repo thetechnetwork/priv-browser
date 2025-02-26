@@ -203,7 +203,7 @@ WebAppToolbarButtonContainer::WebAppToolbarButtonContainer(
     // Extensions toolbar area with pinned extensions is lower priority than,
     // for example, the menu button or other toolbar buttons, and pinned
     // extensions should hide before other toolbar buttons.
-    constexpr int kLowPriorityFlexOrder = 3;
+    constexpr int kLowPriorityFlexOrder = 2;
     extensions_container_ =
         AddChildView(std::make_unique<ExtensionsToolbarContainer>(
             browser_view_->browser(), display_mode));

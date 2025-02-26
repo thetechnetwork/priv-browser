@@ -57,13 +57,12 @@ OneCopyRasterBufferProvider::RasterBufferImpl::RasterBufferImpl(
       previous_content_id_(previous_content_id) {
   if (!in_use_resource.backing()) {
     auto backing = std::make_unique<ResourcePool::Backing>();
-    backing->overlay_candidate = client_->tile_overlay_candidate_;
     in_use_resource.set_backing(std::move(backing));
   }
   backing_ = in_use_resource.backing();
   before_raster_sync_token_ = backing_->returned_sync_token;
   shared_image_ = backing_->shared_image();
-  mailbox_texture_is_overlay_candidate_ = backing_->overlay_candidate;
+  mailbox_texture_is_overlay_candidate_ = client_->tile_overlay_candidate_;
 }
 
 OneCopyRasterBufferProvider::RasterBufferImpl::~RasterBufferImpl() {

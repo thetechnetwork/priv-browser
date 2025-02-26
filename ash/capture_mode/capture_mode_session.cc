@@ -1578,10 +1578,15 @@ void CaptureModeSession::OnScannerActionsFetched(
   }
 
   if (!actions_response.has_value()) {
-    action_container_view_->ShowErrorView(
-        actions_response.error(),
-        base::BindRepeating(&CaptureModeSession::OnScannerTryAgainPressed,
-                            weak_ptr_factory_.GetWeakPtr()));
+    if (actions_response.error().can_try_again) {
+      action_container_view_->ShowErrorView(
+          actions_response.error().error_message,
+          base::BindRepeating(&CaptureModeSession::OnScannerTryAgainPressed,
+                              weak_ptr_factory_.GetWeakPtr()));
+    } else {
+      action_container_view_->ShowErrorView(
+          actions_response.error().error_message);
+    }
     UpdateActionContainerWidget();
     return;
   }
@@ -1716,13 +1721,6 @@ void CaptureModeSession::OnKeyEvent(ui::KeyEvent* event) {
     return;
   }
 
-  // If the results panel is visible, focused, and interactable, let it handle
-  // key events.
-  if (controller_->IsSearchResultsPanelVisible() &&
-      controller_->GetSearchResultsPanel()->HasFocus()) {
-    return;
-  }
-
   // If the consent disclaimer is visible, let it handle key events.
   if (disclaimer_) {
     // The action button may still have a focus ring when we switch focus to the
@@ -1780,6 +1778,16 @@ void CaptureModeSession::OnKeyEvent(ui::KeyEvent* event) {
     }
 
     case ui::VKEY_RETURN: {
+      // If the search results panel is visible, and the textfield has
+      // pseudo focus or the panel is actually focused, we will let the search
+      // results panel handle key events (i.e., pressing Enter/Return to make a
+      // multimodal search).
+      if (controller_->IsSearchResultsPanelVisible() &&
+          (controller_->GetSearchResultsPanel()->IsTextfieldPseudoFocused() ||
+           controller_->GetSearchResultsPanel()->HasFocus())) {
+        return;
+      }
+
       event->StopPropagation();
       if (!is_in_count_down) {
         // Pressing enter while an item is focused should behave exactly like
@@ -3012,7 +3020,7 @@ void CaptureModeSession::UpdateDimensionsLabelWidget(bool is_resizing) {
         views::Widget::VisibilityTransition::ANIMATE_SHOW);
 
     auto size_label = std::make_unique<views::Label>();
-    size_label->SetEnabledColorId(kColorAshTextColorPrimary);
+    size_label->SetEnabledColor(kColorAshTextColorPrimary);
     size_label->SetBackground(views::CreateThemedRoundedRectBackground(
         kColorAshShieldAndBase80, kSizeLabelBorderRadius));
     size_label->SetAutoColorReadabilityEnabled(false);
@@ -3629,10 +3637,10 @@ CaptureModeSession::ShowDefaultActionButtonsOrPerformSearch() {
     return false;
   }
 
-  // `ShouldShowActionContainerWidget()` checks `IsSunfishSessionAllowed()`
+  // `ShouldShowActionContainerWidget()` checks `CanShowSunfishOrScannerUi()`
   // which checks if *either* Scanner or Sunfish is enabled. Check again if
   // Sunfish specifically is enabled to show the Search button.
-  if (active_behavior_->ShouldShowDefaultActionButtonsAfterRegionSelected() &&
+  if (active_behavior_->ShouldShowDefaultActionButtonsInActionContainer() &&
       CanShowSunfishUi()) {
     if (controller_->IsNetworkConnectionOffline()) {
       ShowActionContainerError(l10n_util::GetStringUTF16(
@@ -3655,8 +3663,9 @@ CaptureModeSession::ShowDefaultActionButtonsOrPerformSearch() {
   // needs to do specific handling. Note `this` may be destroyed by
   // `OnRegionSelectedOrAdjusted()`.
   auto weak_ptr = weak_ptr_factory_.GetWeakPtr();
-  active_behavior_
-      ->OnRegionSelectedOrAdjusted();  // `this` may be deleted after this line.
+  // `this` may be deleted after the following line.
+  active_behavior_->OnRegionSelectedOrAdjustedWhenActionContainerShowing();
+
   return !weak_ptr;
 }
 
@@ -3705,7 +3714,7 @@ bool CaptureModeSession::ShouldHideFeedbackWidget(views::Widget* widget) const {
     return false;
   }
 
-  if (!IsSunfishSessionAllowed()) {
+  if (!CanShowSunfishOrScannerUi()) {
     return true;
   }
 
@@ -3725,7 +3734,7 @@ bool CaptureModeSession::ShouldHideFeedbackWidget(views::Widget* widget) const {
 }
 
 bool CaptureModeSession::ShouldShowActionContainerWidget() const {
-  if (!IsSunfishSessionAllowed()) {
+  if (!CanShowSunfishOrScannerUi()) {
     return false;
   }
 

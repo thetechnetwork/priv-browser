@@ -26,6 +26,9 @@ from datetime import datetime
 #   google-api-python-client \
 #   google-auth-httplib2 \
 #   google-auth-oauthlib
+#
+# In addition when invoking evaluate_patches.py you can pass an optional integer
+# argument which will set the limit of patches to evaluate. Default is 100.
 # ```
 
 from google.auth.transport.requests import Request
@@ -225,6 +228,8 @@ run("autoninja -C out/linux", "Failed to build the project.")
 # Create and evaluate patches
 try:
     patch_limit = 100
+    if len(sys.argv) > 1:
+        patch_limit = int(sys.argv[1])
     for patch in patches:
         # Limit the number of patches to evaluate. We don't want to spent too
         # many resources on this.
@@ -241,8 +246,35 @@ try:
         run(f"git branch -D spanification_rewrite_evaluate_{index}",
             exit_on_error=False)
         run(f"git new-branch spanification_rewrite_evaluate_{index}")
-        run(f"cat ~/scratch/{patch} " +
-            " | tools/clang/scripts/apply_edits.py -p ./out/linux/")
+        try:
+            result = subprocess.run(f"cat ~/scratch/{patch} " +
+                                    " | tools/clang/scripts/apply_edits.py" +
+                                    " -p ./out/linux/",
+                                    shell=True,
+                                    check=True,
+                                    capture_output=True,
+                                    text=True)
+        except subprocess.CalledProcessError as e:
+            error_msg = str(e) + " !!! exception(stderr): " + str(e.stderr)
+            with open(scratch_dir + "/evaluation.csv", "a") as f:
+                f.write(f"{index}, fail, {error_msg}\n")
+
+            run(f"git diff  > ~/scratch/patch_{index}.diff")
+            diff = open(scratch_dir + f"/patch_{index}.diff").read()
+
+            appendRow(spreadsheet, [
+                today,
+                index,
+                len(patches),
+                "fail",
+                error_msg,
+                diff,
+            ])
+
+            shutil.copy(scratch_dir + f"/patch_{index}.out",
+                        scratch_dir + f"/patch_{index}.fail")
+            continue
+
 
         # Commit changes
         run("git add -u", "Failed to add changes.")

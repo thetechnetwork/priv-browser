@@ -15,6 +15,7 @@ import org.gradle.api.artifacts.repositories.ArtifactRepository
 import org.gradle.api.artifacts.result.DependencyResult
 import org.gradle.api.artifacts.result.ResolvedDependencyResult
 import org.gradle.api.logging.Logger
+import java.util.concurrent.*
 
 /**
  * Parses the project dependencies and generates a graph of {@link ChromiumDepGraph.DependencyDescription} objects to
@@ -39,6 +40,12 @@ class ChromiumDepGraph {
                     description: 'Firebase Cloud Messaging library that interfaces with gmscore.'),
             com_google_android_gms_play_services_location: new PropertyOverride(
                     description: 'Provides data about the device\'s physical location via gmscore.'),
+            com_google_ar_impress: new PropertyOverride(
+                    url: 'https://maven.google.com/web/index.html?q=impress#com.google.ar:impress',
+                    description: 'Impress shows GLTF models on XR devices, and provides advanced materials and rendering.\n'
+                               + 'A dependency of https://developer.android.com/jetpack/androidx/releases/xr-scenecore.\n',
+                    licenseUrl: 'https://www.apache.org/licenses/LICENSE-2.0.txt',
+                    licenseName: 'Apache-2.0'),
             com_google_auto_service_auto_service_annotations: new PropertyOverride(
                     licenseUrl: 'https://www.apache.org/licenses/LICENSE-2.0.txt',
                     licenseName: 'Apache 2.0'),
@@ -272,7 +279,7 @@ class ChromiumDepGraph {
             'https://www.unicode.org/license.html': 'licenses/Unicode.txt',
     ]
 
-    final Map<String, DependencyDescription> dependencies = [:]
+    final Map<String, DependencyDescription> dependencies = [:] as ConcurrentHashMap<String, DependencyDescription>
     Project[] projects
     Logger logger
     boolean skipLicenses
@@ -336,10 +343,16 @@ class ChromiumDepGraph {
         }
 
         List<String> topLevelIds = []
+        Map<String, ResolvedDependency> resolvedVersions = [:]
         deps.each { dependency ->
             topLevelIds.add(makeModuleId(dependency.module))
-            collectDependenciesInternal(dependency)
+            resolveVersionRecursive(dependency, resolvedVersions)
         }
+        ExecutorService taskExecutor = Executors.newCachedThreadPool()
+        List<Future> taskList = []
+        buildDepDescriptionsAsync(resolvedVersions, taskExecutor, taskList)
+        taskExecutor.shutdown()
+        taskList.each { task -> task.get() }
 
         topLevelIds.each { id -> dependencies.get(id).visible = true }
 
@@ -420,50 +433,6 @@ class ChromiumDepGraph {
         }
     }
 
-    private void collectDependenciesInternal(ResolvedDependency dependency) {
-        String id = makeModuleId(dependency.module)
-        if (dependencies.containsKey(id)) {
-            String gotVersion = dependency.module.id.version
-            if (dependencies.get(id).version == gotVersion) {
-                return
-            }
-            PropertyOverride overrides = PROPERTY_OVERRIDES.get(id)
-            if (overrides?.resolveVersion) {
-                if (overrides.resolveVersion != gotVersion) {
-                    return
-                }
-            } else if (isVersionLower(gotVersion, dependencies.get(id).version)) {
-                // Default to using largest version for version conflict resolution. See http://crbug.com/1040958.
-                // https://docs.gradle.org/current/userguide/dependency_resolution.html#sec:version-conflict
-                return
-            }
-        }
-        List<String> childModules = []
-
-        dependency.children.each { it ->
-            childModules += makeModuleId(it.module)
-        }
-
-        if (dependency.moduleArtifacts.empty) {
-            dependencies.put(id, buildDepDescriptionNoArtifact(id, dependency, childModules))
-            dependency.children.each {
-                it -> collectDependenciesInternal(it)
-            }
-        } else if (!areAllModuleArtifactsSameFile(dependency.moduleArtifacts)) {
-            throw new IllegalStateException("The dependency ${id} has multiple different artifacts: " +
-                    "${dependency.moduleArtifacts}")
-        } else {
-            ResolvedArtifact artifact = dependency.moduleArtifacts[0]
-            if (artifact.extension != 'jar' && artifact.extension != 'aar') {
-                throw new IllegalStateException("Type ${artifact.extension} of ${id} not supported.")
-            }
-            dependencies.put(id, buildDepDescription(id, dependency, artifact, childModules))
-            dependency.children.each {
-                it -> collectDependenciesInternal(it)
-            }
-        }
-    }
-
     private static boolean areAllModuleArtifactsSameFile(Set<ResolvedArtifact> artifacts) {
         String expectedPath = artifacts[0].file.absolutePath
         for (ResolvedArtifact artifact : artifacts) {
@@ -472,6 +441,57 @@ class ChromiumDepGraph {
             }
         }
         return true
+    }
+
+    private void resolveVersionRecursive(ResolvedDependency dependency, Map<String, ResolvedDependency> resolvedVersions) {
+        String id = makeModuleId(dependency.module)
+        if (resolvedVersions.containsKey(id)) {
+            String gotVersion = dependency.module.id.version
+            if (resolvedVersions.get(id).module.id.version == gotVersion) {
+                return
+            }
+            PropertyOverride overrides = PROPERTY_OVERRIDES.get(id)
+            if (overrides?.resolveVersion) {
+                if (overrides.resolveVersion != gotVersion) {
+                    return
+                }
+            } else if (isVersionLower(gotVersion, resolvedVersions.get(id).module.id.version)) {
+                // Default to using largest version for version conflict resolution. See http://crbug.com/1040958.
+                // https://docs.gradle.org/current/userguide/dependency_resolution.html#sec:version-conflict
+                return
+            }
+        }
+
+        resolvedVersions.put(id, dependency)
+
+        dependency.children.each { it -> resolveVersionRecursive(it, resolvedVersions) }
+    }
+
+    private void buildDepDescriptionsAsync(Map<String, ResolvedDependency> resolvedDeps, ExecutorService taskExecutor, List<Future> taskList) {
+        resolvedDeps.each { String id, ResolvedDependency dependency ->
+            List<String> childModules = []
+
+            dependency.children.each { it ->
+                childModules += makeModuleId(it.module)
+            }
+
+            if (dependency.moduleArtifacts.empty) {
+                taskList.add(taskExecutor.submit {
+                    dependencies.put(id, buildDepDescriptionNoArtifact(id, dependency, childModules))
+                })
+            } else if (!areAllModuleArtifactsSameFile(dependency.moduleArtifacts)) {
+                throw new IllegalStateException("The dependency ${id} has multiple different artifacts: " +
+                        "${dependency.moduleArtifacts}")
+            } else {
+                ResolvedArtifact artifact = dependency.moduleArtifacts[0]
+                if (artifact.extension != 'jar' && artifact.extension != 'aar') {
+                    throw new IllegalStateException("Type ${artifact.extension} of ${id} not supported.")
+                }
+                taskList.add(taskExecutor.submit {
+                    dependencies.put(id, buildDepDescription(id, dependency, artifact, childModules))
+                })
+            }
+        }
     }
 
     private DependencyDescription buildDepDescriptionNoArtifact(

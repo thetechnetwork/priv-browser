@@ -343,6 +343,9 @@ extern const char kIOSKeyboardAccessoryUpgradeForIPadDescription[];
 extern const char kIOSKeyboardAccessoryUpgradeShortManualFillMenuName[];
 extern const char kIOSKeyboardAccessoryUpgradeShortManualFillMenuDescription[];
 
+extern const char kIOSPasskeysM2Name[];
+extern const char kIOSPasskeysM2Description[];
+
 extern const char kIOSPasswordBottomSheetAutofocusName[];
 extern const char kIOSPasswordBottomSheetAutofocusDescription[];
 
@@ -614,8 +617,9 @@ extern const char kIPHPriceNotificationsWhileBrowsingDescription[];
 extern const char kNotificationSettingsMenuItemName[];
 extern const char kNotificationSettingsMenuItemDescription[];
 
-extern const char kRefactorToolbarUIName[];
-extern const char kRefactorToolbarUIDescription[];
+// Title and description for the flag to refactor the toolbarsSize.
+extern const char kRefactorToolbarsSizeName[];
+extern const char kRefactorToolbarsSizeDescription[];
 
 extern const char kRemoveExcessNTPsExperimentName[];
 extern const char kRemoveExcessNTPsExperimentDescription[];

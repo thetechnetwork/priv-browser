@@ -11,8 +11,6 @@
 #include "base/metrics/histogram_macros.h"
 #include "base/types/pass_key.h"
 #include "chrome/app/vector_icons/vector_icons.h"
-#include "chrome/browser/contextual_cueing/contextual_cueing_service.h"
-#include "chrome/browser/contextual_cueing/contextual_cueing_service_factory.h"
 #include "chrome/browser/ui/browser.h"
 #include "chrome/browser/ui/browser_element_identifiers.h"
 #include "chrome/browser/ui/browser_window/public/browser_window_features.h"
@@ -278,6 +276,8 @@ TabStripActionContainer::TabStripActionContainer(
       SetLayoutManager(std::make_unique<views::BoxLayout>());
   layout_manager->set_main_axis_alignment(
       views::BoxLayout::MainAxisAlignment::kStart);
+  layout_manager->set_cross_axis_alignment(
+      views::BoxLayout::CrossAxisAlignment::kCenter);
 }
 
 TabStripActionContainer::~TabStripActionContainer() {
@@ -349,9 +349,6 @@ std::unique_ptr<glic::GlicButton> TabStripActionContainer::CreateGlicButton(
               IDR_GLIC_BUTTON_VECTOR_ICON),
           l10n_util::GetStringUTF16(IDS_GLIC_TAB_STRIP_BUTTON_TOOLTIP));
 
-  glic_button->SetTooltipText(l10n_util::GetStringUTF16(IDS_GLIC_PROMO_TITLE));
-  glic_button->GetViewAccessibility().SetName(
-      l10n_util::GetStringUTF16(IDS_GLIC_PROMO_TITLE));
   glic_button->SetProperty(views::kCrossAxisAlignmentKey,
                            views::LayoutAlignment::kCenter);
 
@@ -420,24 +417,16 @@ void TabStripActionContainer::OnGlicButtonClicked() {
                      : glic::InvocationSource::kTopChromeButton);
 
   if (glic_button_->GetIsShowingNudge()) {
-    auto* contextual_cueing_service =
-        contextual_cueing::ContextualCueingServiceFactory::GetForProfile(
-            tab_strip_controller_->GetProfile());
-    if (contextual_cueing_service) {
-      contextual_cueing_service->CueingNudgeClicked();
-    }
+    glic_nudge_controller_->OnNudgeActivity(
+        tabs::GlicNudgeActivity::kNudgeClicked);
   }
 
   ExecuteHideTabStripNudge(glic_button_);
 }
 
 void TabStripActionContainer::OnGlicButtonDismissed() {
-  auto* contextual_cueing_service =
-      contextual_cueing::ContextualCueingServiceFactory::GetForProfile(
-          tab_strip_controller_->GetProfile());
-  if (contextual_cueing_service) {
-    contextual_cueing_service->CueingNudgeDismissed();
-  }
+  glic_nudge_controller_->OnNudgeActivity(
+      tabs::GlicNudgeActivity::kNudgeDismissed);
 
   // Force hide the button when pressed, bypassing locked expansion mode.
   ExecuteHideTabStripNudge(glic_button_);

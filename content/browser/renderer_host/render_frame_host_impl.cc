@@ -8790,7 +8790,6 @@ void RenderFrameHostImpl::SuddenTerminationDisablerChanged(
       has_unload_handler_ = present;
       break;
     case blink::mojom::SuddenTerminationDisablerType::kVisibilityChangeHandler:
-      DCHECK_NE(has_visibilitychange_handler_, present);
       has_visibilitychange_handler_ = present;
       break;
   }
@@ -13800,7 +13799,8 @@ void RenderFrameHostImpl::BindMediaMetricsProviderReceiver(
                 ->GetLearningSession();
           },
           weak_ptr_factory_.GetWeakPtr()),
-      std::move(is_shutting_down_cb), std::move(receiver));
+      std::move(is_shutting_down_cb), CreateAutoPipReasonCallback(),
+      std::move(receiver));
 }
 
 void RenderFrameHostImpl::BindVideoEncoderMetricsProviderReceiver(
@@ -18445,6 +18445,18 @@ blink::mojom::PermissionStatus RenderFrameHostImpl::GetCombinedPermissionStatus(
   return GetBrowserContext()
       ->GetPermissionController()
       ->GetCombinedPermissionAndDeviceStatus(permission_type, this);
+}
+
+media::PictureInPictureEventsInfo::AutoPipReasonCallback
+RenderFrameHostImpl::CreateAutoPipReasonCallback() {
+  return base::BindRepeating(
+      [](base::WeakPtr<RenderFrameHostImpl> rfh) {
+        if (rfh == nullptr) {
+          return media::PictureInPictureEventsInfo::AutoPipReason::kUnknown;
+        }
+        return rfh->delegate()->GetAutoPipReason();
+      },
+      weak_ptr_factory_.GetWeakPtr());
 }
 
 }  // namespace content

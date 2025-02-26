@@ -11,6 +11,7 @@
 #import "ios/chrome/common/ui/colors/semantic_color_names.h"
 #import "ios/chrome/common/ui/elements/form_input_accessory_view_text_data.h"
 #import "ios/chrome/common/ui/elements/gradient_view.h"
+#import "ios/chrome/common/ui/util/background_util.h"
 #import "ios/chrome/common/ui/util/constraints_ui_util.h"
 
 namespace {
@@ -27,16 +28,6 @@ constexpr CGFloat kLargeButtonTargetArea = 44;
 // The padding between the image and the title on the manual fill button.
 // Only applies to the iPad version of this button.
 constexpr CGFloat kManualFillTitlePadding = 4;
-
-// The width for the background-colored gradient UIView.
-constexpr CGFloat ManualFillGradientWidth = 44;
-
-// The width for the background-colored gradient UIView for the large keyboard
-// accessory.
-constexpr CGFloat ManualFillLargeAccessoryGradientWidth = 6;
-
-// The margin for the background-colored gradient UIView.
-constexpr CGFloat ManualFillGradientMargin = 14;
 
 // The spacing between the items in the navigation view.
 constexpr CGFloat ManualFillNavigationItemSpacing = 4;
@@ -107,6 +98,8 @@ NSString* const kFormInputAccessoryViewOmniboxTypingShieldAccessibilityID =
   NSLayoutConstraint* _omniboxTypingShieldHiddenBottomConstraint;
   // View containing the leading and trailing buttons.
   UIView* _contentView;
+  // The view used as the background for the content view.
+  UIView* _backgroundView;
   // Whether we are using the large accessory view.
   BOOL _largeAccessoryViewEnabled;
   // Whether the current form factor is a tablet.
@@ -250,7 +243,14 @@ NSString* const kFormInputAccessoryViewOmniboxTypingShieldAccessibilityID =
 
   _contentView = [[UIView alloc] init];
   _contentView.translatesAutoresizingMaskIntoConstraints = NO;
-  _contentView.backgroundColor = [self contentBackgroundColor];
+  if (_largeAccessoryViewEnabled) {
+    _backgroundView = PrimaryBackgroundBlurView();
+    _backgroundView.translatesAutoresizingMaskIntoConstraints = NO;
+    [_contentView addSubview:_backgroundView];
+    AddSameConstraints(_backgroundView, _contentView);
+  } else {
+    _contentView.backgroundColor = [self contentBackgroundColor];
+  }
   [self addSubview:_contentView];
   AddSameConstraintsToSides(
       self, _contentView,
@@ -311,20 +311,6 @@ NSString* const kFormInputAccessoryViewOmniboxTypingShieldAccessibilityID =
         constraintEqualToAnchor:self.safeAreaLayoutGuide.bottomAnchor],
   ]];
 
-  // Gradient view to disolve the leading view's end.
-  UIView* gradientView =
-      [[GradientView alloc] initWithStartColor:[[self contentBackgroundColor]
-                                                   colorWithAlphaComponent:0]
-                                      endColor:[self contentBackgroundColor]
-                                    startPoint:CGPointMake(0, 0.5)
-                                      endPoint:CGPointMake(0.6, 0.5)];
-
-  gradientView.translatesAutoresizingMaskIntoConstraints = NO;
-  if (base::i18n::IsRTL()) {
-    gradientView.transform = CGAffineTransformMakeRotation(M_PI);
-  }
-  [_contentView insertSubview:gradientView belowSubview:trailingView];
-
   UIView* topGrayLine = [[UIView alloc] init];
   topGrayLine.backgroundColor = [UIColor colorNamed:kGrey50Color];
   topGrayLine.translatesAutoresizingMaskIntoConstraints = NO;
@@ -347,19 +333,6 @@ NSString* const kFormInputAccessoryViewOmniboxTypingShieldAccessibilityID =
     [bottomGrayLine.trailingAnchor constraintEqualToAnchor:self.trailingAnchor],
     [bottomGrayLine.heightAnchor
         constraintEqualToConstant:ManualFillSeparatorHeight],
-
-    [gradientView.topAnchor constraintEqualToAnchor:trailingView.topAnchor],
-    [gradientView.bottomAnchor
-        constraintEqualToAnchor:trailingView.bottomAnchor],
-    [gradientView.widthAnchor
-        constraintEqualToConstant:_largeAccessoryViewEnabled
-                                      ? ManualFillLargeAccessoryGradientWidth
-                                      : ManualFillGradientWidth],
-    [gradientView.trailingAnchor
-        constraintEqualToAnchor:trailingView.leadingAnchor
-                       constant:_largeAccessoryViewEnabled
-                                    ? 0
-                                    : ManualFillGradientMargin],
 
     [leadingViewContainer.trailingAnchor
         constraintEqualToAnchor:trailingView.leadingAnchor],

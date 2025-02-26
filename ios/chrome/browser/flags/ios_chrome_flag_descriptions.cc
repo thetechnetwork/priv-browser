@@ -608,6 +608,11 @@ const char kIOSKeyboardAccessoryUpgradeShortManualFillMenuDescription[] =
     "When enabled, the upgraded keyboard accessory UI will be presented with a "
     "shorter manual fill menu.";
 
+const char kIOSPasskeysM2Name[] = "Enable the passkey syncing follow-ups";
+const char kIOSPasskeysM2Description[] =
+    "When enabled, the passkey syncing-related features will be available in "
+    "the app.";
+
 const char kIOSChooseFromDriveName[] = "IOS Choose from Drive";
 const char kIOSChooseFromDriveDescription[] =
     "Enables the Choose from Drive feature on iOS.";
@@ -1063,9 +1068,9 @@ const char kNotificationSettingsMenuItemDescription[] =
     "Displays the menu item for the notification controls inside the chrome "
     "settings UI.";
 
-const char kRefactorToolbarUIName[] = "Refactor toolbar UI";
-const char kRefactorToolbarUIDescription[] =
-    "When enabled, the toolbar ui does not use broadcaster but observers.";
+const char kRefactorToolbarsSizeName[] = "Refactor toolbars State";
+const char kRefactorToolbarsSizeDescription[] =
+    "When enabled, the toolbars size does not use broadcaster but observers.";
 
 const char kRemoveExcessNTPsExperimentName[] = "Remove extra New Tab Pages";
 const char kRemoveExcessNTPsExperimentDescription[] =

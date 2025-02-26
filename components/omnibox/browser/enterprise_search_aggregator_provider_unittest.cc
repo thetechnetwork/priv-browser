@@ -13,6 +13,7 @@
 #include "base/memory/scoped_refptr.h"
 #include "base/strings/stringprintf.h"
 #include "base/test/task_environment.h"
+#include "base/test/test_future.h"
 #include "base/time/time.h"
 #include "components/omnibox/browser/autocomplete_input.h"
 #include "components/omnibox/browser/autocomplete_match.h"
@@ -40,7 +41,9 @@ class FakeEnterpriseSearchAggregatorProvider
   explicit FakeEnterpriseSearchAggregatorProvider(
       AutocompleteProviderClient* client,
       AutocompleteProviderListener* listener)
-      : EnterpriseSearchAggregatorProvider(client, listener) {}
+      : EnterpriseSearchAggregatorProvider(client, listener),
+        update_results_future_(
+            std::make_unique<base::test::TestFuture<void>>()) {}
 
   using EnterpriseSearchAggregatorProvider::SuggestionType;
 
@@ -50,14 +53,23 @@ class FakeEnterpriseSearchAggregatorProvider
   using EnterpriseSearchAggregatorProvider::
       ParseEnterpriseSearchAggregatorSearchResults;
   using EnterpriseSearchAggregatorProvider::RequestCompleted;
-  using EnterpriseSearchAggregatorProvider::UpdateResults;
 
   using EnterpriseSearchAggregatorProvider::done_;
   using EnterpriseSearchAggregatorProvider::input_;
   using EnterpriseSearchAggregatorProvider::matches_;
 
+  void UpdateResults(const std::optional<base::Value::Dict>& response_value,
+                     const int response_code) override {
+    EnterpriseSearchAggregatorProvider::UpdateResults(std::move(response_value),
+                                                      response_code);
+    update_results_future_->SetValue();
+  }
+
+  bool WaitForUpdateResults() { return update_results_future_->Wait(); }
+
  protected:
   ~FakeEnterpriseSearchAggregatorProvider() override = default;
+  std::unique_ptr<base::test::TestFuture<void>> update_results_future_;
 };
 
 const std::string kGoodJsonResponse = base::StringPrintf(
@@ -296,6 +308,19 @@ TEST_F(EnterpriseSearchAggregatorProviderTest, IsProviderAllowed) {
     scoped_config_.Get().enabled = true;
     EXPECT_TRUE(provider_->IsProviderAllowed(input));
   }
+
+  {
+    // Query must be at least 4 characters long in unscoped mode.
+    AutocompleteInput unscoped_input_long(
+        u"text", metrics::OmniboxEventProto::OTHER, TestSchemeClassifier());
+    EXPECT_TRUE(provider_->IsProviderAllowed(unscoped_input_long));
+    AutocompleteInput unscoped_input_short(
+        u"t", metrics::OmniboxEventProto::OTHER, TestSchemeClassifier());
+    EXPECT_FALSE(provider_->IsProviderAllowed(unscoped_input_short));
+    AutocompleteInput unscoped_empty_input(
+        u"", metrics::OmniboxEventProto::OTHER, TestSchemeClassifier());
+    EXPECT_FALSE(provider_->IsProviderAllowed(unscoped_empty_input));
+  }
 }
 
 // Test that a call to `Start()` will stop old requests to prevent their results
@@ -349,11 +374,9 @@ TEST_F(EnterpriseSearchAggregatorProviderTest, StartCallsStopForZeroSuggest) {
   EXPECT_CALL(*mock_listener_.get(), OnProviderUpdate(_, provider_.get()))
       .Times(0);
 
-  // Matches will not be cleared but the provider will not be called for Zero
-  // Suggest.
   provider_->Start(input, false);
   EXPECT_TRUE(provider_->done());
-  EXPECT_THAT(GetMatches(), testing::ElementsAre(u"https://cached.org"));
+  EXPECT_THAT(GetMatches(), testing::ElementsAre());
 }
 
 // Test that a call to `Start()` will not set `done_` if
@@ -374,10 +397,9 @@ TEST_F(EnterpriseSearchAggregatorProviderTest,
 
 // Test response is parsed accurately.
 TEST_F(EnterpriseSearchAggregatorProviderTest, Parse) {
-  std::optional<base::Value> response =
-      base::JSONReader::Read(kGoodJsonResponse);
+  std::optional<base::Value::Dict> response =
+      base::JSONReader::ReadDict(kGoodJsonResponse);
   ASSERT_TRUE(response);
-  ASSERT_TRUE(response->is_dict());
   AutocompleteInput input{u"keyword text", metrics::OmniboxEventProto::OTHER,
                           TestSchemeClassifier()};
   input.set_keyword_mode_entry_method(metrics::OmniboxEventProto::TAB);
@@ -413,10 +435,9 @@ TEST_F(EnterpriseSearchAggregatorProviderTest, Parse) {
 
 // Test results with missing expected fields are skipped.
 TEST_F(EnterpriseSearchAggregatorProviderTest, ParseWithMissingFields) {
-  std::optional<base::Value> response =
-      base::JSONReader::Read(kMissingFieldsJsonResponse);
+  std::optional<base::Value::Dict> response =
+      base::JSONReader::ReadDict(kMissingFieldsJsonResponse);
   ASSERT_TRUE(response);
-  ASSERT_TRUE(response->is_dict());
   AutocompleteInput input{u"keyword text", metrics::OmniboxEventProto::OTHER,
                           TestSchemeClassifier()};
   input.set_keyword_mode_entry_method(metrics::OmniboxEventProto::TAB);
@@ -437,8 +458,18 @@ TEST_F(EnterpriseSearchAggregatorProviderTest, ParseWithNonDict) {
   input.set_keyword_mode_entry_method(metrics::OmniboxEventProto::TAB);
 
   provider_->input_ = input;
-  provider_->UpdateResults(kNonDictJsonResponse);
 
+  // Matches are not updated when response is not a json.
+  EXPECT_CALL(*mock_listener_.get(), OnProviderUpdate(true, provider_.get()))
+      .Times(0);
+  EXPECT_CALL(*mock_listener_.get(), OnProviderUpdate(false, provider_.get()))
+      .Times(1);
+
+  provider_->input_ = input;
+  provider_->done_ = false;
+  provider_->RequestCompleted(
+      nullptr, 200, std::make_unique<std::string>(kNonDictJsonResponse));
+  ASSERT_TRUE(provider_->WaitForUpdateResults());
   EXPECT_THAT(GetMatches(), testing::ElementsAre());
 }
 
@@ -517,16 +548,18 @@ TEST_F(EnterpriseSearchAggregatorProviderTest, CacheMatches_EmptyResponse) {
       FakeEnterpriseSearchAggregatorProvider::SuggestionType::QUERY, true, 1500,
       "https://cached.org", u"cached", u"cached")};
 
+  // Matches are updated (cleared) when response is empty.
   EXPECT_CALL(*mock_listener_.get(), OnProviderUpdate(true, provider_.get()))
-      .Times(0);
-  EXPECT_CALL(*mock_listener_.get(), OnProviderUpdate(false, provider_.get()))
       .Times(1);
+  EXPECT_CALL(*mock_listener_.get(), OnProviderUpdate(false, provider_.get()))
+      .Times(0);
 
   // Complete request with empty results, old match should be cleared.
   provider_->input_ = input;
   provider_->done_ = false;
   provider_->RequestCompleted(
       nullptr, 200, std::make_unique<std::string>(kGoodEmptyJsonResponse));
+  ASSERT_TRUE(provider_->WaitForUpdateResults());
   EXPECT_THAT(GetMatches(), testing::ElementsAre());
 }
 
@@ -551,6 +584,7 @@ TEST_F(EnterpriseSearchAggregatorProviderTest,
   provider_->done_ = false;
   provider_->RequestCompleted(nullptr, 200,
                               std::make_unique<std::string>(kGoodJsonResponse));
+  ASSERT_TRUE(provider_->WaitForUpdateResults());
   EXPECT_THAT(GetMatches(),
               testing::ElementsAre(u"http://www.yahoo.com/Document%201",
                                    u"http://www.yahoo.com/john@example.com",
@@ -581,6 +615,7 @@ TEST_F(EnterpriseSearchAggregatorProviderTest, UnfeaturedKeyword) {
   provider_->Start(input, false);
   provider_->RequestCompleted(nullptr, 200,
                               std::make_unique<std::string>(kGoodJsonResponse));
+  ASSERT_TRUE(provider_->WaitForUpdateResults());
   EXPECT_THAT(GetMatches(),
               testing::ElementsAre(u"http://www.yahoo.com/Document%201",
                                    u"http://www.yahoo.com/john@example.com",
@@ -600,6 +635,7 @@ TEST_F(EnterpriseSearchAggregatorProviderTest, UnscopedMode) {
   provider_->Start(input, false);
   provider_->RequestCompleted(nullptr, 200,
                               std::make_unique<std::string>(kGoodJsonResponse));
+  ASSERT_TRUE(provider_->WaitForUpdateResults());
   EXPECT_THAT(GetMatches(),
               testing::ElementsAre(u"http://www.yahoo.com/Document%201",
                                    u"http://www.yahoo.com/john@example.com",

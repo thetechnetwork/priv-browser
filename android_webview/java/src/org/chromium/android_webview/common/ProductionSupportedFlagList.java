@@ -233,7 +233,6 @@ public final class ProductionSupportedFlagList {
                 BlinkFeatures.GMS_CORE_EMOJI,
                 "Enables retrieval of the emoji font through GMS Core "
                         + "improving emoji glyph coverage."),
-        Flag.baseFeature("AffiliationsGroupInfoEnabled", "Enables group affiliations on Android."),
         Flag.baseFeature(
                 AndroidAutofillFeatures.ANDROID_AUTOFILL_BOTTOM_SHEET_WORKAROUND_NAME,
                 "Enable the workaround for autofill bottom sheet platform bug."),
@@ -704,7 +703,6 @@ public final class ProductionSupportedFlagList {
         Flag.baseFeature("V8MemoryReducer"),
         Flag.baseFeature("V8MinorMS"),
         Flag.baseFeature("V8ScavengerHigherCapacity"),
-        Flag.baseFeature("V8SeparateGCPhases"),
         Flag.baseFeature("V8SingleThreadedGCInBackground"),
         Flag.baseFeature("V8SingleThreadedGCInBackgroundNoIncrementalMarking"),
         Flag.baseFeature("V8SingleThreadedGCInBackgroundParallelPause"),
@@ -901,6 +899,7 @@ public final class ProductionSupportedFlagList {
         Flag.baseFeature(
                 CcFeatures.DONT_ALWAYS_PUSH_PICTURE_LAYER_IMPLS,
                 "Stop always pushing PictureLayerImpl properties on tree Activation."),
+        Flag.baseFeature(CcFeatures.CC_SLIMMING, "Reduce unnecessary work in CC frame updates."),
         Flag.baseFeature(
                 AccessibilityFeatures.ACCESSIBILITY_PRUNE_REDUNDANT_INLINE_TEXT,
                 "Prune redundant text for AX inline text boxes during serialization"),

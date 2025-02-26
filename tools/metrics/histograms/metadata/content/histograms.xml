@@ -311,8 +311,9 @@ chromium-metrics-reviews@google.com.
   <owner>wanderview@chromium.org</owner>
   <summary>
     Measures how long a call to network::CookieSettings::GetContentSetting
-    takes. Logged each time a call is made. Note that histogram samples for
-    clients without high-resolution clocks are dropped.
+    takes. Logged each time a call is made. Starting M135 sub-sampled with
+    probability 0.001. Note that histogram samples for clients without
+    high-resolution clocks are dropped.
   </summary>
 </histogram>
 
@@ -322,8 +323,9 @@ chromium-metrics-reviews@google.com.
   <owner>wanderview@chromium.org</owner>
   <summary>
     Measures how long a call to CookieSettingBase::GetCookieSettingInternal
-    takes. Logged each time a call is made. Note that histogram samples for
-    clients without high-resolution clocks are dropped.
+    takes. Logged each time a call is made. Starting M135 sub-sampled with
+    probability 0.1. Note that histogram samples for clients without
+    high-resolution clocks are dropped.
   </summary>
 </histogram>
 
@@ -667,7 +669,7 @@ chromium-metrics-reviews@google.com.
 
 <histogram
     name="ContentSettings.{RegularProfileFiltered}DefaultRequestDesktopSiteSetting"
-    enum="ContentSetting" expires_after="2025-06-22">
+    enum="ContentSetting" expires_after="2025-08-24">
   <owner>shuyng@google.com</owner>
   <owner>twellington@chromium.org</owner>
   <summary>
@@ -1136,7 +1138,7 @@ chromium-metrics-reviews@google.com.
 </histogram>
 
 <histogram name="ContentSuggestions.Feed.Network.Duration{NetworkEvent}"
-    units="ms" expires_after="2025-06-22">
+    units="ms" expires_after="2025-08-24">
   <owner>sczs@chromium.org</owner>
   <owner>harringtond@chromium.org</owner>
   <owner>feed@chromium.org</owner>
@@ -1297,7 +1299,7 @@ chromium-metrics-reviews@google.com.
 </histogram>
 
 <histogram name="ContentSuggestions.Feed.UniformityFlag" enum="Boolean"
-    expires_after="2025-06-22">
+    expires_after="2025-08-24">
   <owner>ginnyhuang@chromium.org</owner>
   <owner>feed@chromium.org</owner>
   <summary>

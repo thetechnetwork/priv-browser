@@ -2711,11 +2711,6 @@ BASE_FEATURE(kShowLiveCaptionInVideoConferenceTray,
              "ShowLiveCaptionInVideoConferenceTray",
              base::FEATURE_ENABLED_BY_DEFAULT);
 
-// Shows the Play Store icon in Demo Mode.
-BASE_FEATURE(kShowPlayInDemoMode,
-             "ShowPlayInDemoMode",
-             base::FEATURE_ENABLED_BY_DEFAULT);
-
 // Whether sharing user name should be shown in the continue section for drive
 // files shown because they have been recently shared with the user.
 BASE_FEATURE(kShowSharingUserInLauncherContinueSection,
@@ -3047,12 +3042,12 @@ BASE_FEATURE(kVcStudioLook, "VcStudioLook", base::FEATURE_ENABLED_BY_DEFAULT);
 // Enables or disables mic indicator inside VC tray title header
 BASE_FEATURE(kVcTrayMicIndicator,
              "VCTrayMicIndicator",
-             base::FEATURE_DISABLED_BY_DEFAULT);
+             base::FEATURE_ENABLED_BY_DEFAULT);
 
 // Enables or disables sidetone toggle inside VC tray title header
 BASE_FEATURE(kVcTrayTitleHeader,
              "VCTrayTitleHeader",
-             base::FEATURE_DISABLED_BY_DEFAULT);
+             base::FEATURE_ENABLED_BY_DEFAULT);
 
 // Enables or disables alternative light intensity for ChromeOS video
 // conferencing relighting.
@@ -4686,10 +4681,6 @@ bool IsWmModeEnabled() {
 
 bool IsSearchCustomizableShortcutsInLauncherEnabled() {
   return base::FeatureList::IsEnabled(kSearchCustomizableShortcutsInLauncher);
-}
-
-bool ShouldShowPlayStoreInDemoMode() {
-  return base::FeatureList::IsEnabled(kShowPlayInDemoMode);
 }
 
 bool IsFeatureAwareDeviceDemoModeEnabled() {

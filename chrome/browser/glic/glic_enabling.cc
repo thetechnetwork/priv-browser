@@ -4,10 +4,12 @@
 
 #include "chrome/browser/glic/glic_enabling.h"
 
+#include "base/command_line.h"
 #include "chrome/browser/glic/glic_pref_names.h"
 #include "chrome/browser/profiles/profile.h"
 #include "chrome/browser/signin/identity_manager_factory.h"
 #include "chrome/common/chrome_features.h"
+#include "chrome/common/chrome_switches.h"
 #include "components/prefs/pref_service.h"
 #include "components/signin/public/identity_manager/account_info.h"
 #include "components/signin/public/identity_manager/identity_manager.h"
@@ -30,6 +32,11 @@ bool GlicEnabling::IsProfileEligible(const Profile* profile) {
 bool GlicEnabling::IsEnabledForProfile(Profile* profile) {
   if (!IsProfileEligible(profile)) {
     return false;
+  }
+
+  auto* command_line = base::CommandLine::ForCurrentProcess();
+  if (command_line->HasSwitch(::switches::kGlicDev)) {
+    return true;
   }
 
   signin::IdentityManager* identity_manager =
@@ -112,12 +119,15 @@ void GlicEnabling::OnExtendedAccountInfoUpdated(const AccountInfo& info) {
   enable_changed_callback_list_.Notify();
 }
 
+void GlicEnabling::OnRefreshTokensLoaded() {
+  enable_changed_callback_list_.Notify();
+}
+
 void GlicEnabling::OnErrorStateOfRefreshTokenUpdatedForAccount(
     const CoreAccountInfo& account_info,
     const GoogleServiceAuthError& error,
     signin_metrics::SourceForRefreshTokenOperation token_operation_source) {
-  // Do nothing for now because there is no callback list for detecting changes
-  // to IsReady().
+  enable_changed_callback_list_.Notify();
 }
 
 }  // namespace glic

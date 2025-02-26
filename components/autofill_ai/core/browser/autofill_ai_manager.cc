@@ -25,10 +25,10 @@
 #include "base/types/expected.h"
 #include "components/autofill/core/browser/autofill_field.h"
 #include "components/autofill/core/browser/data_manager/autofill_ai/entity_data_manager.h"
+#include "components/autofill/core/browser/data_model/addresses/autofill_structured_address_utils.h"
 #include "components/autofill/core/browser/data_model/autofill_ai/entity_instance.h"
 #include "components/autofill/core/browser/data_model/autofill_ai/entity_type.h"
 #include "components/autofill/core/browser/data_model/autofill_ai/entity_type_names.h"
-#include "components/autofill/core/browser/data_model/autofill_structured_address_utils.h"
 #include "components/autofill/core/browser/field_type_utils.h"
 #include "components/autofill/core/browser/field_types.h"
 #include "components/autofill/core/browser/filling/field_filling_skip_reason.h"
@@ -105,8 +105,10 @@ std::vector<autofill::EntityInstance> GetPossibleEntitiesFromSubmittedForm(
 
     section_to_entity_types_attributes[field->section()]
                                       [field_attribute_type->entity_type()]
-                                          .emplace_back(*field_attribute_type,
-                                                        value);
+                                          .emplace_back(*field_attribute_type)
+                                          .SetInfo(
+                                              field->Type().GetStorableType(),
+                                              value);
   }
 
   std::vector<autofill::EntityInstance> entities_found_in_form;
@@ -193,46 +195,7 @@ MaybeUpdateEntity(const autofill::EntityInstance& entity,
 
 AutofillAiManager::AutofillAiManager(AutofillAiClient* client,
                                      autofill::StrikeDatabase* strike_database)
-    : client_(CHECK_DEREF(client)) {
-  user_annotation_prompt_strike_database_ =
-      strike_database
-          ? std::make_unique<
-                AutofillPrectionImprovementsAnnotationPromptStrikeDatabase>(
-                strike_database)
-          : nullptr;
-}
-
-bool AutofillAiManager::IsFormBlockedForImport(
-    const autofill::FormStructure& form) const {
-  if (!user_annotation_prompt_strike_database_) {
-    return true;
-  }
-
-  return user_annotation_prompt_strike_database_->ShouldBlockFeature(
-      AutofillAiAnnotationPromptStrikeDatabaseTraits::GetId(
-          form.form_signature()));
-}
-void AutofillAiManager::AddStrikeForImportFromForm(
-    const autofill::FormStructure& form) {
-  if (!user_annotation_prompt_strike_database_) {
-    return;
-  }
-
-  user_annotation_prompt_strike_database_->AddStrike(
-      AutofillAiAnnotationPromptStrikeDatabaseTraits::GetId(
-          form.form_signature()));
-}
-
-void AutofillAiManager::RemoveStrikesForImportFromForm(
-    const autofill::FormStructure& form) {
-  if (!user_annotation_prompt_strike_database_) {
-    return;
-  }
-
-  user_annotation_prompt_strike_database_->ClearStrikes(
-      AutofillAiAnnotationPromptStrikeDatabaseTraits::GetId(
-          form.form_signature()));
-}
+    : client_(CHECK_DEREF(client)) {}
 
 base::flat_map<autofill::FieldGlobalId, bool>
 AutofillAiManager::GetFieldValueSensitivityMap(
@@ -288,11 +251,9 @@ void AutofillAiManager::OnReceivedAXTree(
 
 void AutofillAiManager::OnSuggestionsShown(
     const autofill::DenseSet<SuggestionType>& shown_suggestion_types,
-    const autofill::FormData& form,
-    const autofill::FormFieldData& trigger_field,
-    UpdateSuggestionsCallback update_suggestions_callback) {
+    const autofill::FormGlobalId& form_id) {
   if (shown_suggestion_types.contains(SuggestionType::kFillAutofillAi)) {
-    logger_.OnFillingSuggestionsShown(form.global_id());
+    logger_.OnFillingSuggestionsShown(form_id);
   }
 }
 
@@ -387,38 +348,34 @@ void AutofillAiManager::OnSavePromptAcceptance(
   entity_manager->AddOrUpdateEntityInstance(*std::move(result.entity));
 }
 
-void AutofillAiManager::GetSuggestions(autofill::FormGlobalId form_global_id,
-                                       autofill::FieldGlobalId field_global_id,
-                                       GetSuggestionsCallback callback) {
+std::vector<autofill::Suggestion> AutofillAiManager::GetSuggestions(
+    autofill::FormGlobalId form_global_id,
+    autofill::FieldGlobalId field_global_id) {
   autofill::EntityDataManager* entity_manager = client_->GetEntityDataManager();
   if (!entity_manager) {
-    return std::move(callback).Run({});
+    return {};
   }
 
   base::span<const autofill::EntityInstance> entities =
       entity_manager->GetEntityInstances();
   if (entities.empty()) {
-    std::move(callback).Run({});
-    return;
+    return {};
   }
 
   autofill::FormStructure* form_structure =
       client_->GetCachedFormStructure(form_global_id);
   if (!form_structure) {
-    std::move(callback).Run({});
-    return;
+    return {};
   }
 
   const autofill::AutofillField* autofill_field =
       form_structure->GetFieldById(field_global_id);
   if (!autofill_field) {
-    std::move(callback).Run({});
-    return;
+    return {};
   }
 
   CHECK(autofill_field->GetAutofillAiServerTypePredictions());
-  std::move(callback).Run(
-      CreateFillingSuggestions(*form_structure, field_global_id, entities));
+  return CreateFillingSuggestions(*form_structure, field_global_id, entities);
 }
 
 bool AutofillAiManager::ShouldDisplayIph(

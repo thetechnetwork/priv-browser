@@ -357,6 +357,7 @@ chromium-metrics-reviews@google.com.
   <int value="80" label="FacilitatedPaymentsEwallet"/>
   <int value="81" label="AutofillBnplEnabled"/>
   <int value="82" label="AutofillHasSeenBnpl"/>
+  <int value="83" label="AutomaticPasskeyUpgrades"/>
 <!-- LINT.ThenChange(/components/sync_preferences/common_syncable_prefs_database.cc:CommonSyncablePref)-->
 
 <!-- LINT.IfChange(ChromeSyncablePref) -->
@@ -717,6 +718,7 @@ chromium-metrics-reviews@google.com.
       label="OfficeMoveConfirmationShownForCloudToDriveSyncable"/>
   <int value="100322"
       label="OfficeMoveConfirmationShownForCloudToOneDriveSyncable"/>
+  <int value="100323" label="PinnedCastMigrationComplete"/>
 <!-- LINT.ThenChange(/chrome/browser/sync/prefs/chrome_syncable_prefs_database.cc:ChromeSyncablePref)-->
 
 <!-- LINT.IfChange(IosSyncablePref) -->
@@ -894,6 +896,7 @@ chromium-metrics-reviews@google.com.
   <int value="66" label="Product Comparison"/>
   <int value="67" label="Cookies"/>
   <int value="68" label="Plus Address Settings"/>
+  <int value="69" label="Autofill Loyalty Card"/>
 </enum>
 
 <!-- LINT.ThenChange(/components/sync/base/data_type.h:SyncDataTypes) -->

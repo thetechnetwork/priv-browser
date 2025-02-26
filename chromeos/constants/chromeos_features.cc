@@ -62,7 +62,7 @@ BASE_FEATURE(kCrosComponents,
 
 // Enables an app to discover and install other apps. This flag will be enabled
 // with Finch.
-BASE_FEATURE(kCrosMall, "CrosMall", base::FEATURE_ENABLED_BY_DEFAULT);
+BASE_FEATURE(kCrosMall, "CrosMall", base::FEATURE_DISABLED_BY_DEFAULT);
 
 // Enables the Mall app for managed users. Only has an effect when kCrosMall is
 // also enabled.
@@ -134,7 +134,7 @@ BASE_FEATURE(kKioskHeartbeatsViaERP,
 // Enables the new Magic Boost Consent Flow.
 BASE_FEATURE(kMagicBoostRevamp,
              "MagicBoostRevamp",
-             base::FEATURE_DISABLED_BY_DEFAULT);
+             base::FEATURE_ENABLED_BY_DEFAULT);
 
 // Controls enabling / disabling the mahi feature.
 BASE_FEATURE(kMahi, "Mahi", base::FEATURE_ENABLED_BY_DEFAULT);

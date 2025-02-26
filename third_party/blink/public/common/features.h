@@ -124,9 +124,6 @@ BLINK_COMMON_EXPORT BASE_DECLARE_FEATURE_PARAM(
     std::string,
     kBackgroundTracingPerformanceMark_AllowList);
 
-// Debug reporting runtime flag/JS API.
-BLINK_COMMON_EXPORT BASE_DECLARE_FEATURE(kBiddingAndScoringDebugReportingAPI);
-
 // Finch flag for preventing rendering starvation during threaded scrolling.
 // With this feature enabled, the compositor task queue priority remains low
 // during compositor gestures, e.g. scrolling, but main thread compositor tasks
@@ -440,6 +437,9 @@ BLINK_COMMON_EXPORT BASE_DECLARE_FEATURE_PARAM(double,
 // use a minimal cull rect expansion instead of the above expansion.
 BLINK_COMMON_EXPORT BASE_DECLARE_FEATURE_PARAM(bool,
                                                kSmallScrollersUseMinCullRect);
+// Parameter for ChangedEnoughMinimumDistance() in cull_rect.cc.
+BLINK_COMMON_EXPORT BASE_DECLARE_FEATURE_PARAM(int,
+                                               kCullRectChangedEnoughDistance);
 
 BLINK_COMMON_EXPORT BASE_DECLARE_FEATURE(kFencedFrames);
 
@@ -1373,10 +1373,6 @@ enum class Prerender2WarmUpCompositorTriggerPoint {
 BLINK_COMMON_EXPORT BASE_DECLARE_FEATURE_PARAM(
     Prerender2WarmUpCompositorTriggerPoint,
     kPrerender2WarmUpCompositorTriggerPoint);
-
-// Enables to run prerendering for new tabs (e.g., target="_blank").
-// See https://crbug.com/1350676.
-BLINK_COMMON_EXPORT BASE_DECLARE_FEATURE(kPrerender2InNewTab);
 
 // Firing pagehide events for intended prerender cancellation. See
 // crbug.com/353628449 for more details.

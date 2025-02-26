@@ -2447,9 +2447,9 @@ const flags_ui::FeatureEntry kFeatureEntries[] = {
      FEATURE_WITH_PARAMS_VALUE_TYPE(kDeprecateFeedHeader,
                                     kDeprecateFeedHeaderVariations,
                                     "IOSDeprecateFeedHeader")},
-    {"refactor-toolbar-ui", flag_descriptions::kRefactorToolbarUIName,
-     flag_descriptions::kRefactorToolbarUIDescription, flags_ui::kOsIos,
-     FEATURE_VALUE_TYPE(kRefactorToolbarUI)},
+    {"refactor-toolbars-size", flag_descriptions::kRefactorToolbarsSizeName,
+     flag_descriptions::kRefactorToolbarsSizeDescription, flags_ui::kOsIos,
+     FEATURE_VALUE_TYPE(kRefactorToolbarsSize)},
     {"lens-gesture-text-selection-disabled",
      flag_descriptions::kLensGestureTextSelectionDisabledName,
      flag_descriptions::kLensGestureTextSelectionDisabledDescription,
@@ -2479,6 +2479,9 @@ const flags_ui::FeatureEntry kFeatureEntries[] = {
      flag_descriptions::kAutofillEnableCardExpiredTextDescription,
      flags_ui::kOsIos,
      FEATURE_VALUE_TYPE(autofill::features::kAutofillEnableCardExpiredText)},
+    {"ios-passkeys-m2", flag_descriptions::kIOSPasskeysM2Name,
+     flag_descriptions::kIOSPasskeysM2Description, flags_ui::kOsIos,
+     FEATURE_VALUE_TYPE(kIOSPasskeysM2)},
 };
 
 bool SkipConditionalFeatureEntry(const flags_ui::FeatureEntry& entry) {

@@ -2694,6 +2694,7 @@ interface Element : Node
     method setHTML
     method setHTMLUnsafe
     method setPointerCapture
+    method startViewTransition
     method toggleAttribute
     method webkitMatchesSelector
     method webkitRequestFullScreen
@@ -12567,7 +12568,6 @@ interface XRSystem : EventTarget
     method constructor
     method isSessionSupported
     method requestSession
-    method supportsSession
     setter ondevicechange
 interface XRTransientInputHitTestResult
     attribute @@toStringTag

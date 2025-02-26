@@ -274,6 +274,8 @@ chromium-metrics-reviews@google.com.
       summary="Showing the Enhanced Safe Browsing Promo on iOS"/>
   <variant name="IPH_iOSLensOverlayEntrypointTip"
       summary="IOS Lens overlay toolbar entrypoint"/>
+  <variant name="IPH_iOSLensOverlayEscapeHatchTip"
+      summary="IOS Lens overlay Escape Hatch"/>
   <variant name="IPH_iOSOverflowMenuCustomization"
       summary="overflow menu customization"/>
   <variant name="IPH_iOSPageInfoRevamp"
@@ -301,6 +303,11 @@ chromium-metrics-reviews@google.com.
       summary="showing generic default browser promo"/>
   <variant name="IPH_iOSPromoMadeForIOS"
       summary="showing Made for iOS default browser promo"/>
+  <variant name="IPH_iOSPromoNonModalAppSwitcherDefaultBrowser"
+      summary="showing the non-modal Default Browser Promo from app switcher
+               on iOS"/>
+  <variant name="IPH_iOSPromoNonModalShareDefaultBrowser"
+      summary="showing the non-modal Default Browser Promo from share on iOS"/>
   <variant name="IPH_iOSPromoNonModalUrlPasteDefaultBrowser"
       summary="showing the non-modal Default Browser Promo from omnibox paste
                on iOS"/>
@@ -731,7 +738,7 @@ chromium-metrics-reviews@google.com.
 </histogram>
 
 <histogram name="InProductHelp.ShownTime2.{IPHFeature}" units="ms"
-    expires_after="2025-06-22">
+    expires_after="2025-08-24">
   <owner>gayane@google.com</owner>
   <owner>lpromero@google.com</owner>
   <owner>gambard@chromium.org</owner>

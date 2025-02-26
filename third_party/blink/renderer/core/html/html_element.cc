@@ -471,6 +471,8 @@ const AttributeTriggers* HTMLElement::TriggersForAttributeName(
        nullptr},
       {html_names::kOncloseAttr, kNoWebFeature, event_type_names::kClose,
        nullptr},
+      {html_names::kOncommandAttr, kNoWebFeature, event_type_names::kCommand,
+       nullptr},
       {html_names::kOncontentvisibilityautostatechangeAttr, kNoWebFeature,
        event_type_names::kContentvisibilityautostatechange, nullptr},
       {html_names::kOncontextlostAttr, kNoWebFeature,
@@ -2951,8 +2953,6 @@ int HTMLElement::offsetWidthForBinding() {
   int result = 0;
   if (const auto* layout_object = GetLayoutBoxModelObject()) {
     result = AdjustedOffsetForZoom(layout_object->OffsetWidth());
-    RecordScrollbarSizeForStudy(result, /* is_width= */ true,
-                                /* is_offset= */ true);
   }
   return result;
 }
@@ -2964,8 +2964,6 @@ int HTMLElement::offsetHeightForBinding() {
   int result = 0;
   if (const auto* layout_object = GetLayoutBoxModelObject()) {
     result = AdjustedOffsetForZoom(layout_object->OffsetHeight());
-    RecordScrollbarSizeForStudy(result, /* is_width= */ false,
-                                /* is_offset= */ true);
   }
   return result;
 }

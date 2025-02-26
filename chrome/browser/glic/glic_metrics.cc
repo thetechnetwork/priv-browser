@@ -6,6 +6,7 @@
 
 #include "base/metrics/histogram_functions.h"
 #include "base/metrics/user_metrics.h"
+#include "chrome/browser/browser_process.h"
 #include "chrome/browser/glic/glic_enabling.h"
 #include "chrome/browser/glic/glic_focused_tab_manager.h"
 #include "chrome/browser/glic/glic_fre_controller.h"
@@ -37,9 +38,11 @@ enum class Error {
 // LINT.IfChange(EntryPointImpression)
 enum class EntryPointImpression {
   kBeforeFre = 0,
-  kAfterFreGlicEnabled = 1,
-  kAfterFreGlicDisabled = 2,
-  kMaxValue = kAfterFreGlicDisabled,
+  kAfterFreBrowserOnly = 1,
+  kAfterFreOsOnly = 2,
+  kAfterFreEnabled = 3,
+  kAfterFreDisabled = 4,
+  kMaxValue = kAfterFreDisabled,
 };
 // LINT.ThenChange(//tools/metrics/histograms/metadata/glic/enums.xml:GlicEntryPointImpression)
 
@@ -156,6 +159,7 @@ void GlicMetrics::OnUserInputSubmitted(mojom::WebClientMode mode) {
 }
 
 void GlicMetrics::OnResponseStarted() {
+  response_started_ = true;
   base::RecordAction(base::UserMetricsAction("GlicResponseStart"));
 
   // It doesn't make sense to record response start without input submission.
@@ -216,6 +220,12 @@ void GlicMetrics::OnResponseStarted() {
 }
 
 void GlicMetrics::OnResponseStopped() {
+  // The client may call "stopped" without "started" for very short responses.
+  // We synthetically call it ourselves in this case.
+  if (!input_submitted_time_.is_null() && !response_started_) {
+    OnResponseStarted();
+  }
+
   base::RecordAction(base::UserMetricsAction("GlicResponseStop"));
 
   if (input_submitted_time_.is_null()) {
@@ -231,6 +241,7 @@ void GlicMetrics::OnResponseStopped() {
   input_submitted_time_ = base::TimeTicks();
   did_request_context_ = false;
   source_id_ = no_url_source_id_;
+  response_started_ = false;
 }
 
 void GlicMetrics::OnSessionTerminated() {
@@ -290,18 +301,28 @@ void GlicMetrics::DidRequestContextFromFocusedTab() {
 }
 
 void GlicMetrics::OnImpressionTimerFired() {
-  bool passed_fre =
-      !window_controller_->fre_controller()->ShouldShowFreDialog();
+  if (window_controller_->fre_controller()->ShouldShowFreDialog()) {
+    base::UmaHistogramEnumeration("Glic.EntryPoint.Impression",
+                                  EntryPointImpression::kBeforeFre);
+    return;
+  }
+  if (!is_enabled_) {
+    base::UmaHistogramEnumeration("Glic.EntryPoint.Impression",
+                                  EntryPointImpression::kAfterFreDisabled);
+    return;
+  }
+
   EntryPointImpression impression;
-  if (passed_fre) {
-    bool glic_enabled = GlicEnabling::IsEnabledForProfile(profile_);
-    if (glic_enabled) {
-      impression = EntryPointImpression::kAfterFreGlicEnabled;
-    } else {
-      impression = EntryPointImpression::kAfterFreGlicDisabled;
-    }
+  bool is_os_entrypoint_enabled =
+      g_browser_process->local_state()->GetBoolean(prefs::kGlicLauncherEnabled);
+  if (is_pinned_ && is_os_entrypoint_enabled) {
+    impression = EntryPointImpression::kAfterFreEnabled;
+  } else if (is_pinned_) {
+    impression = EntryPointImpression::kAfterFreBrowserOnly;
+  } else if (is_os_entrypoint_enabled) {
+    impression = EntryPointImpression::kAfterFreOsOnly;
   } else {
-    impression = EntryPointImpression::kBeforeFre;
+    impression = EntryPointImpression::kAfterFreDisabled;
   }
   base::UmaHistogramEnumeration("Glic.EntryPoint.Impression", impression);
 }
@@ -328,7 +349,11 @@ void GlicMetrics::OnPinningPrefChanged() {
     return;
   }
   is_pinned_ = is_pinned;
-  base::UmaHistogramBoolean("Glic.Settings.TogglePinning", is_pinned_);
+  if (is_pinned_) {
+    base::RecordAction(base::UserMetricsAction("Glic.Pinned"));
+  } else {
+    base::RecordAction(base::UserMetricsAction("Glic.Unpinned"));
+  }
 }
 
 }  // namespace glic

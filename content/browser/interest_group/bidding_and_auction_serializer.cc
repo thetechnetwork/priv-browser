@@ -864,8 +864,12 @@ void BiddingAndAuctionSerializer::TargetSizeEstimator::UpdateUnsizedGroupSizes(
           remaining_unallocated_unsized_buyers_ - 1) /
          remaining_unallocated_unsized_buyers_)
             .ValueOrDie<size_t>();
-    if (equal_size_allocation == previous_size_allocation) {
+    if (equal_size_allocation <= previous_size_allocation) {
       // No changes mean no more buyers can be removed, so we're done.
+      // We have to use <= because we took the ceiling when calculating the
+      // equal size allocation above, so an assignment of this size may
+      // reduce the allocation by up to
+      // `remaining_unallocated_unsized_buyers_ - 1`.
       break;
     }
     unsized_buyer_size_ = equal_size_allocation;
@@ -959,9 +963,7 @@ BiddingAndAuctionData BiddingAndAuctionSerializer::Build() {
                            TaggedStringLength(publisher_.size());
 
   message_obj[cbor::Value("enableDebugReporting")] =
-      cbor::Value(base::FeatureList::IsEnabled(
-                      blink::features::kBiddingAndScoringDebugReportingAPI) &&
-                  !debug_report_in_lockout_);
+      cbor::Value(!debug_report_in_lockout_);
   message_elements_size +=
       TaggedStringLength(constexpr_strlen("enableDebugReporting")) + 1;
 

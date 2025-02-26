@@ -189,12 +189,6 @@ BASE_FEATURE_PARAM(std::string,
                    "allow_list",
                    "");
 
-// See https://github.com/WICG/turtledove/blob/main/FLEDGE.md
-// Feature flag to enable debug reporting APIs.
-BASE_FEATURE(kBiddingAndScoringDebugReportingAPI,
-             "BiddingAndScoringDebugReportingAPI",
-             base::FEATURE_ENABLED_BY_DEFAULT);
-
 // Boost the priority of the first N not-small images.
 // crbug.com/1431169
 BASE_FEATURE(kBoostImagePriority,
@@ -762,17 +756,27 @@ BASE_FEATURE_PARAM(int,
                    kCullRectPixelDistanceToExpand,
                    &kExpandCompositedCullRect,
                    "pixels",
-                   4000);
+#if BUILDFLAG(IS_ANDROID) || BUILDFLAG(IS_FUCHSIA)
+                   2000
+#else
+                   4000
+#endif
+);
 BASE_FEATURE_PARAM(double,
                    kCullRectExpansionDPRCoef,
                    &kExpandCompositedCullRect,
                    "dpr_coef",
-                   0);
+                   1);
 BASE_FEATURE_PARAM(bool,
                    kSmallScrollersUseMinCullRect,
                    &kExpandCompositedCullRect,
                    "small_scroller_opt",
                    true);
+BASE_FEATURE_PARAM(int,
+                   kCullRectChangedEnoughDistance,
+                   &kExpandCompositedCullRect,
+                   "changed_enough",
+                   512);
 
 // Enable the <fencedframe> element; see crbug.com/1123606. Note that enabling
 // this feature does not automatically expose this element to the web, it only
@@ -1994,10 +1998,6 @@ BASE_FEATURE_PARAM(int,
 
 BASE_FEATURE(kPreloadingViewportHeuristics,
              "PreloadingViewportHeuristics",
-             base::FEATURE_DISABLED_BY_DEFAULT);
-
-BASE_FEATURE(kPrerender2InNewTab,
-             "Prerender2InNewTab",
              base::FEATURE_DISABLED_BY_DEFAULT);
 
 // Firing pagehide events for intended prerender cancellation. See

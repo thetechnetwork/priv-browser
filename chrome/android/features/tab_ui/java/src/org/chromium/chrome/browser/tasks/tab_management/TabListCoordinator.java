@@ -404,11 +404,6 @@ public class TabListCoordinator
         configureRecyclerViewTouchHelpers();
     }
 
-    /** Returns the {@link TabListMode} of the coordinator. */
-    public @TabListMode int getTabListMode() {
-        return mMode;
-    }
-
     /**
      * @param onLongPressTabItemEventListener to handle long press events on tabs.
      */
@@ -444,7 +439,7 @@ public class TabListCoordinator
         // TODO(crbug.com/40627995): calculate the location before the real one is ready.
         Rect rect =
                 mRecyclerView.getRectOfCurrentThumbnail(
-                        mModelList.indexFromId(mMediator.selectedTabId()),
+                        mModelList.indexFromTabId(mMediator.selectedTabId()),
                         mMediator.selectedTabId());
         if (rect == null) return new Rect();
         rect.offset(0, 0);
@@ -791,14 +786,6 @@ public class TabListCoordinator
     }
 
     /**
-     * Inserts a special {@link org.chromium.ui.modelutil.MVCListAdapter.ListItem} to the end of
-     * model list.
-     */
-    void addSpecialListItemToEnd(@UiType int uiType, PropertyModel model) {
-        mMediator.addSpecialItemToModel(mModelList.size(), uiType, model);
-    }
-
-    /**
      * Removes a special {@link org.chromium.ui.modelutil.MVCListAdapter.ListItem} that has the
      * given {@code uiType} and/or its {@link PropertyModel} has the given {@code itemIdentifier}.
      *
@@ -813,7 +800,7 @@ public class TabListCoordinator
     // PriceWelcomeMessageService.PriceWelcomeMessageProvider implementation.
     @Override
     public int getTabIndexFromTabId(int tabId) {
-        return mModelList.indexFromId(tabId);
+        return mModelList.indexFromTabId(tabId);
     }
 
     @Override
@@ -841,8 +828,10 @@ public class TabListCoordinator
         return mMediator.specialItemExistsInModel(itemIdentifier);
     }
 
-    boolean isLastItemMessage() {
-        return mMediator.isLastItemMessage();
+    /** Provides the tab ID for the most recently swiped tab. */
+    @NonNull
+    ObservableSupplier<Integer> getRecentlySwipedTabSupplier() {
+        return mMediator.getRecentlySwipedTabSupplier();
     }
 
     private void checkAwaitingLayout() {
@@ -850,7 +839,7 @@ public class TabListCoordinator
             SimpleRecyclerViewAdapter.ViewHolder holder =
                     (SimpleRecyclerViewAdapter.ViewHolder)
                             mRecyclerView.findViewHolderForAdapterPosition(
-                                    mModelList.indexFromId(mAwaitingTabId));
+                                    mModelList.indexFromTabId(mAwaitingTabId));
             if (holder == null) return;
             assert holder.model.get(TabProperties.TAB_ID) == mAwaitingTabId;
             Runnable r = mAwaitingLayoutRunnable;
@@ -861,7 +850,7 @@ public class TabListCoordinator
     }
 
     private int getIndexForTabId(int tabId) {
-        int index = mModelList.indexFromId(tabId);
+        int index = mModelList.indexFromTabId(tabId);
         if (index != TabModel.INVALID_TAB_INDEX) return index;
 
         TabModel tabModel = mCurrentTabGroupModelFilterSupplier.get().getTabModel();

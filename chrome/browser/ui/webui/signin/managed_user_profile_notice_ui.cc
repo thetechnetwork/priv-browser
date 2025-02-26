@@ -16,6 +16,9 @@
 #include "chrome/browser/enterprise/profile_management/profile_management_features.h"
 #include "chrome/browser/enterprise/util/managed_browser_utils.h"
 #include "chrome/browser/profiles/profile.h"
+#include "chrome/browser/profiles/profile_statistics.h"
+#include "chrome/browser/profiles/profile_statistics_common.h"
+#include "chrome/browser/profiles/profile_statistics_factory.h"
 #include "chrome/browser/signin/signin_util.h"
 #include "chrome/browser/ui/managed_ui.h"
 #include "chrome/browser/ui/ui_features.h"
@@ -32,6 +35,7 @@
 #include "components/strings/grit/components_strings.h"
 #include "content/public/browser/web_ui.h"
 #include "content/public/browser/web_ui_data_source.h"
+#include "extensions/browser/extension_registry.h"
 #include "services/network/public/mojom/content_security_policy.mojom.h"
 #include "ui/base/l10n/l10n_util.h"
 #include "ui/base/ui_base_features.h"
@@ -138,8 +142,9 @@ ManagedUserProfileNoticeUI::ManagedUserProfileNoticeUI(content::WebUI* web_ui)
   source->AddLocalizedString("linkDataText",
                              IDS_ENTERPRISE_PROFILE_WELCOME_LINK_DATA_CHECKBOX);
 
-  source->AddLocalizedString("profileDisclosureTitle",
-                             IDS_ENTERPRISE_WELCOME_PROFILE_DISCLOSURE_TITLE);
+  source->AddLocalizedString(
+      "profileDisclosureTitle",
+      IDS_ENTERPRISE_WELCOME_PROFILE_DISCLOSURE_WORK_TITLE);
   source->AddLocalizedString(
       "profileOidcDisclosureTitle",
       IDS_ENTERPRISE_WELCOME_PROFILE_OIDC_DISCLOSURE_TITLE);
@@ -178,16 +183,17 @@ ManagedUserProfileNoticeUI::ManagedUserProfileNoticeUI(content::WebUI* web_ui)
       "valuePropositionTitle",
       IDS_ENTERPRISE_VALUE_PROPOSITION_PROFILE_SUGGESTED_TITLE);
   source->AddLocalizedString("valuePropSubtitle",
-                             IDS_ENTERPRISE_VALUE_PROPOSITION_SUBTITLE);
+                             IDS_ENTERPRISE_VALUE_PROPOSITION_WORK_SUBTITLE);
 
   source->AddLocalizedString(
       "separateBrowsingDataChoiceTitle",
-      IDS_ENTERPRISE_WELCOME_SEPARATE_BROWSING_DATA_CHOICE);
+      IDS_ENTERPRISE_WELCOME_SEPARATE_BROWSING_DATA_WORK_CHOICE);
   source->AddLocalizedString(
       "separateBrowsingDataChoiceDetails",
       IDS_ENTERPRISE_WELCOME_SEPARATE_BROWSING_DATA_CHOICE_DETAILS);
-  source->AddLocalizedString("mergeBrowsingDataChoiceTitle",
-                             IDS_ENTERPRISE_WELCOME_MERGE_BROWSING_DATA_CHOICE);
+  source->AddLocalizedString(
+      "mergeBrowsingDataChoiceTitle",
+      IDS_ENTERPRISE_WELCOME_MERGE_BROWSING_DATA_WORK_CHOICE);
   source->AddLocalizedString(
       "mergeBrowsingDataChoiceDetails",
       IDS_ENTERPRISE_WELCOME_MERGE_BROWSING_DATA_CHOICE_DETAILS);
@@ -211,6 +217,9 @@ void ManagedUserProfileNoticeUI::Initialize(
     std::unique_ptr<signin::EnterpriseProfileCreationDialogParams>
         create_param) {
   auto* profile = Profile::FromWebUI(web_ui());
+  bool is_school_account =
+      create_param->account_info.capabilities.can_use_edu_features() ==
+      signin::Tribool::kTrue;
   base::Value::Dict update_data;
   if (type ==
       ManagedUserProfileNoticeUI::ScreenType::kEnterpriseAccountCreation) {
@@ -273,15 +282,32 @@ void ManagedUserProfileNoticeUI::Initialize(
   }
 
   if (!create_param->account_info.IsManaged()) {
+    update_data.Set("valuePropSubtitle",
+                    l10n_util::GetStringUTF16(
+                        IDS_ENTERPRISE_VALUE_PROPOSITION_CONSUMER_SUBTITLE));
     update_data.Set(
         "separateBrowsingDataTitle",
         l10n_util::GetStringUTF16(
             IDS_ENTERPRISE_WELCOME_SEPARATE_BROWSING_CONSUMER_TITLE));
-  } else if (create_param->account_info.capabilities.can_use_edu_features() ==
-             signin::Tribool::kTrue) {
+  } else if (is_school_account) {
     update_data.Set("separateBrowsingDataTitle",
                     l10n_util::GetStringUTF16(
                         IDS_ENTERPRISE_WELCOME_SEPARATE_BROWSING_SCHOOL_TITLE));
+    update_data.Set(
+        "profileDisclosureTitle",
+        l10n_util::GetStringUTF16(
+            IDS_ENTERPRISE_WELCOME_PROFILE_DISCLOSURE_SCHOOL_TITLE));
+    update_data.Set("valuePropSubtitle",
+                    l10n_util::GetStringUTF16(
+                        IDS_ENTERPRISE_VALUE_PROPOSITION_SCHOOL_SUBTITLE));
+    update_data.Set(
+        "mergeBrowsingDataChoiceTitle",
+        l10n_util::GetStringUTF16(
+            IDS_ENTERPRISE_WELCOME_MERGE_BROWSING_DATA_SCHOOL_CHOICE));
+    update_data.Set(
+        "separateBrowsingDataChoiceTitle",
+        l10n_util::GetStringUTF16(
+            IDS_ENTERPRISE_WELCOME_SEPARATE_BROWSING_DATA_SCHOOL_CHOICE));
   }
 
   // Change the text so that the "(Recommended)" label is not shown when the
@@ -298,7 +324,16 @@ void ManagedUserProfileNoticeUI::Initialize(
     update_data.Set(
         "separateBrowsingDataChoiceTitle",
         l10n_util::GetStringUTF16(
-            IDS_ENTERPRISE_WELCOME_SEPARATE_BROWSING_DATA_CHOICE_NOT_RECOMMENDED));
+            is_school_account
+                ? IDS_ENTERPRISE_WELCOME_SEPARATE_BROWSING_DATA_CHOICE_SCHOOL_NOT_RECOMMENDED
+                : IDS_ENTERPRISE_WELCOME_SEPARATE_BROWSING_DATA_CHOICE_WORK_NOT_RECOMMENDED));
+  }
+
+  if (create_param->show_link_data_option) {
+    ProfileStatisticsFactory::GetForProfile(profile)->GatherStatistics(
+        base::BindRepeating(
+            &ManagedUserProfileNoticeUI::UpdateBrowsingDataStringWithCounts,
+            weak_ptr_factory_.GetWeakPtr()));
   }
 
   content::WebUIDataSource::Update(
@@ -315,6 +350,74 @@ void ManagedUserProfileNoticeUI::Initialize(
 ManagedUserProfileNoticeHandler*
 ManagedUserProfileNoticeUI::GetHandlerForTesting() {
   return handler_;
+}
+
+void ManagedUserProfileNoticeUI::UpdateBrowsingDataStringWithCounts(
+    profiles::ProfileCategoryStats stats) {
+  int browsing_history_count = 0;
+  int bookmarks_count = 0;
+  int extensions_count = 0;
+
+  for (const auto& stat : stats) {
+    if (stat.category == profiles::kProfileStatisticsBrowsingHistory) {
+      browsing_history_count = stat.count;
+    } else if (stat.category == profiles::kProfileStatisticsBookmarks) {
+      bookmarks_count = stat.count;
+    }
+  }
+  auto* profile = Profile::FromWebUI(web_ui());
+  auto* registry = extensions::ExtensionRegistry::Get(profile);
+  extensions_count = registry->enabled_extensions().size() +
+                     registry->disabled_extensions().size() +
+                     registry->terminated_extensions().size() +
+                     registry->blocklisted_extensions().size() +
+                     registry->blocked_extensions().size();
+
+  std::vector<std::u16string> string_replacements;
+  if (bookmarks_count > 0) {
+    string_replacements.push_back(
+        l10n_util::GetPluralStringFUTF16(IDS_BOOKMARKS_COUNT, bookmarks_count));
+  }
+  if (extensions_count > 0) {
+    string_replacements.push_back(l10n_util::GetPluralStringFUTF16(
+        IDS_EXTENSIONS_COUNT, extensions_count));
+  }
+  if (browsing_history_count > 0) {
+    string_replacements.push_back(l10n_util::GetPluralStringFUTF16(
+        IDS_BROWSING_HISTORY_COUNT, browsing_history_count));
+  }
+
+  if (string_replacements.empty()) {
+    return;
+  }
+
+  base::Value::Dict update_data;
+  std::u16string browsing_data_string;
+  if (string_replacements.size() == 1) {
+    update_data.Set(
+        "mergeBrowsingDataChoiceDetails",
+        l10n_util::GetStringFUTF16(
+            IDS_ENTERPRISE_WELCOME_MERGE_BROWSING_DATA_WITH_ONE_COUNT_CHOICE_DETAILS,
+            string_replacements, nullptr));
+  }
+  if (string_replacements.size() == 2) {
+    update_data.Set(
+        "mergeBrowsingDataChoiceDetails",
+        l10n_util::GetStringFUTF16(
+            IDS_ENTERPRISE_WELCOME_MERGE_BROWSING_DATA_WITH_TWO_COUNTS_CHOICE_DETAILS,
+            string_replacements, nullptr));
+  }
+  if (string_replacements.size() == 3) {
+    update_data.Set(
+        "mergeBrowsingDataChoiceDetails",
+        l10n_util::GetStringFUTF16(
+            IDS_ENTERPRISE_WELCOME_MERGE_BROWSING_DATA_WITH_THREE_COUNTS_CHOICE_DETAILS,
+            string_replacements, nullptr));
+  }
+
+  content::WebUIDataSource::Update(
+      profile, chrome::kChromeUIManagedUserProfileNoticeHost,
+      std::move(update_data));
 }
 
 WEB_UI_CONTROLLER_TYPE_IMPL(ManagedUserProfileNoticeUI)

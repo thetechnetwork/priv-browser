@@ -326,7 +326,8 @@ class BocaAppPageHandlerTest : public testing::Test {
         std::make_unique<MockWebviewAuthHandler>(browser_context,
                                                  kWebviewHostName),
         /*classroom_client_impl=*/nullptr,
-        /*content_settings_handler=*/nullptr, &session_client_impl_,
+        /*content_settings_handler=*/nullptr,
+        /*system_web_app_manager=*/nullptr, &session_client_impl_,
         /*is_producer=*/true);
     boca_app_handler_->SetSpotlightService(&spotlight_service_);
     // Explicitly set pref
@@ -1630,6 +1631,18 @@ TEST_F(BocaAppPageHandlerTest, OnSessionSessionStartedSucceed) {
   boca_app_handler()->SetSessionConfigInterceptorCallbackForTesting(
       future.GetCallback());
   boca_app_handler()->OnSessionStarted(std::string(), ::boca::UserIdentity());
+  auto result = future.Take();
+  ASSERT_TRUE(result->is_config());
+}
+
+TEST_F(BocaAppPageHandlerTest, OnSessionSessionMetadataUpdatedSucceed) {
+  auto session = GetCommonActiveSessionProto();
+  EXPECT_CALL(*session_manager(), GetCurrentSession())
+      .WillOnce(Return(&session));
+  base::test::TestFuture<mojom::ConfigResultPtr> future;
+  boca_app_handler()->SetSessionConfigInterceptorCallbackForTesting(
+      future.GetCallback());
+  boca_app_handler()->OnSessionMetadataUpdated(std::string());
   auto result = future.Take();
   ASSERT_TRUE(result->is_config());
 }

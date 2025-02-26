@@ -13,7 +13,6 @@
 #include "components/autofill/core/common/aliases.h"
 #include "components/autofill/core/common/form_data.h"
 #include "components/autofill/core/common/unique_ids.h"
-#include "components/autofill_ai/core/browser/autofill_ai_annotation_prompt_strike_database.h"
 #include "components/autofill_ai/core/browser/autofill_ai_client.h"
 #include "components/autofill_ai/core/browser/autofill_ai_logger.h"
 
@@ -35,9 +34,9 @@ class AutofillAiManager : public autofill::AutofillAiDelegate {
   ~AutofillAiManager() override;
 
   // autofill::AutofillAiDelegate:
-  void GetSuggestions(autofill::FormGlobalId form_global_id,
-                      autofill::FieldGlobalId field_global_id,
-                      GetSuggestionsCallback callback) override;
+  std::vector<autofill::Suggestion> GetSuggestions(
+      autofill::FormGlobalId form_global_id,
+      autofill::FieldGlobalId field_global_id) override;
   bool IsFormAndFieldEligibleForAutofillAi(
       const autofill::FormStructure& form,
       const autofill::AutofillField& field) const override;
@@ -49,20 +48,12 @@ class AutofillAiManager : public autofill::AutofillAiDelegate {
                               bool autofill_ai_shows_bubble)> callback)
       override;
   bool ShouldDisplayIph(const autofill::AutofillField& field) const override;
-  void OnSuggestionsShown(
-      const autofill::DenseSet<autofill::SuggestionType>&
-          shown_suggestion_types,
-      const autofill::FormData& form,
-      const autofill::FormFieldData& trigger_field,
-      UpdateSuggestionsCallback update_suggestions_callback) override;
+  void OnSuggestionsShown(const autofill::DenseSet<autofill::SuggestionType>&
+                              shown_suggestion_types,
+                          const autofill::FormGlobalId& form_id) override;
   void OnFormSeen(const autofill::FormStructure& form) override;
   void OnDidFillSuggestion(autofill::FormGlobalId form_id) override;
   void OnEditedAutofilledField(autofill::FormGlobalId form_id) override;
-
-  // Methods for strike counting of rejected forms.
-  bool IsFormBlockedForImport(const autofill::FormStructure& form) const;
-  void AddStrikeForImportFromForm(const autofill::FormStructure& form);
-  void RemoveStrikesForImportFromForm(const autofill::FormStructure& form);
 
   base::flat_map<autofill::FieldGlobalId, bool> GetFieldValueSensitivityMap(
       const autofill::FormData& form_data);
@@ -91,11 +82,6 @@ class AutofillAiManager : public autofill::AutofillAiDelegate {
   // A raw reference to the client, which owns `this` and therefore outlives
   // it.
   const raw_ref<AutofillAiClient> client_;
-
-  // A strike data base used blocking save prompt for specific form signatures
-  // to prevent over prompting.
-  std::unique_ptr<AutofillPrectionImprovementsAnnotationPromptStrikeDatabase>
-      user_annotation_prompt_strike_database_;
 
   base::WeakPtrFactory<AutofillAiManager> weak_ptr_factory_{this};
 };

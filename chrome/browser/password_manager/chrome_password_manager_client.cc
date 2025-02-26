@@ -70,6 +70,7 @@
 #include "components/password_manager/content/browser/password_manager_log_router_factory.h"
 #include "components/password_manager/content/browser/password_requirements_service_factory.h"
 #include "components/password_manager/core/browser/browser_save_password_progress_logger.h"
+#include "components/password_manager/core/browser/credential_manager_impl.h"
 #include "components/password_manager/core/browser/features/password_features.h"
 #include "components/password_manager/core/browser/hsts_query.h"
 #include "components/password_manager/core/browser/http_auth_manager.h"
@@ -603,7 +604,7 @@ void ChromePasswordManagerClient::
   if (webauthn_delegate) {
     webauthn_delegate->NotifyForPasskeysDisplay();
     if (webauthn_delegate->GetPasskeys().has_value()) {
-      passkeys = *webauthn_delegate->GetPasskeys();
+      passkeys = *webauthn_delegate->GetPasskeys().value();
       should_show_hybrid_option =
           webauthn_delegate->IsSecurityKeyOrHybridFlowAvailable();
     }
@@ -1569,6 +1570,10 @@ void ChromePasswordManagerClient::ShowPasswordEditingPopup(
   if (!password_manager::bad_message::CheckFrameNotPrerendering(rfh)) {
     return;
   }
+  if (!password_manager::bad_message::CheckGeneratedPassword(rfh,
+                                                             password_value)) {
+    return;
+  }
   auto* driver =
       password_manager::ContentPasswordManagerDriver::GetForRenderFrameHost(
           rfh);
@@ -1592,7 +1597,7 @@ void ChromePasswordManagerClient::ShowPasswordEditingPopup(
       popup_controller_, element_bounds_in_screen_space, ui_data,
       driver->AsWeakPtr(), observer_, web_contents(),
       password_generation_driver_receivers_.GetCurrentTargetFrame());
-  DCHECK(!password_value.empty());
+  CHECK(!password_value.empty());
   popup_controller_->UpdateGeneratedPassword(password_value);
   popup_controller_->Show(
       PasswordGenerationPopupController::kEditGeneratedPassword);
@@ -1778,7 +1783,8 @@ ChromePasswordManagerClient::ChromePasswordManagerClient(
                                 g_browser_process->local_state(),
                                 SyncServiceFactory::GetForProfile(profile_)),
       httpauth_manager_(this),
-      content_credential_manager_(this),
+      content_credential_manager_(
+          std::make_unique<password_manager::CredentialManagerImpl>(this)),
       password_generation_driver_receivers_(web_contents, this),
       observer_(nullptr),
 #if BUILDFLAG(ENABLE_DICE_SUPPORT)

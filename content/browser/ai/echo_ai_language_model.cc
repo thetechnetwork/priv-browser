@@ -26,7 +26,9 @@ constexpr char kResponsePrefix[] =
     "back the input:\n";
 }
 
-EchoAILanguageModel::EchoAILanguageModel() = default;
+EchoAILanguageModel::EchoAILanguageModel(
+    blink::mojom::AILanguageModelSamplingParamsPtr sampling_params)
+    : sampling_params_(std::move(sampling_params)) {}
 
 EchoAILanguageModel::~EchoAILanguageModel() = default;
 
@@ -70,10 +72,22 @@ void EchoAILanguageModel::Prompt(
     return;
   }
 
-  CHECK_EQ(input->pieces.size(), 1u);
-  CHECK(std::holds_alternative<std::string>(input->pieces[0]));
-  const std::string& response = std::get<std::string>(input->pieces[0]);
-
+  std::string response = "";
+  for (const auto& piece : input->pieces) {
+    if (std::holds_alternative<std::string>(piece)) {
+      response += std::get<std::string>(piece);
+    } else if (std::holds_alternative<SkBitmap>(piece)) {
+      response += "<image>";
+    } else if (std::holds_alternative<::ml::Token>(piece)) {
+      NOTIMPLEMENTED_LOG_ONCE();
+    } else if (std::holds_alternative<bool>(piece)) {
+      NOTIMPLEMENTED_LOG_ONCE();
+    } else if (std::holds_alternative<ml::AudioBuffer>(piece)) {
+      NOTIMPLEMENTED_LOG_ONCE();
+    } else {
+      NOTIMPLEMENTED_LOG_ONCE();
+    }
+  }
   mojo::RemoteSetElementId responder_id =
       responder_set_.Add(std::move(pending_responder));
   // Simulate the time taken by model execution.
@@ -91,17 +105,14 @@ void EchoAILanguageModel::Fork(
       std::move(client));
   mojo::PendingRemote<blink::mojom::AILanguageModel> language_model;
 
-  mojo::MakeSelfOwnedReceiver(std::make_unique<EchoAILanguageModel>(),
-                              language_model.InitWithNewPipeAndPassReceiver());
+  mojo::MakeSelfOwnedReceiver(
+      std::make_unique<EchoAILanguageModel>(sampling_params_.Clone()),
+      language_model.InitWithNewPipeAndPassReceiver());
   client_remote->OnResult(
       std::move(language_model),
       blink::mojom::AILanguageModelInstanceInfo::New(
           EchoAIManagerImpl::kMaxContextSizeInTokens, current_tokens_,
-          blink::mojom::AILanguageModelSamplingParams::New(
-              optimization_guide::features::GetOnDeviceModelDefaultTopK(),
-              optimization_guide::features::
-                  GetOnDeviceModelDefaultTemperature()),
-          std::nullopt));
+          sampling_params_->Clone(), std::nullopt));
 }
 
 void EchoAILanguageModel::Destroy() {

@@ -6,13 +6,14 @@
 
 #include "testing/gtest/include/gtest/gtest.h"
 #include "third_party/blink/renderer/platform/testing/paint_property_test_helpers.h"
+#include "third_party/blink/renderer/platform/testing/paint_test_configurations.h"
 #include "third_party/blink/renderer/platform/testing/runtime_enabled_features_test_helpers.h"
 #include "third_party/blink/renderer/platform/transforms/affine_transform.h"
 #include "ui/gfx/geometry/rect_f.h"
 
 namespace blink {
 
-class CullRectTest : public testing::Test {
+class CullRectTest : public testing::Test, private CullRectTestConfig {
  protected:
   bool ApplyPaintProperties(
       CullRect& cull_rect,
@@ -35,7 +36,7 @@ class CullRectTest : public testing::Test {
                      const std::optional<gfx::Rect>& bounds = std::nullopt,
                      const std::pair<bool, bool>& expanded = {true, true}) {
     return CullRect(new_rect).ChangedEnough(expanded, CullRect(old_rect),
-                                            bounds, 1.f);
+                                            bounds, t0(), 1.f);
   }
 
   float expansion_ratio_ = 1.f;
@@ -213,9 +214,7 @@ TEST_F(CullRectTest, ApplyScrollTranslationPartialScrollingContents1) {
             ApplyScrollTranslation(cull_rect, scroll_translation));
   // No expansion in the non-scrollable direction.
   if (RuntimeEnabledFeatures::ScrollCullRectFromContainerRectEnabled()) {
-    // The cull rect used small scroller minimum expansion because the
-    // intersection of the scrollport and the input cull rect is small.
-    EXPECT_EQ(gfx::Rect(20, 3986, 300, 2448), cull_rect.Rect());
+    EXPECT_EQ(gfx::Rect(20, 1010, 300, 7000), cull_rect.Rect());
   } else {
     EXPECT_EQ(gfx::Rect(30, 1010, 100, 7000), cull_rect.Rect());
   }

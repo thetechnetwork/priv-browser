@@ -11,7 +11,7 @@
 #include <string>
 
 #include "base/values.h"
-#include "components/autofill/core/browser/data_model/autofill_profile.h"
+#include "components/autofill/core/browser/data_model/addresses/autofill_profile.h"
 #include "components/autofill/core/browser/data_model/credit_card.h"
 #include "components/autofill/core/browser/payments/autofill_error_dialog_context.h"
 #include "components/autofill/core/browser/payments/card_unmask_challenge_option.h"
@@ -436,7 +436,7 @@ struct CreateBnplPaymentInstrumentRequestDetails {
   // The ID of the BNPL partner to be linked. i.e. Affirm
   std::string issuer_id;
   // An opaque token used to chain consecutive payments requests together.
-  std::u16string context_token;
+  std::string context_token;
   // Client encoded risk data.
   std::string risk_data;
 };

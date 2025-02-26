@@ -315,6 +315,7 @@ uploading your change for review.  These are checked by presubmit scripts.
 <enum name="AmountExtractionResult">
   <int value="0" label="Success"/>
   <int value="1" label="Amount not found"/>
+  <int value="2" label="Timeout"/>
 </enum>
 
 <enum name="AndroidMultiWindowActivityType">
@@ -9244,6 +9245,7 @@ from previous Chrome versions.
       label="OmniboxRemoveExcessiveRecycledViewClearCalls:disabled"/>
   <int value="-1968729540" label="ArcExtendIntentAnrTimeout:enabled"/>
   <int value="-1966599581" label="LauncherKeyShortcutInBestMatch:enabled"/>
+  <int value="-1966458819" label="AutofillPaymentsFieldSwapping:disabled"/>
   <int value="-1966445414" label="StylusBatteryStatus:disabled"/>
   <int value="-1965587041" label="omnibox-tab-switch-suggestions"/>
   <int value="-1964730371"
@@ -9827,6 +9829,7 @@ from previous Chrome versions.
   <int value="-1732940196" label="MultiCalendarSupport:disabled"/>
   <int value="-1732888954" label="UseButtonTranslateBubbleUI:enabled"/>
   <int value="-1732777136" label="SignInProfileCreationFlow:disabled"/>
+  <int value="-1732696544" label="TabGroupParityBottomSheetAndroid:enabled"/>
   <int value="-1732561795" label="ConsistentOmniboxGeolocation:enabled"/>
   <int value="-1731997767" label="SharingHubDesktopAppMenu:enabled"/>
   <int value="-1731267886" label="AutofillEnableStickyPaymentsBubble:enabled"/>
@@ -12734,6 +12737,7 @@ from previous Chrome versions.
   <int value="-592148755" label="RoundedWindows:enabled"/>
   <int value="-591874964" label="LiteVideo:enabled"/>
   <int value="-591219096" label="SystemChinesePhysicalTyping:enabled"/>
+  <int value="-589491568" label="DataSharingNonProductionEnvironment:disabled"/>
   <int value="-589096918" label="ash-enable-fullscreen-app-list"/>
   <int value="-588245348"
       label="history-clusters-should-show-all-clusters-on-prominent-ui-surfaces"/>
@@ -14270,6 +14274,7 @@ from previous Chrome versions.
   <int value="10458238" label="disable-print-preview-simplify"/>
   <int value="10511293" label="LensOverlaySimplifiedSelection:enabled"/>
   <int value="10929486" label="WebNNDirectML:disabled"/>
+  <int value="11390425" label="TabGroupParityBottomSheetAndroid:disabled"/>
   <int value="11698808" label="enable-dom-distiller-button-animation"/>
   <int value="11924259"
       label="AutofillEnableUpdateVirtualCardEnrollment:enabled"/>
@@ -14305,6 +14310,7 @@ from previous Chrome versions.
   <int value="27970819" label="ProductSpecificationsMultiSpecifics:disabled"/>
   <int value="28182289" label="CastStreamingVp8:disabled"/>
   <int value="29212695" label="OfflineIndicator:enabled"/>
+  <int value="29769995" label="DataSharingNonProductionEnvironment:enabled"/>
   <int value="31258497"
       label="AutofillEnableSyncingOfPixBankAccounts:disabled"/>
   <int value="31439497" label="ZeroSuggestInMemoryCaching:disabled"/>
@@ -17884,6 +17890,7 @@ from previous Chrome versions.
   <int value="1438157693" label="BlockTelephonyDevicePhoneMute:disabled"/>
   <int value="1438182104" label="PasswordGenerationSoftNudge:disabled"/>
   <int value="1438417722" label="MessagesForAndroidReaderMode:enabled"/>
+  <int value="1438814782" label="AutofillPaymentsFieldSwapping:enabled"/>
   <int value="1440618113" label="EnableNetworkingInDiagnosticsApp:disabled"/>
   <int value="1440881073" label="DesktopPWAsAppIconShortcutsMenuUI:enabled"/>
   <int value="1441764258" label="RelatedSearchesAllLanguage:disabled"/>

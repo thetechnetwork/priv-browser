@@ -948,6 +948,13 @@
       base_feature: "none",
     },
     {
+     // crbug.com/40258893
+     // Update UA styles for lists to match HTML spec. This was added in M135
+     // and can be removed after M138.
+     name: "CorrectStylesForLists",
+     status: "stable",
+    },
+    {
       // Corrects the handling of <form> elements nested within <template> tags
       // in HTML parsing. See https://crbug.com/352896478 for details.
       name: "CorrectTemplateFormParsing",
@@ -990,8 +997,10 @@
       // This remembered scroll offset may affect the sizing of an
       // anchor-positioned element, if it is tethered to the default anchor at
       // one edge, and to the original containing block at the other edge.
+      // This feature was shipped in M135, and the flag can be cleaned up in
+      // M137, assuming no issues.
       name: "CSSAnchorRememberedScrollOffset",
-      status: "experimental",
+      status: "stable",
     },
     {
       // Support for the anchor-scope property.
@@ -2029,6 +2038,10 @@
       status: "experimental",
     },
     {
+      name: "FindFirstMisspellingEndWhenNonEditable",
+      status: "stable",
+    },
+    {
       name: "FindTextInReadonlyTextInput",
       status: "experimental",
     },
@@ -2354,6 +2367,7 @@
     {
       name: "HTMLInterestTargetAttribute",
       status: "experimental",
+      origin_trial_feature_name: "HTMLInterestTargetAttribute",
     },
     {
       // A flag, just for local testing to make the
@@ -2935,6 +2949,11 @@
       status: "stable",
     },
     {
+      // crbug.com/380107555
+      name: "NodeInUAShadowRootUnderAnonymousBlockFlow",
+      status: "stable",
+    },
+    {
       name: "NoIdleEncodingForWebTests",
       status: "test",
     },
@@ -3404,6 +3423,10 @@
       status: "stable"
     },
     {
+      name: "PrevOrNextCandidateIsEditingRootChild",
+      status: "stable",
+    },
+    {
       // Controls whether Private Aggregation's "maxContributions" field is
       // enabled for Shared Storage callers. If disabled, the field will be
       // ignored. https://chromestatus.com/feature/5189366316793856
@@ -3771,7 +3794,9 @@
     },
     {
       // https://github.com/WICG/view-transitions/blob/main/scoped-transitions.md
-      name: "ScopedViewTransitions"
+      name: "ScopedViewTransitions",
+      status: "experimental"
+
     },
     // WebSpeech API with both speech recognition and synthesis functionality
     // is not fully enabled on all platforms.
@@ -3799,6 +3824,10 @@
       status: "stable",
     },
     {
+      name: "ScrollAnchorPriorityCandidateSubtree",
+      status: "experimental",
+    },
+    {
       name: "ScrollbarColor",
       status: "stable",
     },
@@ -3806,7 +3835,7 @@
       name: "ScrollbarWidth",
       status: "stable",
     },
-    // Killswitch in M134.
+    // Killswitch added in M134, changed in M135.
     {
       name: "ScrollCullRectFromContainerRect",
       status: "stable",
@@ -4139,6 +4168,16 @@
     },
     {
       name: "SpeculationRulesPrefetchWithSubresources",
+    },
+    {
+      // Enables to run prerendering for new tabs (e.g., target="_blank").
+      // See https://crbug.com/1350676.
+      name: "SpeculationRulesTargetHint",
+      origin_trial_feature_name: "SpeculationRulesTargetHint",
+      base_feature: "Prerender2InNewTab",
+      status: "experimental",
+      base_feature_status: "enabled",
+      copied_from_base_feature_if: "overridden",
     },
     {
       name: "SplitTextNotCleanupDummySpans",
@@ -4638,12 +4677,6 @@
     },
     {
       name: "VideoTrackGeneratorInWorker",
-    },
-    {
-      // This is a kill switch for a fix where viewport changes did not update
-      // the text autosizer, see: crbug.com/359910401.
-      name: "ViewportChangesUpdateTextAutosizing",
-      status: "stable",
     },
     {
       name: "ViewportHeightClientHintHeader",

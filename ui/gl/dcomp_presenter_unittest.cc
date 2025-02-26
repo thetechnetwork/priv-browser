@@ -33,6 +33,7 @@
 #include "ui/gfx/geometry/size.h"
 #include "ui/gfx/geometry/transform.h"
 #include "ui/gfx/geometry/vector2d_f.h"
+#include "ui/gfx/overlay_layer_id.h"
 #include "ui/gfx/test/sk_color_eq.h"
 #include "ui/gl/dc_layer_overlay_params.h"
 #include "ui/gl/dc_layer_tree.h"
@@ -1417,7 +1418,7 @@ TEST_P(DCompPresenterPixelTest, SoftwareVideoSwapchain) {
   std::vector<uint8_t> nv12_pixmap(stride * 3 * y_size.height() / 2, 0xff);
 
   auto params = CreateParamsFromImage(
-      DCLayerOverlayImage(y_size, nv12_pixmap.data(), stride));
+      DCLayerOverlayImage(y_size, base::span(nv12_pixmap), stride));
   params.quad_rect = gfx::Rect(window_size);
   params.video_params.color_space = gfx::ColorSpace::CreateREC709();
   ScheduleOverlay(std::move(params));
@@ -2756,7 +2757,7 @@ TEST_P(DCompPresenterSkiaGoldTest, EdgeAANoSeamsOnSameLayerComplexTransform) {
   ScheduleOverlays(GetOverlaysForSeamsWithComplexTransformTest(
       base::BindRepeating([](int x, int y, DCLayerOverlayParams& overlay) {
         // All on the same layer.
-        overlay.aggregated_layer_id = 1;
+        overlay.layer_id = gfx::OverlayLayerId::MakeForVizInternal(1);
       })));
 
   PresentAndCheckScreenshot();
@@ -2772,7 +2773,8 @@ TEST_P(DCompPresenterSkiaGoldTest, EdgeAASeamsOnNotSameLayerComplexTransform) {
   ScheduleOverlays(GetOverlaysForSeamsWithComplexTransformTest(
       base::BindRepeating([](int x, int y, DCLayerOverlayParams& overlay) {
         // Reuse layer IDs but have no two adjacent overlays have the same ID.
-        overlay.aggregated_layer_id = (x + y * 4) % 2 + 1;
+        overlay.layer_id =
+            gfx::OverlayLayerId::MakeForVizInternal((x + y * 4) % 2 + 1);
       })));
 
   PresentAndCheckScreenshot();

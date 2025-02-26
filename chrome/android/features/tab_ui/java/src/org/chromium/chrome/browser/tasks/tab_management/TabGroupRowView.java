@@ -41,11 +41,11 @@ import java.time.Clock;
 public class TabGroupRowView extends LinearLayout {
     private TabGroupFaviconCluster mTabGroupFaviconCluster;
     private View mColorView;
+    private View mMenuLayout;
     private TextView mTitleTextView;
     private TextView mSubtitleTextView;
     private FrameLayout mImageTilesContainer;
     private ListMenuButton mListMenuButton;
-    private TabGroupTimeAgoResolver mTimeAgoResolver;
 
     /** Constructor for inflation. */
     public TabGroupRowView(Context context, @Nullable AttributeSet attrs) {
@@ -61,7 +61,7 @@ public class TabGroupRowView extends LinearLayout {
         mSubtitleTextView = findViewById(R.id.tab_group_subtitle);
         mImageTilesContainer = findViewById(R.id.image_tiles_container);
         mListMenuButton = findViewById(R.id.more);
-        mTimeAgoResolver = new TabGroupTimeAgoResolver(getResources(), Clock.systemUTC());
+        mMenuLayout = findViewById(R.id.tab_group_menu);
 
         setTouchDelegate(getListMenuItemTouchDelegate());
     }
@@ -90,6 +90,13 @@ public class TabGroupRowView extends LinearLayout {
                 resources.getString(R.string.tab_group_row_accessibility_text, title));
     }
 
+    void setTimestampEvent(TabGroupTimeAgo event) {
+        TabGroupTimeAgoTextResolver timeAgoResolver =
+                new TabGroupTimeAgoTextResolver(getResources(), Clock.systemUTC());
+        mSubtitleTextView.setText(
+                timeAgoResolver.resolveTimeAgoText(event.timestampMs, event.eventType));
+    }
+
     private TouchDelegate getListMenuItemTouchDelegate() {
         Rect rect = new Rect();
         mListMenuButton.getHitRect(rect);
@@ -110,10 +117,6 @@ public class TabGroupRowView extends LinearLayout {
         return new TouchDelegate(rect, mListMenuButton);
     }
 
-    void setCreationMillis(long creationMillis) {
-        mSubtitleTextView.setText(mTimeAgoResolver.resolveTimeAgoText(creationMillis));
-    }
-
     void setColorIndex(@TabGroupColorId int colorIndex) {
         @ColorInt
         int color =
@@ -127,8 +130,10 @@ public class TabGroupRowView extends LinearLayout {
             @Nullable Runnable openRunnable,
             @Nullable Runnable deleteRunnable,
             @Nullable Runnable leaveRunnable) {
-        setOnClickListener(openRunnable == null ? null : v -> openRunnable.run());
         mListMenuButton.setDelegate(() -> getListMenu(openRunnable, deleteRunnable, leaveRunnable));
+        boolean shouldMenuBeVisible =
+                openRunnable != null || deleteRunnable != null || leaveRunnable != null;
+        mMenuLayout.setVisibility(shouldMenuBeVisible ? VISIBLE : GONE);
     }
 
     void setSharedImageTilesView(@Nullable SharedImageTilesView sharedImageTilesView) {
@@ -174,7 +179,7 @@ public class TabGroupRowView extends LinearLayout {
         }
     }
 
-    void setTimeAgoResolverForTesting(TabGroupTimeAgoResolver timeAgoResolver) {
-        mTimeAgoResolver = timeAgoResolver;
+    public void setRowClickRunnable(@Nullable Runnable runnable) {
+        setOnClickListener(runnable == null ? null : v -> runnable.run());
     }
 }

@@ -849,6 +849,18 @@ chromium-metrics-reviews@google.com.
   </token>
 </histogram>
 
+<histogram name="Network.Ash.WiFi.WeakestLoginConnectionAvailability"
+    enum="WiFiSecurityType" expires_after="2025-07-01">
+  <owner>skuhne@chromium.org</owner>
+  <owner>rbock@google.com</owner>
+  <summary>
+    Logs the weakest security type for a connectable, configured and available
+    wireless network while the user logs in.
+
+    Note: This histogram is needed for managed migration related research.
+  </summary>
+</histogram>
+
 <histogram name="Network.Ash.WiFiDirect.CapabilitiesWhenUpgrade"
     enum="WifiP2PCapabilities" expires_after="2026-01-14">
   <owner>jiajunz@google.com</owner>
@@ -2017,7 +2029,7 @@ chromium-metrics-reviews@google.com.
 </histogram>
 
 <histogram name="Network.Mdns.{ServiceType}" enum="MdnsQueryType"
-    expires_after="2025-06-22">
+    expires_after="2025-08-24">
   <owner>nmuggli@google.com</owner>
   <owner>project-bolton@google.com</owner>
   <summary>
@@ -2292,7 +2304,7 @@ chromium-metrics-reviews@google.com.
 
 <histogram
     name="Network.SharedDictionary.CreateBrotliSourceStreamWithDictionary"
-    units="microseconds" expires_after="2025-06-22">
+    units="microseconds" expires_after="2025-08-24">
   <owner>horo@chromium.org</owner>
   <owner>blink-network-stack@google.com</owner>
   <summary>
@@ -5064,7 +5076,7 @@ chromium-metrics-reviews@google.com.
 </histogram>
 
 <histogram name="NetworkService.IpProtection.GetProxyListResult"
-    enum="IpProtectionGetProxyListResult" expires_after="2025-06-22">
+    enum="IpProtectionGetProxyListResult" expires_after="2025-08-24">
   <owner>ashleynewson@chromium.org</owner>
   <owner>src/android_webview/OWNERS</owner>
   <owner>src/chrome/browser/ip_protection/OWNERS</owner>
@@ -5085,7 +5097,7 @@ chromium-metrics-reviews@google.com.
 </histogram>
 
 <histogram name="NetworkService.IpProtection.IsProxyListAvailable"
-    enum="BooleanAvailable" expires_after="2025-06-22">
+    enum="BooleanAvailable" expires_after="2025-08-24">
   <owner>ashleynewson@chromium.org</owner>
   <owner>src/android_webview/OWNERS</owner>
   <owner>src/chrome/browser/ip_protection/OWNERS</owner>
@@ -5108,7 +5120,7 @@ chromium-metrics-reviews@google.com.
 </histogram>
 
 <histogram name="NetworkService.IpProtection.ProtectionIsAvailableForRequest"
-    enum="BooleanAvailable" expires_after="2025-06-22">
+    enum="BooleanAvailable" expires_after="2025-08-24">
   <owner>ashleynewson@chromium.org</owner>
   <owner>src/android_webview/OWNERS</owner>
   <owner>src/chrome/browser/ip_protection/OWNERS</owner>
@@ -5221,7 +5233,7 @@ chromium-metrics-reviews@google.com.
 </histogram>
 
 <histogram name="NetworkService.IpProtection.RequestIsEligibleForProtection"
-    enum="IpProtectionEligibility" expires_after="2025-06-22">
+    enum="IpProtectionEligibility" expires_after="2025-08-24">
   <owner>ashleynewson@chromium.org</owner>
   <owner>src/android_webview/OWNERS</owner>
   <owner>src/chrome/browser/ip_protection/OWNERS</owner>
@@ -5307,7 +5319,7 @@ chromium-metrics-reviews@google.com.
 </histogram>
 
 <histogram name="NetworkService.IpProtection.{ProxyLayer}.TokenExpirationRate"
-    units="tokens" expires_after="2025-06-22">
+    units="tokens" expires_after="2025-08-24">
   <owner>djmitche@chromium.org</owner>
   <owner>ashleynewson@chromium.org</owner>
   <owner>src/android_webview/OWNERS</owner>
@@ -5324,7 +5336,7 @@ chromium-metrics-reviews@google.com.
 </histogram>
 
 <histogram name="NetworkService.IpProtection.{ProxyLayer}.TokenSpendRate"
-    units="tokens" expires_after="2025-06-22">
+    units="tokens" expires_after="2025-08-24">
   <owner>djmitche@chromium.org</owner>
   <owner>ashleynewson@chromium.org</owner>
   <owner>src/android_webview/OWNERS</owner>
@@ -5412,7 +5424,7 @@ chromium-metrics-reviews@google.com.
 </histogram>
 
 <histogram name="NetworkService.NetworkLoaderCompletionTime2.{Source}"
-    units="ms" expires_after="2025-06-22">
+    units="ms" expires_after="2025-08-24">
   <owner>bashi@chromium.org</owner>
   <owner>blink-network-stack@google.com</owner>
   <summary>

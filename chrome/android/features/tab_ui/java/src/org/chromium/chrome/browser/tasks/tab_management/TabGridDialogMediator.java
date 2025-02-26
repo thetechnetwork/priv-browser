@@ -65,6 +65,7 @@ import org.chromium.chrome.browser.tinker_tank.TinkerTankDelegate;
 import org.chromium.chrome.browser.ui.messages.snackbar.Snackbar;
 import org.chromium.chrome.browser.ui.messages.snackbar.SnackbarManager;
 import org.chromium.chrome.tab_ui.R;
+import org.chromium.components.browser_ui.bottomsheet.BottomSheetController;
 import org.chromium.components.browser_ui.desktop_windowing.AppHeaderState;
 import org.chromium.components.browser_ui.desktop_windowing.DesktopWindowStateManager;
 import org.chromium.components.browser_ui.desktop_windowing.DesktopWindowStateManager.AppHeaderObserver;
@@ -86,7 +87,6 @@ import org.chromium.components.tab_group_sync.LocalTabGroupId;
 import org.chromium.components.tab_group_sync.TabGroupSyncService;
 import org.chromium.components.tab_groups.TabGroupColorId;
 import org.chromium.ui.KeyboardVisibilityDelegate;
-import org.chromium.ui.base.DeviceFormFactor;
 import org.chromium.ui.modaldialog.ModalDialogManager;
 import org.chromium.ui.modelutil.PropertyModel;
 import org.chromium.ui.text.EmptyTextWatcher;
@@ -208,6 +208,7 @@ public class TabGridDialogMediator
     private final AnimationSourceViewProvider mAnimationSourceViewProvider;
     private final DialogHandler mTabGridDialogHandler;
     private final @Nullable SnackbarManager mSnackbarManager;
+    private final @NonNull BottomSheetController mBottomSheetController;
     private final @Nullable SharedImageTilesCoordinator mSharedImageTilesCoordinator;
     private final DataSharingTabManager mDataSharingTabManager;
     private final String mComponentName;
@@ -245,6 +246,7 @@ public class TabGridDialogMediator
             Supplier<RecyclerViewPosition> recyclerViewPositionSupplier,
             AnimationSourceViewProvider animationSourceViewProvider,
             @Nullable SnackbarManager snackbarManager,
+            @NonNull BottomSheetController bottomSheetController,
             @Nullable SharedImageTilesCoordinator sharedImageTilesCoordinator,
             @NonNull DataSharingTabManager dataSharingTabManager,
             String componentName,
@@ -261,6 +263,7 @@ public class TabGridDialogMediator
         mAnimationSourceViewProvider = animationSourceViewProvider;
         mTabGridDialogHandler = new DialogHandler();
         mSnackbarManager = snackbarManager;
+        mBottomSheetController = bottomSheetController;
         mSharedImageTilesCoordinator = sharedImageTilesCoordinator;
         mDataSharingTabManager = dataSharingTabManager;
         mComponentName = componentName;
@@ -639,6 +642,8 @@ public class TabGridDialogMediator
 
             mDialogController.prepareDialog();
             mModel.set(TabGridDialogProperties.IS_DIALOG_VISIBLE, true);
+
+            requestShowBottomSheet();
         } else if (isVisible()) {
             mModel.set(TabGridDialogProperties.IS_DIALOG_VISIBLE, false);
         }
@@ -682,6 +687,20 @@ public class TabGridDialogMediator
 
         if (currentTab != null) {
             filter.setTabGroupColor(currentTab.getRootId(), selectedColor);
+        }
+    }
+
+    private void requestShowBottomSheet() {
+        if (mTransitiveSharedGroupObserver != null) {
+            @Nullable
+            String collaborationId =
+                    mTransitiveSharedGroupObserver.getCollaborationIdSupplier().get();
+            if (TabShareUtils.isCollaborationIdValid(collaborationId)) {
+                TabGroupShareNoticeBottomSheetCoordinator bottomSheetCoordinator =
+                        new TabGroupShareNoticeBottomSheetCoordinator(
+                                mBottomSheetController, mActivity, mOriginalProfile);
+                bottomSheetCoordinator.requestShowContent();
+            }
         }
     }
 
@@ -905,12 +924,6 @@ public class TabGridDialogMediator
             TabModel tabModel = filter.getTabModel();
             Tab currentTab = tabModel.getTabById(mCurrentTabId);
             hideDialog(false);
-
-            // Reset the list of tabs so the new tab doesn't appear on the dialog before the
-            // animation.
-            if (!DeviceFormFactor.isNonMultiDisplayContextOnTablet(mActivity)) {
-                mDialogController.resetWithListOfTabs(null);
-            }
 
             if (currentTab == null) {
                 tabModel.getTabCreator().launchNtp();
@@ -1401,7 +1414,7 @@ public class TabGridDialogMediator
     }
 
     private void updateUngroupBarText(int tabCount) {
-        @StringRes int ungroupBarTextId = R.string.tab_grid_dialog_remove_from_group;
+        @StringRes int ungroupBarTextId = R.string.remove_tab_from_group;
         if (tabCount == 1) {
             boolean isMember = MemberRole.MEMBER == getMemberRole();
             ungroupBarTextId =

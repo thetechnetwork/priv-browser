@@ -19,6 +19,7 @@ import static org.chromium.chrome.browser.tasks.tab_management.TabGroupMessageCa
 import static org.chromium.chrome.browser.tasks.tab_management.TabGroupRowProperties.DESTROYABLE;
 import static org.chromium.chrome.browser.tasks.tab_management.TabListModel.CardProperties.CARD_TYPE;
 import static org.chromium.chrome.browser.tasks.tab_management.TabListModel.CardProperties.ModelType.MESSAGE;
+import static org.chromium.ui.modelutil.ModelListCleaner.destroyAndClearAllRows;
 
 import android.content.Context;
 import android.text.TextUtils;
@@ -28,14 +29,12 @@ import androidx.annotation.Nullable;
 
 import org.chromium.base.CallbackController;
 import org.chromium.base.Token;
-import org.chromium.base.lifetime.Destroyable;
 import org.chromium.base.task.TaskTraits;
 import org.chromium.chrome.browser.bookmarks.PendingRunnable;
 import org.chromium.chrome.browser.hub.PaneManager;
 import org.chromium.chrome.browser.tab.Tab;
 import org.chromium.chrome.browser.tabmodel.TabGroupModelFilter;
 import org.chromium.chrome.browser.tabmodel.TabGroupTitleUtils;
-import org.chromium.chrome.browser.tabmodel.TabList;
 import org.chromium.chrome.browser.tabmodel.TabModelObserver;
 import org.chromium.chrome.browser.tasks.tab_management.TabGroupListCoordinator.RowType;
 import org.chromium.chrome.tab_ui.R;
@@ -143,6 +142,13 @@ public class TabGroupListMediator {
                     boolean enabled =
                             mSyncService.getActiveDataTypes().contains(DataType.SAVED_TAB_GROUP);
                     mPropertyModel.set(TabGroupListProperties.SYNC_ENABLED, enabled);
+                    if (!enabled) {
+                        // When sign out happens, we need to clear the message cards. There is no
+                        // other signal that will do this, hence we explicitly clear and rebuild the
+                        // list.
+                        // TODO(crbug.com/398901000): Build this into backend service observer.
+                        repopulateModelList();
+                    }
                 }
             };
 
@@ -246,7 +252,7 @@ public class TabGroupListMediator {
 
     /** Clean up observers used by this class. */
     public void destroy() {
-        destroyAndClearAllRows();
+        destroyAndClearAllRows(mModelList, DESTROYABLE);
         mFilter.removeObserver(mTabModelObserver);
         if (mTabGroupSyncService != null) {
             mTabGroupSyncService.removeObserver(mTabGroupSyncObserver);
@@ -255,45 +261,6 @@ public class TabGroupListMediator {
         mSyncService.removeSyncStateChangedListener(mSyncStateChangeListener);
         mCallbackController.destroy();
         mMessagingBackendService.removePersistentMessageObserver(mPersistentMessageObserver);
-    }
-
-    private @GroupWindowState int getState(SavedTabGroup savedTabGroup) {
-        if (savedTabGroup.localId == null) {
-            return GroupWindowState.HIDDEN;
-        }
-        Token groupId = savedTabGroup.localId.tabGroupId;
-        boolean isFullyClosing = true;
-        int rootId = Tab.INVALID_TAB_ID;
-        TabList tabList = mFilter.getTabModel().getComprehensiveModel();
-        for (int i = 0; i < tabList.getCount(); i++) {
-            Tab tab = tabList.getTabAt(i);
-            if (groupId.equals(tab.getTabGroupId())) {
-                rootId = tab.getRootId();
-                isFullyClosing &= tab.isClosing();
-            }
-        }
-        if (rootId == Tab.INVALID_TAB_ID) return GroupWindowState.IN_ANOTHER;
-
-        // If the group is only partially closing no special case is required since we still have to
-        // do all the IN_CURRENT work and returning to the tab group via the dialog will work.
-        return isFullyClosing ? GroupWindowState.IN_CURRENT_CLOSING : GroupWindowState.IN_CURRENT;
-    }
-
-    private List<SavedTabGroup> getSortedGroupList() {
-        List<SavedTabGroup> groupList = new ArrayList<>();
-        if (mTabGroupSyncService == null) return groupList;
-
-        for (String syncGroupId : mTabGroupSyncService.getAllGroupIds()) {
-            SavedTabGroup savedTabGroup = mTabGroupSyncService.getGroup(syncGroupId);
-            assert !savedTabGroup.savedTabs.isEmpty();
-
-            // To simplify interactions, do not include any groups currently open in other windows.
-            if (getState(savedTabGroup) != GroupWindowState.IN_ANOTHER) {
-                groupList.add(savedTabGroup);
-            }
-        }
-        groupList.sort((a, b) -> Long.compare(b.creationTimeMs, a.creationTimeMs));
-        return groupList;
     }
 
     private List<PropertyModel> getTabGroupRemovedMessageModelList() {
@@ -344,13 +311,17 @@ public class TabGroupListMediator {
     }
 
     private void repopulateModelList() {
-        destroyAndClearAllRows();
+        destroyAndClearAllRows(mModelList, DESTROYABLE);
 
         for (PropertyModel propertyModel : getTabGroupRemovedMessageModelList()) {
             mModelList.add(new ListItem(RowType.TAB_GROUP_REMOVED_CARD, propertyModel));
         }
 
-        for (SavedTabGroup savedTabGroup : getSortedGroupList()) {
+        GroupWindowChecker sortUtil = new GroupWindowChecker(mTabGroupSyncService, mFilter);
+        List<SavedTabGroup> sortedTabGroups =
+                sortUtil.getSortedGroupList(
+                        (a, b) -> Long.compare(b.creationTimeMs, a.creationTimeMs));
+        for (SavedTabGroup savedTabGroup : sortedTabGroups) {
             TabGroupRowMediator rowMediator =
                     new TabGroupRowMediator(
                             mContext,
@@ -364,7 +335,7 @@ public class TabGroupListMediator {
                             mModalDialogManager,
                             mActionConfirmationManager,
                             mFaviconResolver,
-                            () -> getState(savedTabGroup));
+                            () -> sortUtil.getState(savedTabGroup));
             ListItem listItem = new ListItem(RowType.TAB_GROUP, rowMediator.getModel());
             mModelList.add(listItem);
         }
@@ -410,18 +381,5 @@ public class TabGroupListMediator {
                 break;
             }
         }
-    }
-
-    private void destroyAndClearAllRows() {
-        for (ListItem listItem : mModelList) {
-            Destroyable destroyable =
-                    listItem.model.containsKey(DESTROYABLE)
-                            ? listItem.model.get(DESTROYABLE)
-                            : null;
-            if (destroyable != null) {
-                destroyable.destroy();
-            }
-        }
-        mModelList.clear();
     }
 }

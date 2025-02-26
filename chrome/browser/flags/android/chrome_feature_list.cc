@@ -90,6 +90,7 @@ const base::Feature* const kFeaturesExposedToJava[] = {
     &autofill::features::kAutofillEnableRankingFormulaAddressProfiles,
     &autofill::features::kAutofillEnableRankingFormulaCreditCards,
     &autofill::features::kAutofillEnableCardBenefitsForAmericanExpress,
+    &autofill::features::kAutofillEnableCardBenefitsForBmo,
     &autofill::features::kAutofillEnableCardProductName,
     &autofill::features::kAutofillEnablePaymentSettingsCardPromoAndScanCard,
     &autofill::features::kAutofillEnablePaymentSettingsCardPromoAndScanCard,
@@ -119,6 +120,7 @@ const base::Feature* const kFeaturesExposedToJava[] = {
     &data_sharing::features::kDataSharingFeature,
     &collaboration::features::kCollaborationFlowAndroid,
     &data_sharing::features::kDataSharingJoinOnly,
+    &data_sharing::features::kDataSharingNonProductionEnvironment,
     &download::features::kSmartSuggestionForLargeDownloads,
     &base::features::kCollectAndroidFrameTimelineMetrics,
     &download::features::kDownloadNotificationServiceUnifiedAPI,
@@ -328,6 +330,7 @@ const base::Feature* const kFeaturesExposedToJava[] = {
     &kSuppressToolbarCaptures,
     &kSuppressToolbarCapturesAtGestureEnd,
     &kTabDragDropAndroid,
+    &kTabGroupParityBottomSheetAndroid,
     &kToolbarPhoneCleanup,
     &kTabResumptionModuleAndroid,
     &kTabStateFlatBuffer,
@@ -1075,6 +1078,10 @@ BASE_FEATURE(kSuppressToolbarCapturesAtGestureEnd,
 
 BASE_FEATURE(kTabDragDropAndroid,
              "TabDragDropAndroid",
+             base::FEATURE_DISABLED_BY_DEFAULT);
+
+BASE_FEATURE(kTabGroupParityBottomSheetAndroid,
+             "TabGroupParityBottomSheetAndroid",
              base::FEATURE_DISABLED_BY_DEFAULT);
 
 BASE_FEATURE(kToolbarPhoneCleanup,

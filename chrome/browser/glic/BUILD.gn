@@ -98,6 +98,8 @@ source_set("impl") {
     "glic_ui.cc",
     "glic_vector_icon_manager.cc",
     "glic_view.cc",
+    "glic_widget.cc",
+    "glic_widget.h",
     "glic_window_animator.cc",
     "glic_window_animator.h",
     "glic_window_controller.cc",
@@ -170,6 +172,8 @@ source_set("test_support") {
     "glic_test_util.h",
     "interactive_glic_test.cc",
     "interactive_glic_test.h",
+    "interactive_test_util.cc",
+    "interactive_test_util.h",
   ]
   deps = [
     ":glic",

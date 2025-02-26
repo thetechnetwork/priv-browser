@@ -1500,6 +1500,7 @@ void BrowserView::Show() {
   // calls to Browser::GetLastActive() will return the wrong result if we do not
   // explicitly set it here.
   BrowserList::SetLastActive(browser());
+  browser()->DidBecomeActive();
 #endif
 
   // If the window is already visible, just activate it.
@@ -1574,6 +1575,7 @@ void BrowserView::Activate() {
   // Update the list managed by `BrowserList` synchronously the same way
   // `BrowserView::Show()` does.
   BrowserList::SetLastActive(browser());
+  browser_->DidBecomeActive();
 #endif
   frame_->Activate();
 }
@@ -4390,9 +4392,13 @@ void BrowserView::OnWidgetActivationChanged(views::Widget* widget,
         }
       }
 
-      browser_->DidBecomeActive();
+      // TODO: Unify semantics of "active" between the BrowserList and
+      // BrowserWindowInterface clients.
+      BrowserList::SetLastActive(browser_.get());
     } else {
-      browser_->DidBecomeInactive();
+      // TODO: Unify semantics of "active" between the BrowserList and
+      // BrowserWindowInterface clients.
+      BrowserList::NotifyBrowserNoLongerActive(browser_.get());
     }
   }
 
@@ -5070,7 +5076,7 @@ bool BrowserView::MaybeShowBookmarkBar(WebContents* contents) {
         new_parent->AddChildViewAt(bookmark_bar_view_.get(),
                                    separator_index.value());
       } else {
-        new_parent->AddChildView(bookmark_bar_view_.get());
+        new_parent->AddChildViewRaw(bookmark_bar_view_.get());
       }
     } else {
       DCHECK(!new_parent);
@@ -5813,7 +5819,7 @@ void BrowserView::OnImmersiveRevealStarted() {
 
   top_container()->SetPaintToLayer();
   top_container()->layer()->SetFillsBoundsOpaquely(false);
-  overlay_view_->AddChildView(top_container());
+  overlay_view_->AddChildViewRaw(top_container());
   overlay_view_->SetVisible(true);
   InvalidateLayout();
   GetWidget()->GetRootView()->DeprecatedLayoutImmediately();
@@ -5873,8 +5879,19 @@ const WebAppFrameToolbarView* BrowserView::web_app_frame_toolbar() const {
 }
 
 void BrowserView::PaintAsActiveChanged() {
+  const bool is_active = frame_->ShouldPaintAsActive();
+
+  // TODO: Unify semantics of "active" between the BrowserList and
+  // BrowserWindowInterface clients. The latter is more accurate definition
+  // where the top level window or any of its child widgets can have focus.
+  if (is_active) {
+    browser_->DidBecomeActive();
+  } else {
+    browser_->DidBecomeInactive();
+  }
+
   if (web_app_frame_toolbar()) {
-    web_app_frame_toolbar()->SetPaintAsActive(frame_->ShouldPaintAsActive());
+    web_app_frame_toolbar()->SetPaintAsActive(is_active);
   }
   FrameColorsChanged();
 }

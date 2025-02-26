@@ -212,6 +212,8 @@ DEFINE_VARIATION_PARAM(kIPHBottomToolbarTipFeature, "IPH_BottomToolbarTip");
 #if BUILDFLAG(IS_IOS)
 DEFINE_VARIATION_PARAM(kIPHiOSLensOverlayEntrypointTipFeature,
                        "IPH_iOSLensOverlayEntrypointTip");
+DEFINE_VARIATION_PARAM(kIPHiOSLensOverlayEscapeHatchTipFeature,
+                       "IPH_iOSLensOverlayEscapeHatchTip");
 DEFINE_VARIATION_PARAM(kIPHLongPressToolbarTipFeature,
                        "IPH_LongPressToolbarTip");
 DEFINE_VARIATION_PARAM(kIPHBadgedReadingListFeature, "IPH_BadgedReadingList");
@@ -247,6 +249,10 @@ DEFINE_VARIATION_PARAM(kIPHiOSPromoPostRestoreDefaultBrowserFeature,
                        "IPH_iOSPromoPostRestoreDefaultBrowser");
 DEFINE_VARIATION_PARAM(kIPHiOSPromoNonModalUrlPasteDefaultBrowserFeature,
                        "IPH_iOSPromoNonModalUrlPasteDefaultBrowser");
+DEFINE_VARIATION_PARAM(kIPHiOSPromoNonModalAppSwitcherDefaultBrowserFeature,
+                       "IPH_iOSPromoNonModalAppSwitcherDefaultBrowser");
+DEFINE_VARIATION_PARAM(kIPHiOSPromoNonModalShareDefaultBrowserFeature,
+                       "IPH_iOSPromoNonModalShareDefaultBrowser");
 DEFINE_VARIATION_PARAM(kIPHiOSPromoPasswordManagerWidgetFeature,
                        "IPH_iOSPromoPasswordManagerWidget");
 DEFINE_VARIATION_PARAM(kIPHiOSParcelTrackingFeature,
@@ -649,6 +655,8 @@ inline constexpr flags_ui::FeatureEntry::FeatureVariation
         VARIATION_ENTRY(kIPHiOSHistoryOnOverflowMenuFeature),
         VARIATION_ENTRY(kIPHiOSPromoPostRestoreDefaultBrowserFeature),
         VARIATION_ENTRY(kIPHiOSPromoNonModalUrlPasteDefaultBrowserFeature),
+        VARIATION_ENTRY(kIPHiOSPromoNonModalAppSwitcherDefaultBrowserFeature),
+        VARIATION_ENTRY(kIPHiOSPromoNonModalShareDefaultBrowserFeature),
         VARIATION_ENTRY(kIPHiOSPromoPasswordManagerWidgetFeature),
         VARIATION_ENTRY(kIPHiOSParcelTrackingFeature),
         VARIATION_ENTRY(kIPHiOSPullToRefreshFeature),
@@ -669,6 +677,7 @@ inline constexpr flags_ui::FeatureEntry::FeatureVariation
         VARIATION_ENTRY(kIPHiOSContextualPanelPriceInsightsFeature),
         VARIATION_ENTRY(kIPHHomeCustomizationMenuFeature),
         VARIATION_ENTRY(kIPHiOSLensOverlayEntrypointTipFeature),
+        VARIATION_ENTRY(kIPHiOSLensOverlayEscapeHatchTipFeature),
         VARIATION_ENTRY(kIPHiOSSharedTabGroupForeground),
         VARIATION_ENTRY(kIPHiOSDefaultBrowserBannerPromoFeature),
         VARIATION_ENTRY(kIPHiOSReminderNotificationsOverflowMenuBubbleFeature),

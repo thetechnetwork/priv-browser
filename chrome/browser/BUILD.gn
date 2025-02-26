@@ -6521,6 +6521,9 @@ static_library("browser") {
     deps += [
       "//chrome/browser/enterprise/connectors/device_trust/key_management/core/network",
       "//components/enterprise/client_certificates/core",
+      "//components/enterprise/client_certificates/core:cloud_management_delegate",
+      "//components/enterprise/client_certificates/core:dm_server_client",
+      "//components/enterprise/client_certificates/core:management_delegate",
       "//components/enterprise/core",
     ]
   }
@@ -6611,6 +6614,8 @@ static_library("browser") {
       "enterprise/connectors/analysis/files_request_handler.h",
       "enterprise/connectors/analysis/page_print_analysis_request.cc",
       "enterprise/connectors/analysis/page_print_analysis_request.h",
+      "enterprise/connectors/analysis/page_print_request_handler.cc",
+      "enterprise/connectors/analysis/page_print_request_handler.h",
       "enterprise/connectors/analysis/request_handler_base.cc",
       "enterprise/connectors/analysis/request_handler_base.h",
       "enterprise/connectors/reporting/browser_crash_event_router.cc",

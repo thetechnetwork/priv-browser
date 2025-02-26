@@ -29,8 +29,9 @@
 #include "components/autofill/core/browser/data_manager/payments/payments_data_manager.h"
 #include "components/autofill/core/browser/data_manager/personal_data_manager_observer.h"
 #include "components/autofill/core/browser/data_manager/test_personal_data_manager.h"
-#include "components/autofill/core/browser/data_model/autofill_profile.h"
+#include "components/autofill/core/browser/data_model/addresses/autofill_profile.h"
 #include "components/autofill/core/browser/field_types.h"
+#include "components/autofill/core/browser/filling/entities/field_filling_entity_util.h"
 #include "components/autofill/core/browser/foundations/autofill_client.h"
 #include "components/autofill/core/browser/foundations/browser_autofill_manager.h"
 #include "components/autofill/core/browser/foundations/browser_autofill_manager_test_api.h"
@@ -48,6 +49,7 @@
 #include "components/autofill/core/browser/metrics/suggestions_list_metrics.h"
 #include "components/autofill/core/browser/payments/mock_iban_access_manager.h"
 #include "components/autofill/core/browser/payments/payments_autofill_client.h"
+#include "components/autofill/core/browser/payments/test/mock_bnpl_manager.h"
 #include "components/autofill/core/browser/payments/test_payments_autofill_client.h"
 #include "components/autofill/core/browser/single_field_fillers/mock_single_field_fill_router.h"
 #include "components/autofill/core/browser/studies/autofill_experiments.h"
@@ -253,6 +255,12 @@ class MockBrowserAutofillManager : public TestBrowserAutofillManager {
       const FieldGlobalId& field_id,
       AutofillSuggestionTriggerSource trigger_source) const override {
     return should_show_cards_from_account_option_;
+  }
+
+  void DidShowSuggestions(DenseSet<SuggestionType> shown_suggestion_types,
+                          const FormData& form,
+                          const FieldGlobalId& field_id) override {
+    // Do nothing for testing.
   }
 
   void ShowCardsFromAccountOption() {
@@ -759,6 +767,40 @@ TEST_F(AutofillExternalDelegateTest, DuplicateAutocompleteDatalistValues) {
   OnSuggestionsReturned(queried_field().global_id(), autocomplete_items);
 }
 
+// Test that `BnplManager::OnSuggestionsShown` will not be called if the
+// suggestion list doesn't contain a credit card entry.
+TEST_F(AutofillExternalDelegateTest, SuggestionsShownWithoutCreditCardEntry) {
+  // Set up `BnplManager` for testing.
+  MockBnplManager& bnpl_manager =
+      client().GetPaymentsAutofillClient()->CreateOrGetMockBnplManager();
+
+  EXPECT_CALL(bnpl_manager, OnSuggestionsShown).Times(0);
+
+  const std::vector<Suggestion> suggestions = {
+      test::CreateAutofillSuggestion(SuggestionType::kAddressEntry),
+      test::CreateAutofillSuggestion(SuggestionType::kSeparator),
+      test::CreateAutofillSuggestion(SuggestionType::kManageCreditCard)};
+
+  external_delegate().OnSuggestionsShown(suggestions);
+}
+
+// Test that `BnplManager::OnSuggestionsShown` will be called if the
+// suggestion list contains a credit card entry.
+TEST_F(AutofillExternalDelegateTest, SuggestionsShownWithCreditCardEntry) {
+  // Set up `BnplManager` for testing.
+  MockBnplManager& bnpl_manager =
+      client().GetPaymentsAutofillClient()->CreateOrGetMockBnplManager();
+
+  EXPECT_CALL(bnpl_manager, OnSuggestionsShown).Times(1);
+
+  const std::vector<Suggestion> suggestions = {
+      test::CreateAutofillSuggestion(SuggestionType::kCreditCardEntry),
+      test::CreateAutofillSuggestion(SuggestionType::kSeparator),
+      test::CreateAutofillSuggestion(SuggestionType::kManageCreditCard)};
+
+  external_delegate().OnSuggestionsShown(suggestions);
+}
+
 // Test that the Autofill popup is able to display warnings explaining why
 // Autofill is disabled for a website.
 // Regression test for http://crbug.com/247880
@@ -1025,7 +1067,7 @@ TEST_F(AutofillExternalDelegateTest, AutofillSuggestionAvailability_Autofill) {
 // Test that a11y autofill availability is set to `kAutofillAvailable` when
 // the popup is open with the `kFillAutofillAi` suggestion.
 TEST_F(AutofillExternalDelegateTest,
-       AutofillSuggestionAvailability_RetrieveAutofillAi) {
+       AutofillSuggestionAvailabilityFillAutofillAi) {
   IssueOnQuery();
 
   std::vector<Suggestion> suggestions = {
@@ -1197,24 +1239,28 @@ TEST_F(AutofillExternalDelegateTest, FillAutofillAiFillsFullForm) {
                            {.role = IBAN_VALUE},
                            {.role = UNKNOWN_TYPE}}});
 
-  const std::u16string value_to_fill = u"123";
+  base::optional_ref<const AttributeInstance> passport_number =
+      passport.attribute(AttributeType(AttributeTypeName::kPassportNumber));
   const FieldGlobalId& field_to_fill = queried_form().fields()[2].global_id();
 
-  auto field_with_value = [](FieldGlobalId field_id,
-                             std::u16string_view value) {
+  auto field_with_value = [](FieldGlobalId field_id, std::u16string value) {
     return AllOf(Property("global_id", &FormFieldData::global_id, field_id),
-                 Property("value", &FormFieldData::value, value));
+                 Property("value", &FormFieldData::value, Eq(value)));
   };
 
-  EXPECT_CALL(driver(), ApplyFormAction(_, mojom::ActionPersistence::kPreview,
-                                        ElementsAre(field_with_value(
-                                            field_to_fill, value_to_fill)),
-                                        _, _))
+  EXPECT_CALL(
+      driver(),
+      ApplyFormAction(
+          _, mojom::ActionPersistence::kPreview,
+          ElementsAre(field_with_value(
+              field_to_fill, GetObfuscatedAttributeValue(*passport_number))),
+          _, _))
       .WillOnce(Return(std::vector<FieldGlobalId>{}));
-  EXPECT_CALL(driver(), ApplyFormAction(_, mojom::ActionPersistence::kFill,
-                                        ElementsAre(field_with_value(
-                                            field_to_fill, value_to_fill)),
-                                        _, _))
+  EXPECT_CALL(driver(),
+              ApplyFormAction(_, mojom::ActionPersistence::kFill,
+                              ElementsAre(field_with_value(
+                                  field_to_fill, passport_number->value())),
+                              _, _))
       .WillOnce(Return(std::vector<FieldGlobalId>{}));
 
   Suggestion fill_suggestion =

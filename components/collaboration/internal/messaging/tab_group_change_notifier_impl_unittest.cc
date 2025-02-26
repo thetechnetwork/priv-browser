@@ -17,6 +17,7 @@
 #include "components/saved_tab_groups/public/types.h"
 #include "components/saved_tab_groups/test_support/mock_tab_group_sync_service.h"
 #include "components/saved_tab_groups/test_support/saved_tab_group_test_utils.h"
+#include "components/signin/public/identity_manager/identity_test_environment.h"
 #include "components/tab_groups/tab_group_color.h"
 #include "google_apis/gaia/gaia_id.h"
 #include "testing/gmock/include/gmock/gmock.h"
@@ -85,6 +86,7 @@ class MockTabGroupChangeNotifierObserver
   ~MockTabGroupChangeNotifierObserver() override = default;
 
   MOCK_METHOD(void, OnTabGroupChangeNotifierInitialized, ());
+  MOCK_METHOD(void, OnSyncDisabled, ());
   MOCK_METHOD(void,
               OnTabGroupAdded,
               (const tab_groups::SavedTabGroup&, tab_groups::TriggerSource));
@@ -128,7 +130,7 @@ class TabGroupChangeNotifierImplTest : public testing::Test {
     tab_group_sync_service_ =
         std::make_unique<tab_groups::MockTabGroupSyncService>();
     notifier_ = std::make_unique<TabGroupChangeNotifierImpl>(
-        tab_group_sync_service_.get());
+        tab_group_sync_service_.get(), identity_test_env_.identity_manager());
     AddNotifierObserver();
   }
 
@@ -221,6 +223,7 @@ class TabGroupChangeNotifierImplTest : public testing::Test {
 
  protected:
   base::test::SingleThreadTaskEnvironment task_environment_;
+  signin::IdentityTestEnvironment identity_test_env_;
 
   std::unique_ptr<tab_groups::MockTabGroupSyncService> tab_group_sync_service_;
   std::unique_ptr<TabGroupChangeNotifierImpl> notifier_;
@@ -281,6 +284,7 @@ TEST_F(TabGroupChangeNotifierImplTest,
       /*init_tab_groups=*/std::vector<tab_groups::SavedTabGroup>());
 
   // Sign-in and start initial merge. Incoming sync updates should be ignored.
+  EXPECT_CALL(*notifier_observer_, OnSyncDisabled).Times(0);
   tgss_observer_->OnSyncBridgeUpdateTypeChanged(
       tab_groups::SyncBridgeUpdateType::kInitialMerge);
   // Add a tab group to the service.
@@ -291,6 +295,7 @@ TEST_F(TabGroupChangeNotifierImplTest,
   testing::Mock::VerifyAndClearExpectations(tgss_observer_);
 
   // Complete initial merge.
+  EXPECT_CALL(*notifier_observer_, OnSyncDisabled).Times(0);
   tgss_observer_->OnSyncBridgeUpdateTypeChanged(
       tab_groups::SyncBridgeUpdateType::kDefaultState);
 
@@ -305,6 +310,7 @@ TEST_F(TabGroupChangeNotifierImplTest,
 
   // Sign-out and start disabling sync. Incoming sync updates should be ignored.
   // Remove the first group and ensure the observer is not informed.
+  EXPECT_CALL(*notifier_observer_, OnSyncDisabled).Times(1);
   tgss_observer_->OnSyncBridgeUpdateTypeChanged(
       tab_groups::SyncBridgeUpdateType::kDisableSync);
 

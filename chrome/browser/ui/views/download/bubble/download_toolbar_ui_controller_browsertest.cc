@@ -22,6 +22,7 @@
 #include "chrome/browser/ui/views/toolbar/toolbar_view.h"
 #include "chrome/browser/ui/views/web_apps/frame_toolbar/web_app_frame_toolbar_test_helper.h"
 #include "chrome/browser/ui/views/web_apps/frame_toolbar/web_app_frame_toolbar_view.h"
+#include "chrome/browser/ui/web_applications/test/web_app_browsertest_util.h"
 #include "chrome/browser/web_applications/test/os_integration_test_override_impl.h"
 #include "chrome/browser/web_applications/test/web_app_install_test_utils.h"
 #include "chrome/common/webui_url_constants.h"
@@ -220,39 +221,40 @@ IN_PROC_BROWSER_TEST_F(DownloadToolbarUIControllerBrowserTest,
 }
 
 IN_PROC_BROWSER_TEST_F(DownloadToolbarUIControllerBrowserTest,
-                       ButtonPressWithRecentDownloadsInWebApp) {
-  // Create a web app and download from the web app.
-  const GURL app_url("https://test.org");
-  toolbar_helper().InstallAndLaunchWebApp(browser(), app_url);
-  ui_test_utils::DownloadURL(
-      toolbar_helper().app_browser(),
-      ui_test_utils::GetTestUrl(
-          base::FilePath().AppendASCII("downloads"),
-          base::FilePath().AppendASCII("a_zip_file.zip")));
-  views::test::WaitForAnimatingLayoutManager(
-      toolbar_container(toolbar_helper().app_browser()));
-  EXPECT_NE(toolbar_button(toolbar_helper().app_browser()), nullptr);
-  EXPECT_TRUE(toolbar_button(toolbar_helper().app_browser())->GetVisible());
+                       DownloadsAppearsinWebAppWithRecentDownload) {
+  const GURL app_url("https://example.com/");
+  // Create a web app, download from the web app, and verify the downloads
+  // button appears.
+  auto web_app_info =
+      web_app::WebAppInstallInfo::CreateWithStartUrlForTesting(app_url);
+  web_app_info->scope = GURL();
 
-  // Make sure the bubble has shown and closed.
-  controller(toolbar_helper().app_browser())->ShowDetails();
-  controller(toolbar_helper().app_browser())->OpenPrimaryDialog();
-  EXPECT_EQ(controller(toolbar_helper().app_browser())
-                ->bubble_contents_for_testing()
-                ->VisiblePage(),
-            DownloadBubbleContentsView::Page::kPrimary);
-  controller(toolbar_helper().app_browser())
-      ->auto_close_bubble_timer_for_testing()
-      ->user_task()
-      .Run();
-  EXPECT_TRUE(base::test::RunUntil([&]() {
-    return controller(toolbar_helper().app_browser())
-               ->bubble_contents_for_testing() == nullptr;
-  }));
+  webapps::AppId app_id = web_app::test::InstallWebApp(
+      browser()->profile(), std::move(web_app_info),
+      /*overwrite_existing_manifest_fields=*/false,
+      webapps::WebappInstallSource::OMNIBOX_INSTALL_ICON);
+  Browser* app_browser =
+      web_app::LaunchWebAppBrowserAndWait(browser()->profile(), app_id);
+  ui_test_utils::DownloadURL(
+      app_browser, ui_test_utils::GetTestUrl(
+                       base::FilePath().AppendASCII("downloads"),
+                       base::FilePath().AppendASCII("a_zip_file.zip")));
+  views::test::WaitForAnimatingLayoutManager(toolbar_container(app_browser));
+  EXPECT_NE(toolbar_button(app_browser), nullptr);
+  EXPECT_TRUE(toolbar_button(app_browser)->GetVisible());
+  // Close web app.
+  CloseBrowserSynchronously(app_browser);
+
+  // Reopen web app and verify download button appears.
+  Browser* app_browser2 =
+      web_app::LaunchWebAppBrowserAndWait(browser()->profile(), app_id);
+  views::test::WaitForAnimatingLayoutManager(toolbar_container(app_browser2));
+  EXPECT_NE(toolbar_button(app_browser2), nullptr);
+  EXPECT_TRUE(toolbar_button(app_browser2)->GetVisible());
 
   // Click the button and verify the bubble opens.
-  ClickButton(toolbar_button(toolbar_helper().app_browser()));
-  EXPECT_EQ(controller(toolbar_helper().app_browser())
+  ClickButton(toolbar_button(app_browser2));
+  EXPECT_EQ(controller(app_browser2)
                 ->bubble_contents_for_testing()
                 ->VisiblePage(),
             DownloadBubbleContentsView::Page::kPrimary);

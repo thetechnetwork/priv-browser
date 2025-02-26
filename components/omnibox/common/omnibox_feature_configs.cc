@@ -91,7 +91,7 @@ RealboxContextualAndTrendingSuggestions::
 // static
 BASE_FEATURE(SearchAggregatorProvider::kSearchAggregatorProvider,
              "SearchAggregatorProvider",
-             base::FEATURE_DISABLED_BY_DEFAULT);
+             base::FEATURE_ENABLED_BY_DEFAULT);
 
 SearchAggregatorProvider::SearchAggregatorProvider() {
   enabled = base::FeatureList::IsEnabled(kSearchAggregatorProvider);
@@ -112,6 +112,13 @@ SearchAggregatorProvider::SearchAggregatorProvider() {
   require_shortcut = base::FeatureParam<bool>(&kSearchAggregatorProvider,
                                               "require_shortcut", false)
                          .Get();
+  min_query_length =
+      base::FeatureParam<int>(&kSearchAggregatorProvider, "min_query_length", 4)
+          .Get();
+  parse_response_in_utility_process =
+      base::FeatureParam<bool>(&kSearchAggregatorProvider,
+                               "parse_response_in_utility_process", true)
+          .Get();
 }
 
 SearchAggregatorProvider::SearchAggregatorProvider(

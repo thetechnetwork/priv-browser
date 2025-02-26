@@ -52,10 +52,7 @@ export declare interface GlicWebClient {
    * initialize() will not be called again.
    *
    * A failed promise means initialization failed and it will not be retried.
-   *
-   * Note: Later on, error-status information may be bundled with the failed
-   * promise so that the browser may retry calling initialize() in case of
-   * retryable errors.
+   * @throws {WebClientInitializeError}
    */
   initialize(glicBrowserHost: GlicBrowserHost): Promise<void>;
 
@@ -642,7 +639,20 @@ export declare interface ErrorReasonTypes {
   tabContext: GetTabContextErrorReason;
   captureScreenshot: CaptureScreenshotErrorReason;
   scrollTo: ScrollToErrorReason;
+  webClientInitialize: WebClientInitializeErrorReason;
 }
+
+/** Reason why the web client could not initialize. */
+export enum WebClientInitializeErrorReason {
+  /**
+   * Unknown reason. The user can manually retry loading, which reloads the
+   * entire webview.
+   */
+  UNKNOWN = 0,
+  /** This list will be expanded later. */
+}
+
+export type WebClientInitializeError = ErrorWithReason<'webClientInitialize'>;
 
 /** Error implementation with a typed generic reason attached. */
 export declare interface ErrorWithReason<
@@ -817,6 +827,8 @@ export declare interface UserProfileInfo {
   displayName: string;
   /** The given name for this profile. */
   givenName?: string;
+  /** The local profile name, which can be customized by the user. */
+  localProfileName?: string;
   /** The profile email. */
   email: string;
   /** Whether the profile or the browser is managed. */
@@ -846,58 +858,58 @@ export declare interface GlicApiBootMessage {
   glicApiSource: string;
 }
 
+//
 // Types used in presubmit check.
-export namespace checks {
+//
 
-  // Types consumed by the client. These are subject to stricter checks than
-  // those in TypesConsumedByHost.
-  export interface TypesConsumedByClient {
-    hostRegistry: GlicHostRegistry;
-    browserHost: GlicBrowserHost;
-    tabContextResult: TabContextResult;
-    tabData: TabData;
-    imageOriginAnnotations: ImageOriginAnnotations;
-    screenshot: Screenshot;
-    userProfileInfo: UserProfileInfo;
-    chromeVersion: ChromeVersion;
-    focusedTabData: FocusedTabData;
-    focusedTabCandidate: FocusedTabCandidate;
-    pdfDocumentData: PdfDocumentData;
-    webPageData: WebPageData;
-    documentData: DocumentData;
-    panelState: PanelState;
-    annotatedPageData: AnnotatedPageData;
-  }
+// Types consumed by the client. These are subject to stricter checks than
+// those in TypesConsumedByHost.
+export interface TypesConsumedByClient {
+  hostRegistry: GlicHostRegistry;
+  browserHost: GlicBrowserHost;
+  tabContextResult: TabContextResult;
+  tabData: TabData;
+  imageOriginAnnotations: ImageOriginAnnotations;
+  screenshot: Screenshot;
+  userProfileInfo: UserProfileInfo;
+  chromeVersion: ChromeVersion;
+  focusedTabData: FocusedTabData;
+  focusedTabCandidate: FocusedTabCandidate;
+  pdfDocumentData: PdfDocumentData;
+  webPageData: WebPageData;
+  documentData: DocumentData;
+  panelState: PanelState;
+  annotatedPageData: AnnotatedPageData;
+}
 
-  // Types consumed by the host.
-  export interface TypesConsumedByHost {
-    webClient: GlicWebClient;
-    resizeWindowOptions: ResizeWindowOptions;
-    createTabOptions: CreateTabOptions;
-    glicBrowserHostMetrics: GlicBrowserHostMetrics;
-    openPanelInfo: OpenPanelInfo;
-    tabContextOptions: TabContextOptions;
-    draggableArea: DraggableArea;
-    subscriber: Subscriber;
-    scrollToParams: ScrollToParams;
-    scrollToSelector: ScrollToSelector;
-    scrollToTextSelector: ScrollToTextSelector;
-    scrollToTextFragmentSelector: ScrollToTextFragmentSelector;
-  }
+// Types consumed by the host.
+export interface TypesConsumedByHost {
+  webClient: GlicWebClient;
+  resizeWindowOptions: ResizeWindowOptions;
+  createTabOptions: CreateTabOptions;
+  glicBrowserHostMetrics: GlicBrowserHostMetrics;
+  openPanelInfo: OpenPanelInfo;
+  tabContextOptions: TabContextOptions;
+  draggableArea: DraggableArea;
+  subscriber: Subscriber;
+  scrollToParams: ScrollToParams;
+  scrollToSelector: ScrollToSelector;
+  scrollToTextSelector: ScrollToTextSelector;
+  scrollToTextFragmentSelector: ScrollToTextFragmentSelector;
+}
 
-  // Enums that should not be changed.
-  export interface ClosedEnums {
-    panelStateKind: typeof PanelStateKind;
-    webClientMode: typeof WebClientMode;
-  }
+// Enums that should not be changed.
+export interface ClosedEnums {
+  panelStateKind: typeof PanelStateKind;
+  webClientMode: typeof WebClientMode;
+}
 
-  // Enums that can be extended.
-  export interface ExtensibleEnums {
-    getTabContextErrorReason: typeof GetTabContextErrorReason;
-    captureScreenshotErrorReason: typeof CaptureScreenshotErrorReason;
-    scrollToErrorReason: typeof ScrollToErrorReason;
-    invalidCandidateError: typeof InvalidCandidateError;
-    noCandidateTabError: typeof NoCandidateTabError;
-  }
-
+// Enums that can be extended.
+export interface ExtensibleEnums {
+  getTabContextErrorReason: typeof GetTabContextErrorReason;
+  captureScreenshotErrorReason: typeof CaptureScreenshotErrorReason;
+  scrollToErrorReason: typeof ScrollToErrorReason;
+  invalidCandidateError: typeof InvalidCandidateError;
+  noCandidateTabError: typeof NoCandidateTabError;
+  webClientInitializeErrorReason: typeof WebClientInitializeErrorReason;
 }

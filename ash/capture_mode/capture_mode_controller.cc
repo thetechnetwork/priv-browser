@@ -516,7 +516,7 @@ BehaviorType ToBehaviorType(CaptureModeEntryType entry_type) {
     case CaptureModeEntryType::kGameDashboard:
       return BehaviorType::kGameDashboard;
     case CaptureModeEntryType::kSunfish:
-      DCHECK(IsSunfishSessionAllowed());
+      DCHECK(CanShowSunfishOrScannerUi());
       return BehaviorType::kSunfish;
     default:
       return BehaviorType::kDefault;
@@ -569,14 +569,14 @@ gfx::Rect CalculateSearchResultPanelScreenBounds(
       work_area_in_screen.x() + capture_mode::kPanelWorkAreaSpacing,
       work_area_in_screen.bottom() - capture_mode::kSearchResultsPanelHeight -
           capture_mode::kPanelWorkAreaSpacing,
-      capture_mode::kSearchResultsPanelWidth,
+      capture_mode::kSearchResultsPanelTotalWidth,
       capture_mode::kSearchResultsPanelHeight);
 
   // If the region would then intersect with the panel, attempt to place the
   // panel on the right.
   if (bounds.Intersects(captured_region_in_screen)) {
     bounds.set_x(work_area_in_screen.right() -
-                 capture_mode::kSearchResultsPanelWidth -
+                 capture_mode::kSearchResultsPanelTotalWidth -
                  capture_mode::kPanelWorkAreaSpacing);
 
     // If the region would still intersect with the panel, choose the side with
@@ -971,11 +971,7 @@ void CaptureModeController::StartRecordingInstantlyForGameDashboard(
 void CaptureModeController::StartSunfishSession() {
   RecordScannerFeatureUserState(
       ScannerFeatureUserState::kSunfishScreenEnteredViaShortcut);
-  DCHECK(IsSunfishSessionAllowed());
-  if (!capture_mode_util::GetActiveUserPrefService()->GetBoolean(
-          prefs::kSunfishEnabled)) {
-    return;
-  }
+  CHECK(CanShowSunfishOrScannerUi());
   // Close the launcher nudge if it is still visible.
   AnchoredNudgeManager::Get()->Cancel(capture_mode::kSunfishLauncherNudgeId);
   StartInternal(

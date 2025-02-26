@@ -31,6 +31,7 @@
 #import "components/profile_metrics/browser_profile_type.h"
 #import "components/safe_browsing/core/common/features.h"
 #import "components/segmentation_platform/embedder/home_modules/tips_manager/signal_constants.h"
+#import "components/send_tab_to_self/features.h"
 #import "components/supervised_user/core/browser/supervised_user_utils.h"
 #import "components/supervised_user/core/common/features.h"
 #import "components/supervised_user/core/common/supervised_user_constants.h"
@@ -40,6 +41,7 @@
 #import "ios/chrome/browser/app_store_rating/ui_bundled/features.h"
 #import "ios/chrome/browser/authentication/ui_bundled/enterprise/enterprise_prompt/enterprise_prompt_coordinator.h"
 #import "ios/chrome/browser/authentication/ui_bundled/enterprise/enterprise_prompt/enterprise_prompt_type.h"
+#import "ios/chrome/browser/authentication/ui_bundled/signin/signin_constants.h"
 #import "ios/chrome/browser/authentication/ui_bundled/signin_presenter.h"
 #import "ios/chrome/browser/autofill/model/bottom_sheet/autofill_bottom_sheet_tab_helper.h"
 #import "ios/chrome/browser/autofill/ui_bundled/authentication/card_unmask_authentication_coordinator.h"
@@ -129,8 +131,6 @@
 #import "ios/chrome/browser/overscroll_actions/ui_bundled/overscroll_actions_controller.h"
 #import "ios/chrome/browser/page_info/ui_bundled/page_info_coordinator.h"
 #import "ios/chrome/browser/page_info/ui_bundled/requirements/page_info_presentation.h"
-#import "ios/chrome/browser/parcel_tracking/parcel_tracking_infobar_delegate.h"
-#import "ios/chrome/browser/parcel_tracking/parcel_tracking_step.h"
 #import "ios/chrome/browser/passwords/model/password_controller_delegate.h"
 #import "ios/chrome/browser/passwords/ui_bundled/bottom_sheet/password_suggestion_bottom_sheet_coordinator.h"
 #import "ios/chrome/browser/passwords/ui_bundled/password_breach_coordinator.h"
@@ -154,6 +154,7 @@
 #import "ios/chrome/browser/reading_list/ui_bundled/reading_list_coordinator_delegate.h"
 #import "ios/chrome/browser/recent_tabs/ui_bundled/recent_tabs_coordinator.h"
 #import "ios/chrome/browser/recent_tabs/ui_bundled/recent_tabs_coordinator_delegate.h"
+#import "ios/chrome/browser/reminder_notifications/coordinator/reminder_notifications_coordinator.h"
 #import "ios/chrome/browser/sad_tab/ui_bundled/sad_tab_coordinator.h"
 #import "ios/chrome/browser/safe_browsing/ui_bundled/safe_browsing_coordinator.h"
 #import "ios/chrome/browser/save_to_drive/ui_bundled/save_to_drive_coordinator.h"
@@ -198,7 +199,6 @@
 #import "ios/chrome/browser/shared/public/commands/new_tab_page_commands.h"
 #import "ios/chrome/browser/shared/public/commands/omnibox_commands.h"
 #import "ios/chrome/browser/shared/public/commands/page_info_commands.h"
-#import "ios/chrome/browser/shared/public/commands/parcel_tracking_opt_in_commands.h"
 #import "ios/chrome/browser/shared/public/commands/parent_access_commands.h"
 #import "ios/chrome/browser/shared/public/commands/password_breach_commands.h"
 #import "ios/chrome/browser/shared/public/commands/password_protection_commands.h"
@@ -209,6 +209,7 @@
 #import "ios/chrome/browser/shared/public/commands/promos_manager_commands.h"
 #import "ios/chrome/browser/shared/public/commands/qr_generation_commands.h"
 #import "ios/chrome/browser/shared/public/commands/quick_delete_commands.h"
+#import "ios/chrome/browser/shared/public/commands/reminder_notifications_commands.h"
 #import "ios/chrome/browser/shared/public/commands/save_image_to_photos_command.h"
 #import "ios/chrome/browser/shared/public/commands/save_to_drive_commands.h"
 #import "ios/chrome/browser/shared/public/commands/save_to_photos_commands.h"
@@ -335,7 +336,6 @@ enum class ToolbarKind {
     OverscrollActionsControllerDelegate,
     PageInfoCommands,
     PageInfoPresentation,
-    ParcelTrackingOptInCommands,
     ParentAccessCommands,
     PasswordBreachCommands,
     PasswordControllerDelegate,
@@ -351,6 +351,7 @@ enum class ToolbarKind {
     QuickDeleteCommands,
     ReadingListCoordinatorDelegate,
     RecentTabsCoordinatorDelegate,
+    ReminderNotificationsCommands,
     RepostFormCoordinatorDelegate,
     RepostFormTabHelperDelegate,
     SaveToDriveCommands,
@@ -619,6 +620,9 @@ enum class ToolbarKind {
   ContextualSheetCoordinator* _contextualSheetCoordinator;
   RootDriveFilePickerCoordinator* _driveFilePickerCoordinator;
   GoogleOneCoordinator* _googleOneCoordinator;
+  // Coordinator to display the "Set a reminder" screen for the user's current
+  // tab.
+  ReminderNotificationsCoordinator* _reminderNotificationsCoordinator;
   SafeAreaProvider* _safeAreaProvider;
   // Number of time `showActivityOverlay` was called and its callback not
   // called.
@@ -874,6 +878,12 @@ enum class ToolbarKind {
   self.recentTabsCoordinator = nil;
 }
 
+// Stops the reminder notifications coordinator.
+- (void)stopReminderNotificationsCoordinator {
+  [_reminderNotificationsCoordinator stop];
+  _reminderNotificationsCoordinator = nil;
+}
+
 // Stop the store kit coordinator.
 - (void)stopStoreKitCoordinator {
   [self.storeKitCoordinator stop];
@@ -1008,8 +1018,8 @@ enum class ToolbarKind {
     @protocol(WebContentCommands),
     @protocol(DefaultBrowserGenericPromoCommands),
     @protocol(MiniMapCommands),
-    @protocol(ParcelTrackingOptInCommands),
     @protocol(ParentAccessCommands),
+    @protocol(ReminderNotificationsCommands),
     @protocol(UnitConversionCommands),
     @protocol(AddContactsCommands),
     @protocol(CountryCodePickerCommands),
@@ -1376,6 +1386,9 @@ enum class ToolbarKind {
 
   /* RecentTabsCoordinator is created and started by a BrowserCommand */
 
+  /* `ReminderNotificationsCoordinator` is created and started by a
+   * `ReminderNotificationsCommands` */
+
   /* RepostFormCoordinator is created and started by a delegate method */
 
   /* WhatsNewCoordinator is created and started by a BrowserCommand */
@@ -1510,6 +1523,8 @@ enum class ToolbarKind {
   self.readingListCoordinator = nil;
 
   [self stopRecentTabsCoordinator];
+
+  [self stopReminderNotificationsCoordinator];
 
   [self stopRepostFormCoordinator];
 
@@ -1834,6 +1849,12 @@ enum class ToolbarKind {
 - (void)showPasswordBottomSheet:(const autofill::FormActivityParams&)params {
   // Do not present the bottom sheet if it is already being presented.
   if (self.passwordSuggestionBottomSheetCoordinator) {
+    return;
+  }
+  // Do not present the bottom sheet when the omnibox is being used to not
+  // disrupt the user.
+  if (OmniboxPositionBrowserAgent::FromBrowser(self.browser)
+          ->IsOmniboxFocused()) {
     return;
   }
   self.passwordSuggestionBottomSheetCoordinator =
@@ -2714,6 +2735,14 @@ enum class ToolbarKind {
   [self.defaultBrowserGenericPromoCoordinator start];
 }
 
+- (void)showSigninPromo {
+  [HandlerForProtocol(self.dispatcher, ApplicationCommands)
+      showSigninUpgradePromoWithCompletion:^(SigninCoordinatorResult result,
+                                             id<SystemIdentity>) {
+        [self.promosManagerCoordinator promoWasDismissed];
+      }];
+}
+
 #pragma mark - PageInfoCommands
 
 - (void)showPageInfo {
@@ -2971,40 +3000,6 @@ enum class ToolbarKind {
   if (FollowBrowserAgent::FromBrowser(self.browser)) {
     FollowBrowserAgent::FromBrowser(self.browser)->ClearUIProviders();
   }
-}
-
-#pragma mark - ParcelTrackingOptInCommands
-
-- (void)showParcelTrackingInfobarWithParcels:
-            (NSArray<CustomTextCheckingResult*>*)parcels
-                                     forStep:(ParcelTrackingStep)step {
-  web::WebState* activeWebState = self.activeWebState;
-  if (!activeWebState) {
-    return;
-  }
-  ProfileIOS* profile = self.browser->GetProfile();
-  if (!commerce::IsParcelTrackingEligible(
-          commerce::ShoppingServiceFactory::GetForProfile(profile)
-              ->GetAccountChecker())) {
-    return;
-  }
-  if (step == ParcelTrackingStep::kNewPackageTracked) {
-    feature_engagement::Tracker* engagementTracker =
-        feature_engagement::TrackerFactory::GetForProfile(profile);
-    engagementTracker->NotifyEvent(feature_engagement::events::kParcelTracked);
-  }
-  std::unique_ptr<ParcelTrackingInfobarDelegate> delegate =
-      std::make_unique<ParcelTrackingInfobarDelegate>(
-          activeWebState, step, parcels,
-          HandlerForProtocol(self.dispatcher, ApplicationCommands),
-          HandlerForProtocol(self.dispatcher, ParcelTrackingOptInCommands));
-  infobars::InfoBarManager* infobar_manager =
-      InfoBarManagerImpl::FromWebState(activeWebState);
-
-  std::unique_ptr<infobars::InfoBar> infobar = std::make_unique<InfoBarIOS>(
-      InfobarType::kInfobarTypeParcelTracking, std::move(delegate));
-  infobar_manager->AddInfoBar(std::move(infobar),
-                              /*replace_existing=*/true);
 }
 
 #pragma mark - ParentAccessCommands
@@ -3909,6 +3904,26 @@ enum class ToolbarKind {
     (RecentTabsCoordinator*)coordinator {
   CHECK_EQ(coordinator, self.recentTabsCoordinator);
   [self stopRecentTabsCoordinator];
+}
+
+#pragma mark - ReminderNotificationsCommands
+
+- (void)showSetTabReminderUI:(SetTabReminderEntryPoint)entryPoint {
+  CHECK(
+      send_tab_to_self::IsSendTabIOSPushNotificationsEnabledWithTabReminders());
+
+  _reminderNotificationsCoordinator = [[ReminderNotificationsCoordinator alloc]
+      initWithBaseViewController:self.viewController
+                         browser:self.browser];
+
+  [_reminderNotificationsCoordinator start];
+}
+
+- (void)dismissSetTabReminderUI {
+  CHECK(
+      send_tab_to_self::IsSendTabIOSPushNotificationsEnabledWithTabReminders());
+
+  [self stopReminderNotificationsCoordinator];
 }
 
 #pragma mark - StoreKitCoordinatorDelegate

@@ -19,7 +19,7 @@
 #include "base/types/strong_alias.h"
 #include "base/values.h"
 #include "chrome/browser/ui/browser.h"
-#include "components/autofill/core/browser/data_model/autofill_profile.h"
+#include "components/autofill/core/browser/data_model/addresses/autofill_profile.h"
 #include "components/autofill/core/browser/data_model/credit_card.h"
 #include "content/public/browser/browser_context.h"
 #include "content/public/test/browser_test_utils.h"
@@ -98,7 +98,7 @@ std::optional<base::Value::Dict> ReadRecipeFile(
 std::optional<base::FilePath> GetCommandFilePath();
 
 // Prints tips on how to run captured-site tests.
-// |test_file_name| should be without the .cc suffix.
+// `test_file_name` should be without the .cc suffix.
 void PrintInstructions(const char* test_file_name);
 
 // IFrameWaiter
@@ -417,7 +417,7 @@ class TestRecipeReplayer {
 
   // Wait until Chrome finishes loading a page and updating the page's visuals.
   // If Chrome finishes loading a page but continues to paint every half
-  // second, exit after |continuous_paint_timeout| expires since Chrome
+  // second, exit after `continuous_paint_timeout` expires since Chrome
   // finished loading the page.
   void WaitTillPageIsIdle(
       base::TimeDelta continuous_paint_timeout = default_action_timeout);

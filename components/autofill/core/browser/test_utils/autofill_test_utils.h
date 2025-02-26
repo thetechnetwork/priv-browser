@@ -12,9 +12,9 @@
 #include "base/memory/raw_ptr.h"
 #include "base/time/time.h"
 #include "components/autofill/core/browser/autofill_field.h"
+#include "components/autofill/core/browser/data_model/addresses/autofill_profile.h"
 #include "components/autofill/core/browser/data_model/autofill_ai/entity_instance.h"
 #include "components/autofill/core/browser/data_model/autofill_offer_data.h"
-#include "components/autofill/core/browser/data_model/autofill_profile.h"
 #include "components/autofill/core/browser/data_model/autofill_wallet_usage_data.h"
 #include "components/autofill/core/browser/data_model/bnpl_issuer.h"
 #include "components/autofill/core/browser/data_model/credit_card.h"
@@ -219,6 +219,11 @@ std::vector<CardUnmaskChallengeOption> GetCardUnmaskChallengeOptions(
 // One getter for each benefit type.
 CreditCardFlatRateBenefit GetActiveCreditCardFlatRateBenefit();
 CreditCardCategoryBenefit GetActiveCreditCardCategoryBenefit();
+CreditCardCategoryBenefit CreateCreditCardCategoryBenefit(
+    CreditCardBenefitBase::BenefitId benefit_id,
+    CreditCardBenefitBase::LinkedCardInstrumentId linked_card_instrument_id,
+    CreditCardCategoryBenefit::BenefitCategory benefit_category,
+    std::u16string benefit_description);
 CreditCardMerchantBenefit GetActiveCreditCardMerchantBenefit();
 
 // Returns a set of merchant origin webpages used for a merchant credit card

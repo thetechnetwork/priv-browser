@@ -92,9 +92,6 @@ PinnedActionToolbarButton::PinnedActionToolbarButton(
 
   if (web_app::AppBrowserController::IsWebApp(browser_)) {
     SetLayoutInsets(gfx::Insets());
-    SetMinSize(BrowserView::GetBrowserViewForBrowser(browser)
-                   ->toolbar_button_provider()
-                   ->GetToolbarButtonSize());
     SetHorizontalAlignment(gfx::ALIGN_CENTER);
     SetAppearDisabledInInactiveWidget(true);
   }

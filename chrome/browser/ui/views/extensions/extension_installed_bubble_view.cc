@@ -99,14 +99,8 @@ views::View* AnchorViewForBrowser(const ExtensionInstalledBubbleModel* model,
 std::unique_ptr<views::View> CreateSigninPromoView(
     Profile* profile,
     BubbleSignInPromoDelegate* delegate) {
-  int promo_message_id =
-      extensions::sync_util::IsExtensionsExplicitSigninEnabled()
-          ? IDS_EXTENSION_INSTALLED_PROMO_EXPLICIT_SIGNIN_MESSAGE
-          : IDS_EXTENSION_INSTALLED_DICE_PROMO_SYNC_MESSAGE;
-
   return std::make_unique<BubbleSignInPromoView>(
-      profile, delegate, signin_metrics::AccessPoint::kExtensionInstallBubble,
-      promo_message_id, ui::ButtonStyle::kProminent);
+      profile, delegate, signin_metrics::AccessPoint::kExtensionInstallBubble);
 }
 #endif
 
@@ -212,7 +206,7 @@ void ExtensionInstalledBubbleView::Init() {
   SetLayoutManager(std::move(layout));
 
   if (model_->show_how_to_use()) {
-    AddChildView(CreateLabel(model_->GetHowToUseText()));
+    AddChildViewRaw(CreateLabel(model_->GetHowToUseText()));
   }
 
   if (model_->show_key_binding()) {

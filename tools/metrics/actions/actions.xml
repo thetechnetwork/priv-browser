@@ -12219,6 +12219,22 @@ should be able to be added at any place in this file.
   </description>
 </action>
 
+<action name="Glic.Pinned">
+  <owner>charlesmeng@chromium.org</owner>
+  <owner>erikchen@chromium.org</owner>
+  <description>
+    Logged anytime glic is pinned to the tabstrip, regardless of source.
+  </description>
+</action>
+
+<action name="Glic.Unpinned">
+  <owner>charlesmeng@chromium.org</owner>
+  <owner>erikchen@chromium.org</owner>
+  <description>
+    Logged anytime glic is unpinned from the tabstrip, regardless of source.
+  </description>
+</action>
+
 <action name="GlicOsEntrypoint.ContextMenuSelection.Exit">
   <owner>agale@chromium.org</owner>
   <owner>erikchen@chromium.org</owner>
@@ -27030,6 +27046,41 @@ should be able to be added at any place in this file.
   </description>
 </action>
 
+<action name="MobileToolbarTabMenu.AddToTabGroup">
+  <owner>jhimawan@google.com</owner>
+  <owner>clank-large-form-factors@google.com</owner>
+  <description>
+    User opened the bottom sheet to add a tab to a new or existing tab group,
+    via the tab context menu on tab strip on Android.
+  </description>
+</action>
+
+<action name="MobileToolbarTabMenu.CloseTab">
+  <owner>jhimawan@google.com</owner>
+  <owner>clank-large-form-factors@google.com</owner>
+  <description>
+    User closed a tab via the tab context menu on tab strip on Android.
+  </description>
+</action>
+
+<action name="MobileToolbarTabMenu.RemoveFromTabGroup">
+  <owner>jhimawan@google.com</owner>
+  <owner>clank-large-form-factors@google.com</owner>
+  <description>
+    User removed a tab from its tab group via the tab context menu on tab strip
+    on Android.
+  </description>
+</action>
+
+<action name="MobileToolbarTabMenu.ShareTab">
+  <owner>jhimawan@google.com</owner>
+  <owner>clank-large-form-factors@google.com</owner>
+  <description>
+    User shared the URL open in a tab, via the tab context menu on tab strip on
+    Android.
+  </description>
+</action>
+
 <action name="MobileToolbarToggleBookmark">
   <owner>Please list the metric's owners. Add more owner tags as needed.</owner>
   <description>Please enter the description of this user action.</description>
@@ -36304,6 +36355,22 @@ should be able to be added at any place in this file.
   <owner>chromeleon@chromium.org</owner>
   <description>
     Reported when user navigates to Tab Pickup Tabs Settings. iOS only.
+  </description>
+</action>
+
+<action name="Settings.ThirdPartyCookies.Allow">
+  <owner>mjenn@google.org</owner>
+  <owner>koilos@google.com</owner>
+  <description>
+    Recorded on user change to allow third-party cookies.
+  </description>
+</action>
+
+<action name="Settings.ThirdPartyCookies.Block">
+  <owner>mjenn@google.org</owner>
+  <owner>koilos@google.com</owner>
+  <description>
+    Recorded on user change to block third-party cookies.
   </description>
 </action>
 
@@ -47655,6 +47722,8 @@ should be able to be added at any place in this file.
       label="For Enhanced Safe Browsing Promo feature"/>
   <suffix name="iOSLensOverlayEntrypointTip"
       label="For iOSLensOverlayEntrypoint IPH feature"/>
+  <suffix name="iOSLensOverlayEscapeHatchTip"
+      label="For iOSLensOverlayEscapeHatchTip IPH feature"/>
   <suffix name="iOSOverflowMenuCustomization"
       label="For iOSOverflowMenuCustomization feature"/>
   <suffix name="iOSPageInfoRevamp"
@@ -47679,9 +47748,14 @@ should be able to be added at any place in this file.
       label="For generivc default browser promo."/>
   <suffix name="iOSPromoMadeForIOS"
       label="For Made for iOS default browser promo."/>
-  <suffix name="iOSPromoNonModalUrlPasteDefaultBrowser"
-      label="howing the non-modal Default Browser Promo from omnibox paste on
+  <suffix name="iOSPromoNonModalAppSwitcherDefaultBrowser"
+      label="Showing the non-modal Default Browser Promo from app switcher on
              iOS."/>
+  <suffix name="iOSPromoNonModalShareDefaultBrowser"
+      label="Showing the non-modal Default Browser Promo from share on iOS."/>
+  <suffix name="iOSPromoNonModalUrlPasteDefaultBrowser"
+      label="Showing the non-modal Default Browser Promo from omnibox paste
+             on iOS."/>
   <suffix name="iOSPromoPasswordManagerWidget"
       label="For iOSPromoPasswordManagerWidget feature"/>
   <suffix name="iOSPromoPostRestore" label="For iOSPromoPostRestore feature"/>

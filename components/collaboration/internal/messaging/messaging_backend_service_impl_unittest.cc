@@ -1016,11 +1016,26 @@ TEST_F(MessagingBackendServiceImplTest, TestOnTabAddedFromLocal) {
       .WillRepeatedly(Return(tab_group));
 
   // Add a new tab locally.
-  // Should not create any messages for this tab.
+  // It should add a messages for this tab to the DB.
   EXPECT_CALL(mock_persistent_message_observer_, DisplayPersistentMessage)
       .Times(0);
   EXPECT_FALSE(HasLastMessageFromDB());
   tg_notifier_observer_->OnTabAdded(*tab1, tab_groups::TriggerSource::LOCAL);
+  EXPECT_TRUE(HasLastMessageFromDB());
+
+  // Verify that a message is created for local tab addition.
+  auto message = GetLastMessageFromDB();
+  VerifyGenericMessageData(message, "my group id", collaboration_pb::TAB_ADDED,
+                           DirtyType::kNone, now.ToTimeT());
+
+  EXPECT_EQ(gaia1, GaiaId(message.triggering_user_gaia_id()));
+  EXPECT_EQ(tab1->saved_tab_guid().AsLowercaseString(),
+            message.tab_data().sync_tab_id());
+  EXPECT_EQ(tab1->saved_group_guid().AsLowercaseString(),
+            message.tab_data().sync_tab_group_id());
+  EXPECT_EQ(tab_group.saved_guid().AsLowercaseString(),
+            message.tab_data().sync_tab_group_id());
+  EXPECT_EQ(now.ToTimeT(), message.event_timestamp());
 }
 
 TEST_F(MessagingBackendServiceImplTest, TestOnTabUpdatedFromLocal) {
@@ -1071,8 +1086,20 @@ TEST_F(MessagingBackendServiceImplTest, TestOnTabUpdatedFromLocal) {
   EXPECT_FALSE(GetDirtyMessageForTab(collaboration_group_id, tab2_sync_id,
                                      DirtyType::kDot));
 
-  // Update a tab locally does not create a new db message.
-  EXPECT_EQ(db_message.uuid(), GetLastMessageFromDB().uuid());
+  // Verify that a message is created for local tab update.
+  auto message = GetLastMessageFromDB();
+  EXPECT_NE(db_message.uuid(), message.uuid());
+  VerifyGenericMessageData(message, "my group id",
+                           collaboration_pb::TAB_UPDATED, DirtyType::kNone,
+                           now.ToTimeT());
+
+  EXPECT_EQ(gaia2, GaiaId(message.triggering_user_gaia_id()));
+  EXPECT_EQ(tab2->saved_tab_guid().AsLowercaseString(),
+            message.tab_data().sync_tab_id());
+  EXPECT_EQ(tab2->saved_group_guid().AsLowercaseString(),
+            message.tab_data().sync_tab_group_id());
+  EXPECT_EQ(tab_group.saved_guid().AsLowercaseString(),
+            message.tab_data().sync_tab_group_id());
 }
 
 TEST_F(MessagingBackendServiceImplTest, TestOnTabRemovedFromLocal) {
@@ -1084,6 +1111,7 @@ TEST_F(MessagingBackendServiceImplTest, TestOnTabRemovedFromLocal) {
   GaiaId gaia1("abc");
   GaiaId gaia2("def");
 
+  base::Time now = base::Time::Now();
   tab_groups::SavedTabGroup tab_group =
       CreateSharedTabGroup(collaboration_group_id);
 
@@ -1106,6 +1134,22 @@ TEST_F(MessagingBackendServiceImplTest, TestOnTabRemovedFromLocal) {
   EXPECT_FALSE(HasLastMessageFromDB());
   tg_notifier_observer_->OnTabRemoved(tab3, tab_groups::TriggerSource::LOCAL,
                                       false);
+
+  // Verify that a message is created for local tab removal.
+  EXPECT_TRUE(HasLastMessageFromDB());
+  auto message = GetLastMessageFromDB();
+  VerifyGenericMessageData(message, "my group id",
+                           collaboration_pb::TAB_REMOVED, DirtyType::kNone,
+                           now.ToTimeT());
+
+  EXPECT_EQ(gaia2, GaiaId(message.triggering_user_gaia_id()));
+  EXPECT_EQ(tab3.saved_tab_guid().AsLowercaseString(),
+            message.tab_data().sync_tab_id());
+  EXPECT_EQ(tab3.saved_group_guid().AsLowercaseString(),
+            message.tab_data().sync_tab_group_id());
+  EXPECT_EQ(tab_group.saved_guid().AsLowercaseString(),
+            message.tab_data().sync_tab_group_id());
+  EXPECT_EQ(now.ToTimeT(), message.event_timestamp());
 }
 
 TEST_F(MessagingBackendServiceImplTest, TestActivityLogTabEvents) {
@@ -1460,6 +1504,23 @@ TEST_F(MessagingBackendServiceImplTest, TestRemoveMessages) {
   EXPECT_TRUE(unowned_messaging_backend_store_
                   ->GetRecentMessagesForGroup(collaboration_group_id)
                   .empty());
+}
+
+TEST_F(MessagingBackendServiceImplTest, TestSyncDisabled) {
+  CreateAndInitializeService();
+
+  data_sharing::GroupId collaboration_group_id =
+      data_sharing::GroupId("my group id");
+  base::Uuid uuid1 = base::Uuid::GenerateRandomV4();
+  auto message1 = CreateStoredMessage(
+      collaboration_group_id, collaboration_pb::EventType::TAB_ADDED,
+      DirtyType::kDotAndChip, base::Time::Now());
+  message1.set_uuid(uuid1.AsLowercaseString());
+  AddMessage(message1);
+
+  EXPECT_TRUE(HasDirtyMessages());
+  tg_notifier_observer_->OnSyncDisabled();
+  EXPECT_FALSE(HasDirtyMessages());
 }
 
 TEST_F(MessagingBackendServiceImplTest, TestGetMessagesForTab) {

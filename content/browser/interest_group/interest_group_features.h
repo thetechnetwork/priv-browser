@@ -9,6 +9,7 @@
 #include "base/metrics/field_trial_params.h"
 #include "base/time/time.h"
 #include "content/common/content_export.h"
+#include "third_party/blink/public/common/features.h"
 
 namespace features {
 // Please keep features in alphabetical order.
@@ -27,6 +28,12 @@ CONTENT_EXPORT BASE_DECLARE_FEATURE(kFledgeEnableUserAgentOverrides);
 CONTENT_EXPORT BASE_DECLARE_FEATURE(kFledgeEnableWALForInterestGroupStorage);
 CONTENT_EXPORT BASE_DECLARE_FEATURE(kFledgeFacilitatedTestingSignalsHeaders);
 
+CONTENT_EXPORT BASE_DECLARE_FEATURE(
+    kFledgeLimitSelectableBuyerAndSellerReportingIdsFetchedFromKAnon);
+CONTENT_EXPORT BASE_DECLARE_FEATURE_PARAM(
+    int,
+    kFledgeSelectableBuyerAndSellerReportingIdsFetchedFromKAnonLimit);
+
 CONTENT_EXPORT BASE_DECLARE_FEATURE(kFledgeQueryKAnonymity);
 
 CONTENT_EXPORT BASE_DECLARE_FEATURE(kFledgeStartAnticipatoryProcesses);
@@ -37,6 +44,8 @@ CONTENT_EXPORT BASE_DECLARE_FEATURE_PARAM(
 CONTENT_EXPORT BASE_DECLARE_FEATURE(kFledgeStoreBandAKeysInDB);
 
 CONTENT_EXPORT BASE_DECLARE_FEATURE(kFledgeUseKVv2SignalsCache);
+
+CONTENT_EXPORT BASE_DECLARE_FEATURE(kFledgeUseNonTransientNIKForSeller);
 
 CONTENT_EXPORT BASE_DECLARE_FEATURE(kFledgeUsePreconnectCache);
 

@@ -338,6 +338,11 @@ const char kDataSharingJoinOnlyName[] = "Data Sharing Join Only";
 const char kDataSharingJoinOnlyDescription[] =
     "Enabled Data Sharing Joining flow related UI and features.";
 
+const char kDataSharingNonProductionEnvironmentName[] =
+    "Data Sharing server environment";
+const char kDataSharingNonProductionEnvironmentDescription[] =
+    "Sets data sharing server environment.";
+
 const char kDbdRevampDesktopName[] = "Revamped Delete Browsing Data dialog";
 const char kDbdRevampDesktopDescription[] =
     "Enables a revamped Delete Browsing Data dialog on Desktop. This includes "
@@ -755,6 +760,12 @@ const char kAutofillMoreProminentPopupName[] = "More prominent Autofill popup";
 const char kAutofillMoreProminentPopupDescription[] =
     "If enabled Autofill's popup becomes more prominent, i.e. its shadow "
     "becomes more emphasized, position is also updated";
+
+const char kAutofillPaymentsFieldSwappingName[] =
+    "Swap credit card suggestions";
+const char kAutofillPaymentsFieldSwappingDescription[] =
+    "When enabled, swapping autofilled payment suggestions would result"
+    "in overriding all of the payments fields with the swapped profile data";
 
 const char kAutofillRemovePaymentsButterDropdownName[] =
     "Remove \"Show cards from your Google Account\" dropdown";
@@ -3606,6 +3617,11 @@ const char kSystemKeyboardLockDescription[] =
 const char kTabDragDropName[] = "Tab Drag and Drop via Strip";
 const char kTabDragDropDescription[] =
     "Enables Tab drag and drop UI to move tab on tab-strip across windows.";
+
+const char kTabGroupParityBottomSheetAndroidName[] =
+    "Tab Group Parity Bottom Sheet";
+const char kTabGroupParityBottomSheetAndroidDescription[] =
+    "Enables adding Tabs to Tab Groups via the Tab Group Parity Bottom Sheet";
 
 const char kToolbarPhoneCleanupName[] = "Toolbar Phone cleanup";
 const char kToolbarPhoneCleanupDescription[] =
