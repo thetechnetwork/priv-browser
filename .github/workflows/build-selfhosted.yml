@@ -14,7 +14,7 @@ jobs:
       - name: Install Dependencies
         run: |
           sudo apt update
-          sudo apt install -y build-essential ninja-build clang lld cmake python3 python3-pip git mingw-w64 unzip wget zip tar
+          sudo apt install -y build-essential ninja-build clang lld cmake python3 python3-pip git mingw-w64 unzip wget
 
       - name: Setup Depot Tools
         run: |
@@ -42,39 +42,38 @@ jobs:
           target_os = ["linux", "win"]
           EOL
 
-      - name: Sync Chromium Dependencies
+      - name: Force Re-Sync Chromium Dependencies
         run: |
           cd /home/user/priv_browser_build/priv-browser
-          gclient sync
+          gclient sync --reset --force
 
       - name: Setup Windows Toolchain
         run: |
           TOOLCHAIN_DIR="/home/user/priv_browser_build/win_toolchain"
+          if [ -d "$TOOLCHAIN_DIR" ]; then
+            echo "⚠️ Removing existing Windows toolchain directory to prevent conflicts..."
+            rm -rf "$TOOLCHAIN_DIR"
+          fi
+          
           mkdir -p "$TOOLCHAIN_DIR"
           
-          if [ ! -d "$TOOLCHAIN_DIR/VC" ]; then
-            echo "⬇️ Downloading Windows toolchain..."
-            wget --no-check-certificate -O win_toolchain.zip "https://drive.usercontent.google.com/download?id=1Z6DcuUdsL0pNCmHSmKA6CxHZlbL-CN1V&export=download&confirm=t"
-            unzip -o win_toolchain.zip -d "$TOOLCHAIN_DIR"
-            rm win_toolchain.zip
-          else
-            echo "✅ Windows toolchain already exists, skipping download."
-          fi
+          echo "⬇️ Downloading Windows toolchain..."
+          wget --no-check-certificate -O win_toolchain.zip "https://drive.usercontent.google.com/download?id=1Z6DcuUdsL0pNCmHSmKA6CxHZlbL-CN1V&export=download&confirm=t"
+          unzip -o win_toolchain.zip -d "$TOOLCHAIN_DIR"
+          rm win_toolchain.zip
 
-          echo "DEPOT_TOOLS_WIN_TOOLCHAIN_BASE_URL=$TOOLCHAIN_DIR" >> $GITHUB_ENV
-          echo "GYP_MSVS_HASH_7393122652=e0b1a90051" >> $GITHUB_ENV
+          echo "DEPOT_TOOLS_WIN_TOOLCHAIN_BASE_URL=$TOOLCHAIN_DIR" | sudo tee -a /etc/environment
+          echo "GYP_MSVS_HASH_7393122652=e0b1a90051" | sudo tee -a /etc/environment
+          export DEPOT_TOOLS_WIN_TOOLCHAIN_BASE_URL="$TOOLCHAIN_DIR"
+          export GYP_MSVS_HASH_7393122652="e0b1a90051"
 
-      - name: Set Windows Build Environment Variables
+      - name: Remove Existing `vs_files` Directory (If Exists)
         run: |
-          TOOLCHAIN_DIR="/home/user/priv_browser_build/win_toolchain"
-          SDK_PATH=$(find "$TOOLCHAIN_DIR" -type d -name "Windows Kits" | head -n 1)
-          VS_PATH="$TOOLCHAIN_DIR/VC"
-          SDK_VERSION=$(ls "$SDK_PATH/10/Include/" | sort -V | tail -n 1)
-
-          echo "WINDOWSSDKDIR=$SDK_PATH/10" >> $GITHUB_ENV
-          echo "GYP_MSVS_OVERRIDE_PATH=$VS_PATH" >> $GITHUB_ENV
-          echo "DEPOT_TOOLS_WIN_TOOLCHAIN_BASE_URL=$TOOLCHAIN_DIR" >> $GITHUB_ENV
-          echo "GYP_MSVS_HASH_7393122652=e0b1a90051" >> $GITHUB_ENV
+          TOOLCHAIN_DIR="/home/user/priv_browser_build/priv-browser/src/third_party/depot_tools/win_toolchain"
+          if [ -d "$TOOLCHAIN_DIR/vs_files" ]; then
+            echo "⚠️ Removing conflicting vs_files directory..."
+            rm -rf "$TOOLCHAIN_DIR/vs_files"
+          fi
 
       - name: Configure Priv Browser for Linux
         run: |
@@ -96,24 +95,24 @@ jobs:
           cd /home/user/priv_browser_build/priv-browser/src
           ninja -C out/Windows chrome -j$(nproc)
 
-      - name: Compress Windows Build
+      - name: Package Linux Build
         run: |
-          cd /home/user/priv_browser_build/priv-browser/src/out
-          zip -r Windows.zip Windows
+          cd /home/user/priv_browser_build/priv-browser/src/out/
+          tar -czvf priv-browser-linux.tar.gz Linux
 
-      - name: Compress Linux Build
+      - name: Package Windows Build
         run: |
-          cd /home/user/priv_browser_build/priv-browser/src/out
-          tar -czvf Linux.tar.gz Linux
+          cd /home/user/priv_browser_build/priv-browser/src/out/
+          zip -r priv-browser-windows.zip Windows
 
       - name: Upload Linux Build
         uses: actions/upload-artifact@v4
         with:
           name: priv-browser-linux-build
-          path: /home/user/priv_browser_build/priv-browser/src/out/Linux.tar.gz
+          path: /home/user/priv_browser_build/priv-browser/src/out/priv-browser-linux.tar.gz
 
       - name: Upload Windows Build
         uses: actions/upload-artifact@v4
         with:
           name: priv-browser-windows-build
-          path: /home/user/priv_browser_build/priv-browser/src/out/Windows.zip
+          path: /home/user/priv_browser_build/priv-browser/src/out/priv-browser-windows.zip
