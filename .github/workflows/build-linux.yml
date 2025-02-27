@@ -1,137 +1,72 @@
-name: Build Chromium Linux
+name: Build Chromium - Linux
+
 on:
   #push:
-  #  branches: [ main ]
-  #pull_request:
-  #  branches: [ main ]
-  workflow_dispatch:
+  #  branches:
+  #    - main
+  pull_request:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
-    
+    runs-on: self-hosted
     steps:
-    - name: Free up disk space
-      run: |
-        # Remove unnecessary large packages
-        sudo apt-get remove -y '^dotnet-.*'
-        sudo apt-get remove -y '^llvm-.*'
-        sudo apt-get remove -y 'php.*'
-        sudo apt-get remove -y azure-cli google-cloud-cli google-chrome-stable firefox powershell mono-devel
-        sudo apt-get autoremove -y
-        sudo apt-get clean
-        
-        # Remove large directories we don't need
-        sudo rm -rf /usr/share/dotnet
-        sudo rm -rf /usr/local/lib/android
-        sudo rm -rf /opt/ghc
-        sudo rm -rf /usr/local/share/boost
-        sudo rm -rf "$AGENT_TOOLSDIRECTORY"
-        
-        # Show available space
-        df -h
-        
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.11'
-    
-    - name: Install system dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y git pkg-config gcc g++ curl
-    
-    - name: Create clean working directory
-      run: |
-        sudo mkdir -p /mnt/build/chromium
-        sudo chown $USER:$USER /mnt/build/chromium
-    
-    - name: Cache depot_tools
-      uses: actions/cache@v4
-      with:
-        path: /mnt/build/depot_tools
-        key: ${{ runner.os }}-depot_tools
-    
-    - name: Install depot_tools
-      if: steps.cache-depot_tools.outputs.cache-hit != 'true'
-      run: |
-        # Create parent directory with correct permissions first
-        sudo mkdir -p /mnt/build/depot_tools
-        sudo chown -R $USER:$USER /mnt/build/depot_tools
-        sudo rm -rf /mnt/build/depot_tools/*
-        git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git /mnt/build/depot_tools
-        
-    - name: Configure environment
-      run: |
-        echo "PATH=/opt/depot_tools:$PATH" >> $GITHUB_ENV
-        
-    - name: Configure Git
-      working-directory: /mnt/build/chromium
-      run: |
-        git config --global core.autocrlf false
-        git config --global core.filemode false
-        git config --global branch.autosetuprebase always
-        
-    - name: Initialize gclient and fetch source
-      working-directory: /opt/chromium
-      run: |
-        # Function to perform clean fetch
-        clean_fetch() {
-          echo "Performing clean fetch..."
-          # Safe cleanup of only chromium directory contents
-          cd /opt/chromium
-          rm -rf .gclient .gclient_entries src
-          
-          # Initialize gclient configuration
-          gclient config --spec 'solutions = [{"url": "https://chromium.googlesource.com/chromium/src.git","managed": False,"name": "src","custom_vars": {"checkout_android": False,"checkout_chromeos": False,}}]'
-          
-          # Do minimal fetch first to get essential files
-          git clone --depth 1 https://chromium.googlesource.com/chromium/src.git
-          
-          # Now that we have src/.vpython3, we can proceed with full fetch
-          cd src
-          git checkout main
-          cd ..
-          fetch --no-history chromium
-        }
+      - name: Checkout Chromium Fork
+        uses: actions/checkout@v4
+        with:
+          repository: TheTechNetwork/priv-browser
+          submodules: recursive
 
-        # Try initial fetch
-        if ! fetch --no-history chromium; then
-          echo "Initial fetch failed, attempting clean fetch..."
-          clean_fetch
-        else
+      - name: Set up caching
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.ccache
+            src/out/Default
+          key: linux-chromium-${{ github.run_id }}
+          restore-keys: |
+            linux-chromium-
+
+      - name: Install Dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y build-essential clang lld ninja-build python3 python3-pip
+
+      - name: Fetch Depot Tools
+        run: |
+          git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
+          echo "$PWD/depot_tools" >> $GITHUB_PATH
+
+      - name: Sync Chromium Source
+        run: |
+          fetch --nohooks chromium
           cd src
-          git checkout main
-        fi
-        
-        # Now that we have a proper checkout, run sync and hooks
-        cd /opt/chromium
-        gclient sync --no-history --with_branch_heads
-        gclient runhooks
-        
-    - name: Generate build files
-      working-directory: /opt/chromium/src
-      run: |
-        # Configure for minimal disk space usage
-        gn gen out/Default --args="is_debug=false is_component_build=true symbol_level=0 enable_nacl=false blink_symbol_level=0 chrome_pgo_phase=0 clang_use_chrome_plugins=false enable_reading_list=false enable_remoting=false enable_reporting=false exclude_unwind_tables=true is_official_build=true remove_webcore_debug_symbols=true use_debug_fission=false use_thin_lto=false"
-    
-    - name: Build Chromium
-      working-directory: /opt/chromium/src
-      run: |
-        autoninja -C out/Default chrome
-    
-    - name: Package artifacts
-      working-directory: /opt/chromium/src/out/Default
-      run: |
-        tar -czf chromium-linux.tar.gz chrome *.so *.pak *.dat locales/ MEIPreload/
-    
-    - name: Upload artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: chromium-linux
-        path: /opt/chromium/src/out/Default/chromium-linux.tar.gz
-        
-    - name: Cleanup
-      if: always()
-      run: |
-        sudo rm -rf /opt/chromium
+          gclient sync --nohooks --with_branch_heads --with_tags
+
+      - name: Run GN Config
+        run: |
+          cd src
+          gn gen out/Default --args='is_debug=false is_component_build=false symbol_level=0 use_ccache=true'
+
+      - name: Build Chromium
+        run: |
+          cd src
+          autoninja -C out/Default chrome
+
+      - name: Run Tests
+        run: |
+          cd src
+          autoninja -C out/Default base_unittests
+          ./out/Default/base_unittests --gtest_output=xml:test-results.xml
+
+      - name: Upload Test Results
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-linux
+          path: src/out/Default/test-results.xml
+
+      - name: Upload Build Artifact
+        uses: softprops/action-gh-release@v2
+        with:
+          files: src/out/Default/chrome
+          tag_name: latest
+          token: ${{ secrets.GITHUB_TOKEN }}
