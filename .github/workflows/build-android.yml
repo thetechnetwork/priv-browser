@@ -5,7 +5,7 @@ on:
 
 jobs:
   build:
-    runs-on: [self-hosted, linux, chromium-build, android]
+    runs-on: [self-hosted, linux, chromium-build]
 
     steps:
       - name: Checkout Priv Browser Repo
