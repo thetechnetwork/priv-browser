@@ -1,18 +1,18 @@
 name: Build Chromium - Linux
 
 on:
-  workflow_dispatch:  # Allows manual triggering
+  workflow_dispatch:
 
 jobs:
   build:
-    runs-on: [self-hosted, linux, chromium-build]  # Ensure correct runner
+    runs-on: [self-hosted, linux, chromium-build]
     steps:
       - name: Checkout Chromium Fork
         uses: actions/checkout@v4
         with:
           repository: TheTechNetwork/priv-browser
-          fetch-depth: 1  # Fetch only the latest commit
-          submodules: true # Only fetch submodules at the latest commit
+          fetch-depth: 1  # Fetch latest commit only
+          submodules: true  # Fetch only necessary submodules
 
       - name: Set up caching
         uses: actions/cache@v4
@@ -38,7 +38,7 @@ jobs:
         run: |
           fetch --nohooks --no-history chromium
           cd src
-          echo "{ 'checkout_google_internal': False }" >> .gclient
+          echo "{ 'checkout_google_internal': False }" > .gclient  # Force disable internal Google repos
           gclient sync --nohooks --with_branch_heads --with_tags
 
       - name: Run GN Config
