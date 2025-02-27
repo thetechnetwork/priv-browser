@@ -8,7 +8,7 @@ on:
 
 jobs:
   build:
-    runs-on: self-hosted
+    runs-on: [self-hosted, linux, chromium-build]
     steps:
       - name: Checkout Chromium Fork
         uses: actions/checkout@v4
