@@ -1,15 +1,11 @@
 name: Build Chromium - Linux
 
 on:
-  #push:
-  #  branches:
-  #    - main
-  #pull_request:
-  workflow_dispatch:
+  workflow_dispatch:  # Allows manual triggering
 
 jobs:
   build:
-    runs-on: [self-hosted, linux, chromium-build]
+    runs-on: [self-hosted, linux, chromium-build]  # Ensure correct runner
     steps:
       - name: Checkout Chromium Fork
         uses: actions/checkout@v4
@@ -37,10 +33,11 @@ jobs:
           git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
           echo "$PWD/depot_tools" >> $GITHUB_PATH
 
-      - name: Sync Chromium Source
+      - name: Sync Chromium Source (Prevent Google Internal Fetch)
         run: |
-          fetch --nohooks chromium
+          fetch --nohooks --no-history chromium
           cd src
+          echo "{ 'checkout_google_internal': False }" >> .gclient
           gclient sync --nohooks --with_branch_heads --with_tags
 
       - name: Run GN Config
