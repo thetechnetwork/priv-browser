@@ -1,87 +1,71 @@
-name: Build Chromium Windows
+name: Build Chromium - Windows
 
 on:
   #push:
-  #  branches: [ main ]
-  #pull_request:
-  #  branches: [ main ]
-  workflow_dispatch:
+  #  branches:
+  #    - main
+  pull_request:
 
 jobs:
   build:
-    runs-on: windows-latest
-    
+    runs-on: self-hosted
     steps:
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.11'
-    
-    - name: Create clean working directory
-      run: |
-        Remove-Item -Path D:\chromium -Recurse -Force -ErrorAction SilentlyContinue
-        New-Item -Path D:\chromium -ItemType Directory
-    
-    - name: Cache depot_tools
-      uses: actions/cache@v4
-      with:
-        path: D:\depot_tools
-        key: ${{ runner.os }}-depot_tools
-    
-    - name: Install depot_tools
-      if: steps.cache-depot_tools.outputs.cache-hit != 'true'
-      run: |
-        Remove-Item -Path D:\depot_tools -Recurse -Force -ErrorAction SilentlyContinue
-        git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git D:\depot_tools
-    
-    - name: Configure environment
-      run: |
-        echo "DEPOT_TOOLS_WIN_TOOLCHAIN=0" >> $env:GITHUB_ENV
-        echo "D:\depot_tools" >> $env:GITHUB_PATH
-        
-    - name: Configure Git
-      working-directory: D:\chromium
-      run: |
-        git config --global core.autocrlf false
-        git config --global core.filemode false
-        git config --global branch.autosetuprebase always
-        git config --global core.fscache true
-        git config --global core.preloadindex true
-        
-    - name: Initialize gclient and fetch source
-      working-directory: D:\chromium
-      run: |
-        # Initialize gclient with config
-        gclient config --spec 'solutions = [{"url": "https://chromium.googlesource.com/chromium/src.git","managed": False,"name": "src","custom_vars": {"checkout_android": False,"checkout_chromeos": False,}}]'
-        
-        # Now fetch chromium
-        fetch --no-history chromium
-        
-        # Run gclient sync to ensure everything is properly synchronized
-        gclient sync --no-history
-        
-    - name: Generate build files
-      working-directory: D:\chromium\src
-      run: |
-        gn gen out/Default --args="is_debug=false is_component_build=true symbol_level=0 enable_nacl=false"
-    
-    - name: Build Chromium
-      working-directory: D:\chromium\src
-      run: |
-        autoninja -C out/Default chrome
-    
-    - name: Package artifacts
-      working-directory: D:\chromium\src\out\Default
-      run: |
-        Compress-Archive -Path chrome.exe, *.dll, *.pak, *.dat, locales/*, MEIPreload/* -DestinationPath chromium-windows.zip
-    
-    - name: Upload artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: chromium-windows
-        path: D:\chromium\src\out\Default\chromium-windows.zip
-        
-    - name: Cleanup
-      if: always()
-      run: |
-        Remove-Item -Path D:\chromium -Recurse -Force -ErrorAction SilentlyContinue
+      - name: Checkout Chromium Fork
+        uses: actions/checkout@v4
+        with:
+          repository: TheTechNetwork/priv-browser
+          submodules: recursive
+
+      - name: Set up caching
+        uses: actions/cache@v4
+        with:
+          path: |
+            C:\cache
+            src\out\Default
+          key: windows-chromium-${{ github.run_id }}
+          restore-keys: |
+            windows-chromium-
+
+      - name: Fetch Depot Tools
+        run: |
+          git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
+          echo "${PWD}/depot_tools" | Out-File -Append -Encoding ASCII $env:GITHUB_PATH
+
+      - name: Sync Chromium Source
+        shell: cmd
+        run: |
+          fetch --nohooks chromium
+          cd src
+          gclient sync --nohooks --with_branch_heads --with_tags
+
+      - name: Run GN Config
+        shell: cmd
+        run: |
+          cd src
+          gn gen out\Default --args="is_debug=false is_component_build=false symbol_level=0 use_ccache=true"
+
+      - name: Build Chromium
+        shell: cmd
+        run: |
+          cd src
+          autoninja -C out\Default chrome
+
+      - name: Run Tests
+        shell: cmd
+        run: |
+          cd src
+          autoninja -C out\Default base_unittests
+          out\Default\base_unittests.exe --gtest_output=xml:test-results.xml
+
+      - name: Upload Test Results
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-windows
+          path: src\out\Default\test-results.xml
+
+      - name: Upload Build Artifact
+        uses: softprops/action-gh-release@v2
+        with:
+          files: src\out\Default\chrome.exe
+          tag_name: latest
+          token: ${{ secrets.GITHUB_TOKEN }}
