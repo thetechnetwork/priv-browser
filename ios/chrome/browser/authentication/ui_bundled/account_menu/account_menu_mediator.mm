@@ -63,11 +63,6 @@
   BOOL _blockUpdates;
   // The authentication flow,
   AuthenticationFlow* _authenticationFlow;
-  // This object is set iff an account switch is in progress.
-  // DEPRECATED. This should be removed once all the UI has been migrated to the
-  // new API.
-  // Replaced by `_accountSwitchingBatchClosureRunner`.
-  base::ScopedClosureRunner _accountSwitchInProgress;
   // The lifetime of this ScopedClosureRunner denotes a batch of primary account
   // changes. UI listens to batched changes to avoid visual artifacts during an
   // account switch.
@@ -130,7 +125,6 @@
 }
 
 - (void)disconnect {
-  _accountSwitchInProgress.RunAndReset();
   _accountSwitchingBatchClosureRunner.RunAndReset();
   _signinCompletionIdentity = nil;
   _blockUpdates = YES;
@@ -233,30 +227,24 @@
 
 #pragma mark - IdentityManagerObserverBridgeDelegate
 
-- (void)onPrimaryAccountChanged:
-    (const signin::PrimaryAccountChangeEvent&)event {
+- (void)onEndBatchOfPrimaryAccountChanges {
   if (_blockUpdates) {
     return;
   }
-  switch (event.GetEventTypeFor(signin::ConsentLevel::kSignin)) {
-    case signin::PrimaryAccountChangeEvent::Type::kNone:
-      return;
-    case signin::PrimaryAccountChangeEvent::Type::kSet:
-      _primaryIdentity = _authenticationService->GetPrimaryIdentity(
-          signin::ConsentLevel::kSignin);
-      [self updateIdentitiesIfAllowed];
-      break;
-    case signin::PrimaryAccountChangeEvent::Type::kCleared:
-      if (_authenticationService->IsAccountSwitchInProgress()) {
-        return;
-      }
-      self.signinCoordinatorResult =
-          SigninCoordinatorResult::SigninCoordinatorResultInterrupted;
-      _blockUpdates = YES;
-      self.userInteractionsBlocked = YES;
-      [self.delegate mediatorWantsToBeDismissed:self];
-      break;
+  id<SystemIdentity> primaryIdentity =
+      _authenticationService->GetPrimaryIdentity(signin::ConsentLevel::kSignin);
+  if (primaryIdentity) {
+    _primaryIdentity = primaryIdentity;
+    [self updateIdentitiesIfAllowed];
+    return;
   }
+  // The user is not signed anymore. The account menu can be stopped.
+  // The old value of `_primaryIdentity` can be kept during the shutdown.
+  self.signinCoordinatorResult =
+      SigninCoordinatorResult::SigninCoordinatorResultInterrupted;
+  _blockUpdates = YES;
+  self.userInteractionsBlocked = YES;
+  [self.delegate mediatorWantsToBeDismissed:self];
 }
 
 - (void)onExtendedAccountInfoUpdated:(const AccountInfo&)info {
@@ -348,8 +336,6 @@
     return;
   }
 
-  _accountSwitchInProgress =
-      _authenticationService->DeclareAccountSwitchInProgress();
   _accountSwitchingBatchClosureRunner =
       _identityManager->StartBatchOfPrimaryAccountChanges();
   [self.delegate signOutFromTargetRect:targetRect
@@ -474,7 +460,6 @@
   if (!signoutSuccess) {
     // User had not signed-out. Allow to interact with the UI.
     self.userInteractionsBlocked = NO;
-    _accountSwitchInProgress.RunAndReset();
     _accountSwitchingBatchClosureRunner.RunAndReset();
     [self restartUpdates];
     return;
@@ -494,7 +479,6 @@
                    toIdentity:(id<SystemIdentity>)newIdentity {
   CHECK(_authenticationFlow);
   _authenticationFlow = nil;
-  _accountSwitchInProgress.RunAndReset();
   _accountSwitchingBatchClosureRunner.RunAndReset();
   BOOL success =
       result == SigninCoordinatorResult::SigninCoordinatorResultSuccess;

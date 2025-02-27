@@ -69,6 +69,8 @@ source_set("impl") {
     "browser_conditions.h",
     "fre_util.cc",
     "fre_util.h",
+    "glic_annotation_manager.cc",
+    "glic_annotation_manager.h",
     "glic_border_view.cc",
     "glic_button_controller.cc",
     "glic_cookie_synchronizer.cc",
@@ -242,6 +244,7 @@ source_set("interactive_ui_tests") {
   defines = [ "HAS_OUT_OF_PROC_TEST_RUNNER" ]
   sources = [
     "glic_border_view_interactive_uitest.cc",
+    "glic_keyed_service_interactive_uitest.cc",
     "glic_settings_util_interactive_uitest.cc",
     "glic_tab_indicator_helper_interactive_uitest.cc",
     "glic_ui_interactive_uitest.cc",

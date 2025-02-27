@@ -14,6 +14,8 @@
 
 #include "base/check.h"
 #include "base/timer/elapsed_timer.h"
+#include "components/content_settings/core/common/content_settings_rules.h"
+#include "components/content_settings/core/common/content_settings_utils.h"
 #include "components/ip_protection/common/ip_protection_data_types.h"
 #include "components/ip_protection/common/ip_protection_proxy_config_manager.h"
 #include "components/ip_protection/common/ip_protection_proxy_config_manager_impl.h"
@@ -21,6 +23,7 @@
 #include "components/ip_protection/common/ip_protection_token_manager.h"
 #include "components/ip_protection/common/ip_protection_token_manager_impl.h"
 #include "components/ip_protection/common/masked_domain_list_manager.h"
+#include "components/ip_protection/common/probabilistic_reveal_token_registry.h"
 #include "net/base/features.h"
 #include "net/base/network_change_notifier.h"
 #include "net/base/proxy_chain.h"
@@ -74,11 +77,13 @@ IpProtectionCoreImpl::IpProtectionCoreImpl(
         ip_protection_proxy_config_manager,
     std::map<ProxyLayer, std::unique_ptr<IpProtectionTokenManager>>
         ip_protection_token_managers,
+    ProbabilisticRevealTokenRegistry* probabilistic_reveal_token_registry,
     bool is_ip_protection_enabled,
     bool use_regular_mdl)
     : masked_domain_list_manager_(masked_domain_list_manager),
       ipp_proxy_config_manager_(std::move(ip_protection_proxy_config_manager)),
       ipp_token_managers_(std::move(ip_protection_token_managers)),
+      probabilistic_reveal_token_registry_(probabilistic_reveal_token_registry),
       is_ip_protection_enabled_(is_ip_protection_enabled),
       ipp_over_quic_(net::features::kIpPrivacyUseQuicProxies.Get()),
       enable_token_caching_by_geo_(
@@ -223,6 +228,11 @@ void IpProtectionCoreImpl::GeoObserved(const std::string& geo_id) {
   }
 }
 
+bool IpProtectionCoreImpl::ShouldRequestIncludeProbabilisticRevealToken(
+    const GURL& request_url) {
+  return probabilistic_reveal_token_registry_->IsRegistered(request_url);
+}
+
 void IpProtectionCoreImpl::OnNetworkChanged(
     net::NetworkChangeNotifier::ConnectionType type) {
   // When the network changes, but there is still a network, reset the
@@ -248,6 +258,26 @@ void IpProtectionCoreImpl::set_ip_protection_enabled(bool enabled) {
   // disabled via the try again after time returned by the next TryGetAuthToken
   // call, but the GetProxyConfig calls will continue and receive failures until
   // the feature is re-enabled.
+}
+
+bool IpProtectionCoreImpl::HasTrackingProtectionException(
+    const GURL& first_party_url) const {
+  for (const content_settings::HostIndexedContentSettings& index :
+       tp_content_settings_) {
+    if (const content_settings::RuleEntry* result =
+            index.Find(GURL(), first_party_url);
+        result != nullptr) {
+      return content_settings::ValueToContentSetting(result->second.value) ==
+             CONTENT_SETTING_ALLOW;
+    }
+  }
+  return false;
+}
+
+void IpProtectionCoreImpl::SetTrackingProtectionContentSetting(
+    const ContentSettingsForOneType& settings) {
+  tp_content_settings_ =
+      content_settings::HostIndexedContentSettings::Create(settings);
 }
 
 }  // namespace ip_protection

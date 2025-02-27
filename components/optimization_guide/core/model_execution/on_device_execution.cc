@@ -208,11 +208,13 @@ void OnDeviceExecution::BeginExecution(OnDeviceContext& context,
   logged_request->set_execution_string(input->ToString());
   LogRequest(opts_.logger.get(), *logged_request);
 
-  auto append_options = on_device_model::mojom::AppendOptions::New();
-  append_options->input = std::move(input->input);
-  append_options->max_tokens = opts_.token_limits.max_execute_tokens;
-  session_->Append(std::move(append_options),
-                   context_receiver_.BindNewPipeAndPassRemote());
+  if (input->input->pieces.size() > 0) {
+    auto append_options = on_device_model::mojom::AppendOptions::New();
+    append_options->input = std::move(input->input);
+    append_options->max_tokens = opts_.token_limits.max_execute_tokens;
+    session_->Append(std::move(append_options),
+                     context_receiver_.BindNewPipeAndPassRemote());
+  }
 
   auto options = on_device_model::mojom::GenerateOptions::New();
   options->max_output_tokens = opts_.token_limits.max_output_tokens;
@@ -320,7 +322,6 @@ void OnDeviceExecution::OnComplete(
   MutableLoggedResponse()->set_time_to_completion_millis(
       time_to_completion.InMilliseconds());
 
-  input_token_count_ = summary->input_token_count;
   output_token_count_ = summary->output_token_count;
 
   opts_.model_client->OnResponseCompleted();
@@ -540,7 +541,6 @@ void OnDeviceExecution::SendSuccessCompletionCallback(
   std::move(callback_).Run(OptimizationGuideModelStreamingExecutionResult(
       base::ok(StreamingResponse{.response = success_response_metadata,
                                  .is_complete = true,
-                                 .input_token_count = input_token_count_,
                                  .output_token_count = output_token_count_}),
       /*provided_by_on_device=*/true, std::move(log_entry),
       std::move(model_execution_info)));

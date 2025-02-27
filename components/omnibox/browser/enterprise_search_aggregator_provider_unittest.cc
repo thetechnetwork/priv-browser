@@ -45,8 +45,6 @@ class FakeEnterpriseSearchAggregatorProvider
         update_results_future_(
             std::make_unique<base::test::TestFuture<void>>()) {}
 
-  using EnterpriseSearchAggregatorProvider::SuggestionType;
-
   using EnterpriseSearchAggregatorProvider::CreateMatch;
   using EnterpriseSearchAggregatorProvider::EnterpriseSearchAggregatorProvider;
   using EnterpriseSearchAggregatorProvider::IsProviderAllowed;
@@ -54,9 +52,10 @@ class FakeEnterpriseSearchAggregatorProvider
       ParseEnterpriseSearchAggregatorSearchResults;
   using EnterpriseSearchAggregatorProvider::RequestCompleted;
 
+  using EnterpriseSearchAggregatorProvider::adjusted_input_;
   using EnterpriseSearchAggregatorProvider::done_;
-  using EnterpriseSearchAggregatorProvider::input_;
   using EnterpriseSearchAggregatorProvider::matches_;
+  using EnterpriseSearchAggregatorProvider::template_url_;
 
   void UpdateResults(const std::optional<base::Value::Dict>& response_value,
                      const int response_code) override {
@@ -125,6 +124,7 @@ const std::string kGoodJsonResponse = base::StringPrintf(
                 "link": "https://www.example.com"
               }
             },
+            "iconUri": "https://example.com/icon.png",
             "dataStore": "project2"
           }
         ]
@@ -210,6 +210,16 @@ const std::string kMissingFieldsJsonResponse = base::StringPrintf(
 const std::string kNonDictJsonResponse =
     base::StringPrintf(R"(["test","result1","result2"])");
 
+AutocompleteInput CreateInput(const std::u16string& text,
+                              bool in_keyword_mode) {
+  AutocompleteInput input = {text, metrics::OmniboxEventProto::OTHER,
+                             TestSchemeClassifier()};
+  if (in_keyword_mode) {
+    input.set_keyword_mode_entry_method(metrics::OmniboxEventProto::TAB);
+  }
+  return input;
+}
+
 class MockAutocompleteProviderListener : public AutocompleteProviderListener {
  public:
   MOCK_METHOD(void,
@@ -217,6 +227,7 @@ class MockAutocompleteProviderListener : public AutocompleteProviderListener {
               (bool updated_matches, const AutocompleteProvider* provider),
               (override));
 };
+
 class EnterpriseSearchAggregatorProviderTest : public testing::Test {
  protected:
   EnterpriseSearchAggregatorProviderTest() {
@@ -234,9 +245,7 @@ class EnterpriseSearchAggregatorProviderTest : public testing::Test {
     EXPECT_CALL(*client_.get(), IsOffTheRecord()).WillRepeatedly(Return(false));
   }
 
-  void InitFeature() {
-    scoped_config_.Get().enabled = true;
-  }
+  void InitFeature() { scoped_config_.Get().enabled = true; }
 
   void InitTemplateUrlService() {
     TemplateURLData data;
@@ -246,7 +255,8 @@ class EnterpriseSearchAggregatorProviderTest : public testing::Test {
     data.is_active = TemplateURLData::ActiveStatus::kTrue;
     data.featured_by_policy = true;
     data.policy_origin = TemplateURLData::PolicyOrigin::kSearchAggregator;
-    client_->GetTemplateURLService()->Add(std::make_unique<TemplateURL>(data));
+    provider_->template_url_ = client_->GetTemplateURLService()->Add(
+        std::make_unique<TemplateURL>(data));
   }
 
   std::vector<std::u16string> GetMatches() {
@@ -267,20 +277,21 @@ class EnterpriseSearchAggregatorProviderTest : public testing::Test {
 };
 
 TEST_F(EnterpriseSearchAggregatorProviderTest, CreateMatch) {
-  AutocompleteInput input{u"input text", metrics::OmniboxEventProto::OTHER,
-                          TestSchemeClassifier()};
-  input.set_keyword_mode_entry_method(metrics::OmniboxEventProto::TAB);
+  provider_->adjusted_input_ = CreateInput(u"input text", true);
 
   auto match = provider_->CreateMatch(
-      input, u"keyword",
-      FakeEnterpriseSearchAggregatorProvider::SuggestionType::QUERY, true, 1000,
-      "https://url.com", "https://example.com/image.png", u"title",
+      AutocompleteMatch::EnterpriseSearchAggregatorType::QUERY, true, 1000,
+      "https://url.com", "https://example.com/image.png",
+      "https://example.com/icon.png", u"title",
       u"additional text");
   EXPECT_EQ(match.destination_url.spec(), "https://url.com/");
   EXPECT_EQ(match.fill_into_edit, u"https://url.com");
+  EXPECT_EQ(match.enterprise_search_aggregator_type,
+            AutocompleteMatch::EnterpriseSearchAggregatorType::QUERY);
   EXPECT_EQ(match.description, u"title");
   EXPECT_EQ(match.contents, u"additional text");
   EXPECT_EQ(match.image_url.spec(), "https://example.com/image.png");
+  EXPECT_EQ(match.icon_url.spec(), "https://example.com/icon.png");
   EXPECT_EQ(match.keyword, u"keyword");
   EXPECT_TRUE(
       PageTransitionCoreTypeIs(match.transition, ui::PAGE_TRANSITION_KEYWORD));
@@ -289,8 +300,7 @@ TEST_F(EnterpriseSearchAggregatorProviderTest, CreateMatch) {
 
 // Test that the provider runs only when allowed.
 TEST_F(EnterpriseSearchAggregatorProviderTest, IsProviderAllowed) {
-  AutocompleteInput input(u"text text", metrics::OmniboxEventProto::OTHER,
-                          TestSchemeClassifier());
+  AutocompleteInput input = CreateInput(u"text text", false);
 
   // Check `IsProviderAllowed()` returns true when all conditions pass.
   EXPECT_TRUE(provider_->IsProviderAllowed(input));
@@ -323,15 +333,31 @@ TEST_F(EnterpriseSearchAggregatorProviderTest, IsProviderAllowed) {
         u"", metrics::OmniboxEventProto::OTHER, TestSchemeClassifier());
     EXPECT_FALSE(provider_->IsProviderAllowed(unscoped_empty_input));
   }
+
+  {
+    // Query must not be a url in unscoped mode
+    EXPECT_TRUE(provider_->IsProviderAllowed(input));
+    AutocompleteInput query_input(u"https", metrics::OmniboxEventProto::OTHER,
+                                  TestSchemeClassifier());
+    EXPECT_TRUE(provider_->IsProviderAllowed(query_input));
+    AutocompleteInput person_query(
+        u"john doe", metrics::OmniboxEventProto::OTHER, TestSchemeClassifier());
+    EXPECT_TRUE(provider_->IsProviderAllowed(person_query));
+    AutocompleteInput url_input(u"www.web.site",
+                                metrics::OmniboxEventProto::OTHER,
+                                TestSchemeClassifier());
+    EXPECT_FALSE(provider_->IsProviderAllowed(url_input));
+    AutocompleteInput url_no_prefix(
+        u"john.com", metrics::OmniboxEventProto::OTHER, TestSchemeClassifier());
+    EXPECT_FALSE(provider_->IsProviderAllowed(url_no_prefix));
+  }
 }
 
 // Test that a call to `Start()` will stop old requests to prevent their results
 // from appearing with the new input.
 TEST_F(EnterpriseSearchAggregatorProviderTest, StartCallsStop) {
   scoped_config_.Get().enabled = false;
-  AutocompleteInput invalid_input(u"keyword text",
-                                  metrics::OmniboxEventProto::OTHER,
-                                  TestSchemeClassifier());
+  AutocompleteInput invalid_input = CreateInput(u"keyword text", false);
   invalid_input.set_omit_asynchronous_matches(false);
 
   EXPECT_CALL(*mock_listener_.get(), OnProviderUpdate(_, provider_.get()))
@@ -346,32 +372,28 @@ TEST_F(EnterpriseSearchAggregatorProviderTest, StartCallsStop) {
 // request if input (scoped) is empty.
 TEST_F(EnterpriseSearchAggregatorProviderTest,
        StartCallsStopForScopedEmptyInput) {
-  AutocompleteInput input(u"keyword ", metrics::OmniboxEventProto::OTHER,
-                          TestSchemeClassifier());
-  input.set_keyword_mode_entry_method(metrics::OmniboxEventProto::TAB);
+  provider_->adjusted_input_ = CreateInput(u"keyword", true);
   provider_->matches_ = {provider_->CreateMatch(
-      input, u"keyword",
-      FakeEnterpriseSearchAggregatorProvider::SuggestionType::QUERY, true, 1500,
-      "https://cached.org", "", u"cached", u"cached")};
+      AutocompleteMatch::EnterpriseSearchAggregatorType::QUERY, true, 1500,
+      "https://cached.org", "", "", u"cached", u"cached")};
 
   EXPECT_CALL(*mock_listener_.get(), OnProviderUpdate(_, provider_.get()))
       .Times(0);
 
-  provider_->Start(input, false);
+  provider_->Start(provider_->adjusted_input_, false);
   EXPECT_TRUE(provider_->done());
   EXPECT_THAT(GetMatches(), testing::ElementsAre());
 }
 
-// Test that a call to `Start()` will not send a new  request if input is zero
+// Test that a call to `Start()` will not send a new request if input is zero
 // suggest.
 TEST_F(EnterpriseSearchAggregatorProviderTest, StartCallsStopForZeroSuggest) {
-  AutocompleteInput input(u"", metrics::OmniboxEventProto::OTHER,
-                          TestSchemeClassifier());
+  AutocompleteInput input = CreateInput(u"", false);
   input.set_focus_type(metrics::INTERACTION_FOCUS);
+  provider_->adjusted_input_ = input;
   provider_->matches_ = {provider_->CreateMatch(
-      input, u"keyword",
-      FakeEnterpriseSearchAggregatorProvider::SuggestionType::QUERY, true, 1500,
-      "https://cached.org", "", u"cached", u"cached")};
+      AutocompleteMatch::EnterpriseSearchAggregatorType::QUERY, true, 1500,
+      "https://cached.org", "", "", u"cached", u"cached")};
 
   EXPECT_CALL(*mock_listener_.get(), OnProviderUpdate(_, provider_.get()))
       .Times(0);
@@ -385,8 +407,7 @@ TEST_F(EnterpriseSearchAggregatorProviderTest, StartCallsStopForZeroSuggest) {
 // `omit_asynchronous_matches` is true.
 TEST_F(EnterpriseSearchAggregatorProviderTest,
        StartLeavesDoneForOmitAsynchronousMatches) {
-  AutocompleteInput input(u"keyword text", metrics::OmniboxEventProto::OTHER,
-                          TestSchemeClassifier());
+  AutocompleteInput input = CreateInput(u"keyword text", false);
   input.set_omit_asynchronous_matches(true);
 
   EXPECT_CALL(*mock_listener_.get(), OnProviderUpdate(_, provider_.get()))
@@ -402,11 +423,7 @@ TEST_F(EnterpriseSearchAggregatorProviderTest, Parse) {
   std::optional<base::Value::Dict> response =
       base::JSONReader::ReadDict(kGoodJsonResponse);
   ASSERT_TRUE(response);
-  AutocompleteInput input{u"keyword text", metrics::OmniboxEventProto::OTHER,
-                          TestSchemeClassifier()};
-  input.set_keyword_mode_entry_method(metrics::OmniboxEventProto::TAB);
-
-  provider_->input_ = input;
+  provider_->adjusted_input_ = CreateInput(u"keyword text", true);
 
   provider_->ParseEnterpriseSearchAggregatorSearchResults(*response);
   ACMatches matches = provider_->matches_;
@@ -423,9 +440,9 @@ TEST_F(EnterpriseSearchAggregatorProviderTest, Parse) {
   EXPECT_EQ(matches[0].destination_url,
             GURL("http://www.yahoo.com/Document%201"));
 
-  EXPECT_EQ(matches[1].type, AutocompleteMatchType::SEARCH_SUGGEST);
-  EXPECT_EQ(matches[1].contents, u"John Doe");
-  EXPECT_EQ(matches[1].description, u"john@example.com");
+  EXPECT_EQ(matches[1].type, AutocompleteMatchType::NAVSUGGEST);
+  EXPECT_EQ(matches[1].contents, u"john@example.com");
+  EXPECT_EQ(matches[1].description, u"John Doe");
   EXPECT_EQ(matches[1].destination_url,
             GURL("http://www.yahoo.com/john@example.com"));
   EXPECT_EQ(matches[1].image_url, GURL("https://example.com/image.png"));
@@ -434,6 +451,7 @@ TEST_F(EnterpriseSearchAggregatorProviderTest, Parse) {
   EXPECT_EQ(matches[2].contents, u"");
   EXPECT_EQ(matches[2].description, u"Critical Crash");
   EXPECT_EQ(matches[2].destination_url, GURL("https://www.example.com"));
+  EXPECT_EQ(matches[2].icon_url, GURL("https://example.com/icon.png"));
 }
 
 // Test results with missing expected fields are skipped.
@@ -441,11 +459,8 @@ TEST_F(EnterpriseSearchAggregatorProviderTest, ParseWithMissingFields) {
   std::optional<base::Value::Dict> response =
       base::JSONReader::ReadDict(kMissingFieldsJsonResponse);
   ASSERT_TRUE(response);
-  AutocompleteInput input{u"keyword text", metrics::OmniboxEventProto::OTHER,
-                          TestSchemeClassifier()};
-  input.set_keyword_mode_entry_method(metrics::OmniboxEventProto::TAB);
+  provider_->adjusted_input_ = CreateInput(u"keyword text", true);
 
-  provider_->input_ = input;
   provider_->ParseEnterpriseSearchAggregatorSearchResults(*response);
 
   EXPECT_THAT(GetMatches(),
@@ -456,11 +471,8 @@ TEST_F(EnterpriseSearchAggregatorProviderTest, ParseWithMissingFields) {
 
 // Test non-dict results are skipped.
 TEST_F(EnterpriseSearchAggregatorProviderTest, ParseWithNonDict) {
-  AutocompleteInput input{u"keyword text", metrics::OmniboxEventProto::OTHER,
-                          TestSchemeClassifier()};
-  input.set_keyword_mode_entry_method(metrics::OmniboxEventProto::TAB);
-
-  provider_->input_ = input;
+  AutocompleteInput input = CreateInput(u"keyword text", true);
+  provider_->adjusted_input_ = input;
 
   // Matches are not updated when response is not a json.
   EXPECT_CALL(*mock_listener_.get(), OnProviderUpdate(true, provider_.get()))
@@ -468,7 +480,6 @@ TEST_F(EnterpriseSearchAggregatorProviderTest, ParseWithNonDict) {
   EXPECT_CALL(*mock_listener_.get(), OnProviderUpdate(false, provider_.get()))
       .Times(1);
 
-  provider_->input_ = input;
   provider_->done_ = false;
   provider_->RequestCompleted(
       nullptr, 200, std::make_unique<std::string>(kNonDictJsonResponse));
@@ -479,12 +490,11 @@ TEST_F(EnterpriseSearchAggregatorProviderTest, ParseWithNonDict) {
 // Test matches are cached and cleared in the appropriate flows.
 TEST_F(EnterpriseSearchAggregatorProviderTest, CacheMatches_Start) {
   // Set a cached match.
-  AutocompleteInput input(u"keyword query", metrics::OmniboxEventProto::OTHER,
-                          TestSchemeClassifier());
+  AutocompleteInput input = CreateInput(u"keyword query", false);
+  provider_->adjusted_input_ = input;
   provider_->matches_ = {provider_->CreateMatch(
-      input, u"keyword",
-      FakeEnterpriseSearchAggregatorProvider::SuggestionType::QUERY, true, 1500,
-      "https://cached.org", "", u"cached", u"cached")};
+      AutocompleteMatch::EnterpriseSearchAggregatorType::QUERY, true, 1500,
+      "https://cached.org", "", "", u"cached", u"cached")};
 
   // Call `Start()`, old match should still be present.
   provider_->Start(input, false);
@@ -495,13 +505,11 @@ TEST_F(EnterpriseSearchAggregatorProviderTest, CacheMatches_Start) {
 // cached match to be cleared for scoped error responses.
 TEST_F(EnterpriseSearchAggregatorProviderTest, CacheMatches_ErrorResponse) {
   // Set cached matches.
-  AutocompleteInput input(u"keyword q", metrics::OmniboxEventProto::OTHER,
-                          TestSchemeClassifier());
-  input.set_keyword_mode_entry_method(metrics::OmniboxEventProto::TAB);
+  AutocompleteInput input = CreateInput(u"keyword q", true);
+  provider_->adjusted_input_ = input;
   provider_->matches_ = {provider_->CreateMatch(
-      input, u"keyword",
-      FakeEnterpriseSearchAggregatorProvider::SuggestionType::QUERY, true, 1500,
-      "https://cached.org", "", u"cached", u"cached")};
+      AutocompleteMatch::EnterpriseSearchAggregatorType::QUERY, true, 1500,
+      "https://cached.org", "", "", u"cached", u"cached")};
 
   EXPECT_CALL(*mock_listener_.get(), OnProviderUpdate(true, provider_.get()))
       .Times(1);
@@ -509,7 +517,6 @@ TEST_F(EnterpriseSearchAggregatorProviderTest, CacheMatches_ErrorResponse) {
       .Times(0);
 
   // Complete request with error, old match should be cleared.
-  provider_->input_ = input;
   provider_->done_ = false;
   provider_->RequestCompleted(nullptr, 404,
                               std::make_unique<std::string>("bad"));
@@ -521,12 +528,11 @@ TEST_F(EnterpriseSearchAggregatorProviderTest, CacheMatches_ErrorResponse) {
 TEST_F(EnterpriseSearchAggregatorProviderTest,
        CacheMatches_ErrorResponse_Unscoped) {
   // Set cached matches.
-  AutocompleteInput input(u"keyword q", metrics::OmniboxEventProto::OTHER,
-                          TestSchemeClassifier());
+  AutocompleteInput input = CreateInput(u"keyword q", false);
+  provider_->adjusted_input_ = input;
   provider_->matches_ = {provider_->CreateMatch(
-      input, u"keyword",
-      FakeEnterpriseSearchAggregatorProvider::SuggestionType::QUERY, true, 1500,
-      "https://cached.org", "", u"cached", u"cached")};
+      AutocompleteMatch::EnterpriseSearchAggregatorType::QUERY, true, 1500,
+      "https://cached.org", "", "", u"cached", u"cached")};
 
   EXPECT_CALL(*mock_listener_.get(), OnProviderUpdate(true, provider_.get()))
       .Times(1);
@@ -534,7 +540,6 @@ TEST_F(EnterpriseSearchAggregatorProviderTest,
       .Times(0);
 
   // Complete request with error, old match should be cleared.
-  provider_->input_ = input;
   provider_->done_ = false;
   provider_->RequestCompleted(nullptr, 404,
                               std::make_unique<std::string>("bad"));
@@ -544,12 +549,11 @@ TEST_F(EnterpriseSearchAggregatorProviderTest,
 // Test matches are cached and cleared in the appropriate flows.
 TEST_F(EnterpriseSearchAggregatorProviderTest, CacheMatches_EmptyResponse) {
   // Set a cached match.
-  AutocompleteInput input(u"keyword query", metrics::OmniboxEventProto::OTHER,
-                          TestSchemeClassifier());
+  AutocompleteInput input = CreateInput(u"keyword query", false);
+  provider_->adjusted_input_ = input;
   provider_->matches_ = {provider_->CreateMatch(
-      input, u"keyword",
-      FakeEnterpriseSearchAggregatorProvider::SuggestionType::QUERY, true, 1500,
-      "https://cached.org", "", u"cached", u"cached")};
+      AutocompleteMatch::EnterpriseSearchAggregatorType::QUERY, true, 1500,
+      "https://cached.org", "", "", u"cached", u"cached")};
 
   // Matches are updated (cleared) when response is empty.
   EXPECT_CALL(*mock_listener_.get(), OnProviderUpdate(true, provider_.get()))
@@ -558,7 +562,6 @@ TEST_F(EnterpriseSearchAggregatorProviderTest, CacheMatches_EmptyResponse) {
       .Times(0);
 
   // Complete request with empty results, old match should be cleared.
-  provider_->input_ = input;
   provider_->done_ = false;
   provider_->RequestCompleted(
       nullptr, 200, std::make_unique<std::string>(kGoodEmptyJsonResponse));
@@ -570,12 +573,11 @@ TEST_F(EnterpriseSearchAggregatorProviderTest, CacheMatches_EmptyResponse) {
 TEST_F(EnterpriseSearchAggregatorProviderTest,
        CacheMatches_SuccessfulResponse) {
   // Set a cached match.
-  AutocompleteInput input(u"keyword query", metrics::OmniboxEventProto::OTHER,
-                          TestSchemeClassifier());
+  AutocompleteInput input = CreateInput(u"keyword query", false);
+  provider_->adjusted_input_ = input;
   provider_->matches_ = {provider_->CreateMatch(
-      input, u"keyword",
-      FakeEnterpriseSearchAggregatorProvider::SuggestionType::QUERY, true, 1500,
-      "https://cached.org", "", u"cached", u"cached")};
+      AutocompleteMatch::EnterpriseSearchAggregatorType::QUERY, true, 1500,
+      "https://cached.org", "", "", u"cached", u"cached")};
 
   EXPECT_CALL(*mock_listener_.get(), OnProviderUpdate(true, provider_.get()))
       .Times(1);
@@ -583,7 +585,6 @@ TEST_F(EnterpriseSearchAggregatorProviderTest,
       .Times(0);
 
   // Complete request with non-empty results, old match should be replaced.
-  provider_->input_ = input;
   provider_->done_ = false;
   provider_->RequestCompleted(nullptr, 200,
                               std::make_unique<std::string>(kGoodJsonResponse));
@@ -607,8 +608,7 @@ TEST_F(EnterpriseSearchAggregatorProviderTest, UnfeaturedKeyword) {
   turl_data.policy_origin = TemplateURLData::PolicyOrigin::kSearchAggregator;
   client_->GetTemplateURLService()->Add(
       std::make_unique<TemplateURL>(turl_data));
-  AutocompleteInput input(u"yahoo query", metrics::OmniboxEventProto::OTHER,
-                          TestSchemeClassifier());
+  AutocompleteInput input = CreateInput(u"yahoo query", false);
 
   EXPECT_CALL(*mock_listener_.get(), OnProviderUpdate(true, provider_.get()))
       .Times(1);
@@ -627,8 +627,7 @@ TEST_F(EnterpriseSearchAggregatorProviderTest, UnfeaturedKeyword) {
 
 // Test things work in unscoped mode.
 TEST_F(EnterpriseSearchAggregatorProviderTest, UnscopedMode) {
-  AutocompleteInput input(u"query", metrics::OmniboxEventProto::OTHER,
-                          TestSchemeClassifier());
+  AutocompleteInput input = CreateInput(u"query", false);
 
   EXPECT_CALL(*mock_listener_.get(), OnProviderUpdate(true, provider_.get()))
       .Times(1);

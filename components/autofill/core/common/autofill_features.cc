@@ -75,6 +75,13 @@ BASE_FEATURE(kAutofillAddressUserDeclinedSuggestionSurvey,
              "AutofillAddressUserDeclinedSuggestionSurvey",
              base::FEATURE_DISABLED_BY_DEFAULT);
 
+// Feature flag controlling the deduplication of GAS addresses. When disabled
+// GAS addresses will never be deleted as part of the deduplication flow.
+// TODO(crbug.com/357074792): Remove when launched.
+BASE_FEATURE(kAutofillDeduplicateAccountAddresses,
+             "AutofillDeduplicateAccountAddresses",
+             base::FEATURE_DISABLED_BY_DEFAULT);
+
 // Kill switch for Autofill filling.
 BASE_FEATURE(kAutofillDisableFilling,
              "AutofillDisableFilling",
@@ -311,10 +318,10 @@ BASE_FEATURE(kAutofillIncludeSelectOptionsInCrowdsourcing,
              base::FEATURE_DISABLED_BY_DEFAULT);
 
 // If enabled, we include a `FormData`'s URL in crowdsourcing votes.
-// TODO(crbug.com/385043924): Clean up when launched.
+// TODO(crbug.com/385043924): Clean up in M137.
 BASE_FEATURE(kAutofillIncludeUrlInCrowdsourcing,
              "AutofillIncludeUrlInCrowdsourcing",
-             base::FEATURE_DISABLED_BY_DEFAULT);
+             base::FEATURE_ENABLED_BY_DEFAULT);
 
 // If enabled, we start forwarding submissions with source
 // DOM_MUTATION_AFTER_AUTOFILL, even for non-password forms.
@@ -845,13 +852,14 @@ BASE_FEATURE(kAutofillOverridePredictions,
              base::FEATURE_DISABLED_BY_DEFAULT);
 
 // The override specification in string form.
+// See `OverrideFormat::kSpec` for details.
 const base::FeatureParam<std::string> kAutofillOverridePredictionsSpecification{
     &kAutofillOverridePredictions, "spec", ""};
 
-// The override specification using alternative_form_signature in string form.
-const base::FeatureParam<std::string>
-    kAutofillOverridePredictionsForAlternativeFormSignaturesSpecification{
-        &kAutofillOverridePredictions, "alternative_signature_spec", ""};
+// The override specification in Base64-encoded JSON.
+// See `OverrideFormat::kJson` for details.
+const base::FeatureParam<std::string> kAutofillOverridePredictionsJson{
+    &kAutofillOverridePredictions, "json", ""};
 
 // Enables or Disables (mostly for hermetic testing) autofill server
 // communication. The URL of the autofill server can further be controlled via

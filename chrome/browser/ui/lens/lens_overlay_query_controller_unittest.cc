@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "lens_overlay_query_controller.h"
+
 #include <string>
 
 #include "base/base64url.h"
@@ -40,6 +42,7 @@
 #include "third_party/icu/source/i18n/unicode/timezone.h"
 #include "third_party/lens_server_proto/lens_overlay_document.pb.h"
 #include "third_party/lens_server_proto/lens_overlay_request_id.pb.h"
+#include "third_party/lens_server_proto/lens_overlay_request_type.pb.h"
 #include "third_party/lens_server_proto/lens_overlay_selection_type.pb.h"
 #include "third_party/lens_server_proto/lens_overlay_server.pb.h"
 #include "third_party/lens_server_proto/lens_overlay_service_deps.pb.h"
@@ -120,6 +123,16 @@ constexpr char kGen204IdentifierQueryParameter[] = "plla";
 // controller, so initialize it here.
 const std::vector<uint8_t> kFakeContentBytes({1, 2, 3, 4});
 const std::vector<uint8_t> kNewFakeContentBytes({5, 6, 7, 8});
+
+// The PageContent needs to outlive the query controller, so initialize it here.
+const std::vector<lens::PageContent> kFakePdfPageContents = {
+    lens::PageContent(kFakeContentBytes, lens::MimeType::kPdf)};
+const std::vector<lens::PageContent> kFakeTextPageContents = {
+    lens::PageContent(kFakeContentBytes, lens::MimeType::kPlainText)};
+const std::vector<lens::PageContent> kFakeHtmlPageContents = {
+    lens::PageContent(kFakeContentBytes, lens::MimeType::kHtml)};
+const std::vector<lens::PageContent> kNewFakeTextPageContents = {
+    lens::PageContent(kFakeContentBytes, lens::MimeType::kPlainText)};
 
 const std::vector<std::u16string> kShortPartialContent({u"page 1", u"page 2",
                                                         u"page 3"});
@@ -415,7 +428,8 @@ TEST_F(LensOverlayQueryControllerTest, FetchInitialQuery_ReturnsResponse) {
       bitmap, GURL(kTestPageUrl),
       std::make_optional<std::string>(kTestPageTitle),
       std::vector<lens::mojom::CenterRotatedBoxPtr>(),
-      /*underlying_content_bytes=*/{}, lens::MimeType::kUnknown, 0,
+      /*underlying_page_contents=*/{},
+      /*primary_content_type=*/lens::MimeType::kUnknown, 0,
       base::TimeTicks::Now());
 
   ASSERT_TRUE(full_image_response_future.Wait());
@@ -488,7 +502,8 @@ TEST_F(LensOverlayQueryControllerTest,
       bitmap, GURL(kTestPageUrl),
       std::make_optional<std::string>(kTestPageTitle),
       std::vector<lens::mojom::CenterRotatedBoxPtr>(),
-      /*underlying_content_bytes=*/{}, lens::MimeType::kUnknown, 0,
+      /*underlying_page_contents=*/{},
+      /*primary_content_type=*/lens::MimeType::kUnknown, 0,
       base::TimeTicks::Now());
 
   ASSERT_TRUE(full_image_response_future.Wait());
@@ -560,7 +575,8 @@ TEST_F(LensOverlayQueryControllerTest,
       bitmap, GURL(kTestPageUrl),
       std::make_optional<std::string>(kTestPageTitle),
       std::vector<lens::mojom::CenterRotatedBoxPtr>(),
-      /*underlying_content_bytes=*/{}, lens::MimeType::kUnknown, 0,
+      /*underlying_page_contents=*/{},
+      /*primary_content_type=*/lens::MimeType::kUnknown, 0,
       base::TimeTicks::Now());
 
   // Wait for the access token request for the cluster info to be sent.
@@ -635,7 +651,8 @@ TEST_F(LensOverlayQueryControllerTest,
       bitmap, GURL(kTestPageUrl),
       std::make_optional<std::string>(kTestPageTitle),
       std::vector<lens::mojom::CenterRotatedBoxPtr>(),
-      /*underlying_content_bytes=*/{}, lens::MimeType::kUnknown, 0,
+      /*underlying_page_contents=*/{},
+      /*primary_content_type=*/lens::MimeType::kUnknown, 0,
       base::TimeTicks::Now());
 
   ASSERT_TRUE(full_image_response_future.Wait());
@@ -689,7 +706,8 @@ TEST_F(LensOverlayQueryControllerTest,
       bitmap, GURL(kTestPageUrl),
       std::make_optional<std::string>(kTestPageTitle),
       std::vector<lens::mojom::CenterRotatedBoxPtr>(),
-      /*underlying_content_bytes=*/{}, lens::MimeType::kUnknown, 0,
+      /*underlying_page_contents=*/{},
+      /*primary_content_type=*/lens::MimeType::kUnknown, 0,
       base::TimeTicks::Now());
 
   ASSERT_TRUE(full_image_response_future.Wait());
@@ -751,7 +769,8 @@ TEST_F(LensOverlayQueryControllerTest,
       bitmap, GURL(kTestPageUrl),
       std::make_optional<std::string>(kTestPageTitle),
       std::vector<lens::mojom::CenterRotatedBoxPtr>(),
-      /*underlying_content_bytes=*/{}, lens::MimeType::kUnknown, 0,
+      /*underlying_page_contents=*/{},
+      /*primary_content_type=*/lens::MimeType::kUnknown, 0,
       base::TimeTicks::Now());
   ASSERT_TRUE(full_image_response_future.Wait());
 
@@ -885,7 +904,8 @@ TEST_F(LensOverlayQueryControllerTest,
       bitmap, GURL(kTestPageUrl),
       std::make_optional<std::string>(kTestPageTitle),
       std::vector<lens::mojom::CenterRotatedBoxPtr>(),
-      /*underlying_content_bytes=*/{}, lens::MimeType::kUnknown, 0,
+      /*underlying_page_contents=*/{},
+      /*primary_content_type=*/lens::MimeType::kUnknown, 0,
       base::TimeTicks::Now());
 
   ASSERT_EQ(query_controller.num_cluster_info_fetch_requests_sent(), 1);
@@ -951,7 +971,8 @@ TEST_F(LensOverlayQueryControllerTest,
       viewport_bitmap, GURL(kTestPageUrl),
       std::make_optional<std::string>(kTestPageTitle),
       std::vector<lens::mojom::CenterRotatedBoxPtr>(),
-      /*underlying_content_bytes=*/{}, lens::MimeType::kUnknown, 0,
+      /*underlying_page_contents=*/{},
+      /*primary_content_type=*/lens::MimeType::kUnknown, 0,
       base::TimeTicks::Now());
   ASSERT_TRUE(full_image_response_future.Wait());
 
@@ -1078,7 +1099,8 @@ TEST_F(LensOverlayQueryControllerTest,
       bitmap, GURL(kTestPageUrl),
       std::make_optional<std::string>(kTestPageTitle),
       std::vector<lens::mojom::CenterRotatedBoxPtr>(),
-      /*underlying_content_bytes=*/{}, lens::MimeType::kUnknown, 0,
+      /*underlying_page_contents=*/{},
+      /*primary_content_type=*/lens::MimeType::kUnknown, 0,
       base::TimeTicks::Now());
   ASSERT_TRUE(full_image_response_future.Wait());
 
@@ -1188,7 +1210,8 @@ TEST_F(LensOverlayQueryControllerTest,
       bitmap, GURL(kTestPageUrl),
       std::make_optional<std::string>(kTestPageTitle),
       std::vector<lens::mojom::CenterRotatedBoxPtr>(),
-      /*underlying_content_bytes=*/{}, lens::MimeType::kUnknown, 0,
+      /*underlying_page_contents=*/{},
+      /*primary_content_type=*/lens::MimeType::kUnknown, 0,
       base::TimeTicks::Now());
   ASSERT_TRUE(full_image_response_future.Wait());
 
@@ -1264,7 +1287,7 @@ TEST_F(LensOverlayQueryControllerTest,
   query_controller.StartQueryFlow(
       bitmap, GURL(kTestPageUrl),
       std::make_optional<std::string>(kTestPageTitle),
-      std::vector<lens::mojom::CenterRotatedBoxPtr>(), kFakeContentBytes,
+      std::vector<lens::mojom::CenterRotatedBoxPtr>(), kFakePdfPageContents,
       lens::MimeType::kPdf, 0, base::TimeTicks::Now());
   ASSERT_TRUE(full_image_response_future.Wait());
 
@@ -1399,7 +1422,7 @@ TEST_F(LensOverlayQueryControllerTest,
   query_controller.StartQueryFlow(
       bitmap, GURL(kTestPageUrl),
       std::make_optional<std::string>(kTestPageTitle),
-      std::vector<lens::mojom::CenterRotatedBoxPtr>(), kFakeContentBytes,
+      std::vector<lens::mojom::CenterRotatedBoxPtr>(), kFakeHtmlPageContents,
       lens::MimeType::kHtml, 0, base::TimeTicks::Now());
   ASSERT_TRUE(full_image_response_future.Wait());
   query_controller.SendContextualTextQuery(
@@ -1533,7 +1556,7 @@ TEST_F(LensOverlayQueryControllerTest,
   query_controller.StartQueryFlow(
       bitmap, GURL(kTestPageUrl),
       std::make_optional<std::string>(kTestPageTitle),
-      std::vector<lens::mojom::CenterRotatedBoxPtr>(), kFakeContentBytes,
+      std::vector<lens::mojom::CenterRotatedBoxPtr>(), kFakeTextPageContents,
       lens::MimeType::kPlainText, 0, base::TimeTicks::Now());
   ASSERT_TRUE(full_image_response_future.Wait());
   query_controller.SendContextualTextQuery(
@@ -1671,7 +1694,7 @@ TEST_F(LensOverlayQueryControllerTest,
   query_controller.StartQueryFlow(
       bitmap, GURL(kTestPageUrl),
       std::make_optional<std::string>(kTestPageTitle),
-      std::vector<lens::mojom::CenterRotatedBoxPtr>(), kFakeContentBytes,
+      std::vector<lens::mojom::CenterRotatedBoxPtr>(), kFakeTextPageContents,
       lens::MimeType::kPlainText, 0, base::TimeTicks::Now());
   ASSERT_TRUE(full_image_response_future.Wait());
 
@@ -1735,7 +1758,7 @@ TEST_F(LensOverlayQueryControllerTest,
   query_controller.StartQueryFlow(
       bitmap, GURL(kTestPageUrl),
       std::make_optional<std::string>(kTestPageTitle),
-      std::vector<lens::mojom::CenterRotatedBoxPtr>(), kFakeContentBytes,
+      std::vector<lens::mojom::CenterRotatedBoxPtr>(), kFakeTextPageContents,
       lens::MimeType::kPlainText, 0, base::TimeTicks::Now());
   ASSERT_TRUE(full_image_response_future.Wait());
 
@@ -1799,7 +1822,7 @@ TEST_F(
   query_controller.StartQueryFlow(
       bitmap, GURL(kTestPageUrl),
       std::make_optional<std::string>(kTestPageTitle),
-      std::vector<lens::mojom::CenterRotatedBoxPtr>(), kFakeContentBytes,
+      std::vector<lens::mojom::CenterRotatedBoxPtr>(), kFakeTextPageContents,
       lens::MimeType::kPlainText, 0, base::TimeTicks::Now());
   ASSERT_TRUE(full_image_response_future.Wait());
 
@@ -1859,7 +1882,7 @@ TEST_F(LensOverlayQueryControllerTest,
   query_controller.StartQueryFlow(
       bitmap, GURL(kTestPageUrl),
       std::make_optional<std::string>(kTestPageTitle),
-      std::vector<lens::mojom::CenterRotatedBoxPtr>(), kFakeContentBytes,
+      std::vector<lens::mojom::CenterRotatedBoxPtr>(), kFakeTextPageContents,
       lens::MimeType::kPlainText, 0, base::TimeTicks::Now());
   ASSERT_TRUE(full_image_response_future.Wait());
 
@@ -1915,12 +1938,14 @@ TEST_F(LensOverlayQueryControllerTest,
   query_controller.StartQueryFlow(
       bitmap, GURL(kTestPageUrl),
       std::make_optional<std::string>(kTestPageTitle),
-      std::vector<lens::mojom::CenterRotatedBoxPtr>(), std::vector<uint8_t>(),
-      lens::MimeType::kUnknown, 0, base::TimeTicks::Now());
+      std::vector<lens::mojom::CenterRotatedBoxPtr>(),
+      /*underlying_page_contents=*/{},
+      /*primary_content_type=*/lens::MimeType::kUnknown, 0,
+      base::TimeTicks::Now());
 
   // Immediately send a page content update request.
   query_controller.SendPageContentUpdateRequest(
-      kFakeContentBytes, lens::MimeType::kPlainText, GURL(kTestPageUrl));
+      kFakeTextPageContents, lens::MimeType::kPlainText, GURL(kTestPageUrl));
 
   ASSERT_TRUE(full_image_response_future.Wait());
   ASSERT_TRUE(base::test::RunUntil([&]() {
@@ -1937,7 +1962,7 @@ TEST_F(LensOverlayQueryControllerTest,
 
   // Send a new page content update request.
   query_controller.SendPageContentUpdateRequest(
-      kNewFakeContentBytes, lens::MimeType::kPlainText, GURL(kTestPageUrl));
+      kNewFakeTextPageContents, lens::MimeType::kPlainText, GURL(kTestPageUrl));
 
   ASSERT_TRUE(base::test::RunUntil([&]() {
     return query_controller.num_page_content_update_requests_sent() == 2;
@@ -1958,7 +1983,7 @@ TEST_F(LensOverlayQueryControllerTest,
   // Send an additional page content update request with a partial page content
   // request.
   query_controller.SendPageContentUpdateRequest(
-      kNewFakeContentBytes, lens::MimeType::kPlainText, GURL(kTestPageUrl));
+      kNewFakeTextPageContents, lens::MimeType::kPlainText, GURL(kTestPageUrl));
   query_controller.SendPartialPageContentRequest(kLongPartialContent);
 
   ASSERT_TRUE(base::test::RunUntil([&]() {
@@ -2035,7 +2060,7 @@ TEST_F(LensOverlayQueryControllerTest,
   query_controller.StartQueryFlow(
       bitmap, GURL(kTestPageUrl),
       std::make_optional<std::string>(kTestPageTitle),
-      std::vector<lens::mojom::CenterRotatedBoxPtr>(), kFakeContentBytes,
+      std::vector<lens::mojom::CenterRotatedBoxPtr>(), kFakePdfPageContents,
       lens::MimeType::kPdf, 0, base::TimeTicks::Now());
 
   const std::vector<std::u16string> kFakeSubstantialPartialContent(
@@ -2051,7 +2076,7 @@ TEST_F(LensOverlayQueryControllerTest,
   auto sent_request =
       query_controller.sent_partial_page_content_objects_request();
   ASSERT_EQ(1, sent_request.request_context().request_id().sequence_id());
-  ASSERT_EQ(lens::Payload::REQUEST_TYPE_EARLY_PARTIAL_PDF,
+  ASSERT_EQ(lens::RequestType::REQUEST_TYPE_EARLY_PARTIAL_PDF,
             sent_request.payload().request_type());
   ASSERT_EQ(2, sent_request.payload().partial_pdf_document().pages_size());
   ASSERT_EQ(
@@ -2067,7 +2092,7 @@ TEST_F(LensOverlayQueryControllerTest,
 
   // Send a new page content request to incremement the sequence id.
   query_controller.SendPageContentUpdateRequest(
-      kFakeContentBytes, lens::MimeType::kPdf, GURL(kTestPageUrl));
+      kFakePdfPageContents, lens::MimeType::kPdf, GURL(kTestPageUrl));
 
   // Send a new request.
   const std::vector<std::u16string> kNewFakeSubstantialPartialContent(
@@ -2081,7 +2106,7 @@ TEST_F(LensOverlayQueryControllerTest,
   // Check the request is correct.
   sent_request = query_controller.sent_partial_page_content_objects_request();
   ASSERT_EQ(3, sent_request.request_context().request_id().sequence_id());
-  ASSERT_EQ(lens::Payload::REQUEST_TYPE_EARLY_PARTIAL_PDF,
+  ASSERT_EQ(lens::RequestType::REQUEST_TYPE_EARLY_PARTIAL_PDF,
             sent_request.payload().request_type());
   ASSERT_EQ(1, sent_request.payload().partial_pdf_document().pages_size());
   ASSERT_EQ(
@@ -2138,7 +2163,8 @@ TEST_F(LensOverlayQueryControllerTest,
       bitmap, GURL(kTestPageUrl),
       std::make_optional<std::string>(kTestPageTitle),
       std::vector<lens::mojom::CenterRotatedBoxPtr>(),
-      /*underlying_content_bytes=*/{}, lens::MimeType::kUnknown, 0,
+      /*underlying_page_contents=*/{},
+      /*primary_content_type=*/lens::MimeType::kUnknown, 0,
       base::TimeTicks::Now());
   ASSERT_TRUE(full_image_response_future.Wait());
 
@@ -2195,7 +2221,8 @@ TEST_F(LensOverlayQueryControllerTest,
       bitmap, GURL(kTestPageUrl),
       std::make_optional<std::string>(kTestPageTitle),
       std::vector<lens::mojom::CenterRotatedBoxPtr>(),
-      /*underlying_content_bytes=*/{}, lens::MimeType::kUnknown, 0,
+      /*underlying_page_contents=*/{},
+      /*primary_content_type=*/lens::MimeType::kUnknown, 0,
       base::TimeTicks::Now());
   ASSERT_TRUE(full_image_response_future.Wait());
 
@@ -2355,7 +2382,8 @@ TEST_F(LensOverlayQueryControllerTest, GetVsridForNewTab) {
       bitmap, GURL(kTestPageUrl),
       std::make_optional<std::string>(kTestPageTitle),
       std::vector<lens::mojom::CenterRotatedBoxPtr>(),
-      /*underlying_content_bytes=*/{}, lens::MimeType::kUnknown, 0,
+      /*underlying_page_contents=*/{},
+      /*primary_content_type=*/lens::MimeType::kUnknown, 0,
       base::TimeTicks::Now());
   ASSERT_TRUE(full_image_response_future.Wait());
   ASSERT_TRUE(full_image_response_future.IsReady());
@@ -2441,7 +2469,8 @@ TEST_F(LensOverlayQueryControllerTest,
       bitmap, GURL(kTestPageUrl),
       std::make_optional<std::string>(kTestPageTitle),
       std::vector<lens::mojom::CenterRotatedBoxPtr>(),
-      /*underlying_content_bytes=*/{}, lens::MimeType::kUnknown, 0,
+      /*underlying_page_contents=*/{},
+      /*primary_content_type=*/lens::MimeType::kUnknown, 0,
       base::TimeTicks::Now());
   ASSERT_TRUE(full_image_response_future.Wait());
 
@@ -2507,7 +2536,8 @@ TEST_F(LensOverlayQueryControllerTest,
       bitmap, GURL(kTestPageUrl),
       std::make_optional<std::string>(kTestPageTitle),
       std::vector<lens::mojom::CenterRotatedBoxPtr>(),
-      /*underlying_content_bytes=*/{}, lens::MimeType::kUnknown, 0,
+      /*underlying_page_contents=*/{},
+      /*primary_content_type=*/lens::MimeType::kUnknown, 0,
       base::TimeTicks::Now());
   ASSERT_TRUE(full_image_response_future.Wait());
 
@@ -2574,7 +2604,8 @@ TEST_F(LensOverlayQueryControllerTest,
       bitmap, GURL(kTestPageUrl),
       std::make_optional<std::string>(kTestPageTitle),
       std::vector<lens::mojom::CenterRotatedBoxPtr>(),
-      /*underlying_content_bytes=*/{}, lens::MimeType::kUnknown, 0,
+      /*underlying_page_contents=*/{},
+      /*primary_content_type=*/lens::MimeType::kUnknown, 0,
       base::TimeTicks::Now());
   ASSERT_TRUE(full_image_response_future.Wait());
 
@@ -2636,7 +2667,7 @@ TEST_F(LensOverlayQueryControllerTest,
   query_controller.StartQueryFlow(
       bitmap, GURL(kTestPageUrl),
       std::make_optional<std::string>(kTestPageTitle),
-      std::vector<lens::mojom::CenterRotatedBoxPtr>(), kFakeContentBytes,
+      std::vector<lens::mojom::CenterRotatedBoxPtr>(), kFakeHtmlPageContents,
       lens::MimeType::kHtml, 0, base::TimeTicks::Now());
   ASSERT_TRUE(full_image_response_future.Wait());
 
@@ -2655,7 +2686,7 @@ TEST_F(LensOverlayQueryControllerTest,
   ASSERT_EQ(page_content_request.payload().content_data().size(),
             kFakeContentBytes.size());
   ASSERT_EQ(page_content_request.payload().compression_type(),
-            lens::Payload::UNCOMPRESSED);
+            lens::CompressionType::UNCOMPRESSED);
 }
 
 TEST_F(LensOverlayQueryControllerTest,
@@ -2692,7 +2723,7 @@ TEST_F(LensOverlayQueryControllerTest,
   query_controller.StartQueryFlow(
       bitmap, GURL(kTestPageUrl),
       std::make_optional<std::string>(kTestPageTitle),
-      std::vector<lens::mojom::CenterRotatedBoxPtr>(), kFakeContentBytes,
+      std::vector<lens::mojom::CenterRotatedBoxPtr>(), kFakePdfPageContents,
       lens::MimeType::kPdf, 0, base::TimeTicks::Now());
   ASSERT_TRUE(full_image_response_future.Wait());
 
@@ -2718,7 +2749,7 @@ TEST_F(LensOverlayQueryControllerTest,
   ASSERT_EQ(page_content_request.payload().content_data().size(),
             expected_compressed_size);
   ASSERT_EQ(page_content_request.payload().compression_type(),
-            lens::Payload::ZSTD);
+            lens::CompressionType::ZSTD);
 }
 
 TEST_F(LensOverlayQueryControllerTest,
@@ -2767,7 +2798,8 @@ TEST_F(LensOverlayQueryControllerTest,
       bitmap, GURL(kTestPageUrl),
       std::make_optional<std::string>(kTestPageTitle),
       std::vector<lens::mojom::CenterRotatedBoxPtr>(),
-      /*underlying_content_bytes=*/{}, lens::MimeType::kUnknown, 0,
+      /*underlying_page_contents=*/{},
+      /*primary_content_type=*/lens::MimeType::kUnknown, 0,
       base::TimeTicks::Now());
   ASSERT_TRUE(full_image_response_future.Wait());
 
@@ -2830,7 +2862,7 @@ TEST_F(LensOverlayQueryControllerMockTimeTest,
   query_controller.StartQueryFlow(
       bitmap, GURL(kTestPageUrl),
       std::make_optional<std::string>(kTestPageTitle),
-      std::vector<lens::mojom::CenterRotatedBoxPtr>(), kFakeContentBytes,
+      std::vector<lens::mojom::CenterRotatedBoxPtr>(), kFakePdfPageContents,
       lens::MimeType::kPdf,
       /*ui_scale_factor=*/0, base::TimeTicks::Now());
 

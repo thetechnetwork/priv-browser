@@ -31,6 +31,7 @@
 #include "base/strings/string_split.h"
 #include "base/strings/string_util.h"
 #include "base/strings/stringize_macros.h"
+#include "base/strings/stringprintf.h"
 #include "base/task/single_thread_task_executor.h"
 #include "base/task/single_thread_task_runner.h"
 #include "base/task/thread_pool/thread_pool_instance.h"
@@ -1465,7 +1466,12 @@ void HostProcess::ApplyHostDomainListPolicy() {
 
   std::set<std::string> allowed_emails;
   for (const std::string& owner_email : host_owner_emails_) {
-    auto [_, domain] = *base::SplitStringOnce(owner_email, '@');
+    auto email_parts = base::SplitStringOnce(owner_email, '@');
+    if (!email_parts.has_value()) {
+      LOG(WARNING) << owner_email << " is not a valid email address";
+      continue;
+    }
+    auto domain = email_parts->second;
     bool allowed_by_policy = IsInAllowlist(domain, host_domain_list_);
     if (allowed_by_policy) {
       allowed_emails.emplace(owner_email);
@@ -1667,7 +1673,12 @@ std::optional<ErrorCode> HostProcess::OnSessionPoliciesReceived(
   LOG(INFO) << "Current local username is '" << username << "'";
   std::set<std::string> allowed_emails;
   for (const std::string& owner_email : host_owner_emails_) {
-    auto [owner_username, _] = *base::SplitStringOnce(owner_email, '@');
+    auto email_parts = base::SplitStringOnce(owner_email, '@');
+    if (!email_parts.has_value()) {
+      LOG(WARNING) << owner_email << " is not a valid email address";
+      continue;
+    }
+    auto owner_username = email_parts->first;
     if (base::EqualsCaseInsensitiveASCII(username, owner_username)) {
       LOG(INFO) << owner_email << " matches the local username";
       allowed_emails.emplace(owner_email);
@@ -1725,7 +1736,9 @@ void HostProcess::InitializeSignaling() {
     // generate tokens for calling the private Remoting Cloud API.
     instance_identity_token_getter_ =
         std::make_unique<InstanceIdentityTokenGetter>(
-            ServiceUrls::GetInstance()->remoting_cloud_private_endpoint(),
+            base::StringPrintf(
+                "https://%s",
+                ServiceUrls::GetInstance()->remoting_cloud_private_endpoint()),
             context_->url_loader_factory());
 
     service_client = std::make_unique<CloudHeartbeatServiceClient>(

@@ -354,8 +354,8 @@ ElementRuleCollector::ElementRuleCollector(
       can_use_fast_reject_(selector_filter_.ParentStackIsConsistent(
           context.GetElement().IsPseudoElement()
               ? LayoutTreeBuilderTraversal::ParentElement(
-                    *To<PseudoElement>(context.GetElement())
-                         .UltimateOriginatingElement())
+                    To<PseudoElement>(context.GetElement())
+                        .UltimateOriginatingElement())
               : context.ParentElement())),
       matching_ua_rules_(false),
       suppress_visited_(false),
@@ -901,8 +901,14 @@ DISABLE_CFI_PERF bool ElementRuleCollector::CollectMatchingRulesInternal(
     }
   }
 
+  // Get either `element` if we are collecting rules for regular element,
+  // or `pseudo_element` if we are collecting rules for pseudo element.
+  // 0u indicates the pseudo element we resolve for, look inside for more
+  // context.
+  Element& matching_element = context.context.GetElementForMatching(0u);
   if (match_request.HasAnyRuleSetsWithFocusPseudoClassRules()) {
-    if (SelectorChecker::MatchesFocusPseudoClass(element, kPseudoIdNone)) {
+    if (SelectorChecker::MatchesFocusPseudoClass(matching_element,
+                                                 kPseudoIdNone)) {
       for (const auto bundle :
            match_request.RuleSetsWithFocusPseudoClassRules()) {
         if (CollectMatchingRulesForList<stop_at_first_match>(
@@ -929,7 +935,7 @@ DISABLE_CFI_PERF bool ElementRuleCollector::CollectMatchingRulesInternal(
   }
 
   if (match_request.HasAnyRuleSetsWithFocusVisiblePseudoClassRules()) {
-    if (SelectorChecker::MatchesFocusVisiblePseudoClass(element)) {
+    if (SelectorChecker::MatchesFocusVisiblePseudoClass(matching_element)) {
       for (const auto bundle :
            match_request.RuleSetsWithFocusVisiblePseudoClassRules()) {
         if (CollectMatchingRulesForList<stop_at_first_match>(

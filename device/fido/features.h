@@ -52,6 +52,10 @@ BASE_DECLARE_FEATURE(kWebAuthnICloudKeychainForInactiveWithDrive);
 COMPONENT_EXPORT(DEVICE_FIDO)
 BASE_DECLARE_FEATURE(kWebAuthnICloudKeychainForInactiveWithoutDrive);
 
+// Retry requests to U2F keys after a delay if a low-level error happens.
+COMPONENT_EXPORT(DEVICE_FIDO)
+BASE_DECLARE_FEATURE(kWebAuthnRetryU2FErrors);
+
 // Use insecure software unexportable keys to authenticate to the enclave.
 // For development purposes only.
 COMPONENT_EXPORT(DEVICE_FIDO)
@@ -139,6 +143,11 @@ BASE_DECLARE_FEATURE(kSyncSecurityDomainBeforePINRenewal);
 // `WebAuthenticationRemoteDesktopAllowedOrigins` enterprise policy.
 COMPONENT_EXPORT(DEVICE_FIDO)
 BASE_DECLARE_FEATURE(kWebAuthnRemoteDesktopAllowedOriginsPolicy);
+
+// Enables using the Microsoft Software Key Storage Provider to store
+// unexportable keys when a TPM is not available.
+COMPONENT_EXPORT(DEVICE_FIDO)
+BASE_DECLARE_FEATURE(kWebAuthnMicrosoftSoftwareUnexportableKeyProvider);
 
 }  // namespace device
 

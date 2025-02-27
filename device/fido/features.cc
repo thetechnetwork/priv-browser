@@ -76,6 +76,12 @@ BASE_FEATURE(kWebAuthnICloudKeychainForInactiveWithoutDrive,
              "WebAuthenticationICloudKeychainForInactiveWithoutDrive",
              base::FEATURE_DISABLED_BY_DEFAULT);
 
+// Default enabled in M135. Remove in or after M138.
+COMPONENT_EXPORT(DEVICE_FIDO)
+BASE_FEATURE(kWebAuthnRetryU2FErrors,
+             "WebAuthenticationRetryU2FErrors",
+             base::FEATURE_ENABLED_BY_DEFAULT);
+
 // Development flag. Must not be enabled by default once
 // kWebAuthnEnclaveAuthenticator is enabled.
 BASE_FEATURE(kWebAuthnUseInsecureSoftwareUnexportableKeys,
@@ -167,9 +173,14 @@ BASE_FEATURE(kSyncSecurityDomainBeforePINRenewal,
              "kWebAuthenticationSyncSecurityDomainBeforePINRenewal",
              base::FEATURE_ENABLED_BY_DEFAULT);
 
-// Net yet enabled by default.
+// Not yet enabled by default.
 BASE_FEATURE(kWebAuthnRemoteDesktopAllowedOriginsPolicy,
              "WebAuthenticationRemoteDesktopAllowedOriginsPolicy",
+             base::FEATURE_DISABLED_BY_DEFAULT);
+
+// Not yet enabled by default.
+BASE_FEATURE(kWebAuthnMicrosoftSoftwareUnexportableKeyProvider,
+             "WebAuthenticationMicrosoftSoftwareUnexportableKeyProvider",
              base::FEATURE_DISABLED_BY_DEFAULT);
 
 }  // namespace device

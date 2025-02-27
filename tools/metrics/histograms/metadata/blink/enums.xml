@@ -5787,7 +5787,7 @@ Called by update_use_counter_feature_enum.py.-->
   <int value="5196" label="MoveEvent"/>
   <int value="5197" label="Canvas2DDrawText"/>
   <int value="5198" label="Canvas2DMeasureText"/>
-  <int value="5199" label="CrossPartitionBlobURLFetch"/>
+  <int value="5199" label="OBSOLETE_CrossPartitionBlobURLFetch"/>
   <int value="5200" label="CrossTopLevelSiteBlobURLNavigation"/>
   <int value="5201" label="GeolocationSucceeded"/>
   <int value="5202" label="GeolocationSucceededWithoutInjectionMitigation"/>
@@ -5929,6 +5929,11 @@ Called by update_use_counter_feature_enum.py.-->
   <int value="5326" label="GeolocationWouldSucceedWhenAdScriptInStack"/>
   <int value="5327" label="AdScriptInStackOnWatchGeoLocation"/>
   <int value="5328" label="DeviceBoundSessionRegistered"/>
+  <int value="5329" label="V8AILanguageDetectorFactory_Availability_Method"/>
+  <int value="5330" label="CrossPartitionSameOriginBlobURLFetch"/>
+  <int value="5331" label="WebAppManifestUpdate"/>
+  <int value="5332" label="CSSEnvironmentVariable_PreferredTextScale"/>
+  <int value="5333" label="ButtonTypeAttrInvalidWithCommandOrCommandfor"/>
 </enum>
 
 <!-- LINT.ThenChange(//third_party/blink/public/mojom/use_counter/metrics/web_feature.mojom:WebFeature) -->
@@ -7459,6 +7464,7 @@ Called by update_use_counter_css.py.-->
   <int value="843" label="scroll-marker-contain"/>
   <int value="844" label="row-rule-style"/>
   <int value="845" label="gap-rule-paint-order"/>
+  <int value="846" label="row-rule-width"/>
 </enum>
 
 <!-- LINT.ThenChange(//third_party/blink/public/mojom/use_counter/metrics/css_property_id.mojom:CSSSampleId) -->
@@ -7858,6 +7864,8 @@ Called by update_use_counter_feature_enum.py.-->
   <int value="301" label="Badging"/>
   <int value="302" label="Manifest"/>
   <int value="303" label="BeforeInstallPrompt"/>
+  <int value="304" label="AppShareTargets"/>
+  <int value="305" label="AppShortcuts"/>
 </enum>
 
 <!-- LINT.ThenChange(//third_party/blink/public/mojom/use_counter/metrics/webdx_feature.mojom:WebDXFeature) -->

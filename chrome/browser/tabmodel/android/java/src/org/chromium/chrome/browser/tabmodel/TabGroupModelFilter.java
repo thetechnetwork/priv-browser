@@ -64,9 +64,20 @@ public interface TabGroupModelFilter extends TabList {
 
     /**
      * @param rootId The root identifier of the tab group.
-     * @return Whether the given rootId has any tab group associated with it.
+     * @return Whether the given rootId is tracked in the {@link TabGroupModelFilter}.
+     * @deprecated Use {@link #tabGroupExists(Token)}. This method is confusing; it checked if any
+     *     {@link TabGroup} existed for the {@code rootId}. This is not the same as the tab group
+     *     being a valid group since {@link TabGroup} objects exist for all tabs and only some of
+     *     the tabs are valid tab groups. When migrating off this method make sure the new behavior
+     *     is still applicable. The old implementation effectively leaked implementation details
+     *     which shouldn't be relevant to any caller, but in the event it was relevant a workaround
+     *     might be required.
      */
+    @Deprecated
     boolean tabGroupExistsForRootId(int rootId);
+
+    /** Returns whether a tab group exists with {@code tabGroupId}. */
+    boolean tabGroupExists(@Nullable Token tabGroupId);
 
     /**
      * Given a tab group's stable ID, finds out the root ID, or {@link Tab.INVALID_TAB_ID} if the
@@ -76,7 +87,7 @@ public interface TabGroupModelFilter extends TabList {
      * @return The root ID of the tab group or {@link Tab.INVALID_TAB_ID} if the group isn't found
      *     in the tab model.
      */
-    int getRootIdFromStableId(@Nullable Token stableId);
+    int getRootIdFromTabGroupId(@Nullable Token stableId);
 
     /**
      * Given a tab group's root ID, finds out the stable ID, or null if the tab group doesn't exist
@@ -86,7 +97,7 @@ public interface TabGroupModelFilter extends TabList {
      * @return The stable ID of the tab group or null if the group isn't found in the tab model.
      */
     @Nullable
-    Token getStableIdFromRootId(int rootId);
+    Token getTabGroupIdFromRootId(int rootId);
 
     /**
      * Any of the concrete class can override and define a relationship that links a {@link Tab} to

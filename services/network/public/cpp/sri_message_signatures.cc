@@ -25,7 +25,7 @@ const size_t kEd25519SigLength = 64;
 constexpr std::string_view kAcceptSignature = "accept-signature";
 
 constexpr std::array<std::string_view, 9u> kDerivedComponents = {
-    "@path", "@status"
+    "@query", "@path", "@status"
     // TODO(383409584): We should support the remaining derived components from
     // https://www.rfc-editor.org/rfc/rfc9421.html#name-derived-components:
     //
@@ -52,31 +52,43 @@ std::optional<mojom::SRIMessageSignatureComponentPtr> ParseComponent(
   }
 
   std::string name = component.item.GetString();
+  auto result = mojom::SRIMessageSignatureComponent::New();
+  result->name = name;
+
+  // The "unencoded-digest" component requires a single `sf` parameter with
+  // a `true` boolean value.
   if (name == "unencoded-digest") {
-    // The "unencoded-digest" component requires a single `sf` parameter with
-    // a `true` boolean value.
     if (!ItemHasSingleBooleanParam(component, "sf")) {
       errors.push_back(
           mojom::SRIMessageSignatureError::
               kSignatureInputHeaderInvalidHeaderComponentParameter);
       return std::nullopt;
     }
-    auto result = mojom::SRIMessageSignatureComponent::New();
-    result->name = name;
-    result->params.push_back(Parameters::kStrictStructuredFieldSerialization);
+    result->params.insert(
+        {Parameters::kStrictStructuredFieldSerialization, ""});
     return result;
   } else if (base::Contains(kDerivedComponents, name)) {
-    // Derived components require a single `req` parameter with a `true` boolean
-    // value.
+    // The `@status` derived component must not have any parameters (as it's
+    // pulled from the response, not the request).
+    if (name == "@status") {
+      if (!component.params.empty()) {
+        errors.push_back(
+            mojom::SRIMessageSignatureError::
+                kSignatureInputHeaderInvalidDerivedComponentParameter);
+        return std::nullopt;
+      }
+      return result;
+    }
+
+    // All other derived components we've implemented require a single `req`
+    // parameter with a `true` boolean value.
     if (!ItemHasSingleBooleanParam(component, "req")) {
       errors.push_back(
           mojom::SRIMessageSignatureError::
               kSignatureInputHeaderInvalidDerivedComponentParameter);
       return std::nullopt;
     }
-    auto result = mojom::SRIMessageSignatureComponent::New();
-    result->name = name;
-    result->params.push_back(Parameters::kRequest);
+    result->params.insert({Parameters::kRequest, ""});
     return result;
   } else {
     errors.push_back(mojom::SRIMessageSignatureError::
@@ -117,13 +129,14 @@ std::string SerializeParams(const net::structured_headers::Parameters params) {
   return param_list.str();
 }
 
-std::string SerializeComponentParams(const std::vector<Parameters>& params) {
+std::string SerializeComponentParams(
+    const base::flat_map<Parameters, std::string>& params) {
   // All currently-supported component params are boolean, so we serialize them
   // by mapping each enum value to a string, and joining them with `;`.
   std::stringstream param_list;
   for (const auto& param : params) {
     param_list << ';';
-    switch (param) {
+    switch (param.first) {
       case Parameters::kRequest:
         param_list << "req";
         break;
@@ -201,7 +214,10 @@ std::string SerializeDerivedComponent(const GURL& request_url,
                                       const std::string& component) {
   DCHECK(base::Contains(kDerivedComponents, component));
 
-  if (component == "@path") {
+  if (component == "@query") {
+    // https://www.rfc-editor.org/rfc/rfc9421.html#name-query
+    return base::StrCat({"?", request_url.query()});
+  } else if (component == "@path") {
     // https://www.rfc-editor.org/rfc/rfc9421.html#content-request-path
     return request_url.path();
   } else if (component == "@status") {
@@ -496,8 +512,8 @@ std::optional<std::string> ConstructSignatureBase(
       // SRI requires the `sf` parameter, which forces strict serialization for
       // structured fields.
       if (component->params.size() != 1u ||
-          component->params[0] !=
-              Parameters::kStrictStructuredFieldSerialization) {
+          !component->params.contains(
+              Parameters::kStrictStructuredFieldSerialization)) {
         return std::nullopt;
       }
 

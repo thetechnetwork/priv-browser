@@ -143,9 +143,9 @@ class SRIMessageSignatureParserTest : public testing::Test {
     ASSERT_EQ(1u, sig->components.size());
     EXPECT_EQ("unencoded-digest", sig->components[0]->name);
     ASSERT_EQ(1u, sig->components[0]->params.size());
-    EXPECT_EQ(mojom::SRIMessageSignatureComponent::Parameter::
-                  kStrictStructuredFieldSerialization,
-              sig->components[0]->params[0]);
+    EXPECT_TRUE(sig->components[0]->params.contains(
+        mojom::SRIMessageSignatureComponent::Parameter::
+            kStrictStructuredFieldSerialization));
   }
 };
 
@@ -424,6 +424,12 @@ TEST_F(SRIMessageSignatureParserTest, MalformedSignatureInputComponents) {
        mojom::SRIMessageSignatureError::
            kSignatureInputHeaderInvalidDerivedComponentParameter},
       {"signature=(\"@path\" \"unencoded-digest\";sf)",
+       mojom::SRIMessageSignatureError::
+           kSignatureInputHeaderInvalidDerivedComponentParameter},
+      {"signature=(\"@status\";req \"unencoded-digest\";sf)",
+       mojom::SRIMessageSignatureError::
+           kSignatureInputHeaderInvalidDerivedComponentParameter},
+      {"signature=(\"unencoded-digest\";sf \"@status\";req)",
        mojom::SRIMessageSignatureError::
            kSignatureInputHeaderInvalidDerivedComponentParameter},
       {"signature=(\"unencoded-digest\";sf token;req)",
@@ -822,6 +828,43 @@ TEST_F(SRIMessageSignatureBaseTest, ValidHeadersStrictlySerializedBase) {
   }
 }
 
+TEST_F(SRIMessageSignatureBaseTest, QueryComponent) {
+  struct {
+    std::string_view url;
+    std::string_view query;
+  } cases[] = {
+      {"https://url.test/", "?"},
+      {"https://url.test/?a", "?a"},
+      {"https://url.test/?a=b", "?a=b"},
+      {"https://url.test/?a=%2F", "?a=%2F"},
+      {"https://url.test/?a=ü", "?a=%C3%BC"},
+  };
+  for (const auto& test : cases) {
+    SCOPED_TRACE(test.url);
+
+    std::string input_header =
+        base::StrCat({"signature=(\"unencoded-digest\";sf \"@query\";req);",
+                      "keyid=\"", kPublicKey, "\";tag=\"sri\""});
+
+    std::stringstream expected_base;
+    expected_base
+        << "\"unencoded-digest\";sf: " << kValidDigestHeader << '\n'
+        << "\"@query\";req: " << test.query << '\n'
+        << "\"@signature-params\": (\"unencoded-digest\";sf \"@query\";req);"
+        << "keyid=\"" << kPublicKey << "\";tag=\"sri\"";
+
+    auto headers = ValidHeadersPlusInput(input_header.c_str());
+    auto parsed = ParseSRIMessageSignaturesFromHeaders(*headers);
+    ASSERT_EQ(1u, parsed->signatures.size());
+    EXPECT_EQ(0u, parsed->errors.size());
+
+    std::optional<std::string> result =
+        ConstructSignatureBase(parsed->signatures[0], GURL(test.url), *headers);
+    ASSERT_TRUE(result.has_value());
+    EXPECT_EQ(expected_base.str(), result.value());
+  }
+}
+
 TEST_F(SRIMessageSignatureBaseTest, PathComponent) {
   struct {
     std::string_view url;
@@ -874,22 +917,23 @@ TEST_F(SRIMessageSignatureBaseTest, StatusComponent) {
       continue;
     }
 
-    SCOPED_TRACE(i);
+    SCOPED_TRACE(testing::Message() << "Status code: " << i);
 
     std::string input_header =
-        base::StrCat({"signature=(\"unencoded-digest\";sf \"@status\";req);",
+        base::StrCat({"signature=(\"unencoded-digest\";sf \"@status\");",
                       "keyid=\"", kPublicKey, "\";tag=\"sri\""});
 
     std::stringstream expected_base;
     expected_base
         << "\"unencoded-digest\";sf: " << kValidDigestHeader << '\n'
-        << "\"@status\";req: " << *test_code << '\n'
-        << "\"@signature-params\": (\"unencoded-digest\";sf \"@status\";req);"
+        << "\"@status\": " << *test_code << '\n'
+        << "\"@signature-params\": (\"unencoded-digest\";sf \"@status\");"
         << "keyid=\"" << kPublicKey << "\";tag=\"sri\"";
 
     auto headers =
         ValidHeadersPlusInputAndStatus(input_header.c_str(), *test_code);
     auto parsed = ParseSRIMessageSignaturesFromHeaders(*headers);
+
     ASSERT_EQ(1u, parsed->signatures.size());
     EXPECT_EQ(0u, parsed->errors.size());
 

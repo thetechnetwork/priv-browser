@@ -1702,7 +1702,7 @@ ScrollMarkerPseudoElement* Element::FindScrollMarkerForTargetedScroll() {
       // |dom_marker| is the preferred scroll marker. Otherwise the
       // scroll-marker belonging to the ::column is preferred.
       LayoutBox* dom_marker_box =
-          dom_marker->UltimateOriginatingElement()->GetLayoutBox();
+          dom_marker->UltimateOriginatingElement().GetLayoutBox();
       PhysicalRect dom_search_target_rect = dom_marker_box->LocalToAncestorRect(
           dom_marker_box->PhysicalBorderBoxRect(), containing_box);
       if (current_scroll_area) {
@@ -1727,7 +1727,7 @@ void Element::ScrollIntoViewNoVisualUpdate(
   LayoutObject* target = nullptr;
   auto* pseudo_element = DynamicTo<PseudoElement>(this);
   if (pseudo_element) {
-    originating_element = pseudo_element->UltimateOriginatingElement();
+    originating_element = &pseudo_element->UltimateOriginatingElement();
     if (pseudo_element->parentNode()->IsColumnPseudoElement()) {
       // The originating element of a ::column is a multicol container. See if
       // it also is the scrollable container that is to be scrolled, or if it's
@@ -3760,6 +3760,9 @@ const ComputedStyle* Element::StyleForLayoutObject(
       context = &EnsureDisplayLockContext();
     }
     context->SetRequestedState(style->ContentVisibility());
+    context->SetHasScrollerWithScrollMarkerGroup(
+        style_recalc_context
+            .has_scroller_ancestor_with_scroll_marker_group_property);
     style = context->AdjustElementStyle(style);
   }
 
@@ -4365,6 +4368,20 @@ StyleRecalcChange Element::RecalcOwnStyle(
       (old_style && new_style &&
        old_style->ContainsStyle() != new_style->ContainsStyle())) {
     GetDocument().GetStyleEngine().MarkCountersDirty();
+  }
+
+  bool old_style_has_scroll_marker_group =
+      old_style && !old_style->ScrollMarkerGroupNone();
+  bool new_style_has_scroll_marker_group =
+      new_style && !new_style->ScrollMarkerGroupNone();
+  // If the scroll-marker-group and there may be content-visibility: auto locked
+  // locks, then we need to recurse. If there are non-locked content-visibility:
+  // auto locks we'll reach those when the lock gets acquired again.
+  if (old_style_has_scroll_marker_group != new_style_has_scroll_marker_group &&
+      GetDocument().GetDisplayLockDocumentState().LockedDisplayLockCount() >
+          0 &&
+      GetDocument().GetDisplayLockDocumentState().HasActivatableLocks()) {
+    child_change = child_change.ForceRecalcDescendantContentVisibility();
   }
 
   // Update style containment tree if the style containment of the element
@@ -8858,7 +8875,7 @@ const ComputedStyle* Element::StyleForPseudoElement(
       }
       Element* originating_element_or_self =
           IsPseudoElement()
-              ? To<PseudoElement>(this)->UltimateOriginatingElement()
+              ? &To<PseudoElement>(this)->UltimateOriginatingElement()
               : this;
       if (auto* quote =
               DynamicTo<HTMLQuoteElement>(originating_element_or_self)) {
@@ -11242,7 +11259,7 @@ Element* Element::ImplicitAnchorElement() const {
       case kPseudoIdScrollButtonInlineEnd:
       case kPseudoIdScrollButtonBlockEnd:
         return pseudo_element->UltimateOriginatingElement()
-            ->ImplicitAnchorElement();
+            .ImplicitAnchorElement();
       default:
         return nullptr;
     }

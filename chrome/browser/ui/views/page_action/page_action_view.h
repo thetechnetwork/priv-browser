@@ -5,6 +5,7 @@
 #ifndef CHROME_BROWSER_UI_VIEWS_PAGE_ACTION_PAGE_ACTION_VIEW_H_
 #define CHROME_BROWSER_UI_VIEWS_PAGE_ACTION_PAGE_ACTION_VIEW_H_
 
+#include "base/functional/callback.h"
 #include "base/memory/raw_ptr.h"
 #include "base/scoped_observation.h"
 #include "chrome/browser/ui/views/location_bar/icon_label_bubble_view.h"
@@ -12,6 +13,10 @@
 #include "ui/actions/actions.h"
 #include "ui/events/event.h"
 #include "ui/views/view.h"
+
+namespace ui {
+class MouseEvent;
+}  // namespace ui
 
 namespace page_actions {
 
@@ -26,7 +31,9 @@ class PageActionView : public IconLabelBubbleView,
   METADATA_HEADER(PageActionView, IconLabelBubbleView)
  public:
   PageActionView(actions::ActionItem* action_item,
-                 const PageActionViewParams& params);
+                 const PageActionViewParams& params,
+                 base::RepeatingCallback<void(actions::ActionId, bool)>
+                     chip_state_changed_callback);
   PageActionView(const PageActionView&) = delete;
   PageActionView& operator=(const PageActionView&) = delete;
   ~PageActionView() override;
@@ -54,6 +61,8 @@ class PageActionView : public IconLabelBubbleView,
   bool ShouldUpdateInkDropOnClickCanceled() const override;
   void NotifyClick(const ui::Event& event) override;
   gfx::Size GetMinimumSize() const override;
+  bool OnMousePressed(const ui::MouseEvent& event) override;
+  void OnClickCanceled(const ui::Event& event) override;
 
   actions::ActionId GetActionId() const;
 
@@ -80,6 +89,20 @@ class PageActionView : public IconLabelBubbleView,
 
   const int icon_size_;
   const gfx::Insets icon_insets_;
+
+  // Helps to notify to the parent container that this child chip state has
+  // changed.
+  const base::RepeatingCallback<void(actions::ActionId, bool)>
+      chip_state_changed_callback_;
+
+  // Indicates that the current page action is showing as a suggestion chip.
+  bool showing_suggestion_chip_ = false;
+
+  // Used to track whether the mouse was pressed when associated ephemeral UI
+  // (eg. a bubble that closes on focus loss) was showing, to avoid
+  // re-triggering the action if so. This is necessary because the bubble will
+  // have closed by the time the view invokes the action on button click.
+  bool skip_action_invocation_ = false;
 };
 
 }  // namespace page_actions

@@ -11,9 +11,18 @@
 
 namespace autofill {
 class EntityInstance;
+class EntityType;
 }  // namespace autofill
 
 namespace extensions::autofill_ai_util {
+
+// Returns the i18n string representation of "Add <entity>". For example, for a
+// passport for "en-US", this function should return "Add passport".
+std::string GetAddEntityStringForI18n(autofill::EntityType entity_type);
+
+// Returns the i18n string representation of "Edit <entity>". For example, for a
+// passport for "en-US", this function should return "Edit passport".
+std::string GetEditEntityStringForI18n(autofill::EntityType entity_type);
 
 // Converts an `api::autofill_private::EntityInstance` object to an
 // `autofill::EntityInstance` object. Returns `std::nullopt` if one of the
@@ -25,6 +34,12 @@ PrivateApiEntityInstanceToEntityInstance(
 // Converts an `autofill::EntityInstance` object to an
 // `api::autofill_private::EntityInstance` object.
 api::autofill_private::EntityInstance EntityInstanceToPrivateApiEntityInstance(
+    const autofill::EntityInstance& entity_instance);
+
+// Converts an `autofill::EntityInstance` object to an
+// `api::autofill_private::EntityInstanceWithLabels` object.
+api::autofill_private::EntityInstanceWithLabels
+EntityInstanceToPrivateApiEntityInstanceWithLabels(
     const autofill::EntityInstance& entity_instance);
 
 }  // namespace extensions::autofill_ai_util

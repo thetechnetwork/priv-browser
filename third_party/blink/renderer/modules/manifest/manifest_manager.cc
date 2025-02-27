@@ -283,6 +283,8 @@ void ManifestManager::ParseManifestFromPage(const KURL& document_url,
   CHECK(!result.manifest().scope.IsEmpty() &&
         result.manifest().scope.IsValid());
 
+  // At this point, the manifest is validly parsed, and is not the default one.
+  UseCounter::CountWebDXFeature(GetSupplementable(), WebDXFeature::kManifest);
   RecordMetrics(result.manifest());
   ResolveCallbacks(std::move(result));
 }
@@ -310,6 +312,16 @@ void ManifestManager::RecordMetrics(const mojom::blink::Manifest& manifest) {
   if (!manifest.scope_extensions.empty()) {
     UseCounter::Count(GetSupplementable(),
                       WebFeature::kWebAppManifestScopeExtensions);
+  }
+
+  if (!manifest.share_target.is_null()) {
+    UseCounter::CountWebDXFeature(GetSupplementable(),
+                                  WebDXFeature::kAppShareTargets);
+  }
+
+  if (!manifest.shortcuts.empty()) {
+    UseCounter::CountWebDXFeature(GetSupplementable(),
+                                  WebDXFeature::kAppShortcuts);
   }
 
   for (const mojom::blink::DisplayMode& display_override :

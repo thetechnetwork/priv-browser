@@ -58,6 +58,7 @@
 #include "ash/wm/window_dimmer.h"
 #include "ash/wm/work_area_insets.h"
 #include "base/check.h"
+#include "base/check_op.h"
 #include "base/functional/bind.h"
 #include "base/functional/callback.h"
 #include "base/functional/callback_helpers.h"
@@ -1530,19 +1531,35 @@ ActionButtonView* CaptureModeSession::AddActionButton(
 }
 
 void CaptureModeSession::AddSmartActionsButton() {
-  if (active_behavior_->CanShowSmartActionsButton() &&
-      !controller_->IsNetworkConnectionOffline()) {
+  // This should only be called from the default behavior.
+  // This method is only called from `DefaultBehavior::OnRegionSelected…` and
+  // `CaptureModeController::OnTextDetectionComplete`, which should only be
+  // called by the default behavior, and early returns if the session changes
+  // via `image_search_token`.
+  CHECK_EQ(active_behavior_->behavior_type(), BehaviorType::kDefault);
+
+  if (!ScannerController::CanShowUiForShell()) {
     RecordScannerFeatureUserState(
-        ScannerFeatureUserState::kScreenCaptureModeScannerButtonShown);
-    // TODO(crbug.com/375967525): Finalize and translate the smart actions
-    // button text.
-    AddActionButton(
-        base::BindRepeating(&CaptureModeSession::OnSmartActionsButtonPressed,
-                            weak_ptr_factory_.GetWeakPtr()),
-        u"More actions", /*icon=*/nullptr,
-        ActionButtonRank{ActionButtonType::kScanner, /*weight=*/0},
-        ActionButtonViewID::kSmartActionsButton);
+        ScannerFeatureUserState::
+            kSmartActionsButtonNotShownDueToCanShowUiFalse);
+    return;
   }
+
+  if (controller_->IsNetworkConnectionOffline()) {
+    RecordScannerFeatureUserState(
+        ScannerFeatureUserState::kSmartActionsButtonNotShownDueToOffline);
+    return;
+  }
+
+  RecordScannerFeatureUserState(
+      ScannerFeatureUserState::kScreenCaptureModeScannerButtonShown);
+  AddActionButton(
+      base::BindRepeating(&CaptureModeSession::OnSmartActionsButtonPressed,
+                          weak_ptr_factory_.GetWeakPtr()),
+      l10n_util::GetStringUTF16(IDS_ASH_SCANNER_SMART_ACTIONS_BUTTON_LABEL),
+      /*icon=*/nullptr,
+      ActionButtonRank{ActionButtonType::kScanner, /*weight=*/0},
+      ActionButtonViewID::kSmartActionsButton);
 }
 
 void CaptureModeSession::MaybeShowScannerDisclaimer(

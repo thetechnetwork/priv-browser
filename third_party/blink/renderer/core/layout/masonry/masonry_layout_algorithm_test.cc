@@ -33,8 +33,12 @@ class MasonryLayoutAlgorithmTest : public BaseLayoutAlgorithmTest {
 
   const GridRangeVector& Ranges() { return grid_axis_tracks_->ranges_; }
   wtf_size_t SetCount() { return grid_axis_tracks_->GetSetCount(); }
-  wtf_size_t MasonryItemCount() { return masonry_items_.Size(); }
-  wtf_size_t VirtualItemCount() { return virtual_masonry_items_.Size(); }
+  wtf_size_t VirtualItemCount() {
+    return virtual_masonry_items_ ? virtual_masonry_items_->Size() : 0;
+  }
+  wtf_size_t MasonryItemCount() {
+    return masonry_items_ ? masonry_items_->Size() : 0;
+  }
 
   LayoutUnit TrackSize(wtf_size_t index) {
     return grid_axis_tracks_->GetSetOffset(index + 1) -
@@ -50,40 +54,42 @@ class MasonryLayoutAlgorithmTest : public BaseLayoutAlgorithmTest {
   }
 
   const GridSpan& VirtualItemSpan(wtf_size_t index) {
-    return virtual_masonry_items_.At(index).resolved_position.Span(
+    return virtual_masonry_items_->At(index).resolved_position.Span(
         grid_axis_tracks_->Direction());
   }
 
   const GridSpan& MasonryItemSpan(wtf_size_t index) {
-    return masonry_items_.At(index).resolved_position.Span(
+    return masonry_items_->At(index).resolved_position.Span(
         grid_axis_tracks_->Direction());
   }
 
  private:
   const MinMaxSizes& ContributionSizes(wtf_size_t index) {
     const auto& contribution_sizes =
-        virtual_masonry_items_.At(index).contribution_sizes;
+        virtual_masonry_items_->At(index).contribution_sizes;
 
     DCHECK(contribution_sizes);
     return *contribution_sizes;
   }
 
   std::unique_ptr<GridSizingTrackCollection> grid_axis_tracks_;
-  // Virtual items represent the contributions of item groups in the track
-  // sizing algorithm.
-  GridItems virtual_masonry_items_;
+
+  // Virtual items represent the contributions of item groups in track sizing
+  // and are not directly related to any children of the container.
+  Persistent<GridItems> virtual_masonry_items_;
+
   // Children of the container to be laid out are represented by masonry items.
-  GridItems masonry_items_;
+  Persistent<GridItems> masonry_items_;
 };
 
-TEST_F(MasonryLayoutAlgorithmTest, BuildTrackSizesAndMasonryItems) {
+TEST_F(MasonryLayoutAlgorithmTest, BuildMasonryItems) {
   LoadAhem();
   SetBodyInnerHTML(R"HTML(
     <style>
-      #masonry {
-        display: masonry;
-        masonry-template-tracks: 5% repeat(3, 10px 15%) repeat(1, 15px 5px 20px);
-      }
+    #masonry {
+      display: masonry;
+      masonry-template-tracks: 5% repeat(3, 10px 15%) repeat(1, 15px 5px 20px);
+    }
     </style>
     <div id="masonry">
       <div>1</div>
@@ -104,10 +110,9 @@ TEST_F(MasonryLayoutAlgorithmTest, BuildTrackSizesAndMasonryItems) {
 
   const auto fragment_geometry =
       CalculateInitialFragmentGeometry(space, node, /*break_token=*/nullptr);
-
   MasonryLayoutAlgorithm algorithm({node, fragment_geometry, space});
-  EXPECT_EQ(MasonryItemCount(), 0U);
 
+  EXPECT_EQ(MasonryItemCount(), 0U);
   ComputeGeometry(algorithm);
   EXPECT_EQ(MasonryItemCount(), 5U);
 

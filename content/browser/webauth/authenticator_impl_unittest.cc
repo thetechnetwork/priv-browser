@@ -63,6 +63,7 @@
 #include "content/browser/webauth/client_data_json.h"
 #include "content/browser/webauth/virtual_authenticator.h"
 #include "content/browser/webauth/virtual_authenticator_manager_impl.h"
+#include "content/browser/webauth/webauth_request_security_checker.h"
 #include "content/public/browser/authenticator_request_client_delegate.h"
 #include "content/public/browser/content_browser_client.h"
 #include "content/public/browser/render_frame_host.h"
@@ -241,7 +242,7 @@ typedef struct {
   AuthenticatorStatus expected_status;
 } OriginClaimedAuthorityPair;
 
-const auto kValidRpTestCases = std::to_array<OriginClaimedAuthorityPair>({
+constexpr auto kValidRpTestCases = std::to_array<OriginClaimedAuthorityPair>({
     {"http://localhost", "localhost", AuthenticatorStatus::SUCCESS},
     {"https://myawesomedomain", "myawesomedomain",
      AuthenticatorStatus::SUCCESS},
@@ -270,7 +271,7 @@ const auto kValidRpTestCases = std::to_array<OriginClaimedAuthorityPair>({
      AuthenticatorStatus::SUCCESS},
 });
 
-const auto kInvalidRpTestCases = std::to_array<OriginClaimedAuthorityPair>({
+constexpr auto kInvalidRpTestCases = std::to_array<OriginClaimedAuthorityPair>({
     {"https://google.com", "com", AuthenticatorStatus::BAD_RELYING_PARTY_ID},
     {"http://google.com", "google.com", AuthenticatorStatus::INVALID_DOMAIN},
     {"http://myawesomedomain", "myawesomedomain",
@@ -620,6 +621,9 @@ class AuthenticatorTestBase : public RenderViewHostTestHarness {
   void SetUp() override {
     RenderViewHostTestHarness::SetUp();
 
+    WebAuthRequestSecurityChecker::UseSystemSharedURLLoaderFactoryForTesting() =
+        true;
+
     mojo::SetDefaultProcessErrorHandler(base::BindRepeating(
         &AuthenticatorTestBase::OnMojoError, base::Unretained(this)));
 
@@ -645,6 +649,8 @@ class AuthenticatorTestBase : public RenderViewHostTestHarness {
 
   void TearDown() override {
     RenderViewHostTestHarness::TearDown();
+    WebAuthRequestSecurityChecker::UseSystemSharedURLLoaderFactoryForTesting() =
+        false;
 
     mojo::SetDefaultProcessErrorHandler(base::NullCallback());
 
@@ -1128,22 +1134,6 @@ TEST_F(AuthenticatorImplTest,
 }
 
 TEST_F(AuthenticatorImplTest,
-       GetClientCapabilities_HybridTransport_BluetoothDisabled) {
-  network::ParsedPermissionsPolicy permissions_policy(1);
-  permissions_policy[0].feature =
-      network::mojom::PermissionsPolicyFeature::kBluetooth;
-  // Simulate navigating to a page with this Permissions Policy.
-  auto navigation_simulator = NavigationSimulator::CreateRendererInitiated(
-      GURL(kTestOrigin1), main_rfh());
-  navigation_simulator->SetPermissionsPolicyHeader(permissions_policy);
-  navigation_simulator->Commit();
-
-  EXPECT_CALL(*mock_adapter_, IsPresent()).Times(0);
-  ClientCapabilitiesList capabilities = AuthenticatorGetClientCapabilities();
-  ExpectCapability(capabilities, client_capabilities::kHybridTransport, false);
-}
-
-TEST_F(AuthenticatorImplTest,
        GetClientCapabilities_HybridTransport_LowEnergyNotSupported) {
   SetBluetoothLESupported(false);
 
@@ -1256,7 +1246,7 @@ TEST_F(AuthenticatorImplTest, ReportOriginAndRpIds) {
   }
 }
 
-const auto kValidAppIdCases = std::to_array<OriginClaimedAuthorityPair>({
+constexpr auto kValidAppIdCases = std::to_array<OriginClaimedAuthorityPair>({
     {"https://example.com", "https://example.com",
      AuthenticatorStatus::SUCCESS},
     {"https://www.example.com", "https://example.com",

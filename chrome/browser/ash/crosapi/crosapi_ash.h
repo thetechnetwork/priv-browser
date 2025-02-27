@@ -57,7 +57,6 @@ class DeviceAttributesAsh;
 class DeviceLocalAccountExtensionServiceAsh;
 class DeviceOAuth2TokenServiceAsh;
 class DocumentScanAsh;
-class DownloadControllerAsh;
 class DriveIntegrationServiceAsh;
 class EchoPrivateAsh;
 class EmbeddedAccessibilityHelperClientAsh;
@@ -98,7 +97,6 @@ class RemotingAsh;
 class ResourceManagerAsh;
 class ScreenAIDownloaderAsh;
 class StructuredMetricsServiceAsh;
-class SuggestionServiceAsh;
 class VpnServiceAsh;
 class WebKioskServiceAsh;
 class VirtualKeyboardAsh;
@@ -156,8 +154,6 @@ class CrosapiAsh : public mojom::Crosapi {
       mojo::PendingReceiver<mojom::DiagnosticsService> receiver) override;
   void BindDocumentScan(
       mojo::PendingReceiver<mojom::DocumentScan> receiver) override;
-  void BindDownloadController(
-      mojo::PendingReceiver<mojom::DownloadController> receiver) override;
   void BindDriveIntegrationService(
       mojo::PendingReceiver<mojom::DriveIntegrationService> receiver) override;
   void BindEchoPrivate(
@@ -270,8 +266,6 @@ class CrosapiAsh : public mojom::Crosapi {
   void BindStructuredMetricsService(
       ::mojo::PendingReceiver<::crosapi::mojom::StructuredMetricsService>
           receiver) override;
-  void BindSuggestionService(
-      mojo::PendingReceiver<mojom::SuggestionService> receiver) override;
   void BindTelemetryDiagnosticRoutinesService(
       mojo::PendingReceiver<mojom::TelemetryDiagnosticRoutinesService> receiver)
       override;
@@ -323,10 +317,6 @@ class CrosapiAsh : public mojom::Crosapi {
   }
 
   DocumentScanAsh* document_scan_ash() { return document_scan_ash_.get(); }
-
-  DownloadControllerAsh* download_controller_ash() {
-    return download_controller_ash_.get();
-  }
 
   EchoPrivateAsh* echo_private_ash() { return echo_private_ash_.get(); }
 
@@ -421,10 +411,6 @@ class CrosapiAsh : public mojom::Crosapi {
     return structured_metrics_service_ash_.get();
   }
 
-  SuggestionServiceAsh* suggestion_service_ash() {
-    return suggestion_service_ash_.get();
-  }
-
   WebKioskServiceAsh* web_kiosk_service_ash() {
     return web_kiosk_service_ash_.get();
   }
@@ -459,7 +445,6 @@ class CrosapiAsh : public mojom::Crosapi {
   std::unique_ptr<DeviceOAuth2TokenServiceAsh> device_oauth2_token_service_ash_;
   std::unique_ptr<ash::DiagnosticsServiceAsh> diagnostics_service_ash_;
   std::unique_ptr<DocumentScanAsh> document_scan_ash_;
-  std::unique_ptr<DownloadControllerAsh> download_controller_ash_;
   std::unique_ptr<DriveIntegrationServiceAsh> drive_integration_service_ash_;
   std::unique_ptr<EchoPrivateAsh> echo_private_ash_;
   std::unique_ptr<EmbeddedAccessibilityHelperClientAsh>
@@ -514,7 +499,6 @@ class CrosapiAsh : public mojom::Crosapi {
       print_preview_webcontents_adapter_ash_;
   std::unique_ptr<ScreenAIDownloaderAsh> screen_ai_downloader_ash_;
   std::unique_ptr<StructuredMetricsServiceAsh> structured_metrics_service_ash_;
-  std::unique_ptr<SuggestionServiceAsh> suggestion_service_ash_;
   std::unique_ptr<ash::VideoConferenceManagerAsh> video_conference_manager_ash_;
   std::unique_ptr<VirtualKeyboardAsh> virtual_keyboard_ash_;
   std::unique_ptr<VpnServiceAsh> vpn_service_ash_;

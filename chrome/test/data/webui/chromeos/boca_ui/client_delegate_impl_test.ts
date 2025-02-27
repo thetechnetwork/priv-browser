@@ -7,30 +7,35 @@ import type {Assignment, BocaValidPref, CaptionConfig, Config, Course, EndViewSc
 import {PageHandlerRemote, SubmitAccessCodeError} from 'chrome-untrusted://boca-app/mojom/boca.mojom-webui.js';
 import type {TimeDelta} from 'chrome-untrusted://resources/mojo/mojo/public/mojom/base/time.mojom-webui.js';
 import type {Value} from 'chrome-untrusted://resources/mojo/mojo/public/mojom/base/values.mojom-webui.js';
-import type {Url} from 'chrome-untrusted://resources/mojo/url/mojom/url.mojom-webui.js';
 import {assertDeepEquals, assertTrue} from 'chrome-untrusted://webui-test/chai_assert.js';
 
 class MockRemoteHandler extends PageHandlerRemote {
   override getWindowsTabsList(): Promise<{windowList: Window[]}> {
-    const url1: Url = {
-      url: 'http://foo1',
-    };
-    const url2: Url = {
-      url: 'http://foo2',
-    };
-    const url3: Url = {
-      url: 'http://foo3',
-    };
     return Promise.resolve({
       windowList: [
         {
           name: 'window1',
           tabList: [
-            {title: 'title1', url: url1, favicon: 'dataurl1'},
-            {title: 'title2', url: url2, favicon: 'dataurl2'},
+            {
+              id: 1,
+              title: 'title1',
+              url: {url: 'http://foo1'},
+              favicon: {url: 'dataurl1'},
+            },
+            {
+              title: 'title2',
+              url: {url: 'http://foo2'},
+              favicon: {url: 'dataurl2'},
+            },
           ],
         },
-        {tabList: [{title: 'title3', url: url3, favicon: 'dataurl3'}]},
+        {
+          tabList: [{
+            title: 'title3',
+            url: {url: 'http://foo3'},
+            favicon: {url: 'dataurl3'},
+          }],
+        },
       ] as Window[],
     });
   }
@@ -111,17 +116,19 @@ class MockRemoteHandler extends PageHandlerRemote {
             tabs: [
               {
                 tab: {
+                  id: null,
                   url: {url: 'http://google.com/'},
                   title: 'google',
-                  favicon: 'data/image',
+                  favicon: {url: 'data/image'},
                 },
                 navigationType: 0,
               },
               {
                 tab: {
+                  id: null,
                   url: {url: 'http://youtube.com/'},
                   title: 'youtube',
-                  favicon: 'data/image',
+                  favicon: {url: 'data/image'},
                 },
                 navigationType: 1,
               },
@@ -178,17 +185,19 @@ class MockRemoteHandler extends PageHandlerRemote {
               tabs: [
                 {
                   tab: {
+                    id: 1,
                     url: {url: 'http://google.com/'},
                     title: 'google',
-                    favicon: 'data/image',
+                    favicon: {url: 'data/image'},
                   },
                   navigationType: 0,
                 },
                 {
                   tab: {
+                    id: null,
                     url: {url: 'http://youtube.com/'},
                     title: 'youtube',
-                    favicon: 'data/image',
+                    favicon: {url: 'data/image'},
                   },
                   navigationType: 1,
                 },
@@ -214,17 +223,19 @@ class MockRemoteHandler extends PageHandlerRemote {
           tabs: [
             {
               tab: {
+                id: null,
                 url: {url: 'http://google.com/'},
                 title: 'google',
-                favicon: 'data/image',
+                favicon: {url: 'data/image'},
               },
               navigationType: 0,
             },
             {
               tab: {
+                id: null,
                 url: {url: 'http://youtube.com/'},
                 title: 'youtube',
-                favicon: 'data/image',
+                favicon: {url: 'data/image'},
               },
               navigationType: 1,
             },
@@ -307,6 +318,9 @@ class MockRemoteHandler extends PageHandlerRemote {
     tabId;
     return Promise.resolve({success: true});
   }
+  override openFeedbackDialog() {
+    return Promise.resolve();
+  }
 }
 
 suite('ClientDelegateTest', function() {
@@ -322,21 +336,35 @@ suite('ClientDelegateTest', function() {
       async () => {
         const result =
             await clientDelegateImpl.getInstance().getWindowsTabsList();
-
         assertDeepEquals(
             [
               {
                 windowName: 'window1',
                 tabList: [
-                  {title: 'title1', url: 'http://foo1', favicon: 'dataurl1'},
-                  {title: 'title2', url: 'http://foo2', favicon: 'dataurl2'},
+                  {
+                    id: 1,
+                    title: 'title1',
+                    url: 'http://foo1',
+                    favicon: 'dataurl1',
+                  },
+                  {
+                    id: undefined,
+                    title: 'title2',
+                    url: 'http://foo2',
+                    favicon: 'dataurl2',
+                  },
                 ],
               },
               {
                 // Default window name should be empty
                 windowName: '',
                 tabList: [
-                  {title: 'title3', url: 'http://foo3', favicon: 'dataurl3'},
+                  {
+                    id: undefined,
+                    title: 'title3',
+                    url: 'http://foo3',
+                    favicon: 'dataurl3',
+                  },
                 ],
               },
             ],
@@ -478,6 +506,7 @@ suite('ClientDelegateTest', function() {
               tabs: [
                 {
                   tab: {
+                    id: 1,
                     title: 'google',
                     url: 'http://google.com/',
                     favicon: 'data/image',
@@ -486,6 +515,7 @@ suite('ClientDelegateTest', function() {
                 },
                 {
                   tab: {
+                    id: undefined,
                     title: 'youtube',
                     url: 'http://youtube.com/',
                     favicon: 'data/image',
@@ -759,4 +789,14 @@ suite('ClientDelegateTest', function() {
     const result = await clientDelegateImpl.getInstance().closeTab(1);
     assertTrue(result);
   });
+
+  test(
+      'client delegate should respond correctly for open feedback dialog',
+      async () => {
+        let openFeedbackDialogResponded = false;
+        await clientDelegateImpl.getInstance().openFeedbackDialog().then(() => {
+          openFeedbackDialogResponded = true;
+        });
+        assertTrue(openFeedbackDialogResponded);
+      });
 });

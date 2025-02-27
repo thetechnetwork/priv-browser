@@ -25,6 +25,7 @@ ci.defaults.set(
     os = os.WINDOWS_DEFAULT,
     gardener_rotations = gardener_rotations.CHROMIUM,
     tree_closing = True,
+    tree_closing_notifiers = ci.DEFAULT_TREE_CLOSING_NOTIFIERS,
     main_console_view = "main",
     contact_team_email = "chrome-desktop-engprod@google.com",
     execution_timeout = ci.DEFAULT_EXECUTION_TIMEOUT,
@@ -710,6 +711,9 @@ ci.thin_tester(
             "telemetry_unittests": targets.remove(
                 reason = "Disabled on similar Windows testers due to crbug/40622135.",
             ),
+            "webui_resources_tools_python_unittests": targets.remove(
+                reason = "Unneeded; only run on non-cross-compiling bots",
+            ),
         },
     ),
     tree_closing = False,
@@ -958,6 +962,9 @@ ci.builder(
             ),
             "telemetry_unittests": targets.remove(
                 reason = "Shadow Win10 Tests x64.",
+            ),
+            "webui_resources_tools_python_unittests": targets.remove(
+                reason = "Unneeded; only run on non-cross-compiling bots",
             ),
         },
     ),

@@ -2200,16 +2200,11 @@ TEST_F(TabGroupSyncServiceTest, ShouldNotReturnOriginatingTabGroupOnRemoteAdd) {
 TEST_F(TabGroupSyncServiceTest, OnCollaborationRemoved) {
   std::optional<SavedTabGroup> group =
       tab_group_sync_service_->GetGroup(local_group_id_1_);
-  ASSERT_EQ(tab_group_sync_service_->GetAllGroups().size(), 3u);
-  ASSERT_TRUE(model_->Contains(group->saved_guid()));
-
   MakeTabGroupShared(local_group_id_1_, kCollaborationId);
   std::optional<SavedTabGroup> shared_group =
       tab_group_sync_service_->GetGroup(local_group_id_1_);
   ASSERT_TRUE(shared_group->is_shared_tab_group());
   ASSERT_EQ(tab_group_sync_service_->GetAllGroups().size(), 3u);
-  ASSERT_TRUE(model_->Contains(group->saved_guid()));
-  ASSERT_TRUE(model_->Contains(shared_group->saved_guid()));
 
   tab_group_sync_service_->OnCollaborationRemoved(
       syncer::CollaborationId(kCollaborationId));
@@ -2218,10 +2213,6 @@ TEST_F(TabGroupSyncServiceTest, OnCollaborationRemoved) {
   EXPECT_TRUE(shared_group->is_hidden());
 
   EXPECT_EQ(tab_group_sync_service_->GetAllGroups().size(), 2u);
-  // The originating group is cleaned up, but the shared group is
-  // still tracked in model and will be deleted later.
-  EXPECT_FALSE(model_->Contains(group->saved_guid()));
-  EXPECT_TRUE(model_->Contains(shared_group->saved_guid()));
 }
 
 class PinningTabGroupSyncServiceTest : public TabGroupSyncServiceTest {
@@ -2466,6 +2457,7 @@ TEST_F(TabGroupSyncServiceTest, ShouldReturnSavedTabGroupOnly) {
   MakeTabGroupShared(local_group_id_1_, "collaboration");
   ASSERT_THAT(tab_group_sync_service_->GetAllGroups(), SizeIs(3));
   ASSERT_THAT(model_->saved_tab_groups(), SizeIs(4));
+  ASSERT_TRUE(model_->Contains(group->saved_guid()));
   std::optional<SavedTabGroup> shared_group =
       tab_group_sync_service_->GetGroup(local_group_id_1_);
 
@@ -2479,13 +2471,14 @@ TEST_F(TabGroupSyncServiceTest, ShouldReturnSavedTabGroupOnly) {
   std::vector<SavedTabGroup> all_groups =
       tab_group_sync_service_->GetAllGroups();
   EXPECT_THAT(all_groups, SizeIs(3));
-  EXPECT_THAT(model_->saved_tab_groups(), SizeIs(5));
+  EXPECT_THAT(model_->saved_tab_groups(), SizeIs(4));
   EXPECT_THAT(all_groups, Contains(HasGuid(shared_group->saved_guid())));
+  EXPECT_FALSE(model_->Contains(group->saved_guid()));
 
   WaitForPostedTasks();
   all_groups = tab_group_sync_service_->GetAllGroups();
   EXPECT_THAT(all_groups, SizeIs(3));
-  EXPECT_THAT(model_->saved_tab_groups(), SizeIs(5));
+  EXPECT_THAT(model_->saved_tab_groups(), SizeIs(4));
   EXPECT_THAT(all_groups, Not(Contains(HasGuid(shared_group->saved_guid()))));
 }
 

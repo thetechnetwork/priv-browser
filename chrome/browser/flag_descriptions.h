@@ -12,6 +12,7 @@
 #include "build/buildflag.h"
 #include "chrome/common/buildflags.h"
 #include "components/compose/buildflags.h"
+#include "components/enterprise/buildflags/buildflags.h"
 #include "components/nacl/common/buildflags.h"
 #include "components/paint_preview/buildflags/buildflags.h"
 #include "components/signin/public/base/signin_buildflags.h"
@@ -569,9 +570,6 @@ extern const char kGetUserMediaDeferredDeviceSettingsSelectionDescription[];
 extern const char kCanvasHibernationName[];
 extern const char kCanvasHibernationDescription[];
 
-extern const char kCanvasOopRasterizationName[];
-extern const char kCanvasOopRasterizationDescription[];
-
 #if !BUILDFLAG(IS_ANDROID)
 extern const char kCapturedSurfaceControlName[];
 extern const char kCapturedSurfaceControlDescription[];
@@ -677,9 +675,6 @@ extern const char kViewTransitionOnNavigationDescription[];
 
 extern const char kViewTransitionOnNavigationIframeName[];
 extern const char kViewTransitionOnNavigationIframeDescription[];
-
-extern const char kViewTransitionOverflowRectFromSurfaceName[];
-extern const char kViewTransitionOverflowRectFromSurfaceDescription[];
 
 extern const char kEnableAutofillAddressSavePromptName[];
 extern const char kEnableAutofillAddressSavePromptDescription[];
@@ -2108,6 +2103,9 @@ extern const char kToolbarPhoneCleanupDescription[];
 extern const char kCommerceDeveloperName[];
 extern const char kCommerceDeveloperDescription[];
 
+extern const char kDataSharingDebugLogsName[];
+extern const char kDataSharingDebugLogsDescription[];
+
 extern const char kTabGroupsDeferRemoteNavigationsId[];
 extern const char kTabGroupsDeferRemoteNavigationsName[];
 extern const char kTabGroupsDeferRemoteNavigationsDescription[];
@@ -2500,9 +2498,6 @@ extern const char kAndroidOpenPdfInlineBackportDescription[];
 
 extern const char kAndroidPdfAssistContentName[];
 extern const char kAndroidPdfAssistContentDescription[];
-
-extern const char kChromePageInfoSharingName[];
-extern const char kChromePageInfoSharingDescription[];
 
 extern const char kAndroidTabDeclutterName[];
 extern const char kAndroidTabDeclutterDescription[];
@@ -4733,6 +4728,11 @@ extern const char kBatchUploadDesktopName[];
 extern const char kBatchUploadDesktopDescription[];
 #endif
 
+#if BUILDFLAG(ENABLE_DICE_SUPPORT) && BUILDFLAG(ENABLE_EXTENSIONS)
+extern const char kEnableExtensionsExplicitBrowserSigninName[];
+extern const char kEnableExtensionsExplicitBrowserSigninDescription[];
+#endif  // BUILDFLAG(ENABLE_DICE_SUPPORT) && BUILDFLAG(ENABLE_EXTENSIONS)
+
 #if BUILDFLAG(ENABLE_BOUND_SESSION_CREDENTIALS)
 extern const char kEnableBoundSessionCredentialsName[];
 extern const char kEnableBoundSessionCredentialsDescription[];
@@ -4810,6 +4810,11 @@ extern const char kHistoryOptInEntryPointsDescription[];
 extern const char kSupervisedUserForceSigninWithCapabilitiesName[];
 extern const char kSupervisedUserForceSigninWithCapabilitiesDescription[];
 #endif  // BUILDFLAG(IS_ANDROID)
+
+#if BUILDFLAG(ENTERPRISE_CONTENT_ANALYSIS)
+extern const char kEnterpriseFileObfuscationName[];
+extern const char kEnterpriseFileObfuscationDescription[];
+#endif  // BUILDFLAG(ENTERPRISE_CONTENT_ANALYSIS)
 
 // ============================================================================
 // Don't just add flags to the end, put them in the right section in

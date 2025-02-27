@@ -1451,6 +1451,7 @@ interface CanvasRenderingContext2D
     method stroke
     method strokeRect
     method strokeText
+    method strokeTextCluster
     method transferBackFromGPUTexture
     method transferToGPUTexture
     method transform
@@ -6629,7 +6630,6 @@ interface NamedNodeMap
 interface NavigateEvent : Event
     attribute @@toStringTag
     getter canIntercept
-    getter canTransition
     getter destination
     getter downloadRequest
     getter formData
@@ -7097,6 +7097,7 @@ interface OffscreenCanvasRenderingContext2D
     method stroke
     method strokeRect
     method strokeText
+    method strokeTextCluster
     method transferBackFromGPUTexture
     method transferToGPUTexture
     method transform

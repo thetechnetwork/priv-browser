@@ -41,8 +41,10 @@ import java.util.List;
  */
 /*package*/ class AwPaymentRequestService
         implements BrowserPaymentRequest, PaymentResponseHelperInterface, AndroidIntentLauncher {
-    // The following error string is used only in WebView:
+    // The following error strings are only used in WebView:
     private static final String RETRY_DISABLED = "PaymentResponse.retry() is disabled in WebView.";
+    private static final String MORE_THAN_ONE_APP =
+            "WebView supports launching only one payment app at a time.";
 
     @Nullable private PaymentRequestService mPaymentRequestService;
     private final List<PaymentApp> mApps = new ArrayList<>();
@@ -77,15 +79,26 @@ import java.util.List;
         onCompleteHandled.run();
     }
 
+    // BrowserPaymentRequest
+    @Override
+    public boolean disconnectIfNoRetrySupport() {
+        // WebView implementation of PaymentRequest API does not support retrying payments, because
+        // that requires either browser UI or payment handler support. However, WebView is not
+        // supposed to have any UI and Android payment apps do not have support for retrying
+        // payments.
+        if (mPaymentRequestService != null) {
+            mPaymentRequestService.disconnectFromClientWithDebugMessage(
+                    RETRY_DISABLED, PaymentErrorReason.NOT_SUPPORTED);
+        }
+        close();
+        return true; // Indicate that the Mojo IPC connection has been closed.
+    }
+
     // BrowserPaymentRequest:
     @Override
     public void onRetry(PaymentValidationErrors errors) {
-        // No UI in WebView.
-        if (mPaymentRequestService != null) {
-            mPaymentRequestService.disconnectFromClientWithDebugMessage(
-                    RETRY_DISABLED, PaymentErrorReason.INVALID_DATA_FROM_RENDERER);
-        }
-        close();
+        // This code path cannot happen because disconnectIfNoRetrySupport() returned true.
+        assert false;
     }
 
     // BrowserPaymentRequest:
@@ -134,6 +147,12 @@ import java.util.List;
                 || mPaymentRequestService.getSpec() == null
                 || mPaymentRequestService.getSpec().isDestroyed()) {
             return ErrorStrings.INVALID_STATE;
+        }
+
+        if (mApps.size() > 1) {
+            // WebView does not have UI for the user to choose one of their multiple payment apps
+            // that match merchant's PaymentRequest parameters. In this case, abort payment.
+            return MORE_THAN_ONE_APP;
         }
 
         PaymentApp selectedPaymentApp = getSelectedPaymentApp();

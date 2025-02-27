@@ -222,7 +222,7 @@ License File: LICENSE
 CPEPrefix: ${cpePrefix}
 Security Critical: ${securityCritical ? 'yes' : 'no'}
 Shipped: ${dependency.isShipped ? 'yes' : 'no'}
-${dependency.licenseAndroidCompatible ? 'License Android Compatible: yes' : ''}
+${dependency.licenseAndroidCompatible ? 'License Android Compatible: yes\n' : ''}
 Description:
 ${dependency.description}
 
@@ -428,7 +428,11 @@ No modifications.
                 return
             }
 
-            dependencyDirectories.add(depDir)
+            if (project.hasProperty('readmePrefix')) {
+                dependencyDirectories.add(project.readmePrefix + depDir)
+            } else {
+                dependencyDirectories.add(depDir)
+            }
 
             if (new File("${absoluteDepDir}/${dependency.fileName}").exists()) {
                 logger.quiet("${dependency.id} exists, skipping.")
@@ -503,6 +507,8 @@ No modifications.
             description.put('version', dependency.version)
             bom.add(description)
         }
+        // Ensure that the bom order is stable to improve git diffs.
+        bom.sort { d1, d2 -> return "${d1.group}:${d1.name}" <=> "${d2.group}:${d2.name}"}
         return JsonOutput.prettyPrint(JsonOutput.toJson(bom))
     }
 

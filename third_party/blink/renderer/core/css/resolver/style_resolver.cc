@@ -150,6 +150,7 @@ bool IsPseudoElementWithUAStyle(PseudoId pseudo_id) {
     case kPseudoIdScrollButtonInlineStart:
     case kPseudoIdScrollButtonInlineEnd:
     case kPseudoIdScrollButtonBlockEnd:
+    case kPseudoIdScrollMarker:
       return true;
     default:
       return false;
@@ -237,7 +238,7 @@ const Element& UltimateOriginatingElementOrSelf(const Element& element) {
   if (!element.IsPseudoElement()) {
     return element;
   }
-  return *To<PseudoElement>(element).UltimateOriginatingElement();
+  return To<PseudoElement>(element).UltimateOriginatingElement();
 }
 
 bool HasAnimationsOrTransitions(const StyleResolverState& state) {
@@ -2788,7 +2789,8 @@ const CSSValue* StyleResolver::ResolveValue(
     const CSSValue& value) {
   StyleResolverState state(element.GetDocument(), element);
   state.SetStyle(style);
-  return StyleCascade::Resolve(state, property_name, value);
+  return StyleCascade::Resolve(state, property_name, value,
+                               /*tree_scope=*/&element.GetDocument());
 }
 
 FilterOperations StyleResolver::ComputeFilterOperations(

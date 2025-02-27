@@ -32,9 +32,9 @@
 #include "third_party/blink/renderer/core/css/css_color.h"
 #include "third_party/blink/renderer/core/css/css_computed_style_declaration.h"
 #include "third_party/blink/renderer/core/css/css_identifier_value.h"
+#include "third_party/blink/renderer/core/css/css_identifier_value_mappings.h"
 #include "third_party/blink/renderer/core/css/css_numeric_literal_value.h"
 #include "third_party/blink/renderer/core/css/css_primitive_value.h"
-#include "third_party/blink/renderer/core/css/css_primitive_value_mappings.h"
 #include "third_party/blink/renderer/core/css/css_property_value_set.h"
 #include "third_party/blink/renderer/core/css/css_rule_list.h"
 #include "third_party/blink/renderer/core/css/css_style_rule.h"
@@ -795,7 +795,8 @@ static const CSSPropertyID kStaticBlockProperties[] = {
                                // elements
     CSSPropertyID::kColumnCount, CSSPropertyID::kColumnGap,
     CSSPropertyID::kColumnRuleColor, CSSPropertyID::kColumnRuleStyle,
-    CSSPropertyID::kColumnRuleWidth, CSSPropertyID::kWebkitColumnBreakBefore,
+    CSSPropertyID::kColumnRuleWidth, CSSPropertyID::kRowRuleWidth,
+    CSSPropertyID::kWebkitColumnBreakBefore,
     CSSPropertyID::kWebkitColumnBreakAfter,
     CSSPropertyID::kWebkitColumnBreakInside, CSSPropertyID::kColumnWidth,
     CSSPropertyID::kPageBreakAfter, CSSPropertyID::kPageBreakBefore,

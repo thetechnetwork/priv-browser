@@ -146,14 +146,15 @@ void ContextualCueingService::OnNudgeActivity(
       break;
     case tabs::GlicNudgeActivity::kNudgeNotShownWebContents:
       interaction = NudgeInteraction::kNudgeNotShownWebContents;
-      log_ukm = true;
       break;
     case tabs::GlicNudgeActivity::kNudgeIgnoredActiveTabChanged:
       interaction = NudgeInteraction::kIgnoredTabChange;
       log_ukm = true;
       break;
-      // TODO: b/395169951 - Make sure UKM called for ignored nudges due to
-      // navigation changes.
+    case tabs::GlicNudgeActivity::kNudgeIgnoredNavigation:
+      interaction = NudgeInteraction::kIgnoredNavigation;
+      log_ukm = true;
+      break;
   }
   LogNudgeInteractionHistogram(interaction);
   // As this function is called multiple times per nudge only some of the

@@ -13,7 +13,7 @@
 #include "base/check_deref.h"
 #include "base/containers/contains.h"
 #include "base/functional/bind.h"
-#include "components/autofill/core/browser/data_model/bnpl_issuer.h"
+#include "components/autofill/core/browser/data_model/payments/bnpl_issuer.h"
 #include "components/autofill/core/browser/payments/constants.h"
 #include "components/autofill/core/browser/payments/payments_network_interface.h"
 #include "components/autofill/core/browser/payments/payments_request_details.h"
@@ -30,13 +30,9 @@ namespace {
 bool ShouldShowBnplOptionForIssuer(const BnplIssuer& bnpl_issuer,
                                    uint64_t extracted_amount_in_micros) {
   // For MVP, BNPL will only target US users and support USD.
-  if (bnpl_issuer.IsEligibleAmount(extracted_amount_in_micros,
-                                   /*currency=*/"USD") &&
-      base::FeatureList::IsEnabled(features::kAutofillEnableBuyNowPayLater)) {
-    return true;
-  }
-
-  return false;
+  return bnpl_issuer.IsEligibleAmount(extracted_amount_in_micros,
+                                      /*currency=*/"USD") &&
+         base::FeatureList::IsEnabled(features::kAutofillEnableBuyNowPayLater);
 }
 
 }  // namespace
@@ -117,14 +113,13 @@ bool BnplManager::ShouldShowBnplSettingsToggle() const {
   const PaymentsDataManager& payments_data_manager =
       payments_autofill_client().GetPaymentsDataManager();
 
-  // Call `GetBnplIssuers()` only if `IsAutofillHasSeenBnplPrefEnabled()` is
-  // true and a BNPL issuer is present to avoid unnecessary feature flag
-  // checks. Ensures that only relevant sessions are included in BNPL related
-  // A/B experiments. Otherwise, users that navigate to the settings page can
-  // enroll in the experiment, with very little guarantee they will actually use
-  // the BNPL feature.
+  // Check `kAutofillEnableBuyNowPayLater` only if user has seen a BNPL
+  // suggestion before to avoid unnecessary feature flag checks. Ensures that
+  // only relevant sessions are included in BNPL related A/B experiments.
+  // Otherwise, users that navigate to the settings page can enroll in the
+  // experiment, with very little guarantee they will actually use the BNPL
+  // feature.
   return payments_data_manager.IsAutofillHasSeenBnplPrefEnabled() &&
-         !payments_data_manager.GetBnplIssuers().empty() &&
          base::FeatureList::IsEnabled(features::kAutofillEnableBuyNowPayLater);
 #else
   return false;

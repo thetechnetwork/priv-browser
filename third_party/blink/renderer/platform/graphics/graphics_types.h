@@ -40,9 +40,6 @@ class String;
 
 namespace blink {
 
-typedef uintptr_t DisplayItemClientId;
-static const DisplayItemClientId kInvalidDisplayItemClientId = 0u;
-
 using DynamicRangeLimit = ::cc::PaintFlags::DynamicRangeLimitMixture;
 
 enum AlphaDisposition {
@@ -68,15 +65,6 @@ enum ImageEncodingMimeType {
   kMimeTypePng,
   kMimeTypeJpeg,
   kMimeTypeWebp,
-};
-
-enum StrokeStyle {
-  kNoStroke,
-  kSolidStroke,
-  kDottedStroke,
-  kDashedStroke,
-  kDoubleStroke,
-  kWavyStroke,
 };
 
 enum InterpolationQuality {
@@ -131,12 +119,6 @@ enum OpacityMode {
   kOpaque,
 };
 
-enum class RasterEffectOutset : uint8_t {
-  kNone,
-  kHalfPixel,
-  kWholePixel,
-};
-
 // Specifies whether the provider should rasterize paint commands on the CPU
 // or GPU. This is used to support software raster with GPU compositing.
 enum class RasterMode {
@@ -150,12 +132,6 @@ enum class RasterModeHint {
 };
 
 enum AntiAliasingMode { kNotAntiAliased, kAntiAliased };
-
-enum GradientSpreadMethod {
-  kSpreadMethodPad,
-  kSpreadMethodReflect,
-  kSpreadMethodRepeat
-};
 
 enum TextPaintOrder { kFillStroke, kStrokeFill };
 

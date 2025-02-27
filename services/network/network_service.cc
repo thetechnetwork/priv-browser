@@ -41,6 +41,7 @@
 #include "build/chromecast_buildflags.h"
 #include "components/ip_protection/common/ip_protection_telemetry.h"
 #include "components/ip_protection/common/masked_domain_list_manager.h"
+#include "components/ip_protection/common/probabilistic_reveal_token_registry.h"
 #include "components/network_session_configurator/common/network_features.h"
 #include "components/os_crypt/sync/os_crypt.h"
 #include "components/privacy_sandbox/masked_domain_list/masked_domain_list.pb.h"
@@ -486,6 +487,9 @@ void NetworkService::Initialize(mojom::NetworkServiceParamsPtr params,
       std::make_unique<ip_protection::MaskedDomainListManager>(
           params->ip_protection_proxy_bypass_policy);
 
+  probabilistic_reveal_token_registry_ =
+      std::make_unique<ip_protection::ProbabilisticRevealTokenRegistry>();
+
 #if BUILDFLAG(IS_CT_SUPPORTED)
   constexpr size_t kMaxSCTAuditingCacheEntries = 1024;
   sct_auditing_cache_ =
@@ -860,6 +864,9 @@ void NetworkService::ParseHeaders(
     const GURL& url,
     const scoped_refptr<net::HttpResponseHeaders>& headers,
     ParseHeadersCallback callback) {
+  base::ScopedUmaHistogramTimer parse_headers_time(
+      "NetworkService.ParsedHeaders.IPCHandleTime",
+      base::ScopedUmaHistogramTimer::ScopedHistogramTiming::kMicrosecondTimes);
   std::move(callback).Run(PopulateParsedHeaders(headers.get(), url));
 }
 
@@ -956,6 +963,11 @@ void NetworkService::UpdateMaskedDomainListFlatbuffer(
   masked_domain_list_manager_->UpdateMaskedDomainListFlatbuffer(
       std::move(default_file), default_file_size,
       std::move(regular_browsing_file), regular_browsing_file_size);
+}
+
+void NetworkService::UpdateProbabilisticRevealTokenRegistry(
+    base::Value::Dict registry) {
+  probabilistic_reveal_token_registry_->UpdateRegistry(std::move(registry));
 }
 
 #if BUILDFLAG(IS_ANDROID)

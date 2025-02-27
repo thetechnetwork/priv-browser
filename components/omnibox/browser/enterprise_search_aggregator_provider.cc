@@ -5,8 +5,9 @@
 #include "enterprise_search_aggregator_provider.h"
 
 #include <memory>
+#include <optional>
 #include <string>
-#include <string_view>
+#include <utility>
 #include <vector>
 
 #include "base/json/json_reader.h"
@@ -41,7 +42,6 @@ std::string ptr_to_string(const std::string* ptr) {
 }
 
 // Helper for getting the correct TemplateURL based on the input.
-// If the user is in keyword mode, the input should not include the keyword.
 const TemplateURL* AdjustTemplateURL(AutocompleteInput* input,
                                      TemplateURLService* turl_service) {
   DCHECK(turl_service);
@@ -75,6 +75,8 @@ void EnterpriseSearchAggregatorProvider::Start(const AutocompleteInput& input,
        /*due_to_user_inactivity=*/false);
 
   if (!IsProviderAllowed(input)) {
+    // Clear old matches if provider is not allowed.
+    matches_.clear();
     return;
   }
 
@@ -88,28 +90,23 @@ void EnterpriseSearchAggregatorProvider::Start(const AutocompleteInput& input,
     return;
   }
 
+  adjusted_input_ = input;
+  template_url_ = AdjustTemplateURL(&adjusted_input_, template_url_service_);
+  CHECK(template_url_);
+  CHECK(template_url_->policy_origin() ==
+        TemplateURLData::PolicyOrigin::kSearchAggregator);
+
   // There should be no enterprise search suggestions fetched for on-focus
-  // suggestion requests, or if the input is empty.
-  if (input.IsZeroSuggest() ||
-      input.type() == metrics::OmniboxInputType::EMPTY) {
+  // suggestion requests, or if the input is empty. Don't check
+  // `OmniboxInputType::EMPTY` as the input's type isn't updated when keyword
+  // adjusting.
+  // TODO(crbug.com/393480150): Update this check once recent suggestions are
+  //   supported.
+  if (adjusted_input_.IsZeroSuggest() || adjusted_input_.text().empty()) {
+    matches_.clear();
     return;
   }
 
-  // Request will always return 400 error response if the query is empty and
-  // recent suggestions is not the only requested suggestion type. In keyword
-  // mode, always clear matches_.
-  // TODO(crbug.com/393480150): Remove this check once recent suggestions
-  // are supported.
-  if (input.InKeywordMode()) {
-    auto adjusted_input = input;
-    AdjustTemplateURL(&adjusted_input, template_url_service_);
-    if (adjusted_input.text().empty()) {
-      matches_.clear();
-      return;
-    }
-  }
-
-  input_ = input;
   done_ = false;  // Set true in callbacks.
 
   // Unretained is safe because `this` owns `debouncer_`.
@@ -149,8 +146,11 @@ bool EnterpriseSearchAggregatorProvider::IsProviderAllowed(
       static_cast<int>(input.text().length()) <
           omnibox_feature_configs::SearchAggregatorProvider::Get()
               .min_query_length) {
-    // Clear old matches if the query length goes below `min_query_length`.
-    matches_.clear();
+    return false;
+  }
+
+  // Don't run provider if the input is a URL.
+  if (input.type() == metrics::OmniboxInputType::URL) {
     return false;
   }
 
@@ -159,25 +159,17 @@ bool EnterpriseSearchAggregatorProvider::IsProviderAllowed(
 }
 
 void EnterpriseSearchAggregatorProvider::Run() {
-  auto adjusted_input = input_;
-  const TemplateURL* template_url =
-      AdjustTemplateURL(&adjusted_input, template_url_service_);
-
-  CHECK(template_url);
-  CHECK(template_url->policy_origin() ==
-        TemplateURLData::PolicyOrigin::kSearchAggregator);
-
   // Don't clear `matches_` until a new successful response is ready to replace
   // them.
   client_->GetRemoteSuggestionsService(/*create_if_necessary=*/true)
       ->CreateEnterpriseSearchAggregatorSuggestionsRequest(
-          adjusted_input.text(), GURL(template_url->suggestions_url()),
+          adjusted_input_.text(), GURL(template_url_->suggestions_url()),
           base::BindOnce(&EnterpriseSearchAggregatorProvider::RequestStarted,
                          weak_ptr_factory_.GetWeakPtr()),
           base::BindOnce(
               &EnterpriseSearchAggregatorProvider::RequestCompleted,
               base::Unretained(this) /* this owns SimpleURLLoader */),
-          input_.InKeywordMode());
+          adjusted_input_.InKeywordMode());
 }
 
 void EnterpriseSearchAggregatorProvider::RequestStarted(
@@ -253,9 +245,6 @@ void EnterpriseSearchAggregatorProvider::UpdateResults(
 void EnterpriseSearchAggregatorProvider::
     ParseEnterpriseSearchAggregatorSearchResults(
         const base::Value::Dict& root_val) {
-  const TemplateURL* template_url =
-      template_url_service_->GetEnterpriseSearchAggregatorEngine();
-
   // Parse the results.
   const base::Value::List* queryResults = root_val.FindList("querySuggestions");
   const base::Value::List* peopleResults =
@@ -263,23 +252,22 @@ void EnterpriseSearchAggregatorProvider::
   const base::Value::List* contentResults =
       root_val.FindList("contentSuggestions");
 
-  ParseResultList(queryResults, template_url,
+  ParseResultList(queryResults,
                   /*suggestion_type=*/SuggestionType::QUERY,
                   /*is_navigation=*/false);
-  ParseResultList(peopleResults, template_url,
+  ParseResultList(peopleResults,
                   /*suggestion_type=*/SuggestionType::PEOPLE,
-                  /*is_navigation=*/false);
-  ParseResultList(contentResults, template_url,
+                  /*is_navigation=*/true);
+  ParseResultList(contentResults,
                   /*suggestion_type=*/SuggestionType::CONTENT,
                   /*is_navigation=*/true);
 }
 
 void EnterpriseSearchAggregatorProvider::ParseResultList(
     const base::Value::List* results,
-    const TemplateURL* template_url,
     SuggestionType suggestion_type,
     bool is_navigation) {
-  if (!results || !template_url) {
+  if (!results) {
     return;
   }
 
@@ -297,14 +285,22 @@ void EnterpriseSearchAggregatorProvider::ParseResultList(
 
     const base::Value::Dict& result = result_value.GetDict();
 
-    auto url = GetMatchDestinationUrl(result, template_url->url_ref(), suggestion_type);
+    auto url = GetMatchDestinationUrl(result, template_url_->url_ref(),
+                                      suggestion_type);
     // All matches must have a URL.
     if (url.empty()) {
       continue;
     }
 
-    // Some matches are supplied with an associated image URL.
-    auto image_url = GetMatchImageUrl(result);
+    // Some matches are supplied with an associated icon or image URL.
+    std::string image_url;
+    std::string icon_url;
+    if (suggestion_type == SuggestionType::PEOPLE) {
+      image_url = ptr_to_string(result.FindStringByDottedPath(
+        "document.derivedStructData.displayPhoto.url"));
+    } else if (suggestion_type == SuggestionType::CONTENT) {
+      icon_url = ptr_to_string(result.FindStringByDottedPath("iconUri"));
+    }
 
     auto description = GetMatchDescription(result, suggestion_type);
     // Nav matches must have a description.
@@ -319,9 +315,9 @@ void EnterpriseSearchAggregatorProvider::ParseResultList(
     }
 
     AutocompleteMatch match = CreateMatch(
-        input_, template_url->keyword(), suggestion_type, is_navigation,
-        1000 - int(matches_.size()), url, image_url,
-        base::UTF8ToUTF16(description), base::UTF8ToUTF16(contents));
+        suggestion_type, is_navigation, 1000 - int(matches_.size()), url,
+        image_url, icon_url, base::UTF8ToUTF16(description),
+        base::UTF8ToUTF16(contents));
     matches_.push_back(match);
   }
 }
@@ -347,18 +343,12 @@ std::string EnterpriseSearchAggregatorProvider::GetMatchDestinationUrl(
       TemplateURLRef::SearchTermsArgs(base::UTF8ToUTF16(query)), {}, nullptr);
 }
 
-std::string EnterpriseSearchAggregatorProvider::GetMatchImageUrl(
-    const base::Value::Dict& result) const {
-  return ptr_to_string(result.FindStringByDottedPath(
-      "document.derivedStructData.displayPhoto.url"));
-}
-
 std::string EnterpriseSearchAggregatorProvider::GetMatchDescription(
     const base::Value::Dict& result,
     SuggestionType suggestion_type) const {
   if (suggestion_type == SuggestionType::PEOPLE) {
     return ptr_to_string(result.FindStringByDottedPath(
-        "document.derivedStructData.name.userName"));
+        "document.derivedStructData.name.displayName"));
   } else if (suggestion_type == SuggestionType::CONTENT) {
     return ptr_to_string(
         result.FindStringByDottedPath("document.derivedStructData.title"));
@@ -373,19 +363,18 @@ std::string EnterpriseSearchAggregatorProvider::GetMatchContents(
     return ptr_to_string(result.FindString("suggestion"));
   } else if (suggestion_type == SuggestionType::PEOPLE) {
     return ptr_to_string(result.FindStringByDottedPath(
-        "document.derivedStructData.name.displayName"));
+        "document.derivedStructData.name.userName"));
   }
   return "";
 }
 
 AutocompleteMatch EnterpriseSearchAggregatorProvider::CreateMatch(
-    const AutocompleteInput& input,
-    const std::u16string& keyword,
     SuggestionType suggestion_type,
     bool is_navigation,
     int relevance,
     const std::string& url,
     const std::string& image_url,
+    const std::string& icon_url,
     const std::u16string& description,
     const std::u16string& contents) {
   auto type = is_navigation ? AutocompleteMatchType::NAVSUGGEST
@@ -399,20 +388,27 @@ AutocompleteMatch EnterpriseSearchAggregatorProvider::CreateMatch(
     match.image_url = GURL(image_url);
   }
 
+  if (!icon_url.empty()) {
+    match.icon_url = GURL(icon_url);
+  }
+
+  match.enterprise_search_aggregator_type = suggestion_type;
+
   match.description = AutocompleteMatch::SanitizeString(description);
   match.description_class = ClassifyTermMatches(
-      FindTermMatches(input.text(), match.description),
+      FindTermMatches(adjusted_input_.text(), match.description),
       match.description.size(), ACMatchClassification::MATCH,
       ACMatchClassification::NONE);
   match.contents = AutocompleteMatch::SanitizeString(contents);
   match.contents_class = ClassifyTermMatches(
-      FindTermMatches(input.text(), match.contents), match.contents.size(),
-      ACMatchClassification::MATCH, ACMatchClassification::NONE);
+      FindTermMatches(adjusted_input_.text(), match.contents),
+      match.contents.size(), ACMatchClassification::MATCH,
+      ACMatchClassification::NONE);
 
-  match.keyword = keyword;
+  match.keyword = template_url_->keyword();
   match.transition = ui::PAGE_TRANSITION_KEYWORD;
 
-  if (input.InKeywordMode()) {
+  if (adjusted_input_.InKeywordMode()) {
     match.from_keyword = true;
   }
 

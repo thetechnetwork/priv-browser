@@ -94,10 +94,13 @@
 #include "components/contextual_search/core/browser/contextual_search_field_trial.h"
 #include "components/contextual_search/core/browser/public.h"
 #include "components/data_sharing/public/features.h"
+#include "components/data_sharing/public/switches.h"
 #include "components/dom_distiller/core/dom_distiller_features.h"
 #include "components/dom_distiller/core/dom_distiller_switches.h"
 #include "components/download/public/common/download_features.h"
+#include "components/enterprise/buildflags/buildflags.h"
 #include "components/enterprise/data_controls/core/browser/features.h"
+#include "components/enterprise/obfuscation/core/utils.h"
 #include "components/error_page/common/error_page_switches.h"
 #include "components/feature_engagement/public/feature_constants.h"
 #include "components/feature_engagement/public/feature_list.h"
@@ -5666,12 +5669,6 @@ const FeatureEntry kFeatureEntries[] = {
      flag_descriptions::kViewTransitionOnNavigationIframeDescription, kOsAll,
      FEATURE_VALUE_TYPE(
          blink::features::kViewTransitionOnNavigationForIframes)},
-    {"view-transition-overflow-rect-from-surface",
-     flag_descriptions::kViewTransitionOverflowRectFromSurfaceName,
-     flag_descriptions::kViewTransitionOverflowRectFromSurfaceDescription,
-     kOsAll,
-     FEATURE_VALUE_TYPE(
-         blink::features::kViewTransitionOverflowRectFromSurface)},
 #if BUILDFLAG(IS_WIN)
     {"use-winrt-midi-api", flag_descriptions::kUseWinrtMidiApiName,
      flag_descriptions::kUseWinrtMidiApiDescription, kOsWin,
@@ -9100,10 +9097,6 @@ const FeatureEntry kFeatureEntries[] = {
 #endif  // ENABLE_EXTENSIONS
 
 #if !BUILDFLAG(IS_ANDROID)
-    {"canvas-oop-rasterization", flag_descriptions::kCanvasOopRasterizationName,
-     flag_descriptions::kCanvasOopRasterizationDescription, kOsDesktop,
-     FEATURE_VALUE_TYPE(features::kCanvasOopRasterization)},
-
     {"captured-surface-control", flag_descriptions::kCapturedSurfaceControlName,
      flag_descriptions::kCapturedSurfaceControlDescription, kOsDesktop,
      FEATURE_VALUE_TYPE(blink::features::kCapturedSurfaceControl)},
@@ -10086,6 +10079,14 @@ const FeatureEntry kFeatureEntries[] = {
      FEATURE_VALUE_TYPE(switches::kBatchUploadDesktop)},
 #endif
 
+#if BUILDFLAG(ENABLE_DICE_SUPPORT) && BUILDFLAG(ENABLE_EXTENSIONS)
+    {"enable-extensions-explicit-browser-signin",
+     flag_descriptions::kEnableExtensionsExplicitBrowserSigninName,
+     flag_descriptions::kEnableExtensionsExplicitBrowserSigninDescription,
+     kOsMac | kOsWin | kOsLinux | kOsCrOS,
+     FEATURE_VALUE_TYPE(switches::kEnableExtensionsExplicitBrowserSignin)},
+#endif  // BUILDFLAG(ENABLE_DICE_SUPPORT) && BUILDFLAG(ENABLE_EXTENSIONS)
+
 #if BUILDFLAG(IS_CHROMEOS)
     {"flex-firmware-update", flag_descriptions::kFlexFirmwareUpdateName,
      flag_descriptions::kFlexFirmwareUpdateDescription, kOsCrOS,
@@ -10428,6 +10429,10 @@ const FeatureEntry kFeatureEntries[] = {
 
 #endif  // BUILDFLAG(IS_ANDROID)
 
+    {"data-sharing-debug-logs", flag_descriptions::kDataSharingDebugLogsName,
+     flag_descriptions::kDataSharingDebugLogsDescription, kOsAll,
+     SINGLE_VALUE_TYPE(data_sharing::kDataSharingDebugLoggingEnabled)},
+
     {"autofill-shared-storage-server-card-data",
      flag_descriptions::kAutofillSharedStorageServerCardDataName,
      flag_descriptions::kAutofillSharedStorageServerCardDataDescription, kOsAll,
@@ -10448,12 +10453,6 @@ const FeatureEntry kFeatureEntries[] = {
      flag_descriptions::kAndroidPdfAssistContentName,
      flag_descriptions::kAndroidPdfAssistContentDescription, kOsAndroid,
      FEATURE_VALUE_TYPE(chrome::android::kAndroidPdfAssistContent)},
-#endif  // BUILDFLAG(IS_ANDROID)
-
-#if BUILDFLAG(IS_ANDROID)
-    {"page-info-sharing", flag_descriptions::kChromePageInfoSharingName,
-     flag_descriptions::kChromePageInfoSharingDescription, kOsAndroid,
-     FEATURE_VALUE_TYPE(chrome::android::kChromeSharePageInfo)},
 #endif  // BUILDFLAG(IS_ANDROID)
 
 #if BUILDFLAG(IS_CHROMEOS)
@@ -11744,6 +11743,13 @@ const FeatureEntry kFeatureEntries[] = {
      FEATURE_VALUE_TYPE(
          blink::features::
              kWebAuthenticationAlignErrorTypeForPaymentCredentialCreate)},
+
+#if BUILDFLAG(ENTERPRISE_CONTENT_ANALYSIS)
+    {"enterprise-file-obfuscation",
+     flag_descriptions::kEnterpriseFileObfuscationName,
+     flag_descriptions::kEnterpriseFileObfuscationDescription, kOsDesktop,
+     FEATURE_VALUE_TYPE(enterprise_obfuscation::kEnterpriseFileObfuscation)},
+#endif  // BUILDFLAG(ENTERPRISE_CONTENT_ANALYSIS)
 
     // NOTE: Adding a new flag requires adding a corresponding entry to enum
     // "LoginCustomFlags" in tools/metrics/histograms/enums.xml. See "Flag

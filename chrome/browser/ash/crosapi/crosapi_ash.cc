@@ -28,7 +28,6 @@
 #include "chrome/browser/ash/crosapi/device_local_account_extension_service_ash.h"
 #include "chrome/browser/ash/crosapi/device_oauth2_token_service_ash.h"
 #include "chrome/browser/ash/crosapi/document_scan_ash.h"
-#include "chrome/browser/ash/crosapi/download_controller_ash.h"
 #include "chrome/browser/ash/crosapi/drive_integration_service_ash.h"
 #include "chrome/browser/ash/crosapi/echo_private_ash.h"
 #include "chrome/browser/ash/crosapi/embedded_accessibility_helper_client_ash.h"
@@ -66,7 +65,6 @@
 #include "chrome/browser/ash/crosapi/resource_manager_ash.h"
 #include "chrome/browser/ash/crosapi/screen_ai_downloader_ash.h"
 #include "chrome/browser/ash/crosapi/structured_metrics_service_ash.h"
-#include "chrome/browser/ash/crosapi/suggestion_service_ash.h"
 #include "chrome/browser/ash/crosapi/virtual_keyboard_ash.h"
 #include "chrome/browser/ash/crosapi/vpn_service_ash.h"
 #include "chrome/browser/ash/crosapi/web_kiosk_service_ash.h"
@@ -171,7 +169,6 @@ CrosapiAsh::CrosapiAsh()
           std::make_unique<DeviceOAuth2TokenServiceAsh>()),
       diagnostics_service_ash_(std::make_unique<ash::DiagnosticsServiceAsh>()),
       document_scan_ash_(std::make_unique<DocumentScanAsh>()),
-      download_controller_ash_(std::make_unique<DownloadControllerAsh>()),
       drive_integration_service_ash_(
           std::make_unique<DriveIntegrationServiceAsh>()),
       echo_private_ash_(std::make_unique<EchoPrivateAsh>()),
@@ -229,7 +226,6 @@ CrosapiAsh::CrosapiAsh()
       screen_ai_downloader_ash_(std::make_unique<ScreenAIDownloaderAsh>()),
       structured_metrics_service_ash_(
           std::make_unique<StructuredMetricsServiceAsh>()),
-      suggestion_service_ash_(std::make_unique<SuggestionServiceAsh>()),
       video_conference_manager_ash_(
           std::make_unique<ash::VideoConferenceManagerAsh>()),
       virtual_keyboard_ash_(std::make_unique<VirtualKeyboardAsh>()),
@@ -354,11 +350,6 @@ void CrosapiAsh::BindDiagnosticsService(
 void CrosapiAsh::BindDocumentScan(
     mojo::PendingReceiver<mojom::DocumentScan> receiver) {
   document_scan_ash_->BindReceiver(std::move(receiver));
-}
-
-void CrosapiAsh::BindDownloadController(
-    mojo::PendingReceiver<mojom::DownloadController> receiver) {
-  download_controller_ash_->BindReceiver(std::move(receiver));
 }
 
 void CrosapiAsh::BindDriveIntegrationService(
@@ -645,11 +636,6 @@ void CrosapiAsh::BindSensorHalClient(
 void CrosapiAsh::BindStructuredMetricsService(
     mojo::PendingReceiver<crosapi::mojom::StructuredMetricsService> receiver) {
   structured_metrics_service_ash_->BindReceiver(std::move(receiver));
-}
-
-void CrosapiAsh::BindSuggestionService(
-    mojo::PendingReceiver<crosapi::mojom::SuggestionService> receiver) {
-  suggestion_service_ash_->BindReceiver(std::move(receiver));
 }
 
 void CrosapiAsh::BindTelemetryDiagnosticRoutinesService(

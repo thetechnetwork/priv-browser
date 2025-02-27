@@ -34,12 +34,6 @@ const char kCanvasHibernationName[] = "Hibernation for 2D canvas";
 const char kCanvasHibernationDescription[] =
     "Enables canvas hibernation for 2D canvas.";
 
-const char kCanvasOopRasterizationName[] =
-    "Out-of-process 2D canvas rasterization.";
-const char kCanvasOopRasterizationDescription[] =
-    "The rasterization of 2d canvas contents is performed in the GPU process. "
-    "Requires that out-of-process rasterization be enabled.";
-
 #if !BUILDFLAG(IS_ANDROID)
 const char kCapturedSurfaceControlName[] = "Captured Surface Control";
 const char kCapturedSurfaceControlDescription[] =
@@ -1163,14 +1157,6 @@ const char kViewTransitionOnNavigationIframeDescription[] =
     "Controls the availability of the viewTransition API on document "
     "navigations in a subframe. Must be used with "
     "view-transition-on-navigation";
-
-const char kViewTransitionOverflowRectFromSurfaceName[] =
-    "CSS view transitions: compute visual overflow from surfaces";
-const char kViewTransitionOverflowRectFromSurfaceDescription[] =
-    "Changes the underlying mechanism to compute the view transition live "
-    "element geometry. "
-    "This shouldn't have web-observable effects, but exposing as a flag for "
-    "easy triage.";
 
 const char kEnableAutoDisableAccessibilityName[] = "Auto-disable Accessibility";
 const char kEnableAutoDisableAccessibilityDescription[] =
@@ -3636,6 +3622,11 @@ const char kCommerceDeveloperName[] = "Commerce developer mode";
 const char kCommerceDeveloperDescription[] =
     "Allows users in the allowlist to enter the developer mode";
 
+const char kDataSharingDebugLogsName[] = "Enable data sharing debug logs";
+const char kDataSharingDebugLogsDescription[] =
+    "Enables the data sharing infrastructure to log and save debug messages "
+    "that can be shown in the internals page.";
+
 const char kTabGroupsDeferRemoteNavigationsId[] =
     "tab-groups-defer-remote-navigations";
 const char kTabGroupsDeferRemoteNavigationsName[] =
@@ -4244,10 +4235,6 @@ const char kAndroidOpenPdfInlineBackportDescription[] =
 const char kAndroidPdfAssistContentName[] = "Provide assist content for PDF";
 const char kAndroidPdfAssistContentDescription[] =
     "Provide assist content for PDF on Android.";
-
-const char kChromePageInfoSharingName[] = "Page Info Sharing";
-const char kChromePageInfoSharingDescription[] =
-    "Enable Page Info Sharing on Android.";
 
 const char kAndroidTabDeclutterName[] = "Android Tab Declutter";
 const char kAndroidTabDeclutterDescription[] =
@@ -8002,6 +7989,15 @@ const char kBatchUploadDesktopDescription[] =
     "Passwords and Addresses";
 #endif
 
+#if BUILDFLAG(ENABLE_DICE_SUPPORT) && BUILDFLAG(ENABLE_EXTENSIONS)
+const char kEnableExtensionsExplicitBrowserSigninName[] =
+    "Enable Extensions Explicit Sign In";
+const char kEnableExtensionsExplicitBrowserSigninDescription[] =
+    "Enables users to perform an explicit signin upon installing an extension. "
+    "After this, syncing for extensions will be enabled when in transport mode "
+    "(when a user is signed in but has not turned on full sync).";
+#endif  // BUILDFLAG(ENABLE_DICE_SUPPORT) && BUILDFLAG(ENABLE_EXTENSIONS)
+
 #if BUILDFLAG(ENABLE_BOUND_SESSION_CREDENTIALS)
 const char kEnableBoundSessionCredentialsName[] =
     "Device Bound Session Credentials";
@@ -8140,6 +8136,14 @@ const char kSupervisedUserForceSigninWithCapabilitiesDescription[] =
     "Migrate the usage of USM flags to force supervised user accounts to be "
     "signed in to Chrome to instead use account capabilities.";
 #endif  // BUILDFLAG(IS_ANDROID)
+
+#if BUILDFLAG(ENTERPRISE_CONTENT_ANALYSIS)
+const char kEnterpriseFileObfuscationName[] = "Enterprise File Obfuscation";
+const char kEnterpriseFileObfuscationDescription[] =
+    "Enables temporary file obfuscation during download for enterprise users. "
+    "Downloaded files remain obfuscated on disk while WebProtect performs deep "
+    "scanning, preventing access before verification is complete.";
+#endif  // BUILDFLAG(ENTERPRISE_CONTENT_ANALYSIS)
 
 // ============================================================================
 // Don't just add flags to the end, put them in the right section in

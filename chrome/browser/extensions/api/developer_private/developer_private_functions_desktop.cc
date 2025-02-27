@@ -36,7 +36,6 @@
 #include "chrome/browser/extensions/extension_commands_global_registry.h"
 #include "chrome/browser/extensions/extension_management.h"
 #include "chrome/browser/extensions/extension_sync_service.h"
-#include "chrome/browser/extensions/extension_sync_util.h"
 #include "chrome/browser/extensions/extension_tab_util.h"
 #include "chrome/browser/extensions/extension_util.h"
 #include "chrome/browser/extensions/install_verifier.h"
@@ -59,7 +58,6 @@
 #include "chrome/browser/ui/chrome_select_file_policy.h"
 #include "chrome/browser/ui/extensions/application_launch.h"
 #include "chrome/browser/ui/extensions/extensions_dialogs.h"
-#include "chrome/browser/ui/safety_hub/menu_notification_service_factory.h"
 #include "chrome/browser/ui/safety_hub/safety_hub_constants.h"
 #include "chrome/browser/ui/tabs/tab_strip_model.h"
 #include "chrome/browser/web_applications/extension_status_utils.h"
@@ -67,6 +65,7 @@
 #include "chrome/common/pref_names.h"
 #include "chrome/common/url_constants.h"
 #include "chrome/grit/generated_resources.h"
+#include "components/signin/public/base/signin_switches.h"
 #include "components/signin/public/identity_manager/identity_manager.h"
 #include "content/public/browser/browser_task_traits.h"
 #include "content/public/browser/browser_thread.h"
@@ -123,53 +122,7 @@ namespace extensions {
 namespace developer = api::developer_private;
 
 namespace {
-const char kNoSuchExtensionError[] = "No such extension.";
-const char kRequiresUserGestureError[] = "This action requires a user gesture.";
-const char kCouldNotShowSelectFileDialogError[] =
-    "Could not show a file chooser.";
-const char kFileSelectionCanceled[] = "File selection was canceled.";
-const char kNoSuchRendererError[] = "No such renderer.";
-const char kInvalidPathError[] = "Invalid path.";
-const char kManifestKeyIsRequiredError[] =
-    "The 'manifestKey' argument is required for manifest files.";
-const char kCouldNotFindWebContentsError[] =
-    "Could not find a valid web contents.";
-const char kNoOptionsPageForExtensionError[] =
-    "Extension does not have an options page.";
-const char kCannotRepairHealthyExtension[] =
-    "Cannot repair a healthy extension.";
-const char kCannotRepairPolicyExtension[] =
-    "Cannot repair a policy-installed extension.";
-const char kCannotChangeHostPermissions[] =
-    "Cannot change host permissions for the given extension.";
-const char kCannotSetPinnedWithoutAction[] =
-    "Cannot set pinned action state for an extension with no action.";
-const char kInvalidHost[] = "Invalid host.";
-const char kInvalidLazyBackgroundPageParameter[] =
-    "isServiceWorker can not be set for lazy background page based extensions.";
-const char kInvalidRenderProcessId[] =
-    "render_process_id can be set to -1 for only lazy background page based or "
-    "service-worker based extensions.";
-const char kFailToUninstallEnterpriseOrComponentExtensions[] =
-    "Cannot uninstall the enterprise or component extensions in your list.";
-const char kFailToUninstallNoneExistentExtensions[] =
-    "Cannot uninstall non-existent extensions in your list.";
-const char kUserCancelledError[] = "User cancelled uninstall";
-const char kNoExtensionError[] = "Extension with ID '*' doesn't exist.";
-const char kExtensionNotAffectedByMV2Deprecation[] =
-    "Extension with ID '*' is not affected by the MV2 deprecation.";
-const char kCannotRepairNonWebstoreExtension[] =
-    "Cannot repair an extension that is not installed from the Chrome Web "
-    "Store.";
-const char kCannotDismissExtensionOnUnsupportedStage[] =
-    "Cannot dismiss the MV2 deprecation notice for extension with ID '*' on "
-    "the unsupported stage.";
-const char kUserNotSignedIn[] = "User is not signed in.";
-const char kCannotUploadExtensionToAccount[] =
-    "Extension with ID '*' cannot be uploaded to the user's account.";
-
-const char kUnpackedAppsFolder[] = "apps_target";
-const char kManifestFile[] = "manifest.json";
+constexpr char kUnpackedAppsFolder[] = "apps_target";
 
 base::FilePath* g_drop_path_for_testing = nullptr;
 
@@ -265,27 +218,6 @@ developer::LoadError CreateLoadError(
   response.source->after_highlight = highlighter.GetAfterFeature();
 
   return response;
-}
-
-std::optional<URLPattern> ParseRuntimePermissionsPattern(
-    const std::string& pattern_str) {
-  constexpr int kValidRuntimePermissionSchemes = URLPattern::SCHEME_HTTP |
-                                                 URLPattern::SCHEME_HTTPS |
-                                                 URLPattern::SCHEME_FILE;
-
-  URLPattern pattern(kValidRuntimePermissionSchemes);
-  if (pattern.Parse(pattern_str) != URLPattern::ParseResult::kSuccess) {
-    return std::nullopt;
-  }
-
-  // We don't allow adding paths for permissions, because they aren't meaningful
-  // in terms of origin access. The frontend should validate this, but there's
-  // a chance something can slip through, so we should fail gracefully.
-  if (pattern.path() != "/*") {
-    return std::nullopt;
-  }
-
-  return pattern;
 }
 
 std::string GetETldPlusOne(const GURL& site) {
@@ -1412,16 +1344,6 @@ void DeveloperPrivateChoosePathFunction::FileSelectionCanceled() {
   Release();
 }
 
-ExtensionFunction::ResponseAction
-DeveloperPrivateIsProfileManagedFunction::Run() {
-  Profile* profile = Profile::FromBrowserContext(browser_context());
-  return RespondNow(WithArguments(
-      profile && supervised_user::AreExtensionsPermissionsEnabled(profile)));
-}
-
-DeveloperPrivateIsProfileManagedFunction::
-    ~DeveloperPrivateIsProfileManagedFunction() = default;
-
 DeveloperPrivateRequestFileSourceFunction::
     DeveloperPrivateRequestFileSourceFunction() = default;
 
@@ -1601,35 +1523,6 @@ ExtensionFunction::ResponseAction DeveloperPrivateOpenDevToolsFunction::Run() {
   return RespondNow(NoArguments());
 }
 
-DeveloperPrivateDeleteExtensionErrorsFunction::
-    ~DeveloperPrivateDeleteExtensionErrorsFunction() = default;
-
-ExtensionFunction::ResponseAction
-DeveloperPrivateDeleteExtensionErrorsFunction::Run() {
-  std::optional<developer::DeleteExtensionErrors::Params> params =
-      developer::DeleteExtensionErrors::Params::Create(args());
-  EXTENSION_FUNCTION_VALIDATE(params);
-  const developer::DeleteExtensionErrorsProperties& properties =
-      params->properties;
-
-  ErrorConsole* error_console = ErrorConsole::Get(browser_context());
-  int type = -1;
-  if (properties.type != developer::ErrorType::kNone) {
-    type = properties.type == developer::ErrorType::kManifest
-               ? static_cast<int>(ExtensionError::Type::kManifestError)
-               : static_cast<int>(ExtensionError::Type::kRuntimeError);
-  }
-  std::set<int> error_ids;
-  if (properties.error_ids) {
-    error_ids.insert(properties.error_ids->begin(),
-                     properties.error_ids->end());
-  }
-  error_console->RemoveErrors(
-      ErrorMap::Filter(properties.extension_id, type, error_ids, false));
-
-  return RespondNow(NoArguments());
-}
-
 DeveloperPrivateRepairExtensionFunction::
     ~DeveloperPrivateRepairExtensionFunction() = default;
 
@@ -1770,204 +1663,6 @@ DeveloperPrivateUpdateExtensionCommandFunction::Run() {
   return RespondNow(NoArguments());
 }
 
-DeveloperPrivateAddHostPermissionFunction::
-    DeveloperPrivateAddHostPermissionFunction() = default;
-DeveloperPrivateAddHostPermissionFunction::
-    ~DeveloperPrivateAddHostPermissionFunction() = default;
-
-ExtensionFunction::ResponseAction
-DeveloperPrivateAddHostPermissionFunction::Run() {
-  std::optional<developer::AddHostPermission::Params> params =
-      developer::AddHostPermission::Params::Create(args());
-  EXTENSION_FUNCTION_VALIDATE(params);
-
-  std::optional<URLPattern> pattern =
-      ParseRuntimePermissionsPattern(params->host);
-  if (!pattern) {
-    return RespondNow(Error(kInvalidHost));
-  }
-
-  const Extension* extension = GetExtensionById(params->extension_id);
-  if (!extension) {
-    return RespondNow(Error(kNoSuchExtensionError));
-  }
-
-  if (!PermissionsManager::Get(browser_context())
-           ->CanAffectExtension(*extension)) {
-    return RespondNow(Error(kCannotChangeHostPermissions));
-  }
-
-  URLPatternSet new_host_permissions({*pattern});
-  PermissionsUpdater(browser_context())
-      .GrantRuntimePermissions(
-          *extension,
-          PermissionSet(APIPermissionSet(), ManifestPermissionSet(),
-                        new_host_permissions.Clone(),
-                        new_host_permissions.Clone()),
-          base::BindOnce(&DeveloperPrivateAddHostPermissionFunction::
-                             OnRuntimePermissionsGranted,
-                         this));
-
-  return did_respond() ? AlreadyResponded() : RespondLater();
-}
-
-void DeveloperPrivateAddHostPermissionFunction::OnRuntimePermissionsGranted() {
-  Respond(NoArguments());
-}
-
-DeveloperPrivateRemoveHostPermissionFunction::
-    DeveloperPrivateRemoveHostPermissionFunction() = default;
-DeveloperPrivateRemoveHostPermissionFunction::
-    ~DeveloperPrivateRemoveHostPermissionFunction() = default;
-
-ExtensionFunction::ResponseAction
-DeveloperPrivateRemoveHostPermissionFunction::Run() {
-  std::optional<developer::RemoveHostPermission::Params> params =
-      developer::RemoveHostPermission::Params::Create(args());
-  EXTENSION_FUNCTION_VALIDATE(params);
-
-  std::optional<URLPattern> pattern =
-      ParseRuntimePermissionsPattern(params->host);
-  if (!pattern) {
-    return RespondNow(Error(kInvalidHost));
-  }
-
-  const Extension* extension = GetExtensionById(params->extension_id);
-  if (!extension) {
-    return RespondNow(Error(kNoSuchExtensionError));
-  }
-
-  PermissionsManager* manager = PermissionsManager::Get(browser_context());
-  if (!manager->CanAffectExtension(*extension)) {
-    return RespondNow(Error(kCannotChangeHostPermissions));
-  }
-
-  URLPatternSet host_permissions_to_remove({*pattern});
-  std::unique_ptr<const PermissionSet> permissions_to_remove =
-      PermissionSet::CreateIntersection(
-          PermissionSet(APIPermissionSet(), ManifestPermissionSet(),
-                        host_permissions_to_remove.Clone(),
-                        host_permissions_to_remove.Clone()),
-          *manager->GetRevokablePermissions(*extension),
-          URLPatternSet::IntersectionBehavior::kDetailed);
-  if (permissions_to_remove->IsEmpty()) {
-    return RespondNow(Error("Cannot remove a host that hasn't been granted."));
-  }
-
-  PermissionsUpdater(browser_context())
-      .RevokeRuntimePermissions(
-          *extension, *permissions_to_remove,
-          base::BindOnce(&DeveloperPrivateRemoveHostPermissionFunction::
-                             OnRuntimePermissionsRevoked,
-                         this));
-
-  return did_respond() ? AlreadyResponded() : RespondLater();
-}
-
-void DeveloperPrivateRemoveHostPermissionFunction::
-    OnRuntimePermissionsRevoked() {
-  Respond(NoArguments());
-}
-
-DeveloperPrivateGetUserSiteSettingsFunction::
-    DeveloperPrivateGetUserSiteSettingsFunction() = default;
-DeveloperPrivateGetUserSiteSettingsFunction::
-    ~DeveloperPrivateGetUserSiteSettingsFunction() = default;
-
-ExtensionFunction::ResponseAction
-DeveloperPrivateGetUserSiteSettingsFunction::Run() {
-  developer::UserSiteSettings user_site_settings =
-      DeveloperPrivateEventRouter::ConvertToUserSiteSettings(
-          PermissionsManager::Get(browser_context())
-              ->GetUserPermissionsSettings());
-
-  return RespondNow(WithArguments(user_site_settings.ToValue()));
-}
-
-DeveloperPrivateAddUserSpecifiedSitesFunction::
-    DeveloperPrivateAddUserSpecifiedSitesFunction() = default;
-DeveloperPrivateAddUserSpecifiedSitesFunction::
-    ~DeveloperPrivateAddUserSpecifiedSitesFunction() = default;
-
-ExtensionFunction::ResponseAction
-DeveloperPrivateAddUserSpecifiedSitesFunction::Run() {
-  std::optional<developer::AddUserSpecifiedSites::Params> params =
-      developer::AddUserSpecifiedSites::Params::Create(args());
-  EXTENSION_FUNCTION_VALIDATE(params);
-
-  std::set<url::Origin> origins;
-  for (const auto& host : params->options.hosts) {
-    GURL url(host);
-    if (!url.is_valid()) {
-      return RespondNow(Error("Invalid host: " + host));
-    }
-    origins.insert(url::Origin::Create(url));
-  }
-
-  PermissionsManager* manager = PermissionsManager::Get(browser_context());
-  switch (params->options.site_set) {
-    case developer::SiteSet::kUserPermitted:
-      for (const auto& origin : origins) {
-        manager->AddUserPermittedSite(origin);
-      }
-      break;
-    case developer::SiteSet::kUserRestricted:
-      for (const auto& origin : origins) {
-        manager->AddUserRestrictedSite(origin);
-      }
-      break;
-    case developer::SiteSet::kExtensionSpecified:
-      return RespondNow(
-          Error("Site set must be USER_PERMITTED or USER_RESTRICTED"));
-    case developer::SiteSet::kNone:
-      NOTREACHED();
-  }
-
-  return RespondNow(NoArguments());
-}
-
-DeveloperPrivateRemoveUserSpecifiedSitesFunction::
-    DeveloperPrivateRemoveUserSpecifiedSitesFunction() = default;
-DeveloperPrivateRemoveUserSpecifiedSitesFunction::
-    ~DeveloperPrivateRemoveUserSpecifiedSitesFunction() = default;
-
-ExtensionFunction::ResponseAction
-DeveloperPrivateRemoveUserSpecifiedSitesFunction::Run() {
-  std::optional<developer::RemoveUserSpecifiedSites::Params> params =
-      developer::RemoveUserSpecifiedSites::Params::Create(args());
-  EXTENSION_FUNCTION_VALIDATE(params);
-
-  std::set<url::Origin> origins;
-  for (const auto& host : params->options.hosts) {
-    GURL url(host);
-    if (!url.is_valid()) {
-      return RespondNow(Error("Invalid host: " + host));
-    }
-    origins.insert(url::Origin::Create(url));
-  }
-
-  PermissionsManager* manager = PermissionsManager::Get(browser_context());
-  switch (params->options.site_set) {
-    case developer::SiteSet::kUserPermitted:
-      for (const auto& origin : origins) {
-        manager->RemoveUserPermittedSite(origin);
-      }
-      break;
-    case developer::SiteSet::kUserRestricted:
-      for (const auto& origin : origins) {
-        manager->RemoveUserRestrictedSite(origin);
-      }
-      break;
-    case developer::SiteSet::kExtensionSpecified:
-      return RespondNow(
-          Error("Site set must be USER_PERMITTED or USER_RESTRICTED"));
-    case developer::SiteSet::kNone:
-      NOTREACHED();
-  }
-
-  return RespondNow(NoArguments());
-}
-
 DeveloperPrivateGetUserAndExtensionSitesByEtldFunction::
     DeveloperPrivateGetUserAndExtensionSitesByEtldFunction() = default;
 DeveloperPrivateGetUserAndExtensionSitesByEtldFunction::
@@ -2053,81 +1748,6 @@ DeveloperPrivateGetUserAndExtensionSitesByEtldFunction::Run() {
   return RespondNow(
       ArgumentList(developer::GetUserAndExtensionSitesByEtld::Results::Create(
           site_group_list)));
-}
-
-DeveloperPrivateGetMatchingExtensionsForSiteFunction::
-    DeveloperPrivateGetMatchingExtensionsForSiteFunction() = default;
-DeveloperPrivateGetMatchingExtensionsForSiteFunction::
-    ~DeveloperPrivateGetMatchingExtensionsForSiteFunction() = default;
-
-ExtensionFunction::ResponseAction
-DeveloperPrivateGetMatchingExtensionsForSiteFunction::Run() {
-  std::optional<developer::GetMatchingExtensionsForSite::Params> params =
-      developer::GetMatchingExtensionsForSite::Params::Create(args());
-  EXTENSION_FUNCTION_VALIDATE(params);
-
-  URLPattern parsed_site(Extension::kValidHostPermissionSchemes);
-  if (parsed_site.Parse(params->site) != URLPattern::ParseResult::kSuccess) {
-    return RespondNow(Error("Invalid site: " + params->site));
-  }
-
-  constexpr bool kIncludeApiPermissions = false;
-
-  std::vector<developer::MatchingExtensionInfo> matching_extensions;
-  URLPatternSet site_pattern({parsed_site});
-  const ExtensionSet& enabled_extensions =
-      ExtensionRegistry::Get(browser_context())->enabled_extensions();
-  PermissionsManager* permissions_manager =
-      PermissionsManager::Get(browser_context());
-  for (const auto& extension : enabled_extensions) {
-    std::unique_ptr<const PermissionSet> granted_permissions =
-        permissions_manager->GetExtensionGrantedPermissions(*extension);
-    const URLPatternSet& extension_withheld_sites =
-        extension->permissions_data()->withheld_permissions().effective_hosts();
-    const URLPatternSet granted_intersection =
-        URLPatternSet::CreateIntersection(
-            site_pattern, granted_permissions->effective_hosts(),
-            URLPatternSet::IntersectionBehavior::kDetailed);
-    const URLPatternSet withheld_intersection =
-        URLPatternSet::CreateIntersection(
-            site_pattern, extension_withheld_sites,
-            URLPatternSet::IntersectionBehavior::kDetailed);
-
-    if (granted_intersection.is_empty() && withheld_intersection.is_empty()) {
-      continue;
-    }
-
-    // By default, return ON_CLICK if the extension has requested but does not
-    // have access to any sites that match `site_pattern`.
-    developer::HostAccess host_access = developer::HostAccess::kOnClick;
-
-    // TODO(crbug.com/40278776): Add a version of CanUserSelectSiteAccess to
-    // PermissionsManager which takes in a URLPattern.
-    bool can_request_all_sites =
-        granted_permissions->ShouldWarnAllHosts(kIncludeApiPermissions) ||
-        extension->permissions_data()
-            ->withheld_permissions()
-            .ShouldWarnAllHosts(kIncludeApiPermissions);
-
-    // If the extension has access to at least one site that matches
-    // `site_pattern`, return ON_ALL_SITES if the extension can request all
-    // sites and has no withheld sites, or ON_SPECIFIC_SITES otherwise.
-    if (!granted_intersection.is_empty()) {
-      host_access = can_request_all_sites && extension_withheld_sites.is_empty()
-                        ? developer::HostAccess::kOnAllSites
-                        : developer::HostAccess::kOnSpecificSites;
-    }
-
-    developer::MatchingExtensionInfo matching_info;
-    matching_info.can_request_all_sites = can_request_all_sites;
-    matching_info.site_access = host_access;
-    matching_info.id = extension->id();
-    matching_extensions.push_back(std::move(matching_info));
-  }
-
-  return RespondNow(
-      ArgumentList(developer::GetMatchingExtensionsForSite::Results::Create(
-          matching_extensions)));
 }
 
 DeveloperPrivateUpdateSiteAccessFunction::
@@ -2306,27 +1926,6 @@ void DeveloperPrivateRemoveMultipleExtensionsFunction::OnDialogAccepted() {
   Respond(NoArguments());
 }
 
-DeveloperPrivateDismissSafetyHubExtensionsMenuNotificationFunction::
-    DeveloperPrivateDismissSafetyHubExtensionsMenuNotificationFunction() =
-        default;
-DeveloperPrivateDismissSafetyHubExtensionsMenuNotificationFunction::
-    ~DeveloperPrivateDismissSafetyHubExtensionsMenuNotificationFunction() =
-        default;
-
-ExtensionFunction::ResponseAction
-DeveloperPrivateDismissSafetyHubExtensionsMenuNotificationFunction::Run() {
-  content::WebContents* web_contents = GetSenderWebContents();
-  if (!web_contents) {
-    return RespondNow(Error(kCouldNotFindWebContentsError));
-  }
-
-  Profile* profile = Profile::FromBrowserContext(browser_context());
-  SafetyHubMenuNotificationServiceFactory::GetForProfile(profile)
-      ->DismissActiveNotificationOfModule(
-          safety_hub::SafetyHubModuleType::EXTENSIONS);
-  return RespondNow(NoArguments());
-}
-
 DeveloperPrivateDismissMv2DeprecationNoticeForExtensionFunction::
     DeveloperPrivateDismissMv2DeprecationNoticeForExtensionFunction() = default;
 DeveloperPrivateDismissMv2DeprecationNoticeForExtensionFunction::
@@ -2466,7 +2065,7 @@ DeveloperPrivateUploadExtensionToAccountFunction::Run() {
   //   disabled.
   // - the extension is already associated with the signed in user's account.
   // - the extension is not syncable (for example, if it's unpacked).
-  if (!sync_util::IsExtensionsExplicitSigninEnabled() ||
+  if (!switches::IsExtensionsExplicitBrowserSigninEnabled() ||
       !AccountExtensionTracker::Get(profile_)->CanUploadAsAccountExtension(
           *extension)) {
     return RespondNow(Error(ErrorUtils::FormatErrorMessage(

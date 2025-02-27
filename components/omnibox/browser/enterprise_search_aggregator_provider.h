@@ -6,6 +6,7 @@
 #define COMPONENTS_OMNIBOX_BROWSER_ENTERPRISE_SEARCH_AGGREGATOR_PROVIDER_H_
 
 #include <memory>
+#include <optional>
 #include <string>
 
 #include "base/memory/raw_ptr.h"
@@ -41,14 +42,9 @@ class EnterpriseSearchAggregatorProvider : public AutocompleteProvider {
  private:
   friend class FakeEnterpriseSearchAggregatorProvider;
 
-  ~EnterpriseSearchAggregatorProvider() override;
+  using SuggestionType = AutocompleteMatch::EnterpriseSearchAggregatorType;
 
-  // The types of suggestions provided by the response body.
-  enum class SuggestionType {
-    QUERY,
-    PEOPLE,
-    CONTENT,
-  };
+  ~EnterpriseSearchAggregatorProvider() override;
 
   // Determines whether the profile/session/window meet the feature
   // prerequisites.
@@ -98,7 +94,6 @@ class EnterpriseSearchAggregatorProvider : public AutocompleteProvider {
   //  policy,
   //  - `match.relevance` = 1001.
   void ParseResultList(const base::Value::List* results,
-                       const TemplateURL* template_url,
                        SuggestionType suggestion_type,
                        bool is_navigation);
 
@@ -107,9 +102,6 @@ class EnterpriseSearchAggregatorProvider : public AutocompleteProvider {
   std::string GetMatchDestinationUrl(const base::Value::Dict& result,
                                      const TemplateURLRef& url_ref,
                                      SuggestionType suggestion_type) const;
-
-  // Helper method to get `image_url`, if one is available, for `CreateMatch()`.
-  std::string GetMatchImageUrl(const base::Value::Dict& result) const;
 
   // Helper method to get `description` based on `suggestion_type` for
   // `CreateMatch()`.
@@ -122,13 +114,12 @@ class EnterpriseSearchAggregatorProvider : public AutocompleteProvider {
                                SuggestionType suggestion_type) const;
 
   // Helper to create a match.
-  AutocompleteMatch CreateMatch(const AutocompleteInput& input,
-                                const std::u16string& keyword,
-                                SuggestionType suggestion_type,
+  AutocompleteMatch CreateMatch(SuggestionType suggestion_type,
                                 bool is_navigation,
                                 int relevance,
                                 const std::string& destination_url,
                                 const std::string& image_url,
+                                const std::string& icon_url,
                                 const std::u16string& description,
                                 const std::u16string& contents);
 
@@ -138,9 +129,10 @@ class EnterpriseSearchAggregatorProvider : public AutocompleteProvider {
   // Used to ensure that we don't send multiple requests in quick succession.
   std::unique_ptr<AutocompleteProviderDebouncer> debouncer_;
 
-  // Saved when starting a new autocomplete request so that it can be retrieved
-  // when responses return asynchronously.
-  AutocompleteInput input_;
+  // Saved when starting a new autocomplete request so that they can be
+  // retrieved when responses return asynchronously.
+  AutocompleteInput adjusted_input_;
+  raw_ptr<const TemplateURL> template_url_;
 
   // Loader used to retrieve results.
   std::unique_ptr<network::SimpleURLLoader> loader_;

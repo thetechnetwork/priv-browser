@@ -42,7 +42,7 @@
 #include "chrome/test/base/ui_test_utils.h"
 #include "components/autofill/core/browser/autofill_type.h"
 #include "components/autofill/core/browser/data_model/addresses/autofill_profile.h"
-#include "components/autofill/core/browser/data_model/credit_card.h"
+#include "components/autofill/core/browser/data_model/payments/credit_card.h"
 #include "components/autofill/core/browser/field_types.h"
 #include "components/autofill/core/browser/test_utils/autofill_test_utils.h"
 #include "components/autofill/core/browser/test_utils/test_autofill_clock.h"
@@ -645,10 +645,12 @@ bool IFrameWaiter::FrameHasOrigin(const GURL& origin,
 WebPageReplayServerWrapper::WebPageReplayServerWrapper(
     const bool start_as_replay,
     int host_http_port,
-    int host_https_port)
+    int host_https_port,
+    const std::vector<std::string> extra_args)
     : host_http_port_(host_http_port),
       host_https_port_(host_https_port),
-      start_as_replay_(start_as_replay) {}
+      start_as_replay_(start_as_replay),
+      extra_args_(std::move(extra_args)) {}
 
 WebPageReplayServerWrapper::~WebPageReplayServerWrapper() = default;
 
@@ -833,6 +835,10 @@ bool WebPageReplayServerWrapper::RunWebPageReplayCmd(
       FilePathToUTF8(
           web_page_replay_support_file_dir.AppendASCII("ecdsa_key.pem").value())
           .c_str()));
+
+  for (const auto& arg : extra_args_) {
+    full_command.AppendArg(arg);
+  }
 
   for (const auto& arg : args)
     full_command.AppendArg(arg);

@@ -8,6 +8,7 @@
 #include "third_party/blink/renderer/core/layout/base_layout_algorithm_test.h"
 #include "third_party/blink/renderer/core/layout/length_utils.h"
 #include "third_party/blink/renderer/core/layout/physical_box_fragment.h"
+#include "third_party/blink/renderer/platform/heap/persistent.h"
 
 namespace blink {
 
@@ -37,15 +38,14 @@ class GridLayoutAlgorithmTest : public BaseLayoutAlgorithmTest {
     algorithm.ComputeGridGeometry(grid_sizing_tree,
                                   &unused_intrinsic_block_size);
 
-    auto& [grid_items, layout_data, tree_size] =
-        grid_sizing_tree.TreeRootData();
+    auto& tree_data = grid_sizing_tree.TreeRootData();
 
-    cached_grid_items_ = std::move(grid_items);
-    layout_data_ = std::move(layout_data);
+    cached_grid_items_ = &tree_data.GetGridItems();
+    layout_data_ = std::move(tree_data.layout_data);
   }
 
   const GridItemData& GridItem(wtf_size_t index) {
-    return cached_grid_items_.At(index);
+    return cached_grid_items_->At(index);
   }
 
   const GridSizingTrackCollection& TrackCollection(
@@ -60,10 +60,8 @@ class GridLayoutAlgorithmTest : public BaseLayoutAlgorithmTest {
     return TrackCollection(track_direction).ranges_;
   }
 
-  LayoutUnit BaseRowSizeForChild(const GridLayoutAlgorithm& algorithm,
-                                 wtf_size_t index) {
-    return algorithm.ComputeGridItemAvailableSize(GridItem(index),
-                                                  layout_data_.Rows());
+  LayoutUnit BaseRowSizeForChild(wtf_size_t index) {
+    return GridItem(index).CalculateAvailableSize(layout_data_.Rows());
   }
 
   void RunBuildGapGeometry(GridTrackSizingDirection track_direction,
@@ -84,12 +82,15 @@ class GridLayoutAlgorithmTest : public BaseLayoutAlgorithmTest {
 
   // Helper methods to access private data on GridLayoutAlgorithm. This class
   // is a friend of GridLayoutAlgorithm but the individual tests are not.
-  wtf_size_t GridItemCount() { return cached_grid_items_.Size(); }
+  wtf_size_t GridItemCount() {
+    return cached_grid_items_ ? cached_grid_items_->Size() : 0U;
+  }
 
   Vector<GridArea> GridItemGridAreas() {
     Vector<GridArea> results;
-    for (const auto& grid_item : cached_grid_items_)
+    for (const auto& grid_item : *cached_grid_items_) {
       results.push_back(grid_item.resolved_position);
+    }
     return results;
   }
 
@@ -157,7 +158,7 @@ class GridLayoutAlgorithmTest : public BaseLayoutAlgorithmTest {
     return fragment->DumpFragmentTree(flags);
   }
 
-  GridItems cached_grid_items_;
+  Persistent<GridItems> cached_grid_items_;
   GridLayoutData layout_data_;
 };
 
@@ -193,11 +194,11 @@ TEST_F(GridLayoutAlgorithmTest, GridLayoutAlgorithmBaseSetSizes) {
 
   GridLayoutAlgorithm algorithm({node, fragment_geometry, space});
   BuildGridItemsAndTrackCollections(algorithm);
-  EXPECT_EQ(BaseRowSizeForChild(algorithm, 0), LayoutUnit(0));
-  EXPECT_EQ(BaseRowSizeForChild(algorithm, 1), LayoutUnit(110));
-  EXPECT_EQ(BaseRowSizeForChild(algorithm, 2), LayoutUnit(210));
-  EXPECT_EQ(BaseRowSizeForChild(algorithm, 3), LayoutUnit(100));
-  EXPECT_EQ(BaseRowSizeForChild(algorithm, 4), LayoutUnit(110));
+  EXPECT_EQ(BaseRowSizeForChild(0), LayoutUnit(0));
+  EXPECT_EQ(BaseRowSizeForChild(1), LayoutUnit(110));
+  EXPECT_EQ(BaseRowSizeForChild(2), LayoutUnit(210));
+  EXPECT_EQ(BaseRowSizeForChild(3), LayoutUnit(100));
+  EXPECT_EQ(BaseRowSizeForChild(4), LayoutUnit(110));
 }
 
 TEST_F(GridLayoutAlgorithmTest, GridLayoutAlgorithmGapGeometry) {

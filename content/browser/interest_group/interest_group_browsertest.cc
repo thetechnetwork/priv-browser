@@ -93,6 +93,7 @@
 #include "content/public/test/test_frame_navigation_observer.h"
 #include "content/public/test/test_navigation_observer.h"
 #include "content/public/test/url_loader_monitor.h"
+#include "content/services/auction_worklet/public/cpp/auction_worklet_features.h"
 #include "content/services/auction_worklet/public/cpp/cbor_test_util.h"
 #include "content/services/auction_worklet/public/mojom/bidder_worklet.mojom.h"
 #include "content/shell/browser/shell.h"
@@ -766,7 +767,8 @@ class InterestGroupBrowserTest : public ContentBrowserTest {
          // TODO(crrev.com/c/6096602): Remove once implementation is removed.
          {blink::features::kFledgeDirectFromSellerSignalsWebBundles, {}},
          {blink::features::kFledgeTrustedSignalsKVv2Support, {}},
-         {blink::features::kFledgeTrustedSignalsKVv1CreativeScanning, {}}},
+         {blink::features::kFledgeTrustedSignalsKVv1CreativeScanning, {}},
+         {features::kFledgeTextConversionHelpers, {}}},
         /*disabled_features=*/
         {blink::features::kFencedFrames,
          blink::features::kFledgeEnforceKAnonymity,
@@ -27367,12 +27369,12 @@ class InterestGroupTrustedSignalsKVv2BrowserTest
         0xf1, 0x85, 0xd9, 0xd8, 0x91, 0xc7, 0x4d, 0xcf, 0x1e, 0xb9, 0x1a,
         0x7d, 0x50, 0xa5, 0x8b, 0x01, 0x68, 0x3e, 0x60, 0x05, 0x2d,
     };
+    BiddingAndAuctionKeySet keyset({BiddingAndAuctionServerKey{
+        std::string(reinterpret_cast<const char*>(kTestPublicKey),
+                    sizeof(kTestPublicKey)),
+        kKeyIdStr}});
     manager_->SetBiddingAndAuctionServerKeys(
-        kCoordinatorOrigin,
-        {BiddingAndAuctionServerKey{
-            std::string(reinterpret_cast<const char*>(kTestPublicKey),
-                        sizeof(kTestPublicKey)),
-            kKeyId}},
+        kCoordinatorOrigin, keyset.AsBinaryProto(),
         /*expiration=*/base::Time::Now() + base::Days(1));
   }
 
@@ -27590,6 +27592,7 @@ class InterestGroupTrustedSignalsKVv2BrowserTest
   }
 
   static constexpr int kKeyId = 170;
+  static constexpr char kKeyIdStr[] = "AA";
   base::test::ScopedFeatureList feature_list_;
 
   const url::Origin kCoordinatorOrigin = url::Origin::Create(

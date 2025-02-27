@@ -5697,7 +5697,7 @@ Element* Document::SequentialFocusNavigationStartingPoint(
         sequential_focus_navigation_starting_point_->startContainer() !=
             focused_element_ &&
         type == mojom::blink::FocusType::kForward) {
-      return scroll_marker->UltimateOriginatingElement();
+      return &scroll_marker->UltimateOriginatingElement();
     }
     return focused_element_.Get();
   }
@@ -8059,12 +8059,9 @@ void Document::RemoveFromTopLayerImmediately(Element* element) {
   }
   element->SetIsInTopLayer(false);
   display_lock_document_state_->ElementRemovedFromTopLayer(element);
-  if (RuntimeEnabledFeatures::PopoverAnchorRelationshipsEnabled() ||
-      HTMLSelectElement::CustomizableSelectEnabled(element)) {
-    if (auto* html_element = DynamicTo<HTMLElement>(element)) {
-      if (html_element->HasPopoverAttribute()) {
-        html_element->SetImplicitAnchor(nullptr);
-      }
+  if (auto* html_element = DynamicTo<HTMLElement>(element)) {
+    if (html_element->HasPopoverAttribute()) {
+      html_element->SetImplicitAnchor(nullptr);
     }
   }
 
