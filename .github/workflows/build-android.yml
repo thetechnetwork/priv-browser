@@ -5,7 +5,7 @@ on:
 
 jobs:
   build:
-    runs-on: [self-hosted, linux, chromium-build]
+    runs-on: [self-hosted, linux, chromium-build, android]
 
     steps:
       - name: Checkout Priv Browser Repo
@@ -18,7 +18,7 @@ jobs:
       - name: Install Dependencies
         run: |
           sudo apt update
-          sudo apt install -y build-essential clang lld cmake python3 python3-pip git unzip wget openjdk-17-jdk
+          sudo apt install -y build-essential clang lld cmake python3 python3-pip git unzip wget openjdk-17-jdk ninja-build
 
       - name: Setup Depot Tools
         run: |
@@ -33,16 +33,25 @@ jobs:
       - name: Install Android SDK & NDK
         run: |
           export ANDROID_SDK_ROOT=$HOME/android-sdk
-          export ANDROID_NDK_ROOT=$ANDROID_SDK_ROOT/ndk-bundle
-          mkdir -p $ANDROID_SDK_ROOT
-          wget -q "https://dl.google.com/android/repository/commandlinetools-linux-8512546_latest.zip" -O cmd-tools.zip
-          unzip -q cmd-tools.zip -d $ANDROID_SDK_ROOT
+          export ANDROID_NDK_ROOT=$ANDROID_SDK_ROOT/ndk
+          mkdir -p $ANDROID_SDK_ROOT/cmdline-tools
+          
+          # Download and unzip Android Command Line Tools
+          wget -q "https://dl.google.com/android/repository/commandlinetools-linux-10406996_latest.zip" -O cmd-tools.zip
+          unzip -q cmd-tools.zip -d $ANDROID_SDK_ROOT/cmdline-tools
           rm cmd-tools.zip
-          yes | $ANDROID_SDK_ROOT/cmdline-tools/bin/sdkmanager --licenses
-          $ANDROID_SDK_ROOT/cmdline-tools/bin/sdkmanager "platform-tools" "platforms;android-33" "build-tools;33.0.2" "ndk;25.1.8937393"
+          
+          # Move to expected location
+          mv $ANDROID_SDK_ROOT/cmdline-tools/cmdline-tools $ANDROID_SDK_ROOT/cmdline-tools/latest
+          
+          # Accept licenses and install dependencies
+          yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --licenses
+          $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager "platform-tools" "platforms;android-33" "build-tools;33.0.2" "ndk;25.1.8937393"
+          
+          # Add environment variables
           echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
           echo "ANDROID_NDK_ROOT=$ANDROID_NDK_ROOT" >> $GITHUB_ENV
-          echo "PATH=$PATH:$ANDROID_SDK_ROOT/cmdline-tools/bin:$ANDROID_SDK_ROOT/platform-tools" >> $GITHUB_ENV
+          echo "PATH=$PATH:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$ANDROID_SDK_ROOT/platform-tools" >> $GITHUB_ENV
 
       - name: Configure `.gclient`
         run: |
