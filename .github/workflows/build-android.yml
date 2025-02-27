@@ -1,0 +1,82 @@
+name: Build Priv Browser - Windows
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: [self-hosted, windows, chromium-build]
+
+    steps:
+      - name: Checkout Priv Browser Repo
+        uses: actions/checkout@v4
+        with:
+          repository: TheTechNetwork/priv-browser
+          #fetch-depth: 1
+          #submodules: true
+
+      - name: Setup Depot Tools
+        run: |
+          if (-Not (Test-Path "C:\priv_browser_build\depot_tools")) {
+            git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git C:\priv_browser_build\depot_tools
+          } else {
+            cd C:\priv_browser_build\depot_tools
+            git pull
+          }
+          echo "C:\priv_browser_build\depot_tools" | Out-File -Append -Encoding ASCII $env:GITHUB_PATH
+
+      - name: Configure `.gclient`
+        run: |
+          New-Item -ItemType Directory -Path "C:\priv_browser_build\priv-browser" -Force
+          @"
+          solutions = [
+            {
+              "name": "src",
+              "url": "https://github.com/TheTechNetwork/priv-browser.git",
+              "deps_file": "DEPS",
+              "managed": False,
+              "custom_deps": {},
+              "custom_vars": {},
+            },
+          ]
+          target_os = ["win"]
+          "@ | Set-Content -Path "C:\priv_browser_build\priv-browser\.gclient"
+
+      - name: Sync Priv Browser Dependencies
+        shell: cmd
+        run: |
+          cd C:\priv_browser_build\priv-browser
+          gclient sync --nohooks --with_branch_heads --with_tags
+
+      - name: Configure Priv Browser for Windows
+        shell: cmd
+        run: |
+          cd C:\priv_browser_build\priv-browser\src
+          gn gen out\Windows --args="target_os=\"win\" target_cpu=\"x64\" is_debug=false"
+
+      - name: Build Priv Browser (Windows)
+        shell: cmd
+        run: |
+          cd C:\priv_browser_build\priv-browser\src
+          ninja -C out\Windows chrome -j%NUMBER_OF_PROCESSORS%
+
+      - name: Verify Output Files
+        shell: cmd
+        run: |
+          echo "Checking output directory..."
+          dir C:\priv_browser_build\priv-browser\src\out\Windows
+          echo "File info for chrome.exe:"
+          file C:\priv_browser_build\priv-browser\src\out\Windows\chrome.exe || echo "chrome.exe not found"
+
+      - name: Fix Permissions (If Needed)
+        shell: cmd
+        run: |
+          icacls C:\priv_browser_build\priv-browser\src\out\Windows\chrome.exe /grant Everyone:F /T
+
+      - name: Upload Windows Build
+        uses: actions/upload-artifact@v4
+        with:
+          name: priv-browser-windows-build
+          path: |
+            C:\priv_browser_build\priv-browser\src\out\Windows\chrome.exe
+            C:\priv_browser_build\priv-browser\src\out\Windows\*
