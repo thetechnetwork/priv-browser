@@ -1,4 +1,4 @@
-name: Build Chromium - Linux
+name: Build Priv Browser - Linux
 
 on:
   workflow_dispatch:
@@ -6,66 +6,64 @@ on:
 jobs:
   build:
     runs-on: [self-hosted, linux, chromium-build]
+
     steps:
-      - name: Checkout Chromium Fork
+      - name: Checkout Priv Browser Repo
         uses: actions/checkout@v4
         with:
           repository: TheTechNetwork/priv-browser
-          fetch-depth: 1  # Fetch latest commit only
-          submodules: true  # Fetch only necessary submodules
-
-      - name: Set up caching
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.ccache
-            src/out/Default
-          key: linux-chromium-${{ github.run_id }}
-          restore-keys: |
-            linux-chromium-
+          fetch-depth: 1  # Shallow clone for faster builds
+          submodules: true  # Only fetch needed submodules
 
       - name: Install Dependencies
         run: |
           sudo apt update
-          sudo apt install -y build-essential clang lld ninja-build python3 python3-pip
+          sudo apt install -y build-essential ninja-build clang lld cmake python3 python3-pip git unzip wget
 
-      - name: Fetch Depot Tools
+      - name: Setup Depot Tools
         run: |
-          git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
-          echo "$PWD/depot_tools" >> $GITHUB_PATH
+          if [ ! -d "$HOME/priv_browser_build/depot_tools" ]; then
+            git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git "$HOME/priv_browser_build/depot_tools"
+          else
+            cd "$HOME/priv_browser_build/depot_tools"
+            git pull
+          fi
+          echo "PATH=$PATH:$HOME/priv_browser_build/depot_tools" >> $GITHUB_ENV
 
-      - name: Sync Chromium Source (Prevent Google Internal Fetch)
+      - name: Configure `.gclient`
         run: |
-          fetch --nohooks --no-history chromium
-          cd src
-          echo "{ 'checkout_google_internal': False }" > .gclient  # Force disable internal Google repos
+          mkdir -p "$HOME/priv_browser_build"
+          cat > "$HOME/priv_browser_build/priv-browser/.gclient" <<EOL
+          solutions = [
+            {
+              "name": "src",
+              "url": "https://github.com/TheTechNetwork/priv-browser.git",
+              "deps_file": "DEPS",
+              "managed": False,
+              "custom_deps": {},
+              "custom_vars": {},
+            },
+          ]
+          target_os = ["linux"]
+          EOL
+
+      - name: Sync Priv Browser Dependencies
+        run: |
+          cd "$HOME/priv_browser_build/priv-browser"
           gclient sync --nohooks --with_branch_heads --with_tags
 
-      - name: Run GN Config
+      - name: Configure Priv Browser for Linux
         run: |
-          cd src
-          gn gen out/Default --args='is_debug=false is_component_build=false symbol_level=0 use_ccache=true'
+          cd "$HOME/priv_browser_build/priv-browser/src"
+          gn gen out/Linux --args="target_os=\"linux\" target_cpu=\"x64\" is_debug=false"
 
-      - name: Build Chromium
+      - name: Build Priv Browser (Linux)
         run: |
-          cd src
-          autoninja -C out/Default chrome
+          cd "$HOME/priv_browser_build/priv-browser/src"
+          ninja -C out/Linux chrome -j$(nproc)
 
-      - name: Run Tests
-        run: |
-          cd src
-          autoninja -C out/Default base_unittests
-          ./out/Default/base_unittests --gtest_output=xml:test-results.xml
-
-      - name: Upload Test Results
+      - name: Upload Linux Build
         uses: actions/upload-artifact@v4
         with:
-          name: test-results-linux
-          path: src/out/Default/test-results.xml
-
-      - name: Upload Build Artifact
-        uses: softprops/action-gh-release@v2
-        with:
-          files: src/out/Default/chrome
-          tag_name: latest
-          token: ${{ secrets.GITHUB_TOKEN }}
+          name: priv-browser-linux-build
+          path: "$HOME/priv_browser_build/priv-browser/src/out/Linux/chrome"
