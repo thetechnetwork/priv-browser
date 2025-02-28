@@ -24,7 +24,7 @@ jobs:
             git fetch origin
             git reset --hard origin/main
           }
-          echo "C:\priv_browser_build\depot_tools" | Out-File -Append -Encoding ASCII $env:GITHUB_PATH| Out-File -Append -Encoding ASCII $env:GITHUB_PATH
+          Add-Content -Path $env:GITHUB_PATH -Value "C:\priv_browser_build\depot_tools"
 
       - name: Configure `.gclient`
         run: |
