@@ -34,24 +34,34 @@ jobs:
         run: |
           export ANDROID_SDK_ROOT=$HOME/android-sdk
           export ANDROID_NDK_ROOT=$ANDROID_SDK_ROOT/ndk
-          mkdir -p $ANDROID_SDK_ROOT/cmdline-tools
-          
-          # Download and unzip Android Command Line Tools
-          wget -q "https://dl.google.com/android/repository/commandlinetools-linux-10406996_latest.zip" -O cmd-tools.zip
-          unzip -q cmd-tools.zip -d $ANDROID_SDK_ROOT/cmdline-tools
-          rm cmd-tools.zip
-          
-          # Move to expected location
-          mv $ANDROID_SDK_ROOT/cmdline-tools/cmdline-tools $ANDROID_SDK_ROOT/cmdline-tools/latest
-          
-          # Accept licenses and install dependencies
-          yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --licenses
-          $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager "platform-tools" "platforms;android-33" "build-tools;33.0.2" "ndk;25.1.8937393"
-          
-          # Add environment variables
-          echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
-          echo "ANDROID_NDK_ROOT=$ANDROID_NDK_ROOT" >> $GITHUB_ENV
-          echo "PATH=$PATH:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$ANDROID_SDK_ROOT/platform-tools" >> $GITHUB_ENV
+
+          # Check if SDK is already installed
+          if [ -d "$ANDROID_SDK_ROOT/platform-tools" ] && [ -d "$ANDROID_SDK_ROOT/cmdline-tools/latest" ]; then
+            echo "✅ Android SDK is already installed. Skipping installation."
+          else
+            echo "⬇️ Installing Android SDK & NDK..."
+            mkdir -p $ANDROID_SDK_ROOT/cmdline-tools
+
+            # Download and unzip Android Command Line Tools
+            wget -q "https://dl.google.com/android/repository/commandlinetools-linux-10406996_latest.zip" -O cmd-tools.zip
+            unzip -q cmd-tools.zip -d $ANDROID_SDK_ROOT/cmdline-tools
+            rm cmd-tools.zip
+            
+            # Move to expected location only if directory is empty
+            if [ ! -d "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin" ]; then
+              mv $ANDROID_SDK_ROOT/cmdline-tools/cmdline-tools $ANDROID_SDK_ROOT/cmdline-tools/latest
+            else
+              echo "⚠️ 'cmdline-tools/latest' already exists. Skipping move."
+            fi
+
+            # Accept licenses and install dependencies
+            yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --licenses
+            $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager "platform-tools" "platforms;android-33" "build-tools;33.0.2" "ndk;25.1.8937393"
+
+            echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
+            echo "ANDROID_NDK_ROOT=$ANDROID_NDK_ROOT" >> $GITHUB_ENV
+            echo "PATH=$PATH:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$ANDROID_SDK_ROOT/platform-tools" >> $GITHUB_ENV
+          fi
 
       - name: Configure `.gclient`
         run: |
