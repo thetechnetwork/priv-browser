@@ -110,6 +110,4 @@ jobs:
         with:
           name: priv-browser-android-apk
           path: |
-            $HOME/priv_browser_build/priv-browser/src/out/Android/apks/ChromePublic.apk
-            $HOME/priv_browser_build/priv-browser/src/out/Android/apks/ChromePublic.apk.mapping
-            $HOME/priv_browser_build/priv-browser/src/out/Android/apks/ChromePublic.apk.R.txt
+            $HOME/priv_browser_build/priv-browser/src/out/Android/apks/
