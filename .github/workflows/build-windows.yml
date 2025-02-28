@@ -22,9 +22,9 @@ jobs:
           
           if exist C:\priv_browser_build\depot_tools (
             echo "✅ depot_tools already exists, updating instead of cloning..."
-            taskkill /F /IM git.exe /T || echo "No Git processes found"
-            takeown /F C:\priv_browser_build\depot_tools /R /D Y
-            icacls C:\priv_browser_build\depot_tools /grant Everyone:F /T
+            #taskkill /F /IM git.exe /T || echo "No Git processes found"
+            #takeown /F C:\priv_browser_build\depot_tools /R /D Y
+            #icacls C:\priv_browser_build\depot_tools /grant Everyone:F /T
             cd C:\priv_browser_build\depot_tools
             git fetch --all
             git reset --hard origin/main
