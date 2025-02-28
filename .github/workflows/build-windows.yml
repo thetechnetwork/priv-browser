@@ -19,19 +19,12 @@ jobs:
           git config --global core.autocrlf false
           git config --global core.filemode false
           git config --global --add safe.directory C:/priv_browser_build/depot_tools
-          git config --global --add safe.directory C:/src/depot_tools
           
           if exist C:\priv_browser_build\depot_tools (
             echo "✅ depot_tools already exists, updating instead of cloning..."
-            
-            echo "🔍 Checking for locked files in depot_tools..."
             taskkill /F /IM git.exe /T || echo "No Git processes found"
-
-            echo "🔓 Fixing permissions on depot_tools..."
             takeown /F C:\priv_browser_build\depot_tools /R /D Y
             icacls C:\priv_browser_build\depot_tools /grant Everyone:F /T
-            
-            echo "🔄 Pulling latest changes..."
             cd C:\priv_browser_build\depot_tools
             git fetch --all
             git reset --hard origin/main
@@ -39,9 +32,7 @@ jobs:
             echo "⬇️ Cloning depot_tools since it doesn't exist..."
             git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git C:\priv_browser_build\depot_tools
           )
-
           echo C:\priv_browser_build\depot_tools >> %GITHUB_PATH%
-
 
       - name: Configure `.gclient`
         shell: cmd
@@ -57,28 +48,44 @@ jobs:
           echo   "custom_vars": {}, >> C:\priv_browser_build\priv-browser\.gclient
           echo } >> C:\priv_browser_build\priv-browser\.gclient
 
-
       - name: Sync Priv Browser Dependencies
         shell: cmd
         run: |
           cd C:\priv_browser_build\priv-browser
           gclient sync --nohooks --with_branch_heads --with_tags
           
-      - name: Configure and Build for Windows
+      - name: Configure Priv Browser for Windows
         shell: cmd
         run: |
           cd C:\priv_browser_build\priv-browser\src
           gn gen out\Windows --args="target_os=\"win\" target_cpu=\"x64\" is_debug=false"
-          ninja -C out\Windows chrome
+
+      - name: Build Priv Browser for Windows
+        shell: cmd
+        run: |
+          cd C:\priv_browser_build\priv-browser\src
+          autoninja -C out\Windows chrome
+
+      - name: Verify Output Files
+        shell: cmd
+        run: |
+          echo "Checking output directory..."
+          dir C:\priv_browser_build\priv-browser\src\out\Windows
 
       - name: Zip Windows Build
         shell: cmd
         run: |
-          powershell Compress-Archive -Path C:\priv_browser_build\priv-browser\src\out\Windows\* -DestinationPath C:\priv-browser-windows.zip
+          mkdir C:\tmp\priv-browser-windows
+          powershell Compress-Archive -Path C:\priv_browser_build\priv-browser\src\out\Windows\* -DestinationPath C:\tmp\priv-browser-windows\priv-browser-windows.zip
 
       - name: Upload Windows Build
         uses: actions/upload-artifact@v4
         with:
           name: priv-browser-windows-build
-          path: C:\priv-browser-windows.zip
+          path: C:\tmp\priv-browser-windows\priv-browser-windows.zip
           if-no-files-found: error
+
+      - name: Cleanup Zip File
+        shell: cmd
+        run: |
+          rmdir /S /Q C:\tmp\priv-browser-windows
