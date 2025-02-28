@@ -17,6 +17,11 @@ jobs:
 
       - name: Setup Depot Tools
         run: |
+          git config --global core.autocrlf false
+          git config --global core.filemode false
+          git config --global core.fscache true
+          git config --global core.preloadindex true
+          git config --global depot-tools.allowGlobalGitConfig false
           if (-Not (Test-Path "C:\priv_browser_build\depot_tools")) {
             git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git C:\priv_browser_build\depot_tools
           } else {
