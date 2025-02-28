@@ -62,6 +62,18 @@ jobs:
           gclient runhooks
           gn gen out\Windows --args="target_os=\"win\" target_cpu=\"x64\" is_debug=false"
 
+      - name: Debug GN Output
+        shell: cmd
+        run: |
+          cd C:\priv_browser_build\priv-browser\src
+          if not exist out\Windows\build.ninja (
+            echo ❌ Error: build.ninja was not generated!
+            type out\Windows\gn.err
+            exit 1
+          ) else (
+            echo ✅ build.ninja was generated successfully.
+          )
+
       - name: Build Priv Browser (Windows)
         shell: cmd
         run: |
