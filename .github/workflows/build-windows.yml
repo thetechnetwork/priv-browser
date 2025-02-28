@@ -30,7 +30,7 @@ jobs:
       - name: Configure `.gclient`
         shell: cmd
         run: |
-          mkdir C:\priv_browser_build
+          if not exist C:\priv_browser_build mkdir C:\priv_browser_build
           echo solutions = [ > C:\priv_browser_build\priv-browser\.gclient
           echo { >> C:\priv_browser_build\priv-browser\.gclient
           echo   "name": "src", >> C:\priv_browser_build\priv-browser\.gclient
@@ -40,6 +40,7 @@ jobs:
           echo   "custom_deps": {}, >> C:\priv_browser_build\priv-browser\.gclient
           echo   "custom_vars": {}, >> C:\priv_browser_build\priv-browser\.gclient
           echo } >> C:\priv_browser_build\priv-browser\.gclient
+
 
       - name: Sync Priv Browser Dependencies
         shell: cmd
