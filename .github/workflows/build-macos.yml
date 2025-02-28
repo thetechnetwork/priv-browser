@@ -1,72 +1,81 @@
-name: Build Chromium - macOS
+name: Build Priv Browser - macOS
 
 on:
-  #push:
-  #  branches:
-  #    - main
-  #pull_request:
   workflow_dispatch:
 
 jobs:
   build:
-    runs-on: [self-hosted, macos, chromium-build]  # Ensure correct runner
+    runs-on: [self-hosted, macos, chromium-build]
+
     steps:
-      - name: Checkout Chromium Fork
+      - name: Checkout Priv Browser Repo
         uses: actions/checkout@v4
         with:
           repository: TheTechNetwork/priv-browser
-          submodules: recursive
-
-      - name: Set up caching
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/Library/Caches
-            src/out/Default
-          key: macos-chromium-${{ github.run_id }}
-          restore-keys: |
-            macos-chromium-
 
       - name: Install Dependencies
         run: |
-          brew install ninja ccache python3
+          brew install ninja cmake python3 git clang llvm
 
-      - name: Fetch Depot Tools
+      - name: Setup Depot Tools
         run: |
-          git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
-          echo "$PWD/depot_tools" >> $GITHUB_PATH
+          if [ ! -d "$HOME/priv_browser_build/depot_tools" ]; then
+            git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git "$HOME/priv_browser_build/depot_tools"
+          else
+            cd "$HOME/priv_browser_build/depot_tools"
+            git pull
+          fi
+          echo "PATH=$PATH:$HOME/priv_browser_build/depot_tools" >> $GITHUB_ENV
 
-      - name: Sync Chromium Source
+      - name: Configure `.gclient`
         run: |
-          fetch --nohooks chromium
-          cd src
+          mkdir -p "$HOME/priv_browser_build"
+          cat > "$HOME/priv_browser_build/priv-browser/.gclient" <<EOL
+          solutions = [
+            {
+              "name": "src",
+              "url": "https://github.com/TheTechNetwork/priv-browser.git",
+              "deps_file": "DEPS",
+              "managed": False,
+              "custom_deps": {},
+              "custom_vars": {},
+            },
+          ]
+          target_os = ["mac"]
+          EOL
+
+      - name: Sync Priv Browser Dependencies
+        run: |
+          cd "$HOME/priv_browser_build/priv-browser"
           gclient sync --nohooks --with_branch_heads --with_tags
 
-      - name: Run GN Config
+      - name: Configure Priv Browser for macOS
         run: |
-          cd src
-          gn gen out/Default --args='is_debug=false is_component_build=false symbol_level=0 use_ccache=true'
+          cd "$HOME/priv_browser_build/priv-browser/src"
+          gn gen out/mac --args='target_os="mac" target_cpu="x64" is_debug=false'
 
-      - name: Build Chromium
+      - name: Build Priv Browser for macOS
         run: |
-          cd src
-          autoninja -C out/Default chrome
+          cd "$HOME/priv_browser_build/priv-browser/src"
+          autoninja -C out/mac chrome
 
-      - name: Run Tests
+      - name: Verify Output Files
         run: |
-          cd src
-          autoninja -C out/Default base_unittests
-          ./out/Default/base_unittests --gtest_output=xml:test-results.xml
+          echo "Checking output directory..."
+          ls -lah "$HOME/priv_browser_build/priv-browser/src/out/mac"
 
-      - name: Upload Test Results
+      - name: Zip macOS Build Files
+        run: |
+          mkdir -p /tmp/priv-browser-mac
+          zip -r /tmp/priv-browser-mac/priv-browser-mac.zip /home/user/priv_browser_build/priv-browser/src/out/mac
+
+      - name: Upload macOS Build
         uses: actions/upload-artifact@v4
         with:
-          name: test-results-macos
-          path: src/out/Default/test-results.xml
+          name: priv-browser-mac-build
+          path: /tmp/priv-browser-mac/priv-browser-mac.zip
+          if-no-files-found: error
 
-      - name: Upload Build Artifact
-        uses: softprops/action-gh-release@v2
-        with:
-          files: src/out/Default/Chromium.app
-          tag_name: latest
-          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Cleanup Zip File
+        run: |
+          rm -rf /tmp/priv-browser-mac
