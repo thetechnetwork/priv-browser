@@ -45,7 +45,7 @@ jobs:
         run: |
           cd C:\priv_browser_build\priv-browser
           gclient sync --nohooks --with_branch_heads --with_tags
-
+          
       - name: Configure and Build for Windows
         shell: cmd
         run: |
