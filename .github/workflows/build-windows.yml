@@ -22,7 +22,8 @@ jobs:
             git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git C:\priv_browser_build\depot_tools
           ) else (
             cd C:\priv_browser_build\depot_tools
-            git pull
+            git fetch --all
+            git reset --hard origin/main
           )
           echo C:\priv_browser_build\depot_tools >> %GITHUB_PATH%
 
