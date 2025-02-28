@@ -12,13 +12,11 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: TheTechNetwork/priv-browser
-          #fetch-depth: 1  # Shallow clone for faster builds
-          #submodules: true  # Only fetch needed submodules
 
       - name: Install Dependencies
         run: |
           sudo apt update
-          sudo apt install -y build-essential ninja-build clang lld cmake python3 python3-pip git unzip wget
+          sudo apt install -y build-essential clang lld cmake python3 python3-pip git unzip wget ninja-build
 
       - name: Setup Depot Tools
         run: |
@@ -55,15 +53,30 @@ jobs:
       - name: Configure Priv Browser for Linux
         run: |
           cd "$HOME/priv_browser_build/priv-browser/src"
-          gn gen out/Linux --args="target_os=\"linux\" target_cpu=\"x64\" is_debug=false"
+          gn gen out/Linux --args='target_os="linux" target_cpu="x64" is_debug=false'
 
-      - name: Build Priv Browser (Linux)
+      - name: Build Priv Browser for Linux
         run: |
           cd "$HOME/priv_browser_build/priv-browser/src"
-          ninja -C out/Linux chrome -j$(nproc)
+          autoninja -C out/Linux chrome
+
+      - name: Verify Output Files
+        run: |
+          echo "Checking output directory..."
+          ls -lah "$HOME/priv_browser_build/priv-browser/src/out/Linux"
+
+      - name: Zip Linux Build Files
+        run: |
+          mkdir -p /tmp/priv-browser-linux
+          zip -r /tmp/priv-browser-linux/priv-browser-linux.zip /home/user/priv_browser_build/priv-browser/src/out/Linux
 
       - name: Upload Linux Build
         uses: actions/upload-artifact@v4
         with:
           name: priv-browser-linux-build
-          path: "$HOME/priv_browser_build/priv-browser/src/out/Linux/chrome"
+          path: /tmp/priv-browser-linux/priv-browser-linux.zip
+          if-no-files-found: error
+
+      - name: Cleanup Zip File
+        run: |
+          rm -rf /tmp/priv-browser-linux
