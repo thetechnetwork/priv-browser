@@ -70,7 +70,7 @@ jobs:
           set DEPOT_TOOLS_WIN_TOOLCHAIN=0
           cd C:\priv_browser_build\priv-browser\src
           gclient runhooks
-          ninja -C out\Windows chrome -j%NUMBER_OF_PROCESSORS%
+          ninja -C out\Windows chrome
 
       - name: Verify Output Files
         shell: cmd
