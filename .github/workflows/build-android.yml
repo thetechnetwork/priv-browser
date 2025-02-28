@@ -104,10 +104,18 @@ jobs:
         run: |
           echo "Checking output directory..."
           ls -lah "$HOME/priv_browser_build/priv-browser/src/out/Android/apks"
+      - name: Zip APK Files
+        run: |
+          mkdir -p /tmp/priv-browser-android-apk
+          zip -r /tmp/priv-browser-android-apk/priv-browser-android.zip /home/user/priv_browser_build/priv-browser/src/out/Android/apks
 
-      - name: Upload Android APK
+      - name: Upload Android APK Zip
         uses: actions/upload-artifact@v4
         with:
           name: priv-browser-android-apk
-          path: |
-            $HOME/priv_browser_build/priv-browser/src/out/Android/apks/
+          path: /tmp/priv-browser-android-apk/priv-browser-android.zip
+          if-no-files-found: error  # Fail the workflow if the ZIP is missing
+
+      - name: Cleanup Zip File
+        run: |
+          rm -rf /tmp/priv-browser-android-apk
