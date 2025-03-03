@@ -47,6 +47,7 @@ jobs:
           echo   "custom_deps": {}, >> C:\priv_browser_build\priv-browser\.gclient
           echo   "custom_vars": {}, >> C:\priv_browser_build\priv-browser\.gclient
           echo } >> C:\priv_browser_build\priv-browser\.gclient
+          echo ] >> C:\priv_browser_build\priv-browser\.gclient
 
       - name: Sync Priv Browser Dependencies
         shell: cmd
