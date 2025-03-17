@@ -37,6 +37,7 @@
 #include "third_party/blink/public/mojom/frame/color_scheme.mojom-blink.h"
 #include "third_party/blink/renderer/platform/fonts/plain_text_painter.h"
 #include "third_party/blink/renderer/platform/fonts/text_run_paint_info.h"
+#include "third_party/blink/renderer/platform/geometry/contoured_rect.h"
 #include "third_party/blink/renderer/platform/geometry/float_rounded_rect.h"
 #include "third_party/blink/renderer/platform/geometry/path.h"
 #include "third_party/blink/renderer/platform/geometry/skia_geometry_utils.h"
@@ -47,6 +48,8 @@
 #include "third_party/blink/renderer/platform/graphics/paint/paint_controller.h"
 #include "third_party/blink/renderer/platform/graphics/paint/paint_record.h"
 #include "third_party/blink/renderer/platform/graphics/paint/paint_recorder.h"
+#include "third_party/blink/renderer/platform/graphics/platform_focus_ring.h"
+#include "third_party/blink/renderer/platform/graphics/skia/skia_utils.h"
 #include "third_party/blink/renderer/platform/graphics/styled_stroke_data.h"
 #include "third_party/blink/renderer/platform/instrumentation/tracing/trace_event.h"
 #include "third_party/blink/renderer/platform/transforms/affine_transform.h"
@@ -956,26 +959,26 @@ void GraphicsContext::StrokeRect(const gfx::RectF& rect,
   }
 }
 
-void GraphicsContext::ClipRoundedRect(const FloatRoundedRect& rrect,
-                                      SkClipOp clip_op,
-                                      AntiAliasingMode should_antialias) {
-  if (!rrect.IsRounded()) {
-    ClipRect(gfx::RectFToSkRect(rrect.Rect()), should_antialias, clip_op);
+void GraphicsContext::ClipContouredRect(const ContouredRect& contoured_rect,
+                                        SkClipOp clip_op,
+                                        AntiAliasingMode should_antialias) {
+  if (!contoured_rect.IsRounded()) {
+    ClipRect(gfx::RectFToSkRect(contoured_rect.Rect()), should_antialias,
+             clip_op);
     return;
   }
 
-  if (rrect.HasSimpleRoundedCurvature()) {
-    ClipRRect(SkRRect(rrect), should_antialias, clip_op);
+  if (contoured_rect.HasRoundCurvature()) {
+    ClipRRect(SkRRect(contoured_rect.AsRoundedRect()), should_antialias,
+              clip_op);
     return;
   }
 
-  Path path;
-  path.AddRoundedRect(rrect);
-  ClipPath(path.GetSkPath(), should_antialias, clip_op);
+  ClipPath(contoured_rect.GetPath().GetSkPath(), should_antialias, clip_op);
 }
 
-void GraphicsContext::ClipOutRoundedRect(const FloatRoundedRect& rect) {
-  ClipRoundedRect(rect, SkClipOp::kDifference);
+void GraphicsContext::ClipOutContouredRect(const ContouredRect& rect) {
+  ClipContouredRect(rect, SkClipOp::kDifference);
 }
 
 void GraphicsContext::ClipRect(const SkRect& rect,

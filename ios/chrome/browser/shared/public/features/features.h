@@ -688,12 +688,8 @@ BASE_DECLARE_FEATURE(kMagicStack);
 // Feature that enables tab resumption.
 BASE_DECLARE_FEATURE(kTabResumption);
 
-// Feature that enables enhancements for Tab Resumption.
-BASE_DECLARE_FEATURE(kTabResumption1_5);
-
-// A parameter to indicate whether the Tab resumption tile should have a see
-// more button.
-extern const char kTR15SeeMoreButtonParam[];
+// Whether the tab resumption feature is enabled.
+bool IsTabResumptionEnabled();
 
 // Feature that enables images for Tab Resumption.
 BASE_DECLARE_FEATURE(kTabResumptionImages);
@@ -709,12 +705,6 @@ extern const char kTabResumptionImagesTypesSalient[];
 // A parameter value for `kTabResumptionImagesTypes` to only enable thumbnails
 // images images for tab resumption.
 extern const char kTabResumptionImagesTypesThumbnails[];
-
-// Feature that enables tab resumption 2.0.
-BASE_DECLARE_FEATURE(kTabResumption2);
-
-// Feature that enables tab resumption 2.0 reason bubble.
-BASE_DECLARE_FEATURE(kTabResumption2Reason);
 
 // A parameter to indicate whether the Most Visited Tiles should be in the Magic
 // Stack.
@@ -737,34 +727,9 @@ extern const char kSetUpListCompactedTimeThresholdDays[];
 // TODO(crbug.com/40246814): Remove this.
 extern const char kDiscoverFeedIsNativeUIEnabled[];
 
-// Feature parameters for the tab resumption feature. If no parameter is set,
-// the default (most recent tab only) will be used.
-extern const char kTabResumptionParameterName[];
-extern const char kTabResumptionMostRecentTabOnlyParam[];
-extern const char kTabResumptionAllTabsParam[];
-
 // Feature parameters for the tab resumption feature. The threshold for tabs
 // fetched from sync in seconds. Default to 12 hours.
 extern const char kTabResumptionThresholdParameterName[];
-
-// Whether the tab resumption feature is enabled.
-bool IsTabResumptionEnabled();
-
-// Whether the tab resumption feature is enabled in 2.0 version. Implies
-// `IsTabResumptionEnabled`.
-bool IsTabResumption2_0Enabled();
-
-// Whether to show the reason bubble for Tab resumption.
-bool IsTabResumption2ReasonEnabled();
-
-// Whether the tab resumption feature is enabled for most recent tab only.
-bool IsTabResumptionEnabledForMostRecentTabOnly();
-
-// Whether the tab resumption enhancements feature is enabled.
-bool IsTabResumption1_5Enabled();
-
-// Whether the tab resumption with see more button is enabled.
-bool IsTabResumption1_5SeeMoreEnabled();
 
 // Whether the tab resumption with salient images for distant tabs (or fallback
 // for local tabs) is enabled.
@@ -1015,8 +980,7 @@ bool FRESignInSecondaryActionLabelUpdate();
 // Enables passkey syncing follow-up features.
 BASE_DECLARE_FEATURE(kIOSPasskeysM2);
 
-// Helper function returning the status of `kIOSPasskeysM2` and the M1
-// prerequisite.
+// Helper function returning the status of `kIOSPasskeysM2`.
 bool IOSPasskeysM2Enabled();
 
 extern const char kFullscreenTransitionSlower[];
@@ -1054,5 +1018,56 @@ BASE_DECLARE_FEATURE(kIPHAblation);
 
 // Returns true if IPH ablation is enabled.
 bool IsIPHAblationEnabled();
+
+// Feature that prevents certain gesture recognition for IPHs.
+BASE_DECLARE_FEATURE(kIPHGestureRecognitionAblation);
+
+// Returns true if taps inside the IPH bubble should be ignored.
+bool IsIPHGestureRecognitionInsideTapAblationEnabled();
+
+// Returns true if taps outside the IPH bubble should be ignored.
+bool IsIPHGestureRecognitionOutsideTapAblationEnabled();
+
+// Returns true if pans outside the IPH bubble should be ignored.
+bool IsIPHGestureRecognitionPanAblationEnabled();
+
+// Returns true if swipes during an IPH presentation should be ignored.
+bool IsIPHGestureRecognitionSwipeAblationEnabled();
+
+// Feature flag for enabling the non-modal sign-in promo.
+BASE_DECLARE_FEATURE(kNonModalSignInPromo);
+
+// Returns whether the non-modal sign-in promo is enabled.
+bool IsNonModalSignInPromoEnabled();
+
+// Feature flags for enhanced One Tap Minimap experiment
+// The main feature that controls of these restrictions. Different parameters
+// control the different available restrictions.
+BASE_DECLARE_FEATURE(kIOSOneTapMiniMapRestrictions);
+// A parameter that requires revalidating the address using NSDataDetector.
+extern const char kIOSOneTapMiniMapRestrictionCrossValidateParamName[];
+extern const base::FeatureParam<bool>
+    kIOSOneTapMiniMapRestrictionCrossValidateParam;
+// A parameter that requires a higher confidence.
+extern const char kIOSOneTapMiniMapRestrictionThreshholdParamName[];
+extern const base::FeatureParam<double>
+    kIOSOneTapMiniMapRestrictionThreshholdParam;
+// A parameter that requires a minimum length for the address.
+extern const char kIOSOneTapMiniMapRestrictionMinCharsParamName[];
+extern const base::FeatureParam<int> kIOSOneTapMiniMapRestrictionMinCharsParam;
+// A parameter that requires a maximum number of sections for the address.
+extern const char kIOSOneTapMiniMapRestrictionMaxSectionsParamName[];
+extern const base::FeatureParam<int>
+    kIOSOneTapMiniMapRestrictionMaxSectionsParam;
+// A parameter that the address contains a word (separated by spaces) of at
+// least that number of characters.
+extern const char kIOSOneTapMiniMapRestrictionLongestWordMinCharsParamName[];
+extern const base::FeatureParam<int>
+    kIOSOneTapMiniMapRestrictionLongestWordMinCharsParam;
+// A parameter that requires having a higher proportion of alphanumerical
+// characters.
+extern const char kIOSOneTapMiniMapRestrictionMinAlphanumProportionParamName[];
+extern const base::FeatureParam<double>
+    kIOSOneTapMiniMapRestrictionMinAlphanumProportionParam;
 
 #endif  // IOS_CHROME_BROWSER_SHARED_PUBLIC_FEATURES_FEATURES_H_

@@ -27,11 +27,6 @@ BASE_DECLARE_FEATURE(kWebAuthCableExtensionAnywhere);
 // passkeys from GMSCore. This is for comparison only.
 COMPONENT_EXPORT(DEVICE_FIDO)
 BASE_DECLARE_FEATURE(kWebAuthnAndroidUsePasskeyCache);
-
-// Enable the "Phone as a security key" fragment in Privacy Settings. This flag
-// is now handled by Gmscore, in Android Settings > "Passkey-linked devices".
-COMPONENT_EXPORT(DEVICE_FIDO)
-BASE_DECLARE_FEATURE(kWebAuthnEnablePaaskFragment);
 #endif  // BUILDFLAG(IS_ANDROID)
 
 // These five feature flags control whether iCloud Keychain is the default
@@ -111,11 +106,6 @@ BASE_DECLARE_FEATURE(kDigitalCredentialsHybridLinking);
 COMPONENT_EXPORT(DEVICE_FIDO)
 BASE_DECLARE_FEATURE(kWebAuthnPasskeyUpgrade);
 
-// Stops Chrome from skipping the "Trust this computer" screen if the user
-// doesn't have phones.
-COMPONENT_EXPORT(DEVICE_FIDO)
-BASE_DECLARE_FEATURE(kWebAuthnNeverSkipTrustThisComputer);
-
 // Checks attestation from the enclave service.
 COMPONENT_EXPORT(DEVICE_FIDO)
 BASE_DECLARE_FEATURE(kWebAuthnEnclaveAttestation);
@@ -148,6 +138,11 @@ BASE_DECLARE_FEATURE(kWebAuthnRemoteDesktopAllowedOriginsPolicy);
 // unexportable keys when a TPM is not available.
 COMPONENT_EXPORT(DEVICE_FIDO)
 BASE_DECLARE_FEATURE(kWebAuthnMicrosoftSoftwareUnexportableKeyProvider);
+
+// Enables hiding passkeys instead of hard deleting them when reported as
+// obsolete by the signal API.
+COMPONENT_EXPORT(DEVICE_FIDO)
+BASE_DECLARE_FEATURE(kWebAuthnSignalApiHidePasskeys);
 
 }  // namespace device
 

@@ -31,16 +31,15 @@ namespace {
 using autofill::AutofillAiDelegate;
 using enum SaveOrUpdateAutofillAiDataController::EntityAttributeUpdateType;
 
-// Returns whether user interacted with the bubble, based on its closed reason.
-bool GetUserInteractionFromAutofillAiBubbleClosedReason(
+bool DidUserDeclineExplicitly(
     SaveOrUpdateAutofillAiDataController::AutofillAiBubbleClosedReason
         closed_reason) {
   using enum SaveOrUpdateAutofillAiDataController::AutofillAiBubbleClosedReason;
   switch (closed_reason) {
-    case kAccepted:
     case kCancelled:
     case kClosed:
       return true;
+    case kAccepted:
     case kUnknown:
     case kNotInteracted:
     case kLostFocus:
@@ -51,10 +50,12 @@ bool GetUserInteractionFromAutofillAiBubbleClosedReason(
 }  // namespace
 
 SaveOrUpdateAutofillAiDataControllerImpl::
-    SaveOrUpdateAutofillAiDataControllerImpl(content::WebContents* web_contents)
+    SaveOrUpdateAutofillAiDataControllerImpl(content::WebContents* web_contents,
+                                             const std::string& app_locale)
     : AutofillBubbleControllerBase(web_contents),
       content::WebContentsUserData<SaveOrUpdateAutofillAiDataControllerImpl>(
-          *web_contents) {}
+          *web_contents),
+      app_locale_(app_locale) {}
 
 SaveOrUpdateAutofillAiDataControllerImpl::
     ~SaveOrUpdateAutofillAiDataControllerImpl() = default;
@@ -62,12 +63,14 @@ SaveOrUpdateAutofillAiDataControllerImpl::
 // static
 SaveOrUpdateAutofillAiDataController*
 SaveOrUpdateAutofillAiDataController::GetOrCreate(
-    content::WebContents* web_contents) {
+    content::WebContents* web_contents,
+    const std::string& app_locale) {
   if (!web_contents) {
     return nullptr;
   }
 
-  SaveOrUpdateAutofillAiDataControllerImpl::CreateForWebContents(web_contents);
+  SaveOrUpdateAutofillAiDataControllerImpl::CreateForWebContents(web_contents,
+                                                                 app_locale);
   return SaveOrUpdateAutofillAiDataControllerImpl::FromWebContents(
       web_contents);
 }
@@ -97,9 +100,7 @@ bool SaveOrUpdateAutofillAiDataControllerImpl::IsSavePrompt() const {
 
 std::vector<SaveOrUpdateAutofillAiDataController::EntityAttributeUpdateDetails>
 SaveOrUpdateAutofillAiDataControllerImpl::GetUpdatedAttributesDetails() const {
-  std::vector<
-      SaveOrUpdateAutofillAiDataController::EntityAttributeUpdateDetails>
-      details;
+  std::vector<EntityAttributeUpdateDetails> details;
 
   auto get_attribute_update_type = [&](const autofill::AttributeInstance&
                                            new_entity_attribute_instance) {
@@ -113,8 +114,15 @@ SaveOrUpdateAutofillAiDataControllerImpl::GetUpdatedAttributesDetails() const {
       return kNewEntityAttributeAdded;
     }
 
-    return old_entity_attribute->NormalizedValue() ==
-                   new_entity_attribute_instance.NormalizedValue()
+    return std::ranges::all_of(
+               new_entity_attribute_instance.GetSupportedTypes(),
+               [&](autofill::FieldType type) {
+                 return old_entity_attribute->GetInfo(
+                            type, app_locale_,
+                            /*format_string=*/std::nullopt) ==
+                        new_entity_attribute_instance.GetInfo(
+                            type, app_locale_, /*format_string=*/std::nullopt);
+               })
                ? kNewEntityAttributeUnchanged
                : kNewEntityAttributeUpdated;
   };
@@ -123,46 +131,32 @@ SaveOrUpdateAutofillAiDataControllerImpl::GetUpdatedAttributesDetails() const {
        new_entity_->attributes()) {
     EntityAttributeUpdateType update_type =
         get_attribute_update_type(attribute_instance);
-    details.emplace_back(attribute_instance.type().GetNameForI18n(),
-                         attribute_instance.value(), update_type);
-
-    // Also add the old value when an attribute is updated to display
-    // before/after to the user.
-    if (update_type == kNewEntityAttributeUpdated) {
-      CHECK(old_entity_);
-      base::optional_ref<const autofill::AttributeInstance>
-          old_entity_attribute =
-              old_entity_->attribute(attribute_instance.type());
-      CHECK(old_entity_attribute);
-      details.emplace_back(old_entity_attribute->type().GetNameForI18n(),
-                           old_entity_attribute->value(),
-                           kOldEntityAttributeUpdated);
+    std::u16string attribute_value =
+        attribute_instance.GetCompleteInfo(app_locale_);
+    if (!attribute_value.empty()) {
+      details.emplace_back(attribute_instance.type().GetNameForI18n(),
+                           std::move(attribute_value), update_type);
     }
   }
 
   // Move new entity values that were either added or updated to the top.
-  std::ranges::stable_sort(
-      details, [](const SaveOrUpdateAutofillAiDataController::
-                      EntityAttributeUpdateDetails& a,
-                  const SaveOrUpdateAutofillAiDataController::
-                      EntityAttributeUpdateDetails& b) {
-        // Returns true if `attribute` is a new entity attribute that was either
-        // added or updated.
-        auto added_or_updated =
-            [](const SaveOrUpdateAutofillAiDataController::
-                   EntityAttributeUpdateDetails& attribute) {
-              return attribute.update_type == kNewEntityAttributeAdded ||
-                     attribute.update_type == kNewEntityAttributeUpdated;
-            };
-        if (added_or_updated(a) && !added_or_updated(b)) {
-          return true;
-        }
+  std::ranges::stable_sort(details, [](const EntityAttributeUpdateDetails& a,
+                                       const EntityAttributeUpdateDetails& b) {
+    // Returns true if `attribute` is a new entity attribute that was either
+    // added or updated.
+    auto added_or_updated = [](const EntityAttributeUpdateDetails& attribute) {
+      return attribute.update_type == kNewEntityAttributeAdded ||
+             attribute.update_type == kNewEntityAttributeUpdated;
+    };
+    if (added_or_updated(a) && !added_or_updated(b)) {
+      return true;
+    }
 
-        if (!added_or_updated(a) && added_or_updated(b)) {
-          return false;
-        }
-        return false;
-      });
+    if (!added_or_updated(a) && added_or_updated(b)) {
+      return false;
+    }
+    return false;
+  });
   return details;
 }
 
@@ -176,14 +170,9 @@ std::u16string SaveOrUpdateAutofillAiDataControllerImpl::GetDialogTitle()
       case autofill::EntityTypeName::kPassport:
         return l10n_util::GetStringUTF16(
             IDS_AUTOFILL_AI_SAVE_PASSPORT_ENTITY_DIALOG_TITLE);
-
       case autofill::EntityTypeName::kDriversLicense:
         return l10n_util::GetStringUTF16(
             IDS_AUTOFILL_AI_SAVE_DRIVERS_LICENSE_ENTITY_DIALOG_TITLE);
-
-      case autofill::EntityTypeName::kLoyaltyCard:
-        return l10n_util::GetStringUTF16(
-            IDS_AUTOFILL_AI_SAVE_LOYALTY_CARD_ENTITY_DIALOG_TITLE);
     }
   } else {
     switch (new_entity_->type().name()) {
@@ -193,17 +182,11 @@ std::u16string SaveOrUpdateAutofillAiDataControllerImpl::GetDialogTitle()
       case autofill::EntityTypeName::kPassport:
         return l10n_util::GetStringUTF16(
             IDS_AUTOFILL_AI_UPDATE_PASSPORT_ENTITY_DIALOG_TITLE);
-
       case autofill::EntityTypeName::kDriversLicense:
         return l10n_util::GetStringUTF16(
             IDS_AUTOFILL_AI_UPDATE_DRIVERS_LICENSE_ENTITY_DIALOG_TITLE);
-
-      case autofill::EntityTypeName::kLoyaltyCard:
-        return l10n_util::GetStringUTF16(
-            IDS_AUTOFILL_AI_UPDATE_LOYALTY_CARD_ENTITY_DIALOG_TITLE);
     }
   }
-
   NOTREACHED();
 }
 
@@ -215,8 +198,7 @@ void SaveOrUpdateAutofillAiDataControllerImpl::OnBubbleClosed(
   if (!save_prompt_acceptance_callback_.is_null()) {
     std::move(save_prompt_acceptance_callback_)
         .Run(
-            {/*did_user_interact=*/
-             GetUserInteractionFromAutofillAiBubbleClosedReason(closed_reason),
+            {DidUserDeclineExplicitly(closed_reason),
              /*entity=*/closed_reason == AutofillAiBubbleClosedReason::kAccepted
                  ? std::exchange(new_entity_, std::nullopt)
                  : std::nullopt});

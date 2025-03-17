@@ -114,6 +114,7 @@
 #include "services/device/public/mojom/vibration_manager.mojom.h"
 #include "services/metrics/public/mojom/ukm_interface.mojom.h"
 #include "services/metrics/ukm_recorder_factory_impl.h"
+#include "services/network/public/cpp/features.h"
 #include "services/network/public/cpp/is_potentially_trustworthy.h"
 #include "services/network/public/mojom/p2p.mojom.h"
 #include "services/network/public/mojom/permissions_policy/permissions_policy_feature.mojom.h"
@@ -314,8 +315,9 @@ void BindWebNNContextProviderForRenderFrame(
 #endif
 }
 
-void BindWebNNContextProviderForDedicatedWorker(
-    DedicatedWorkerHost* host,
+template <typename WorkerHost>
+void BindWebNNContextProviderForWorker(
+    WorkerHost* host,
     mojo::PendingReceiver<webnn::mojom::WebNNContextProvider> receiver) {
   auto* process_host =
       static_cast<RenderProcessHostImpl*>(host->GetProcessHost());
@@ -1201,7 +1203,7 @@ void PopulateBinderMapWithContext(
       &EmptyBinderForFrame<blink::mojom::CredentialManager>));
   map->Add<blink::mojom::LCPCriticalPathPredictorHost>(base::BindRepeating(
       &EmptyBinderForFrame<blink::mojom::LCPCriticalPathPredictorHost>));
-  if (base::FeatureList::IsEnabled(blink::features::kBrowsingTopics) &&
+  if (base::FeatureList::IsEnabled(network::features::kBrowsingTopics) &&
       base::FeatureList::IsEnabled(
           blink::features::kBrowsingTopicsDocumentAPI)) {
     map->Add<blink::mojom::BrowsingTopicsDocumentService>(
@@ -1238,7 +1240,7 @@ void PopulateBinderMapWithContext(
       base::BindRepeating(&ContentIndexServiceImpl::CreateForFrame));
   map->Add<blink::mojom::KeyboardLockService>(
       base::BindRepeating(&KeyboardLockServiceImpl::CreateMojoService));
-  if (base::FeatureList::IsEnabled(blink::features::kInterestGroupStorage)) {
+  if (base::FeatureList::IsEnabled(network::features::kInterestGroupStorage)) {
     map->Add<blink::mojom::AdAuctionService>(
         base::BindRepeating(&AdAuctionServiceImpl::CreateMojoService));
   }
@@ -1368,7 +1370,8 @@ void PopulateDedicatedWorkerBinders(DedicatedWorkerHost* host,
     // base::Unretained(host->GetProcessHost()) is safe because the map is owned
     // by |DedicatedWorkerHost::broker_|.
     map->Add<webnn::mojom::WebNNContextProvider>(base::BindRepeating(
-        &BindWebNNContextProviderForDedicatedWorker, base::Unretained(host)));
+        &BindWebNNContextProviderForWorker<DedicatedWorkerHost>,
+        base::Unretained(host)));
   }
 
 #if !BUILDFLAG(IS_ANDROID)
@@ -1546,6 +1549,12 @@ void PopulateSharedWorkerBinders(SharedWorkerHost* host, mojo::BinderMap* map) {
         &SharedWorkerHost::BindPressureService, base::Unretained(host)));
   }
 #endif  // BUILDFLAG(ENABLE_COMPUTE_PRESSURE)
+  if (base::FeatureList::IsEnabled(
+          webnn::mojom::features::kWebMachineLearningNeuralNetwork)) {
+    map->Add<webnn::mojom::WebNNContextProvider>(base::BindRepeating(
+        &BindWebNNContextProviderForWorker<SharedWorkerHost>,
+        base::Unretained(host)));
+  }
   if (base::FeatureList::IsEnabled(blink::features::kBuiltInAIAPI)) {
     map->Add<blink::mojom::AIManager>(base::BindRepeating(
         &ContentBrowserClient::BindAIManager,
@@ -1717,6 +1726,12 @@ void PopulateServiceWorkerBinders(ServiceWorkerHost* host,
       &ServiceWorkerHost::CreateBucketManagerHost, base::Unretained(host)));
   map->Add<blink::mojom::WebUsbService>(base::BindRepeating(
       &ServiceWorkerHost::BindUsbService, base::Unretained(host)));
+  if (base::FeatureList::IsEnabled(
+          webnn::mojom::features::kWebMachineLearningNeuralNetwork)) {
+    map->Add<webnn::mojom::WebNNContextProvider>(base::BindRepeating(
+        &BindWebNNContextProviderForWorker<ServiceWorkerHost>,
+        base::Unretained(host)));
+  }
   if (base::FeatureList::IsEnabled(blink::features::kBuiltInAIAPI)) {
     map->Add<blink::mojom::AIManager>(base::BindRepeating(
         &ServiceWorkerHost::BindAIManager, base::Unretained(host)));

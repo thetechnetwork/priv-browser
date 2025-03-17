@@ -1258,9 +1258,8 @@ uint32_t PDFiumEngine::GetLoadedByteSize() {
   return doc_loader_->GetDocumentSize();
 }
 
-bool PDFiumEngine::ReadLoadedBytes(uint32_t length, void* buffer) {
-  DCHECK_LE(length, GetLoadedByteSize());
-  return doc_loader_->GetBlock(0, length, buffer);
+bool PDFiumEngine::ReadLoadedBytes(base::span<uint8_t> buffer) {
+  return doc_loader_->GetBlock(0, buffer.size(), buffer.data());
 }
 
 void PDFiumEngine::SetFormSelectedText(FPDF_FORMHANDLE form_handle,
@@ -1341,33 +1340,39 @@ void PDFiumEngine::OnSingleClick(int page_index, int char_index) {
 void PDFiumEngine::OnMultipleClick(int click_count,
                                    int page_index,
                                    int char_index) {
-  DCHECK_GE(click_count, 2);
-  bool is_double_click = click_count == 2;
+  CHECK_GE(click_count, 2);
+  const bool is_double_click = click_count == 2;
+
+  const int char_count = pages_[page_index]->GetCharCount();
+  CHECK_GT(char_count, 0);
 
   // It would be more efficient if the SDK could support finding a space, but
   // now it doesn't.
   int start_index = char_index;
   do {
     uint32_t cur = pages_[page_index]->GetCharUnicode(start_index);
-    if (FindMultipleClickBoundary(is_double_click, cur))
+    if (FindMultipleClickBoundary(is_double_click, cur)) {
       break;
+    }
   } while (--start_index >= 0);
-  if (start_index)
+  if (start_index && start_index < char_count - 1) {
     start_index++;
+  }
 
   int end_index = char_index;
-  const int total = pages_[page_index]->GetCharCount();
-  for (; end_index < total; ++end_index) {
+  for (; end_index < char_count; ++end_index) {
     uint32_t cur = pages_[page_index]->GetCharUnicode(end_index);
-    if (FindMultipleClickBoundary(is_double_click, cur))
+    if (FindMultipleClickBoundary(is_double_click, cur)) {
       break;
+    }
   }
 
   selection_.push_back(PDFiumRange(pages_[page_index].get(), start_index,
                                    end_index - start_index));
 
-  if (handling_long_press_)
+  if (handling_long_press_) {
     client_->NotifyTouchSelectionOccurred();
+  }
 }
 
 bool PDFiumEngine::OnLeftMouseDown(const blink::WebMouseEvent& event) {
@@ -2733,6 +2738,16 @@ printing::mojom::DuplexMode PDFiumEngine::GetDuplexMode() {
   }
 }
 
+std::optional<gfx::SizeF> PDFiumEngine::GetPageSizeInPoints(
+    int page_index) const {
+  FS_SIZEF size_in_points;
+  if (!FPDF_GetPageSizeByIndexF(doc(), page_index, &size_in_points)) {
+    return std::nullopt;
+  }
+
+  return gfx::SizeF(size_in_points.width, size_in_points.height);
+}
+
 std::optional<gfx::Size> PDFiumEngine::GetUniformPageSizePoints() {
   if (pages_.empty())
     return std::nullopt;
@@ -3157,14 +3172,15 @@ gfx::Size PDFiumEngine::GetPageSize(int index) {
 gfx::Size PDFiumEngine::GetPageSizeForLayout(
     int index,
     const DocumentLayout::Options& layout_options) {
-  FS_SIZEF size_in_points;
-  if (!FPDF_GetPageSizeByIndexF(doc(), index, &size_in_points))
+  std::optional<gfx::SizeF> size_in_points = GetPageSizeInPoints(index);
+  if (!size_in_points.has_value()) {
     return gfx::Size();
+  }
 
-  int width_in_pixels = static_cast<int>(
-      ConvertUnitFloat(size_in_points.width, kPointsPerInch, kPixelsPerInch));
-  int height_in_pixels = static_cast<int>(
-      ConvertUnitFloat(size_in_points.height, kPointsPerInch, kPixelsPerInch));
+  int width_in_pixels = static_cast<int>(ConvertUnitFloat(
+      size_in_points.value().width(), kPointsPerInch, kPixelsPerInch));
+  int height_in_pixels = static_cast<int>(ConvertUnitFloat(
+      size_in_points.value().height(), kPointsPerInch, kPixelsPerInch));
 
   switch (layout_options.default_page_orientation()) {
     case PageOrientation::kOriginal:
@@ -4645,12 +4661,26 @@ PDFiumEngine::LoadV2InkPathsForPage(int page_index) {
 
   std::map<InkModeledShapeId, ink::PartitionedMesh> page_shape_map;
 
+  PDFiumPage* page = pages_[page_index].get();
   std::vector<ReadV2InkPathResult> read_results =
-      ReadV2InkPathsFromPageAsModeledShapes(pages_[page_index]->GetPage());
+      ReadV2InkPathsFromPageAsModeledShapes(page->GetPage());
   for (auto& read_result : read_results) {
     InkModeledShapeId id(next_ink_modeled_shape_id_++);
     page_shape_map[id] = std::move(read_result.shape);
     ink_modeled_shape_map_[id] = read_result.page_object;
+  }
+
+  // Should be unique due to the caller's responsibility to call
+  // `LoadV2InkPathsForPage()` at most once per page.
+  CHECK(!stroked_pages_unload_preventers_.contains(page_index));
+
+  // Prevent pages with existing Ink paths from unloading. Otherwise, if the
+  // page unloads and reloads, then the loaded V2 Ink path will no longer match
+  // the PDF object, and any updates to the Ink path will not be visible in the
+  // PDF.
+  if (!page_shape_map.empty()) {
+    stroked_pages_unload_preventers_.insert(
+        {page_index, PDFiumPage::ScopedUnloadPreventer(page)});
   }
 
   return page_shape_map;

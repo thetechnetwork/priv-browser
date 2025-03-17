@@ -2,12 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import type {FocusedTabData, GlicBrowserHost, GlicWebClient, Observable, OpenPanelInfo, PanelState, TabData, WebClientInitializeError} from '/glic/glic_api/glic_api.js';
+import type {FocusedTabData, GlicBrowserHost, GlicWebClient, Observable, OpenPanelInfo, PanelOpeningData, PanelState, TabData, WebClientInitializeError} from '/glic/glic_api/glic_api.js';
 import {WebClientInitializeErrorReason, WebClientMode} from '/glic/glic_api/glic_api.js';
 
 import {createGlicHostRegistryOnLoad} from '../api_boot.js';
 
 interface PageElementTypes {
+  content: HTMLElement;
   status: HTMLElement;
   pageHeader: HTMLElement;
   focusedFavicon: HTMLImageElement;
@@ -34,9 +35,11 @@ interface PageElementTypes {
   newtabbn: HTMLButtonElement;
   reloadpage: HTMLButtonElement;
   getpagecontext: HTMLButtonElement;
+  getPageContextResult: HTMLSpanElement;
   getPageContextStatus: HTMLSpanElement;
   URL: HTMLInputElement;
   innerTextCheckbox: HTMLInputElement;
+  innerTextBytesLimit: HTMLInputElement;
   viewportScreenshotCheckbox: HTMLInputElement;
   pdfDataCheckbox: HTMLInputElement;
   annotatedPageContentCheckbox: HTMLInputElement;
@@ -44,6 +47,9 @@ interface PageElementTypes {
   faviconImg: HTMLImageElement;
   getlocation: HTMLButtonElement;
   location: HTMLElement;
+  locationStatus: HTMLDivElement;
+  locationErrorUI: HTMLDivElement;
+  openOsLocationSettingsButton: HTMLButtonElement;
   permissionSelect: HTMLSelectElement;
   enabledSelect: HTMLSelectElement;
   closebn: HTMLButtonElement;
@@ -70,6 +76,27 @@ interface PageElementTypes {
   fileDropList: HTMLDivElement;
   showDirectoryPicker: HTMLButtonElement;
   failInitializationCheckbox: HTMLInputElement;
+  setExperiment: HTMLButtonElement;
+  trialName: HTMLInputElement;
+  groupName: HTMLInputElement;
+  setExperimentStatus: HTMLSpanElement;
+  testClipboardSave: HTMLButtonElement;
+  busyWork3s: HTMLButtonElement;
+  busyWork8s: HTMLButtonElement;
+  contentSizingTest: HTMLElement;
+  enableTestSizingMode: HTMLButtonElement;
+  disableTestSizingMode: HTMLButtonElement;
+  growHeight: HTMLButtonElement;
+  resetHeight: HTMLButtonElement;
+  dump: HTMLElement;
+  fitWindow: HTMLInputElement;
+  fitContent: HTMLInputElement;
+  startMic: HTMLButtonElement;
+  successUI: HTMLDivElement;
+  localDenialUI: HTMLDivElement;
+  osDenialUI: HTMLDivElement;
+  openLocalSettingsButton: HTMLButtonElement;
+  openOsSettingsButton: HTMLButtonElement;
 }
 
 const $: PageElementTypes = new Proxy({}, {
@@ -79,7 +106,14 @@ const $: PageElementTypes = new Proxy({}, {
 });
 
 function logMessage(message: string) {
-  $.status.append(message.slice(0, 100000), document.createElement('br'));
+  const d = new Date();
+  const hh = String(d.getHours()).padStart(2, '0');
+  const mm = String(d.getMinutes()).padStart(2, '0');
+  const ss = String(d.getSeconds()).padStart(2, '0');
+  const ms = String(d.getMilliseconds()).padStart(3, '0');
+  const timeStamp = `${hh}:${mm}:${ss}.${ms}: `;
+  $.status.append(
+      timeStamp, message.slice(0, 100000), document.createElement('br'));
 }
 
 class TestInitFailure extends Error implements WebClientInitializeError {
@@ -133,9 +167,12 @@ class WebClient implements GlicWebClient {
     });
   }
 
-  async notifyPanelWillOpen(panelState: PanelState):
+  async notifyPanelWillOpen(panelOpeningData: PanelOpeningData&PanelState):
       Promise<void|OpenPanelInfo> {
-    logMessage(`notifyPanelWillOpen(${JSON.stringify(panelState)})`);
+    // Deleting backwards-compatible members coming from PanelState.
+    delete (panelOpeningData as Partial<PanelState>).kind;
+    delete (panelOpeningData as Partial<PanelState>).windowId;
+    logMessage(`notifyPanelWillOpen(${JSON.stringify(panelOpeningData)})`);
     return {
       startingMode: WebClientMode.TEXT,
       resizeParams: {
@@ -149,9 +186,22 @@ class WebClient implements GlicWebClient {
   async notifyPanelClosed() {
     logMessage('notifyPanelClosed called');
   }
+
+  async checkResponsive() {
+    // Nothing need to be checked on the test client.
+  }
 }
 
 const client = new WebClient();
+
+// This allows browser tests using this test client to be able to access and
+// call the glic API directly (using ExecuteJs and similar methods).
+declare global {
+  interface Window {
+    client: WebClient;
+  }
+}
+window.client = client;
 
 function getBrowser(): GlicBrowserHost|undefined {
   return client?.browser;
@@ -235,6 +285,66 @@ createGlicHostRegistryOnLoad().then((registry) => {
   }
 });
 
+async function checkMicrophonePermission():
+    Promise<'success'|'localDenial'|'osDenial'|'unknown'> {
+  try {
+    await navigator.mediaDevices.getUserMedia({audio: true});
+    return 'success';
+  } catch (error) {
+    if (error instanceof DOMException && error.name === 'NotAllowedError') {
+      // Use the GlicBrowserHost to check the permission state.
+      const micPermissionStatus = permissionSwitches['microphone'].checked;
+      if (!micPermissionStatus) {
+        return 'localDenial';
+      } else {
+        return 'osDenial';
+      }
+    } else {
+      console.error(error);
+    }
+    return 'unknown';
+  }
+}
+
+// Test Sizing:
+$.enableTestSizingMode.addEventListener('click', () => {
+  $.content.setAttribute('hidden', '');
+  $.contentSizingTest.removeAttribute('hidden');
+});
+
+$.disableTestSizingMode.addEventListener('click', () => {
+  $.content.removeAttribute('hidden');
+  $.contentSizingTest.setAttribute('hidden', '');
+});
+
+$.growHeight.addEventListener('click', () => {
+  const divElement = document.createElement('div');
+  divElement.textContent = 'Some Text';
+  for (let i = 0; i < 5; i++) {
+    $.dump.appendChild(divElement.cloneNode(true));
+  }
+});
+
+$.resetHeight.addEventListener('click', () => {
+  $.dump.innerHTML = '';
+});
+
+$.fitWindow.addEventListener('change', () => {
+  if (!$.fitWindow.checked) {
+    return;
+  }
+  document.documentElement.style.height = '100%';
+});
+
+$.fitContent.addEventListener('change', () => {
+  if (!$.fitContent.checked) {
+    return;
+  }
+  document.documentElement.style.height = 'unset';
+});
+
+// Permissions:
+
 type PermissionSwitchName = 'microphone'|'geolocation'|'tabContext';
 const permissionSwitches: Record<PermissionSwitchName, HTMLInputElement> = {
   microphone: $.microphoneSwitch,
@@ -301,6 +411,10 @@ $.testLogsBn.addEventListener('click', () => {
   getBrowser()?.getMetrics?.().onSessionTerminated?.();
 });
 
+$.testClipboardSave.addEventListener('click', () => {
+  navigator.clipboard.writeText('This is some junk!');
+});
+
 $.getUserProfileInfoBn.addEventListener('click', async () => {
   $.getUserProfileInfoStatus.innerText = 'Requesting';
   try {
@@ -345,6 +459,10 @@ $.getpagecontext.addEventListener('click', async () => {
   if ($.innerTextCheckbox.checked) {
     options.innerText = true;
   }
+  const textLimit = Number.parseInt($.innerTextBytesLimit.value);
+  if (!Number.isNaN(textLimit)) {
+    options.innerTextBytesLimit = textLimit;
+  }
   if ($.viewportScreenshotCheckbox.checked) {
     options.viewportScreenshot = {};
   }
@@ -379,7 +497,7 @@ $.getpagecontext.addEventListener('click', async () => {
         pdfDataSize =
             (await readStream(pageContent.pdfDocumentData.pdfData!)).length;
       }
-      $.getPageContextStatus.innerText =
+      $.getPageContextResult.innerText =
           `Got ${pdfDataSize} bytes of PDF data(origin = ${
               pdfOrigin}, sizeLimitExceeded = ${pdfSizeLimitExceeded})`;
     }
@@ -388,26 +506,24 @@ $.getpagecontext.addEventListener('click', async () => {
       const annotatedPageDataSize =
           (await readStream(pageContent.annotatedPageData.annotatedPageContent))
               .length;
-      $.getPageContextStatus.innerText =
+      $.getPageContextResult.innerText =
           `Annotated page content data length: ${annotatedPageDataSize}`;
     }
-    $.getPageContextStatus.innerText =
-        `Finished Get Page Context. Returned data: ${
-            JSON.stringify(pageContent, null, 2)}`;
+    $.getPageContextStatus.innerText = 'Finished Get Page Context.';
+    $.getPageContextResult.innerText =
+        `Returned data: ${JSON.stringify(pageContent, null, 2)}`;
   } catch (error) {
     $.getPageContextStatus.innerText = `Error getting page context: ${error}`;
   }
 });
 $.getlocation.addEventListener('click', async () => {
-  logMessage('Requesting geolocation...');
-
   if (navigator.geolocation) {
     try {
+      $.locationStatus.innerText = 'Requesting geolocation...';
       const position =
           await new Promise<GeolocationPosition>((resolve, reject) => {
             navigator.geolocation.getCurrentPosition(resolve, reject);
           });
-
       const latitude = position.coords.latitude;
       const longitude = position.coords.longitude;
       const accuracy = position.coords.accuracy;
@@ -417,16 +533,21 @@ $.getlocation.addEventListener('click', async () => {
           Longitude: ${longitude}<br>
           Accuracy: ${accuracy} meters
         `;
-      logMessage(
-          `Geolocation obtained: Latitude ${latitude}, Longitude ${longitude}`);
+      $.locationStatus.innerText = `Location Received.`;
     } catch (error) {
-      if (error instanceof Error) {
-        logMessage(`Error getting geolocation: ${error.message}`);
-        $.location.innerHTML = `Error: ${error.message}`;
+      $.locationStatus.innerText = `Error: ${error}`;
+      $.location.innerHTML = ``;
+      if (error instanceof GeolocationPositionError) {
+        if (error.code === 1) {
+          $.locationStatus.innerText = `Permission Denied.`;
+          const locPermissionStatus = permissionSwitches['geolocation'].checked;
+          if (locPermissionStatus) {
+            $.locationErrorUI.style.display = 'block';
+          }
+        }
       }
     }
   } else {
-    logMessage('Geolocation is not supported by this browser.');
     $.location.innerHTML = 'Geolocation is not supported by this browser.';
   }
 });
@@ -571,6 +692,22 @@ $.scrollToBn.addEventListener('click', async () => {
   }
 });
 
+// Hang web client for <workTimeMs> amount of time.
+function busyWork(workTimeMs: number) {
+  const end = performance.now() + workTimeMs;
+  while (performance.now() < end) {
+    // mock busy work to test the web client unresponsive handling.
+  }
+}
+
+$.busyWork3s.addEventListener('click', () => {
+  busyWork(3000);
+});
+
+$.busyWork8s.addEventListener('click', () => {
+  busyWork(8000);
+});
+
 
 class AudioCapture {
   recordedData: Blob[] = [];
@@ -581,26 +718,30 @@ class AudioCapture {
     if (this.recorder) {
       return;
     }
-    const stream = await navigator.mediaDevices.getUserMedia({audio: true});
-
-    $.audioStatus.replaceChildren('Recording...');
-    this.recorder = new MediaRecorder(stream, {mimeType: 'audio/webm'});
-    let stopped = false;
-    window.setInterval(() => {
-      if (!stopped) {
-        this.recorder!.requestData();
-      }
-    }, 100);
-    this.recorder.addEventListener('dataavailable', (event: BlobEvent) => {
-      this.recordedData.push(event.data);
-    });
-    this.recorder.addEventListener('stop', () => {
-      stopped = true;
-      $.audioStatus.replaceChildren('Playback...');
-      const blob = new Blob(this.recordedData, {type: 'audio/webm'});
-      $.mic.src = URL.createObjectURL(blob);
-    });
-    this.recorder.start();
+    try {
+      $.audioStatus.innerText = 'Starting Recording...';
+      const stream = await navigator.mediaDevices.getUserMedia({audio: true});
+      this.recorder = new MediaRecorder(stream, {mimeType: 'audio/webm'});
+      let stopped = false;
+      window.setInterval(() => {
+        if (!stopped) {
+          this.recorder!.requestData();
+        }
+      }, 100);
+      this.recorder.addEventListener('dataavailable', (event: BlobEvent) => {
+        this.recordedData.push(event.data);
+      });
+      this.recorder.addEventListener('stop', () => {
+        stopped = true;
+        $.audioStatus.innerText = 'Recording Stopped';
+        const blob = new Blob(this.recordedData, {type: 'audio/webm'});
+        $.mic.src = URL.createObjectURL(blob);
+      });
+      this.recorder.start();
+      $.audioStatus.innerText = 'Recording...';
+    } catch (error) {
+      $.audioStatus.innerText = `Caught error: ${error}`;
+    }
   }
 
   stop() {
@@ -637,6 +778,37 @@ window.addEventListener('load', () => {
     } catch (error) {
       $.desktopScreenshotErrorReason!.innerText = `Caught error: ${error}`;
     }
+  });
+  $.setExperiment.addEventListener('click', async () => {
+    const trialName = $.trialName.value;
+    const groupName = $.groupName.value;
+    $.setExperimentStatus!.innerText +=
+        `\nSetting experiment: ${trialName} ${groupName}`;
+    await getBrowser()!.setSyntheticExperimentState!(trialName, groupName);
+    $.setExperimentStatus!.innerText += '\nExperiment State Set.';
+  });
+  $.startMic.addEventListener('click', async () => {
+    const permissionResult = await checkMicrophonePermission();
+
+    $.startMic.style.display = 'none';
+
+    if (permissionResult === 'success') {
+      $.successUI.style.display = 'block';
+    } else if (permissionResult === 'localDenial') {
+      $.localDenialUI.style.display = 'block';
+    } else if (permissionResult === 'osDenial') {
+      $.osDenialUI.style.display = 'block';
+    }
+  });
+
+  $.openLocalSettingsButton.addEventListener('click', () => {
+    getBrowser()!.openGlicSettingsPage!();
+  });
+  $.openOsSettingsButton.addEventListener('click', () => {
+    getBrowser()!.openOsPermissionSettingsMenu!('media');
+  });
+  $.openOsLocationSettingsButton.addEventListener('click', () => {
+    getBrowser()!.openOsPermissionSettingsMenu!('geolocation');
   });
 });
 

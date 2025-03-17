@@ -339,8 +339,10 @@ if (!is_android) {
       "//chrome/browser/ui/browser_window:browser_window",
       "//chrome/browser/ui/commerce",
       "//chrome/browser/ui/lens",
+      "//chrome/browser/ui/views/intent_picker:intent_picker_page_action",
       "//chrome/browser/ui/views/page_action",
       "//chrome/browser/ui/views/side_panel",
+      "//chrome/browser/ui/views/zoom:zoom_page_action",
       "//chrome/browser/ui/webui:webui_util",
       "//chrome/browser/web_applications",
       "//components/browsing_topics",
@@ -349,7 +351,9 @@ if (!is_android) {
       "//components/favicon/core",
       "//components/fingerprinting_protection_filter/common:features",
       "//components/image_fetcher/core",
+      "//components/ip_protection/common:ip_protection_status",
       "//components/metrics:content",
+      "//components/passage_embeddings",
       "//components/performance_manager",
       "//components/permissions",
       "//components/pref_registry",
@@ -357,6 +361,7 @@ if (!is_android) {
       "//components/sessions",
       "//components/sync_sessions",
       "//components/tab_groups",
+      "//net",
       "//ui/webui",
     ]
 

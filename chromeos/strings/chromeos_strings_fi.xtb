@@ -81,6 +81,7 @@
 <translation id="131461803491198646">Kotiverkko, ei roaming-tilassa </translation>
 <translation id="1327977588028644528">Yhdyskäytävä</translation>
 <translation id="1328223165223065150">Taustakuvan väri</translation>
+<translation id="1329478709358066995">Transkriptio:</translation>
 <translation id="1330426557709298164">JPG</translation>
 <translation id="1337912285145772892">Sovita skannattavalle alueelle</translation>
 <translation id="1343442362630695901">suolajärvi</translation>
@@ -126,7 +127,17 @@
 <translation id="1515129336378114413">selain etusivu</translation>
 <translation id="1526389707933164996">Näytönsäästäjän animaatio</translation>
 <translation id="152892567002884378">Lisää äänenvoimakkuutta</translation>
+<translation id="1531038290222364269">Näytä välilehdet</translation>
 <translation id="1539864135338521185">lapislatsuli</translation>
+<translation id="1548555207631326346">Valitse teema ja sitten alleviivatut sanat, niin voit personoida tekoälyn generoimia kuviasi.<ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          Valitse "Kaipaan inspiraatiota", jos haluat nähdä yksilöllisempiä ja monipuolisempia tekoälyn generoimia kuvavaihtoehtoja.
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          Kun käytät tekoälyä, kehote lähetetään Googlen tekoälypalvelimille ja sitä käytetään kuvien luomiseen ja tuotteen parantamiseen <ph name="BEGIN_LINK_GOOGLE_PRIVACY_POLICY" />Googlen tietosuojakäytännön<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" /> mukaisesti.
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          Generatiivinen tekoäly on kokeellinen ja se on vielä kehitysvaiheessa, ja sen saatavuus on tällä hetkellä rajoitettu.</translation>
 <translation id="1555130319947370107">Sininen</translation>
 <translation id="155865706765934889">Kosketuslevy</translation>
 <translation id="1561927818299383735">taustavalon väri</translation>
@@ -252,7 +263,6 @@
 <translation id="2011174342667534258">SDK-versio:</translation>
 <translation id="2016697457005847575">Kokeile ongelmanratkaisuohjeita</translation>
 <translation id="202500043506723828">EID</translation>
-<translation id="2041627599411887437">Valitse teema ja sitten alleviivatut sanat, niin voit personoida AI-kuviasi.</translation>
 <translation id="2045814230297767491">ruokailuvälineet</translation>
 <translation id="2047316797244836561">Muodosta verkkoyhteys ja päivitä sivu nähdäksesi näytönsäästäjän.</translation>
 <translation id="2056550196601855911">IPv4/IPv6</translation>
@@ -405,6 +415,7 @@
 <translation id="2787237339470862294">Tätä kieltä ei tueta tällä hetkellä</translation>
 <translation id="2787435249130282949">kirkkaampi näppäimistö</translation>
 <translation id="2805756323405976993">Sovellukset</translation>
+<translation id="2822702442014805146">Yhteenveto- ja nimenluomismallia ladataan</translation>
 <translation id="28232023175184696">Ei internetyhteyttä. Yritä uudelleen klikkaamalla.</translation>
 <translation id="2855718259207180827">villa</translation>
 <translation id="2859243502336719778">Tärkeä päivitys</translation>
@@ -502,6 +513,7 @@
 <translation id="3373141842870501561">Maan kulku ‑taustakuva</translation>
 <translation id="33736539805963175">Tausta (<ph name="LETTERS_COLOR" />), jossa on kirjain <ph name="LETTERS_LETTER" /></translation>
 <translation id="3383623117265110236">Eksklusiivinen</translation>
+<translation id="3395147534045164351">Laita automaattinen siirtyminen sijaintiin päälle tai pois päältä</translation>
 <translation id="3404249063913988450">Ota näytönsäästäjä käyttöön</translation>
 <translation id="3413935475507503304">Jatka päivitystä valitsemalla Seuraava</translation>
 <translation id="3428551088151258685">ulkona</translation>
@@ -651,6 +663,7 @@
 <translation id="4113067922640381334">Voit nyt käyttää uusia <ph name="BEGIN_LINK_WALLPAPER_SUBPAGE" />taustakuvia<ph name="END_LINK_WALLPAPER_SUBPAGE" /></translation>
 <translation id="4117637339509843559">Tumma tila</translation>
 <translation id="4126551873361000548">Taaksepäin 10 sekuntia</translation>
+<translation id="4128271910628504223">Lisää kehote, esimerkiksi "piirrä sumuinen metsä"</translation>
 <translation id="4130035430755296270">Pidä osoitin paikallaan, niin näet lisää asetteluvaihtoehtoja</translation>
 <translation id="4130750466177569591">Hyväksyn</translation>
 <translation id="4131410914670010031">Mustavalkoinen</translation>
@@ -824,6 +837,7 @@
 <translation id="4891842000192098784">Rasitus</translation>
 <translation id="4897058166682006107">Laitteen vasemman kuulokkeen akun varaus on <ph name="BATTERY_PERCENTAGE" /> %.</translation>
 <translation id="4905998861748258752">Laita ominaisuus päälle, jotta voit valita näytönsäästäjän asetukset</translation>
+<translation id="4910853326379896417">Yhteenveto- ja nimenluomismallin lataus valmis</translation>
 <translation id="4910858703033903787">APN-tyypit</translation>
 <translation id="4917385247580444890">Vahva</translation>
 <translation id="4917889632206600977">Pysähtynyt – Paperi loppu</translation>
@@ -858,8 +872,10 @@
 <translation id="5050042263972837708">Ryhmän nimi</translation>
 <translation id="5051044138948155788">Tämä on ainoa sivu. Sinut ohjataan skannauksen aloitusnäytölle.</translation>
 <translation id="5053233795640754917">Keskeytä</translation>
+<translation id="5056587122125565772">Luo kuva</translation>
 <translation id="5078711626843651677">Äänimallit tallennetaan väliaikaisesti laitteelle, kunnes puhujatunnisteet ovat valmiit. Voit milloin tahansa laittaa tämän pois päältä asetuksista.</translation>
 <translation id="5078983345702708852">futuristinen</translation>
+<translation id="5085224064082122501">Yhteenveto- ja nimenluomismallia ei voi ladata. Yritä uudelleen tai käynnistä Chromebook uudelleen.</translation>
 <translation id="5087864757604726239">takaisin</translation>
 <translation id="5088172560898466307">Palvelimen isäntänimi</translation>
 <translation id="5089810972385038852">Osavaltio/alue</translation>
@@ -1129,14 +1145,12 @@
 <translation id="6325525973963619867">Epäonnistui</translation>
 <translation id="6327262166342360252">Tämä taustakuva on luotu tekoälyllä seuraavalla tekstillä: "<ph name="PROMPT" />".</translation>
 <translation id="6331191339300272798">Automaattinen tumma teema</translation>
-<translation id="6335228876613776082">Mallin lataus valmis</translation>
 <translation id="6340526405444716530">Personointi</translation>
 <translation id="6348252528297699679">Voit laittaa sijainnin pois päältä valitsemalla Asetukset &gt; Tietosuoja ja turvallisuus &gt; Yksityisyysasetukset &gt; Sijainnin käyttöoikeus. <ph name="LINK_BEGIN" />Lue lisää<ph name="LINK_END" /></translation>
 <translation id="6348738456043757611">Käyttäjätunnus ja salasana</translation>
 <translation id="6352210854422428614">eri planeetta</translation>
 <translation id="6359706544163531585">Poista vaalea teema käytöstä</translation>
 <translation id="6359919876285606596">Tämä toiminto on pysyvä, eikä sitä voi kumota.</translation>
-<translation id="6368342879959028556">Kirjoita oma kehote, kun valitset "Luo tekoälyn avulla". Voit myös valita "AI-taustakuvat", valita teema ja sitten alleviivatut sanat, niin voit personoida AI-taustakuvasi.</translation>
 <translation id="636850387210749493">Yritysversion käyttöönotto</translation>
 <translation id="6369221585240879141">Tallenteiden nimiä ei voi luoda tällä transkriptiokielellä</translation>
 <translation id="6373461326814131011">lampi</translation>
@@ -1209,16 +1223,6 @@
 <translation id="6657240842932274095">Sallitaanko järjestelmäpalveluiden käyttää sijaintiasi?</translation>
 <translation id="6657585470893396449">Salasana</translation>
 <translation id="66621959568103627">korallinpunainen</translation>
-<translation id="6667885109186363316"><ph name="SEA_PEN_INTRO_FIRST_PARAGRAPH" />
-          <ph name="LINE_BREAK" />
-          <ph name="LINE_BREAK" />
-          Valitse "Kaipaan inspiraatiota", jos haluat nähdä yksilöllisempiä ja monipuolisempia AI-kuvavaihtoehtoja.
-          <ph name="LINE_BREAK" />
-          <ph name="LINE_BREAK" />
-          Kun käytät tekoälyä, kehote lähetetään Googlen tekoälypalvelimille ja sitä käytetään kuvien luomiseen ja tuotteen parantamiseen <ph name="BEGIN_LINK_GOOGLE_PRIVACY_POLICY" />Googlen tietosuojakäytännön<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" /> mukaisesti.
-          <ph name="LINE_BREAK" />
-          <ph name="LINE_BREAK" />
-          Generatiivinen tekoäly on kokeellinen ja se on vielä kehitysvaiheessa, ja sen saatavuus on tällä hetkellä rajoitettu.</translation>
 <translation id="6673898378497337661">lisää näppäimistön kirkkautta</translation>
 <translation id="6692996468359469499">Tietoja valinnastasi</translation>
 <translation id="6694534975463174713">lukko</translation>
@@ -1274,6 +1278,7 @@
 <translation id="6930597342185648547">Tietoa taustakuvasta</translation>
 <translation id="6939667434404433010">Hae tallenteen nimeä</translation>
 <translation id="6939766318048400022">kahvila</translation>
+<translation id="6942253772720771875">Jaa palautteesi tai kerro ongelmastasi</translation>
 <translation id="6943893908656559156">Etäidentiteetti (valinnainen)</translation>
 <translation id="6953137545147683679">kulta</translation>
 <translation id="6957231940976260713">Palvelun nimi</translation>
@@ -1295,6 +1300,7 @@
 <translation id="7040230719604914234">Operaattori</translation>
 <translation id="7040729769968826896">Salli puhujan tunnistus</translation>
 <translation id="7041549558901442110">Laitetta ei ole yhdistetty.</translation>
+<translation id="704183341263526038">Jupiter</translation>
 <translation id="7046522406494308071">Palautetaanko kaikki pikanäppäimet oletuksiksi?</translation>
 <translation id="7049916119678019302">Lataa transkriptiomalli asetuksista</translation>
 <translation id="7058278511608979688">Lopeta ja tallenna</translation>
@@ -1389,6 +1395,7 @@ Lataa transkriptiomalli (enintään 100 Mt), niin saat nämä transkriptiot.</t
 <translation id="7388345524791662148">Lisää vaihtoehtoja: <ph name="RECORDING_NAME" /></translation>
 <translation id="7388959671917308825">Sisäänrakennettu kosketuslevy</translation>
 <translation id="7397270852490618635">Laita vaalea teema pois päältä</translation>
+<translation id="7400166052988585408">Opettaja lukitsee näyttösi <ph name="NUM_SECONDS" /> sekunnin kuluttua</translation>
 <translation id="7401543881546089382">Poista pikakuvake</translation>
 <translation id="7405493795721832710"><ph name="DEVICE_NAME" /> on valmis päivitettäväksi</translation>
 <translation id="741244894080940828">muunnos</translation>
@@ -1427,6 +1434,7 @@ Lataa transkriptiomalli (enintään 100 Mt), niin saat nämä transkriptiot.</t
 <translation id="7569444139234840525"><ph name="QUERY_TEXT" /> · /<ph name="PHONETICS" />/</translation>
 <translation id="7570674786725311828">USB-kosketusnäyttö</translation>
 <translation id="757747079855995705">kivi</translation>
+<translation id="7584853321964440104">Lataaminen ei onnistu. Yritä uudelleen tai käynnistä Chromebook uudelleen.</translation>
 <translation id="7590883480672980941">Syöttöasetukset</translation>
 <translation id="7595982850646262331"><ph name="TIME_VALUE" /> jäljellä</translation>
 <translation id="7600430297804876776">Järjestelmänvalvoja (<ph name="MANAGER" />) on määrittänyt, milloin laitetta (<ph name="DEVICE_TYPE" />) voidaan käyttää.</translation>
@@ -1557,6 +1565,16 @@ Lataa transkriptiomalli (enintään 100 Mt), niin saat nämä transkriptiot.</t
 <translation id="8179976553408161302">Enter</translation>
 <translation id="8183975772394450380">ranta</translation>
 <translation id="819278132617411009">Käytä Google tekoälyä tuottavuuden tehostamiseen</translation>
+<translation id="82003371436638355">Kirjoita oma kehote, kun valitset "Luo oma". Voit myös valita "Valitse teema" ja sitten alleviivatut sanat, niin voit personoida AI-taustakuvaasi.
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          Valitse "Kaipaan inspiraatiota", jos haluat nähdä yksilöllisempiä ja monipuolisempia tekoälyn generoimia kuvavaihtoehtoja.
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          Kun luot oman taustakuvan, kehote lähetetään Googlen palvelimille ja sitä käytetään kuvien luomiseen ja tuotteen parantamiseen <ph name="BEGIN_LINK_GOOGLE_PRIVACY_POLICY" />Googlen käyttöehtojen ja tietosuojakäytännön<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" /> mukaisesti. Älä lisää henkilökohtaisia, arkaluontoisia tai luottamuksellisia tietoja.
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          Generatiivinen tekoäly voi tehdä virheitä, myös ihmisiin liittyviä, joten tarkista sen vastaukset. <ph name="BEGIN_LINK_CREATE_YOUR_OWN_WALLPAPER" />Lue lisää<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" /></translation>
 <translation id="8200772114523450471">Jatka</translation>
 <translation id="8206859287963243715">Matkapuhelin</translation>
 <translation id="8208861521865154048">Edut</translation>
@@ -1578,6 +1596,7 @@ Lataa transkriptiomalli (enintään 100 Mt), niin saat nämä transkriptiot.</t
 <translation id="8312330582793120272">toista mediaa</translation>
 <translation id="8318753676953949627">Ei kuvia</translation>
 <translation id="8320910311642849813">metsä</translation>
+<translation id="8322464149031882595">Siirry eteenpäin klikkaamalla</translation>
 <translation id="8329018942023753850">laskin-sovellus</translation>
 <translation id="8336739000755212683">Vaihda laitteen tilikuva</translation>
 <translation id="8339024191194156249">Lue lisää automaattisesta käynnistyksestä</translation>
@@ -1598,6 +1617,7 @@ Lataa transkriptiomalli (enintään 100 Mt), niin saat nämä transkriptiot.</t
 <translation id="8395584934117017006">Tämä <ph name="DEVICE_TYPE" /> on yrityksen ylläpitämä</translation>
 <translation id="8398927464629426868">Laitteen tämänhetkinen latausnopeus tai latauksen purkunopeus</translation>
 <translation id="8403988360557588704">Maalaus: <ph name="ART_FEATURE" />, tyylinä <ph name="ART_MOVEMENT" /></translation>
+<translation id="8409219750150841791">Luotu yhteenveto:</translation>
 <translation id="8410244574650205435">Havaittu automaattisesti</translation>
 <translation id="8420955526972171689">Testaa ja korjaa laitteisto-ongelmia</translation>
 <translation id="8422748173858722634">IMEI-koodi</translation>
@@ -1642,6 +1662,7 @@ Lataa transkriptiomalli (enintään 100 Mt), niin saat nämä transkriptiot.</t
 <translation id="8626489604350149811"><ph name="APN_NAME" />: lisää toimintoja</translation>
 <translation id="86356131183441916">Vaaleanvioletti</translation>
 <translation id="8647595191512746911">Audiotranskriptio</translation>
+<translation id="8648578954147795914">Luodut nimet:</translation>
 <translation id="8650852232143958317">Ota Gmail‑ ja Google Drive ‑tiedostot mukaan</translation>
 <translation id="8651481478098336970">Mykistä äänenvoimakkuus.</translation>
 <translation id="8655295600908251630">Kanava</translation>
@@ -1670,7 +1691,6 @@ Lataa transkriptiomalli (enintään 100 Mt), niin saat nämä transkriptiot.</t
 <translation id="8764414543112028321">WireGuard</translation>
 <translation id="87646919272181953">Google Kuvat ‑albumi</translation>
 <translation id="8775713578693478175">Modeemin APN</translation>
-<translation id="877735394245039557">Mallia ladataan</translation>
 <translation id="877985182522063539">A4</translation>
 <translation id="879568662008399081">Tällä sivustolla saattaa olla captive portal</translation>
 <translation id="8797082062139985406">Luo nimi Googlen tekoälyn avulla</translation>
@@ -1723,6 +1743,7 @@ Lataa transkriptiomalli (enintään 100 Mt), niin saat nämä transkriptiot.</t
 <translation id="8961025972867871808">pingviinit</translation>
 <translation id="8968751544471797276">Latausnopeus</translation>
 <translation id="8970109610781093811">Suorita uudelleen</translation>
+<translation id="8972061581514441296">Siirry takaisin klikkaamalla</translation>
 <translation id="8983038754672563810">HSPA</translation>
 <translation id="8987565828374052507">{NUMBER_OF_PAGES,plural, =0{Skannaa}=1{Skannaa sivu {NUMBER_OF_PAGES}}other{Skannaa sivu {NUMBER_OF_PAGES}}}</translation>
 <translation id="89945434909472341">kylä</translation>
@@ -1784,6 +1805,7 @@ Lataa transkriptiomalli (enintään 100 Mt), niin saat nämä transkriptiot.</t
 <translation id="9218016617214286986">Näytä tunnetut APN:t</translation>
 <translation id="932327136139879170">Etusivu</translation>
 <translation id="939519157834106403">SSID</translation>
+<translation id="940663759301549538">Varmista, että mikrofoni on kytketty, tai yritä käynnistää Chromebook uudelleen</translation>
 <translation id="945522503751344254">Lähetä palautetta</translation>
 <translation id="950520315903467048">Näppäin puuttuu: <ph name="DIRECTION" />. <ph name="ASSIGN_INSTRUCTION" /></translation>
 <translation id="951780398843003443">Vertaile tallenteen ääniä niin, että transkriptio kuvastaa, mitä kukin puhuja sanoi ja milloin</translation>

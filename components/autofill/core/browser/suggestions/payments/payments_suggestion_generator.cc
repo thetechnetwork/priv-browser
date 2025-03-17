@@ -5,8 +5,10 @@
 #include "components/autofill/core/browser/suggestions/payments/payments_suggestion_generator.h"
 
 #include <algorithm>
+#include <cstdint>
 #include <functional>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "base/check_deref.h"
@@ -55,10 +57,6 @@
 #include "components/strings/grit/components_strings.h"
 #include "ui/base/l10n/l10n_util.h"
 #include "ui/base/resource/resource_bundle.h"
-
-#if !BUILDFLAG(IS_ANDROID) && !BUILDFLAG(IS_IOS)
-#include "ui/native_theme/native_theme.h"  // nogncheck
-#endif
 
 namespace autofill {
 
@@ -193,10 +191,7 @@ Suggestion CreateManagePaymentMethodsEntry(SuggestionType suggestion_type,
     suggestion.icon = Suggestion::Icon::kGooglePay;
 #else
     suggestion.icon = Suggestion::Icon::kSettings;
-    suggestion.trailing_icon =
-        ui::NativeTheme::GetInstanceForNativeUi()->ShouldUseDarkColors()
-            ? Suggestion::Icon::kGooglePayDark
-            : Suggestion::Icon::kGooglePay;
+    suggestion.trailing_icon = Suggestion::Icon::kGooglePay;
 #endif
   } else {
     suggestion.icon = Suggestion::Icon::kSettings;
@@ -950,7 +945,8 @@ std::u16string GetBnplPriceLowerBound(
 // Creates a suggestion for the BNPL issuer selection.
 // The suggestion text shows the minimum eligible value of all available
 // BNPL issuers.
-Suggestion CreateBnplSuggestion(const std::vector<BnplIssuer>& bnpl_issuers) {
+Suggestion CreateBnplSuggestion(const std::vector<BnplIssuer>& bnpl_issuers,
+                                uint64_t extracted_amount_in_micros) {
   Suggestion bnpl_suggestion;
 
   bnpl_suggestion.icon = Suggestion::Icon::kBnpl;
@@ -963,6 +959,12 @@ Suggestion CreateBnplSuggestion(const std::vector<BnplIssuer>& bnpl_issuers) {
   bnpl_suggestion.labels = {{Suggestion::Text(
       l10n_util::GetStringFUTF16(IDS_AUTOFILL_BNPL_CREDIT_CARD_SUGGESTION_LABEL,
                                  GetBnplPriceLowerBound(bnpl_issuers)))}};
+  bnpl_suggestion.iph_metadata = Suggestion::IPHMetadata(
+      &feature_engagement::kIPHAutofillBnplAffirmOrZipSuggestionFeature);
+
+  Suggestion::PaymentsPayload payments_payload;
+  payments_payload.extracted_amount_in_micros = extracted_amount_in_micros;
+  bnpl_suggestion.payload = std::move(payments_payload);
 
   return bnpl_suggestion;
 }
@@ -1262,7 +1264,8 @@ std::vector<Suggestion> GetVirtualCardStandaloneCvcFieldSuggestions(
 
 BnplSuggestionUpdateResult MaybeUpdateSuggestionsWithBnpl(
     const base::span<const Suggestion>& current_suggestions,
-    const std::vector<BnplIssuer>& bnpl_issuers) {
+    const std::vector<BnplIssuer>& bnpl_issuers,
+    uint64_t extracted_amount_in_micros) {
   // No need to add BNPL suggestion if the current suggestion list is empty.
   if (current_suggestions.empty()) {
     return BnplSuggestionUpdateResult();
@@ -1279,7 +1282,7 @@ BnplSuggestionUpdateResult MaybeUpdateSuggestionsWithBnpl(
 
     if (IsCreditCardFooterSuggestion(current_suggestions, index)) {
       suggestion_update_result.suggestions.push_back(
-          CreateBnplSuggestion(bnpl_issuers));
+          CreateBnplSuggestion(bnpl_issuers, extracted_amount_in_micros));
       suggestion_update_result.suggestions.insert(
           suggestion_update_result.suggestions.end(),
           current_suggestions.begin() + index, current_suggestions.end());

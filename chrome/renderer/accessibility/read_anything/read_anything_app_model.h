@@ -13,7 +13,6 @@
 #include "base/timer/timer.h"
 #include "base/values.h"
 #include "chrome/common/read_anything/read_anything.mojom.h"
-#include "chrome/common/read_anything/read_anything_constants.h"
 #include "chrome/common/read_anything/read_anything_util.h"
 #include "chrome/renderer/accessibility/read_anything/read_aloud_traversal_utils.h"
 #include "services/metrics/public/cpp/ukm_source_id.h"
@@ -42,10 +41,17 @@ class ReadAnythingAppModel {
     virtual void OnTreeRemoved(ui::AXTree* tree) = 0;
   };
 
-  ReadAnythingAppModel();
-  ~ReadAnythingAppModel();
-  ReadAnythingAppModel(const ReadAnythingAppModel& other) = delete;
-  ReadAnythingAppModel& operator=(const ReadAnythingAppModel&) = delete;
+  // Enum for logging when we show the empty state.
+  // These values are persisted to logs. Entries should not be renumbered and
+  // numeric values should never be reused.
+  //
+  // LINT.IfChange(ReadAnythingEmptyState)
+  enum class EmptyState {
+    kShown = 0,
+    kShownWithSelectionAfter = 1,
+    kMaxValue = kShownWithSelectionAfter,
+  };
+  // LINT.ThenChange(//tools/metrics/histograms/metadata/accessibility/enums.xml:ReadAnythingEmptyState)
 
   struct AXTreeInfo {
     explicit AXTreeInfo(std::unique_ptr<ui::AXTreeManager> other);
@@ -79,6 +85,14 @@ class ReadAnythingAppModel {
     // active ax tree id changes; instead, it should be set once when a new tree
     // is added.
   };
+
+  static constexpr char kEmptyStateHistogramName[] =
+      "Accessibility.ReadAnything.EmptyState";
+
+  ReadAnythingAppModel();
+  ~ReadAnythingAppModel();
+  ReadAnythingAppModel(const ReadAnythingAppModel& other) = delete;
+  ReadAnythingAppModel& operator=(const ReadAnythingAppModel&) = delete;
 
   bool requires_distillation() const { return requires_distillation_; }
   void set_requires_distillation(bool value) { requires_distillation_ = value; }
@@ -183,6 +197,14 @@ class ReadAnythingAppModel {
   bool IsDocs() const;
 
   ui::AXNode* GetAXNode(const ui::AXNodeID& ax_node_id) const;
+
+  // Inserts `id` into `non_ignored_ids` if it corresponds to a node that should
+  // not be ignored during content distillation. Nodes may be ignored for
+  // various reasons, such as being synthetic markers of some type or (some
+  // kinds of) interactive elements.
+  void InsertIdIfNotIgnored(ui::AXNodeID id,
+                            std::set<ui::AXNodeID>& non_ignored_ids);
+
   bool NodeIsContentNode(const ui::AXNodeID& ax_node_id) const;
   void OnSettingsRestoredFromPrefs(
       read_anything::mojom::LineSpacing line_spacing,
@@ -256,9 +278,7 @@ class ReadAnythingAppModel {
  private:
   void EraseTree(const ui::AXTreeID& tree_id);
 
-  void InsertDisplayNode(const ui::AXNodeID& node);
   void ResetSelection();
-  void InsertSelectionNode(const ui::AXNodeID& node);
   void UpdateSelection();
   void ComputeSelectionNodeIds();
   bool IsCurrentSelectionEmpty();
@@ -340,8 +360,13 @@ class ReadAnythingAppModel {
   bool redraw_required_ = false;
   ui::AXNodeID last_expanded_node_id_ = ui::kInvalidAXNodeID;
 
+  // Cached set of fonts that support `base_language_code_`, updated whenever
+  // that is changed.
+  std::vector<std::string> supported_fonts_ =
+      GetSupportedFonts(base_language_code_);
+
   // Theme information.
-  std::string font_name_ = string_constants::kReadAnythingPlaceholderFontName;
+  std::string font_name_ = supported_fonts_.front();
   float font_size_;
   bool links_enabled_ = true;
   bool images_enabled_ = false;
@@ -373,11 +398,6 @@ class ReadAnythingAppModel {
 
   // Whether the webpage has finished loading or not.
   bool page_finished_loading_ = false;
-
-  // Cached set of fonts that support `base_language_code_`, updated whenever
-  // that is changed.
-  std::vector<std::string> supported_fonts_ =
-      GetSupportedFonts(base_language_code_);
 
   // If the page language can't be determined by the model, we can check the
   // AX tree to see if it has that information, but the ax tree is created

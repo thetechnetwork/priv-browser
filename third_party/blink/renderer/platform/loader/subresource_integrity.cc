@@ -168,12 +168,12 @@ String GetIntegrityStringFromDigest(const DigestValue& digest,
   return reported_hash.ReleaseString();
 }
 
-std::optional<String> SubresourceIntegrity::GetSubresourceIntegrityHash(
+String SubresourceIntegrity::GetSubresourceIntegrityHash(
     const SegmentedBuffer* buffer,
     HashAlgorithm algorithm) {
   DigestValue digest;
   if (!ComputeDigest(algorithm, buffer, digest)) {
-    return std::nullopt;
+    return String();
   }
   return GetIntegrityStringFromDigest(digest, algorithm);
 }
@@ -536,8 +536,14 @@ void SubresourceIntegrity::ParseIntegrityAttribute(
 
     IntegrityMetadata integrity_metadata(digest, algorithm);
     if (IsHashingAlgorithm(algorithm)) {
+      if (integrity_report) {
+        integrity_report->AddUseCount(WebFeature::kSRIHashAssertion);
+      }
       metadata_set.hashes.insert(integrity_metadata.ToPair());
     } else {
+      if (integrity_report) {
+        integrity_report->AddUseCount(WebFeature::kSRIPublicKeyAssertion);
+      }
       metadata_set.signatures.insert(integrity_metadata.ToPair());
     }
   }

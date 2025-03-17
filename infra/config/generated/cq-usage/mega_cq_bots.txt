@@ -1,4 +1,5 @@
 chromium/try/android-10-arm64-rel
+chromium/try/android-10-x86-rel
 chromium/try/android-11-x86-rel
 chromium/try/android-12-x64-rel
 chromium/try/android-12l-landscape-x64-dbg
@@ -21,7 +22,6 @@ chromium/try/android-dawn-arm-rel
 chromium/try/android-dawn-arm64-rel
 chromium/try/android-dawn-arm64-s24-rel
 chromium/try/android-desktop-15-x64-rel
-chromium/try/android-desktop-x64-compile-rel
 chromium/try/android-desktop-x64-rel
 chromium/try/android-official
 chromium/try/android-oreo-x86-rel
@@ -75,6 +75,7 @@ chromium/try/fuchsia-arm64-cast-receiver-rel
 chromium/try/fuchsia-fyi-arm64-dbg
 chromium/try/fuchsia-fyi-x64-asan
 chromium/try/fuchsia-fyi-x64-dbg-persistent-emulator
+chromium/try/fuchsia-netstack2-x64-cast-receiver-rel
 chromium/try/fuchsia-x64-cast-receiver-dbg
 chromium/try/fuchsia-x64-cast-receiver-dbg-compile
 chromium/try/fuchsia-x64-cast-receiver-rel

@@ -93,9 +93,14 @@ class TaskManagerTableModel : public TaskManagerObserver,
   ui::ImageModel GetIcon(size_t row) override;
   void SetObserver(ui::TableModelObserver* observer) override;
   int CompareValues(size_t row1, size_t row2, int column_id) override;
+  std::u16string GetAXNameForHeader(
+      const std::vector<std::u16string>& visible_column_titles) override;
   std::u16string GetAXNameForRow(
       size_t row,
       const std::vector<int>& visible_column_ids) override;
+
+  static std::u16string FormatListToString(
+      base::span<const std::u16string> items);
 
   void FilterTaskList(TaskIdList& tasks);
 
@@ -103,6 +108,8 @@ class TaskManagerTableModel : public TaskManagerObserver,
   void OnTaskAdded(TaskId id) override;
   void OnTaskToBeRemoved(TaskId id) override;
   void OnTasksRefreshed(const TaskIdList& task_ids) override;
+  void OnTasksRefreshedWithBackgroundCalculations(
+      const TaskIdList& task_ids) override;
 
   // Gets the start index and length of the group to which the task at
   // |row_index| belongs.
@@ -155,7 +162,7 @@ class TaskManagerTableModel : public TaskManagerObserver,
   void StartUpdating();
   void StopUpdating();
 
-  void OnRefresh();
+  void OnRefresh(const TaskIdList& task_ids);
 
   // Checks whether the task at |row_index| is the first task in its process
   // group of tasks.

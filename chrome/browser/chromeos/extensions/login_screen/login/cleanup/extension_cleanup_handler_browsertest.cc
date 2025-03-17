@@ -37,7 +37,6 @@ namespace {
 
 const char* const kExemptExtensions[] = {
     app_constants::kChromeAppId,
-    app_constants::kLacrosAppId,
 };
 
 const char kAccountId[] = "public-session@test";
@@ -185,8 +184,8 @@ class ExtensionCleanupHandlerTest : public policy::DevicePolicyCrosBrowserTest {
         std::unique_ptr<extensions::TestExtensionRegistryObserver>>
         extension_observers;
     for (const auto& extension : registered_component_extensions) {
-      if (extension_service->pending_extension_manager()->IsIdPending(
-              extension)) {
+      if (extensions::PendingExtensionManager::Get(GetActiveUserProfile())
+              ->IsIdPending(extension)) {
         extension_observers.insert(GetTestExtensionRegistryObserver(extension));
       }
     }
@@ -216,8 +215,6 @@ IN_PROC_BROWSER_TEST_F(ExtensionCleanupHandlerTest,
   Profile* profile = GetActiveUserProfile();
   extensions::ExtensionRegistry* extension_registry =
       extensions::ExtensionRegistry::Get(profile);
-  extensions::ExtensionService* extension_service =
-      extensions::ExtensionSystem::Get(profile)->extension_service();
 
   // Set up the user policy builder and add an extension to the cleanup
   // exemption list.
@@ -281,8 +278,8 @@ IN_PROC_BROWSER_TEST_F(ExtensionCleanupHandlerTest,
   // User installed extension is not reinstalled.
   EXPECT_FALSE(
       extension_registry->enabled_extensions().Contains(kUserExtensionId));
-  EXPECT_FALSE(extension_service->pending_extension_manager()->IsIdPending(
-      kUserExtensionId));
+  EXPECT_FALSE(extensions::PendingExtensionManager::Get(GetActiveUserProfile())
+                   ->IsIdPending(kUserExtensionId));
 
   // Force-installed app and extension are reinstalled.
   EXPECT_TRUE(extension_registry->enabled_extensions().Contains(kAppId));

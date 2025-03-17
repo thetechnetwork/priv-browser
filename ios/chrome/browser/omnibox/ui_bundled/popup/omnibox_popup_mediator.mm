@@ -32,13 +32,14 @@
 #import "ios/chrome/browser/menu/ui_bundled/browser_action_factory.h"
 #import "ios/chrome/browser/net/model/crurl.h"
 #import "ios/chrome/browser/ntp/model/new_tab_page_util.h"
+#import "ios/chrome/browser/omnibox/model/autocomplete_result_wrapper.h"
+#import "ios/chrome/browser/omnibox/model/autocomplete_result_wrapper_delegate.h"
 #import "ios/chrome/browser/omnibox/model/omnibox_popup_controller.h"
 #import "ios/chrome/browser/omnibox/ui_bundled/popup/autocomplete_controller_observer_bridge.h"
 #import "ios/chrome/browser/omnibox/ui_bundled/popup/autocomplete_match_formatter.h"
 #import "ios/chrome/browser/omnibox/ui_bundled/popup/autocomplete_suggestion_group_impl.h"
 #import "ios/chrome/browser/omnibox/ui_bundled/popup/carousel/carousel_item.h"
 #import "ios/chrome/browser/omnibox/ui_bundled/popup/carousel/carousel_item_menu_provider.h"
-#import "ios/chrome/browser/omnibox/ui_bundled/popup/omnibox_pedal_annotator.h"
 #import "ios/chrome/browser/omnibox/ui_bundled/popup/omnibox_popup_mediator+Testing.h"
 #import "ios/chrome/browser/omnibox/ui_bundled/popup/omnibox_popup_presenter.h"
 #import "ios/chrome/browser/omnibox/ui_bundled/popup/pedal_section_extractor.h"
@@ -65,17 +66,12 @@ const CGFloat kOmniboxIconSize = 16;
 const NSUInteger kMaxSuggestTileTypePosition = 15;
 }  // namespace
 
-@interface OmniboxPopupMediator () <PedalSectionExtractorDelegate>
+@interface OmniboxPopupMediator ()
 
 // FET reference.
 @property(nonatomic, assign) feature_engagement::Tracker* tracker;
 /// Extracts pedals from AutocompleSuggestions.
 @property(nonatomic, strong) PedalSectionExtractor* pedalSectionExtractor;
-/// List of suggestions without the pedal group. Used to debouce pedals.
-@property(nonatomic, strong)
-    NSArray<id<AutocompleteSuggestionGroup>>* nonPedalSuggestions;
-/// Holds the currently displayed pedals group, if any.
-@property(nonatomic, strong) id<AutocompleteSuggestionGroup> currentPedals;
 /// Index of the group containing AutocompleteSuggestion, first group to be
 /// highlighted on down arrow key.
 @property(nonatomic, assign) NSInteger preselectedGroupIndex;
@@ -90,6 +86,10 @@ const NSUInteger kMaxSuggestTileTypePosition = 15;
 
 // Whether the omnibox has a thumbnail.
 @property(nonatomic, assign) BOOL hasThumbnail;
+
+// Holds the current suggestion groups.
+@property(nonatomic, strong)
+    NSArray<id<AutocompleteSuggestionGroup>>* suggestionGroups;
 
 @end
 
@@ -123,8 +123,6 @@ const NSUInteger kMaxSuggestTileTypePosition = 15;
     _imageFetcher = std::move(imageFetcher);
     _faviconLoader = faviconLoader;
     _open = NO;
-    _pedalSectionExtractor = [[PedalSectionExtractor alloc] init];
-    _pedalSectionExtractor.delegate = self;
     _preselectedGroupIndex = 0;
     _autocompleteController = autocompleteController;
     _remoteSuggestionsService = remoteSuggestionsService;
@@ -135,6 +133,7 @@ const NSUInteger kMaxSuggestTileTypePosition = 15;
 }
 
 - (void)disconnect {
+  [self.popupController disconnect];
   if (_remoteSuggestionsServiceObserverBridge) {
     self.remoteSuggestionsService->RemoveObserver(
         _remoteSuggestionsServiceObserverBridge.get());
@@ -180,9 +179,6 @@ const NSUInteger kMaxSuggestTileTypePosition = 15;
             (OmniboxPopupController*)popupController
                              hasSuggestions:(BOOL)hasSuggestions
                                  isFocusing:(BOOL)isFocusing {
-  self.nonPedalSuggestions = nil;
-  self.currentPedals = nil;
-
   [self.consumer newResultsAvailable];
 
   if (self.debugInfoConsumer) {
@@ -199,11 +195,19 @@ const NSUInteger kMaxSuggestTileTypePosition = 15;
 }
 
 - (void)popupController:(OmniboxPopupController*)popupController
-         didSortResults:(const AutocompleteResult&)result {
-  NSArray<id<AutocompleteSuggestionGroup>>* groups =
-      [self wrappedMatches:result];
+    didUpdateSuggestionsGroups:
+        (NSArray<id<AutocompleteSuggestionGroup>>*)suggestionGroups {
+  _suggestionGroups = suggestionGroups;
 
-  [self.consumer updateMatches:groups
+  // Preselect the verbatim match. It's the top match, unless we inserted pedals
+  // and pushed it one section down.
+  self.preselectedGroupIndex = 0;
+  if (_suggestionGroups.count > 0 &&
+      _suggestionGroups[0].type == SuggestionGroupType::kPedalSuggestionGroup) {
+    self.preselectedGroupIndex = 1;
+  }
+
+  [self.consumer updateMatches:_suggestionGroups
       preselectedMatchGroupIndex:self.preselectedGroupIndex];
 }
 
@@ -221,6 +225,13 @@ const NSUInteger kMaxSuggestTileTypePosition = 15;
 - (void)popupController:(OmniboxPopupController*)popupController
     didUpdateHasThumbnail:(BOOL)hasThumbnail {
   self.hasThumbnail = hasThumbnail;
+}
+
+- (void)popupController:(OmniboxPopupController*)popupController
+    didInvalidatePedals:
+        (NSArray<id<AutocompleteSuggestionGroup>>*)nonPedalSuggestionsGroups {
+  [self.consumer updateMatches:nonPedalSuggestionsGroups
+      preselectedMatchGroupIndex:0];
 }
 
 #pragma mark - AutocompleteResultDataSource
@@ -453,32 +464,25 @@ const NSUInteger kMaxSuggestTileTypePosition = 15;
       });
 }
 
-#pragma mark - PedalSectionExtractorDelegate
-
-/// Removes the pedal group from suggestions. Pedal are removed from suggestions
-/// with a debouce timer in `PedalSectionExtractor`. When the timer ends the
-/// pedal group is removed.
-- (void)invalidatePedals {
-  if (self.nonPedalSuggestions) {
-    self.currentPedals = nil;
-    [self.consumer updateMatches:self.nonPedalSuggestions
-        preselectedMatchGroupIndex:0];
-  }
-}
-
 #pragma mark - Private methods
 
 - (void)logPedalShownForCurrentResult {
-  for (PedalSuggestionWrapper* pedalMatch in self.currentPedals.suggestions) {
-    base::UmaHistogramEnumeration("Omnibox.PedalShown",
-                                  (OmniboxPedalId)pedalMatch.innerPedal.type,
-                                  OmniboxPedalId::TOTAL_COUNT);
+  for (id<AutocompleteSuggestionGroup> group in _suggestionGroups) {
+    if (group.type != SuggestionGroupType::kPedalSuggestionGroup) {
+      continue;
+    }
+
+    for (PedalSuggestionWrapper* pedalMatch in group.suggestions) {
+      base::UmaHistogramEnumeration("Omnibox.PedalShown",
+                                    (OmniboxPedalId)pedalMatch.innerPedal.type,
+                                    OmniboxPedalId::TOTAL_COUNT);
+    }
   }
 }
 
 /// Log action in suggest shown but not used for the current result.
 - (void)logActionsInSuggestShownForCurrentResult {
-  for (id<AutocompleteSuggestionGroup> group in self.nonPedalSuggestions) {
+  for (id<AutocompleteSuggestionGroup> group in _suggestionGroups) {
     for (id<AutocompleteSuggestion> suggestion in group.suggestions) {
       if (suggestion.actionsInSuggest.count == 0) {
         continue;
@@ -489,189 +493,6 @@ const NSUInteger kMaxSuggestTileTypePosition = 15;
       }
     }
   }
-}
-
-/// Wraps `match` with AutocompleteMatchFormatter.
-- (AutocompleteMatchFormatter*)wrapMatch:(const AutocompleteMatch&)match
-                              fromResult:(const AutocompleteResult&)result {
-  AutocompleteMatchFormatter* formatter =
-      [AutocompleteMatchFormatter formatterWithMatch:match];
-  formatter.starred = [self.popupController isStarredMatch:match];
-  formatter.incognito = _incognito;
-  formatter.defaultSearchEngineIsGoogle = self.defaultSearchEngineIsGoogle;
-  formatter.pedalData = [self.pedalAnnotator pedalForMatch:match];
-  formatter.isMultimodal = self.hasThumbnail;
-
-  if (formatter.suggestionGroupId) {
-    omnibox::GroupId groupId =
-        static_cast<omnibox::GroupId>(formatter.suggestionGroupId.intValue);
-    omnibox::GroupSection sectionId =
-        result.GetSectionForSuggestionGroup(groupId);
-    formatter.suggestionSectionId =
-        [NSNumber numberWithInt:static_cast<int>(sectionId)];
-  }
-
-  NSMutableArray* actions = [[NSMutableArray alloc] init];
-
-  for (auto& action : match.actions) {
-    SuggestAction* suggestAction =
-        [SuggestAction actionWithOmniboxAction:action.get()];
-
-    if (!suggestAction) {
-      continue;
-    }
-
-    if (suggestAction.type != omnibox::ActionInfo_ActionType_CALL) {
-      [actions addObject:suggestAction];
-      continue;
-    }
-
-    BOOL hasDialApp = [[UIApplication sharedApplication]
-        canOpenURL:net::NSURLWithGURL(suggestAction.actionURI)];
-    if (hasDialApp) {
-      [actions addObject:suggestAction];
-    }
-  }
-
-  formatter.actionsInSuggest = actions;
-
-  return formatter;
-}
-
-/// Extract normal (non-tile) matches from `autocompleteResult`.
-- (NSMutableArray<id<AutocompleteSuggestion>>*)extractMatches:
-    (const AutocompleteResult&)autocompleteResult {
-  NSMutableArray<id<AutocompleteSuggestion>>* wrappedMatches =
-      [[NSMutableArray alloc] init];
-  for (size_t i = 0; i < autocompleteResult.size(); i++) {
-    const AutocompleteMatch& match = autocompleteResult.match_at((NSUInteger)i);
-    if (match.type == AutocompleteMatchType::TILE_NAVSUGGEST) {
-      DCHECK(match.type == AutocompleteMatchType::TILE_NAVSUGGEST);
-      for (const AutocompleteMatch::SuggestTile& tile : match.suggest_tiles) {
-        AutocompleteMatch tileMatch = AutocompleteMatch(match);
-        tileMatch.destination_url = tile.url;
-        tileMatch.fill_into_edit = base::UTF8ToUTF16(tile.url.spec());
-        tileMatch.description = tile.title;
-        tileMatch.description_class = ClassifyTermMatches(
-            {}, tileMatch.description.length(), 0, ACMatchClassification::NONE);
-#if DCHECK_IS_ON()
-        tileMatch.Validate();
-#endif  // DCHECK_IS_ON()
-        AutocompleteMatchFormatter* formatter =
-            [self wrapMatch:tileMatch fromResult:autocompleteResult];
-        [wrappedMatches addObject:formatter];
-      }
-    } else {
-      [wrappedMatches addObject:[self wrapMatch:match
-                                     fromResult:autocompleteResult]];
-    }
-  }
-
-  return wrappedMatches;
-}
-
-/// Take a list of suggestions and break it into groups determined by sectionId
-/// field. Use `headerMap` to extract group names.
-- (NSArray<id<AutocompleteSuggestionGroup>>*)
-            groupSuggestions:(NSArray<id<AutocompleteSuggestion>>*)suggestions
-    usingACResultAsHeaderMap:(const AutocompleteResult&)headerMap {
-  __block NSMutableArray<id<AutocompleteSuggestion>>* currentGroup =
-      [[NSMutableArray alloc] init];
-  NSMutableArray<id<AutocompleteSuggestionGroup>>* groups =
-      [[NSMutableArray alloc] init];
-
-  if (suggestions.count == 0) {
-    return @[];
-  }
-
-  id<AutocompleteSuggestion> firstSuggestion = suggestions.firstObject;
-
-  __block NSNumber* currentSectionId = firstSuggestion.suggestionSectionId;
-  __block NSNumber* currentGroupId = firstSuggestion.suggestionGroupId;
-
-  [currentGroup addObject:firstSuggestion];
-
-  void (^startNewGroup)() = ^{
-    if (currentGroup.count == 0) {
-      return;
-    }
-
-    NSString* groupTitle =
-        currentGroupId
-            ? base::SysUTF16ToNSString(headerMap.GetHeaderForSuggestionGroup(
-                  static_cast<omnibox::GroupId>([currentGroupId intValue])))
-            : nil;
-    SuggestionGroupDisplayStyle displayStyle =
-        SuggestionGroupDisplayStyleDefault;
-
-    if (base::FeatureList::IsEnabled(
-            omnibox::kMostVisitedTilesHorizontalRenderGroup)) {
-      omnibox::GroupConfig_RenderType renderType =
-          headerMap.GetRenderTypeForSuggestionGroup(
-              static_cast<omnibox::GroupId>([currentGroupId intValue]));
-      displayStyle = (renderType == omnibox::GroupConfig_RenderType_HORIZONTAL)
-                         ? SuggestionGroupDisplayStyleCarousel
-                         : SuggestionGroupDisplayStyleDefault;
-    } else if (currentSectionId &&
-               static_cast<omnibox::GroupSection>(currentSectionId.intValue) ==
-                   omnibox::SECTION_MOBILE_MOST_VISITED) {
-      displayStyle = SuggestionGroupDisplayStyleCarousel;
-    }
-
-    [groups addObject:[AutocompleteSuggestionGroupImpl
-                          groupWithTitle:groupTitle
-                             suggestions:currentGroup
-                            displayStyle:displayStyle]];
-    currentGroup = [[NSMutableArray alloc] init];
-  };
-
-  for (NSUInteger i = 1; i < suggestions.count; i++) {
-    id<AutocompleteSuggestion> suggestion = suggestions[i];
-    if ((!suggestion.suggestionSectionId && !currentSectionId) ||
-        [suggestion.suggestionSectionId isEqual:currentSectionId]) {
-      [currentGroup addObject:suggestion];
-    } else {
-      startNewGroup();
-      currentGroupId = suggestion.suggestionGroupId;
-      currentSectionId = suggestion.suggestionSectionId;
-      [currentGroup addObject:suggestion];
-    }
-  }
-  startNewGroup();
-
-  return groups;
-}
-
-/// Unpacks AutocompleteMatch into wrapped AutocompleteSuggestion and
-/// AutocompleteSuggestionGroup. Sets `preselectedGroupIndex`.
-- (NSArray<id<AutocompleteSuggestionGroup>>*)wrappedMatches:
-    (const AutocompleteResult&)autocompleteResult {
-  NSMutableArray<id<AutocompleteSuggestionGroup>>* groups =
-      [[NSMutableArray alloc] init];
-
-  // Group the suggestions by the section Id.
-  NSMutableArray<id<AutocompleteSuggestion>>* allMatches =
-      [self extractMatches:autocompleteResult];
-  NSArray<id<AutocompleteSuggestionGroup>>* allGroups =
-      [self groupSuggestions:allMatches
-          usingACResultAsHeaderMap:autocompleteResult];
-  [groups addObjectsFromArray:allGroups];
-
-  // Before inserting pedals above all, back up non-pedal suggestions for
-  // debouncing.
-  self.nonPedalSuggestions = groups;
-
-  // Get pedals, if any. They go at the very top of the list.
-  self.currentPedals = [self.pedalSectionExtractor extractPedals:allMatches];
-  if (self.currentPedals) {
-    [groups insertObject:self.currentPedals atIndex:0];
-  }
-
-  // Preselect the verbatim match. It's the top match, unless we inserted pedals
-  // and pushed it one section down.
-  self.preselectedGroupIndex = self.currentPedals ? MIN(1, groups.count) : 0;
-
-  return groups;
 }
 
 - (void)callActionTapped {

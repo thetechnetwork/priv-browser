@@ -22,6 +22,7 @@
 #include "chrome/browser/ui/tabs/tab_group_model.h"
 #include "chrome/browser/ui/views/chrome_layout_provider.h"
 #include "chrome/browser/ui/views/data_sharing/data_sharing_bubble_controller.h"
+#include "chrome/browser/ui/views/data_sharing/data_sharing_utils.h"
 #include "chrome/browser/ui/views/frame/browser_view.h"
 #include "chrome/browser/ui/views/tabs/collaboration_messaging_page_action_icon_view.h"
 #include "chrome/browser/ui/views/tabs/tab_group_editor_bubble_view.h"
@@ -37,6 +38,7 @@
 #include "components/image_fetcher/core/image_fetcher_service.h"
 #include "components/saved_tab_groups/public/saved_tab_group.h"
 #include "components/signin/public/base/avatar_icon_util.h"
+#include "components/strings/grit/components_strings.h"
 #include "ui/base/l10n/l10n_util.h"
 #include "ui/base/metadata/metadata_impl_macros.h"
 #include "ui/compositor/layer.h"
@@ -44,6 +46,7 @@
 #include "ui/gfx/favicon_size.h"
 #include "ui/gfx/geometry/insets.h"
 #include "ui/gfx/image/image_skia_operations.h"
+#include "ui/gfx/paint_vector_icon.h"
 #include "ui/views/accessibility/view_accessibility.h"
 #include "ui/views/controls/highlight_path_generator.h"
 #include "ui/views/controls/styled_label.h"
@@ -97,53 +100,6 @@ std::optional<data_sharing::GroupMember> GetRelevantUserForActivity(
       NOTREACHED();
   }
   return user;
-}
-
-// TODO(crbug.com/392150086): Refactor this into utilities.
-bool UnwrapTriggeringUserGivenName(const ActivityLogItem& item,
-                                   std::u16string& given_name) {
-  auto triggering_user = item.activity_metadata.triggering_user;
-  if (!triggering_user) {
-    return false;
-  }
-  given_name = base::UTF8ToUTF16(triggering_user->given_name);
-  return true;
-}
-
-// Get the string for the title line to describe the action.
-std::u16string GetTitleText(const ActivityLogItem& item, bool is_current_tab) {
-  using collaboration::messaging::CollaborationEvent;
-
-  if (!is_current_tab) {
-    return item.title_text;
-  }
-
-  // Return early if not a tab event.
-  //
-  // TAB_REMOVED is not included here because the tab no longer exists,
-  // therefore RecentActivity cannot be shown in the context of that tab.
-  bool is_tab_event_type =
-      item.collaboration_event == CollaborationEvent::TAB_ADDED ||
-      item.collaboration_event == CollaborationEvent::TAB_UPDATED;
-  if (!is_tab_event_type) {
-    return item.title_text;
-  }
-
-  std::u16string given_name;
-  if (!UnwrapTriggeringUserGivenName(item, given_name)) {
-    return item.title_text;
-  }
-
-  switch (item.collaboration_event) {
-    case CollaborationEvent::TAB_ADDED:
-      return l10n_util::GetStringFUTF16(
-          IDS_DATA_SHARING_RECENT_ACTIVITY_MEMBER_ADDED_THIS_TAB, given_name);
-    case CollaborationEvent::TAB_UPDATED:
-      return l10n_util::GetStringFUTF16(
-          IDS_DATA_SHARING_RECENT_ACTIVITY_MEMBER_CHANGED_THIS_TAB, given_name);
-    default:
-      NOTREACHED();
-  }
 }
 
 // Gets the string for the metadata line to describe an event.
@@ -210,12 +166,12 @@ DEFINE_ELEMENT_IDENTIFIER_VALUE(kRecentActivityBubbleDialogId);
 RecentActivityBubbleDialogView::RecentActivityBubbleDialogView(
     View* anchor_view,
     content::WebContents* web_contents,
-    std::optional<int> current_tab_activity_index,
-    std::vector<ActivityLogItem> activity_log,
+    std::vector<ActivityLogItem> tab_activity_log,
+    std::vector<ActivityLogItem> group_activity_log,
     Profile* profile)
     : LocationBarBubbleDelegateView(anchor_view, web_contents),
-      activity_log_(activity_log),
-      current_tab_activity_index_(current_tab_activity_index),
+      tab_activity_log_(tab_activity_log),
+      group_activity_log_(group_activity_log),
       profile_(profile) {
   SetProperty(views::kElementIdentifierKey, kRecentActivityBubbleDialogId);
   SetTitle(l10n_util::GetStringUTF16(IDS_DATA_SHARING_RECENT_ACTIVITY_TITLE));
@@ -227,7 +183,7 @@ RecentActivityBubbleDialogView::RecentActivityBubbleDialogView(
   set_fixed_width(views::LayoutProvider::Get()->GetDistanceMetric(
       views::DISTANCE_BUBBLE_PREFERRED_WIDTH));
 
-  if (activity_log.empty()) {
+  if (tab_activity_log.empty() && group_activity_log.empty()) {
     CreateEmptyState();
   }
 
@@ -258,10 +214,7 @@ void RecentActivityBubbleDialogView::CreateEmptyState() {
 }
 
 void RecentActivityBubbleDialogView::CreateTabActivity() {
-  // If an index is supplied, show this element in the tab container
-  // to highlight it was the last action on the current tab.
-  const bool should_show_tab_activity =
-      !activity_log_.empty() && current_tab_activity_index_.has_value();
+  const bool should_show_tab_activity = !tab_activity_log_.empty();
 
   // Margin used between labels and containers.
   const int container_vertical_margin =
@@ -293,10 +246,8 @@ void RecentActivityBubbleDialogView::CreateTabActivity() {
       ->SetLayoutManager(std::make_unique<views::FlexLayout>())
       ->SetOrientation(views::LayoutOrientation::kVertical)
       .SetCollapseMargins(true);
-  tab_activity_container_->SetBackground(
-      views::CreateThemedRoundedRectBackground(
-          kColorSharingRecentActivityDialogActivityContainer,
-          container_radius));
+  tab_activity_container_->SetBackground(views::CreateRoundedRectBackground(
+      kColorSharingRecentActivityDialogActivityContainer, container_radius));
 
   // Skip creating the content if there is no tab activity to show.
   if (!should_show_tab_activity) {
@@ -305,8 +256,7 @@ void RecentActivityBubbleDialogView::CreateTabActivity() {
 
   tab_activity_container_
       ->AddChildView(std::make_unique<RecentActivityRowView>(
-          activity_log_.at(current_tab_activity_index_.value()),
-          /*is_current_tab=*/true, profile_,
+          tab_activity_log_.at(0), profile_,
           base::BindOnce(&RecentActivityBubbleDialogView::Close,
                          weak_factory_.GetWeakPtr())))
       ->SetProperty(views::kMarginsKey,
@@ -315,15 +265,16 @@ void RecentActivityBubbleDialogView::CreateTabActivity() {
 }
 
 void RecentActivityBubbleDialogView::CreateGroupActivity() {
+  // If an item will be shown in the tab activity container, we want to
+  // reduce the number of rows we show in the group activity.
+  const int tab_container_rows = tab_activity_log_.empty() ? 0 : 1;
+
   // Enforce an upper bound of kMaxNumberRows to protect against the
   // backend returning more data than expected.
-  const int max_rows =
-      std::min(static_cast<int>(activity_log_.size()), kMaxNumberRows);
-
-  // If an item will be shown in the tab activity container, it will
-  // not show in the group activity. Reduce size to account for this.
   const int total_group_rows =
-      current_tab_activity_index_.has_value() ? max_rows - 1 : max_rows;
+      std::min(static_cast<int>(group_activity_log_.size()), kMaxNumberRows) -
+      tab_container_rows;
+
   const bool should_show_group_activity = total_group_rows > 0;
 
   // Margin used between labels and containers.
@@ -356,23 +307,14 @@ void RecentActivityBubbleDialogView::CreateGroupActivity() {
       ->SetLayoutManager(std::make_unique<views::FlexLayout>())
       ->SetOrientation(views::LayoutOrientation::kVertical)
       .SetCollapseMargins(true);
-  group_activity_container_->SetBackground(
-      views::CreateThemedRoundedRectBackground(
-          kColorSharingRecentActivityDialogActivityContainer,
-          container_radius));
+  group_activity_container_->SetBackground(views::CreateRoundedRectBackground(
+      kColorSharingRecentActivityDialogActivityContainer, container_radius));
 
   int group_rows_added = 0;
-  for (int i = 0; i < max_rows; i++) {
-    // If an index is supplied, skip the corresponding element since it
-    // will be shown in the tab_activity_container.
-    if (current_tab_activity_index_.has_value() &&
-        i == current_tab_activity_index_.value()) {
-      continue;
-    }
-
+  for (int i = 0; i < total_group_rows; i++) {
     auto* activity_row = group_activity_container_->AddChildView(
         std::make_unique<RecentActivityRowView>(
-            activity_log_.at(i), /*is_current_tab=*/false, profile_,
+            group_activity_log_.at(i), profile_,
             base::BindOnce(&RecentActivityBubbleDialogView::Close,
                            weak_factory_.GetWeakPtr())));
 
@@ -415,13 +357,11 @@ END_METADATA
 
 RecentActivityRowView::RecentActivityRowView(
     ActivityLogItem item,
-    const bool is_current_tab,
     Profile* profile,
     base::OnceCallback<void()> close_callback)
     : HoverButton(base::BindRepeating(&RecentActivityRowView::ButtonPressed,
                                       base::Unretained(this)),
                   std::u16string()),
-      is_current_tab_(is_current_tab),
       item_(item),
       profile_(profile),
       close_callback_(std::move(close_callback)) {
@@ -449,7 +389,7 @@ RecentActivityRowView::RecentActivityRowView(
   // Let hover button process events.
   label_container->SetCanProcessEventsWithinSubtree(false);
 
-  activity_text_ = GetTitleText(item_, is_current_tab_);
+  activity_text_ = item.title_text;
   auto* activity_label =
       label_container->AddChildView(std::make_unique<views::Label>());
   activity_label->SetText(activity_text_);
@@ -559,8 +499,10 @@ void RecentActivityRowView::ManageSharing() {
 
   if (auto* browser = tab_groups::SavedTabGroupUtils::GetBrowserWithTabGroupId(
           group_id.value())) {
+    data_sharing::RequestInfo request_info(group_id.value(),
+                                           data_sharing::FlowType::kManage);
     DataSharingBubbleController::GetOrCreateForBrowser(browser)->Show(
-        group_id.value());
+        request_info);
   }
 }
 
@@ -613,7 +555,9 @@ RecentActivityRowImageView::~RecentActivityRowImageView() = default;
 
 void RecentActivityRowImageView::FetchAvatar() {
   auto user = GetRelevantUserForActivity(item_);
-  if (!user.has_value()) {
+  if (!user.has_value() || !user->avatar_url.is_valid()) {
+    // Unknown user. Will render fallback icon for avatar.
+    avatar_request_complete_ = true;
     return;
   }
 
@@ -643,6 +587,7 @@ void RecentActivityRowImageView::SetAvatar(const gfx::Image& avatar) {
   avatar_image_ = gfx::ImageSkiaOperations::CreateResizedImage(
       avatar.AsImageSkia(), skia::ImageOperations::ResizeMethod::RESIZE_GOOD,
       gfx::Size(avatar_size, avatar_size));
+  avatar_request_complete_ = true;
   SchedulePaint();
 }
 
@@ -688,7 +633,7 @@ void RecentActivityRowImageView::SetFavicon(
 }
 
 void RecentActivityRowImageView::PaintFavicon(gfx::Canvas* canvas,
-                                              gfx::Rect avatar_bounds) {
+                                              const gfx::Rect& avatar_bounds) {
   const int favicon_container_radius =
       ChromeLayoutProvider::Get()->GetDistanceMetric(
           DISTANCE_RECENT_ACTIVITY_FAVICON_CONTAINER_RADIUS);
@@ -757,12 +702,28 @@ void RecentActivityRowImageView::PaintFavicon(gfx::Canvas* canvas,
       resized_favicon_bounds.width(), resized_favicon_bounds.height(), false);
 }
 
-void RecentActivityRowImageView::OnPaint(gfx::Canvas* canvas) {
-  if (!ShouldShowAvatar()) {
-    // Nothing should be painted as the avatar is loading.
-    return;
-  }
+void RecentActivityRowImageView::PaintPlaceholderBackground(
+    gfx::Canvas* canvas,
+    const gfx::Rect& bounds) {
+  cc::PaintFlags indicator_flags;
+  indicator_flags.setColor(
+      GetColorProvider()->GetColor(ui::kColorSysTonalContainer));
+  canvas->DrawCircle(bounds.CenterPoint(), bounds.width() / 2.0,
+                     indicator_flags);
+}
 
+void RecentActivityRowImageView::PaintFallbackIcon(gfx::Canvas* canvas,
+                                                   const gfx::Rect& bounds) {
+  const int icon_size = ChromeLayoutProvider::Get()->GetDistanceMetric(
+      DISTANCE_RECENT_ACTIVITY_AVATAR_FALLBACK_SIZE);
+  int icon_offset = (bounds.width() - icon_size) / 2.0;
+  canvas->Translate({icon_offset, icon_offset});
+  gfx::PaintVectorIcon(
+      canvas, kPersonFilledPaddedSmallIcon, icon_size,
+      GetColorProvider()->GetColor(ui::kColorSysOnTonalContainer));
+}
+
+void RecentActivityRowImageView::OnPaint(gfx::Canvas* canvas) {
   gfx::Rect contents_bounds = GetContentsBounds();
   const int avatar_size = ChromeLayoutProvider::Get()->GetDistanceMetric(
       DISTANCE_RECENT_ACTIVITY_AVATAR_SIZE);
@@ -771,13 +732,24 @@ void RecentActivityRowImageView::OnPaint(gfx::Canvas* canvas) {
   gfx::Rect avatar_bounds(contents_bounds.x(), contents_bounds.y(), avatar_size,
                           avatar_size);
 
+  if (!ShouldShowAvatar()) {
+    // Only the background should be painted as the avatar is loading.
+    PaintPlaceholderBackground(canvas, avatar_bounds);
+    return;
+  }
+
   // Save background layer to be used in favicon container border.
   canvas->SaveLayerAlpha(0xff);
 
   // Draw the avatar image.
-  canvas->DrawImageInt(avatar_image_, 0, 0, avatar_size, avatar_size,
-                       avatar_bounds.x(), avatar_bounds.y(),
-                       avatar_bounds.width(), avatar_bounds.height(), false);
+  if (avatar_image_.isNull()) {
+    PaintPlaceholderBackground(canvas, avatar_bounds);
+    PaintFallbackIcon(canvas, avatar_bounds);
+  } else {
+    canvas->DrawImageInt(avatar_image_, 0, 0, avatar_size, avatar_size,
+                         avatar_bounds.x(), avatar_bounds.y(),
+                         avatar_bounds.width(), avatar_bounds.height(), false);
+  }
 
   if (ShouldShowFavicon()) {
     PaintFavicon(canvas, avatar_bounds);
@@ -817,7 +789,8 @@ void RecentActivityBubbleCoordinator::Show(
     std::vector<ActivityLogItem> activity_log,
     Profile* profile) {
   auto bubble = std::make_unique<RecentActivityBubbleDialogView>(
-      anchor_view, web_contents, std::nullopt, activity_log, profile);
+      anchor_view, web_contents, std::vector<ActivityLogItem>(), activity_log,
+      profile);
   bubble->SetArrow(views::BubbleBorder::Arrow::TOP_LEFT);
 
   RecentActivityBubbleCoordinator::ShowCommon(std::move(bubble));
@@ -826,28 +799,11 @@ void RecentActivityBubbleCoordinator::Show(
 void RecentActivityBubbleCoordinator::ShowForCurrentTab(
     views::View* anchor_view,
     content::WebContents* web_contents,
-    std::vector<ActivityLogItem> activity_log,
+    std::vector<ActivityLogItem> tab_activity_log,
+    std::vector<ActivityLogItem> group_activity_log,
     Profile* profile) {
-  tab_groups::LocalTabID tab_id =
-      tabs::TabInterface::GetFromContents(web_contents)
-          ->GetHandle()
-          .raw_value();
-  // Find the first activity item for this tab, if any.
-  auto it = std::find_if(activity_log.begin(), activity_log.end(),
-                         [&tab_id](const ActivityLogItem& item) -> bool {
-                           std::optional<TabMessageMetadata> tab_metadata =
-                               item.activity_metadata.tab_metadata;
-                           return tab_metadata.has_value() &&
-                                  tab_metadata->local_tab_id == tab_id;
-                         });
-
-  std::optional<int> index;
-  if (it != activity_log.end()) {
-    index = std::distance(activity_log.begin(), it);
-  }
-
   auto bubble = std::make_unique<RecentActivityBubbleDialogView>(
-      anchor_view, web_contents, index, activity_log, profile);
+      anchor_view, web_contents, tab_activity_log, group_activity_log, profile);
   bubble->SetArrow(views::BubbleBorder::Arrow::TOP_RIGHT);
   RecentActivityBubbleCoordinator::ShowCommon(std::move(bubble));
 }

@@ -84,7 +84,7 @@ chromium-metrics-reviews@google.com.
 </histogram>
 
 <histogram name="Conversions.AggregatableFilteringIdMaxBytesValue"
-    units="count" expires_after="2025-07-06">
+    units="count" expires_after="2025-09-07">
   <owner>linnan@chromium.org</owner>
   <owner>measurement-api-dev+metrics@google.com</owner>
   <summary>
@@ -265,7 +265,7 @@ chromium-metrics-reviews@google.com.
 </histogram>
 
 <histogram name="Conversions.AggregatableReport.{ContextType}ExtraReportDelay"
-    units="ms" expires_after="2025-07-06">
+    units="ms" expires_after="2025-09-07">
   <owner>linnan@chromium.org</owner>
   <owner>measurement-api-dev+metrics@google.com</owner>
   <summary>
@@ -364,7 +364,7 @@ chromium-metrics-reviews@google.com.
 </histogram>
 
 <histogram name="Conversions.AttributionSrcRequestStatus.{Type}"
-    enum="ConversionAttributionSrcRequestStatus" expires_after="2025-07-06">
+    enum="ConversionAttributionSrcRequestStatus" expires_after="2025-09-07">
   <owner>linnan@chromium.org</owner>
   <owner>measurement-api-dev+metrics@google.com</owner>
   <summary>
@@ -539,7 +539,7 @@ chromium-metrics-reviews@google.com.
 </histogram>
 
 <histogram name="Conversions.DebugReport.ReportRetrySucceedEventLevel"
-    enum="BooleanSuccess" expires_after="2025-04-13">
+    enum="BooleanSuccess" expires_after="2025-08-24">
   <owner>apaseltiner@chromium.org</owner>
   <owner>measurement-api-dev+metrics@google.com</owner>
   <summary>
@@ -661,7 +661,7 @@ chromium-metrics-reviews@google.com.
 </histogram>
 
 <histogram name="Conversions.GoogleAmpViewer.{Type}" enum="Boolean"
-    expires_after="2025-07-06">
+    expires_after="2025-09-07">
   <owner>linnan@chromium.org</owner>
   <owner>measurement-api-dev+metrics@google.com</owner>
   <summary>
@@ -702,7 +702,7 @@ chromium-metrics-reviews@google.com.
 </histogram>
 
 <histogram name="Conversions.HttpResponseOrNetErrorCode.{AppState}"
-    enum="CombinedHttpResponseAndNetErrorCode" expires_after="2025-07-06">
+    enum="CombinedHttpResponseAndNetErrorCode" expires_after="2025-09-07">
   <owner>tquintanilla@chromium.org</owner>
   <owner>measurement-api-dev+metrics@google.com</owner>
   <summary>
@@ -822,7 +822,7 @@ chromium-metrics-reviews@google.com.
 
 <histogram name="Conversions.NavigationSourceScopesLimitOutcome"
     enum="ConversionNavigationSourceScopesLimitOutcome"
-    expires_after="2025-07-06">
+    expires_after="2025-09-07">
   <owner>tquintanilla@chromium.org</owner>
   <owner>linnan@chromium.org</owner>
   <owner>measurement-api-dev+metrics@google.com</owner>
@@ -976,7 +976,7 @@ chromium-metrics-reviews@google.com.
 </histogram>
 
 <histogram name="Conversions.OsRegistrationsBufferWithSameContext"
-    enum="Boolean" expires_after="2025-06-29">
+    enum="Boolean" expires_after="2025-08-31">
   <owner>linnan@chromium.org</owner>
   <owner>measurement-api-dev+metrics@google.com</owner>
   <summary>
@@ -1429,6 +1429,29 @@ chromium-metrics-reviews@google.com.
   </summary>
 </histogram>
 
+<histogram
+    name="Conversions.UniqueReportingOriginsPerDestAndReportingSiteForSource"
+    units="reporting origins" expires_after="2025-08-27">
+  <owner>linnan@chromium.org</owner>
+  <owner>measurement-api-dev+metrics@google.com</owner>
+  <summary>
+    Measures the number of unique reporting origins per (destination site,
+    reporting site) in the last day. Recorded once per destination site for each
+    successful source registration, including the current source.
+  </summary>
+</histogram>
+
+<histogram name="Conversions.UniqueReportingOriginsPerReportingSiteForSource"
+    units="reporting origins" expires_after="2025-08-27">
+  <owner>linnan@chromium.org</owner>
+  <owner>measurement-api-dev+metrics@google.com</owner>
+  <summary>
+    Measures the number of unique reporting origins per reporting site in the
+    last day. Recorded once for each successful source registration, including
+    the current source.
+  </summary>
+</histogram>
+
 <histogram name="Conversions.UniqueReportingOriginsPerSiteForAttribution"
     units="reporting origins" expires_after="2025-08-24">
   <owner>linnan@chromium.org</owner>
@@ -1442,7 +1465,7 @@ chromium-metrics-reviews@google.com.
 </histogram>
 
 <histogram name="Conversions.ValidReportsInDatabase" units="Reports"
-    expires_after="2025-06-30">
+    expires_after="2025-08-31">
   <owner>tquintanilla@chromium.org</owner>
   <owner>apaseltiner@chromium.org</owner>
   <owner>measurement-api-dev+metrics@google.com</owner>
@@ -1559,7 +1582,7 @@ chromium-metrics-reviews@google.com.
 </histogram>
 
 <histogram name="Conversions.{ReportType}.ReportBodySize" units="bytes"
-    expires_after="2025-07-06">
+    expires_after="2025-09-07">
   <owner>linnan@chromium.org</owner>
   <owner>measurement-api-dev+metrics@google.com</owner>
   <summary>

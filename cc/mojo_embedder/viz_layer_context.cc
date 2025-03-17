@@ -150,9 +150,6 @@ void ComputePropertyTreeNodeUpdate(
       old_node->target_id == new_node.target_id &&
       old_node->backdrop_mask_element_id == new_node.backdrop_mask_element_id &&
       old_node->has_copy_request == new_node.has_copy_request &&
-      old_node->subtree_has_copy_request == new_node.subtree_has_copy_request &&
-      old_node->closest_ancestor_with_copy_request_id ==
-          new_node.closest_ancestor_with_copy_request_id &&
       old_node->backdrop_filters == new_node.backdrop_filters &&
       copy_requests.empty()) {
     return;
@@ -172,9 +169,6 @@ void ComputePropertyTreeNodeUpdate(
   wire->target_id = new_node.target_id;
   wire->backdrop_mask_element_id = new_node.backdrop_mask_element_id;
   wire->copy_output_requests = std::move(copy_requests);
-  wire->subtree_has_copy_request = new_node.subtree_has_copy_request;
-  wire->closest_ancestor_with_copy_request_id =
-      new_node.closest_ancestor_with_copy_request_id;
   wire->backdrop_filters = new_node.backdrop_filters;
   container.push_back(std::move(wire));
 }
@@ -481,18 +475,6 @@ void SerializeLayer(LayerImpl& layer,
     case mojom::LayerType::kPicture: {
       PictureLayerImpl& picture_layer = static_cast<PictureLayerImpl&>(layer);
       wire.is_backdrop_filter_mask = picture_layer.is_backdrop_filter_mask();
-      if (wire.is_backdrop_filter_mask) {
-        // Serialize the contents resource ID for the layer serving as a
-        // backdrop filter.
-        viz::ResourceId resource_id;
-        gfx::Size mask_texture_size;
-        gfx::SizeF mask_uv_size;
-        picture_layer.GetContentsResourceId(&resource_id, &mask_texture_size,
-                                            &mask_uv_size);
-        wire.resource_id = resource_id;
-        wire.texture_size = mask_texture_size;
-        wire.uv_size = mask_uv_size;
-      }
 
       if (picture_layer.GetRasterSource()->IsSolidColor()) {
         wire.solid_color = picture_layer.GetRasterSource()->GetSolidColor();
@@ -763,6 +745,7 @@ void VizLayerContext::UpdateDisplayTreeFrom(
     viz::RasterContextProvider& context_provider) {
   auto& property_trees = *tree.property_trees();
   auto update = viz::mojom::LayerTreeUpdate::New();
+  update->begin_frame_args = tree.CurrentBeginFrameArgs();
   update->source_frame_number = tree.source_frame_number();
   update->trace_id = tree.trace_id().value();
   update->device_viewport = tree.GetDeviceViewport();

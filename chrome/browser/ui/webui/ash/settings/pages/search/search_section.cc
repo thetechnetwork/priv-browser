@@ -17,6 +17,7 @@
 #include "base/no_destructor.h"
 #include "base/strings/string_util.h"
 #include "base/strings/utf_string_conversions.h"
+#include "build/buildflag.h"
 #include "chrome/browser/ash/assistant/assistant_util.h"
 #include "chrome/browser/ash/input_method/editor_mediator_factory.h"
 #include "chrome/browser/ash/lobster/lobster_service.h"
@@ -395,9 +396,11 @@ void SearchSection::AddLoadTimeData(content::WebUIDataSource* html_source) {
       {"enableHelpMeWrite", IDS_OS_SETTINGS_ENABLE_HELP_ME_WRITE},
       {"enableHelpMeWriteDesc",
        IDS_OS_SETTINGS_ENABLE_HELP_ME_WRITE_DESCRIPTION},
+      {"enableLobster", IDS_LOBSTER_OS_SETTINGS_ENABLE},
+      {"enableLobsterDesc", IDS_LOBSTER_OS_SETTINGS_ENABLE_DESCRIPTION},
 #if BUILDFLAG(GOOGLE_CHROME_BRANDING)
-      {"enableLobster", IDS_OS_SETTINGS_ENABLE_LOBSTER},
-      {"enableLobsterDesc", IDS_OS_SETTINGS_ENABLE_LOBSTER_DESCRIPTION},
+      {"enableScanner", IDS_OS_SETTINGS_ENABLE_SCANNER},
+      {"enableScannerDesc", IDS_OS_SETTINGS_ENABLE_SCANNER_DESCRIPTION},
 #endif  // BUILDFLAG(GOOGLE_CHROME_BRANDING)
       {"osSearchEngineLabel", IDS_OS_SETTINGS_SEARCH_ENGINE_LABEL},
       {"searchSubpageTitle", IDS_SETTINGS_SEARCH_SUBPAGE_TITLE},

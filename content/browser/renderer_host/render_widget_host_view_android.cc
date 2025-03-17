@@ -14,6 +14,7 @@
 #include "base/android/jni_string.h"
 #include "base/auto_reset.h"
 #include "base/command_line.h"
+#include "base/feature_list.h"
 #include "base/files/file_util.h"
 #include "base/functional/bind.h"
 #include "base/functional/callback_helpers.h"
@@ -61,6 +62,7 @@
 #include "content/browser/renderer_host/render_view_host_delegate_view.h"
 #include "content/browser/renderer_host/render_view_host_impl.h"
 #include "content/browser/renderer_host/render_widget_host_impl.h"
+#include "content/browser/renderer_host/render_widget_host_view_base.h"
 #include "content/browser/renderer_host/visible_time_request_trigger.h"
 #include "content/browser/screen_orientation/screen_orientation_provider.h"
 #include "content/common/features.h"
@@ -1131,6 +1133,10 @@ void RenderWidgetHostViewAndroid::OnFocusInternal() {
 void RenderWidgetHostViewAndroid::LostFocusInternal() {
   if (overscroll_controller_)
     overscroll_controller_->Disable();
+
+  if (IsPointerLocked()) {
+    UnlockPointer();
+  }
 }
 
 bool RenderWidgetHostViewAndroid::HasFocus() {
@@ -1280,31 +1286,6 @@ void RenderWidgetHostViewAndroid::OnUpdateTextInputStateCalled(
     // reported as none.
     ime_adapter_android_->UpdateState(ui::mojom::TextInputState());
   }
-}
-
-void RenderWidgetHostViewAndroid::OnImeCompositionRangeChanged(
-    TextInputManager* text_input_manager,
-    RenderWidgetHostViewBase* updated_view,
-    bool character_bounds_changed,
-    const std::optional<std::vector<gfx::Rect>>& line_bounds) {
-  DCHECK_EQ(text_input_manager_, text_input_manager);
-  // Don't pass data to Java if using the new pipeline.
-  if (!ime_adapter_android_ ||
-      base::FeatureList::IsEnabled(
-          blink::features::kCursorAnchorInfoMojoPipe)) {
-    return;
-  }
-
-  if (character_bounds_changed) {
-    const TextInputManager::CompositionRangeInfo* info =
-        text_input_manager_->GetCompositionRangeInfo();
-    ime_adapter_android_->SetBounds(
-        info ? info->character_bounds : std::vector<gfx::Rect>(),
-        character_bounds_changed, line_bounds);
-    return;
-  }
-
-  ime_adapter_android_->SetBounds(std::vector<gfx::Rect>(), false, line_bounds);
 }
 
 void RenderWidgetHostViewAndroid::OnImeCancelComposition(
@@ -2209,6 +2190,10 @@ void RenderWidgetHostViewAndroid::StopObservingRootWindow() {
   if (!observing_root_window_)
     return;
 
+  if (IsPointerLocked()) {
+    UnlockPointer();
+  }
+
   // Reset window state variables to their defaults.
   is_window_activity_started_ = true;
   is_window_visible_ = true;
@@ -2336,18 +2321,61 @@ RenderWidgetHostViewAndroid::FilterInputEvent(
 
 blink::mojom::PointerLockResult RenderWidgetHostViewAndroid::LockPointer(
     bool request_unadjusted_movement) {
-  NOTIMPLEMENTED();
-  return blink::mojom::PointerLockResult::kUnsupportedOptions;
+  if (!base::FeatureList::IsEnabled(blink::features::kPointerLockOnAndroid)) {
+    NOTIMPLEMENTED();
+    return blink::mojom::PointerLockResult::kUnsupportedOptions;
+  }
+
+  ui::WindowAndroid* window_android = view_.GetWindowAndroid();
+  if (!window_android || !window_android->RequestPointerLock(view_)) {
+    return blink::mojom::PointerLockResult::kWrongDocument;
+  }
+
+  return blink::mojom::PointerLockResult::kSuccess;
 }
 
 blink::mojom::PointerLockResult RenderWidgetHostViewAndroid::ChangePointerLock(
     bool request_unadjusted_movement) {
-  NOTIMPLEMENTED();
-  return blink::mojom::PointerLockResult::kUnsupportedOptions;
+  if (!base::FeatureList::IsEnabled(blink::features::kPointerLockOnAndroid)) {
+    NOTIMPLEMENTED();
+    return blink::mojom::PointerLockResult::kUnsupportedOptions;
+  }
+
+  // Changing the unadjusted_movement flag has no effect on Android.
+  return blink::mojom::PointerLockResult::kSuccess;
+}
+
+bool RenderWidgetHostViewAndroid::IsPointerLocked() {
+  if (!base::FeatureList::IsEnabled(blink::features::kPointerLockOnAndroid)) {
+    return RenderWidgetHostViewBase::IsPointerLocked();
+  }
+
+  ui::WindowAndroid* window_android = view_.GetWindowAndroid();
+
+  if (!window_android) {
+    return false;
+  }
+
+  return window_android->HasPointerLock(view_);
 }
 
 void RenderWidgetHostViewAndroid::UnlockPointer() {
-  NOTIMPLEMENTED();
+  if (!base::FeatureList::IsEnabled(blink::features::kPointerLockOnAndroid)) {
+    NOTIMPLEMENTED();
+    return;
+  }
+
+  ui::WindowAndroid* window_android = view_.GetWindowAndroid();
+  if (!window_android) {
+    return;
+  }
+
+  window_android->ReleasePointerLock(view_);
+  host_->LostPointerLock();
+}
+
+void RenderWidgetHostViewAndroid::OnPointerLockRelease() {
+  host_->LostPointerLock();
 }
 
 // Methods called from the host to the render
@@ -3114,6 +3142,9 @@ void RenderWidgetHostViewAndroid::NotifyHostAndDelegateOnWasShown(
        delegated_frame_host_->IsPrimarySurfaceEvicted()) ||
       !local_surface_id_allocator_.HasValidLocalSurfaceId()) {
     was_evicted = true;
+    // Release any synchronisation restrictions.
+    screen_state_change_handler_.Unthrottle();
+
     ui::WindowAndroidCompositor* compositor =
         view_.GetWindowAndroid() ? view_.GetWindowAndroid()->GetCompositor()
                                  : nullptr;

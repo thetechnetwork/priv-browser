@@ -115,21 +115,41 @@ void ExpectNoUpdateSequence(
     const base::Version& version = base::Version(kUpdaterVersion)) {
   test_server->ExpectOnce({request::GetUpdaterUserAgentMatcher(version),
                            request::GetContentMatcher({base::StringPrintf(
-                               R"(.*"appid":"%s".*)", app_id.c_str())})},
-                          base::StringPrintf(")]}'\n"
-                                             R"({"response":{)"
-                                             R"(  "protocol":"3.1",)"
-                                             R"(  "app":[)"
-                                             R"(    {)"
-                                             R"(      "appid":"%s",)"
-                                             R"(      "status":"ok",)"
-                                             R"(      "updatecheck":{)"
-                                             R"(        "status":"noupdate")"
-                                             R"(      })"
-                                             R"(    })"
-                                             R"(  ])"
-                                             R"(}})",
-                                             app_id.c_str()));
+                               R"(.*"appid":"%s".*)", app_id)})},
+                          base::BindRepeating(
+                              [](const std::string& app_id, bool v4) {
+                                return v4 ? base::StringPrintf(
+                                                ")]}'\n"
+                                                R"({"response":{)"
+                                                R"(  "protocol":"4.0",)"
+                                                R"(  "apps":[)"
+                                                R"(    {)"
+                                                R"(      "appid":"%s",)"
+                                                R"(      "status":"ok",)"
+                                                R"(      "updatecheck":{)"
+                                                R"(        "status":"noupdate")"
+                                                R"(      })"
+                                                R"(    })"
+                                                R"(  ])"
+                                                R"(}})",
+                                                app_id)
+                                          : base::StringPrintf(
+                                                ")]}'\n"
+                                                R"({"response":{)"
+                                                R"(  "protocol":"3.1",)"
+                                                R"(  "app":[)"
+                                                R"(    {)"
+                                                R"(      "appid":"%s",)"
+                                                R"(      "status":"ok",)"
+                                                R"(      "updatecheck":{)"
+                                                R"(        "status":"noupdate")"
+                                                R"(      })"
+                                                R"(    })"
+                                                R"(  ])"
+                                                R"(}})",
+                                                app_id);
+                              },
+                              app_id));
 }
 
 void ExpectPingRequest(
@@ -150,8 +170,8 @@ void ExpectPingRequest(
                                    : "")})},
       base::StringPrintf(")]}'\n"
                          R"({"response":{)"
-                         R"(  "protocol":"3.1",)"
-                         R"(  "app":[)"
+                         R"(  "protocol":"4.0",)"
+                         R"(  "apps":[)"
                          R"(    {)"
                          R"(      "appid":"%s",)"
                          R"(      "status":"ok")"
@@ -162,7 +182,7 @@ void ExpectPingRequest(
 }
 
 base::FilePath GetInstallerPath(const std::string& installer) {
-  return base::FilePath::FromASCII("test_installer").AppendASCII(installer);
+  return base::FilePath::FromUTF8Unsafe("test_installer").AppendUTF8(installer);
 }
 
 struct TestApp {
@@ -204,7 +224,7 @@ struct TestApp {
         installer_path.ReplaceExtension(FILE_PATH_LITERAL(".exe"))));
 #else
     command.SetProgram(exe_path.Append(
-        installer_path.DirName().AppendASCII("test_app_setup.sh")));
+        installer_path.DirName().AppendUTF8("test_app_setup.sh")));
 #endif
     return command;
   }
@@ -682,8 +702,8 @@ class IntegrationTest : public ::testing::Test {
     const base::FilePath app_json_path =
         GetInstallDirectory(GetUpdaterScopeForTesting())
             ->DirName()
-            .AppendASCII(appid)
-            .AppendASCII("app.json");
+            .AppendUTF8(appid)
+            .AppendUTF8("app.json");
     JSONFileValueDeserializer parser(app_json_path,
                                      base::JSON_ALLOW_TRAILING_COMMAS);
     int error_code = 0;
@@ -723,7 +743,7 @@ class IntegrationTest : public ::testing::Test {
     SetExistenceCheckerPath(app.appid,
                             GetInstallDirectory(GetUpdaterScopeForTesting())
                                 ->DirName()
-                                .AppendASCII(app.appid));
+                                .AppendUTF8(app.appid));
 #endif
 
     ExpectAppInstalled(app.appid, version);
@@ -1035,7 +1055,7 @@ TEST_P(IntegrationCleanupOldVersionTest, VariousArchitectures) {
   int dirs = 0;
   base::FileEnumerator(*path, false, base::FileEnumerator::DIRECTORIES)
       .ForEach([&dirs](const base::FilePath& path) {
-        if (base::Version(path.BaseName().MaybeAsASCII()).IsValid()) {
+        if (base::Version(path.BaseName().AsUTF8Unsafe()).IsValid()) {
           ++dirs;
         }
       });
@@ -1205,8 +1225,8 @@ TEST_F(IntegrationTest, ReportsActive) {
             R"("ping":{"ad":-1,.*)"})},
       R"()]}')"
       "\n"
-      R"({"response":{"protocol":"3.1","daystart":{"elapsed_)"
-      R"(days":5098}},"app":[{"appid":"test1","status":"ok",)"
+      R"({"response":{"protocol":"4.0","daystart":{"elapsed_)"
+      R"(days":5098}},"apps":[{"appid":"test1","status":"ok",)"
       R"("updatecheck":{"status":"noupdate"}},{"appid":"test2",)"
       R"("status":"ok","updatecheck":{"status":"noupdate"}}]})");
   ASSERT_NO_FATAL_FAILURE(RunWake(0));
@@ -1637,9 +1657,11 @@ TEST_F(IntegrationTest, InstallUpdaterAndTwoApps) {
   ASSERT_NO_FATAL_FAILURE(InstallUpdaterAndApp(
       kAppId, /*is_silent_install=*/true,
       base::StrCat({"appguid=", kAppId, "&ap=foo&usagestats=1"})));
+  // The download is skipped because the CRX was cached when installing the
+  // first app.
   ASSERT_NO_FATAL_FAILURE(ExpectInstallSequence(
       &test_server, kAppId2, "", UpdateService::Priority::kForeground,
-      base::Version({0, 0, 0, 0}), v1));
+      base::Version({0, 0, 0, 0}), v1, false, true));
   ASSERT_NO_FATAL_FAILURE(InstallUpdaterAndApp(
       kAppId2, /*is_silent_install=*/true,
       base::StrCat({"appguid=", kAppId2, "&ap=foo2&usagestats=1"})));
@@ -2047,7 +2069,7 @@ TEST_F(IntegrationTest, SameVersionUpdate) {
   const std::string response = base::StringPrintf(
       ")]}'\n"
       R"({"response":{)"
-      R"(  "protocol":"3.1",)"
+      R"(  "protocol":"4.0",)"
       R"(  "app":[)"
       R"(    {)"
       R"(      "appid":"%s",)"
@@ -2090,8 +2112,8 @@ TEST_F(IntegrationTest, InstallDataIndex) {
   const std::string response = base::StringPrintf(
       ")]}'\n"
       R"({"response":{)"
-      R"(  "protocol":"3.1",)"
-      R"(  "app":[)"
+      R"(  "protocol":"4.0",)"
+      R"(  "apps":[)"
       R"(    {)"
       R"(      "appid":"%s",)"
       R"(      "status":"ok",)"
@@ -2148,10 +2170,10 @@ TEST_F(IntegrationTest, RegisterApp) {
   RegistrationRequest registration;
   registration.app_id = "e595682b-02d5-46d1-b7ab-90034bd6be0f";
   registration.brand_code = "TSBD";
-  registration.brand_path = base::FilePath::FromASCII("/bp");
+  registration.brand_path = base::FilePath::FromUTF8Unsafe("/bp");
   registration.ap = "TestAp";
   registration.version = base::Version("11.22.33.44");
-  registration.existence_checker_path = base::FilePath::FromASCII("/tmp");
+  registration.existence_checker_path = base::FilePath::FromUTF8Unsafe("/tmp");
   registration.cohort = "cohort_test";
   test_commands_->RegisterApp(registration);
 
@@ -2462,78 +2484,6 @@ TEST_F(IntegrationTestDeviceManagementBase,
   ASSERT_NO_FATAL_FAILURE(Uninstall());
 }
 #endif  // BUILDFLAG(IS_MAC)
-
-TEST_F(IntegrationTestDeviceManagementBase, PolicyFetchFailedNoAppInstall) {
-  ASSERT_NO_FATAL_FAILURE(InstallBrokenEnterpriseCompanionApp());
-  DMPushEnrollmentToken(kEnrollmentToken);
-
-  // Policy fetch errors.
-  ExpectDeviceManagementRegistrationRequest(test_server_.get(),
-                                            kEnrollmentToken, kDMToken);
-  ExpectDeviceManagementPolicyFetchRequest(test_server_.get(), kDMToken,
-                                           OmahaSettingsClientProto());
-  ASSERT_NO_FATAL_FAILURE(Install(/*switches=*/{}));
-
-  // Verify that policy fetch failure blocks the app installation.
-  test_server_->ExpectOnce({}, "", net::HTTP_INTERNAL_SERVER_ERROR);
-#if BUILDFLAG(IS_MAC)
-  // Mac has an out-of-process fallback fetcher.
-  test_server_->ExpectOnce({}, "", net::HTTP_INTERNAL_SERVER_ERROR);
-#endif  // BUILDFLAG(IS_MAC)
-  ExpectAppsUpdateSequence(UpdaterScope::kSystem, test_server_.get(),
-                           /*request_attributes=*/{}, {});
-  ASSERT_NO_FATAL_FAILURE(InstallAppViaService(kApp1.appid));
-  ASSERT_NO_FATAL_FAILURE(ExpectNotRegistered(kApp1.appid));
-  ASSERT_NO_FATAL_FAILURE(ExpectUninstallPing(test_server_.get()));
-  ASSERT_NO_FATAL_FAILURE(UninstallBrokenEnterpriseCompanionApp());
-  ASSERT_NO_FATAL_FAILURE(Uninstall());
-}
-
-TEST_F(IntegrationTestDeviceManagementBase, PolicyFetchFailedNoAppUpdate) {
-  ASSERT_NO_FATAL_FAILURE(InstallBrokenEnterpriseCompanionApp());
-
-  ASSERT_NO_FATAL_FAILURE(Install(/*switches=*/{}));
-  ASSERT_NO_FATAL_FAILURE(ExpectInstalled());
-  ASSERT_NO_FATAL_FAILURE(InstallTestApp(kApp1, /*install_v1=*/true));
-  ExpectAppInstalled(kApp1.appid, kApp1.v1);
-
-  // Policy fetch failure should block app update. There's still an update
-  // check request for updater itself.
-  DMPushEnrollmentToken(kEnrollmentToken);
-  ExpectDeviceManagementRegistrationRequest(test_server_.get(),
-                                            kEnrollmentToken, kDMToken);
-  test_server_->ExpectOnce({}, "", net::HTTP_INTERNAL_SERVER_ERROR);
-#if BUILDFLAG(IS_MAC)
-  // Mac has an out-of-process fallback fetcher.
-  test_server_->ExpectOnce({}, "", net::HTTP_INTERNAL_SERVER_ERROR);
-#endif  // BUILDFLAG(IS_MAC)
-  ExpectUpdateCheckRequest(test_server_.get());
-  ASSERT_NO_FATAL_FAILURE(RunWake(0));
-  ASSERT_TRUE(WaitForUpdaterExit());
-  ExpectAppInstalled(kApp1.appid, kApp1.v1);
-
-  // Update should perform normally if subsequent policy fetch succeeds.
-  ASSERT_NO_FATAL_FAILURE(SetLastChecked(base::Time::Now() - base::Hours(9)))
-      << "Failed to set last-checked to force next update check.";
-  ExpectDeviceManagementPolicyFetchRequest(test_server_.get(), kDMToken,
-                                           OmahaSettingsClientProto());
-  ExpectAppsUpdateSequence(
-      UpdaterScope::kSystem, test_server_.get(),
-      /*request_attributes=*/{},
-      {AppUpdateExpectation(
-          kApp1.GetInstallCommandLineArgs(/*install_v1=*/false), kApp1.appid,
-          kApp1.v1, kApp1.v2,
-          /*is_install=*/false,
-          /*should_update=*/true, false, "", "",
-          GetInstallerPath(kApp1.v2_crx))});
-  ASSERT_NO_FATAL_FAILURE(RunWake(0));
-  ASSERT_TRUE(WaitForUpdaterExit());
-
-  ASSERT_NO_FATAL_FAILURE(ExpectAppVersion(kApp1.appid, kApp1.v2));
-  ASSERT_NO_FATAL_FAILURE(ExpectUninstallPing(test_server_.get()));
-  ASSERT_NO_FATAL_FAILURE(UninstallBrokenEnterpriseCompanionApp());
-  ASSERT_NO_FATAL_FAILURE(Uninstall());
-}
 
 TEST_P(IntegrationTestDeviceManagement, AppInstall) {
   ASSERT_NO_FATAL_FAILURE(Install(GetInstallSwitches()));
@@ -3855,8 +3805,8 @@ TEST_F(IntegrationTest, CRURegistrationReportsActive) {
             R"("ping":{"ad":-1,.*)"})},
       R"()]}')"
       "\n"
-      R"({"response":{"protocol":"3.1","daystart":{"elapsed_)"
-      R"(days":5098}},"app":[{"appid":"test1","status":"ok",)"
+      R"({"response":{"protocol":"4.0","daystart":{"elapsed_)"
+      R"(days":5098}},"apps":[{"appid":"test1","status":"ok",)"
       R"("updatecheck":{"status":"noupdate"}},{"appid":"test2",)"
       R"("status":"ok","updatecheck":{"status":"noupdate"}}]})");
   ASSERT_NO_FATAL_FAILURE(RunWake(0));
@@ -4629,7 +4579,7 @@ TEST_F(IntegrationTest, AppLogoUrl) {
   std::string app_logo_bytes;
   ASSERT_TRUE(base::ReadFileToString(
       test::GetTestFilePath("app_logos")
-          .AppendASCII(base::StringPrintf("%s.bmp", kAppId.c_str())),
+          .AppendUTF8(base::StringPrintf("%s.bmp", kAppId.c_str())),
       &app_logo_bytes));
   test_logo_server.ExpectOnce(
       {
@@ -5051,7 +5001,7 @@ class IntegrationTestMsi : public IntegrationTest {
     ASSERT_TRUE(base::PathService::Get(base::DIR_EXE, &msi_path));
     msi_path = msi_path.Append(
         GetInstallerPath(base::StrCat({kMsiAppId, ".", version.GetString()}))
-            .AppendASCII(kMsiCrx)
+            .AppendUTF8(kMsiCrx)
             .RemoveExtension());
     const std::wstring command = BuildMsiCommandLine({}, {}, msi_path);
     base::Process process = base::LaunchProcess(command, {});

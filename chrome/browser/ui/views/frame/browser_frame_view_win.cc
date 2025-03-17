@@ -119,7 +119,7 @@ BrowserFrameViewWin::BrowserFrameViewWin(BrowserFrame* frame,
     window_title_->SetSubpixelRenderingEnabled(false);
     window_title_->SetHorizontalAlignment(gfx::ALIGN_LEFT);
     window_title_->SetID(VIEW_ID_WINDOW_TITLE);
-    AddChildView(window_title_.get());
+    AddChildViewRaw(window_title_.get());
   }
 
   caption_button_container_ =
@@ -402,13 +402,8 @@ int BrowserFrameViewWin::NonClientHitTest(const gfx::Point& point) {
     }
   }
 
-  if (window_component != HTNOWHERE) {
-    return window_component;
-  }
-
   // Fall back to the caption if no other component matches.
-  TabStripRegionView::ReportCaptionHitTestInReservedGrabHandleSpace(false);
-  return HTCAPTION;
+  return (window_component == HTNOWHERE) ? HTCAPTION : window_component;
 }
 
 void BrowserFrameViewWin::UpdateWindowIcon() {

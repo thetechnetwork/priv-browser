@@ -33,7 +33,6 @@
 #include "third_party/blink/public/mojom/webid/federated_auth_request.mojom.h"
 #include "third_party/skia/include/core/SkPath.h"
 #include "ui/base/l10n/l10n_util.h"
-#include "ui/base/l10n/time_format.h"
 #include "ui/base/metadata/metadata_impl_macros.h"
 #include "ui/base/models/image_model.h"
 #include "ui/base/mojom/dialog_button.mojom.h"
@@ -563,12 +562,9 @@ AccountSelectionBubbleView::CreateSingleAccountChooser(
   // Prefer using the given name if it is provided, otherwise fallback to name,
   // unless that is disabled.
   std::u16string button_title = l10n_util::GetStringUTF16(IDS_SIGNIN_CONTINUE);
-  if (!account->given_name.empty() ||
-      !base::FeatureList::IsEnabled(features::kFedCmContinueWithoutName)) {
-    const std::string display_name =
-        account->given_name.empty() ? account->name : account->given_name;
-    button_title = l10n_util::GetStringFUTF16(IDS_ACCOUNT_SELECTION_CONTINUE,
-                                              base::UTF8ToUTF16(display_name));
+  if (!account->given_name.empty()) {
+    button_title = l10n_util::GetStringFUTF16(
+        IDS_ACCOUNT_SELECTION_CONTINUE, base::UTF8ToUTF16(account->given_name));
   }
   const content::IdentityProviderData& idp_data = *account->identity_provider;
   const content::IdentityProviderMetadata& idp_metadata = idp_data.idp_metadata;
@@ -577,7 +573,8 @@ AccountSelectionBubbleView::CreateSingleAccountChooser(
   auto button = std::make_unique<ContinueButton>(
       base::BindRepeating(&FedCmAccountSelectionView::OnAccountSelected,
                           base::Unretained(owner_), account),
-      button_title, this, idp_metadata, base::UTF8ToUTF16(account->email));
+      button_title, this, idp_metadata,
+      base::UTF8ToUTF16(account->display_identifier));
   row->AddChildView(std::move(button));
 
   // Do not add disclosure text if this is a sign in or if we were requested
@@ -745,31 +742,15 @@ void AccountSelectionBubbleView::AddAccounts(
     }
     return;
   }
-  std::optional<base::Time> now;
   for (const auto& account : accounts) {
-    std::optional<std::u16string> last_used_string;
-    if (account->last_used_timestamp) {
-      // For the most recently used account, we want to show "last used on this
-      // site" while for all other accounts we want to show timing regarding
-      // when it was last used ("last used 1 month ago"). |now| is set when the
-      // first account is seen, so !|now| is only true for the most recently
-      // used account.
-      if (!now) {
-        last_used_string = l10n_util::GetStringUTF16(
-            IDS_MULTI_IDP_ACCOUNT_LAST_USED_ON_THIS_SITE);
-        now = base::Time::Now();
-      } else {
-        // ui::TimeFormat::SimpleWithMonthAndYear does not support negative
-        // values, so if the value is negative, make it 0.
-        base::TimeDelta delta =
-            std::max(*now - *account->last_used_timestamp, base::TimeDelta());
-        last_used_string = l10n_util::GetStringFUTF16(
-            IDS_MULTI_IDP_ACCOUNT_USED_TIME_AGO,
-            ui::TimeFormat::SimpleWithMonthAndYear(
-                ui::TimeFormat::FORMAT_ELAPSED, ui::TimeFormat::LENGTH_LONG,
-                delta, true));
-      }
-    }
+    // We notify the user that the account has been used in the past based on
+    // the IdP's knowledge, e.g. `approved_clients` (or the browser knowledge if
+    // that one is not present). Thus we use the account's `login_state`.
+    std::optional<std::u16string> last_used_string =
+        account->login_state == Account::LoginState::kSignIn
+            ? std::make_optional<std::u16string>(
+                  l10n_util::GetStringUTF16(IDS_USED_ON_THIS_SITE))
+            : std::nullopt;
     accounts_content->AddChildView(
         CreateAccountRow(account, /*clickable_position=*/out_position++,
                          /*should_include_idp=*/true, /*is_modal_dialog=*/false,
@@ -801,9 +782,9 @@ AccountSelectionBubbleView::CreateSingleReturningAccountChooser(
       gfx::Insets::TLBR(kVerticalSpacing - kTopBottomPadding, 0, 0, 0),
       kVerticalSpacing));
   std::optional<std::u16string> last_used_string =
-      accounts[0]->last_used_timestamp
-          ? std::make_optional<std::u16string>(l10n_util::GetStringUTF16(
-                IDS_MULTI_IDP_ACCOUNT_LAST_USED_ON_THIS_SITE))
+      accounts[0]->login_state == Account::LoginState::kSignIn
+          ? std::make_optional<std::u16string>(
+                l10n_util::GetStringUTF16(IDS_USED_ON_THIS_SITE))
           : std::nullopt;
   CHECK(!accounts[0]->is_filtered_out);
   content->AddChildView(CreateAccountRow(accounts[0],

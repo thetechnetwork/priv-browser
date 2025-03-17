@@ -10,6 +10,9 @@ export default {
     ecmaVersion: 2020,
     sourceType: 'module',
     parser: tsParser,
+    parserOptions: {
+      disallowAutomaticSingleRunInference: true,
+    },
 
     // The following field should be specified by client code. as follows:
     //
@@ -27,5 +30,6 @@ export default {
   rules: {
     'require-await': 'off',
     '@typescript-eslint/require-await' : 'error',
+    '@typescript-eslint/no-unnecessary-type-assertion': 'error',
   },
 };

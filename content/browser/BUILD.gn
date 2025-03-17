@@ -49,6 +49,10 @@ if (is_android) {
   }
 }
 
+if (is_ios) {
+  import("//build/config/apple/mobile_config.gni")  # For `target_platform`
+}
+
 source_set("browser") {
   # Only the public target should depend on this. All other targets (even
   # internal content ones) should depend on the public one.
@@ -102,6 +106,7 @@ source_set("browser") {
     "//components/download/database",
     "//components/download/public/common:public",
     "//components/embedder_support",
+    "//components/embedder_support:user_agent",
     "//components/file_access",
     "//components/filename_generation",
     "//components/input",
@@ -276,6 +281,7 @@ source_set("browser") {
     "//third_party/blink/public/common",
     "//third_party/blink/public/common:common",
     "//third_party/blink/public/common:font_enumeration_table_proto",
+    "//third_party/blink/public/common:preloading_headers",
     "//third_party/blink/public/strings",
     "//third_party/boringssl",
     "//third_party/brotli:dec",
@@ -714,6 +720,30 @@ source_set("browser") {
     "browsing_topics/browsing_topics_url_loader_interceptor.h",
     "browsing_topics/header_util.cc",
     "browsing_topics/header_util.h",
+    "btm/btm_bounce_detector.cc",
+    "btm/btm_bounce_detector.h",
+    "btm/btm_database.cc",
+    "btm/btm_database.h",
+    "btm/btm_database_migrator.cc",
+    "btm/btm_database_migrator.h",
+    "btm/btm_navigation_flow_detector.cc",
+    "btm/btm_navigation_flow_detector.h",
+    "btm/btm_page_visit_observer.cc",
+    "btm/btm_page_visit_observer.h",
+    "btm/btm_service_impl.cc",
+    "btm/btm_service_impl.h",
+    "btm/btm_short_visit_observer.cc",
+    "btm/btm_short_visit_observer.h",
+    "btm/btm_state.cc",
+    "btm/btm_state.h",
+    "btm/btm_storage.cc",
+    "btm/btm_storage.h",
+    "btm/btm_utils.cc",
+    "btm/btm_utils.h",
+    "btm/cookie_access_filter.cc",
+    "btm/cookie_access_filter.h",
+    "btm/persistent_repeating_timer.cc",
+    "btm/persistent_repeating_timer.h",
     "buckets/bucket_context.h",
     "buckets/bucket_host.cc",
     "buckets/bucket_host.h",
@@ -963,30 +993,6 @@ source_set("browser") {
     "devtools/worker_or_worklet_devtools_agent_host.h",
     "devtools/worklet_devtools_agent_host.cc",
     "devtools/worklet_devtools_agent_host.h",
-    "dips/btm_page_visit_observer.cc",
-    "dips/btm_page_visit_observer.h",
-    "dips/btm_short_visit_observer.cc",
-    "dips/btm_short_visit_observer.h",
-    "dips/cookie_access_filter.cc",
-    "dips/cookie_access_filter.h",
-    "dips/dips_bounce_detector.cc",
-    "dips/dips_bounce_detector.h",
-    "dips/dips_database.cc",
-    "dips/dips_database.h",
-    "dips/dips_database_migrator.cc",
-    "dips/dips_database_migrator.h",
-    "dips/dips_navigation_flow_detector.cc",
-    "dips/dips_navigation_flow_detector.h",
-    "dips/dips_service_impl.cc",
-    "dips/dips_service_impl.h",
-    "dips/dips_state.cc",
-    "dips/dips_state.h",
-    "dips/dips_storage.cc",
-    "dips/dips_storage.h",
-    "dips/dips_utils.cc",
-    "dips/dips_utils.h",
-    "dips/persistent_repeating_timer.cc",
-    "dips/persistent_repeating_timer.h",
     "display_cutout/display_cutout_constants.h",
     "display_cutout/display_cutout_host_impl.cc",
     "display_cutout/display_cutout_host_impl.h",
@@ -1199,6 +1205,8 @@ source_set("browser") {
     "interest_group/additional_bid_result.h",
     "interest_group/additional_bids_util.cc",
     "interest_group/additional_bids_util.h",
+    "interest_group/auction_downloader_delegate.cc",
+    "interest_group/auction_downloader_delegate.h",
     "interest_group/auction_metrics_recorder.cc",
     "interest_group/auction_metrics_recorder.h",
     "interest_group/auction_nonce_manager.cc",
@@ -1259,6 +1267,8 @@ source_set("browser") {
     "interest_group/interest_group_update_manager.h",
     "interest_group/noiser_and_bucketer.cc",
     "interest_group/noiser_and_bucketer.h",
+    "interest_group/protected_audience_network_util.cc",
+    "interest_group/protected_audience_network_util.h",
     "interest_group/storage_interest_group.cc",
     "interest_group/storage_interest_group.h",
     "interest_group/subresource_url_authorizations.cc",
@@ -1290,6 +1300,8 @@ source_set("browser") {
     "loader/file_url_loader_factory.h",
     "loader/keep_alive_attribution_request_helper.cc",
     "loader/keep_alive_attribution_request_helper.h",
+    "loader/keep_alive_tracker_throttle.cc",
+    "loader/keep_alive_tracker_throttle.h",
     "loader/keep_alive_url_loader.cc",
     "loader/keep_alive_url_loader.h",
     "loader/keep_alive_url_loader_service.cc",
@@ -1601,8 +1613,8 @@ source_set("browser") {
     "preloading/prefetch/proxy_lookup_client_impl.h",
     "preloading/prefetcher.cc",
     "preloading/prefetcher.h",
-    "preloading/preload_pipeline_info.cc",
-    "preloading/preload_pipeline_info.h",
+    "preloading/preload_pipeline_info_impl.cc",
+    "preloading/preload_pipeline_info_impl.h",
     "preloading/preloading.cc",
     "preloading/preloading.h",
     "preloading/preloading_attempt_impl.cc",
@@ -2812,7 +2824,7 @@ source_set("browser") {
       "IOSurface.framework",
       "UniformTypeIdentifiers.framework",
     ]
-  } else if (is_ios || is_tvos) {
+  } else if (is_ios) {
     sources += [
       "date_time_chooser/ios/date_time_chooser_coordinator.h",
       "date_time_chooser/ios/date_time_chooser_coordinator.mm",
@@ -2847,11 +2859,15 @@ source_set("browser") {
       "web_contents/web_contents_view_ios.mm",
     ]
 
-    if (is_tvos) {
-      sources += [ "child_process_launcher_helper_tvos.mm" ]
-    } else {
+    if (target_platform != "tvos") {
       sources += [ "child_process_launcher_helper_ios.mm" ]
       frameworks += [ "BrowserEngineKit.framework" ]
+    } else {
+      sources += [
+        "child_process_launcher_helper_tvos.mm",
+        "renderer_host/render_widget_host_view_tvos.h",
+        "renderer_host/render_widget_host_view_tvos.mm",
+      ]
     }
 
     frameworks += [ "IOSurface.framework" ]
@@ -2866,6 +2882,10 @@ source_set("browser") {
 
   if (is_linux) {
     sources += [ "accessibility/browser_accessibility_state_impl_auralinux.cc" ]
+  }
+
+  if (is_chromeos) {
+    sources += [ "accessibility/browser_accessibility_state_impl_chromeos.cc" ]
   }
 
   # Desktop/Window/WebContents screen capture implementations, conditionally
@@ -3216,6 +3236,8 @@ source_set("browser") {
       "android/gpu_process_callback.cc",
       "android/ime_adapter_android.cc",
       "android/ime_adapter_android.h",
+      "android/input_token_forwarder_manager.cc",
+      "android/input_token_forwarder_manager.h",
       "android/java/gin_java_bound_object.cc",
       "android/java/gin_java_bound_object.h",
       "android/java/gin_java_bound_object_delegate.cc",
@@ -3248,6 +3270,8 @@ source_set("browser") {
       "android/nfc_host.h",
       "android/overscroll_controller_android.cc",
       "android/overscroll_controller_android.h",
+      "android/page_proxy.cc",
+      "android/page_proxy.h",
       "android/render_widget_host_connector.cc",
       "android/render_widget_host_connector.h",
       "android/scoped_surface_request_manager.cc",
@@ -3495,20 +3519,24 @@ source_set("browser") {
     ]
   }
 
-  if (!is_android && !is_ios && !is_fuchsia) {
+  if ((!is_android || is_desktop_android) && !is_ios && !is_fuchsia) {
     sources += [
-      # Devtools frontend not included in Android and iOS
+      # Devtools frontend not included in mobile Android and iOS
       "devtools/devtools_frontend_host_impl.cc",
       "devtools/devtools_frontend_host_impl.h",
-
-      # Trace report internal UI is not adapted for mobile use.
-      "tracing/trace_report/trace_report_internals_ui.cc",
-      "tracing/trace_report/trace_report_internals_ui.h",
     ]
 
     deps += [
       "//content/browser/devtools:devtools_resources",
       "//content/browser/devtools:devtools_resources_extern",
+    ]
+  }
+
+  if (!is_android && !is_ios && !is_fuchsia) {
+    sources += [
+      # Trace report internal UI is not adapted for mobile use.
+      "tracing/trace_report/trace_report_internals_ui.cc",
+      "tracing/trace_report/trace_report_internals_ui.h",
     ]
   }
 
@@ -3654,7 +3682,7 @@ if (is_android) {
 # See comment at the top of //content/BUILD.gn for how this works.
 group("for_content_tests") {
   visibility = [
-    "//content/browser/dips:unit_tests",
+    "//content/browser/btm:unit_tests",
     "//content/browser/indexed_db:unit_tests",
     "//content/browser/tpcd_heuristics:unit_tests",
     "//content/public/test/android/*",

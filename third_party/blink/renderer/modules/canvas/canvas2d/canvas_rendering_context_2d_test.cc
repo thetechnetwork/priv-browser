@@ -94,7 +94,6 @@
 #include "third_party/blink/renderer/platform/graphics/canvas_resource.h"
 #include "third_party/blink/renderer/platform/graphics/canvas_resource_provider.h"
 #include "third_party/blink/renderer/platform/graphics/gpu/shared_gpu_context.h"
-#include "third_party/blink/renderer/platform/graphics/graphics_types.h"
 #include "third_party/blink/renderer/platform/graphics/graphics_types_3d.h"
 #include "third_party/blink/renderer/platform/graphics/image.h"
 #include "third_party/blink/renderer/platform/graphics/image_orientation.h"
@@ -199,8 +198,7 @@ class FakeImageSource : public CanvasImageSource {
 
   scoped_refptr<Image> GetSourceImageForCanvas(FlushReason,
                                                SourceImageStatus*,
-                                               const gfx::SizeF&,
-                                               const AlphaDisposition) override;
+                                               const gfx::SizeF&) override;
 
   bool WouldTaintOrigin() const override { return false; }
   gfx::SizeF ElementSize(const gfx::SizeF&,
@@ -230,8 +228,7 @@ FakeImageSource::FakeImageSource(gfx::Size size, BitmapOpacity opacity)
 scoped_refptr<Image> FakeImageSource::GetSourceImageForCanvas(
     FlushReason,
     SourceImageStatus* status,
-    const gfx::SizeF&,
-    const AlphaDisposition) {
+    const gfx::SizeF&) {
   if (status)
     *status = kNormalSourceImageStatus;
   return image_;
@@ -494,6 +491,7 @@ class FakeCanvasResourceProvider : public CanvasResourceProvider {
   bool SupportsDirectCompositing() const override {
     return supports_direct_compositing_;
   }
+  bool IsSingleBuffered() const override { return false; }
   bool IsValid() const override { return true; }
   sk_sp<SkSurface> CreateSkSurface() const override {
     return SkSurfaces::Raster(GetSkImageInfo());
@@ -1475,7 +1473,7 @@ TEST_P(CanvasRenderingContext2DTest,
   EXPECT_FALSE(
       CanvasElement()
           .GetOrCreateCanvasResourceProvider(RasterModeHint::kPreferCPU)
-          ->SupportsSingleBuffering());
+          ->IsSingleBuffered());
   EXPECT_EQ(CanvasElement().GetRasterMode(), RasterMode::kCPU);
 }
 
@@ -2866,7 +2864,7 @@ TEST_P(CanvasRenderingContext2DTestAccelerated, LowLatencyIsNotSingleBuffered) {
   EXPECT_FALSE(
       CanvasElement()
           .GetOrCreateCanvasResourceProvider(RasterModeHint::kPreferGPU)
-          ->SupportsSingleBuffering());
+          ->IsSingleBuffered());
   EXPECT_EQ(CanvasElement().GetRasterMode(), RasterMode::kGPU);
 }
 
@@ -3101,7 +3099,7 @@ TEST_P(CanvasRenderingContext2DTestImageChromium, LowLatencyIsSingleBuffered) {
   EXPECT_EQ(CanvasElement().GetRasterMode(), RasterMode::kGPU);
   EXPECT_TRUE(CanvasElement()
                   .GetOrCreateCanvasResourceProvider(RasterModeHint::kPreferGPU)
-                  ->SupportsSingleBuffering());
+                  ->IsSingleBuffered());
   auto frame1_resource =
       CanvasElement()
           .GetOrCreateCanvasResourceProvider(RasterModeHint::kPreferGPU)
@@ -3151,7 +3149,7 @@ TEST_P(CanvasRenderingContext2DTestSwapChain, LowLatencyIsSingleBuffered) {
   EXPECT_EQ(CanvasElement().GetRasterMode(), RasterMode::kGPU);
   EXPECT_TRUE(CanvasElement()
                   .GetOrCreateCanvasResourceProvider(RasterModeHint::kPreferGPU)
-                  ->SupportsSingleBuffering());
+                  ->IsSingleBuffered());
   auto frame1_resource =
       CanvasElement()
           .GetOrCreateCanvasResourceProvider(RasterModeHint::kPreferGPU)

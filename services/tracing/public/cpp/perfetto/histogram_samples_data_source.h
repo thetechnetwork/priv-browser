@@ -29,6 +29,8 @@ class COMPONENT_EXPORT(TRACING_CPP) HistogramSamplesDataSource
     : public perfetto::DataSource<HistogramSamplesDataSource,
                                   HistogramSamplesTraits> {
  public:
+  static constexpr bool kRequiresCallbacksUnderLock = false;
+
   static void Register();
 
   HistogramSamplesDataSource();
@@ -46,15 +48,18 @@ class COMPONENT_EXPORT(TRACING_CPP) HistogramSamplesDataSource
   void OnMetricSample(
       std::optional<base::HistogramBase::Sample32> reference_lower_value,
       std::optional<base::HistogramBase::Sample32> reference_upper_value,
+      std::optional<uint64_t> event_id,
       std::string_view histogram_name,
       uint64_t name_hash,
       base::HistogramBase::Sample32 actual_value);
   static void OnAnyMetricSample(std::string_view histogram_name,
                                 uint64_t name_hash,
-                                base::HistogramBase::Sample32 sample);
+                                base::HistogramBase::Sample32 sample,
+                                std::optional<uint64_t> event_id);
   // `instance` identifies the instance that registered a callback, or nullopt
   // if this is a global callback.
-  static void OnMetricSampleImpl(std::string_view histogram_name,
+  static void OnMetricSampleImpl(std::optional<uint64_t> event_id,
+                                 std::string_view histogram_name,
                                  uint64_t name_hash,
                                  base::HistogramBase::Sample32 sample,
                                  std::optional<uintptr_t> instance);

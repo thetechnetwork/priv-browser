@@ -47,6 +47,7 @@
 #include "ppapi/buildflags/buildflags.h"
 #include "sandbox/policy/switches.h"
 #include "services/tracing/public/cpp/trace_startup.h"
+#include "third_party/blink/public/common/features.h"
 #include "third_party/blink/public/platform/platform.h"
 #include "third_party/blink/public/platform/scheduler/web_thread_scheduler.h"
 #include "third_party/webrtc_overrides/init_webrtc.h"  // nogncheck
@@ -273,8 +274,14 @@ int RendererMain(MainFunctionParams parameters) {
     // Consider CrRendererMain a display critical thread. While some Javascript
     // running on the main thread might not be, experiments demonstrated that
     // overall this improves user-perceived performance.
-    base::PlatformThread::SetCurrentThreadType(
-        base::ThreadType::kDisplayCritical);
+    // If kInputScenarioPriorityBoost is enabled, the main thread will only be
+    // display critical when user input is detected.
+    base::ThreadType thread_type =
+        base::FeatureList::IsEnabled(
+            blink::features::kInputScenarioPriorityBoost)
+            ? base::ThreadType::kDefault
+            : base::ThreadType::kDisplayCritical;
+    base::PlatformThread::SetCurrentThreadType(thread_type);
 
     std::unique_ptr<RenderProcess> render_process = RenderProcessImpl::Create();
     // It's not a memory leak since RenderThread has the same lifetime

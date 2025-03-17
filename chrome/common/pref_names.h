@@ -1463,6 +1463,10 @@ inline constexpr char kOverscrollHistoryNavigationEnabled[] =
     "settings.a11y.overscroll_history_navigation";
 #endif
 
+// Whether AX tree fixing is enabled.
+inline constexpr char kAccessibilityAXTreeFixingEnabled[] =
+    "settings.a11y.enable_ax_tree_fixing";
+
 // Whether main node annotations are enabled.
 inline constexpr char kAccessibilityMainNodeAnnotationsEnabled[] =
     "settings.a11y.enable_main_node_annotations";
@@ -2906,17 +2910,6 @@ inline constexpr char kDeviceSettingsCache[] = "signed_settings_cache";
 // "xkb:us::eng".
 inline constexpr char kHardwareKeyboardLayout[] = "intl.hardware_keyboard";
 
-// A boolean pref of the auto-enrollment decision. Its value is only valid if
-// it's not the default value; otherwise, no auto-enrollment decision has been
-// made yet.
-inline constexpr char kShouldAutoEnroll[] = "ShouldAutoEnroll";
-
-// A boolean pref of the private-set-membership decision. Its value is only
-// valid if it's not the default value; otherwise, no private-set-membership
-// decision has been made yet.
-inline constexpr char kShouldRetrieveDeviceState[] =
-    "ShouldRetrieveDeviceState";
-
 // An integer pref. Its valid values are defined in
 // enterprise_management::DeviceRegisterRequest::PsmExecutionResult enum which
 // indicates all possible PSM execution results in the Chrome OS enrollment
@@ -2927,12 +2920,6 @@ inline constexpr char kEnrollmentPsmResult[] = "EnrollmentPsmResult";
 // determination successfully in the Chrome OS enrollment flow.
 inline constexpr char kEnrollmentPsmDeterminationTime[] =
     "EnrollmentPsmDeterminationTime";
-
-// An integer pref with the maximum number of bits used by the client in a
-// previous auto-enrollment request. If the client goes through an auto update
-// during OOBE and reboots into a version of the OS with a larger maximum
-// modulus, then it will retry auto-enrollment using the updated value.
-inline constexpr char kAutoEnrollmentPowerLimit[] = "AutoEnrollmentPowerLimit";
 
 // The local state pref that stores device activity times before reporting
 // them to the policy server.
@@ -3161,6 +3148,13 @@ inline constexpr char kRelaunchNotificationPeriod[] =
 inline constexpr char kRelaunchWindow[] = "browser.relaunch_window";
 #endif  // !BUILDFLAG(IS_ANDROID)
 
+#if !BUILDFLAG(IS_ANDROID)
+// Pref name for the policy controlling the maximum age of a build before
+// forcing a quick relaunch.
+inline constexpr char kRelaunchSupersededReleaseAge[] =
+    "browser.relaunch_superseded_release_age";
+#endif  // !BUILDFLAG(IS_ANDROID)
+
 #if BUILDFLAG(IS_CHROMEOS)
 // Pref name for the policy controlling the time period between the first user
 // notification about need to relaunch and the end of the
@@ -3233,6 +3227,11 @@ inline constexpr char kDeviceAllowEnterpriseRemoteAccessConnections[] =
 // up the device.
 inline constexpr char kDeviceWeeklyScheduledSuspend[] =
     "device_weekly_scheduled_suspend";
+
+// A boolean pref which determines whether Chrome Apps are allowed in Kiosk
+// sessions.
+inline constexpr char kKioskChromeAppsForceAllowed[] =
+    "kiosk_chrome_apps_force_allowed";
 #endif  // BUILDFLAG(IS_CHROMEOS)
 
 #if BUILDFLAG(IS_LINUX) || BUILDFLAG(IS_MAC) || BUILDFLAG(IS_WIN) || \
@@ -3579,11 +3578,6 @@ inline constexpr char kIncompatibleApplications[] = "incompatible_applications";
 // external tampering.
 inline constexpr char kModuleBlocklistCacheMD5Digest[] =
     "module_blocklist_cache_md5_digest";
-
-// A boolean value, controlling whether third party software is allowed to
-// inject into Chrome's processes.
-inline constexpr char kThirdPartyBlockingEnabled[] =
-    "third_party_blocking_enabled";
 #endif  // BUILDFLAG(IS_WIN)
 
 #if BUILDFLAG(IS_WIN)

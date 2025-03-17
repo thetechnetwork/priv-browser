@@ -133,7 +133,9 @@ public final class AuxiliarySearchDonorTest {
                             GenericDocument genericDocument = result.getGenericDocument();
                             WebPage webPage = genericDocument.toDocumentClass(WebPage.class);
 
-                            String documentId = AuxiliarySearchDonor.getDocumentId(mIds[i]);
+                            String documentId =
+                                    AuxiliarySearchDonor.getDocumentId(
+                                            AuxiliarySearchEntryType.TAB, mIds[i]);
                             assertEquals(documentId, genericDocument.getId());
                             assertEquals(
                                     mLastAccessTimestamps[i],
@@ -145,7 +147,7 @@ public final class AuxiliarySearchDonorTest {
                             assertEquals(
                                     mLastAccessTimestamps[i], webPage.getCreationTimestampMillis());
                             assertEquals(
-                                    mAuxiliarySearchDonor.getDocumentTtlMs(),
+                                    mAuxiliarySearchDonor.getTabDocumentTtlMs(),
                                     webPage.getDocumentTtlMillis());
                             assertTrue(
                                     Arrays.equals(

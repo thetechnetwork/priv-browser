@@ -65,38 +65,16 @@ using l10n_util::GetNSStringF;
   return self;
 }
 
-#pragma mark - SigninCoordinator
+#pragma mark - InterruptibleChromeCoordinator
 
-- (void)interruptWithAction:(SigninCoordinatorInterrupt)action
-                 completion:(ProceduralBlock)completion {
-  BOOL animated;
+- (void)interruptAnimated:(BOOL)animated {
   __weak __typeof(self) weakSelf = self;
   void (^cancelCompletion)(void) = ^() {
     // The reauthentication callback is dropped when the dialog is canceled.
     // The completion block has to be called explicitly.
     [weakSelf runCompletionWithSigninResult:SigninCoordinatorResultInterrupted
                          completionIdentity:nil];
-    if (completion) {
-      completion();
-    }
   };
-  switch (action) {
-    case SigninCoordinatorInterrupt::UIShutdownNoDismiss:
-      CHECK(!IsInterruptibleCoordinatorAlwaysDismissedEnabled(),
-            base::NotFatalUntil::M136);
-      // TrustedVaultClientBackend doesn't support no dismiss. Therefore there
-      // is nothing to do. It will be just deallocated when the service will
-      // be shutdown.
-      [self stopErrorAlertCoordinator];
-      cancelCompletion();
-      return;
-    case SigninCoordinatorInterrupt::DismissWithoutAnimation:
-      animated = NO;
-      break;
-    case SigninCoordinatorInterrupt::DismissWithAnimation:
-      animated = YES;
-      break;
-  }
   // This coordinator should be either showing an error dialog or the trusted
   // vault dialog.
   if (self.errorAlertCoordinator) {
@@ -105,16 +83,9 @@ using l10n_util::GetNSStringF;
     [self stopErrorAlertCoordinator];
     // Checks that `cancelCompletion` is executed synchronously.
     CHECK(!self.signinCompletion, base::NotFatalUntil::M126);
-  } else if (IsInterruptibleCoordinatorStoppedSynchronouslyEnabled()) {
+  } else {
     std::move(_dialogCancelCallback).Run(animated, nil);
     cancelCompletion();
-  } else {
-    if (IsInterruptibleCoordinatorStoppedSynchronouslyEnabled()) {
-      std::move(_dialogCancelCallback).Run(animated, nil);
-      cancelCompletion();
-    } else {
-      std::move(_dialogCancelCallback).Run(animated, cancelCompletion);
-    }
   }
 }
 

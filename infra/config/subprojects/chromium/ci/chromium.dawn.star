@@ -21,6 +21,7 @@ ci.defaults.set(
     contact_team_email = "chrome-gpu-infra@google.com",
     execution_timeout = ci.DEFAULT_EXECUTION_TIMEOUT,
     health_spec = health_spec.DEFAULT,
+    reclient_enabled = False,
     service_account = ci.gpu.SERVICE_ACCOUNT,
     shadow_service_account = ci.gpu.SHADOW_SERVICE_ACCOUNT,
     siso_enabled = True,
@@ -204,7 +205,7 @@ ci.gpu.linux_builder(
             ],
         ),
         chromium_config = builder_config.chromium_config(
-            config = "android",
+            config = "main_builder_rel_mb",
             target_platform = builder_config.target_platform.ANDROID,
         ),
         android_config = builder_config.android_config(
@@ -241,7 +242,7 @@ ci.gpu.linux_builder(
             ],
         ),
         chromium_config = builder_config.chromium_config(
-            config = "android",
+            config = "arm64_builder_rel_mb",
             target_platform = builder_config.target_platform.ANDROID,
         ),
         android_config = builder_config.android_config(
@@ -279,7 +280,7 @@ ci.thin_tester(
             ],
         ),
         chromium_config = builder_config.chromium_config(
-            config = "android",
+            config = "main_builder_rel_mb",
             target_platform = builder_config.target_platform.ANDROID,
         ),
         android_config = builder_config.android_config(
@@ -320,7 +321,7 @@ ci.thin_tester(
             ],
         ),
         chromium_config = builder_config.chromium_config(
-            config = "android",
+            config = "main_builder_rel_mb",
             target_platform = builder_config.target_platform.ANDROID,
         ),
         android_config = builder_config.android_config(
@@ -401,7 +402,7 @@ ci.thin_tester(
             ],
         ),
         chromium_config = builder_config.chromium_config(
-            config = "android",
+            config = "arm64_builder_rel_mb",
             target_platform = builder_config.target_platform.ANDROID,
         ),
         android_config = builder_config.android_config(
@@ -650,7 +651,7 @@ ci.gpu.linux_builder(
             ],
         ),
         chromium_config = builder_config.chromium_config(
-            config = "android",
+            config = "main_builder_rel_mb",
             target_platform = builder_config.target_platform.ANDROID,
         ),
         android_config = builder_config.android_config(
@@ -688,7 +689,7 @@ ci.gpu.linux_builder(
             ],
         ),
         chromium_config = builder_config.chromium_config(
-            config = "android",
+            config = "arm64_builder_rel_mb",
             target_platform = builder_config.target_platform.ANDROID,
         ),
         android_config = builder_config.android_config(
@@ -727,7 +728,7 @@ ci.thin_tester(
             ],
         ),
         chromium_config = builder_config.chromium_config(
-            config = "android",
+            config = "main_builder_rel_mb",
             target_platform = builder_config.target_platform.ANDROID,
         ),
         android_config = builder_config.android_config(
@@ -769,7 +770,7 @@ ci.thin_tester(
             ],
         ),
         chromium_config = builder_config.chromium_config(
-            config = "android",
+            config = "main_builder_rel_mb",
             target_platform = builder_config.target_platform.ANDROID,
         ),
         android_config = builder_config.android_config(
@@ -851,7 +852,7 @@ ci.thin_tester(
             ],
         ),
         chromium_config = builder_config.chromium_config(
-            config = "android",
+            config = "arm64_builder_rel_mb",
             target_platform = builder_config.target_platform.ANDROID,
         ),
         android_config = builder_config.android_config(
@@ -930,7 +931,7 @@ ci.thin_tester(
             ],
         ),
         chromium_config = builder_config.chromium_config(
-            config = "android",
+            config = "arm64_builder_rel_mb",
             target_platform = builder_config.target_platform.ANDROID,
         ),
         android_config = builder_config.android_config(
@@ -1019,7 +1020,7 @@ ci.thin_tester(
             ],
         ),
         chromium_config = builder_config.chromium_config(
-            config = "android",
+            config = "arm64_builder_rel_mb",
             target_platform = builder_config.target_platform.ANDROID,
         ),
         android_config = builder_config.android_config(

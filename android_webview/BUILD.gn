@@ -28,6 +28,7 @@ import("//services/screen_ai/buildflags/features.gni")
 import("//third_party/jni_zero/jni_zero.gni")
 import("//tools/grit/repack.gni")
 import("//tools/resources/generate_resource_allowlist.gni")
+import("//ui/webui/webui_features.gni")
 
 assert(!is_cronet_build)
 
@@ -504,7 +505,6 @@ generate_jni("browser_jni_headers") {
     "java/src/org/chromium/android_webview/AwBrowserMainParts.java",
     "java/src/org/chromium/android_webview/AwBrowserProcess.java",
     "java/src/org/chromium/android_webview/AwContents.java",
-    "java/src/org/chromium/android_webview/AwContentsBackgroundThreadClient.java",
     "java/src/org/chromium/android_webview/AwContentsClientBridge.java",
     "java/src/org/chromium/android_webview/AwContentsIoThreadClient.java",
     "java/src/org/chromium/android_webview/AwContentsLifecycleNotifier.java",
@@ -533,6 +533,7 @@ generate_jni("browser_jni_headers") {
     "java/src/org/chromium/android_webview/AwWindowCoverageTracker.java",
     "java/src/org/chromium/android_webview/JsReplyProxy.java",
     "java/src/org/chromium/android_webview/PopupTouchHandleDrawable.java",
+    "java/src/org/chromium/android_webview/ShouldInterceptRequestMediator.java",
     "java/src/org/chromium/android_webview/StartupJavascriptInfo.java",
     "java/src/org/chromium/android_webview/SystemStateUtil.java",
     "java/src/org/chromium/android_webview/WebMessageListenerHolder.java",
@@ -570,7 +571,6 @@ android_library("browser_java") {
     "java/src/org/chromium/android_webview/AwComputedFlags.java",
     "java/src/org/chromium/android_webview/AwConsoleMessage.java",
     "java/src/org/chromium/android_webview/AwContents.java",
-    "java/src/org/chromium/android_webview/AwContentsBackgroundThreadClient.java",
     "java/src/org/chromium/android_webview/AwContentsClient.java",
     "java/src/org/chromium/android_webview/AwContentsClientBridge.java",
     "java/src/org/chromium/android_webview/AwContentsClientCallbackHelper.java",
@@ -596,10 +596,13 @@ android_library("browser_java") {
     "java/src/org/chromium/android_webview/AwKeyboardShortcuts.java",
     "java/src/org/chromium/android_webview/AwLayoutSizer.java",
     "java/src/org/chromium/android_webview/AwMediaIntegrityApiStatusConfig.java",
+    "java/src/org/chromium/android_webview/AwNavigation.java",
+    "java/src/org/chromium/android_webview/AwNavigationClient.java",
     "java/src/org/chromium/android_webview/AwNetLogsConnection.java",
     "java/src/org/chromium/android_webview/AwNetworkChangeNotifierRegistrationPolicy.java",
     "java/src/org/chromium/android_webview/AwNoVarySearchData.java",
     "java/src/org/chromium/android_webview/AwPacProcessor.java",
+    "java/src/org/chromium/android_webview/AwPage.java",
     "java/src/org/chromium/android_webview/AwPdfExporter.java",
     "java/src/org/chromium/android_webview/AwPrefetchCallback.java",
     "java/src/org/chromium/android_webview/AwPrefetchManager.java",
@@ -648,6 +651,7 @@ android_library("browser_java") {
     "java/src/org/chromium/android_webview/PopupTouchHandleDrawable.java",
     "java/src/org/chromium/android_webview/ScriptHandler.java",
     "java/src/org/chromium/android_webview/ScrollAccessibilityHelper.java",
+    "java/src/org/chromium/android_webview/ShouldInterceptRequestMediator.java",
     "java/src/org/chromium/android_webview/SslUtil.java",
     "java/src/org/chromium/android_webview/StartupJavascriptInfo.java",
     "java/src/org/chromium/android_webview/SystemStateUtil.java",
@@ -1207,6 +1211,7 @@ grit("generate_components_resources") {
     "enable_printing=$enable_printing",
     "safe_browsing_mode=$safe_browsing_mode",
     "enable_supervised_users=$enable_supervised_users",
+    "optimize_webui=$optimize_webui",
     "use_blink=$use_blink",
     "use_internal_isolated_origins=$use_internal_isolated_origins",
   ]
@@ -1236,6 +1241,10 @@ grit("generate_components_resources") {
     "//components/security_interstitials/content/resources:build_ts",
     "//components/security_interstitials/core/browser/resources:bundle_js",
   ]
+
+  if (enable_supervised_users) {
+    deps += [ "//components/supervised_user/core/browser/resources:bundle_js" ]
+  }
 
   if (safe_browsing_mode != 0) {
     deps += [

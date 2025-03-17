@@ -142,11 +142,9 @@ void MerchantTrustService::OnCanApplyOptimizationComplete(
   if (decision != optimization_guide::OptimizationGuideDecision::kUnknown) {
     std::optional<commerce::MerchantTrustSignalsV2> merchant_trust_metadata =
         metadata.ParsedMetadata<commerce::MerchantTrustSignalsV2>();
-    if (merchant_trust_metadata.has_value()) {
-      std::move(callback).Run(
-          url, GetMerchantDataFromProto(merchant_trust_metadata));
-      return;
-    }
+    std::move(callback).Run(url,
+                            GetMerchantDataFromProto(merchant_trust_metadata));
+    return;
   }
 
   if (kMerchantTrustEnabledWithSampleData.Get()) {
@@ -169,7 +167,11 @@ MerchantTrustService::GetMerchantDataFromProto(
   auto status = merchant_trust_validation::ValidateProto(metadata);
   base::UmaHistogramEnumeration("Security.PageInfo.MerchantTrustStatus",
                                 status);
-  if (status != MerchantTrustStatus::kValid) {
+  auto enabled_without_summary =
+      IsMerchantTrustWithoutSummaryEnabled() &&
+      status == MerchantTrustStatus::kValidWithMissingReviewsSummary;
+
+  if (status != MerchantTrustStatus::kValid && !enabled_without_summary) {
     return std::nullopt;
   }
 

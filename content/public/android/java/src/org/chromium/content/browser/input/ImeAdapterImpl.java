@@ -888,6 +888,7 @@ public class ImeAdapterImpl
         mTextInputFlags = 0;
         mTextInputMode = WebTextInputMode.DEFAULT;
         mRestartInputOnNextStateUpdate = false;
+        mNodeEditable = false;
         // This will trigger unblocking if necessary.
         hideKeyboard();
     }
@@ -1615,11 +1616,6 @@ public class ImeAdapterImpl
     private void cancelComposition() {
         if (DEBUG_LOGS) Log.i(TAG, "cancelComposition");
         if (mInputConnection != null) restartInput();
-    }
-
-    @CalledByNative
-    private void setBounds(float @Nullable [] characterBounds, float @Nullable [] lineBounds) {
-        mCursorAnchorInfoController.setBounds(characterBounds, lineBounds, getContainerView());
     }
 
     @CalledByNative

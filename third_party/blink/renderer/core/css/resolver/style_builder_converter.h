@@ -123,8 +123,8 @@ class StyleBuilderConverter {
   STATIC_ONLY(StyleBuilderConverter);
 
  public:
-  static scoped_refptr<StyleReflection> ConvertBoxReflect(StyleResolverState&,
-                                                          const CSSValue&);
+  static StyleReflection* ConvertBoxReflect(StyleResolverState&,
+                                            const CSSValue&);
   template <typename T>
   static T ConvertComputedLength(const StyleResolverState&, const CSSValue&);
   static LengthBox ConvertClip(StyleResolverState&, const CSSValue&);
@@ -392,9 +392,6 @@ class StyleBuilderConverter {
   static ScopedCSSNameList* ConvertViewTransitionClass(StyleResolverState&,
                                                        const CSSValue&);
   static StyleViewTransitionGroup ConvertViewTransitionGroup(
-      StyleResolverState&,
-      const CSSValue&);
-  static StyleViewTransitionCaptureMode ConvertViewTransitionCaptureMode(
       StyleResolverState&,
       const CSSValue&);
 

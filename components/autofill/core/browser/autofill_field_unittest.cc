@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "components/autofill/core/browser/autofill_field.h"
+
 #include <optional>
 
 #include "base/feature_list.h"
@@ -25,14 +26,10 @@ using ::autofill::test::EqualsPrediction;
 using ::testing::ElementsAre;
 
 constexpr FieldTypeSet kMLSupportedTypesForTesting = {
-    UNKNOWN_TYPE,
-    NAME_FIRST,
-    NAME_LAST,
-    EMAIL_ADDRESS,
-    NAME_FULL,
-    PHONE_HOME_NUMBER,
-    ADDRESS_HOME_LINE1,
-    ADDRESS_HOME_STREET_ADDRESS,
+    UNKNOWN_TYPE,       NAME_FIRST,
+    NAME_LAST,          EMAIL_ADDRESS,
+    NAME_FULL,          PHONE_HOME_NUMBER,
+    ADDRESS_HOME_LINE1, ADDRESS_HOME_STREET_ADDRESS,
     ADDRESS_HOME_CITY};
 
 class AutofillFieldTest : public testing::Test {
@@ -42,37 +39,6 @@ class AutofillFieldTest : public testing::Test {
  private:
   test::AutofillUnitTestEnvironment autofill_test_environment_;
 };
-
-TEST_F(AutofillFieldTest, ValueWasIdentifiedAsPotentiallySensitive) {
-  AutofillField field;
-
-  // Initially the value should not be identified as sensitive.
-  EXPECT_FALSE(field.value_identified_as_potentially_sensitive());
-
-  // We should be able to set the value and retrieve the state.
-  field.set_value_identified_as_potentially_sensitive(true);
-  EXPECT_TRUE(field.value_identified_as_potentially_sensitive());
-}
-
-TEST_F(AutofillFieldTest, FieldIsEligibleForAutofillAiFlag) {
-  AutofillField field;
-
-  // Initially the value should not be identified as sensitive.
-  EXPECT_FALSE(field.field_is_eligible_for_autofill_ai().has_value());
-
-  // Test that setting the value works.
-  field.set_field_is_eligible_for_autofill_ai(true);
-  ASSERT_TRUE(field.field_is_eligible_for_autofill_ai().has_value());
-  EXPECT_TRUE(field.field_is_eligible_for_autofill_ai().value());
-
-  field.set_field_is_eligible_for_autofill_ai(false);
-  ASSERT_TRUE(field.field_is_eligible_for_autofill_ai().has_value());
-  EXPECT_FALSE(field.field_is_eligible_for_autofill_ai().value());
-
-  // Verify that the state can also be reset.
-  field.set_field_is_eligible_for_autofill_ai(std::nullopt);
-  EXPECT_FALSE(field.field_is_eligible_for_autofill_ai().has_value());
-}
 
 // Tests that if both autocomplete attributes and server agree it's a phone
 // field, always use server predicted type. If they disagree with autocomplete
@@ -170,11 +136,7 @@ TEST_F(AutofillFieldTest, NoPredictions) {
   EXPECT_EQ(field.PredictionSource(), std::nullopt);
 }
 
-#if !BUILDFLAG(USE_INTERNAL_AUTOFILL_PATTERNS)
-constexpr HeuristicSource kRegexSource = HeuristicSource::kLegacyRegexes;
-#else
-constexpr HeuristicSource kRegexSource = HeuristicSource::kDefaultRegexes;
-#endif
+constexpr HeuristicSource kRegexSource = HeuristicSource::kRegexes;
 constexpr HeuristicSource kMlSource = HeuristicSource::kAutofillMachineLearning;
 
 class AutofillFieldTest_MLPredictions : public AutofillFieldTest {
@@ -607,6 +569,24 @@ TEST(AutofillFieldLogEventTypeTest, AppendLogEventIfNotRepeated) {
   EXPECT_EQ(f.field_log_events().size(), 5u);
   f.AppendLogEventIfNotRepeated(a);
   EXPECT_EQ(f.field_log_events().size(), 5u);
+}
+
+TEST(AutofillPredictionSourceToStringViewTest, ConversionTest) {
+  EXPECT_EQ(AutofillPredictionSourceToStringView(
+                AutofillPredictionSource::kHeuristics),
+            "Heuristics");
+  EXPECT_EQ(AutofillPredictionSourceToStringView(
+                AutofillPredictionSource::kAutocomplete),
+            "AutocompleteAttribute");
+  EXPECT_EQ(AutofillPredictionSourceToStringView(
+                AutofillPredictionSource::kServerCrowdsourcing),
+            "ServerCrowdsourcing");
+  EXPECT_EQ(AutofillPredictionSourceToStringView(
+                AutofillPredictionSource::kServerOverride),
+            "ServerOverride");
+  EXPECT_EQ(AutofillPredictionSourceToStringView(
+                AutofillPredictionSource::kRationalization),
+            "Rationalization");
 }
 
 }  // namespace

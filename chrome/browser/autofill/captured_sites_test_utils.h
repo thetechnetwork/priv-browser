@@ -158,7 +158,7 @@ class WebPageReplayServerWrapper {
       int host_http_port = 8080,
       int host_https_port = 8081,
       // Passes additional arguments used in the WPR command.
-      const std::vector<std::string> extra_args = {});
+      std::vector<std::string> extra_args = {});
 
   WebPageReplayServerWrapper(const WebPageReplayServerWrapper&) = delete;
   WebPageReplayServerWrapper& operator=(const WebPageReplayServerWrapper&) =
@@ -385,6 +385,10 @@ class TestRecipeReplayer {
       const content::ToRenderFrameHost& frame,
       const std::string& element_xpath,
       bool expect_to_be_shown);
+  // When returning true, `frame` points to the RenderFrameHost of the frame
+  // specified in `action`. This is determined dynamically because
+  // WaitForElementToBeReady may need to wait for navigations to finish and the
+  // frame to be loaded.
   bool WaitForElementToBeReady(const std::string& xpath,
                                const int visibility_enum_val,
                                const base::Value::Dict& action,

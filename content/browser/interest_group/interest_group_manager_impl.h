@@ -345,11 +345,6 @@ class CONTENT_EXPORT InterestGroupManagerImpl : public InterestGroupManager {
   void GetLastMaintenanceTimeForTesting(
       base::RepeatingCallback<void(base::Time)> callback) const;
 
-  // Returns a user agent override string for the given frame tree node,
-  // if one is available and the feature is enabled.
-  std::optional<std::string> MaybeGetUserAgentOverride(
-      const FrameTreeNodeId& frame_tree_node_id);
-
   // Enqueues reports for the specified URLs. Virtual for testing.
   virtual void EnqueueReports(
       ReportType report_type,
@@ -388,6 +383,19 @@ class CONTENT_EXPORT InterestGroupManagerImpl : public InterestGroupManager {
   void SetBiddingAndAuctionServerKeys(const url::Origin& coordinator,
                                       std::string serialized_keys,
                                       base::Time expiration);
+
+  // Add a debugging override for B&A keys. Unlike with
+  // `SetBiddingAndAuctionServerKeys` the keys set will not affect the state of
+  // the database, but will affect `GetTrustedServerKey` while the current
+  // process is running. The callback will be invoked with nullopt on
+  // success, an error string on failure. Failures include being called when
+  // a configuration for `coordinator` already exists, including from a previous
+  // code to this method.
+  void AddTrustedServerKeysDebugOverride(
+      TrustedServerAPIType api,
+      const url::Origin& coordinator,
+      std::string serialized_keys,
+      base::OnceCallback<void(std::optional<std::string>)> callback);
 
   // Load stored B&A server keys for a coordinator along with the keys'
   // expiration.
@@ -509,7 +517,8 @@ class CONTENT_EXPORT InterestGroupManagerImpl : public InterestGroupManager {
   // Get the public key to use for the auction data. The `callback` may be
   // called synchronously if the key is already available or the coordinator is
   // not recognized.
-  void GetBiddingAndAuctionServerKey(
+  void GetTrustedServerKey(
+      TrustedServerAPIType api,
       const url::Origin& seller,
       const std::optional<url::Origin>& coordinator,
       base::OnceCallback<void(

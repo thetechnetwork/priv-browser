@@ -193,8 +193,8 @@ ShareThisTabDialogView::ShareThisTabDialogView(
     CreateDialogWidget(this, params.context, nullptr)->Show();
   }
 
-  source_view_->SetBorder(views::CreateThemedRoundedRectBorder(
-      1, 4, ui::kColorSysPrimaryContainer));
+  source_view_->SetBorder(
+      views::CreateRoundedRectBorder(1, 4, ui::kColorSysPrimaryContainer));
 
   SetButtonLabel(ui::mojom::DialogButton::kOk,
                  l10n_util::GetStringUTF16(IDS_SHARE_THIS_TAB_DIALOG_ALLOW));
@@ -290,7 +290,7 @@ void ShareThisTabDialogView::SetupAudioToggle() {
   audio_toggle_container->SetProperty(views::kMarginsKey,
                                       gfx::Insets::TLBR(8, 0, 0, 0));
   audio_toggle_container->SetBackground(
-      views::CreateThemedRoundedRectBackground(ui::kColorSysSurface4, 8));
+      views::CreateRoundedRectBackground(ui::kColorSysSurface4, 8));
 
   views::ImageView* audio_icon_view = audio_toggle_container->AddChildView(
       std::make_unique<views::ImageView>());

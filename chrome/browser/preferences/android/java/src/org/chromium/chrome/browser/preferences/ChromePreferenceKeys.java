@@ -56,6 +56,10 @@ public final class ChromePreferenceKeys {
     public static final String ADDRESS_BAR_SETTINGS_VIEW_COUNT =
             "Chrome.AddressBar.SettingsViewCount";
 
+    public static final String APPEARANCE_SETTINGS_CLICKED = "Chrome.Appearance.SettingsClicked";
+    public static final String APPEARANCE_SETTINGS_VIEW_COUNT =
+            "Chrome.Appearance.SettingsViewCount";
+
     /** The language code to override application language with. */
     public static final String APPLICATION_OVERRIDE_LANGUAGE =
             "Chrome.Language.ApplicationOverrideLanguage";
@@ -408,6 +412,12 @@ public final class ChromePreferenceKeys {
             new KeyPrefix("Chrome.MultiInstance.IsIncognitoSelected.*");
     public static final KeyPrefix MULTI_INSTANCE_TAB_COUNT =
             new KeyPrefix("Chrome.MultiInstance.TabCount.*"); // Normal tab count
+
+    // The total tab count at the time Chrome is shut down for use during relaunch. This value may
+    // not be accurate if Chrome remains active in the foreground or background without being
+    // terminated.
+    public static final KeyPrefix MULTI_INSTANCE_TAB_COUNT_FOR_RELAUNCH =
+            new KeyPrefix("Chrome.MultiInstance.TabCountForRelaunch.*");
     public static final KeyPrefix MULTI_INSTANCE_TITLE =
             new KeyPrefix("Chrome.MultiInstance.Title.*");
     public static final KeyPrefix MULTI_INSTANCE_LAST_ACCESSED_TIME =
@@ -941,6 +951,8 @@ public final class ChromePreferenceKeys {
                 ADAPTIVE_TOOLBAR_CUSTOMIZATION_SETTINGS,
                 ADDRESS_BAR_SETTINGS_CLICKED,
                 ADDRESS_BAR_SETTINGS_VIEW_COUNT,
+                APPEARANCE_SETTINGS_CLICKED,
+                APPEARANCE_SETTINGS_VIEW_COUNT,
                 AUTOFILL_ASSISTANT_FIRST_TIME_LITE_SCRIPT_USER,
                 AUTOFILL_ASSISTANT_PROACTIVE_HELP_ENABLED,
                 AUTOFILL_THIRD_PARTY_MODE_STATE,
@@ -1016,6 +1028,7 @@ public final class ChromePreferenceKeys {
                 MULTI_INSTANCE_LAST_ACCESSED_TIME.pattern(),
                 MULTI_INSTANCE_START_TIME,
                 MULTI_INSTANCE_TAB_COUNT.pattern(),
+                MULTI_INSTANCE_TAB_COUNT_FOR_RELAUNCH.pattern(),
                 MULTI_INSTANCE_TASK_MAP.pattern(),
                 MULTI_INSTANCE_TITLE.pattern(),
                 MULTI_INSTANCE_URL.pattern(),

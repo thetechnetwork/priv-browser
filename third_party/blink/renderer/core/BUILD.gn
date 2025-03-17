@@ -378,7 +378,6 @@ component("core") {
     ":generate_eventhandler_names",
     ":make_deprecation_info",
     "//base",
-    "//build:chromeos_buildflags",
     "//components/attribution_reporting",
     "//components/attribution_reporting:mojom_blink",
     "//components/paint_preview/common",
@@ -394,6 +393,7 @@ component("core") {
     "//services/metrics/public/cpp:metrics_cpp",
     "//services/metrics/public/cpp:ukm_builders",
     "//services/metrics/public/mojom",
+    "//services/network/public/cpp:cpp",
     "//services/service_manager/public/cpp",
     "//skia",
     "//skia:skcms",
@@ -478,7 +478,6 @@ blink_core_sources("core_hot") {
 
   deps = [
     ":buildflags",
-    "//build:chromeos_buildflags",
     "//components/miracle_parameter/common",
     "//services/metrics/public/cpp:ukm_builders",
     "//third_party/blink/public:image_resources_grit",
@@ -514,7 +513,6 @@ source_set("testing") {
     ":core",
     ":element_locator_proto",
     ":generated_testing_idls",
-    "//build:chromeos_buildflags",
     "//components/ukm:test_support",
     "//third_party/blink/renderer/bindings/core/v8:testing",
     "//third_party/blink/renderer/platform:test_support",
@@ -741,7 +739,6 @@ css_properties("make_core_generated_computed_style_base") {
   in_files = [
     "style/computed_style_extra_fields.json5",
     "css/css_value_keywords.json5",
-    "css/css_properties_ranking.json5",
     "css/css_group_config.json5",
   ]
   other_inputs = [
@@ -1493,7 +1490,6 @@ source_set("unit_tests") {
     ":core",
     ":element_locator_proto",
     ":unit_test_support",
-    "//build:chromeos_buildflags",
     "//cc",
     "//components/autofill/core/common:features",
     "//components/page_load_metrics/browser:browser",
@@ -1851,7 +1847,7 @@ fuzzer_test("svg_path_parser_fuzzer") {
   seed_corpus = "//third_party/blink/renderer/core/svg/svg_path_parser_corpus"
 }
 
-# Fuzzers for blink::PermissionsPolicy.
+# Fuzzers for blink::PermissionsPolicyParser.
 fuzzer_test("feature_policy_fuzzer") {
   sources = [ "permissions_policy/feature_policy_fuzzer.cc" ]
   deps = [

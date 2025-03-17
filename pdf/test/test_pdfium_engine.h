@@ -88,6 +88,11 @@ class TestPDFiumEngine : public PDFiumEngine {
 
   MOCK_METHOD(gfx::Rect, GetPageScreenRect, (int), (const override));
 
+  MOCK_METHOD(std::optional<gfx::SizeF>,
+              GetPageSizeInPoints,
+              (int),
+              (const override));
+
   // Returns an empty bookmark list.
   base::Value::List GetBookmarks() override;
 
@@ -95,7 +100,7 @@ class TestPDFiumEngine : public PDFiumEngine {
 
   uint32_t GetLoadedByteSize() override;
 
-  bool ReadLoadedBytes(uint32_t length, void* buffer) override;
+  bool ReadLoadedBytes(base::span<uint8_t> buffer) override;
 
   MOCK_METHOD(void,
               RequestThumbnail,

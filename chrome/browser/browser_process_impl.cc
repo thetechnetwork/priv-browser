@@ -336,13 +336,15 @@ void BrowserProcessImpl::Init() {
   // Initialize the ExtensionsBrowserClient. This isn't in extension-specific
   // code because a number of external concepts that extensions shouldn't know
   // about leverage the extensions system, such as platform apps and controlled
-  // frame.
+  // frame. On Android the ExtensionsBrowserClient is created elsewhere,
+  // as BrowserContextKeyedServices are initialized earlier on Android. However,
+  // ownership is transferred here, as this object lives long into shutdown, and
+  // ExtensionsBrowserClient must also live during most of shutdown.
   // TODO(devlin): Move this block out of BrowserProcessImpl to somewhere like
   // //chrome/browser/initialize_extensions_browser_client, analogous to
   // `EnsureExtensionsClientInitialized()` above?
 #if BUILDFLAG(ENABLE_DESKTOP_ANDROID_EXTENSIONS)
-  extensions_browser_client_ =
-      std::make_unique<extensions::DesktopAndroidExtensionsBrowserClient>();
+  extensions_browser_client_ = startup_data()->TakeExtensionsBrowserClient();
 #elif BUILDFLAG(ENABLE_EXTENSIONS)
   extensions::AppWindowClient::Set(ChromeAppWindowClient::GetInstance());
   extensions_browser_client_ =
@@ -918,18 +920,30 @@ GpuModeManager* BrowserProcessImpl::gpu_mode_manager() {
 void BrowserProcessImpl::CreateDevToolsProtocolHandler() {
   DCHECK_CALLED_ON_VALID_SEQUENCE(sequence_checker_);
 #if !BUILDFLAG(IS_ANDROID)
-  // StartupBrowserCreator::LaunchBrowser can be run multiple times when browser
-  // is started with several profiles or existing browser process is reused.
-  if (!remote_debugging_server_) {
-    if (!local_state_->GetBoolean(prefs::kDevToolsRemoteDebuggingAllowed)) {
-      // Follow content/browser/devtools/devtools_http_handler.cc that reports
-      // its remote debugging port on stderr for symmetry.
+  auto maybe_remote_debugging_server =
+      RemoteDebuggingServer::GetInstance(local_state_.get());
+  if (maybe_remote_debugging_server.has_value()) {
+    remote_debugging_server_ = std::move(*maybe_remote_debugging_server);
+    return;
+  }
+
+  // For errors, follow content/browser/devtools/devtools_http_handler.cc that
+  // reports its remote debugging port on stderr for symmetry.
+  switch (maybe_remote_debugging_server.error()) {
+    case RemoteDebuggingServer::NotStartedReason::kNotRequested:
+      break;
+    case RemoteDebuggingServer::NotStartedReason::kDisabledByPolicy:
       fputs("\nDevTools remote debugging is disallowed by the system admin.\n",
             stderr);
       fflush(stderr);
-      return;
-    }
-    remote_debugging_server_ = std::make_unique<RemoteDebuggingServer>();
+      break;
+    case RemoteDebuggingServer::NotStartedReason::kDisabledByDefaultUserDataDir:
+      fputs(
+          "\nDevTools remote debugging requires a non-default data directory. "
+          "Specify this using --user-data-dir.\n",
+          stderr);
+      fflush(stderr);
+      break;
   }
 #endif
 }

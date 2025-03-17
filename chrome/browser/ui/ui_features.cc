@@ -35,28 +35,6 @@ BASE_FEATURE(kCloseOmniboxPopupOnInactiveAreaClick,
              "CloseOmniboxPopupOnInactiveAreaClick",
              base::FEATURE_ENABLED_BY_DEFAULT);
 
-// Enables updated copy and modified behavior for the default browser prompt.
-BASE_FEATURE(kDefaultBrowserPromptRefresh,
-             "DefaultBrowserPromptRefresh",
-#if BUILDFLAG(IS_WIN) || BUILDFLAG(IS_MAC)
-             base::FEATURE_ENABLED_BY_DEFAULT
-#else
-             base::FEATURE_DISABLED_BY_DEFAULT
-#endif
-);
-
-const base::FeatureParam<bool> kShowDefaultBrowserInfoBar{
-    &kDefaultBrowserPromptRefresh, "show_info_bar", true};
-
-const base::FeatureParam<bool> kShowDefaultBrowserAppMenuItem{
-    &kDefaultBrowserPromptRefresh, "show_app_menu_item", true};
-
-const base::FeatureParam<base::TimeDelta> kRepromptDuration{
-    &kDefaultBrowserPromptRefresh, "reprompt_duration", base::Days(60)};
-
-const base::FeatureParam<int> kMaxPromptCount{&kDefaultBrowserPromptRefresh,
-                                              "max_prompt_count", -1};
-
 // Create new Extensions app menu option (removing "More Tools -> Extensions")
 // with submenu to manage extensions and visit chrome web store.
 BASE_FEATURE(kExtensionsMenuInAppMenu,
@@ -255,14 +233,6 @@ BASE_FEATURE(kTearOffWebAppTabOpensWebAppWindow,
              base::FEATURE_DISABLED_BY_DEFAULT);
 
 #if !defined(ANDROID)
-BASE_FEATURE(kToolbarPinning,
-             "ToolbarPinning",
-             base::FEATURE_ENABLED_BY_DEFAULT);
-
-bool IsToolbarPinningEnabled() {
-  return base::FeatureList::IsEnabled(kToolbarPinning);
-}
-
 BASE_FEATURE(kPinnedCastButton,
              "PinnedCastButton",
              base::FEATURE_DISABLED_BY_DEFAULT);
@@ -292,6 +262,13 @@ BASE_FEATURE(kEnterpriseProfileBadgingForMenu,
 BASE_FEATURE(kEnterpriseProfileBadgingPolicies,
              "EnterpriseProfileBadgingPolicies",
              base::FEATURE_ENABLED_BY_DEFAULT);
+
+// Enables enterprise badging for managed bnpwser on the new tab page footer.
+// On managed browsers, a building icon and "Managed by <domain>" string will be
+// shown in the footer, unless the icon and label are customized by the admin.
+BASE_FEATURE(kEnterpriseBadgingForNtpFooter,
+             "EnterpriseProfileBadgingForNtpFooter",
+             base::FEATURE_DISABLED_BY_DEFAULT);
 
 // Enables showing the EnterpriseCustomLabel` instead of the cloud policy
 // manager in the managed disclaimer "Managed by..." in the profile and app
@@ -370,10 +347,6 @@ BASE_FEATURE(kPageActionsMigration,
 BASE_FEATURE(kCompositorLoadingAnimations,
              "CompositorLoadingAnimations",
              base::FEATURE_DISABLED_BY_DEFAULT);
-
-BASE_FEATURE(kFedCmContinueWithoutName,
-             "FedCmContinueWithoutName",
-             base::FEATURE_ENABLED_BY_DEFAULT);
 
 BASE_FEATURE(kByDateHistoryInSidePanel,
              "ByDateHistoryInSidePanel",

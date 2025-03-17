@@ -63,6 +63,18 @@ BASE_FEATURE(kLensOverlaySimplifiedSelection,
              "LensOverlaySimplifiedSelection",
              base::FEATURE_DISABLED_BY_DEFAULT);
 
+BASE_FEATURE(kLensOverlayUpdatedClientContext,
+             "LensOverlayUpdatedClientContext",
+             base::FEATURE_DISABLED_BY_DEFAULT);
+
+// Enables the Lens Overlay omnibox entry point. This is a separate feature from
+// kLensOverlay so that the omnibox entry point can be disabled without a
+// dependency on the rest of the Lens Overlay features. This means if can be
+// experimented with independently.
+BASE_FEATURE(kLensOverlayOmniboxEntryPoint,
+             "LensOverlayOmniboxEntryPoint",
+             base::FEATURE_ENABLED_BY_DEFAULT);
+
 const base::FeatureParam<int> kLensOverlayMinRamMb{&kLensOverlay, "min_ram_mb",
                                                    /*default=value=*/-1};
 const base::FeatureParam<std::string> kActivityUrl{
@@ -243,6 +255,9 @@ constexpr base::FeatureParam<bool> kEnableEarlyStartQueryFlowOptimization{
     &kLensOverlayLatencyOptimizations,
     "enable-early-start-query-flow-optimization", true};
 
+constexpr base::FeatureParam<bool> kUseUpdatedContentFields{
+    &kLensOverlayContextualSearchbox, "use-updated-content-fields", false};
+
 constexpr base::FeatureParam<bool> kUsePdfsAsContext{
     &kLensOverlayContextualSearchbox, "use-pdfs-as-context", true};
 
@@ -251,6 +266,9 @@ constexpr base::FeatureParam<bool> kUseInnerTextAsContext{
 
 constexpr base::FeatureParam<bool> kUseInnerHtmlAsContext{
     &kLensOverlayContextualSearchbox, "use-inner-html-as-context", true};
+
+constexpr base::FeatureParam<bool> kUseApcAsContext{
+    &kLensOverlayContextualSearchbox, "use-apc-as-context", false};
 
 constexpr base::FeatureParam<bool> kSendPageUrlForContextualization{
     &kLensOverlayContextualSearchbox, "send-page-url-for-contextualization",
@@ -308,7 +326,7 @@ constexpr base::FeatureParam<size_t> kLensOverlayFileUploadLimitBytes{
     &kLensOverlayContextualSearchbox, "file-upload-limit-bytes", 200000000};
 
 constexpr base::FeatureParam<size_t> kLensOverlayPdfTextCharacterLimit{
-    &kLensOverlayContextualSearchbox, "pdf-text-character-limit", 2500};
+    &kLensOverlayContextualSearchbox, "pdf-text-character-limit", 10000};
 
 const base::FeatureParam<base::TimeDelta> kLensOverlaySurveyResultsTime{
     &kLensOverlaySurvey, "results-time", base::Seconds(1)};
@@ -351,6 +369,12 @@ constexpr base::FeatureParam<double> kUploadProgressBarShowHeuristic{
     &kLensOverlayContextualSearchbox, "upload-progress-bar-show-heuristic",
     0.1};
 
+constexpr base::FeatureParam<bool> kAutoFocusSearchbox{
+    &kLensOverlayContextualSearchbox, "auto-focus-searchbox", true};
+
+constexpr base::FeatureParam<bool> kUpdateViewportEachQuery{
+    &kLensOverlayContextualSearchbox, "update-viewport-each-query", false};
+
 constexpr base::FeatureParam<std::string> kTranslateEndpointUrl{
     &kLensOverlayTranslateLanguages, "translate-endpoint-url",
     "https://translate-pa.googleapis.com/v1/supportedLanguages"};
@@ -378,6 +402,22 @@ constexpr base::FeatureParam<base::TimeDelta> kSupportedLanguagesCacheTimeoutMs{
     base::Days(30)};
 constexpr base::FeatureParam<int> kRecentLanguagesAmount{
     &kLensOverlayTranslateLanguages, "recent-languages-amount", 5};
+
+constexpr base::FeatureParam<int>
+    kLensOverlaySimplifiedSelectionTextReceivedTimeout{
+        &kLensOverlaySimplifiedSelection, "simplified-text-received-timeout",
+        2000};
+constexpr base::FeatureParam<int>
+    kLensOverlaySimplifiedSelectionCopyTextReceivedTimeout{
+        &kLensOverlaySimplifiedSelection, "copy-text-received-timeout", 500};
+constexpr base::FeatureParam<int>
+    kLensOverlaySimplifiedSelectionTranslateTextReceivedTimeout{
+        &kLensOverlaySimplifiedSelection, "translate-text-received-timeout",
+        500};
+constexpr base::FeatureParam<bool>
+    kLensOverlaySimplifiedSelectionShouldCopyAsImage{
+        &kLensOverlaySimplifiedSelection, "copy-command-copies-as-image",
+        false};
 
 constexpr base::FeatureParam<std::string> kHomepageURLForLens{
     &kLensStandalone, "lens-homepage-url", "https://lens.google.com/v3/"};
@@ -588,6 +628,10 @@ int GetScannedPdfCharacterPerPageHeuristic() {
   return kScannedPdfCharacterPerPageHeuristic.Get();
 }
 
+bool UseUpdatedContextFields() {
+  return kUseUpdatedContentFields.Get();
+}
+
 bool UsePdfsAsContext() {
   return kUsePdfsAsContext.Get();
 }
@@ -602,6 +646,10 @@ int GetLensOverlayPageContentRequestTimeoutMs() {
 
 bool UseInnerHtmlAsContext() {
   return kUseInnerHtmlAsContext.Get();
+}
+
+bool UseApcAsContext() {
+  return kUseApcAsContext.Get();
 }
 
 bool SendPageUrlForContextualization() {
@@ -650,7 +698,8 @@ bool UseLensOverlayForVideoFrameSearch() {
 }
 
 bool IsOmniboxEntryPointEnabled() {
-  return kIsOmniboxEntryPointEnabled.Get();
+  return base::FeatureList::IsEnabled(kLensOverlayOmniboxEntryPoint) &&
+         kIsOmniboxEntryPointEnabled.Get();
 }
 
 bool IsOmniboxEntrypointAlwaysVisible() {
@@ -838,11 +887,39 @@ double GetUploadProgressBarShowHeuristic() {
   return kUploadProgressBarShowHeuristic.Get();
 }
 
+bool ShouldAutoFocusSearchbox() {
+  return kAutoFocusSearchbox.Get();
+}
+
 bool IsSimplifiedSelectionEnabled() {
   return base::FeatureList::IsEnabled(kLensOverlaySimplifiedSelection);
 }
 
+int GetSimplifiedSelectionTextReceivedTimeout() {
+  return kLensOverlaySimplifiedSelectionTextReceivedTimeout.Get();
+}
+
+int GetCopyTextReceivedTimeout() {
+  return kLensOverlaySimplifiedSelectionCopyTextReceivedTimeout.Get();
+}
+
+int GetTranslateTextReceivedTimeout() {
+  return kLensOverlaySimplifiedSelectionTranslateTextReceivedTimeout.Get();
+}
+
+bool GetShouldCopyAsImage() {
+  return kLensOverlaySimplifiedSelectionShouldCopyAsImage.Get();
+}
+
 bool PageContentUploadRequestIdFixEnabled() {
   return kPageContentUploadRequestIdFix.Get();
+}
+
+bool UpdateViewportEachQueryEnabled() {
+  return kUpdateViewportEachQuery.Get();
+}
+
+bool IsUpdatedClientContextEnabled() {
+  return base::FeatureList::IsEnabled(kLensOverlayUpdatedClientContext);
 }
 }  // namespace lens::features

@@ -8,6 +8,7 @@
 <translation id="1010200102790553230">Load page later</translation>
 <translation id="1010225406377140704">Contact the sender to ask for a new link</translation>
 <translation id="1011206368273183593">Preparing files</translation>
+<translation id="1012264210825687872">Once you review your order, you must sign in to or create an <ph name="BNPL_ISSUER_NAME" /> account. This account will be automatically linked to Google Pay.</translation>
 <translation id="1014509239502131234">Undoing result</translation>
 <translation id="1015730422737071372">Provide additional details.</translation>
 <translation id="1019413721762100891">Off</translation>
@@ -137,6 +138,7 @@ This will otherwise be blocked by your privacy settings. This will allow the con
 <translation id="1230244617745022071"><ph name="SOURCE" /> (auto-detected)</translation>
 <translation id="1232569758102978740">Untitled</translation>
 <translation id="1236081509407217141">Allow VR?</translation>
+<translation id="1236689197410206751">AfterPay</translation>
 <translation id="1240347957665416060">Your device name</translation>
 <translation id="124116460088058876">More languages</translation>
 <translation id="1243027604378859286">Author:</translation>
@@ -251,6 +253,7 @@ This will otherwise be blocked by your privacy settings. This will allow the con
 <translation id="1419305130220238697">Manage downloads in Chrome button, activate to manage files that you have downloaded in Chrome</translation>
 <translation id="1420345875188552368">Your saved auto-pay method may be used for this payment. To turn off eWallets in Chrome, go to your <ph name="BEGIN_LINK1" />payment settings<ph name="END_LINK1" /></translation>
 <translation id="1420920093772172268"><ph name="TURN_ON_BLUETOOTH_LINK" /> to allow pairing</translation>
+<translation id="1421484961346698724">Deleted account</translation>
 <translation id="14222610277930434">You visit often</translation>
 <translation id="1422930527989633628">Can ask to discover nearby Bluetooth devices</translation>
 <translation id="1426410128494586442">Yes</translation>
@@ -626,6 +629,7 @@ This will otherwise be blocked by your privacy settings. This will allow the con
 <translation id="2082238445998314030">Result <ph name="RESULT_NUMBER" /> of <ph name="TOTAL_RESULTS" /></translation>
 <translation id="2083256696566019397">Allow on every visit</translation>
 <translation id="2085876078937250610">Save…</translation>
+<translation id="2090451897496479509">Contact the provider for more information</translation>
 <translation id="2091887806945687916">Sound</translation>
 <translation id="2093982008204312032">Google Chrome is trying to turn off Windows Hello for filling passwords.</translation>
 <translation id="2094505752054353250">Domain mismatch</translation>
@@ -660,6 +664,7 @@ This will otherwise be blocked by your privacy settings. This will allow the con
 <translation id="2145193671493396738">Economy news</translation>
 <translation id="214556005048008348">Cancel payment</translation>
 <translation id="2147117373852943630">Musical instruments</translation>
+<translation id="2147254250314124496"><ph name="EMBEDDED_URL" /> wants to use information that they've saved about you</translation>
 <translation id="2148613324460538318">Add Card</translation>
 <translation id="2148716181193084225">Today</translation>
 <translation id="2149968176347646218">Connection is not secure</translation>
@@ -691,6 +696,7 @@ This will otherwise be blocked by your privacy settings. This will allow the con
 <translation id="2187317261103489799">Detect (default)</translation>
 <translation id="2188375229972301266">Multiple punch bottom</translation>
 <translation id="2194856509914051091">Things to consider</translation>
+<translation id="2198071643181968308">Learn more about <ph name="BNPL_ISSUER_NAME" /></translation>
 <translation id="2200678913752027654">Thumbs-down button, press Enter to open a form for submitting detailed feedback on why you dislike this suggestion</translation>
 <translation id="2202627062836089804">back of your card</translation>
 <translation id="2204482073374652408">Finished updating!</translation>
@@ -837,6 +843,7 @@ This will otherwise be blocked by your privacy settings. This will allow the con
 <translation id="2451607499823206582">Tracking</translation>
 <translation id="2452098632681057184">Ecology and environment</translation>
 <translation id="2452837234288608067">Couldn't help with that. Try again.</translation>
+<translation id="2453045048779611513">Your organisation limits what you can save</translation>
 <translation id="2456755709261364512">Your battery must be charged above <ph name="REQUIRED_BATTERY_PRECENT" />%</translation>
 <translation id="2461385121573678775">Chrome Enterprise Core gives you a centralised tool for configuring browser policies from the cloud</translation>
 <translation id="2461822463642141190">Current</translation>
@@ -1086,6 +1093,7 @@ This will otherwise be blocked by your privacy settings. This will allow the con
 <translation id="2942492342931589800">Casual</translation>
 <translation id="2942515540157583425">IT and Technical Jobs</translation>
 <translation id="2943895734390379394">Upload time:</translation>
+<translation id="2947281105969315778">To share or join tab groups, you must be able to sign in to Chrome</translation>
 <translation id="2948083400971632585">You can disable any proxies configured for a connection from the settings page.</translation>
 <translation id="2949183777371959169">Ignored because the machine is not enrolled with Chrome Browser Cloud Management.</translation>
 <translation id="2951588413176968965">My mailbox</translation>
@@ -1304,6 +1312,7 @@ This will otherwise be blocked by your privacy settings. This will allow the con
 <translation id="33073482541490531">The password that you just used was found in a data breach. Password Manager recommends changing this password now.</translation>
 <translation id="3307649904964670439">Customise Chrome button, activate to customise the look of your browser</translation>
 <translation id="3308006649705061278">Organisational Unit (OU)</translation>
+<translation id="3317077846337994567">Pay over time isn't available at the moment. Please try again later.</translation>
 <translation id="3318016344440038475">TV comedies</translation>
 <translation id="3324687287337751929">4 in x 6 in</translation>
 <translation id="3324983252691184275">Crimson</translation>
@@ -1432,6 +1441,7 @@ This will otherwise be blocked by your privacy settings. This will allow the con
 <translation id="3536227077203206203">Allowed this time</translation>
 <translation id="3537165859691846083">Letter Plus</translation>
 <translation id="353816159217417898">Screen (paged)</translation>
+<translation id="3541016556608204104">More about Chrome Enterprise Connectors</translation>
 <translation id="3542628208405253498">Card image</translation>
 <translation id="3542768452570884558">Open link in new window</translation>
 <translation id="3543935938072367282">Check out faster with autofill</translation>
@@ -1796,6 +1806,7 @@ This will otherwise be blocked by your privacy settings. This will allow the con
 <translation id="415440494507469262">Add tab to comparison table</translation>
 <translation id="4159784952369912983">Purple</translation>
 <translation id="4165422751765527461">Opens a Help Centre article in a new tab</translation>
+<translation id="4165584779486830267">Now you can pay over time using Affirm or Zip.</translation>
 <translation id="4165986682804962316">Site settings</translation>
 <translation id="4169535189173047238">Don't allow</translation>
 <translation id="4171400957073367226">Bad verification signature</translation>
@@ -1946,6 +1957,7 @@ This will otherwise be blocked by your privacy settings. This will allow the con
 <translation id="4378154925671717803">Phone</translation>
 <translation id="4384395682990721132">A4 x 3</translation>
 <translation id="4387692837058041921">File upload to Microsoft OneDrive has been paused</translation>
+<translation id="4389931020843542579">Loading tab group</translation>
 <translation id="4390472908992056574">Brim</translation>
 <translation id="4395550503472021297">This policy is controlling the default behaviour of the following policies: <ph name="POLICIES" /></translation>
 <translation id="4397978002248035985">Opens a pop-up to verify on your bank's website</translation>
@@ -2315,6 +2327,7 @@ This will otherwise be blocked by your privacy settings. This will allow the con
 <translation id="5097501891273180634">A2</translation>
 <translation id="5106405387002409393">Chrome needs access to your device's <ph name="PERMISSION" /></translation>
 <translation id="510644072453496781">Cardboard (end)</translation>
+<translation id="5106648964679263509">Virtual card for <ph name="BNPL_ISSUER_NAME" /> filled</translation>
 <translation id="5108881358339761672">Site is not secure</translation>
 <translation id="5109892411553231226">Manage Payment Methods</translation>
 <translation id="5112422516732747637">A5</translation>
@@ -2510,6 +2523,7 @@ This will otherwise be blocked by your privacy settings. This will allow the con
             <ph name="LIST_ITEM" />Information entered in forms
           <ph name="END_LIST" /></translation>
 <translation id="5443468954631487277">Reverse order face up</translation>
+<translation id="5445340838622821110">When you pay over time, a one-time virtual card number is filled. This number is only for this purchase. <ph name="IDS_AUTOFILL_BNPL_FILLED_CARD_INFORMATION_BUBBLE_LEARN_MORE_LINK_LABEL" /></translation>
 <translation id="5447235695608032700">Allow <ph name="SITE" /> to use info they've saved about you</translation>
 <translation id="5452270690849572955">This <ph name="HOST_NAME" /> page can’t be found</translation>
 <translation id="5452923259299906094">Pay with eWallet and Pix</translation>
@@ -2757,6 +2771,7 @@ This will otherwise be blocked by your privacy settings. This will allow the con
 <translation id="5910140988253729859">Undo autofill</translation>
 <translation id="5911020115933784199">Events and Listings</translation>
 <translation id="5911110632211230665">Blocked open</translation>
+<translation id="5914465277418006379"><ph name="MEMBER_FIRST_NAME" /> added this tab</translation>
 <translation id="5915189366813702112">Flexible work arrangements</translation>
 <translation id="59174027418879706">Enabled</translation>
 <translation id="5918373444239520146">Gadgets and Portable Electronics</translation>
@@ -2837,6 +2852,7 @@ This will otherwise be blocked by your privacy settings. This will allow the con
 <translation id="604124094241169006">Automatic</translation>
 <translation id="6041777658117377052">Chamber temperature</translation>
 <translation id="6042308850641462728">More</translation>
+<translation id="6043357981274314628">Done!</translation>
 <translation id="6044573915096792553">Size 12</translation>
 <translation id="6045164183059402045">Imposition template</translation>
 <translation id="6047927260846328439">This content might try to trick you into installing software or revealing personal information. <ph name="BEGIN_LINK" />Show anyway<ph name="END_LINK" /></translation>
@@ -2860,7 +2876,6 @@ This will otherwise be blocked by your privacy settings. This will allow the con
 <translation id="6062937464449575061">Untrack price</translation>
 <translation id="6063415549109819824">Home financing</translation>
 <translation id="6070432475334343308">One or more files were not uploaded to <ph name="FOLDER_NAME" /> on <ph name="CLOUD_PROVIDER" /></translation>
-<translation id="6080696365213338172">You have accessed content using an administrator-provided certificate. Data you provide to <ph name="DOMAIN" /> can be intercepted by your administrator.</translation>
 <translation id="6085149458302186532">Labels (coloured)</translation>
 <translation id="6087312102907839798">Related searches</translation>
 <translation id="6089505343295765444">Tabs that you delete from your Chrome history will still show up in your comparison tables</translation>
@@ -3002,11 +3017,11 @@ This will otherwise be blocked by your privacy settings. This will allow the con
 <translation id="6322182122604171028">Couldn't use Windows Hello</translation>
 <translation id="6326947323444967009">Set Chrome as the system's default browser in iOS settings</translation>
 <translation id="6328639280570009161">Try disabling network prediction</translation>
-<translation id="6328784461820205019">'Your connection is not private' or '&lt;span class="error-code"&gt;NET::ERR_CERT_AUTHORITY_INVALID&lt;/span&gt;' or '&lt;span class="error-code"&gt;ERR_CERT_COMMON_NAME_INVALID&lt;/span&gt;' or '&lt;span class="error-code"&gt;NET::ERR_CERT_WEAK_SIGNATURE_ALGORITHM&lt;/span&gt;' or '&lt;span class="error-code"&gt;ERR_CERT_SYMANTEC_LEGACY&lt;/span&gt;' or 'SSL certificate error'</translation>
 <translation id="6335029926534404762">Trainers</translation>
 <translation id="6337133576188860026">Frees up less than <ph name="SIZE" />. Some sites may load more slowly on your next visit.</translation>
 <translation id="6337534724793800597">Filter policies by name</translation>
 <translation id="633770708279464947">The <ph name="SECURE_DNS_SALT" /> value is invalid and will not be used.</translation>
+<translation id="6338645927051849741">Password • Google Password Manager</translation>
 <translation id="6340739886198108203">Administrator policy doesn’t recommend taking screenshots or recordings when confidential content is visible:</translation>
 <translation id="6341434961864773665">{0,plural, =1{Administrator policy doesn’t recommend uploading this file to <ph name="DESTINATION_NAME" />}other{Administrator policy doesn’t recommend uploading these files to <ph name="DESTINATION_NAME" />}}</translation>
 <translation id="6342069812937806050">Just now</translation>
@@ -3016,6 +3031,7 @@ This will otherwise be blocked by your privacy settings. This will allow the con
 <translation id="6351658970066645919">Delete browsing data</translation>
 <translation id="6353505687280762741">{COUNT,plural, =0{None}=1{1 password (for <ph name="DOMAIN_LIST" />, synced)}=2{2 passwords (for <ph name="DOMAIN_LIST" />, synced)}other{# passwords (for <ph name="DOMAIN_LIST" />, synced)}}</translation>
 <translation id="6355392890578844978">This browser is not managed by a company or other organisation. Activity on this device may be managed outside of Chromium. <ph name="BEGIN_LINK" />Learn more<ph name="END_LINK" /></translation>
+<translation id="6357546827188504216">'<ph name="GROUP_TITLE_1" />' and '<ph name="GROUP_TITLE_2" />' tab groups no longer available</translation>
 <translation id="6358088212770985041">edit payment methods</translation>
 <translation id="6358450015545214790">What do these mean?</translation>
 <translation id="6360213755783740931">Learn more about malware protection</translation>
@@ -3329,6 +3345,7 @@ This will otherwise be blocked by your privacy settings. This will allow the con
 <translation id="6917795328362592458">The password that you just used was found in a data breach. To secure your accounts, Password Manager recommends checking your saved passwords.</translation>
 <translation id="6917873303492266709">To share, join, and collaborate in tab groups, open settings and turn on Allow Chrome sign-in</translation>
 <translation id="6921197121276419421">Install web apps allowed</translation>
+<translation id="69238565902785824">Keeping your account linked helps you pay faster with <ph name="BNPL_ISSUER_NAME" />, but you can unlink it by going to <ph name="IDS_AUTOFILL_BNPL_TOS_LINK_TEXT_WALLET_LINK_TEXT" /></translation>
 <translation id="6924013822850225188">Choose whether you see your card benefits at checkout (bank terms apply)</translation>
 <translation id="6925267999184670015">North American B+</translation>
 <translation id="6926216138694948720">Body art</translation>
@@ -3394,6 +3411,7 @@ This will otherwise be blocked by your privacy settings. This will allow the con
 <translation id="701757816833614688">Visual Arts and Design Education</translation>
 <translation id="702275896380648118">This site determines things that you like and then suggests ads to other sites. This site also gets your ad topics from Chrome to show you more relevant ads.</translation>
 <translation id="7023162328967545559">Admin warning</translation>
+<translation id="7023765275461720661">Link account and pay with <ph name="BNPL_ISSUER_NAME" />?</translation>
 <translation id="7029809446516969842">Passwords</translation>
 <translation id="7030164307377592766">modify settings for filling payment methods</translation>
 <translation id="7031646650991750659">Which Google Play apps you have installed</translation>
@@ -3616,6 +3634,7 @@ Additional details:
 <translation id="741204030948306876">Yes, I'm in</translation>
 <translation id="7416351320495623771">Manage passwords...</translation>
 <translation id="7416898721136759658">Grants, scholarships and financial aid</translation>
+<translation id="741772962178517671">Affirm</translation>
 <translation id="7418620734632363981">Programming</translation>
 <translation id="7419091773564635591">Computers and electronics</translation>
 <translation id="7419106976560586862">Profile Path</translation>
@@ -3662,6 +3681,7 @@ Additional details:
 <translation id="7485085230273446323">Business and industrial</translation>
 <translation id="7485870689360869515">No data found.</translation>
 <translation id="7486880426035242089">OneDrive</translation>
+<translation id="7489255442002627311"><ph name="BNPL_ISSUER_NAME" /> will check your eligibility (this won't affect your credit score). If approved, <ph name="BNPL_ISSUER_NAME" /> will provide payment plans for you to choose from and complete your purchase.</translation>
 <translation id="7489392576326061356">Shampoos and Conditioners</translation>
 <translation id="7495528107193238112">This content is blocked. Contact the site owner to fix the issue.</translation>
 <translation id="749865518782565832">Plumbing</translation>
@@ -3718,6 +3738,7 @@ Additional details:
 <translation id="7569983096843329377">Black</translation>
 <translation id="7574998639136359461">Winter Sports Equipment</translation>
 <translation id="7575207903026901870">Remove Suggestion button, press Enter to remove this suggestion</translation>
+<translation id="7575800019233204241">'Your connection is not private' or "&lt;span class="error-code"&gt;NET::ERR_CERT_AUTHORITY_INVALID&lt;/span&gt;" or "&lt;span class="error-code"&gt;ERR_CERT_COMMON_NAME_INVALID&lt;/span&gt;" or "&lt;span class="error-code"&gt;NET::ERR_CERT_WEAK_SIGNATURE_ALGORITHM&lt;/span&gt;" or 'SSL certificate error'</translation>
 <translation id="7575887283389198269">Mobile Phones</translation>
 <translation id="7578104083680115302">Pay quickly on sites and apps across devices using cards that you have saved with Google.</translation>
 <translation id="7579442726219254162">Unknown variable '<ph name="VARIABLE" />' in the managed configuration of '<ph name="APPLICATION_ID" />'.</translation>
@@ -3904,6 +3925,7 @@ Additional details:
 <translation id="791107458486222637">Redoing result</translation>
 <translation id="791551905239004656">Drawing and colouring</translation>
 <translation id="7916162853251942238">Flexo base</translation>
+<translation id="791698251820376781">Your organisation doesn't allow you to sign in</translation>
 <translation id="7926503317156566022">Aviation industry</translation>
 <translation id="793209273132572360">Update address?</translation>
 <translation id="7932579305932748336">Coat</translation>
@@ -4227,7 +4249,6 @@ Additional details:
 <translation id="8473626140772740486">300 mm x 450 mm</translation>
 <translation id="8473863474539038330">Addresses and more</translation>
 <translation id="8474910779563686872">Show developer details</translation>
-<translation id="8476959635632921417">To save and use this address on all your devices, verify that it's you</translation>
 <translation id="8479754468255770962">Staple bottom left</translation>
 <translation id="8483229036294884935">This address will be deleted from your Google Account, <ph name="ACCOUNT" /></translation>
 <translation id="8488350697529856933">Applies to</translation>
@@ -4611,11 +4632,13 @@ Additional details:
 <translation id="9183425211371246419"><ph name="HOST_NAME" /> uses an unsupported protocol.</translation>
 <translation id="918454845714257218">Check the code on the <ph name="SIDE_OF_CARD" /> and try again</translation>
 <translation id="9186203289258525843">Set Chrome as default browser button, activate to set Chrome as the system's default browser</translation>
+<translation id="9189468832660648522"><ph name="MEMBER_FIRST_NAME" /> changed this tab</translation>
 <translation id="9189789270972826888">Click card details below to copy and paste if the card wasn't filled. <ph name="IDS_AUTOFILL_FILLED_CARD_INFORMATION_BUBBLE_LEARN_MORE_LINK_LABEL" /></translation>
 <translation id="9190557999028587593">Topics older than four weeks get auto-deleted</translation>
 <translation id="9191834167571392248">Punch bottom left</translation>
 <translation id="9192361865877479444">Metal (matte)</translation>
 <translation id="9192947025498305328">Clean beauty</translation>
+<translation id="9195969368671142407">When your organisation limits saving to your Google Account, you can’t share or join tab groups</translation>
 <translation id="9199905725844810519">Printing is blocked</translation>
 <translation id="9201904868909900493">Opening survey…</translation>
 <translation id="9204089334327209740">Once the upload is complete, you can modify your files in <ph name="CLOUD_PROVIDER" />. Local storage, including any files in Trash, will be automatically removed.</translation>

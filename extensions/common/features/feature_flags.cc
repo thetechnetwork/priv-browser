@@ -24,12 +24,15 @@ const base::Feature* kFeatureFlags[] = {
     &extensions_features::kApiContentSettingsClipboard,
     &extensions_features::kApiEnterpriseKioskInput,
     &extensions_features::kApiPermissionsHostAccessRequests,
+    &extensions_features::kApiPrintingMarginsAndScale,
     &extensions_features::kApiUserScriptsExecute,
     &extensions_features::kApiUserScriptsMultipleWorlds,
     &extensions_features::kApiOdfsConfigPrivate,
     &extensions_features::kExperimentalOmniboxLabs,
     &extensions_features::kExtensionIconVariants,
     &extensions_features::kTelemetryExtensionPendingApprovalApi,
+    &extensions_features::
+        kApiEnterpriseReportingPrivateOnDataMaskingRulesTriggered,
 };
 
 constinit base::span<const base::Feature*> g_feature_flags_test_override;

@@ -6,7 +6,6 @@
 
 #include <optional>
 
-#include "base/notreached.h"
 #include "base/types/cxx23_to_underlying.h"
 #include "components/autofill/core/browser/field_types.h"
 #include "components/strings/grit/components_strings.h"
@@ -38,63 +37,45 @@ std::optional<AttributeType> AttributeType::FromFieldType(FieldType type) {
 }
 
 std::u16string AttributeType::GetNameForI18n() const {
-  switch (name()) {
-    case AttributeTypeName::kPassportName:
-      return l10n_util::GetStringUTF16(
-          IDS_AUTOFILL_AI_PASSPORT_NAME_ATTRIBUTE_NAME);
-    case AttributeTypeName::kPassportNumber:
-      return l10n_util::GetStringUTF16(
-          IDS_AUTOFILL_AI_PASSPORT_NUMBER_ATTRIBUTE_NAME);
-    case AttributeTypeName::kPassportCountry:
-      return l10n_util::GetStringUTF16(
-          IDS_AUTOFILL_AI_PASSPORT_COUNTRY_ATTRIBUTE_NAME);
-    case AttributeTypeName::kPassportExpiryDate:
-      return l10n_util::GetStringUTF16(
-          IDS_AUTOFILL_AI_PASSPORT_EXPIRY_DATE_ATTRIBUTE_NAME);
-    case AttributeTypeName::kPassportIssueDate:
-      return l10n_util::GetStringUTF16(
-          IDS_AUTOFILL_AI_PASSPORT_ISSUE_DATE_ATTRIBUTE_NAME);
-    case AttributeTypeName::kLoyaltyCardProgram:
-      return l10n_util::GetStringUTF16(
-          IDS_AUTOFILL_AI_LOYALTY_CARD_PROGRAM_ATTRIBUTE_NAME);
-    case AttributeTypeName::kLoyaltyCardProvider:
-      return l10n_util::GetStringUTF16(
-          IDS_AUTOFILL_AI_LOYALTY_CARD_PROVIDER_ATTRIBUTE_NAME);
-    case AttributeTypeName::kLoyaltyCardMemberId:
-      return l10n_util::GetStringUTF16(
-          IDS_AUTOFILL_AI_LOYALTY_CARD_MEMBER_ID_ATTRIBUTE_NAME);
-    case AttributeTypeName::kVehicleOwner:
-      return l10n_util::GetStringUTF16(
-          IDS_AUTOFILL_AI_VEHICLE_OWNER_ATTRIBUTE_NAME);
-    case AttributeTypeName::kVehicleLicensePlate:
-      return l10n_util::GetStringUTF16(
-          IDS_AUTOFILL_AI_VEHICLE_LICENSE_PLATE_ATTRIBUTE_NAME);
-    case AttributeTypeName::kVehicleVin:
-      return l10n_util::GetStringUTF16(
-          IDS_AUTOFILL_AI_VEHICLE_VIN_ATTRIBUTE_NAME);
-    case AttributeTypeName::kVehicleMake:
-      return l10n_util::GetStringUTF16(
-          IDS_AUTOFILL_AI_VEHICLE_MAKE_ATTRIBUTE_NAME);
-    case AttributeTypeName::kVehicleModel:
-      return l10n_util::GetStringUTF16(
-          IDS_AUTOFILL_AI_VEHICLE_MODEL_ATTRIBUTE_NAME);
-    case AttributeTypeName::kDriversLicenseName:
-      return l10n_util::GetStringUTF16(
-          IDS_AUTOFILL_AI_DRIVERS_LICENSE_NAME_ATTRIBUTE_NAME);
-    case AttributeTypeName::kDriversLicenseRegion:
-      return l10n_util::GetStringUTF16(
-          IDS_AUTOFILL_AI_DRIVERS_LICENSE_REGION_ATTRIBUTE_NAME);
-    case AttributeTypeName::kDriversLicenseNumber:
-      return l10n_util::GetStringUTF16(
-          IDS_AUTOFILL_AI_DRIVERS_LICENSE_NUMBER_ATTRIBUTE_NAME);
-    case AttributeTypeName::kDriversLicenseExpirationDate:
-      return l10n_util::GetStringUTF16(
-          IDS_AUTOFILL_AI_DRIVERS_LICENSE_EXPIRATION_DATE_ATTRIBUTE_NAME);
-    case AttributeTypeName::kDriversLicenseIssueDate:
-      return l10n_util::GetStringUTF16(
-          IDS_AUTOFILL_AI_DRIVERS_LICENSE_ISSUE_DATE_ATTRIBUTE_NAME);
-  }
-  NOTREACHED();
+  return l10n_util::GetStringUTF16([&] {
+    switch (name()) {
+      case AttributeTypeName::kPassportName:
+        return IDS_AUTOFILL_AI_PASSPORT_NAME_ATTRIBUTE_NAME;
+      case AttributeTypeName::kPassportNumber:
+        return IDS_AUTOFILL_AI_PASSPORT_NUMBER_ATTRIBUTE_NAME;
+      case AttributeTypeName::kPassportCountry:
+        return IDS_AUTOFILL_AI_PASSPORT_COUNTRY_ATTRIBUTE_NAME;
+      case AttributeTypeName::kPassportExpirationDate:
+        return IDS_AUTOFILL_AI_PASSPORT_EXPIRATION_DATE_ATTRIBUTE_NAME;
+      case AttributeTypeName::kPassportIssueDate:
+        return IDS_AUTOFILL_AI_PASSPORT_ISSUE_DATE_ATTRIBUTE_NAME;
+      case AttributeTypeName::kVehicleOwner:
+        return IDS_AUTOFILL_AI_VEHICLE_OWNER_ATTRIBUTE_NAME;
+      case AttributeTypeName::kVehiclePlateNumber:
+        return IDS_AUTOFILL_AI_VEHICLE_PLATE_NUMBER_ATTRIBUTE_NAME;
+      case AttributeTypeName::kVehiclePlateState:
+        return IDS_AUTOFILL_AI_VEHICLE_PLATE_STATE_ATTRIBUTE_NAME;
+      case AttributeTypeName::kVehicleVin:
+        return IDS_AUTOFILL_AI_VEHICLE_VEHICLE_IDENTIFICATION_NUMBER_ATTRIBUTE_NAME;
+      case AttributeTypeName::kVehicleMake:
+        return IDS_AUTOFILL_AI_VEHICLE_MAKE_ATTRIBUTE_NAME;
+      case AttributeTypeName::kVehicleModel:
+        return IDS_AUTOFILL_AI_VEHICLE_MODEL_ATTRIBUTE_NAME;
+      case AttributeTypeName::kVehicleYear:
+        return IDS_AUTOFILL_AI_VEHICLE_YEAR_ATTRIBUTE_NAME;
+      case AttributeTypeName::kDriversLicenseName:
+        return IDS_AUTOFILL_AI_DRIVERS_LICENSE_NAME_ATTRIBUTE_NAME;
+      case AttributeTypeName::kDriversLicenseState:
+        return IDS_AUTOFILL_AI_DRIVERS_LICENSE_STATE_ATTRIBUTE_NAME;
+      case AttributeTypeName::kDriversLicenseNumber:
+        return IDS_AUTOFILL_AI_DRIVERS_LICENSE_NUMBER_ATTRIBUTE_NAME;
+      case AttributeTypeName::kDriversLicenseExpirationDate:
+        return IDS_AUTOFILL_AI_DRIVERS_LICENSE_EXPIRATION_DATE_ATTRIBUTE_NAME;
+      case AttributeTypeName::kDriversLicenseIssueDate:
+        return IDS_AUTOFILL_AI_DRIVERS_LICENSE_ISSUE_DATE_ATTRIBUTE_NAME;
+    }
+    NOTREACHED();
+  }());
 }
 
 // static
@@ -105,12 +86,10 @@ bool EntityType::ImportOrder(const EntityType& lhs, const EntityType& rhs) {
     switch (t.name()) {
       case EntityTypeName::kPassport:
         return 1;
-      case EntityTypeName::kLoyaltyCard:
-        return 2;
       case EntityTypeName::kVehicle:
-        return 3;
+        return 2;
       case EntityTypeName::kDriversLicense:
-        return 4;
+        return 3;
     }
   };
   return rank(lhs) < rank(rhs);
@@ -120,9 +99,6 @@ std::u16string EntityType::GetNameForI18n() const {
   switch (name()) {
     case EntityTypeName::kPassport:
       return l10n_util::GetStringUTF16(IDS_AUTOFILL_AI_PASSPORT_ENTITY_NAME);
-    case EntityTypeName::kLoyaltyCard:
-      return l10n_util::GetStringUTF16(
-          IDS_AUTOFILL_AI_LOYALTY_CARD_ENTITY_NAME);
     case EntityTypeName::kVehicle:
       return l10n_util::GetStringUTF16(IDS_AUTOFILL_AI_VEHICLE_ENTITY_NAME);
     case EntityTypeName::kDriversLicense:

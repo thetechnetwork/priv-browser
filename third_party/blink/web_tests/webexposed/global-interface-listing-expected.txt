@@ -22,14 +22,9 @@ interface AILanguageDetector
     method constructor
     method destroy
     method detect
-interface AILanguageDetectorCapabilities
-    attribute @@toStringTag
-    getter available
-    method constructor
-    method languageAvailable
 interface AILanguageDetectorFactory
     attribute @@toStringTag
-    method capabilities
+    method availability
     method constructor
     method create
 interface AILanguageModel : EventTarget
@@ -48,19 +43,9 @@ interface AILanguageModel : EventTarget
     method prompt
     method promptStreaming
     setter oncontextoverflow
-interface AILanguageModelCapabilities
-    attribute @@toStringTag
-    getter available
-    getter defaultTemperature
-    getter defaultTopK
-    getter maxTemperature
-    getter maxTopK
-    method constructor
-    method languageAvailable
 interface AILanguageModelFactory
     attribute @@toStringTag
     method availability
-    method capabilities
     method constructor
     method create
     method params
@@ -76,12 +61,14 @@ interface AIRewriter
     getter expectedContextLanguages
     getter expectedInputLanguages
     getter format
+    getter inputQuota
     getter length
     getter outputLanguage
     getter sharedContext
     getter tone
     method constructor
     method destroy
+    method measureInputUsage
     method rewrite
     method rewriteStreaming
 interface AIRewriterFactory
@@ -94,24 +81,19 @@ interface AISummarizer
     getter expectedContextLanguages
     getter expectedInputLanguages
     getter format
+    getter inputQuota
     getter length
     getter outputLanguage
     getter sharedContext
     getter type
     method constructor
     method destroy
+    method measureInputUsage
     method summarize
     method summarizeStreaming
-interface AISummarizerCapabilities
-    attribute @@toStringTag
-    getter available
-    method constructor
-    method createOptionsAvailable
-    method languageAvailable
 interface AISummarizerFactory
     attribute @@toStringTag
     method availability
-    method capabilities
     method constructor
     method create
 interface AITranslator
@@ -122,15 +104,9 @@ interface AITranslator
     method destroy
     method translate
     method translateStreaming
-interface AITranslatorCapabilities
-    attribute @@toStringTag
-    getter available
-    method constructor
-    method languagePairAvailable
 interface AITranslatorFactory
     attribute @@toStringTag
     method availability
-    method capabilities
     method constructor
     method create
 interface AIWriter
@@ -138,12 +114,14 @@ interface AIWriter
     getter expectedContextLanguages
     getter expectedInputLanguages
     getter format
+    getter inputQuota
     getter length
     getter outputLanguage
     getter sharedContext
     getter tone
     method constructor
     method destroy
+    method measureInputUsage
     method write
     method writeStreaming
 interface AIWriterFactory
@@ -275,12 +253,6 @@ interface AnimationTrigger
     getter timeline
     getter type
     method constructor
-    setter exitRangeEnd
-    setter exitRangeStart
-    setter rangeEnd
-    setter rangeStart
-    setter timeline
-    setter type
 interface AsyncDisposableStack
     attribute @@toStringTag
     getter disposed
@@ -1484,18 +1456,19 @@ interface CanvasRenderingContext2D
     setter textRendering
     setter wordSpacing
 interface CaptureController : EventTarget
-    static method getSupportedZoomLevels
     attribute @@toStringTag
     getter oncapturedmousechange
-    getter oncapturedzoomlevelchange
-    method captureWheel
+    getter onzoomlevelchange
+    getter zoomLevel
     method constructor
-    method getZoomLevel
-    method sendWheel
+    method decreaseZoomLevel
+    method forwardWheel
+    method getSupportedZoomLevels
+    method increaseZoomLevel
+    method resetZoomLevel
     method setFocusBehavior
-    method setZoomLevel
     setter oncapturedmousechange
-    setter oncapturedzoomlevelchange
+    setter onzoomlevelchange
 interface CapturedMouseEvent : Event
     attribute @@toStringTag
     getter surfaceX
@@ -2615,6 +2588,8 @@ interface Element : Node
     getter currentCSSZoom
     getter elementTiming
     getter firstElementChild
+    getter headingOffset
+    getter headingReset
     getter id
     getter innerHTML
     getter lastElementChild
@@ -2758,6 +2733,8 @@ interface Element : Node
     setter className
     setter containerTiming
     setter elementTiming
+    setter headingOffset
+    setter headingReset
     setter id
     setter innerHTML
     setter onbeforecopy
@@ -3179,10 +3156,8 @@ interface GPU
     method requestAdapter
 interface GPUAdapter
     attribute @@toStringTag
-    getter featureLevel
     getter features
     getter info
-    getter isCompatibilityMode
     getter isFallbackAdapter
     getter limits
     method constructor
@@ -4948,12 +4923,16 @@ interface HTMLPermissionElement : HTMLElement
     getter invalidReason
     getter isValid
     getter ondismiss
+    getter onpromptaction
+    getter onpromptdismiss
     getter onresolve
     getter onvalidationstatuschange
     getter permissionStatus
     getter type
     method constructor
     setter ondismiss
+    setter onpromptaction
+    setter onpromptdismiss
     setter onresolve
     setter onvalidationstatuschange
     setter type
@@ -5678,7 +5657,7 @@ interface ImageData
     getter colorSpace
     getter data
     getter height
-    getter storageFormat
+    getter pixelFormat
     getter width
     method constructor
 interface ImageDecoder
@@ -5804,11 +5783,6 @@ interface KeyframeEffect : AnimationEffect
     setter composite
     setter pseudoElement
     setter target
-interface LanguageTranslator
-    attribute @@toStringTag
-    method constructor
-    method destroy
-    method translate
 interface LargestContentfulPaint : PerformanceEntry
     attribute @@toStringTag
     getter element
@@ -7320,6 +7294,15 @@ interface Performance : EventTarget
     method setResourceTimingBufferSize
     method toJSON
     setter onresourcetimingbufferfull
+interface PerformanceContainerTiming : PerformanceEntry
+    attribute @@toStringTag
+    getter firstRenderTime
+    getter identifier
+    getter intersectionRect
+    getter lastPaintedElement
+    getter size
+    method constructor
+    method toJSON
 interface PerformanceElementTiming : PerformanceEntry
     attribute @@toStringTag
     getter element
@@ -7400,7 +7383,6 @@ interface PerformanceNavigationTiming : PerformanceResourceTiming
     getter loadEventStart
     getter notRestoredReasons
     getter redirectCount
-    getter systemEntropy
     getter type
     getter unloadEventEnd
     getter unloadEventStart
@@ -9422,7 +9404,7 @@ interface Sanitizer
     method removeAttribute
     method removeElement
     method removeUnsafe
-    method replaceWithChildrenElement
+    method replaceElementWithChildren
     method setComments
     method setDataAttributes
 interface Scheduler
@@ -9983,8 +9965,8 @@ interface TextCluster
     attribute @@toStringTag
     getter align
     getter baseline
-    getter begin
     getter end
+    getter start
     getter x
     getter y
     method constructor
@@ -10199,11 +10181,6 @@ interface TransitionEvent : Event
     getter propertyName
     getter pseudoElement
     method constructor
-interface Translation
-    attribute @@toStringTag
-    method canTranslate
-    method constructor
-    method createTranslator
 interface TreeWalker
     attribute @@toStringTag
     getter currentNode
@@ -13162,7 +13139,6 @@ namespace console
     getter styleMedia
     getter toolbar
     getter top
-    getter translation
     getter trustedTypes
     getter viewport
     getter visualViewport
@@ -13195,7 +13171,6 @@ namespace console
     method moveBy
     method moveTo
     method open
-    method openDatabase
     method popinContextType
     method popinContextTypesSupported
     method postMessage
@@ -13392,7 +13367,6 @@ namespace console
     setter status
     setter statusbar
     setter toolbar
-    setter translation
     setter viewport
     setter visualViewport
 PASS successfullyParsed is true

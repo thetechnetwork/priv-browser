@@ -35,6 +35,7 @@
 #include "content/public/browser/identity_request_dialog_controller.h"
 #include "content/public/common/content_features.h"
 #include "content/public/test/back_forward_cache_util.h"
+#include "content/public/test/fake_local_frame.h"
 #include "content/test/test_render_frame_host.h"
 #include "content/test/test_render_view_host.h"
 #include "content/test/test_web_contents.h"
@@ -896,6 +897,8 @@ class FederatedAuthRequestImplTest : public RenderViewHostImplTestHarness {
   void InitConstants() {
     kSingleAccount = {base::MakeRefCounted<IdentityRequestAccount>(
         kAccountId,                  // id
+        kEmail,                      // display_identifier
+        "Ken R. Example",            // display_name
         kEmail,                      // email
         "Ken R. Example",            // name
         "Ken",                       // given_name
@@ -922,6 +925,8 @@ class FederatedAuthRequestImplTest : public RenderViewHostImplTestHarness {
     kSingleProviderInfo = {{kProviderUrlFull, kDefaultIdentityProviderInfo}};
     kSingleAccountWithHint = {base::MakeRefCounted<IdentityRequestAccount>(
         kAccountId,                  // id
+        kEmail,                      // display_identifier
+        "Ken R. Example",            // display_name
         kEmail,                      // email
         "Ken R. Example",            // name
         "Ken",                       // given_name
@@ -933,6 +938,8 @@ class FederatedAuthRequestImplTest : public RenderViewHostImplTestHarness {
     kSingleAccountWithDomainHint = {
         base::MakeRefCounted<IdentityRequestAccount>(
             kAccountId,                  // id
+            kEmail,                      // display_identifier
+            "Ken R. Example",            // display_name
             kEmail,                      // email
             "Ken R. Example",            // name
             "Ken",                       // given_name
@@ -943,6 +950,8 @@ class FederatedAuthRequestImplTest : public RenderViewHostImplTestHarness {
             )};
     kTwoAccounts = {base::MakeRefCounted<IdentityRequestAccount>(
                         kAccountIdNicolas,           // id
+                        kAccountEmailNicolas,        // display_identifier
+                        "Nicolas P",                 // display_name
                         kAccountEmailNicolas,        // email
                         "Nicolas P",                 // name
                         "Nicolas",                   // given_name
@@ -954,6 +963,8 @@ class FederatedAuthRequestImplTest : public RenderViewHostImplTestHarness {
                         ),
                     base::MakeRefCounted<IdentityRequestAccount>(
                         kAccountIdZach,              // id
+                        "zach@email.com",            // display_identifier
+                        "Zachary T",                 // display_name
                         "zach@email.com",            // email
                         "Zachary T",                 // name
                         "Zach",                      // given_name
@@ -965,6 +976,8 @@ class FederatedAuthRequestImplTest : public RenderViewHostImplTestHarness {
                         )};
     kMultipleAccounts = {base::MakeRefCounted<IdentityRequestAccount>(
                              kAccountIdNicolas,           // id
+                             kAccountEmailNicolas,        // display_identifier
+                             "Nicolas P",                 // display_name
                              kAccountEmailNicolas,        // email
                              "Nicolas P",                 // name
                              "Nicolas",                   // given_name
@@ -976,6 +989,8 @@ class FederatedAuthRequestImplTest : public RenderViewHostImplTestHarness {
                              ),
                          base::MakeRefCounted<IdentityRequestAccount>(
                              kAccountIdPeter,             // id
+                             kAccountEmailPeter,          // display_identifier
+                             "Peter K",                   // display_name
                              kAccountEmailPeter,          // email
                              "Peter K",                   // name
                              "Peter",                     // given_name
@@ -987,6 +1002,8 @@ class FederatedAuthRequestImplTest : public RenderViewHostImplTestHarness {
                              ),
                          base::MakeRefCounted<IdentityRequestAccount>(
                              kAccountIdZach,              // id
+                             "zach@email.com",            // display_identifier
+                             "Zachary T",                 // display_name
                              "zach@email.com",            // email
                              "Zachary T",                 // name
                              "Zach",                      // given_name
@@ -999,6 +1016,8 @@ class FederatedAuthRequestImplTest : public RenderViewHostImplTestHarness {
     kMultipleAccountsWithHintsAndDomains = {
         base::MakeRefCounted<IdentityRequestAccount>(
             kAccountIdNicolas,           // id
+            kAccountEmailNicolas,        // display_identifier
+            "Nicolas P",                 // display_name
             kAccountEmailNicolas,        // email
             "Nicolas P",                 // name
             "Nicolas",                   // given_name
@@ -1010,6 +1029,8 @@ class FederatedAuthRequestImplTest : public RenderViewHostImplTestHarness {
             ),
         base::MakeRefCounted<IdentityRequestAccount>(
             kAccountIdPeter,             // id
+            kAccountEmailPeter,          // display_identifier
+            "Peter K",                   // display_name
             kAccountEmailPeter,          // email
             "Peter K",                   // name
             "Peter",                     // given_name
@@ -1021,6 +1042,8 @@ class FederatedAuthRequestImplTest : public RenderViewHostImplTestHarness {
             ),
         base::MakeRefCounted<IdentityRequestAccount>(
             kAccountIdZach,              // id
+            kAccountEmailZach,           // display_identifier
+            "Zachary T",                 // display_name
             kAccountEmailZach,           // email
             "Zachary T",                 // name
             "Zach",                      // given_name
@@ -2156,6 +2179,8 @@ TEST_F(FederatedAuthRequestImplTest, LoginStateShouldBeSignUpForFirstTimeUser) {
   RunAuthTest(kDefaultRequestParameters, kExpectationSuccess,
               kConfigurationValid);
   EXPECT_EQ(LoginState::kSignUp, all_accounts_for_display()[0]->login_state);
+  histogram_tester_.ExpectUniqueSample("Blink.FedCm.HasSigninAccount", false,
+                                       1);
 }
 
 TEST_F(FederatedAuthRequestImplTest, LoginStateShouldBeSignInForReturningUser) {
@@ -2185,6 +2210,8 @@ TEST_F(FederatedAuthRequestImplTest, LoginStateShouldBeSignInForReturningUser) {
   histogram_tester_.ExpectUniqueTimeSample(
       "Blink.FedCm.Timing.ShowAccountsDialogBreakdown.ClientMetadataFetch",
       base::TimeDelta(), 1);
+
+  histogram_tester_.ExpectUniqueSample("Blink.FedCm.HasSigninAccount", true, 1);
 }
 
 TEST_F(FederatedAuthRequestImplTest,
@@ -5423,7 +5450,7 @@ TEST_F(FederatedAuthRequestImplTest, LoginHintSingleAccountEmailMatch) {
 
   RunAuthTest(parameters, kExpectationSuccess, configuration);
   ASSERT_EQ(all_accounts_for_display().size(), 1u);
-  EXPECT_EQ(all_accounts_for_display()[0]->email, kEmail);
+  EXPECT_EQ(all_accounts_for_display()[0]->display_identifier, kEmail);
 
   histogram_tester_.ExpectUniqueSample(
       "Blink.FedCm.LoginHint.NumMatchingAccounts",
@@ -5449,6 +5476,7 @@ TEST_F(FederatedAuthRequestImplTest, LoginHintSingleAccountNoMatch) {
   RunAuthTest(parameters, expectations, configuration);
   EXPECT_TRUE(DidFetch(FetchedEndpoint::ACCOUNTS));
   EXPECT_FALSE(did_show_accounts_dialog());
+  ExpectNoUKMPresence("HasSigninAccount");
 
   histogram_tester_.ExpectUniqueSample(
       "Blink.FedCm.LoginHint.NumMatchingAccounts",
@@ -6529,6 +6557,7 @@ TEST_F(FederatedAuthRequestImplTest, MismatchDialogShownMetric) {
       FedCmMetrics::MismatchDialogType::kFirstWithoutHints, 1);
   ExpectUKMPresence("MismatchDialogShown");
   ExpectNoUKMPresence("AccountsDialogShown");
+  ExpectNoUKMPresence("HasSigninAccount");
   CheckAllFedCmSessionIDs();
 }
 
@@ -7415,6 +7444,8 @@ TEST_F(FederatedAuthRequestImplTest,
   EXPECT_EQ(all_accounts_for_display()[2]->login_state, LoginState::kSignUp);
   EXPECT_EQ(all_accounts_for_display()[2]->browser_trusted_login_state,
             LoginState::kSignUp);
+
+  ExpectUkmValue("HasSigninAccount", true);
 }
 
 // Test that IdP claimed SignIn does not affect browser observed SignUp.
@@ -8078,4 +8109,33 @@ TEST_F(FederatedAuthRequestImplTest,
   ExpectStatusMetrics(TokenStatus::kSuccessUsingTokenInHttpResponse);
   CheckAllFedCmSessionIDs();
 }
+
+// Tests that we record whether the RP's URL has a path when an accounts dialog
+// is shown.
+TEST_F(FederatedAuthRequestImplTest, MetricsForRpUrlHasPath) {
+  RunAuthTest(kDefaultRequestParameters, kExpectationSuccess,
+              kConfigurationValid);
+  EXPECT_TRUE(did_show_accounts_dialog());
+
+  ExpectUkmValueInEntry("RpUrlHasPath", FedCmEntry::kEntryName, false);
+  CheckAllFedCmSessionIDs();
+}
+
+// Tests that we record the scroll position when an account is selected.
+TEST_F(FederatedAuthRequestImplTest, MetricsForAccountSelectionScrollPosition) {
+  // Mock the `GetScrollPosition` call.
+  TestRenderFrameHost* test_rfh =
+      static_cast<TestRenderFrameHost*>(web_contents()->GetPrimaryMainFrame());
+  test_rfh->ResetLocalFrame();
+  FakeLocalFrame local_frame;
+  local_frame.Init(test_rfh->GetRemoteAssociatedInterfaces());
+
+  RunAuthTest(kDefaultRequestParameters, kExpectationSuccess,
+              kConfigurationValid);
+
+  ExpectUkmValueInEntry("AccountSelectionScrollPosition",
+                        FedCmEntry::kEntryName, 0);
+  CheckAllFedCmSessionIDs();
+}
+
 }  // namespace content

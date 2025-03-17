@@ -236,6 +236,9 @@ BASE_FEATURE(kIPHAndroidTabDeclutter,
 BASE_FEATURE(kIPHAdaptiveButtonInTopToolbarCustomizationNewTabFeature,
              "IPH_AdaptiveButtonInTopToolbarCustomization_NewTab",
              base::FEATURE_DISABLED_BY_DEFAULT);
+BASE_FEATURE(kIPHAdaptiveButtonInTopToolbarCustomizationOpenInBrowserFeature,
+             "IPH_AdaptiveButtonInTopToolbarCustomization_OpenInBrowser",
+             base::FEATURE_DISABLED_BY_DEFAULT);
 BASE_FEATURE(kIPHAdaptiveButtonInTopToolbarCustomizationShareFeature,
              "IPH_AdaptiveButtonInTopToolbarCustomization_Share",
              base::FEATURE_DISABLED_BY_DEFAULT);
@@ -590,9 +593,6 @@ BASE_FEATURE(kIPHiOSPromoNonModalShareDefaultBrowserFeature,
 BASE_FEATURE(kIPHiOSPromoPasswordManagerWidgetFeature,
              "IPH_iOSPromoPasswordManagerWidget",
              base::FEATURE_ENABLED_BY_DEFAULT);
-BASE_FEATURE(kIPHiOSParcelTrackingFeature,
-             "IPH_iOSParcelTrackingFeature",
-             base::FEATURE_ENABLED_BY_DEFAULT);
 BASE_FEATURE(kIPHiOSPullToRefreshFeature,
              "IPH_iOSPullToRefreshFeature",
              base::FEATURE_ENABLED_BY_DEFAULT);
@@ -652,7 +652,7 @@ BASE_FEATURE(kIPHHomeCustomizationMenuFeature,
              base::FEATURE_ENABLED_BY_DEFAULT);
 BASE_FEATURE(kIPHiOSLensOverlayEntrypointTipFeature,
              "IPH_iOSLensOverlayEntrypointTip",
-             base::FEATURE_DISABLED_BY_DEFAULT);
+             base::FEATURE_ENABLED_BY_DEFAULT);
 BASE_FEATURE(kIPHiOSLensOverlayEscapeHatchTipFeature,
              "IPH_iOSLensOverlayEscapeHatchTip",
              base::FEATURE_DISABLED_BY_DEFAULT);
@@ -667,6 +667,11 @@ BASE_FEATURE(kIPHiOSReminderNotificationsOverflowMenuBubbleFeature,
              base::FEATURE_ENABLED_BY_DEFAULT);
 BASE_FEATURE(kIPHiOSReminderNotificationsOverflowMenuNewBadgeFeature,
              "IPH_iOSReminderNotificationsOverflowMenuNewBadgeFeature",
+             base::FEATURE_ENABLED_BY_DEFAULT);
+// Note: This IPH will only be triggered if `kIdentityDiscAccountMenu` is
+// enabled.
+BASE_FEATURE(kIPHiOSSettingsInOverflowMenuBubbleFeature,
+             "IPH_iOSSettingsInOverflowMenuBubbleFeature",
              base::FEATURE_ENABLED_BY_DEFAULT);
 
 // Non-FET feature.
@@ -687,6 +692,9 @@ BASE_FEATURE(kDefaultBrowserTriggerCriteriaExperiment,
 
 #if BUILDFLAG(IS_WIN) || BUILDFLAG(IS_APPLE) || BUILDFLAG(IS_LINUX) || \
     BUILDFLAG(IS_CHROMEOS) || BUILDFLAG(IS_ANDROID) || BUILDFLAG(IS_FUCHSIA)
+BASE_FEATURE(kIPHAutofillBnplAffirmOrZipSuggestionFeature,
+             "IPH_AutofillBnplAffirmOrZipSuggestion",
+             base::FEATURE_DISABLED_BY_DEFAULT);
 BASE_FEATURE(kIPHAutofillCardInfoRetrievalSuggestionFeature,
              "IPH_AutofillCardInfoRetrievalSuggestion",
              base::FEATURE_DISABLED_BY_DEFAULT);
@@ -699,8 +707,8 @@ BASE_FEATURE(kIPHAutofillDisabledVirtualCardSuggestionFeature,
 BASE_FEATURE(kIPHAutofillExternalAccountProfileSuggestionFeature,
              "IPH_AutofillExternalAccountProfileSuggestion",
              base::FEATURE_ENABLED_BY_DEFAULT);
-BASE_FEATURE(kIPHAutofillPredictionImprovementsFeature,
-             "IPH_AutofillPredictionImprovements",
+BASE_FEATURE(kIPHAutofillAiOptInFeature,
+             "IPH_AutofillAiOptIn",
              base::FEATURE_ENABLED_BY_DEFAULT);
 BASE_FEATURE(kIPHAutofillVirtualCardCVCSuggestionFeature,
              "IPH_AutofillVirtualCardCVCSuggestion",

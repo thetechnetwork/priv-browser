@@ -45,6 +45,7 @@
 #include "pdf/test/test_helpers.h"
 #include "pdf/test/test_pdfium_engine.h"
 #include "printing/metafile_skia.h"
+#include "printing/units.h"
 #include "services/network/public/mojom/referrer_policy.mojom-shared.h"
 #include "services/screen_ai/buildflags/buildflags.h"
 #include "testing/gmock/include/gmock/gmock.h"
@@ -96,6 +97,8 @@
 #include "pdf/test/test_helpers.h"
 #include "third_party/ink/src/ink/strokes/stroke.h"
 #endif
+
+using printing::kUnitConversionFactorPixelsToPoints;
 
 namespace chrome_pdf {
 
@@ -193,6 +196,13 @@ SkBitmap GenerateExpectedBitmapForPaint(const gfx::Rect& expected_clipped_rect,
   SkBitmap expected_bitmap;
   expected_surface->makeImageSnapshot()->asLegacyBitmap(&expected_bitmap);
   return expected_bitmap;
+}
+
+base::Value::Dict GenerateShowSearchifyInProgressMessage(bool show) {
+  base::Value::Dict message;
+  message.Set("type", "showSearchifyInProgress");
+  message.Set("show", show);
+  return message;
 }
 
 class MockHeaderVisitor : public blink::WebHTTPHeaderVisitor {
@@ -1798,9 +1808,7 @@ TEST_F(PdfViewWebPluginTest, OnDocumentLoadComplete) {
 }
 
 TEST_F(PdfViewWebPluginTest, OnSearchifyStarted) {
-  base::Value::Dict message;
-  message.Set("type", "showSearchifyInProgress");
-  message.Set("show", true);
+  base::Value::Dict message = GenerateShowSearchifyInProgressMessage(true);
 
   EXPECT_CALL(*client_ptr_, PostMessage(Eq(std::ref(message))));
 
@@ -1808,55 +1816,65 @@ TEST_F(PdfViewWebPluginTest, OnSearchifyStarted) {
 
   EXPECT_CALL(pdf_host_, OnSearchifyStarted);
 
-  // Wait for the state to be propagated.
-  base::RunLoop run_loop;
-  base::SingleThreadTaskRunner::GetCurrentDefault()->PostDelayedTask(
-      FROM_HERE, run_loop.QuitClosure(), kSearchifyStatePropagationDelay);
-  run_loop.Run();
+  pdf_receiver_.FlushForTesting();
 }
 
 TEST_F(PdfViewWebPluginTest, OnSearchifyStartedAndStoppedFast) {
-  base::Value::Dict message;
-  message.Set("type", "showSearchifyInProgress");
-  message.Set("show", false);
+  base::Value::Dict message_show = GenerateShowSearchifyInProgressMessage(true);
+  base::Value::Dict message_hide =
+      GenerateShowSearchifyInProgressMessage(false);
 
-  // Since `PdfViewWebPlugin` does not keep two distinct states for "progress
-  // indicator is showing" and "progress indicator will be shown", an
-  // unnecessary hide message is sent to UI. This has no effect in the UI as the
-  // progress indicator is already not showing.
-  EXPECT_CALL(*client_ptr_, PostMessage(Eq(std::ref(message))));
+  // Since "hide" message is sent with some delay, it is expected to only
+  // observe one "show" message.
+  EXPECT_CALL(*client_ptr_, PostMessage(Eq(std::ref(message_show))));
+  EXPECT_CALL(*client_ptr_, PostMessage(Eq(std::ref(message_hide)))).Times(0);
 
   plugin_->OnSearchifyStateChange(true);
   plugin_->OnSearchifyStateChange(false);
 
-  // Wait for the state to be propagated.
-  base::RunLoop run_loop;
-  base::SingleThreadTaskRunner::GetCurrentDefault()->PostDelayedTask(
-      FROM_HERE, run_loop.QuitClosure(), kSearchifyStatePropagationDelay);
-  run_loop.Run();
+  pdf_receiver_.FlushForTesting();
 }
 
-TEST_F(PdfViewWebPluginTest, OnSearchifyStartedAndStoppedWithDelay) {
-  base::Value::Dict message_show;
-  message_show.Set("type", "showSearchifyInProgress");
-  message_show.Set("show", true);
-
-  base::Value::Dict message_hide;
-  message_hide.Set("type", "showSearchifyInProgress");
-  message_hide.Set("show", false);
+TEST_F(PdfViewWebPluginTest, OnSearchifyStopped) {
+  base::Value::Dict message_show = GenerateShowSearchifyInProgressMessage(true);
+  base::Value::Dict message_hide =
+      GenerateShowSearchifyInProgressMessage(false);
 
   EXPECT_CALL(*client_ptr_, PostMessage(Eq(std::ref(message_show))));
   EXPECT_CALL(*client_ptr_, PostMessage(Eq(std::ref(message_hide))));
 
   plugin_->OnSearchifyStateChange(true);
+  plugin_->OnSearchifyStateChange(false);
 
-  // Wait for the state to be propagated and indicator be shown.
+  // Wait for the state to be propagated and indicator be hidden.
   base::RunLoop run_loop;
   base::SingleThreadTaskRunner::GetCurrentDefault()->PostDelayedTask(
-      FROM_HERE, run_loop.QuitClosure(), kSearchifyStatePropagationDelay * 2);
+      FROM_HERE, run_loop.QuitClosure(), kSearchifyStatePropagationDelay);
+  run_loop.Run();
+}
+
+TEST_F(PdfViewWebPluginTest, OnSearchifyStartedAndStoppedAndStarted) {
+  base::Value::Dict message_show = GenerateShowSearchifyInProgressMessage(true);
+  base::Value::Dict message_hide =
+      GenerateShowSearchifyInProgressMessage(false);
+
+  // Since `PdfViewWebPlugin` does not keep two distinct states for "progress
+  // indicator is showing" and "progress indicator will be hidden a bit later",
+  // an unnecessary show message is sent to UI. This has no effect in the UI as
+  // the progress indicator is already showing.
+  EXPECT_CALL(*client_ptr_, PostMessage(Eq(std::ref(message_show)))).Times(2);
+  EXPECT_CALL(*client_ptr_, PostMessage(Eq(std::ref(message_hide)))).Times(0);
+
+  plugin_->OnSearchifyStateChange(true);
+  plugin_->OnSearchifyStateChange(false);
+
+  // Wait, but not enough for the state to be propagated.
+  base::RunLoop run_loop;
+  base::SingleThreadTaskRunner::GetCurrentDefault()->PostDelayedTask(
+      FROM_HERE, run_loop.QuitClosure(), kSearchifyStatePropagationDelay / 2);
   run_loop.Run();
 
-  plugin_->OnSearchifyStateChange(false);
+  plugin_->OnSearchifyStateChange(true);
 }
 
 TEST_F(PdfViewWebPluginTest, OnSearchifyStartedMoreThanOnce) {
@@ -2604,13 +2622,13 @@ class PdfViewWebPluginInkTest : public PdfViewWebPluginTest {
     // not matter.
     EXPECT_CALL(*engine_ptr_, HandleInputEvent).Times(0);
     ON_CALL(*engine_ptr_, GetPageContentsRect)
-        .WillByDefault([](int page_index) -> gfx::Rect {
-          return gfx::Rect(/*x=*/0, /*y=*/0, /*width=*/100, /*height=*/50);
-        });
+        .WillByDefault(
+            Return(gfx::Rect(/*x=*/0, /*y=*/0, /*width=*/100, /*height=*/50)));
+    ON_CALL(*engine_ptr_, GetPageSizeInPoints)
+        .WillByDefault(Return(gfx::SizeF(75.0f, 37.5f)));
     ON_CALL(*engine_ptr_, GetThumbnailSize)
         .WillByDefault(Return(gfx::Size(50, 25)));
-    ON_CALL(*engine_ptr_, IsPageVisible)
-        .WillByDefault([](int page_index) -> bool { return true; });
+    ON_CALL(*engine_ptr_, IsPageVisible).WillByDefault(Return(true));
 
     // Draw some trivial strokes.
     plugin_->OnMessage(
@@ -2765,6 +2783,13 @@ TEST_F(PdfViewWebPluginInkTest, UpdateCursor) {
   cursor =
       TestSendInputEvent(mouse_event, blink::WebInputEventResult::kNotHandled);
   EXPECT_EQ(ui::mojom::CursorType::kPointer, cursor.type());
+}
+
+TEST_F(PdfViewWebPluginInkTest, GetPageSizeInPoints) {
+  SetUpWithTrivialInkStrokes();
+  EXPECT_EQ(gfx::SizeF(75.0f, 37.5f),
+            plugin_->ink_module_client_for_testing()->GetPageSizeInPoints(
+                /*page_index=*/0));
 }
 
 TEST_F(PdfViewWebPluginInkTest, GetThumbnailSize) {
@@ -2940,13 +2965,15 @@ TEST_F(PdfViewWebPluginInkTest, AnnotationModeSetsFormAndClearsText) {
 TEST_F(PdfViewWebPluginInkTest, DrawInProgressStroke) {
   plugin_->set_in_paint_for_testing(true);
   constexpr gfx::Rect kScreenRect(kCanvasSize);
-  ON_CALL(*engine_ptr_, GetPageContentsRect)
-      .WillByDefault(
-          [kScreenRect](int page_index) -> gfx::Rect { return kScreenRect; });
+  constexpr gfx::SizeF kPageSizeInPoints(
+      kCanvasSize.width() * kUnitConversionFactorPixelsToPoints,
+      kCanvasSize.height() * kUnitConversionFactorPixelsToPoints);
+  ON_CALL(*engine_ptr_, GetPageContentsRect).WillByDefault(Return(kScreenRect));
+  ON_CALL(*engine_ptr_, GetPageSizeInPoints)
+      .WillByDefault(Return(kPageSizeInPoints));
   ON_CALL(*engine_ptr_, GetThumbnailSize)
       .WillByDefault(Return(gfx::Size(50, 50)));
-  ON_CALL(*engine_ptr_, IsPageVisible)
-      .WillByDefault([](int page_index) -> bool { return true; });
+  ON_CALL(*engine_ptr_, IsPageVisible).WillByDefault(Return(true));
 
   UpdatePluginGeometry(/*device_scale=*/1.0f, kScreenRect);
 
@@ -2977,8 +3004,9 @@ TEST_F(PdfViewWebPluginInkTest, DrawInProgressStroke) {
 
   // Draw the canvas for the in-progress stroke.
   plugin_->Paint(canvas_.sk_canvas(), kScreenRect);
-  EXPECT_TRUE(MatchesPngFile(canvas_.GetBitmap().asImage().get(),
-                             GetInkTestDataFilePath("diagonal_stroke.png")));
+  EXPECT_TRUE(MatchesPngFile(
+      canvas_.GetBitmap().asImage().get(),
+      GetInkTestDataFilePath(FILE_PATH_LITERAL("diagonal_stroke.png"))));
 
   // Finish the stroke.  After a stroke is finished there is nothing more to
   // be drawn by PdfInkModule, as the completed stroke is provided by a

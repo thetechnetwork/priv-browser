@@ -437,6 +437,8 @@ class CORE_EXPORT StyleCascade {
     STACK_ALLOCATED();
 
    public:
+    StyleRuleFunction& function;
+
     // The TreeScope owning the corresponding function rule.
     const TreeScope* tree_scope = nullptr;
 
@@ -448,7 +450,7 @@ class CORE_EXPORT StyleCascade {
     // Arguments are resolved eagerly at the call site, and locals are resolved
     // through the process described in "Application of Local Variables"
     // near `ApplyLocalVariables` in this file.
-    HeapHashMap<String, Member<const CSSValue>> arguments;
+    const HeapHashMap<String, Member<const CSSValue>>& arguments;
     HeapHashMap<String, Member<const CSSValue>> locals;
 
     // Contains the *specified* locals, with any var() (etc) intact.
@@ -462,7 +464,7 @@ class CORE_EXPORT StyleCascade {
     //
     // When resolving some local (an entry in `unresolved_locals`),
     // the corresponding type in this map (if any) will be applied.
-    const HashMap<String, const CSSSyntaxDefinition*> local_types;
+    const HashMap<String, const CSSSyntaxDefinition*>& local_types;
 
     // Parent stack frame (for dynamic scoping).
     FunctionContext* parent = nullptr;
@@ -512,6 +514,15 @@ class CORE_EXPORT StyleCascade {
                      FunctionContext*,
                      TokenSequence&);
 
+  // Returns whatever var(`property_name`) would return (and triggers the same
+  // side-effects). Useful for evaluating the left hand side of e.g.
+  // if(style(--x:foo)), where we don't actually have a function token
+  // representing the the var().
+  CSSVariableData* ResolveLikeVar(const AtomicString& property_name,
+                                  CascadeResolver&,
+                                  const CSSParserContext&,
+                                  FunctionContext*);
+
   KleeneValue EvalIfTest(const IfCondition& node,
                          const TreeScope* tree_scope,
                          CascadeResolver& resolver,
@@ -548,10 +559,6 @@ class CORE_EXPORT StyleCascade {
                            FunctionContext* function_context,
                            TokenSequence& out);
   bool ResolveArgumentOrLocalInto(const CSSValue* value,
-                                  const TreeScope*,
-                                  CSSParserTokenStream& stream,
-                                  CascadeResolver& resolver,
-                                  const CSSParserContext& context,
                                   const TokenSequence* fallback,
                                   TokenSequence& out);
 

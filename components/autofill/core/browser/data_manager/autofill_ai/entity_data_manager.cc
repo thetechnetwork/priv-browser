@@ -7,15 +7,25 @@
 #include <memory>
 
 #include "base/containers/contains.h"
+#include "components/autofill/core/browser/strike_databases/autofill_ai/autofill_ai_save_strike_database_by_host.h"
 #include "components/webdata/common/web_data_results.h"
 
 namespace autofill {
 
 EntityDataManager::EntityDataManager(
-    scoped_refptr<AutofillWebDataService> webdata_service)
+    scoped_refptr<AutofillWebDataService> webdata_service,
+    history::HistoryService* history_service,
+    StrikeDatabaseBase* strike_database)
     : webdata_service_(std::move(webdata_service)) {
   CHECK(webdata_service_);
   LoadEntities();
+  if (history_service) {
+    history_service_observation_.Observe(history_service);
+  }
+  if (strike_database) {
+    save_strike_db_by_host_ =
+        std::make_unique<AutofillAiSaveStrikeDatabaseByHost>(strike_database);
+  }
 }
 
 EntityDataManager::~EntityDataManager() {
@@ -41,6 +51,9 @@ void EntityDataManager::LoadEntities() {
           self->entities_ =
               base::flat_set<EntityInstance, EntityInstance::CompareByGuid>(
                   std::move(result).GetValue());
+          if (!self->entities_.empty()) {
+            self->NotifyEntityInstancesChanged();
+          }
         }
       },
       weak_ptr_factory_.GetWeakPtr()));
@@ -59,6 +72,7 @@ void EntityDataManager::AddOrUpdateEntityInstance(EntityInstance entity) {
             if (!inserted) {
               *it = *eic.data_model();
             }
+            self->NotifyEntityInstancesChanged();
           },
           weak_ptr_factory_.GetWeakPtr()));
 }
@@ -73,6 +87,7 @@ void EntityDataManager::RemoveEntityInstance(base::Uuid guid) {
             }
             CHECK_EQ(eic.type(), EntityInstanceChange::REMOVE);
             self->entities_.erase(eic.key());
+            self->NotifyEntityInstancesChanged();
           },
           weak_ptr_factory_.GetWeakPtr()));
 }
@@ -93,6 +108,20 @@ base::optional_ref<const EntityInstance> EntityDataManager::GetEntityInstance(
     return std::nullopt;
   }
   return *it;
+}
+
+void EntityDataManager::OnHistoryDeletions(
+    history::HistoryService*,
+    const history::DeletionInfo& deletion_info) {
+  if (save_strike_db_by_host_) {
+    save_strike_db_by_host_->ClearStrikesWithHistory(deletion_info);
+  }
+}
+
+void EntityDataManager::NotifyEntityInstancesChanged() {
+  for (Observer& observer : observers_) {
+    observer.OnEntityInstancesChanged();
+  }
 }
 
 }  // namespace autofill

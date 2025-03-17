@@ -127,7 +127,17 @@
 <translation id="1515129336378114413">home page del browser</translation>
 <translation id="1526389707933164996">Animazione del salvaschermo</translation>
 <translation id="152892567002884378">Alza il volume</translation>
+<translation id="1531038290222364269">Mostra schede</translation>
 <translation id="1539864135338521185">lapislazzuli</translation>
+<translation id="1548555207631326346">Scegli un tema e seleziona le parole sottolineate per personalizzare le tue immagini AI.<ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          Seleziona "Dammi l'ispirazione" per avere più opzioni di immagini AI univoche e diversificate.
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          Quando crei contenuti con l'AI, ai server di Google AI viene inviata una richiesta di generazione di immagini e miglioramento del prodotto, ai sensi delle <ph name="BEGIN_LINK_GOOGLE_PRIVACY_POLICY" />Norme sulla privacy di Google<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" />.
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          L'AI generativa è un esperimento in fase di sviluppo iniziale e attualmente ha una disponibilità limitata.</translation>
 <translation id="1555130319947370107">Blu</translation>
 <translation id="155865706765934889">Touchpad</translation>
 <translation id="1561927818299383735">colore retroilluminato</translation>
@@ -253,7 +263,6 @@
 <translation id="2011174342667534258">Versione SDK:</translation>
 <translation id="2016697457005847575">Prova i passaggi per la risoluzione dei problemi</translation>
 <translation id="202500043506723828">EID</translation>
-<translation id="2041627599411887437">Scegli un tema e seleziona le parole sottolineate per personalizzare le tue immagini AI.</translation>
 <translation id="2045814230297767491">posate</translation>
 <translation id="2047316797244836561">Connettiti a una rete e ricarica la pagina per visualizzare il salvaschermo.</translation>
 <translation id="2056550196601855911">IPv4/IPv6</translation>
@@ -406,6 +415,7 @@
 <translation id="2787237339470862294">Al momento questa lingua non è supportata</translation>
 <translation id="2787435249130282949">Tastiera più luminosa</translation>
 <translation id="2805756323405976993">App</translation>
+<translation id="2822702442014805146">Download del modello di riepilogo e creazione del nome in corso…</translation>
 <translation id="28232023175184696">Impossibile connettersi a Internet. Fai clic per riprovare.</translation>
 <translation id="2855718259207180827">lana</translation>
 <translation id="2859243502336719778">Aggiornamento critico</translation>
@@ -503,6 +513,7 @@
 <translation id="3373141842870501561">Sfondo Flusso terrestre</translation>
 <translation id="33736539805963175">Sfondo <ph name="LETTERS_COLOR" /> con la lettera <ph name="LETTERS_LETTER" /></translation>
 <translation id="3383623117265110236">Esclusiva</translation>
+<translation id="3395147534045164351">Attiva/disattiva posizione di aggancio</translation>
 <translation id="3404249063913988450">Abilita salvaschermo</translation>
 <translation id="3413935475507503304">Per continuare con l'aggiornamento, fai clic su Avanti.</translation>
 <translation id="3428551088151258685">all'aperto</translation>
@@ -652,6 +663,7 @@
 <translation id="4113067922640381334">Ora puoi accedere a nuovi <ph name="BEGIN_LINK_WALLPAPER_SUBPAGE" />sfondi<ph name="END_LINK_WALLPAPER_SUBPAGE" /></translation>
 <translation id="4117637339509843559">Modalità Buio</translation>
 <translation id="4126551873361000548">Indietro di 10 secondi</translation>
+<translation id="4128271910628504223">Inserisci un prompt come "disegna una foresta nebbiosa"</translation>
 <translation id="4130035430755296270">Continua a passare il mouse sopra per altre opzioni di layout</translation>
 <translation id="4130750466177569591">Accetto</translation>
 <translation id="4131410914670010031">In bianco e nero</translation>
@@ -825,6 +837,7 @@
 <translation id="4891842000192098784">Stress</translation>
 <translation id="4897058166682006107">Percentuale di batteria dell'auricolare sinistro del dispositivo a <ph name="BATTERY_PERCENTAGE" />%.</translation>
 <translation id="4905998861748258752">Attiva la funzionalità per selezionare le opzioni per il salvaschermo</translation>
+<translation id="4910853326379896417">Download del modello di riepilogo e creazione del nome completato</translation>
 <translation id="4910858703033903787">Tipi di APN</translation>
 <translation id="4917385247580444890">Forte</translation>
 <translation id="4917889632206600977">Operazione interrotta - Carta esaurita</translation>
@@ -859,8 +872,10 @@
 <translation id="5050042263972837708">Nome del gruppo</translation>
 <translation id="5051044138948155788">Questa è l'unica pagina. Si aprirà la schermata iniziale della scansione.</translation>
 <translation id="5053233795640754917">Metti in pausa</translation>
+<translation id="5056587122125565772">Crea immagine</translation>
 <translation id="5078711626843651677">I modelli vocali vengono memorizzati temporaneamente sul dispositivo fino al completamento dell'assegnazione delle etichette di chi parla. Puoi disattivare questa funzionalità in qualsiasi momento nelle Impostazioni.</translation>
 <translation id="5078983345702708852">futuristico</translation>
+<translation id="5085224064082122501">Impossibile scaricare il modello di riepilogo e creazione del nome. Riprova o riavvia Chromebook.</translation>
 <translation id="5087864757604726239">indietro</translation>
 <translation id="5088172560898466307">Nome host del server</translation>
 <translation id="5089810972385038852">Stato</translation>
@@ -914,6 +929,7 @@
 <translation id="5286263799730375393">colore della retroilluminazione</translation>
 <translation id="5292579816060236070">Sfondo Alba</translation>
 <translation id="5294769550414936029">versione <ph name="MILESTONE_VERSION" /></translation>
+<translation id="5300172019534884676">opzione di attivazione/disattivazione accesso alla fotocamera</translation>
 <translation id="5300814202279832142">Sposta finestra nella scrivania</translation>
 <translation id="5302048478445481009">Lingua</translation>
 <translation id="5303837385540978511">Sfondo esclusivo di <ph name="PRODUCT_NAME" /></translation>
@@ -1070,7 +1086,7 @@
 <translation id="6073292342939316679">riduci la luminosità della tastiera</translation>
 <translation id="6074752328838739425">Nascondi riepilogo</translation>
 <translation id="6075872808778243331">(Android) Latenza HTTP</translation>
-<translation id="6078323886959318429">Scorciatoia</translation>
+<translation id="6078323886959318429">Aggiungi scorciatoia</translation>
 <translation id="6079693086494835199">Reimposta per assicurarti che la home page predefinita non sia un sito di phishing. Utilizza solo siti web che ritieni affidabili.</translation>
 <translation id="6091080061796993741">giallo</translation>
 <translation id="6104112872696127344">La scansione è stata annullata</translation>
@@ -1130,14 +1146,12 @@
 <translation id="6325525973963619867">Non riuscito</translation>
 <translation id="6327262166342360252">Questo sfondo è stato creato con l'IA utilizzando il seguente testo: "<ph name="PROMPT" />".</translation>
 <translation id="6331191339300272798">Tema scuro automatico</translation>
-<translation id="6335228876613776082">Download del modello completato</translation>
 <translation id="6340526405444716530">Personalizzazione</translation>
 <translation id="6348252528297699679">Puoi disattivare la posizione in Impostazioni &gt; Privacy e sicurezza &gt; Controlli per la privacy &gt; Accesso alla posizione. <ph name="LINK_BEGIN" />Scopri di più<ph name="LINK_END" /></translation>
 <translation id="6348738456043757611">Nome utente e password</translation>
 <translation id="6352210854422428614">un altro pianeta</translation>
 <translation id="6359706544163531585">Disabilita il tema chiaro</translation>
 <translation id="6359919876285606596">Questa azione è definitiva e non può essere annullata</translation>
-<translation id="6368342879959028556">Quando selezioni "Crea con l'AI", scrivi un prompt personalizzato. In alternativa, puoi selezionare "Sfondi AI" per scegliere un tema e poi selezionare le parole sottolineate per personalizzare il tuo sfondo creato dall'AI.</translation>
 <translation id="636850387210749493">Registrazione aziendale</translation>
 <translation id="6369221585240879141">Impossibile creare nomi di registrazioni per trascrizioni in questa lingua</translation>
 <translation id="6373461326814131011">stagno</translation>
@@ -1210,16 +1224,6 @@
 <translation id="6657240842932274095">Consentire ai servizi di sistema di utilizzare la tua posizione?</translation>
 <translation id="6657585470893396449">Password</translation>
 <translation id="66621959568103627">rosa corallo</translation>
-<translation id="6667885109186363316"><ph name="SEA_PEN_INTRO_FIRST_PARAGRAPH" />
-          <ph name="LINE_BREAK" />
-          <ph name="LINE_BREAK" />
-          Seleziona "Dammi l'ispirazione" per avere più opzioni di immagini create dall'AI univoche e diversificate.
-          <ph name="LINE_BREAK" />
-          <ph name="LINE_BREAK" />
-          Quando crei contenuti con l'AI, ai server di Google AI viene inviata una richiesta di generazione di immagini e miglioramento del prodotto, ai sensi delle <ph name="BEGIN_LINK_GOOGLE_PRIVACY_POLICY" />Norme sulla privacy di Google<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" />.
-          <ph name="LINE_BREAK" />
-          <ph name="LINE_BREAK" />
-          L'AI generativa è sperimentale, in fase di sviluppo iniziale, e attualmente ha una disponibilità limitata.</translation>
 <translation id="6673898378497337661">aumenta la luminosità della tastiera</translation>
 <translation id="6692996468359469499">Ricevi informazioni correlate alla tua selezione</translation>
 <translation id="6694534975463174713">serratura</translation>
@@ -1297,6 +1301,7 @@
 <translation id="7040230719604914234">Operatore</translation>
 <translation id="7040729769968826896">Consenti l'identificazione dell'interlocutore</translation>
 <translation id="7041549558901442110">Il dispositivo non è collegato.</translation>
+<translation id="704183341263526038">Giove</translation>
 <translation id="7046522406494308071">Vuoi reimpostare i valori predefiniti di tutte le scorciatoie?</translation>
 <translation id="7049916119678019302">Scarica il modello di trascrizione nelle Impostazioni</translation>
 <translation id="7058278511608979688">Termina e salva</translation>
@@ -1391,6 +1396,7 @@ Scarica il modello di trascrizione (fino a 100 MB) per ottenere queste trascrizi
 <translation id="7388345524791662148">Altre opzioni per <ph name="RECORDING_NAME" /></translation>
 <translation id="7388959671917308825">Touchpad integrato</translation>
 <translation id="7397270852490618635">Disattiva il tema chiaro</translation>
+<translation id="7400166052988585408">L'insegnante bloccherà il tuo schermo tra <ph name="NUM_SECONDS" /> secondi</translation>
 <translation id="7401543881546089382">Elimina collegamento</translation>
 <translation id="7405493795721832710">Il dispositivo <ph name="DEVICE_NAME" /> è pronto per l'aggiornamento</translation>
 <translation id="741244894080940828">conversione</translation>
@@ -1429,6 +1435,7 @@ Scarica il modello di trascrizione (fino a 100 MB) per ottenere queste trascrizi
 <translation id="7569444139234840525"><ph name="QUERY_TEXT" /> · /<ph name="PHONETICS" />/</translation>
 <translation id="7570674786725311828">Touchscreen USB</translation>
 <translation id="757747079855995705">pietra</translation>
+<translation id="7584853321964440104">Impossibile scaricare. Riprova o riavvia Chromebook.</translation>
 <translation id="7590883480672980941">Impostazioni di immissione</translation>
 <translation id="7595982850646262331">Tempo rimanente: <ph name="TIME_VALUE" /></translation>
 <translation id="7600430297804876776">L'amministratore di <ph name="MANAGER" /> ha impostato il periodo di utilizzo di <ph name="DEVICE_TYPE" />.</translation>
@@ -1559,6 +1566,16 @@ Scarica il modello di trascrizione (fino a 100 MB) per ottenere queste trascrizi
 <translation id="8179976553408161302">Invio</translation>
 <translation id="8183975772394450380">una spiaggia</translation>
 <translation id="819278132617411009">Usa Google AI per aumentare la produttività</translation>
+<translation id="82003371436638355">Quando selezioni "Crea il tuo", scrivi un prompt personalizzato. In alternativa, puoi selezionare "Scegli un tema" e poi selezionare le parole sottolineate per personalizzare il tuo sfondo AI.
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          Seleziona "Dammi l'ispirazione" per avere più opzioni di immagini AI univoche e diversificate.
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          Quando crei il tuo sfondo, ai server di Google AI viene inviato un prompt di generazione di immagini e miglioramento del prodotto, ai sensi dei <ph name="BEGIN_LINK_GOOGLE_PRIVACY_POLICY" />Termini di servizio e delle Norme sulla privacy di Google<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" />. Non includere informazioni personali, sensibili o riservate.
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          L'AI generativa può fare errori, anche riguardo a persone, quindi verifica le sue risposte. <ph name="BEGIN_LINK_CREATE_YOUR_OWN_WALLPAPER" />Scopri di più<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" /></translation>
 <translation id="8200772114523450471">Riprendi</translation>
 <translation id="8206859287963243715">Cellulare</translation>
 <translation id="8208861521865154048">Vantaggi</translation>
@@ -1580,6 +1597,7 @@ Scarica il modello di trascrizione (fino a 100 MB) per ottenere queste trascrizi
 <translation id="8312330582793120272">riproduci i contenuti multimediali</translation>
 <translation id="8318753676953949627">Nessuna immagine</translation>
 <translation id="8320910311642849813">una foresta</translation>
+<translation id="8322464149031882595">Fai clic per proseguire</translation>
 <translation id="8329018942023753850">app calcolatrice</translation>
 <translation id="8336739000755212683">Modifica l'immagine dell'account del dispositivo</translation>
 <translation id="8339024191194156249">Scopri di più sull'avvio automatico</translation>
@@ -1674,7 +1692,6 @@ Scarica il modello di trascrizione (fino a 100 MB) per ottenere queste trascrizi
 <translation id="8764414543112028321">WireGuard</translation>
 <translation id="87646919272181953">Album di Google Foto</translation>
 <translation id="8775713578693478175">APN modem</translation>
-<translation id="877735394245039557">Download del modello in corso…</translation>
 <translation id="877985182522063539">A4</translation>
 <translation id="879568662008399081">Questa rete potrebbe avere un captive portal</translation>
 <translation id="8797082062139985406">Crea nome con Google AI</translation>
@@ -1727,6 +1744,7 @@ Scarica il modello di trascrizione (fino a 100 MB) per ottenere queste trascrizi
 <translation id="8961025972867871808">pinguini</translation>
 <translation id="8968751544471797276">Velocità di ricarica</translation>
 <translation id="8970109610781093811">Esegui di nuovo</translation>
+<translation id="8972061581514441296">Fai clic per tornare indietro</translation>
 <translation id="8983038754672563810">HSPA</translation>
 <translation id="8987565828374052507">{NUMBER_OF_PAGES,plural, =0{Scansiona}=1{Scansiona pagina {NUMBER_OF_PAGES}}other{Scansiona pagina {NUMBER_OF_PAGES}}}</translation>
 <translation id="89945434909472341">un villaggio</translation>

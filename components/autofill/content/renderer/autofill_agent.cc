@@ -31,6 +31,7 @@
 #include "base/strings/strcat.h"
 #include "base/strings/string_split.h"
 #include "base/strings/string_util.h"
+#include "base/strings/to_string.h"
 #include "base/strings/utf_string_conversions.h"
 #include "base/task/single_thread_task_runner.h"
 #include "base/time/time.h"
@@ -282,9 +283,9 @@ bool ShowPredictions(const WebDocument& document,
         "\nfield renderer id: ",
         field_id_str,
         "\nvisible: ",
-        field_data.is_visible() ? "true" : "false",
+        base::ToString(field_data.is_visible()),
         "\nfocusable: ",
-        field_data.IsFocusable() ? "true" : "false",
+        base::ToString(field_data.IsFocusable()),
         "\nfield rank: ",
         base::NumberToString(field.rank),
         "\nfield rank in signature group: ",
@@ -769,7 +770,7 @@ void AutofillAgent::OnDestruct() {
 }
 
 void AutofillAgent::AccessibilityModeChanged(const ui::AXMode& mode) {
-  is_screen_reader_enabled_ = mode.has_mode(ui::AXMode::kScreenReader);
+  is_screen_reader_enabled_ = mode.has_mode(ui::AXMode::kExtendedProperties);
 }
 
 void AutofillAgent::FireHostSubmitEvents(const FormData& form_data,
@@ -1336,6 +1337,19 @@ void AutofillAgent::PreviewPasswordGenerationSuggestion(
   password_generation_agent_->PreviewGenerationSuggestion(password);
 }
 
+bool AutofillAgent::ShouldThrottleAskForValuesToFill(FieldRendererId field) {
+  static constexpr base::TimeDelta kThrottle = base::Milliseconds(100);
+  base::TimeTicks now = base::TimeTicks::Now();
+  if (field == last_ask_for_values_to_fill_.field &&
+      now - last_ask_for_values_to_fill_.time < kThrottle &&
+      base::FeatureList::IsEnabled(
+          features::kAutofillThrottleAskForValuesToFill)) {
+    return true;
+  }
+  last_ask_for_values_to_fill_ = {now, field};
+  return false;
+}
+
 void AutofillAgent::ShowSuggestions(
     const WebFormControlElement& element,
     AutofillSuggestionTriggerSource trigger_source,
@@ -1429,13 +1443,20 @@ void AutofillAgent::ShowSuggestionsForContentEditable(
   if (!form) {
     return;
   }
+
   CHECK_EQ(form->fields().size(), 1u);
+  const FormFieldData& field = form->fields()[0];
+
+  if (ShouldThrottleAskForValuesToFill(field.renderer_id())) {
+    return;
+  }
+
   if (auto* autofill_driver = unsafe_autofill_driver()) {
     is_popup_possibly_visible_ = true;
     if (auto* render_frame = unsafe_render_frame()) {
-      autofill_driver->AskForValuesToFill(
-          *form, form->fields()[0].renderer_id(), GetCaretBounds(*render_frame),
-          trigger_source);
+      autofill_driver->AskForValuesToFill(*form, field.renderer_id(),
+                                          GetCaretBounds(*render_frame),
+                                          trigger_source);
     }
   }
 }
@@ -1476,6 +1497,10 @@ void AutofillAgent::QueryAutofillSuggestions(
       !element.GetDocument().IsSecureContext()) {
     LOG(WARNING) << "Autofill suggestions are disabled because the document "
                     "isn't a secure context.";
+    return;
+  }
+
+  if (ShouldThrottleAskForValuesToFill(field->renderer_id())) {
     return;
   }
 

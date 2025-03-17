@@ -9,6 +9,7 @@
 #include "third_party/blink/public/mojom/frame/frame.mojom-blink.h"
 #include "third_party/blink/renderer/bindings/core/v8/v8_view_transition_callback.h"
 #include "third_party/blink/renderer/bindings/core/v8/v8_view_transition_options.h"
+#include "third_party/blink/renderer/core/css/style_engine.h"
 #include "third_party/blink/renderer/core/dom/document.h"
 #include "third_party/blink/renderer/core/frame/local_dom_window.h"
 #include "third_party/blink/renderer/core/frame/local_frame.h"
@@ -117,7 +118,8 @@ DOMViewTransition* ViewTransitionSupplement::StartTransition(
         ->GetScriptDelegate();
   }
 
-  if (ViewTransition* active_transition = GetTransition(element)) {
+  ViewTransition* active_transition = GetTransition(element);
+  if (active_transition) {
     active_transition->SkipTransition();
   }
 
@@ -129,8 +131,8 @@ DOMViewTransition* ViewTransitionSupplement::StartTransition(
     return nullptr;
   }
 
-  ViewTransition* transition =
-      ViewTransition::CreateFromScript(&element, callback, types, this);
+  ViewTransition* transition = ViewTransition::CreateFromScript(
+      &element, callback, types, this, active_transition);
   DCHECK(transition);
 
   if (for_document) {
@@ -267,6 +269,29 @@ ViewTransition* ViewTransitionSupplement::GetTransition(Element& element) {
   }
   auto transition = element_transitions_.find(&element);
   return transition == element_transitions_.end() ? nullptr : transition->value;
+}
+
+void ViewTransitionSupplement::ForEachTransition(
+    base::FunctionRef<void(ViewTransition&)> function) {
+  if (!RuntimeEnabledFeatures::ScopedViewTransitionsEnabled()) {
+    if (ViewTransition* document_transition = GetTransition()) {
+      function(*document_transition);
+    }
+    DCHECK(element_transitions_.empty());
+    return;
+  }
+
+  // Local copy of the list, since the function may modify the transition map.
+  HeapVector<Member<ViewTransition>> transitions;
+  if (ViewTransition* document_transition = GetTransition()) {
+    transitions.push_back(document_transition);
+  }
+  for (auto& element_transition : element_transitions_.Values()) {
+    transitions.push_back(element_transition);
+  }
+  for (auto transition : transitions) {
+    function(*transition);
+  }
 }
 
 ViewTransitionSupplement::ViewTransitionSupplement(Document& document)

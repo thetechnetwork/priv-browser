@@ -84,6 +84,24 @@ chromium-metrics-reviews@google.com.
   <int value="2" label="Watch Position"/>
 </enum>
 
+<!-- LINT.IfChange(GoogleOneOutcome) -->
+
+<enum name="GoogleOneOutcome">
+  <int value="0" label="Success (User likely purchased a plan)"/>
+  <int value="1" label="Unknown error"/>
+  <int value="2" label="Unspecified GoogleOne error"/>
+  <int value="3" label="Flow externally interrupted"/>
+  <int value="4" label="Flow interrupted to open a link"/>
+  <int value="5" label="Flow interrupted by the user"/>
+  <int value="6" label="GoogleOne already presented"/>
+  <int value="7" label="Purchase failed"/>
+  <int value="8" label="Flow continued in another app"/>
+  <int value="9" label="Flow could not launch"/>
+  <int value="10" label="Invalid parameters"/>
+</enum>
+
+<!-- LINT.ThenChange(//ios/chrome/browser/google_one/coordinator/google_one_coordinator.mm:GoogleOneOutcome) -->
+
 <enum name="InactiveTabsThresholdSettingType">
   <int value="0" label="Unknown"/>
   <int value="1" label="Never Move"/>
@@ -153,6 +171,18 @@ chromium-metrics-reviews@google.com.
 </enum>
 
 <!-- LINT.ThenChange(//ios/chrome/browser/incognito_reauth/ui_bundled/incognito_reauth_constants.h:IncognitoLockSettingStartupState) -->
+
+<enum name="IOSAddressValidationOutcome">
+  <int value="0" label="Address is valid for Long Press"/>
+  <int value="1" label="Address is valid for One Tap"/>
+  <int value="2" label="Address has no component"/>
+  <int value="3" label="Address is low confidence"/>
+  <int value="4" label="Address has too many sections"/>
+  <int value="5" label="Address is too short"/>
+  <int value="6" label="Address has too many symbols"/>
+  <int value="7" label="Address has no long word"/>
+  <int value="8" label="Address is not validated by NSDataDetector"/>
+</enum>
 
 <enum name="IOSAnnotationType">
   <int value="0" label="Unknown"/>
@@ -473,7 +503,7 @@ chromium-metrics-reviews@google.com.
   <int value="5" label="Set Up List"/>
   <int value="6" label="Omnibox navigation"/>
   <int value="7" label="Safety Check tile"/>
-  <int value="8" label="Parcel Tracking tile"/>
+  <int value="8" label="Obsolete in M136 - Parcel Tracking tile"/>
   <int value="9" label="Distant tab resumption tile"/>
   <int value="10" label="Price Tracking Promo tile"/>
   <int value="11" label="Tips tile"/>
@@ -1199,14 +1229,14 @@ chromium-metrics-reviews@google.com.
   <int value="0" label="Default Browser [Tip]"/>
   <int value="1" label="Whats New [Tip]"/>
   <int value="2" label="Sign in [Tip]"/>
-  <int value="4" label="Set Up List Continuation [Tip]"/>
-  <int value="5" label="Docking [Tip]"/>
-  <int value="6" label="Omnibox Position [Tip"/>
-  <int value="7" label="Lens [Tip]"/>
-  <int value="8" label="Enhanced Safe Browsing [Tip]"/>
+  <int value="3" label="Set Up List Continuation [Tip]"/>
+  <int value="4" label="Docking [Tip]"/>
+  <int value="5" label="Omnibox Position [Tip"/>
+  <int value="6" label="Lens [Tip]"/>
+  <int value="7" label="Enhanced Safe Browsing [Tip]"/>
+  <int value="8" label="Update Chrome [SafetyCheck]"/>
   <int value="9" label="Passwords [SafetyCheck]"/>
   <int value="10" label="Safe Browsing [SafetyCheck]"/>
-  <int value="11" label="Update Chrome [SafetyCheck]"/>
 </enum>
 
 <!-- LINT.ThenChange(/ios/chrome/browser/push_notification/model/constants.h:NotificationType) -->

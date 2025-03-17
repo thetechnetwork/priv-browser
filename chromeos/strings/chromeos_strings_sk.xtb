@@ -81,6 +81,7 @@
 <translation id="131461803491198646">Domáca sieť, bez roamingu</translation>
 <translation id="1327977588028644528">Brána</translation>
 <translation id="1328223165223065150">Farba tapety</translation>
+<translation id="1329478709358066995">Prepis:</translation>
 <translation id="1330426557709298164">JPG</translation>
 <translation id="1337912285145772892">Prispôsobiť naskenovanej ploche</translation>
 <translation id="1343442362630695901">slané jazero</translation>
@@ -126,7 +127,17 @@
 <translation id="1515129336378114413">domovská stránka prehliadača</translation>
 <translation id="1526389707933164996">Animácia šetriča obrazovky</translation>
 <translation id="152892567002884378">Zvýšenie hlasitosti</translation>
+<translation id="1531038290222364269">Zobraziť karty</translation>
 <translation id="1539864135338521185">lapis lazuli</translation>
+<translation id="1548555207631326346">Zvoľte motív a výberom podčiarknutých slov prispôsobte obrázky od umelej inteligencie.<ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          Vyberte Inšpiruj ma a získajte jedinečnejšie a rozmanitejšie možnosti obrázkov od umelej inteligencie.
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          Pri vytváraní obsahu pomocou umelej inteligencie sa príslušný pokyn odosiela na servery umelej inteligencie od Googlu na účely generovania obrázkov a zlepšovania danej služby v súlade s <ph name="BEGIN_LINK_GOOGLE_PRIVACY_POLICY" />pravidlami ochrany súkromia spoločnosti Google<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" />.
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          Generatívna umelá inteligencia je experiment v ranom vývoji a momentálne je jej dostupnosť obmedzená.</translation>
 <translation id="1555130319947370107">Modrá</translation>
 <translation id="155865706765934889">Touchpad</translation>
 <translation id="1561927818299383735">farba podsvietenia</translation>
@@ -252,7 +263,6 @@
 <translation id="2011174342667534258">Verzia súpravy SDK:</translation>
 <translation id="2016697457005847575">Vyskúšať kroky na riešenie problémov</translation>
 <translation id="202500043506723828">EID</translation>
-<translation id="2041627599411887437">Zvoľte motív a výberom podčiarknutých slov prispôsobte obrázky od umelej inteligencie.</translation>
 <translation id="2045814230297767491">príbor</translation>
 <translation id="2047316797244836561">Ak chcete zobraziť šetrič obrazovky, pripojte sa k sieti a znova načítajte stránku.</translation>
 <translation id="2056550196601855911">IPv4 alebo IPv6</translation>
@@ -405,6 +415,7 @@
 <translation id="2787237339470862294">Tento jazyk nie je momentálne podporovaný</translation>
 <translation id="2787435249130282949">jasnejšia klávesnica</translation>
 <translation id="2805756323405976993">Aplikácie</translation>
+<translation id="2822702442014805146">Sťahuje sa model na vytvorenie zhrnutia a názvu</translation>
 <translation id="28232023175184696">Nedá sa pripojiť k internetu. Kliknutím to skúste znova.</translation>
 <translation id="2855718259207180827">vlna</translation>
 <translation id="2859243502336719778">Kľúčová aktualizácia</translation>
@@ -502,6 +513,7 @@
 <translation id="3373141842870501561">Tapeta s otáčaním Zeme</translation>
 <translation id="33736539805963175">Pozadie farby <ph name="LETTERS_COLOR" /> s písmenom <ph name="LETTERS_LETTER" /></translation>
 <translation id="3383623117265110236">Exkluzívne</translation>
+<translation id="3395147534045164351">Prepnúť umiestnenie prichytenia</translation>
 <translation id="3404249063913988450">Aktivovať šetrič obrazovky</translation>
 <translation id="3413935475507503304">Ak chcete pokračovať v aktualizácii, kliknite na Ďalej.</translation>
 <translation id="3428551088151258685">nezastrešená</translation>
@@ -552,7 +564,7 @@
 <translation id="361575905210396100">Ďakujeme vám za spätnú väzbu</translation>
 <translation id="3621072146987826699">slony</translation>
 <translation id="3628462041319107639">Sťahuje sa model prepisov…</translation>
-<translation id="3632040286124154621">Nevhodný návrh</translation>
+<translation id="3632040286124154621">Vhodný návrh</translation>
 <translation id="3632579075709132555">Prepínanie zámky na ochranu súkromia</translation>
 <translation id="3634941468757842845">Výber motívu</translation>
 <translation id="3639873154908477486">Názov (od A po Z)</translation>
@@ -651,6 +663,7 @@
 <translation id="4113067922640381334">Teraz máte prístup k novým <ph name="BEGIN_LINK_WALLPAPER_SUBPAGE" />tapetám<ph name="END_LINK_WALLPAPER_SUBPAGE" /></translation>
 <translation id="4117637339509843559">Tmavý režim</translation>
 <translation id="4126551873361000548">Preskočiť o 10 sekúnd dozadu</translation>
+<translation id="4128271910628504223">Zadajte pokyn, napríklad „nakresli hmlistý les“</translation>
 <translation id="4130035430755296270">Ďalšie možnosti rozloženia zobrazíte umiestnením kurzora na príslušné miesto</translation>
 <translation id="4130750466177569591">Súhlasím</translation>
 <translation id="4131410914670010031">Čiernobielo</translation>
@@ -824,6 +837,7 @@
 <translation id="4891842000192098784">Záťaž</translation>
 <translation id="4897058166682006107">Úroveň batérie ľavého slúchadla zariadenia je <ph name="BATTERY_PERCENTAGE" /> %.</translation>
 <translation id="4905998861748258752">Zapnite danú funkciu a vyberte možnosti šetriča obrazovky</translation>
+<translation id="4910853326379896417">Sťahovanie modelu na vytvorenie zhrnutia a názvu bolo dokončené</translation>
 <translation id="4910858703033903787">Typy názvu prístupového bodu (APN)</translation>
 <translation id="4917385247580444890">Silné</translation>
 <translation id="4917889632206600977">Zastavené – minul sa papier</translation>
@@ -858,8 +872,10 @@
 <translation id="5050042263972837708">Názov skupiny</translation>
 <translation id="5051044138948155788">Toto je jediná strana. Prejdete na úvodnú obrazovku skenovania.</translation>
 <translation id="5053233795640754917">Pozastaviť</translation>
+<translation id="5056587122125565772">Vytvoriť obrázok</translation>
 <translation id="5078711626843651677">Hlasové modely sa dočasne ukladajú v zariadení, kým sa označovanie hovoriacich nedokončí. V Nastaveniach to môžete kedykoľvek vypnúť.</translation>
 <translation id="5078983345702708852">Futuristická</translation>
+<translation id="5085224064082122501">Model na vytvorenie zhrnutia a názvu sa nedá stiahnuť. Skúste to znova alebo reštartujte Chromebook.</translation>
 <translation id="5087864757604726239">späť</translation>
 <translation id="5088172560898466307">Názov hostiteľského servera</translation>
 <translation id="5089810972385038852">Štát</translation>
@@ -1129,14 +1145,12 @@
 <translation id="6325525973963619867">Zlyhanie</translation>
 <translation id="6327262166342360252">Táto tapeta bola vytvorená umelou inteligenciou pomocou nasledujúceho textu: <ph name="PROMPT" />.</translation>
 <translation id="6331191339300272798">Automatický tmavý motív</translation>
-<translation id="6335228876613776082">Sťahovanie modelu bolo dokončené</translation>
 <translation id="6340526405444716530">Prispôsobenie</translation>
 <translation id="6348252528297699679">Polohu môžete vypnúť v sekcii Nastavenia &gt; Ochrana súkromia a zabezpečenie &gt; Nastavenia ochrany súkromia &gt; Prístup k polohe. <ph name="LINK_BEGIN" />Ďalšie informácie<ph name="LINK_END" /></translation>
 <translation id="6348738456043757611">Používateľské meno a heslo</translation>
 <translation id="6352210854422428614">iná planéta</translation>
 <translation id="6359706544163531585">Vypnúť svetlý motív</translation>
 <translation id="6359919876285606596">Táto akcia je trvalá a nedá sa vrátiť späť</translation>
-<translation id="6368342879959028556">Vyberte Vytvoriť pomocou umelej inteligencie a napíšte vlastný pokyn. Prípadne môžete vybrať Tapety od umelej inteligencie, zvoliť motív a výberom podčiarknutých slov prispôsobiť tapetu od umelej inteligencie.</translation>
 <translation id="636850387210749493">Registrácia podniku</translation>
 <translation id="6369221585240879141">Pre tento jazyk prepisu sa nedajú vytvoriť názvy nahrávok</translation>
 <translation id="6373461326814131011">rybník</translation>
@@ -1209,16 +1223,6 @@
 <translation id="6657240842932274095">Chcete povoliť systémovým službám používať vašu polohu?</translation>
 <translation id="6657585470893396449">Heslo</translation>
 <translation id="66621959568103627">koralovo ružovom</translation>
-<translation id="6667885109186363316"><ph name="SEA_PEN_INTRO_FIRST_PARAGRAPH" />
-          <ph name="LINE_BREAK" />
-          <ph name="LINE_BREAK" />
-          Vyberte Inšpiruj ma a získajte jedinečnejšie a rozmanitejšie možnosti obrázkov od umelej inteligencie.
-          <ph name="LINE_BREAK" />
-          <ph name="LINE_BREAK" />
-          Pri vytváraní obsahu pomocou umelej inteligencie sa príslušný pokyn odošle na servery umelej inteligencie od Googlu na účely generovania obrázkov a zlepšovania danej služby v súlade s <ph name="BEGIN_LINK_GOOGLE_PRIVACY_POLICY" />pravidlami ochrany súkromia spoločnosti Google<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" />.
-          <ph name="LINE_BREAK" />
-          <ph name="LINE_BREAK" />
-          Generatívna umelá inteligencia je experiment v ranom vývoji a momentálne je jej dostupnosť obmedzená.</translation>
 <translation id="6673898378497337661">zvýšenie jasu klávesnice</translation>
 <translation id="6692996468359469499">Získajte informácie súvisiace s vaším výberom</translation>
 <translation id="6694534975463174713">uzamknúť</translation>
@@ -1274,6 +1278,7 @@
 <translation id="6930597342185648547">Informácie o pozadí</translation>
 <translation id="6939667434404433010">Vyhľadajte názov nahrávky</translation>
 <translation id="6939766318048400022">Kaviareň</translation>
+<translation id="6942253772720771875">Zdieľajte svoju spätnú väzbu alebo opíšte problém</translation>
 <translation id="6943893908656559156">Vzdialená identita (nepovinné)</translation>
 <translation id="6953137545147683679">zlatom</translation>
 <translation id="6957231940976260713">Názov služby</translation>
@@ -1295,6 +1300,7 @@
 <translation id="7040230719604914234">Operátor</translation>
 <translation id="7040729769968826896">Povoliť identifikáciu hovoriacich</translation>
 <translation id="7041549558901442110">Zariadenie nie je pripojené.</translation>
+<translation id="704183341263526038">Jupiter</translation>
 <translation id="7046522406494308071">Chcete resetovať všetky skratky na predvolené hodnoty?</translation>
 <translation id="7049916119678019302">Stiahnite si model prepisov v Nastaveniach</translation>
 <translation id="7058278511608979688">Ukončiť a uložiť</translation>
@@ -1427,6 +1433,7 @@ Ak chcete mať tieto prepisy k dispozícii, stiahnite si model prepisov (až 10
 <translation id="7569444139234840525"><ph name="QUERY_TEXT" /> · /<ph name="PHONETICS" />/</translation>
 <translation id="7570674786725311828">Dotyková obrazovka USB</translation>
 <translation id="757747079855995705">kameň</translation>
+<translation id="7584853321964440104">Nedá sa stiahnuť. Skúste to znova alebo reštartujte Chromebook.</translation>
 <translation id="7590883480672980941">Nastavenia vstupu</translation>
 <translation id="7595982850646262331">Zostáva <ph name="TIME_VALUE" /></translation>
 <translation id="7600430297804876776">Správca domény <ph name="MANAGER" /> nastavil, kedy sa toto zariadenie <ph name="DEVICE_TYPE" /> môže používať.</translation>
@@ -1557,6 +1564,16 @@ Ak chcete mať tieto prepisy k dispozícii, stiahnite si model prepisov (až 10
 <translation id="8179976553408161302">Enter</translation>
 <translation id="8183975772394450380">pláže</translation>
 <translation id="819278132617411009">Zvýšte si produktivitu pomocou umelej inteligencie od Googlu</translation>
+<translation id="82003371436638355">Vyberte Vytvorte vlastnú a napíšte svoj pokyn. Prípadne môžete vybrať Vybrať motív a výberom podčiarknutých slov prispôsobiť tapetu od umelej inteligencie.
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          Vyberte Inšpiruj ma a získajte jedinečnejšie a rozmanitejšie možnosti obrázkov od umelej inteligencie.
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          Keď si vytvoríte vlastnú tapetu, príslušný pokyn sa odošle na servery Googlu na účely generovania obrázkov a zlepšovania danej služby v súlade so <ph name="BEGIN_LINK_GOOGLE_PRIVACY_POLICY" />zmluvnými podmienkami a pravidlami ochrany súkromia spoločnosti Google<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" />. Neuvádzajte žiadne osobné, citlivé ani dôverné údaje.
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          Generatívna umelá inteligencia môže robiť chyby (napríklad aj o ľuďoch), preto si jej odpovede overujte. <ph name="BEGIN_LINK_CREATE_YOUR_OWN_WALLPAPER" />Ďalšie informácie<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" /></translation>
 <translation id="8200772114523450471">Pokračovať</translation>
 <translation id="8206859287963243715">Mobilné</translation>
 <translation id="8208861521865154048">Výhody</translation>
@@ -1578,6 +1595,7 @@ Ak chcete mať tieto prepisy k dispozícii, stiahnite si model prepisov (až 10
 <translation id="8312330582793120272">prehratie médií</translation>
 <translation id="8318753676953949627">Žiadne obrázky</translation>
 <translation id="8320910311642849813">lesa</translation>
+<translation id="8322464149031882595">Kliknutím prejdete dopredu</translation>
 <translation id="8329018942023753850">aplikácia Kalkulačka</translation>
 <translation id="8336739000755212683">Zmeniť obrázok účtu zariadenia</translation>
 <translation id="8339024191194156249">Ďalšie informácie o automatickom spúšťaní</translation>
@@ -1598,6 +1616,7 @@ Ak chcete mať tieto prepisy k dispozícii, stiahnite si model prepisov (až 10
 <translation id="8395584934117017006">Toto zariadenie <ph name="DEVICE_TYPE" /> spravuje podnik</translation>
 <translation id="8398927464629426868">Rýchlosť, akou sa zariadenie momentálne nabíja či vybíja</translation>
 <translation id="8403988360557588704">Maľba <ph name="ART_FEATURE" /> v štýle <ph name="ART_MOVEMENT" /></translation>
+<translation id="8409219750150841791">Vygenerovaný súhrn:</translation>
 <translation id="8410244574650205435">Automaticky rozpoznaný</translation>
 <translation id="8420955526972171689">Testujte a riešte problémy s hardvérom</translation>
 <translation id="8422748173858722634">IMEI</translation>
@@ -1642,6 +1661,7 @@ Ak chcete mať tieto prepisy k dispozícii, stiahnite si model prepisov (až 10
 <translation id="8626489604350149811">Ďalšie akcie pre aplikáciu <ph name="APN_NAME" /></translation>
 <translation id="86356131183441916">Svetlopurpurová</translation>
 <translation id="8647595191512746911">Prepis zvuku</translation>
+<translation id="8648578954147795914">Vygenerované názvy:</translation>
 <translation id="8650852232143958317">Vezmite si súbory z Gmailu a Disku Google so sebou</translation>
 <translation id="8651481478098336970">stlmenie hlasitosti</translation>
 <translation id="8655295600908251630">Kanál</translation>
@@ -1670,7 +1690,6 @@ Ak chcete mať tieto prepisy k dispozícii, stiahnite si model prepisov (až 10
 <translation id="8764414543112028321">WireGuard</translation>
 <translation id="87646919272181953">Album Fotiek Google</translation>
 <translation id="8775713578693478175">Názov prístupového bodu modemu</translation>
-<translation id="877735394245039557">Sťahuje sa model</translation>
 <translation id="877985182522063539">A4</translation>
 <translation id="879568662008399081">Táto sieť môže mať prihlasovací portál</translation>
 <translation id="8797082062139985406">Vytvoriť názov pomocou umelej inteligencie od Googlu</translation>
@@ -1723,6 +1742,7 @@ Ak chcete mať tieto prepisy k dispozícii, stiahnite si model prepisov (až 10
 <translation id="8961025972867871808">tučniaky</translation>
 <translation id="8968751544471797276">Rýchlosť nabíjania</translation>
 <translation id="8970109610781093811">Spustiť znova</translation>
+<translation id="8972061581514441296">Kliknutím sa vrátite späť</translation>
 <translation id="8983038754672563810">HSPA</translation>
 <translation id="8987565828374052507">{NUMBER_OF_PAGES,plural, =0{Skenovať}=1{Skenovať {NUMBER_OF_PAGES} stránku}few{Skenovať {NUMBER_OF_PAGES} stránky}many{Skenovať {NUMBER_OF_PAGES} stránky}other{Skenovať {NUMBER_OF_PAGES} stránok}}</translation>
 <translation id="89945434909472341">dediny</translation>
@@ -1784,6 +1804,7 @@ Ak chcete mať tieto prepisy k dispozícii, stiahnite si model prepisov (až 10
 <translation id="9218016617214286986">Zobraziť známe názvy prístupových bodov (APN)</translation>
 <translation id="932327136139879170">Domov</translation>
 <translation id="939519157834106403">SSID</translation>
+<translation id="940663759301549538">Skontrolujte, či je mikrofón pripojený, alebo skúste reštartovať Chromebook.</translation>
 <translation id="945522503751344254">Odoslať spätnú väzbu</translation>
 <translation id="950520315903467048">Chýba kláves pre smer <ph name="DIRECTION" />. <ph name="ASSIGN_INSTRUCTION" /></translation>
 <translation id="951780398843003443">porovnať hlasy v nahrávke, aby prepis zodpovedal tomu, čo a kedy každý hovoriaci povedal.</translation>

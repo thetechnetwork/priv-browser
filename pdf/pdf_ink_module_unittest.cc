@@ -30,6 +30,7 @@
 #include "pdf/test/mouse_event_builder.h"
 #include "pdf/test/pdf_ink_test_helpers.h"
 #include "pdf/ui/thumbnail.h"
+#include "printing/units.h"
 #include "testing/gmock/include/gmock/gmock.h"
 #include "testing/gtest/include/gtest/gtest.h"
 #include "third_party/blink/public/common/input/web_mouse_event.h"
@@ -39,6 +40,8 @@
 #include "third_party/ink/src/ink/geometry/affine_transform.h"
 #include "third_party/ink/src/ink/strokes/input/type_matchers.h"
 #include "third_party/skia/include/core/SkBitmap.h"
+#include "ui/base/cursor/cursor.h"
+#include "ui/base/cursor/mojom/cursor_type.mojom.h"
 #include "ui/gfx/geometry/point_f.h"
 #include "ui/gfx/geometry/rect.h"
 #include "ui/gfx/geometry/rect_conversions.h"
@@ -173,9 +176,10 @@ MATCHER_P(InkStrokeDrawingBrushTypeEq, expected_type, "") {
   return opacity == 0.4f;
 }
 
-// Matcher for bitmap against expected dimensions.
-MATCHER_P(BitmapImageSizeEq, dimensions, "") {
-  return arg.dimensions() == dimensions;
+// Matcher for cursor with a custom bitmap against expected dimensions.
+MATCHER_P(CursorBitmapImageSizeEq, dimensions, "") {
+  return arg.type() == ui::mojom::CursorType::kCustom &&
+         arg.custom_bitmap().dimensions() == dimensions;
 }
 
 std::map<int, std::vector<raw_ref<const ink::Stroke>>> CollectVisibleStrokes(
@@ -267,6 +271,14 @@ class FakeClient : public PdfInkModuleClient {
     return gfx::ToEnclosedRect(page_layouts_[page_index]);
   }
 
+  gfx::SizeF GetPageSizeInPoints(int page_index) override {
+    CHECK_GE(page_index, 0);
+    CHECK_LT(static_cast<size_t>(page_index), page_layouts_.size());
+    gfx::SizeF page_size = page_layouts_[page_index].size();
+    page_size.Scale(printing::kUnitConversionFactorPixelsToPoints);
+    return page_size;
+  }
+
   float GetZoom() const override { return zoom_; }
 
   void Invalidate(const gfx::Rect& rect) override {
@@ -296,7 +308,7 @@ class FakeClient : public PdfInkModuleClient {
 
   void StrokeFinished() override { ++stroke_finished_count_; }
 
-  MOCK_METHOD(void, UpdateInkCursorImage, (SkBitmap bitmap), (override));
+  MOCK_METHOD(void, UpdateInkCursor, (const ui::Cursor&), (override));
 
   MOCK_METHOD(void,
               UpdateShapeActive,
@@ -360,8 +372,19 @@ class FakeClient : public PdfInkModuleClient {
   std::vector<gfx::Rect> invalidations_;
 };
 
-class PdfInkModuleTest : public testing::Test {
+class PdfInkModuleTest : public testing::TestWithParam<bool> {
+ public:
+  void SetUp() override {
+    feature_list_.InitAndEnableFeatureWithParameters(
+        chrome_pdf::features::kPdfInk2,
+        {{features::kPdfInk2TextHighlighting.name,
+          base::ToString(UseTextHighlighting())}});
+    ink_module_ = std::make_unique<PdfInkModule>(client_);
+  }
+
  protected:
+  bool UseTextHighlighting() const { return GetParam(); }
+
   void EnableAnnotationMode() {
     EXPECT_TRUE(
         ink_module().OnMessage(CreateSetAnnotationModeMessageForTesting(true)));
@@ -369,26 +392,26 @@ class PdfInkModuleTest : public testing::Test {
   }
 
   FakeClient& client() { return client_; }
-  PdfInkModule& ink_module() { return ink_module_; }
-  const PdfInkModule& ink_module() const { return ink_module_; }
+  PdfInkModule& ink_module() { return *ink_module_; }
+  const PdfInkModule& ink_module() const { return *ink_module_; }
 
  private:
-  base::test::ScopedFeatureList feature_list_{features::kPdfInk2};
+  base::test::ScopedFeatureList feature_list_;
 
   NiceMock<FakeClient> client_;
-  PdfInkModule ink_module_{client_};
+  std::unique_ptr<PdfInkModule> ink_module_;
 };
 
 }  // namespace
 
-TEST_F(PdfInkModuleTest, UnknownMessage) {
+TEST_P(PdfInkModuleTest, UnknownMessage) {
   base::Value::Dict message;
   message.Set("type", "nonInkMessage");
   EXPECT_FALSE(ink_module().OnMessage(message));
 }
 
 // Verify that a get eraser message gets the eraser parameters.
-TEST_F(PdfInkModuleTest, HandleGetAnnotationBrushMessageEraser) {
+TEST_P(PdfInkModuleTest, HandleGetAnnotationBrushMessageEraser) {
   EnableAnnotationMode();
 
   EXPECT_CALL(client(), PostMessage)
@@ -408,7 +431,7 @@ TEST_F(PdfInkModuleTest, HandleGetAnnotationBrushMessageEraser) {
 }
 
 // Verify that a get pen message gets the pen brush parameters.
-TEST_F(PdfInkModuleTest, HandleGetAnnotationBrushMessagePen) {
+TEST_P(PdfInkModuleTest, HandleGetAnnotationBrushMessagePen) {
   EnableAnnotationMode();
 
   EXPECT_CALL(client(), PostMessage)
@@ -434,7 +457,7 @@ TEST_F(PdfInkModuleTest, HandleGetAnnotationBrushMessagePen) {
 }
 
 // Verify that a get highlighter message gets the highlighter brush parameters.
-TEST_F(PdfInkModuleTest, HandleGetAnnotationBrushMessageHighlighter) {
+TEST_P(PdfInkModuleTest, HandleGetAnnotationBrushMessageHighlighter) {
   EnableAnnotationMode();
 
   EXPECT_CALL(client(), PostMessage)
@@ -461,7 +484,7 @@ TEST_F(PdfInkModuleTest, HandleGetAnnotationBrushMessageHighlighter) {
 
 // Verify that a get brush message without a parameter gets the default brush
 // parameters.
-TEST_F(PdfInkModuleTest, HandleGetAnnotationBrushMessageDefault) {
+TEST_P(PdfInkModuleTest, HandleGetAnnotationBrushMessageDefault) {
   EnableAnnotationMode();
 
   EXPECT_CALL(client(), PostMessage)
@@ -488,7 +511,7 @@ TEST_F(PdfInkModuleTest, HandleGetAnnotationBrushMessageDefault) {
 
 // Verify that a get brush message without a parameter gets the current brush
 // parameters if the brush has changed from the default brush.
-TEST_F(PdfInkModuleTest, HandleGetAnnotationBrushMessageCurrent) {
+TEST_P(PdfInkModuleTest, HandleGetAnnotationBrushMessageCurrent) {
   EnableAnnotationMode();
 
   // Set the brush to eraser.
@@ -513,7 +536,7 @@ TEST_F(PdfInkModuleTest, HandleGetAnnotationBrushMessageCurrent) {
 
 // Verify that a set eraser message sets the annotation brush to an eraser. i.e.
 // There is no `PdfInkBrush`.
-TEST_F(PdfInkModuleTest, HandleSetAnnotationBrushMessageEraser) {
+TEST_P(PdfInkModuleTest, HandleSetAnnotationBrushMessageEraser) {
   EnableAnnotationMode();
 
   base::Value::Dict message =
@@ -526,7 +549,7 @@ TEST_F(PdfInkModuleTest, HandleSetAnnotationBrushMessageEraser) {
 
 // Verify that a set pen message sets the annotation brush to a pen, with the
 // given params.
-TEST_F(PdfInkModuleTest, HandleSetAnnotationBrushMessagePen) {
+TEST_P(PdfInkModuleTest, HandleSetAnnotationBrushMessagePen) {
   EnableAnnotationMode();
 
   TestAnnotationBrushMessageParams message_params{/*color_r=*/10,
@@ -551,7 +574,7 @@ TEST_F(PdfInkModuleTest, HandleSetAnnotationBrushMessagePen) {
 
 // Verify that a set highlighter message sets the annotation brush to a
 // highlighter, with the given params.
-TEST_F(PdfInkModuleTest, HandleSetAnnotationBrushMessageHighlighter) {
+TEST_P(PdfInkModuleTest, HandleSetAnnotationBrushMessageHighlighter) {
   EnableAnnotationMode();
 
   TestAnnotationBrushMessageParams message_params{/*color_r=*/240,
@@ -576,7 +599,7 @@ TEST_F(PdfInkModuleTest, HandleSetAnnotationBrushMessageHighlighter) {
 
 // Verify that brushes with zero color values can be set as the annotation
 // brush.
-TEST_F(PdfInkModuleTest, HandleSetAnnotationBrushMessageColorZero) {
+TEST_P(PdfInkModuleTest, HandleSetAnnotationBrushMessageColorZero) {
   EnableAnnotationMode();
 
   TestAnnotationBrushMessageParams message_params{/*color_r=*/0, /*color_g=*/0,
@@ -598,7 +621,7 @@ TEST_F(PdfInkModuleTest, HandleSetAnnotationBrushMessageColorZero) {
   EXPECT_EQ(1.0f, coat.tips[0].opacity_multiplier);
 }
 
-TEST_F(PdfInkModuleTest, HandleSetAnnotationModeMessage) {
+TEST_P(PdfInkModuleTest, HandleSetAnnotationModeMessage) {
   EXPECT_CALL(client(), LoadV2InkPathsFromPdf())
       .WillOnce(Return(PdfInkModuleClient::DocumentV2InkPathShapesMap{
           {0,
@@ -638,12 +661,12 @@ TEST_F(PdfInkModuleTest, HandleSetAnnotationModeMessage) {
   EXPECT_THAT(ink_module().loaded_v2_shapes_, kShapeMapMatcher);
 }
 
-TEST_F(PdfInkModuleTest, MaybeSetCursorWhenTogglingAnnotationMode) {
+TEST_P(PdfInkModuleTest, MaybeSetCursorWhenTogglingAnnotationMode) {
   EXPECT_FALSE(ink_module().enabled());
 
-  EXPECT_CALL(client(), UpdateInkCursorImage(_))
-      .WillOnce(
-          [this](SkBitmap bitmap) { EXPECT_TRUE(ink_module().enabled()); });
+  EXPECT_CALL(client(), UpdateInkCursor(_)).WillOnce([this]() {
+    EXPECT_TRUE(ink_module().enabled());
+  });
 
   base::Value::Dict message =
       CreateSetAnnotationModeMessageForTesting(/*enable=*/true);
@@ -655,21 +678,27 @@ TEST_F(PdfInkModuleTest, MaybeSetCursorWhenTogglingAnnotationMode) {
   EXPECT_FALSE(ink_module().enabled());
 }
 
-TEST_F(PdfInkModuleTest, MaybeSetCursorWhenChangingBrushes) {
+TEST_P(PdfInkModuleTest, MaybeSetCursorWhenChangingBrushes) {
   {
     InSequence seq;
-    EXPECT_CALL(client(), UpdateInkCursorImage(_))
-        .WillOnce([](SkBitmap bitmap) {
+    EXPECT_CALL(client(), UpdateInkCursor(_))
+        .WillOnce([](const ui::Cursor& cursor) {
+          ASSERT_EQ(ui::mojom::CursorType::kCustom, cursor.type());
+          const SkBitmap& bitmap = cursor.custom_bitmap();
           EXPECT_EQ(6, bitmap.width());
           EXPECT_EQ(6, bitmap.height());
         });
-    EXPECT_CALL(client(), UpdateInkCursorImage(_))
-        .WillOnce([](SkBitmap bitmap) {
+    EXPECT_CALL(client(), UpdateInkCursor(_))
+        .WillOnce([](const ui::Cursor& cursor) {
+          ASSERT_EQ(ui::mojom::CursorType::kCustom, cursor.type());
+          const SkBitmap& bitmap = cursor.custom_bitmap();
           EXPECT_EQ(20, bitmap.width());
           EXPECT_EQ(20, bitmap.height());
         });
-    EXPECT_CALL(client(), UpdateInkCursorImage(_))
-        .WillOnce([](SkBitmap bitmap) {
+    EXPECT_CALL(client(), UpdateInkCursor(_))
+        .WillOnce([](const ui::Cursor& cursor) {
+          ASSERT_EQ(ui::mojom::CursorType::kCustom, cursor.type());
+          const SkBitmap& bitmap = cursor.custom_bitmap();
           EXPECT_EQ(6, bitmap.width());
           EXPECT_EQ(6, bitmap.height());
         });
@@ -688,21 +717,27 @@ TEST_F(PdfInkModuleTest, MaybeSetCursorWhenChangingBrushes) {
   EXPECT_TRUE(ink_module().OnMessage(message));
 }
 
-TEST_F(PdfInkModuleTest, MaybeSetCursorWhenChangingZoom) {
+TEST_P(PdfInkModuleTest, MaybeSetCursorWhenChangingZoom) {
   {
     InSequence seq;
-    EXPECT_CALL(client(), UpdateInkCursorImage(_))
-        .WillOnce([](SkBitmap bitmap) {
+    EXPECT_CALL(client(), UpdateInkCursor(_))
+        .WillOnce([](const ui::Cursor& cursor) {
+          ASSERT_EQ(ui::mojom::CursorType::kCustom, cursor.type());
+          const SkBitmap& bitmap = cursor.custom_bitmap();
           EXPECT_EQ(6, bitmap.width());
           EXPECT_EQ(6, bitmap.height());
         });
-    EXPECT_CALL(client(), UpdateInkCursorImage(_))
-        .WillOnce([](SkBitmap bitmap) {
+    EXPECT_CALL(client(), UpdateInkCursor(_))
+        .WillOnce([](const ui::Cursor& cursor) {
+          ASSERT_EQ(ui::mojom::CursorType::kCustom, cursor.type());
+          const SkBitmap& bitmap = cursor.custom_bitmap();
           EXPECT_EQ(20, bitmap.width());
           EXPECT_EQ(20, bitmap.height());
         });
-    EXPECT_CALL(client(), UpdateInkCursorImage(_))
-        .WillOnce([](SkBitmap bitmap) {
+    EXPECT_CALL(client(), UpdateInkCursor(_))
+        .WillOnce([](const ui::Cursor& cursor) {
+          ASSERT_EQ(ui::mojom::CursorType::kCustom, cursor.type());
+          const SkBitmap& bitmap = cursor.custom_bitmap();
           EXPECT_EQ(10, bitmap.width());
           EXPECT_EQ(10, bitmap.height());
         });
@@ -722,7 +757,7 @@ TEST_F(PdfInkModuleTest, MaybeSetCursorWhenChangingZoom) {
   ink_module().OnGeometryChanged();
 }
 
-TEST_F(PdfInkModuleTest, ContentFocusedPostMessage) {
+TEST_P(PdfInkModuleTest, ContentFocusedPostMessage) {
   EnableAnnotationMode();
 
   blink::WebMouseEvent mouse_down_event =
@@ -1101,7 +1136,7 @@ class PdfInkModuleStrokeTest : public PdfInkModuleTest {
   std::vector<int> updated_pdf_thumbnail_page_indices_;
 };
 
-TEST_F(PdfInkModuleStrokeTest, NoAnnotationWithMouseIfNotEnabled) {
+TEST_P(PdfInkModuleStrokeTest, NoAnnotationWithMouseIfNotEnabled) {
   InitializeSimpleSinglePageBasicLayout();
   RunStrokeCheckTest(/*annotation_mode_enabled=*/false);
   EXPECT_EQ(0, ink_module().GetInputOfTypeCountForPageForTesting(
@@ -1112,7 +1147,7 @@ TEST_F(PdfInkModuleStrokeTest, NoAnnotationWithMouseIfNotEnabled) {
                    /*page_index=*/0, ink::StrokeInput::ToolType::kStylus));
 }
 
-TEST_F(PdfInkModuleStrokeTest, AnnotationWithMouseIfEnabled) {
+TEST_P(PdfInkModuleStrokeTest, AnnotationWithMouseIfEnabled) {
   InitializeSimpleSinglePageBasicLayout();
   RunStrokeCheckTest(/*annotation_mode_enabled=*/true);
   EXPECT_EQ(3, ink_module().GetInputOfTypeCountForPageForTesting(
@@ -1123,7 +1158,7 @@ TEST_F(PdfInkModuleStrokeTest, AnnotationWithMouseIfEnabled) {
                    /*page_index=*/0, ink::StrokeInput::ToolType::kStylus));
 }
 
-TEST_F(PdfInkModuleStrokeTest, NoAnnotationWithTouchIfNotEnabled) {
+TEST_P(PdfInkModuleStrokeTest, NoAnnotationWithTouchIfNotEnabled) {
   InitializeSimpleSinglePageBasicLayout();
   RunStrokeTouchCheckTest(/*annotation_mode_enabled=*/false);
   EXPECT_EQ(0, ink_module().GetInputOfTypeCountForPageForTesting(
@@ -1134,7 +1169,7 @@ TEST_F(PdfInkModuleStrokeTest, NoAnnotationWithTouchIfNotEnabled) {
                    /*page_index=*/0, ink::StrokeInput::ToolType::kStylus));
 }
 
-TEST_F(PdfInkModuleStrokeTest, AnnotationWithTouchIfEnabled) {
+TEST_P(PdfInkModuleStrokeTest, AnnotationWithTouchIfEnabled) {
   InitializeSimpleSinglePageBasicLayout();
   RunStrokeTouchCheckTest(/*annotation_mode_enabled=*/true);
   EXPECT_EQ(0, ink_module().GetInputOfTypeCountForPageForTesting(
@@ -1145,7 +1180,7 @@ TEST_F(PdfInkModuleStrokeTest, AnnotationWithTouchIfEnabled) {
                    /*page_index=*/0, ink::StrokeInput::ToolType::kStylus));
 }
 
-TEST_F(PdfInkModuleStrokeTest, NoAnnotationWithMultiTouchIfNotEnabled) {
+TEST_P(PdfInkModuleStrokeTest, NoAnnotationWithMultiTouchIfNotEnabled) {
   InitializeSimpleSinglePageBasicLayout();
   RunStrokeMultiTouchCheckTest(/*annotation_mode_enabled=*/false);
   EXPECT_EQ(0, ink_module().GetInputOfTypeCountForPageForTesting(
@@ -1156,7 +1191,7 @@ TEST_F(PdfInkModuleStrokeTest, NoAnnotationWithMultiTouchIfNotEnabled) {
                    /*page_index=*/0, ink::StrokeInput::ToolType::kStylus));
 }
 
-TEST_F(PdfInkModuleStrokeTest, NoAnnotationWithMultiTouchIfEnabled) {
+TEST_P(PdfInkModuleStrokeTest, NoAnnotationWithMultiTouchIfEnabled) {
   InitializeSimpleSinglePageBasicLayout();
   RunStrokeMultiTouchCheckTest(/*annotation_mode_enabled=*/true);
   EXPECT_EQ(0, ink_module().GetInputOfTypeCountForPageForTesting(
@@ -1167,7 +1202,7 @@ TEST_F(PdfInkModuleStrokeTest, NoAnnotationWithMultiTouchIfEnabled) {
                    /*page_index=*/0, ink::StrokeInput::ToolType::kStylus));
 }
 
-TEST_F(PdfInkModuleStrokeTest, NoAnnotationWithPenIfNotEnabled) {
+TEST_P(PdfInkModuleStrokeTest, NoAnnotationWithPenIfNotEnabled) {
   InitializeSimpleSinglePageBasicLayout();
   RunStrokePenCheckTest(/*annotation_mode_enabled=*/false);
   EXPECT_EQ(0, ink_module().GetInputOfTypeCountForPageForTesting(
@@ -1178,7 +1213,7 @@ TEST_F(PdfInkModuleStrokeTest, NoAnnotationWithPenIfNotEnabled) {
                    /*page_index=*/0, ink::StrokeInput::ToolType::kStylus));
 }
 
-TEST_F(PdfInkModuleStrokeTest, AnnotationWithPenIfEnabled) {
+TEST_P(PdfInkModuleStrokeTest, AnnotationWithPenIfEnabled) {
   InitializeSimpleSinglePageBasicLayout();
   RunStrokePenCheckTest(/*annotation_mode_enabled=*/true);
   EXPECT_EQ(0, ink_module().GetInputOfTypeCountForPageForTesting(
@@ -1189,7 +1224,7 @@ TEST_F(PdfInkModuleStrokeTest, AnnotationWithPenIfEnabled) {
                    /*page_index=*/0, ink::StrokeInput::ToolType::kStylus));
 }
 
-TEST_F(PdfInkModuleStrokeTest, IgnoreTouchEventsAfterPenEvent) {
+TEST_P(PdfInkModuleStrokeTest, IgnoreTouchEventsAfterPenEvent) {
   EnableAnnotationMode();
   InitializeSimpleSinglePageBasicLayout();
 
@@ -1245,7 +1280,7 @@ TEST_F(PdfInkModuleStrokeTest, IgnoreTouchEventsAfterPenEvent) {
                    /*page_index=*/0, ink::StrokeInput::ToolType::kStylus));
 }
 
-TEST_F(PdfInkModuleStrokeTest, AnnotationWithMouseInterruptedByPenEvents) {
+TEST_P(PdfInkModuleStrokeTest, AnnotationWithMouseInterruptedByPenEvents) {
   EnableAnnotationMode();
   InitializeSimpleSinglePageBasicLayout();
 
@@ -1291,7 +1326,7 @@ TEST_F(PdfInkModuleStrokeTest, AnnotationWithMouseInterruptedByPenEvents) {
                    /*page_index=*/0, ink::StrokeInput::ToolType::kStylus));
 }
 
-TEST_F(PdfInkModuleStrokeTest, AnnotationWithPenIgnoresMouseEvents) {
+TEST_P(PdfInkModuleStrokeTest, AnnotationWithPenIgnoresMouseEvents) {
   EnableAnnotationMode();
   InitializeSimpleSinglePageBasicLayout();
 
@@ -1318,7 +1353,7 @@ TEST_F(PdfInkModuleStrokeTest, AnnotationWithPenIgnoresMouseEvents) {
                    /*page_index=*/0, ink::StrokeInput::ToolType::kStylus));
 }
 
-TEST_F(PdfInkModuleStrokeTest, CanonicalAnnotationPoints) {
+TEST_P(PdfInkModuleStrokeTest, CanonicalAnnotationPoints) {
   // Setup to support examining the page stroke points for a layout that is
   // more complicated than what is provide by
   // `InitializeSimpleSinglePageBasicLayout()`.  Include viewport offset,
@@ -1346,7 +1381,7 @@ TEST_F(PdfInkModuleStrokeTest, CanonicalAnnotationPoints) {
                                        kCanonicalMouseUpPosition}})));
 }
 
-TEST_F(PdfInkModuleStrokeTest, BasicLayoutInvalidationsFromStroke) {
+TEST_P(PdfInkModuleStrokeTest, BasicLayoutInvalidationsFromStroke) {
   InitializeSimpleSinglePageBasicLayout();
   RunStrokeCheckTest(/*annotation_mode_enabled=*/true);
 
@@ -1364,7 +1399,7 @@ TEST_F(PdfInkModuleStrokeTest, BasicLayoutInvalidationsFromStroke) {
                   kInvalidationAreaMouseUp, kInvalidationAreaFinishedStroke));
 }
 
-TEST_F(PdfInkModuleStrokeTest, TransformedLayoutInvalidationsFromStroke) {
+TEST_P(PdfInkModuleStrokeTest, TransformedLayoutInvalidationsFromStroke) {
   // Setup to support examining the invalidation areas from page stroke points
   // for a layout that is more complicated than what is provide by
   // `InitializeSimpleSinglePageBasicLayout()`.  Include viewport offset,
@@ -1393,7 +1428,7 @@ TEST_F(PdfInkModuleStrokeTest, TransformedLayoutInvalidationsFromStroke) {
                   kInvalidationAreaMouseUp, kInvalidationAreaFinishedStroke));
 }
 
-TEST_F(PdfInkModuleStrokeTest, StrokeOutsidePage) {
+TEST_P(PdfInkModuleStrokeTest, StrokeOutsidePage) {
   EnableAnnotationMode();
   InitializeVerticalTwoPageLayout();
 
@@ -1410,7 +1445,7 @@ TEST_F(PdfInkModuleStrokeTest, StrokeOutsidePage) {
   EXPECT_TRUE(StrokeInputPositions().empty());
 }
 
-TEST_F(PdfInkModuleStrokeTest, StrokeInsidePages) {
+TEST_P(PdfInkModuleStrokeTest, StrokeInsidePages) {
   EnableAnnotationMode();
   InitializeVerticalTwoPageLayout();
 
@@ -1435,7 +1470,7 @@ TEST_F(PdfInkModuleStrokeTest, StrokeInsidePages) {
               ElementsAre(Pair(0, SizeIs(1)), Pair(1, SizeIs(1))));
 }
 
-TEST_F(PdfInkModuleStrokeTest, StrokeAcrossPages) {
+TEST_P(PdfInkModuleStrokeTest, StrokeAcrossPages) {
   EnableAnnotationMode();
   InitializeVerticalTwoPageLayout();
 
@@ -1452,7 +1487,7 @@ TEST_F(PdfInkModuleStrokeTest, StrokeAcrossPages) {
   EXPECT_THAT(StrokeInputPositions(), ElementsAre(Pair(0, SizeIs(1))));
 }
 
-TEST_F(PdfInkModuleStrokeTest, StrokePageExitAndReentry) {
+TEST_P(PdfInkModuleStrokeTest, StrokePageExitAndReentry) {
   EnableAnnotationMode();
   InitializeVerticalTwoPageLayout();
 
@@ -1473,7 +1508,7 @@ TEST_F(PdfInkModuleStrokeTest, StrokePageExitAndReentry) {
                           kTwoPageVerticalLayoutPageExitAndReentrySegment2)))));
 }
 
-TEST_F(PdfInkModuleStrokeTest, StrokePageExitAndReentryWithQuickMoves) {
+TEST_P(PdfInkModuleStrokeTest, StrokePageExitAndReentryWithQuickMoves) {
   EnableAnnotationMode();
   InitializeVerticalTwoPageLayout();
 
@@ -1499,7 +1534,7 @@ TEST_F(PdfInkModuleStrokeTest, StrokePageExitAndReentryWithQuickMoves) {
                                            gfx::PointF(10.0f, 10.0f)})))));
 }
 
-TEST_F(PdfInkModuleStrokeTest, EraseStroke) {
+TEST_P(PdfInkModuleStrokeTest, EraseStroke) {
   InitializeSimpleSinglePageBasicLayout();
   RunStrokeCheckTest(/*annotation_mode_enabled=*/true);
 
@@ -1533,7 +1568,7 @@ TEST_F(PdfInkModuleStrokeTest, EraseStroke) {
   EXPECT_TRUE(updated_pdf_thumbnail_page_indices().empty());
 }
 
-TEST_F(PdfInkModuleStrokeTest, EraseOnPageWithoutStrokes) {
+TEST_P(PdfInkModuleStrokeTest, EraseOnPageWithoutStrokes) {
   EnableAnnotationMode();
   InitializeSimpleSinglePageBasicLayout();
 
@@ -1551,7 +1586,7 @@ TEST_F(PdfInkModuleStrokeTest, EraseOnPageWithoutStrokes) {
   EXPECT_TRUE(updated_ink_thumbnail_page_indices().empty());
 }
 
-TEST_F(PdfInkModuleStrokeTest, EraseStrokeEntirelyOffPage) {
+TEST_P(PdfInkModuleStrokeTest, EraseStrokeEntirelyOffPage) {
   InitializeSimpleSinglePageBasicLayout();
   RunStrokeCheckTest(/*annotation_mode_enabled=*/true);
 
@@ -1577,7 +1612,7 @@ TEST_F(PdfInkModuleStrokeTest, EraseStrokeEntirelyOffPage) {
   EXPECT_THAT(updated_ink_thumbnail_page_indices(), ElementsAre(0));
 }
 
-TEST_F(PdfInkModuleStrokeTest, EraseStrokeErasesTwoStrokes) {
+TEST_P(PdfInkModuleStrokeTest, EraseStrokeErasesTwoStrokes) {
   InitializeSimpleSinglePageBasicLayout();
   ExpectStrokesAdded(/*strokes_affected=*/2);
   ExpectNoUpdateStrokeActive();
@@ -1628,7 +1663,7 @@ TEST_F(PdfInkModuleStrokeTest, EraseStrokeErasesTwoStrokes) {
   EXPECT_THAT(updated_ink_thumbnail_page_indices(), ElementsAre(0, 0, 0, 0));
 }
 
-TEST_F(PdfInkModuleStrokeTest, EraseStrokesAcrossTwoPages) {
+TEST_P(PdfInkModuleStrokeTest, EraseStrokesAcrossTwoPages) {
   EnableAnnotationMode();
   InitializeVerticalTwoPageLayout();
 
@@ -1674,7 +1709,7 @@ TEST_F(PdfInkModuleStrokeTest, EraseStrokesAcrossTwoPages) {
   EXPECT_THAT(updated_ink_thumbnail_page_indices(), ElementsAre(0, 1, 0, 1));
 }
 
-TEST_F(PdfInkModuleStrokeTest, EraseStrokePageExitAndReentry) {
+TEST_P(PdfInkModuleStrokeTest, EraseStrokePageExitAndReentry) {
   EnableAnnotationMode();
   InitializeVerticalTwoPageLayout();
 
@@ -1718,7 +1753,7 @@ TEST_F(PdfInkModuleStrokeTest, EraseStrokePageExitAndReentry) {
   EXPECT_THAT(updated_ink_thumbnail_page_indices(), ElementsAre(0, 0));
 }
 
-TEST_F(PdfInkModuleStrokeTest, EraseStrokeWithTouch) {
+TEST_P(PdfInkModuleStrokeTest, EraseStrokeWithTouch) {
   InitializeSimpleSinglePageBasicLayout();
   RunStrokeTouchCheckTest(/*annotation_mode_enabled=*/true);
 
@@ -1765,7 +1800,7 @@ TEST_F(PdfInkModuleStrokeTest, EraseStrokeWithTouch) {
   EXPECT_THAT(updated_ink_thumbnail_page_indices(), ElementsAre(0, 0));
 }
 
-TEST_F(PdfInkModuleStrokeTest, EraseStrokeWithPen) {
+TEST_P(PdfInkModuleStrokeTest, EraseStrokeWithPen) {
   InitializeSimpleSinglePageBasicLayout();
   RunStrokePenCheckTest(/*annotation_mode_enabled=*/true);
 
@@ -1812,7 +1847,7 @@ TEST_F(PdfInkModuleStrokeTest, EraseStrokeWithPen) {
   EXPECT_THAT(updated_ink_thumbnail_page_indices(), ElementsAre(0, 0));
 }
 
-TEST_F(PdfInkModuleStrokeTest, StrokeMissedEndEventThenMouseDown) {
+TEST_P(PdfInkModuleStrokeTest, StrokeMissedEndEventThenMouseDown) {
   EnableAnnotationMode();
   InitializeSimpleSinglePageBasicLayout();
 
@@ -1829,7 +1864,7 @@ TEST_F(PdfInkModuleStrokeTest, StrokeMissedEndEventThenMouseDown) {
   EXPECT_TRUE(ink_module().HandleInputEvent(mouse_down_event));
 }
 
-TEST_F(PdfInkModuleStrokeTest, StrokeMissedEndEventThenMouseMoveDuringDrawing) {
+TEST_P(PdfInkModuleStrokeTest, StrokeMissedEndEventThenMouseMoveDuringDrawing) {
   EnableAnnotationMode();
   InitializeSimpleSinglePageBasicLayout();
 
@@ -1840,7 +1875,7 @@ TEST_F(PdfInkModuleStrokeTest, StrokeMissedEndEventThenMouseMoveDuringDrawing) {
   RunStrokeMissedEndEventThenMouseMoveTest();
 }
 
-TEST_F(PdfInkModuleStrokeTest, StrokeMissedEndEventThenMouseMoveDuringErasing) {
+TEST_P(PdfInkModuleStrokeTest, StrokeMissedEndEventThenMouseMoveDuringErasing) {
   EnableAnnotationMode();
   InitializeSimpleSinglePageBasicLayout();
 
@@ -1849,7 +1884,7 @@ TEST_F(PdfInkModuleStrokeTest, StrokeMissedEndEventThenMouseMoveDuringErasing) {
   RunStrokeMissedEndEventThenMouseMoveTest();
 }
 
-TEST_F(PdfInkModuleStrokeTest, ChangeBrushColorDuringDrawing) {
+TEST_P(PdfInkModuleStrokeTest, ChangeBrushColorDuringDrawing) {
   EnableAnnotationMode();
   InitializeSimpleSinglePageBasicLayout();
 
@@ -1901,7 +1936,7 @@ TEST_F(PdfInkModuleStrokeTest, ChangeBrushColorDuringDrawing) {
   EXPECT_TRUE(ink_module().HandleInputEvent(mouse_up_event));
 }
 
-TEST_F(PdfInkModuleStrokeTest, ChangeBrushSizeDuringDrawing) {
+TEST_P(PdfInkModuleStrokeTest, ChangeBrushSizeDuringDrawing) {
   EnableAnnotationMode();
   InitializeSimpleSinglePageBasicLayout();
 
@@ -1909,7 +1944,8 @@ TEST_F(PdfInkModuleStrokeTest, ChangeBrushSizeDuringDrawing) {
   // until the mouse-up event.  The cursor image will be updated only when
   // there is not a stroke in progress.
   EXPECT_CALL(client(), StrokeAdded(_, _, _)).Times(0);
-  EXPECT_CALL(client(), UpdateInkCursorImage(BitmapImageSizeEq(SkISize(6, 6))));
+  EXPECT_CALL(client(),
+              UpdateInkCursor(CursorBitmapImageSizeEq(SkISize(6, 6))));
   TestAnnotationBrushMessageParams message_params{/*color_r=*/0,
                                                   /*color_g=*/0,
                                                   /*color_b=*/0, /*size=*/2.0};
@@ -1936,7 +1972,7 @@ TEST_F(PdfInkModuleStrokeTest, ChangeBrushSizeDuringDrawing) {
     EXPECT_CALL(client(), StrokeAdded(kPageIndex, InkStrokeId(0),
                                       InkStrokeBrushSizeEq(2.0f)));
     EXPECT_CALL(client(),
-                UpdateInkCursorImage(BitmapImageSizeEq(SkISize(8, 8))));
+                UpdateInkCursor(CursorBitmapImageSizeEq(SkISize(8, 8))));
   }
   blink::WebMouseEvent mouse_move_event =
       CreateMouseMoveWithLeftButtonEventAtPoint(kLeftVerticalStrokePoint2);
@@ -1956,7 +1992,7 @@ TEST_F(PdfInkModuleStrokeTest, ChangeBrushSizeDuringDrawing) {
   EXPECT_TRUE(ink_module().HandleInputEvent(mouse_up_event));
 }
 
-TEST_F(PdfInkModuleStrokeTest, ChangeToEraserDuringDrawing) {
+TEST_P(PdfInkModuleStrokeTest, ChangeToEraserDuringDrawing) {
   InitializeSimpleSinglePageBasicLayout();
 
   // Draw an initial stroke.
@@ -2002,7 +2038,7 @@ TEST_F(PdfInkModuleStrokeTest, ChangeToEraserDuringDrawing) {
   EXPECT_TRUE(ink_module().HandleInputEvent(mouse_up_event));
 }
 
-TEST_F(PdfInkModuleStrokeTest, ChangeToDrawingDuringErasing) {
+TEST_P(PdfInkModuleStrokeTest, ChangeToDrawingDuringErasing) {
   EnableAnnotationMode();
   InitializeSimpleSinglePageBasicLayout();
 
@@ -2065,7 +2101,7 @@ TEST_F(PdfInkModuleStrokeTest, ChangeToDrawingDuringErasing) {
   EXPECT_TRUE(ink_module().HandleInputEvent(mouse_up_event));
 }
 
-TEST_F(PdfInkModuleStrokeTest, ChangeDrawingBrushTypeDuringDrawing) {
+TEST_P(PdfInkModuleStrokeTest, ChangeDrawingBrushTypeDuringDrawing) {
   EnableAnnotationMode();
   InitializeSimpleSinglePageBasicLayout();
 
@@ -2073,7 +2109,8 @@ TEST_F(PdfInkModuleStrokeTest, ChangeDrawingBrushTypeDuringDrawing) {
   // until the mouse-up event.  The cursor image will be updated only if a
   // stroke is not in progress.
   EXPECT_CALL(client(), StrokeAdded(_, _, _)).Times(0);
-  EXPECT_CALL(client(), UpdateInkCursorImage(BitmapImageSizeEq(SkISize(6, 6))));
+  EXPECT_CALL(client(),
+              UpdateInkCursor(CursorBitmapImageSizeEq(SkISize(6, 6))));
   TestAnnotationBrushMessageParams pen_message_params{/*color_r=*/0,
                                                       /*color_g=*/0,
                                                       /*color_b=*/0,
@@ -2107,7 +2144,7 @@ TEST_F(PdfInkModuleStrokeTest, ChangeDrawingBrushTypeDuringDrawing) {
         StrokeAdded(kPageIndex, InkStrokeId(0),
                     InkStrokeDrawingBrushTypeEq(PdfInkBrush::Type::kPen)));
     EXPECT_CALL(client(),
-                UpdateInkCursorImage(BitmapImageSizeEq(SkISize(10, 10))));
+                UpdateInkCursor(CursorBitmapImageSizeEq(SkISize(10, 10))));
   }
   blink::WebMouseEvent mouse_move_event =
       CreateMouseMoveWithLeftButtonEventAtPoint(kLeftVerticalStrokePoint2);
@@ -2142,7 +2179,7 @@ class PdfInkModuleUndoRedoTest : public PdfInkModuleStrokeTest {
   }
 };
 
-TEST_F(PdfInkModuleUndoRedoTest, UndoRedoEmpty) {
+TEST_P(PdfInkModuleUndoRedoTest, UndoRedoEmpty) {
   InitializeSimpleSinglePageBasicLayout();
   EnableAnnotationMode();
 
@@ -2160,7 +2197,7 @@ TEST_F(PdfInkModuleUndoRedoTest, UndoRedoEmpty) {
   EXPECT_TRUE(VisibleStrokeInputPositions().empty());
 }
 
-TEST_F(PdfInkModuleUndoRedoTest, UndoRedoBasic) {
+TEST_P(PdfInkModuleUndoRedoTest, UndoRedoBasic) {
   InitializeSimpleSinglePageBasicLayout();
   ExpectStrokesAdded(/*strokes_affected=*/1);
   ExpectUpdateStrokesActive(/*strokes_affected=*/1, /*expect_active=*/false);
@@ -2211,7 +2248,7 @@ TEST_F(PdfInkModuleUndoRedoTest, UndoRedoBasic) {
   EXPECT_THAT(updated_ink_thumbnail_page_indices(), ElementsAre(0, 0, 0));
 }
 
-TEST_F(PdfInkModuleUndoRedoTest, UndoRedoInvalidationsBasic) {
+TEST_P(PdfInkModuleUndoRedoTest, UndoRedoInvalidationsBasic) {
   InitializeSimpleSinglePageBasicLayout();
   RunStrokeCheckTest(/*annotation_mode_enabled=*/true);
 
@@ -2249,7 +2286,7 @@ TEST_F(PdfInkModuleUndoRedoTest, UndoRedoInvalidationsBasic) {
                   kInvalidationAreaEntireStroke));
 }
 
-TEST_F(PdfInkModuleUndoRedoTest, UndoRedoInvalidationsScaledRotated90) {
+TEST_P(PdfInkModuleUndoRedoTest, UndoRedoInvalidationsScaledRotated90) {
   InitializeScaledLandscapeSinglePageBasicLayout();
   client().set_orientation(PageOrientation::kClockwise90);
   client().set_zoom(2.0f);
@@ -2289,7 +2326,7 @@ TEST_F(PdfInkModuleUndoRedoTest, UndoRedoInvalidationsScaledRotated90) {
                   kInvalidationAreaEntireStroke));
 }
 
-TEST_F(PdfInkModuleUndoRedoTest, UndoRedoAnnotationModeDisabled) {
+TEST_P(PdfInkModuleUndoRedoTest, UndoRedoAnnotationModeDisabled) {
   InitializeSimpleSinglePageBasicLayout();
   RunStrokeCheckTest(/*annotation_mode_enabled=*/true);
 
@@ -2319,7 +2356,7 @@ TEST_F(PdfInkModuleUndoRedoTest, UndoRedoAnnotationModeDisabled) {
   EXPECT_THAT(updated_ink_thumbnail_page_indices(), ElementsAre(0, 0, 0));
 }
 
-TEST_F(PdfInkModuleUndoRedoTest, UndoRedoBetweenDraws) {
+TEST_P(PdfInkModuleUndoRedoTest, UndoRedoBetweenDraws) {
   InitializeSimpleSinglePageBasicLayout();
   RunStrokeCheckTest(/*annotation_mode_enabled=*/true);
 
@@ -2436,7 +2473,7 @@ TEST_F(PdfInkModuleUndoRedoTest, UndoRedoBetweenDraws) {
               ElementsAre(Pair(0, ElementsAre(kFinal1StrokeMatcher))));
 }
 
-TEST_F(PdfInkModuleUndoRedoTest, UndoRedoOnTwoPages) {
+TEST_P(PdfInkModuleUndoRedoTest, UndoRedoOnTwoPages) {
   EnableAnnotationMode();
   InitializeVerticalTwoPageLayout();
 
@@ -2485,7 +2522,7 @@ TEST_F(PdfInkModuleUndoRedoTest, UndoRedoOnTwoPages) {
               ElementsAre(kPage0Matcher, kPage1Matcher));
 }
 
-TEST_F(PdfInkModuleUndoRedoTest, UndoRedoEraseLoadedV2Shapes) {
+TEST_P(PdfInkModuleUndoRedoTest, UndoRedoEraseLoadedV2Shapes) {
   constexpr int kPageIndex = 0;
   constexpr InkModeledShapeId kShapeId0(0);
   constexpr InkModeledShapeId kShapeId1(1);
@@ -2577,7 +2614,7 @@ TEST_F(PdfInkModuleUndoRedoTest, UndoRedoEraseLoadedV2Shapes) {
 }
 
 // Regression test for crbug.com/378724153.
-TEST_F(PdfInkModuleUndoRedoTest, StrokeStrokeUndoStroke) {
+TEST_P(PdfInkModuleUndoRedoTest, StrokeStrokeUndoStroke) {
   InitializeSimpleSinglePageBasicLayout();
 
   // Draw stroke 1.
@@ -2634,14 +2671,14 @@ TEST_F(PdfInkModuleUndoRedoTest, StrokeStrokeUndoStroke) {
 
 using PdfInkModuleGetVisibleStrokesTest = PdfInkModuleStrokeTest;
 
-TEST_F(PdfInkModuleGetVisibleStrokesTest, NoPageStrokes) {
+TEST_P(PdfInkModuleGetVisibleStrokesTest, NoPageStrokes) {
   std::map<int, std::vector<raw_ref<const ink::Stroke>>>
       collected_stroke_shapes =
           CollectVisibleStrokes(ink_module().GetVisibleStrokesIterator());
   ASSERT_EQ(collected_stroke_shapes.size(), 0u);
 }
 
-TEST_F(PdfInkModuleGetVisibleStrokesTest, MultiplePageStrokes) {
+TEST_P(PdfInkModuleGetVisibleStrokesTest, MultiplePageStrokes) {
   EnableAnnotationMode();
   InitializeVerticalTwoPageLayout();
 
@@ -2696,7 +2733,7 @@ class PdfInkModuleMetricsTest : public PdfInkModuleUndoRedoTest {
   static constexpr char kTypeMetric[] = "PDF.Ink2StrokeBrushType";
 };
 
-TEST_F(PdfInkModuleMetricsTest, StrokeUndoRedoDoesNotAffectMetrics) {
+TEST_P(PdfInkModuleMetricsTest, StrokeUndoRedoDoesNotAffectMetrics) {
   InitializeSimpleSinglePageBasicLayout();
   base::HistogramTester histograms;
 
@@ -2725,7 +2762,7 @@ TEST_F(PdfInkModuleMetricsTest, StrokeUndoRedoDoesNotAffectMetrics) {
                                 1);
 }
 
-TEST_F(PdfInkModuleMetricsTest, StrokeBrushColorPen) {
+TEST_P(PdfInkModuleMetricsTest, StrokeBrushColorPen) {
   InitializeSimpleSinglePageBasicLayout();
   base::HistogramTester histograms;
 
@@ -2760,7 +2797,7 @@ TEST_F(PdfInkModuleMetricsTest, StrokeBrushColorPen) {
   histograms.ExpectTotalCount(kHighlighterColorMetric, 0);
 }
 
-TEST_F(PdfInkModuleMetricsTest, StrokeBrushColorHighlighter) {
+TEST_P(PdfInkModuleMetricsTest, StrokeBrushColorHighlighter) {
   EnableAnnotationMode();
   InitializeSimpleSinglePageBasicLayout();
   base::HistogramTester histograms;
@@ -2788,7 +2825,7 @@ TEST_F(PdfInkModuleMetricsTest, StrokeBrushColorHighlighter) {
   histograms.ExpectTotalCount(kPenColorMetric, 0);
 }
 
-TEST_F(PdfInkModuleMetricsTest, StrokeBrushSizePen) {
+TEST_P(PdfInkModuleMetricsTest, StrokeBrushSizePen) {
   InitializeSimpleSinglePageBasicLayout();
   base::HistogramTester histograms;
 
@@ -2817,7 +2854,7 @@ TEST_F(PdfInkModuleMetricsTest, StrokeBrushSizePen) {
   histograms.ExpectTotalCount(kHighlighterSizeMetric, 0);
 }
 
-TEST_F(PdfInkModuleMetricsTest, StrokeBrushSizeHighlighter) {
+TEST_P(PdfInkModuleMetricsTest, StrokeBrushSizeHighlighter) {
   EnableAnnotationMode();
   InitializeSimpleSinglePageBasicLayout();
   base::HistogramTester histograms;
@@ -2851,7 +2888,7 @@ TEST_F(PdfInkModuleMetricsTest, StrokeBrushSizeHighlighter) {
   histograms.ExpectTotalCount(kHighlighterSizeMetric, 3);
 }
 
-TEST_F(PdfInkModuleMetricsTest, StrokeBrushType) {
+TEST_P(PdfInkModuleMetricsTest, StrokeBrushType) {
   InitializeSimpleSinglePageBasicLayout();
   base::HistogramTester histograms;
 
@@ -2898,7 +2935,7 @@ TEST_F(PdfInkModuleMetricsTest, StrokeBrushType) {
   histograms.ExpectTotalCount(kTypeMetric, 4);
 }
 
-TEST_F(PdfInkModuleMetricsTest, StrokeInputDeviceMouse) {
+TEST_P(PdfInkModuleMetricsTest, StrokeInputDeviceMouse) {
   InitializeSimpleSinglePageBasicLayout();
   base::HistogramTester histograms;
 
@@ -2926,7 +2963,7 @@ TEST_F(PdfInkModuleMetricsTest, StrokeInputDeviceMouse) {
                                 StrokeMetricInputDeviceType::kMouse, 2);
 }
 
-TEST_F(PdfInkModuleMetricsTest, StrokeInputDeviceTouch) {
+TEST_P(PdfInkModuleMetricsTest, StrokeInputDeviceTouch) {
   InitializeSimpleSinglePageBasicLayout();
   base::HistogramTester histograms;
 
@@ -2959,7 +2996,7 @@ TEST_F(PdfInkModuleMetricsTest, StrokeInputDeviceTouch) {
                                 StrokeMetricInputDeviceType::kTouch, 2);
 }
 
-TEST_F(PdfInkModuleMetricsTest, StrokeInputDevicePen) {
+TEST_P(PdfInkModuleMetricsTest, StrokeInputDevicePen) {
   InitializeSimpleSinglePageBasicLayout();
   base::HistogramTester histograms;
 
@@ -2991,5 +3028,13 @@ TEST_F(PdfInkModuleMetricsTest, StrokeInputDevicePen) {
   histograms.ExpectUniqueSample(kInputDeviceMetric,
                                 StrokeMetricInputDeviceType::kPen, 2);
 }
+
+INSTANTIATE_TEST_SUITE_P(All, PdfInkModuleTest, testing::Bool());
+INSTANTIATE_TEST_SUITE_P(All, PdfInkModuleStrokeTest, testing::Bool());
+INSTANTIATE_TEST_SUITE_P(All, PdfInkModuleUndoRedoTest, testing::Bool());
+INSTANTIATE_TEST_SUITE_P(All,
+                         PdfInkModuleGetVisibleStrokesTest,
+                         testing::Bool());
+INSTANTIATE_TEST_SUITE_P(All, PdfInkModuleMetricsTest, testing::Bool());
 
 }  // namespace chrome_pdf

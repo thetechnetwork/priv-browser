@@ -29,6 +29,7 @@ import org.chromium.third_party.android.media.MediaController;
 
 /** The activity that's opened by clicking the video flinging (casting) notification. */
 @NullMarked
+@SuppressWarnings("NullAway") // https://crbug.com/401584051
 public class CafExpandedControllerActivity extends FragmentActivity
         implements BaseSessionController.Callback {
     private static final int PROGRESS_UPDATE_PERIOD_IN_MS = 1000;
@@ -201,9 +202,10 @@ public class CafExpandedControllerActivity extends FragmentActivity
 
     private void updateUi() {
         if (!mSessionController.isConnected()) return;
-        assumeNonNull(mSessionController.getSession());
 
-        String deviceName = mSessionController.getSession().getCastDevice().getFriendlyName();
+        String deviceName =
+                assumeNonNull(assumeNonNull(mSessionController.getSession()).getCastDevice())
+                        .getFriendlyName();
         String titleText = "";
         if (deviceName != null) {
             titleText = getString(R.string.cast_casting_video, deviceName);

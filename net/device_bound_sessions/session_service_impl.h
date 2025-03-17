@@ -71,7 +71,9 @@ class NET_EXPORT SessionServiceImpl : public SessionService {
       const NetLogWithSource& net_log,
       const std::optional<url::Origin>& original_request_initiator) override;
 
-  std::optional<DeferralParams> ShouldDefer(URLRequest* request) override;
+  std::optional<DeferralParams> ShouldDefer(
+      URLRequest* request,
+      const FirstPartySetMetadata& first_party_set_metadata) override;
 
   void DeferRequestForRefresh(
       URLRequest* request,
@@ -93,7 +95,9 @@ class NET_EXPORT SessionServiceImpl : public SessionService {
   void DeleteAllSessions(
       std::optional<base::Time> created_after_time,
       std::optional<base::Time> created_before_time,
-      base::RepeatingCallback<bool(const net::SchemefulSite&)> site_matcher,
+      base::RepeatingCallback<bool(const url::Origin&,
+                                   const net::SchemefulSite&)>
+          origin_and_site_matcher,
       base::OnceClosure completion_callback) override;
   base::ScopedClosureRunner AddObserver(
       const GURL& url,
@@ -174,17 +178,9 @@ class NET_EXPORT SessionServiceImpl : public SessionService {
   // Helper function encapsulating the processing of refresh
   SessionError::ErrorType OnRefreshRequestCompletionInternal(
       OnAccessCallback on_access_callback,
-      SchemefulSite site,
-      Session::Id session_id,
+      const SchemefulSite& site,
+      const Session::Id& session_id,
       base::expected<SessionParams, SessionError> params_or_error);
-
-  // If a request comes in before initialization, we deferred it until
-  // initialization completes. This function either resumes such
-  // requests or defers them further.
-  void ResumePreInitializationRequest(
-      URLRequest* request,
-      RefreshCompleteCallback restart_callback,
-      RefreshCompleteCallback continue_callback);
 
   // Callback after unwrapping a session key
   void OnSessionKeyRestored(URLRequest* request,
@@ -198,6 +194,9 @@ class NET_EXPORT SessionServiceImpl : public SessionService {
                               Session* session,
                               unexportable_keys::UnexportableKeyId key_id);
 
+  // Whether the site has exceeded its refresh quota.
+  bool RefreshQuotaExceeded(const SchemefulSite& site);
+
   // Whether we are waiting on the initial load of saved sessions to complete.
   bool pending_initialization_ = false;
   // Functions to call once initialization completes.
@@ -209,6 +208,10 @@ class NET_EXPORT SessionServiceImpl : public SessionService {
   raw_ptr<const URLRequestContext> context_;
   raw_ptr<SessionStore> session_store_ = nullptr;
 
+  // When true, the refresh quota is not enforced. This is only ever set to
+  // true for testing purposes.
+  bool ignore_refresh_quota_ = false;
+
   // Deferred requests are stored by session ID.
   DeferredRequestsMap deferred_requests_;
 
@@ -217,6 +220,10 @@ class NET_EXPORT SessionServiceImpl : public SessionService {
 
   // All observers of sessions.
   std::map<net::SchemefulSite, ObserverSet> observers_by_site_;
+
+  // Per-site session refresh quota. In order to be robust across
+  // session parameter changes, we enforce refresh quota for a site.
+  std::map<net::SchemefulSite, std::vector<base::TimeTicks>> refresh_times_;
 
   base::WeakPtrFactory<SessionServiceImpl> weak_factory_{this};
 };

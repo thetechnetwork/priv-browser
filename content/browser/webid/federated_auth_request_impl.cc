@@ -5,6 +5,7 @@
 #include "content/browser/webid/federated_auth_request_impl.h"
 
 #include <algorithm>
+#include <iostream>
 #include <random>
 #include <vector>
 
@@ -13,11 +14,13 @@
 #include "base/command_line.h"
 #include "base/containers/contains.h"
 #include "base/functional/callback.h"
+#include "base/functional/callback_helpers.h"
 #include "base/json/json_reader.h"
 #include "base/json/json_writer.h"
 #include "base/metrics/histogram_macros.h"
 #include "base/rand_util.h"
 #include "base/strings/escape.h"
+#include "base/strings/to_string.h"
 #include "base/task/sequenced_task_runner.h"
 #include "base/time/time.h"
 #include "base/values.h"
@@ -187,7 +190,7 @@ std::string ComputeUrlEncodedTokenPostData(
   // disclosure text is not necessary. This field indicates in the request
   // whether the user has been shown such disclosure text.
   std::string disclosure_text_shown_param =
-      IsRequestingDefaultPermissions(disclosure_shown_for) ? "true" : "false";
+      base::ToString(IsRequestingDefaultPermissions(disclosure_shown_for));
   if (!query.empty()) {
     query += "&";
   }
@@ -196,7 +199,7 @@ std::string ComputeUrlEncodedTokenPostData(
   // Shares with IdP that whether the identity credential was automatically
   // selected. This could help developers to better comprehend the token
   // request and segment metrics accordingly.
-  std::string is_auto_selected = is_auto_reauthn ? "true" : "false";
+  std::string is_auto_selected = base::ToString(is_auto_reauthn);
   if (!query.empty()) {
     query += "&";
   }
@@ -783,7 +786,8 @@ void FederatedAuthRequestImpl::RequestToken(
               ? FedCmThirdPartyCookiesStatus::kEnabledInSettings
               : FedCmThirdPartyCookiesStatus::kDisabledInSettings,
           webid::ComputeRequesterFrameType(render_frame_host(), origin(),
-                                           GetEmbeddingOrigin()));
+                                           GetEmbeddingOrigin()),
+          /*has_signin_account=*/std::nullopt);
 
       AddDevToolsIssue(
           blink::mojom::FederatedAuthRequestResult::kTooManyRequests);
@@ -1849,6 +1853,8 @@ void FederatedAuthRequestImpl::MaybeShowAccountsDialog() {
   // Although not useful for catching malicious IDPs, it should only be a very
   // small percentage of the samples recorded.
   fedcm_metrics_->RecordAccountsDialogShown(idp_data_for_display_);
+  fedcm_metrics_->RecordRpUrlHasPath(
+      render_frame_host().GetMainFrame()->GetLastCommittedURL().path() != "/");
 }
 
 void FederatedAuthRequestImpl::OnAccountsDisplayed() {
@@ -2346,6 +2352,15 @@ void FederatedAuthRequestImpl::OnAccountSelected(const GURL& idp_config_url,
     // auto re-authn with embargo.
     auto_reauthn_permission_delegate_->RemoveEmbargoForAutoReauthn(
         GetEmbeddingOrigin());
+
+    // Record page scroll Y-axis position upon account selection to analyse
+    // for intrusion. Do not record for auto re-authn because we want to detect
+    // whether users scroll the webpage before choosing to sign-in.
+    RenderFrameHostImpl* host_impl = static_cast<RenderFrameHostImpl*>(
+        render_frame_host().GetOutermostMainFrame());
+    host_impl->GetAssociatedLocalFrame()->GetScrollPosition(
+        base::BindOnce(&FedCmMetrics::RecordAccountSelectionScrollPosition,
+                       base::Unretained(fedcm_metrics_.get())));
   }
 
   fedcm_metrics_->RecordIsSignInUser(is_sign_in);
@@ -2937,11 +2952,18 @@ void FederatedAuthRequestImpl::CompleteRequest(
     bool should_delay_callback) {
   DCHECK(result == FederatedAuthRequestResult::kSuccess || id_token.empty());
 
+  bool should_trigger_cooldown_on_ignore =
+      IsFedCmCooldownOnIgnoreEnabled() &&
+      token_status == TokenStatus::kUnhandledRequest &&
+      rp_mode_ == RpMode::kPassive;
   if (accounts_dialog_shown_time_.has_value()) {
     fedcm_metrics_->RecordAccountsDialogShownDuration(
         idp_data_for_display_,
         base::TimeTicks::Now() - accounts_dialog_shown_time_.value());
     accounts_dialog_shown_time_ = std::nullopt;
+    if (should_trigger_cooldown_on_ignore && dialog_type_ == kSelectAccount) {
+      api_permission_delegate_->RecordIgnoreAndEmbargo(GetEmbeddingOrigin());
+    }
   }
 
   if (mismatch_dialog_shown_time_.has_value()) {
@@ -2949,6 +2971,9 @@ void FederatedAuthRequestImpl::CompleteRequest(
         idp_data_for_display_,
         base::TimeTicks::Now() - mismatch_dialog_shown_time_.value());
     mismatch_dialog_shown_time_ = std::nullopt;
+    if (should_trigger_cooldown_on_ignore && dialog_type_ == kConfirmIdpLogin) {
+      api_permission_delegate_->RecordIgnoreAndEmbargo(GetEmbeddingOrigin());
+    }
   }
 
   if (!auth_request_token_callback_) {
@@ -2974,6 +2999,18 @@ void FederatedAuthRequestImpl::CompleteRequest(
               : FedCmVerifyingDialogResult::kDestroyAutoReauthn;
     }
 
+    std::optional<bool> has_signin_account;
+    // Note: accounts_ does not include the ones that got filtered out. In case
+    // that all accounts are filtered out, we'd show the mismatch UI and skip
+    // recording the account status on the mismatch UI.
+    for (const auto& account : accounts_) {
+      has_signin_account = false;
+      if (account->login_state == LoginState::kSignIn) {
+        has_signin_account = true;
+        break;
+      }
+    }
+
     fedcm_metrics_->RecordRequestTokenStatus(
         *token_status, mediation_requirement_, idp_order_, num_idps_mismatch,
         selected_idp_config_url, rp_mode_, use_other_account_result,
@@ -2982,7 +3019,8 @@ void FederatedAuthRequestImpl::CompleteRequest(
             ? FedCmThirdPartyCookiesStatus::kEnabledInSettings
             : FedCmThirdPartyCookiesStatus::kDisabledInSettings,
         webid::ComputeRequesterFrameType(render_frame_host(), origin(),
-                                         GetEmbeddingOrigin()));
+                                         GetEmbeddingOrigin()),
+        has_signin_account);
   }
 
   if (result == FederatedAuthRequestResult::kSuccess) {

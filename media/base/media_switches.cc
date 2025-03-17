@@ -330,7 +330,7 @@ BASE_FEATURE(kPlatformHEVCEncoderSupport,
 // Enables HEVC MediaRecorder muxer support.
 BASE_FEATURE(kMediaRecorderHEVCSupport,
              "MediaRecorderHEVCSupport",
-             base::FEATURE_DISABLED_BY_DEFAULT);
+             base::FEATURE_ENABLED_BY_DEFAULT);
 #endif  // BUILDFLAG(ENABLE_HEVC_PARSER_AND_HW_DECODER)
 
 // Let videos be resumed via remote controls (for example, the notification)
@@ -605,7 +605,7 @@ BASE_FEATURE(kFeatureManagementLiveTranslateCrOS,
 // Blocks picture-in-picture windows while file dialogs are open.
 BASE_FEATURE(kFileDialogsBlockPictureInPicture,
              "FileDialogsBlockPictureInPicture",
-             base::FEATURE_ENABLED_BY_DEFAULT);
+             base::FEATURE_DISABLED_BY_DEFAULT);
 #endif  // !BUILDFLAG(IS_ANDROID)
 
 // Show toolbar button that opens dialog for controlling media sessions.
@@ -1084,6 +1084,12 @@ BASE_FEATURE(kUseAudioLatencyFromHAL,
              "UseAudioLatencyFromHAL",
              base::FEATURE_DISABLED_BY_DEFAULT);
 
+// Specify the required security level for MediaDrm when checking the MediaDrm
+// version.
+BASE_FEATURE(kUseSecurityLevelWhenCheckingMediaDrmVersion,
+             "UseSecurityLevelWhenCheckingMediaDrmVersion",
+             base::FEATURE_ENABLED_BY_DEFAULT);
+
 // Allow the media pipeline to prioritize the software decoder provided by
 // MediaCodec, instead of the built-in software decoders. This is only enabled
 // for platforms which shows worse performance when using the built-in software
@@ -1504,6 +1510,13 @@ const base::FeatureParam<int> kAudioDuckingAttenuation{&kAudioDucking,
                                                        "attenuation", 80};
 #endif  // !BUILDFLAG(IS_ANDROID)
 
+#if BUILDFLAG(IS_WIN)
+// Enables ducking of other Windows applications.
+BASE_FEATURE(kAudioDuckingWin,
+             "AudioDuckingWin",
+             base::FEATURE_ENABLED_BY_DEFAULT);
+#endif  // BUILDFLAG(IS_WIN)
+
 // Enables flash to be ducked by audio focus. This is enabled on Chrome OS which
 // has audio focus enabled.
 BASE_FEATURE(kAudioFocusDuckFlash,
@@ -1543,13 +1556,6 @@ BASE_FEATURE(kCameraMicEffects,
              base::FEATURE_DISABLED_BY_DEFAULT);
 #endif  // !BUILDFLAG(IS_ANDROID) && !BUILDFLAG(IS_CHROMEOS) &&
         // !BUILDFLAG(IS_FUCHSIA)
-
-// Controls whether system loopback audio can be Cast to audio-only Cast
-// receivers, e.g. speakers.
-// TODO(crbug.com/40579200): Remove once launched.
-BASE_FEATURE(kCastLoopbackAudioToAudioReceivers,
-             "CastLoopbackAudioToAudioReceivers",
-             base::FEATURE_ENABLED_BY_DEFAULT);
 
 // Controls whether mirroring negotiations will include the AV1 codec for video
 // encoding.

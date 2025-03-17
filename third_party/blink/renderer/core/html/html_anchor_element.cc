@@ -311,7 +311,7 @@ void HTMLAnchorElementBase::ParseAttribute(
     InvalidateCachedVisitedLinkHash();
     LogUpdateAttributeIfIsolatedWorldAndInDocument("a", params);
   } else if (params.name == html_names::kNameAttr) {
-    if (GetDocument().HasRenderBlockingExpectLinkElements() && isConnected() &&
+    if (GetDocument().HasPendingExpectLinkElements() && isConnected() &&
         IsFinishedParsingChildren() && !params.new_value.empty()) {
       DCHECK(GetDocument().GetRenderBlockingResourceManager());
       GetDocument()
@@ -361,7 +361,7 @@ bool HTMLAnchorElementBase::HasLegalLinkAttribute(
 
 void HTMLAnchorElementBase::FinishParsingChildren() {
   Element::FinishParsingChildren();
-  if (GetDocument().HasRenderBlockingExpectLinkElements()) {
+  if (GetDocument().HasPendingExpectLinkElements()) {
     DCHECK(GetDocument().GetRenderBlockingResourceManager());
     GetDocument()
         .GetRenderBlockingResourceManager()

@@ -32,9 +32,10 @@
 #include "chrome/browser/ui/startup/startup_browser_creator.h"
 #include "chrome/browser/ui/tab_modal_confirm_dialog_browsertest.h"
 #include "chrome/browser/ui/tabs/tab_strip_model.h"
-#include "chrome/browser/ui/ui_features.h"
 #include "chrome/browser/ui/views/side_panel/side_panel_ui.h"
 #include "chrome/test/base/in_process_browser_test.h"
+#include "chrome/test/base/test_browser_window.h"
+#include "chrome/test/base/testing_profile_manager.h"
 #include "chrome/test/base/ui_test_utils.h"
 #include "components/commerce/core/commerce_feature_list.h"
 #include "components/search_engines/template_url_service.h"
@@ -126,22 +127,8 @@ class BrowserCommandControllerBrowserTestRefreshOnly
   }
 };
 // Test case for actions behind Toolbar Pinning.
-class BrowserCommandControllerBrowserTestToolbarPinningOnly
-    : public BrowserCommandControllerBrowserTestRefreshOnly {
- public:
-  BrowserCommandControllerBrowserTestToolbarPinningOnly() {
-    scoped_feature_list_.InitWithFeatures({features::kToolbarPinning}, {});
-  }
-  BrowserCommandControllerBrowserTestToolbarPinningOnly(
-      const BrowserCommandControllerBrowserTestToolbarPinningOnly&) = delete;
-  BrowserCommandControllerBrowserTestToolbarPinningOnly& operator=(
-      const BrowserCommandControllerBrowserTestToolbarPinningOnly&) = delete;
-
-  ~BrowserCommandControllerBrowserTestToolbarPinningOnly() override = default;
-
- private:
-  base::test::ScopedFeatureList scoped_feature_list_;
-};
+using BrowserCommandControllerBrowserTestToolbarPinningOnly =
+    BrowserCommandControllerBrowserTestRefreshOnly;
 
 // Verify that showing a constrained window disables find.
 IN_PROC_BROWSER_TEST_F(BrowserCommandControllerBrowserTest, DisableFind) {
@@ -466,10 +453,6 @@ IN_PROC_BROWSER_TEST_F(BrowserCommandControllerBrowserTestRefreshOnly,
                        ExecuteShowCustomizeChrome) {
   content::WebContents* web_contents =
       browser()->tab_strip_model()->GetActiveWebContents();
-  if (!features::IsToolbarPinningEnabled()) {
-    ASSERT_TRUE(ui_test_utils::NavigateToURL(browser(),
-                                             GURL("chrome://new-tab-page/")));
-  }
   content::WaitForLoadStop(web_contents);
   EXPECT_TRUE(
       chrome::ExecuteCommand(browser(), IDC_SHOW_CUSTOMIZE_CHROME_SIDE_PANEL));
@@ -483,10 +466,6 @@ IN_PROC_BROWSER_TEST_F(BrowserCommandControllerBrowserTestRefreshOnly,
                        ExecuteShowCustomizeChromeToolbar) {
   content::WebContents* web_contents =
       browser()->tab_strip_model()->GetActiveWebContents();
-  if (!features::IsToolbarPinningEnabled()) {
-    ASSERT_TRUE(ui_test_utils::NavigateToURL(browser(),
-                                             GURL("chrome://new-tab-page/")));
-  }
   content::WaitForLoadStop(web_contents);
   EXPECT_TRUE(
       chrome::ExecuteCommand(browser(), IDC_SHOW_CUSTOMIZE_CHROME_TOOLBAR));
@@ -690,6 +669,48 @@ IN_PROC_BROWSER_TEST_F(BrowserCommandControllerBrowserTestGlic,
 
   EXPECT_TRUE(chrome::ExecuteCommand(browser(), IDC_GLIC_TOGGLE_PIN));
   EXPECT_FALSE(profile_prefs->GetBoolean(glic::prefs::kGlicPinnedToTabstrip));
+}
+
+IN_PROC_BROWSER_TEST_F(BrowserCommandControllerBrowserTestGlic,
+                       EnabledInRegularProfile) {
+  ASSERT_TRUE(browser()->profile()->IsRegularProfile());
+  EXPECT_TRUE(chrome::IsCommandEnabled(browser(), IDC_GLIC_TOGGLE_PIN));
+}
+
+IN_PROC_BROWSER_TEST_F(BrowserCommandControllerBrowserTestGlic,
+                       DisabledInIncognitoProfile) {
+  // Set up a profile with an off the record profile.
+  std::unique_ptr<TestingProfile> profile = TestingProfile::Builder().Build();
+  Profile* incognito_profile =
+      profile->GetPrimaryOTRProfile(/*create_if_needed=*/true);
+  ASSERT_EQ(incognito_profile->GetOriginalProfile(), profile.get());
+  ASSERT_TRUE(incognito_profile->IsIncognitoProfile());
+
+  // Create a new browser based on the off the record profile.
+  Browser::CreateParams profile_params(incognito_profile, true);
+  std::unique_ptr<Browser> incognito_browser =
+      CreateBrowserWithTestWindowForParams(profile_params);
+
+  EXPECT_FALSE(
+      chrome::IsCommandEnabled(incognito_browser.get(), IDC_GLIC_TOGGLE_PIN));
+}
+
+IN_PROC_BROWSER_TEST_F(BrowserCommandControllerBrowserTestGlic,
+                       DisabledInGuestProfile) {
+  // Set up a guest profile.
+  std::unique_ptr<TestingProfile> profile = TestingProfile::Builder().Build();
+  profile->SetGuestSession(true);
+  Profile* guest_profile =
+      profile->GetPrimaryOTRProfile(/*create_if_needed=*/true);
+  ASSERT_TRUE(guest_profile->IsGuestSession());
+
+  // Create a new browser based on the off the record profile.
+  Browser::CreateParams profile_params(guest_profile, true);
+  std::unique_ptr<Browser> guest_browser =
+      CreateBrowserWithTestWindowForParams(profile_params);
+
+  EXPECT_FALSE(
+      chrome::IsCommandEnabled(guest_browser.get(), IDC_GLIC_TOGGLE_PIN));
 }
 #endif
 

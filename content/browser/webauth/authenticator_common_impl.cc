@@ -638,6 +638,7 @@ std::vector<blink::mojom::WebAuthnClientCapabilityPtr> InsertIsPPAACapability(
   capabilities.push_back(
       MakeCapability(client_capabilities::kPasskeyPlatformAuthenticator,
                      isUVPAA || hybridTransport));
+
   return capabilities;
 }
 
@@ -1757,13 +1758,16 @@ void AuthenticatorCommonImpl::GetClientCapabilities(
   // collect the results of the check with the `BarrierCallback`), update this
   // constant to match the number of `barrier_callback.Run()` calls. Otherwise,
   // the `GetClientCapabilities()` call will crash or timeout.
-  constexpr size_t kNumberOfComputedCapabilities = 4;
+  constexpr size_t kNumberOfComputedCapabilities = 5;
   auto barrier_callback =
       base::BarrierCallback<blink::mojom::WebAuthnClientCapabilityPtr>(
           kNumberOfComputedCapabilities, std::move(completion_callback));
 
   barrier_callback.Run(
       MakeCapability(client_capabilities::kRelatedOrigins, true));
+  barrier_callback.Run(MakeCapability(
+      client_capabilities::kConditionalCreate,
+      base::FeatureList::IsEnabled(device::kWebAuthnPasskeyUpgrade)));
 
   IsHybridTransportSupported(
       base::BindOnce(&MakeCapability, client_capabilities::kHybridTransport)
@@ -1958,9 +1962,9 @@ void AuthenticatorCommonImpl::ContinueReportAfterRpIdCheck(
         render_frame_host, req_state_->relying_party_id,
         options->all_accepted_credentials->user_id,
         options->all_accepted_credentials->all_accepted_credentials_ids);
-    GetWebAuthenticationDelegate()->DeleteUnacceptedPasskeys(
+    GetWebAuthenticationDelegate()->SignalAllAcceptedCredentials(
         WebContents::FromRenderFrameHost(render_frame_host),
-        req_state_->relying_party_id,
+        req_state_->caller_origin, req_state_->relying_party_id,
         options->all_accepted_credentials->user_id,
         options->all_accepted_credentials->all_accepted_credentials_ids);
 #if BUILDFLAG(IS_WIN)
@@ -1990,9 +1994,10 @@ void AuthenticatorCommonImpl::ContinueReportAfterRpIdCheck(
     DeleteVirtualAuthenticatorCreds(render_frame_host,
                                     *options->unknown_credential_id,
                                     req_state_->relying_party_id);
-    GetWebAuthenticationDelegate()->DeletePasskey(
+    GetWebAuthenticationDelegate()->PasskeyUnrecognized(
         WebContents::FromRenderFrameHost(render_frame_host),
-        *options->unknown_credential_id, req_state_->relying_party_id);
+        req_state_->caller_origin, *options->unknown_credential_id,
+        req_state_->relying_party_id);
   }
   CompleteReportRequest(blink::mojom::AuthenticatorStatus::SUCCESS, nullptr);
 }

@@ -8,6 +8,7 @@
 <translation id="1010200102790553230">Seite später laden</translation>
 <translation id="1010225406377140704">Bitte den Absender um einen neuen Link</translation>
 <translation id="1011206368273183593">Dateien werden vorbereitet</translation>
+<translation id="1012264210825687872">Nachdem du deine Bestellung geprüft hast, musst du dich in deinem <ph name="BNPL_ISSUER_NAME" />-Konto anmelden oder ein neues erstellen. Dieses Konto wird automatisch mit Google Pay verknüpft.</translation>
 <translation id="1014509239502131234">Aktion wird rückgängig gemacht</translation>
 <translation id="1015730422737071372">Weitere Details angeben</translation>
 <translation id="1019413721762100891">Aus</translation>
@@ -137,6 +138,7 @@ Du wirst sonst gemäß deinen Datenschutzeinstellungen blockiert. Wenn Cookies u
 <translation id="1230244617745022071"><ph name="SOURCE" /> (automatisch erkannt)</translation>
 <translation id="1232569758102978740">Unbenannt</translation>
 <translation id="1236081509407217141">VR zulassen?</translation>
+<translation id="1236689197410206751">AfterPay</translation>
 <translation id="1240347957665416060">Gerätename</translation>
 <translation id="124116460088058876">Weitere Sprachen</translation>
 <translation id="1243027604378859286">Autor:</translation>
@@ -251,6 +253,7 @@ Du wirst sonst gemäß deinen Datenschutzeinstellungen blockiert. Wenn Cookies u
 <translation id="1419305130220238697">Schaltfläche „Downloads in Chrome verwalten“ – aktivieren, um in Chrome heruntergeladene Dateien zu verwalten</translation>
 <translation id="1420345875188552368">Für diese Zahlung kann die Zahlungsmethode verwendet werden, die du für automatische Zahlungen festgelegt hast. Wenn du E‑Wallets in Chrome deaktivieren möchtest, rufe deine <ph name="BEGIN_LINK1" />Zahlungseinstellungen<ph name="END_LINK1" /> auf.</translation>
 <translation id="1420920093772172268"><ph name="TURN_ON_BLUETOOTH_LINK" />, um eine Kopplung zu ermöglichen</translation>
+<translation id="1421484961346698724">Gelöschtes Konto</translation>
 <translation id="14222610277930434">Häufig von dir aufgerufen</translation>
 <translation id="1422930527989633628">Darf nachfragen, wenn sie nach Bluetooth-Geräten in der Nähe suchen möchte</translation>
 <translation id="1426410128494586442">Ja</translation>
@@ -626,6 +629,7 @@ Du wirst sonst gemäß deinen Datenschutzeinstellungen blockiert. Wenn Cookies u
 <translation id="2082238445998314030">Ergebnis <ph name="RESULT_NUMBER" /> von <ph name="TOTAL_RESULTS" /></translation>
 <translation id="2083256696566019397">Bei jedem Besuch erlauben</translation>
 <translation id="2085876078937250610">Speichern…</translation>
+<translation id="2090451897496479509">Wende dich für weitere Informationen an den Anbieter</translation>
 <translation id="2091887806945687916">Ton</translation>
 <translation id="2093982008204312032">Google Chrome versucht, Windows Hello zum Ausfüllen von Passwörtern zu deaktivieren.</translation>
 <translation id="2094505752054353250">Domains stimmen nicht überein.</translation>
@@ -660,6 +664,7 @@ Du wirst sonst gemäß deinen Datenschutzeinstellungen blockiert. Wenn Cookies u
 <translation id="2145193671493396738">Wirtschaftsnachrichten</translation>
 <translation id="214556005048008348">Zahlung abbrechen</translation>
 <translation id="2147117373852943630">Musikinstrumente</translation>
+<translation id="2147254250314124496"><ph name="EMBEDDED_URL" /> möchte Informationen nutzen, die sie zu deiner Person gespeichert hat</translation>
 <translation id="2148613324460538318">Karte hinzufügen</translation>
 <translation id="2148716181193084225">Heute</translation>
 <translation id="2149968176347646218">Verbindung ist nicht sicher</translation>
@@ -691,6 +696,7 @@ Du wirst sonst gemäß deinen Datenschutzeinstellungen blockiert. Wenn Cookies u
 <translation id="2187317261103489799">Erkennen (Standardeinstellung)</translation>
 <translation id="2188375229972301266">Mehrfache Lochung unten</translation>
 <translation id="2194856509914051091">Wichtige Punkte</translation>
+<translation id="2198071643181968308">Weitere Informationen zu <ph name="BNPL_ISSUER_NAME" /></translation>
 <translation id="2200678913752027654">Schaltfläche „Mag ich nicht“ – Eingabetaste drücken, um ein Formular zu öffnen, über das du detailliertes Feedback dazu geben kannst, warum dir dieser Vorschlag nicht gefällt</translation>
 <translation id="2202627062836089804">Rückseite deiner Karte</translation>
 <translation id="2204482073374652408">Update abgeschlossen.</translation>
@@ -837,6 +843,7 @@ Du wirst sonst gemäß deinen Datenschutzeinstellungen blockiert. Wenn Cookies u
 <translation id="2451607499823206582">Tracking</translation>
 <translation id="2452098632681057184">Ökologie und Umwelt</translation>
 <translation id="2452837234288608067">Dabei konnten wir nicht helfen. Bitte versuche es noch einmal.</translation>
+<translation id="2453045048779611513">Deine Organisation schränkt ein, was du speichern kannst</translation>
 <translation id="2456755709261364512">Der Akku muss mindestens zu <ph name="REQUIRED_BATTERY_PRECENT" /> % geladen sein</translation>
 <translation id="2461385121573678775">Mit Chrome Enterprise Core kannst du Browserrichtlinien über die Cloud zentral konfigurieren</translation>
 <translation id="2461822463642141190">Aktuell</translation>
@@ -1086,6 +1093,7 @@ Du wirst sonst gemäß deinen Datenschutzeinstellungen blockiert. Wenn Cookies u
 <translation id="2942492342931589800">Informell</translation>
 <translation id="2942515540157583425">IT- und technische Jobs</translation>
 <translation id="2943895734390379394">Uhrzeit des Uploads:</translation>
+<translation id="2947281105969315778">Wenn du Tabgruppen teilen oder ihnen beitreten möchtest, musst du dich in Chrome anmelden können</translation>
 <translation id="2948083400971632585">Du kannst alle für eine Verbindung konfigurierten Proxys auf der Seite „Einstellungen“ deaktivieren.</translation>
 <translation id="2949183777371959169">Ignoriert, da der Computer nicht bei der Chrome-Verwaltung über die Cloud angemeldet ist.</translation>
 <translation id="2951588413176968965">Meine Ablage</translation>
@@ -1304,6 +1312,7 @@ Du wirst sonst gemäß deinen Datenschutzeinstellungen blockiert. Wenn Cookies u
 <translation id="33073482541490531">Das eingegebene Passwort wurde in einer Datenpanne gefunden. Der Passwortmanager empfiehlt, dieses Passwort jetzt zu ändern.</translation>
 <translation id="3307649904964670439">Schaltfläche „Chrome anpassen“ – aktivieren, um das Erscheinungsbild des Browsers anzupassen</translation>
 <translation id="3308006649705061278">Organisationseinheit (OU)</translation>
+<translation id="3317077846337994567">Das Bezahlen in Raten ist momentan nicht verfügbar. Versuche es später noch einmal.</translation>
 <translation id="3318016344440038475">Comedy-Fernsehserien</translation>
 <translation id="3324687287337751929">4 × 6 Zoll</translation>
 <translation id="3324983252691184275">Purpur</translation>
@@ -1431,6 +1440,7 @@ Du wirst sonst gemäß deinen Datenschutzeinstellungen blockiert. Wenn Cookies u
 <translation id="3536227077203206203">Einmal gewährt</translation>
 <translation id="3537165859691846083">Letter Plus</translation>
 <translation id="353816159217417898">Leinwand (seitenweise)</translation>
+<translation id="3541016556608204104">Weitere Informationen zu Chrome Enterprise Connectors</translation>
 <translation id="3542628208405253498">Bild der Karte</translation>
 <translation id="3542768452570884558">Link in neuem Fenster öffnen</translation>
 <translation id="3543935938072367282">Mit Autofill schneller bezahlen</translation>
@@ -1794,6 +1804,7 @@ Du wirst sonst gemäß deinen Datenschutzeinstellungen blockiert. Wenn Cookies u
 <translation id="415440494507469262">Tab zur Vergleichstabelle hinzufügen</translation>
 <translation id="4159784952369912983">Violett</translation>
 <translation id="4165422751765527461">Hilfeartikel wird in einem neuen Tab geöffnet</translation>
+<translation id="4165584779486830267">Du kannst jetzt mit Affirm oder Zip in Raten bezahlen.</translation>
 <translation id="4165986682804962316">Website-Einstellungen</translation>
 <translation id="4169535189173047238">Nicht zulassen</translation>
 <translation id="4171400957073367226">Ungültige Bestätigungssignatur</translation>
@@ -1944,6 +1955,7 @@ Du wirst sonst gemäß deinen Datenschutzeinstellungen blockiert. Wenn Cookies u
 <translation id="4378154925671717803">Telefon</translation>
 <translation id="4384395682990721132">A4x3</translation>
 <translation id="4387692837058041921">Datei-Upload in Microsoft OneDrive wurde pausiert</translation>
+<translation id="4389931020843542579">Tabgruppe wird geladen</translation>
 <translation id="4390472908992056574">Brim</translation>
 <translation id="4395550503472021297">Mit dieser Richtlinie wird das Standardverhalten der folgenden Richtlinien festgelegt: <ph name="POLICIES" /></translation>
 <translation id="4397978002248035985">Öffnet ein Bestätigungs-Pop-up auf der Website deiner Bank</translation>
@@ -2313,6 +2325,7 @@ Du wirst sonst gemäß deinen Datenschutzeinstellungen blockiert. Wenn Cookies u
 <translation id="5097501891273180634">A2</translation>
 <translation id="5106405387002409393">Chrome benötigt Zugriff auf die „<ph name="PERMISSION" />“-Berechtigung deines Geräts</translation>
 <translation id="510644072453496781">Karton (Ende)</translation>
+<translation id="5106648964679263509">Virtuelle Karte für <ph name="BNPL_ISSUER_NAME" /> ausgefüllt</translation>
 <translation id="5108881358339761672">Website ist nicht sicher</translation>
 <translation id="5109892411553231226">Zahlungsmethoden verwalten</translation>
 <translation id="5112422516732747637">A5</translation>
@@ -2508,6 +2521,7 @@ Du wirst sonst gemäß deinen Datenschutzeinstellungen blockiert. Wenn Cookies u
             <ph name="LIST_ITEM" />In Formulare eingegebene Informationen
           <ph name="END_LIST" /></translation>
 <translation id="5443468954631487277">Umgekehrte Reihenfolge mit der Vorderseite nach oben</translation>
+<translation id="5445340838622821110">Wenn du in Raten bezahlst, wird eine einmalige virtuelle Kartennummer ausgefüllt. Diese Nummer gilt nur für diesen Kauf. <ph name="IDS_AUTOFILL_BNPL_FILLED_CARD_INFORMATION_BUBBLE_LEARN_MORE_LINK_LABEL" /></translation>
 <translation id="5447235695608032700"><ph name="SITE" /> erlauben, Informationen, die zu deiner Person gespeichert wurden, zu verwenden</translation>
 <translation id="5452270690849572955">Diese <ph name="HOST_NAME" />-Seite wurde nicht gefunden</translation>
 <translation id="5452923259299906094">Mit E‑Wallet und Pix bezahlen</translation>
@@ -2755,6 +2769,7 @@ Du wirst sonst gemäß deinen Datenschutzeinstellungen blockiert. Wenn Cookies u
 <translation id="5910140988253729859">Autofill rückgängig machen</translation>
 <translation id="5911020115933784199">Veranstaltungen und Freizeitangebote</translation>
 <translation id="5911110632211230665">Öffnen blockiert</translation>
+<translation id="5914465277418006379"><ph name="MEMBER_FIRST_NAME" /> hat diesen Tab hinzugefügt</translation>
 <translation id="5915189366813702112">Flexible Arbeits(-zeit-)modelle</translation>
 <translation id="59174027418879706">Aktiviert</translation>
 <translation id="5918373444239520146">Gadgets und tragbare Elektrogeräte</translation>
@@ -2835,6 +2850,7 @@ Du wirst sonst gemäß deinen Datenschutzeinstellungen blockiert. Wenn Cookies u
 <translation id="604124094241169006">Automatisch</translation>
 <translation id="6041777658117377052">Temperatur der Kammer</translation>
 <translation id="6042308850641462728">Mehr</translation>
+<translation id="6043357981274314628">Fertig!</translation>
 <translation id="6044573915096792553">Größe 12</translation>
 <translation id="6045164183059402045">Vorlage für Ausschießen</translation>
 <translation id="6047927260846328439">Mit diesen Inhalten wird möglicherweise versucht, dich zu täuschen und so zur Installation von Software oder der Offenlegung personenbezogener Daten zu bringen. <ph name="BEGIN_LINK" />Trotzdem anzeigen<ph name="END_LINK" /></translation>
@@ -2858,7 +2874,6 @@ Du wirst sonst gemäß deinen Datenschutzeinstellungen blockiert. Wenn Cookies u
 <translation id="6062937464449575061">Preis nicht mehr beobachten</translation>
 <translation id="6063415549109819824">Hausfinanzierung</translation>
 <translation id="6070432475334343308">Mindestens eine Datei wurde nicht in „<ph name="FOLDER_NAME" />“ bei <ph name="CLOUD_PROVIDER" /> hochgeladen</translation>
-<translation id="6080696365213338172">Du hast über ein vom Administrator bereitgestelltes Zertifikat auf Inhalte zugegriffen. Die Daten, die du innerhalb von <ph name="DOMAIN" /> bereitstellst, können von deinem Administrator abgefangen werden.</translation>
 <translation id="6085149458302186532">Etiketten (farbig)</translation>
 <translation id="6087312102907839798">Ähnliche Suchanfragen</translation>
 <translation id="6089505343295765444">Tabs, die du aus deinem Chrome-Verlauf löschst, werden weiterhin in deinen Vergleichstabellen angezeigt</translation>
@@ -3000,11 +3015,11 @@ Du wirst sonst gemäß deinen Datenschutzeinstellungen blockiert. Wenn Cookies u
 <translation id="6322182122604171028">Windows Hello konnte nicht verwendet werden</translation>
 <translation id="6326947323444967009">Chrome in den iOS-Einstellungen als Standardbrowser für das System festlegen</translation>
 <translation id="6328639280570009161">Deaktiviere die Netzwerkvorhersage.</translation>
-<translation id="6328784461820205019">"Dies ist keine sichere Verbindung" oder "&lt;span class="error-code"&gt;NET::ERR_CERT_AUTHORITY_INVALID&lt;/span&gt;" oder "&lt;span class="error-code"&gt;ERR_CERT_COMMON_NAME_INVALID&lt;/span&gt;" oder "&lt;span class="error-code"&gt;NET::ERR_CERT_WEAK_SIGNATURE_ALGORITHM&lt;/span&gt;" oder "&lt;span class="error-code"&gt;ERR_CERT_SYMANTEC_LEGACY&lt;/span&gt;" oder "SSL-Zertifikatfehler"</translation>
 <translation id="6335029926534404762">Sportschuhe</translation>
 <translation id="6337133576188860026">Es werden weniger als <ph name="SIZE" /> Speicherplatz freigegeben. Manche Websites werden beim nächsten Öffnen eventuell langsamer geladen.</translation>
 <translation id="6337534724793800597">Richtlinien nach Name filtern</translation>
 <translation id="633770708279464947">Der <ph name="SECURE_DNS_SALT" />-Wert ist ungültig und wird nicht verwendet.</translation>
+<translation id="6338645927051849741">Passwort • Google Passwortmanager</translation>
 <translation id="6340739886198108203">Gemäß der Administratorrichtlinie wird nicht empfohlen, Screenshots oder Aufnahmen zu machen, wenn vertrauliche Inhalte zu sehen sind:</translation>
 <translation id="6341434961864773665">{0,plural, =1{Gemäß der Administratorrichtlinie wird nicht empfohlen, diese Datei auf <ph name="DESTINATION_NAME" /> hochzuladen}other{Gemäß der Administratorrichtlinie wird nicht empfohlen, diese Dateien auf <ph name="DESTINATION_NAME" /> hochzuladen}}</translation>
 <translation id="6342069812937806050">Gerade eben</translation>
@@ -3014,6 +3029,7 @@ Du wirst sonst gemäß deinen Datenschutzeinstellungen blockiert. Wenn Cookies u
 <translation id="6351658970066645919">Browserdaten löschen</translation>
 <translation id="6353505687280762741">{COUNT,plural, =0{Keins}=1{1 Passwort (für <ph name="DOMAIN_LIST" />, synchronisiert)}=2{2 Passwörter (für <ph name="DOMAIN_LIST" />, synchronisiert)}other{# Passwörter (für <ph name="DOMAIN_LIST" />, synchronisiert)}}</translation>
 <translation id="6355392890578844978">Dieser Browser wird nicht von einem Unternehmen oder einer anderen Organisation verwaltet. Aktivitäten auf diesem Gerät können außerhalb von Chromium verwaltet werden. <ph name="BEGIN_LINK" />Weitere Informationen<ph name="END_LINK" /></translation>
+<translation id="6357546827188504216">Die Tabgruppen „<ph name="GROUP_TITLE_1" />“ und „<ph name="GROUP_TITLE_2" />“ sind nicht mehr verfügbar</translation>
 <translation id="6358088212770985041">Zahlungsmethoden zu bearbeiten</translation>
 <translation id="6358450015545214790">Was bedeuten diese Hinweise?</translation>
 <translation id="6360213755783740931">Weitere Informationen zum Malwareschutz</translation>
@@ -3327,6 +3343,7 @@ Du wirst sonst gemäß deinen Datenschutzeinstellungen blockiert. Wenn Cookies u
 <translation id="6917795328362592458">Das eingegebene Passwort wurde in einer Datenpanne gefunden. Zum besseren Schutz deiner Konten empfiehlt der Passwortmanager, deine gespeicherten Passwörter zu prüfen.</translation>
 <translation id="6917873303492266709">Wenn du Tabgruppen teilen, ihnen beitreten und gemeinsam mit anderen an ihnen arbeiten möchtest, öffne die Einstellungen und aktiviere die Option „Anmeldung in Chrome zulassen“</translation>
 <translation id="6921197121276419421">Installation von Web-Apps erlaubt</translation>
+<translation id="69238565902785824">Wenn du dein Konto verknüpft lässt, kannst du schneller mit <ph name="BNPL_ISSUER_NAME" /> bezahlen. Du kannst die Verknüpfung jedoch unter <ph name="IDS_AUTOFILL_BNPL_TOS_LINK_TEXT_WALLET_LINK_TEXT" /> aufheben.</translation>
 <translation id="6924013822850225188">Du kannst festlegen, ob deine Kartenvorteile an der Kasse angezeigt werden (es gelten die Bedingungen der Bank)</translation>
 <translation id="6925267999184670015">B+ (Nordamerika)</translation>
 <translation id="6926216138694948720">Körperschmuck und -kunst</translation>
@@ -3392,6 +3409,7 @@ Du wirst sonst gemäß deinen Datenschutzeinstellungen blockiert. Wenn Cookies u
 <translation id="701757816833614688">Kunsterziehung (Bildende Künste und Design)</translation>
 <translation id="702275896380648118">Diese Website erhebt Informationen dazu, was dir gefällt, und schlägt dann anderen Websites Werbung vor. Außerdem ruft sie deine Anzeigenthemen von Chrome ab, damit sie dir relevantere Werbung anzeigen kann.</translation>
 <translation id="7023162328967545559">Warnung vom Administrator</translation>
+<translation id="7023765275461720661">Konto verknüpfen und mit <ph name="BNPL_ISSUER_NAME" /> bezahlen?</translation>
 <translation id="7029809446516969842">Passwörter</translation>
 <translation id="7030164307377592766">Einstellungen für das Ausfüllen von Zahlungsmethoden zu ändern</translation>
 <translation id="7031646650991750659">Welche Google Play-Apps du installiert hast</translation>
@@ -3614,6 +3632,7 @@ Weitere Details:
 <translation id="741204030948306876">Ja, bitte</translation>
 <translation id="7416351320495623771">Passwörter verwalten…</translation>
 <translation id="7416898721136759658">Ausbildungsförderung, Stipendien und Finanzhilfen</translation>
+<translation id="741772962178517671">Affirm</translation>
 <translation id="7418620734632363981">Programmieren</translation>
 <translation id="7419091773564635591">Computer und Elektronik</translation>
 <translation id="7419106976560586862">Profilpfad</translation>
@@ -3660,6 +3679,7 @@ Weitere Details:
 <translation id="7485085230273446323">Wirtschaft und Industrie</translation>
 <translation id="7485870689360869515">Keine Daten gefunden</translation>
 <translation id="7486880426035242089">OneDrive</translation>
+<translation id="7489255442002627311"><ph name="BNPL_ISSUER_NAME" /> prüft, ob du die Voraussetzungen erfüllst. Das hat keinen Einfluss auf deinen Kreditscore. Nach der Genehmigung erhältst du von <ph name="BNPL_ISSUER_NAME" /> Abrechnungsmodelle, aus denen du eines auswählen und den Kauf abschließen kannst.</translation>
 <translation id="7489392576326061356">Haarpflegeprodukte</translation>
 <translation id="7495528107193238112">Dieser Inhalt ist blockiert. Setze dich mit dem Websiteinhaber in Verbindung, um das Problem zu beheben.</translation>
 <translation id="749865518782565832">Klempnerarbeiten</translation>
@@ -3716,6 +3736,7 @@ Weitere Details:
 <translation id="7569983096843329377">Schwarz</translation>
 <translation id="7574998639136359461">Wintersportausrüstung</translation>
 <translation id="7575207903026901870">Schaltfläche "Vorschlag entfernen", zum Entfernen dieses Vorschlags Eingabetaste drücken</translation>
+<translation id="7575800019233204241">"Dies ist keine sichere Verbindung", "&lt;span class="error-code"&gt;NET::ERR_CERT_AUTHORITY_INVALID&lt;/span&gt;", "&lt;span class="error-code"&gt;ERR_CERT_COMMON_NAME_INVALID&lt;/span&gt;", "&lt;span class="error-code"&gt;NET::ERR_CERT_WEAK_SIGNATURE_ALGORITHM&lt;/span&gt;" oder "SSL-Zertifikatfehler"</translation>
 <translation id="7575887283389198269">Smartphones</translation>
 <translation id="7578104083680115302">Mit Karten, die du bei Google gespeichert hast, kannst du schnell und geräteübergreifend auf Websites und in Apps bezahlen.</translation>
 <translation id="7579442726219254162">Die verwaltete Konfiguration von „<ph name="APPLICATION_ID" />“ enthält die unbekannte Variable „<ph name="VARIABLE" />“.</translation>
@@ -3902,6 +3923,7 @@ Weitere Details:
 <translation id="791107458486222637">Aktion wird wiederholt</translation>
 <translation id="791551905239004656">Zeichnen und Malen</translation>
 <translation id="7916162853251942238">Flexobasis</translation>
+<translation id="791698251820376781">Deine Organisation lässt deine Anmeldung nicht zu</translation>
 <translation id="7926503317156566022">Luftfahrtindustrie</translation>
 <translation id="793209273132572360">Adresse aktualisieren?</translation>
 <translation id="7932579305932748336">Im­prä­g­nie­ren</translation>
@@ -4225,7 +4247,6 @@ Weitere Details:
 <translation id="8473626140772740486">300 × 450 mm</translation>
 <translation id="8473863474539038330">Adressen und andere Daten</translation>
 <translation id="8474910779563686872">Entwicklerdetails anzeigen</translation>
-<translation id="8476959635632921417">Wenn du diese Adresse speichern und auf allen deinen Geräten verwenden möchtest, bestätige deine Identität</translation>
 <translation id="8479754468255770962">Heftklammer unten links</translation>
 <translation id="8483229036294884935">Diese Adresse wird aus deinem Google-Konto (<ph name="ACCOUNT" />) gelöscht</translation>
 <translation id="8488350697529856933">Gilt für</translation>
@@ -4610,11 +4631,13 @@ Weitere Details:
 <translation id="9183425211371246419"><ph name="HOST_NAME" /> verwendet ein nicht unterstütztes Protokoll.</translation>
 <translation id="918454845714257218">Prüfe den Code auf der <ph name="SIDE_OF_CARD" /> und versuch es noch einmal</translation>
 <translation id="9186203289258525843">Schaltfläche „Google Chrome als Standardbrowser festlegen“ – aktivieren, um Chrome als Standardbrowser für das System festzulegen</translation>
+<translation id="9189468832660648522"><ph name="MEMBER_FIRST_NAME" /> hat diesen Tab geändert</translation>
 <translation id="9189789270972826888">Falls die Karte nicht automatisch ausgefüllt wurde, klicke unten auf die Kartendetails, um sie manuell einzufügen. <ph name="IDS_AUTOFILL_FILLED_CARD_INFORMATION_BUBBLE_LEARN_MORE_LINK_LABEL" /></translation>
 <translation id="9190557999028587593">Themen, die älter als 4 Wochen sind, werden automatisch gelöscht</translation>
 <translation id="9191834167571392248">Lochung unten links</translation>
 <translation id="9192361865877479444">Metall (matt)</translation>
 <translation id="9192947025498305328">Naturkosmetik</translation>
+<translation id="9195969368671142407">Wenn deine Organisation die Speicheroption für dein Google-Konto einschränkt, kannst du Tabgruppen nicht teilen oder ihnen beitreten</translation>
 <translation id="9199905725844810519">Drucken ist blockiert</translation>
 <translation id="9201904868909900493">Umfrage öffnen…</translation>
 <translation id="9204089334327209740">Sobald der Upload abgeschlossen ist, kannst du deine Dateien in <ph name="CLOUD_PROVIDER" /> bearbeiten. Der lokale Speicher, einschließlich aller Dateien im Papierkorb, wird automatisch deaktiviert.</translation>

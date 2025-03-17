@@ -6,7 +6,6 @@ package org.chromium.chrome.browser.tasks.tab_management;
 
 import android.app.Activity;
 import android.content.res.Resources;
-import android.graphics.Color;
 import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
@@ -28,9 +27,8 @@ import org.chromium.chrome.browser.browser_controls.BrowserControlsStateProvider
 import org.chromium.chrome.browser.collaboration.CollaborationServiceFactory;
 import org.chromium.chrome.browser.data_sharing.DataSharingServiceFactory;
 import org.chromium.chrome.browser.data_sharing.DataSharingTabManager;
-import org.chromium.chrome.browser.data_sharing.ui.shared_image_tiles.SharedImageTilesColor;
+import org.chromium.chrome.browser.data_sharing.ui.shared_image_tiles.SharedImageTilesConfig;
 import org.chromium.chrome.browser.data_sharing.ui.shared_image_tiles.SharedImageTilesCoordinator;
-import org.chromium.chrome.browser.data_sharing.ui.shared_image_tiles.SharedImageTilesType;
 import org.chromium.chrome.browser.flags.ChromeFeatureList;
 import org.chromium.chrome.browser.layouts.LayoutStateProvider;
 import org.chromium.chrome.browser.profiles.Profile;
@@ -81,8 +79,6 @@ public class TabGroupUiCoordinator implements TabGroupUiMediator.ResetHandler, T
     private final ModalDialogManager mModalDialogManager;
     private final ObservableSupplierImpl<Token> mCurrentTabGroupId = new ObservableSupplierImpl<>();
     private final ThemeColorProvider mThemeColorProvider;
-    private final ObservableSupplierImpl<Integer> mBackgroundColorSupplier =
-            new ObservableSupplierImpl<>(Color.TRANSPARENT);
 
     private @Nullable PropertyModelChangeProcessor mModelChangeProcessor;
     private @Nullable TabGridDialogCoordinator mTabGridDialogCoordinator;
@@ -174,7 +170,9 @@ public class TabGroupUiCoordinator implements TabGroupUiMediator.ResetHandler, T
     public void initializeWithNative(
             Activity activity,
             BottomControlsCoordinator.BottomControlsVisibilityController visibilityController,
-            Callback<Object> onModelTokenChange) {
+            Callback<Object> onSnapshotTokenChange) {
+        ObservableSupplierImpl<Object> tabStripTokenSupplier = new ObservableSupplierImpl<>();
+
         var currentTabGroupModelFilterSupplier =
                 mTabModelSelector
                         .getTabGroupModelFilterProvider()
@@ -199,13 +197,12 @@ public class TabGroupUiCoordinator implements TabGroupUiMediator.ResetHandler, T
                             mTabListContainerView,
                             /* attachToParent= */ true,
                             COMPONENT_NAME,
-                            onModelTokenChange,
+                            tabStripTokenSupplier::set,
                             /* hasEmptyView= */ false,
                             /* emptyImageResId= */ Resources.ID_NULL,
                             /* emptyHeadingStringResId= */ Resources.ID_NULL,
                             /* emptySubheadingStringResId= */ Resources.ID_NULL,
                             /* onTabGroupCreation= */ null,
-                            mBackgroundColorSupplier,
                             /* allowDragAndDrop= */ false);
             mTabStripCoordinator.initWithNative(mTabModelSelector.getModel(false).getProfile());
 
@@ -226,6 +223,7 @@ public class TabGroupUiCoordinator implements TabGroupUiMediator.ResetHandler, T
             }
 
             @Nullable SharedImageTilesCoordinator sharedImageTilesCoordinator = null;
+            @Nullable SharedImageTilesConfig.Builder sharedImageTilesConfigBuilder = null;
             Profile profile = mTabModelSelector.getModel(/* incognito= */ false).getProfile();
             CollaborationService collaborationService =
                     CollaborationServiceFactory.getForProfile(profile);
@@ -233,11 +231,13 @@ public class TabGroupUiCoordinator implements TabGroupUiMediator.ResetHandler, T
             if (serviceStatus.isAllowedToJoin()) {
                 DataSharingService dataSharingService =
                         DataSharingServiceFactory.getForProfile(profile);
+                sharedImageTilesConfigBuilder =
+                        new SharedImageTilesConfig.Builder(activity)
+                                .setIconSizeDp(R.dimen.tab_strip_shared_image_tiles_size);
                 sharedImageTilesCoordinator =
                         new SharedImageTilesCoordinator(
                                 activity,
-                                SharedImageTilesType.DEFAULT,
-                                new SharedImageTilesColor(SharedImageTilesColor.Style.DYNAMIC),
+                                sharedImageTilesConfigBuilder.build(),
                                 dataSharingService,
                                 collaborationService);
                 FrameLayout container =
@@ -248,7 +248,6 @@ public class TabGroupUiCoordinator implements TabGroupUiMediator.ResetHandler, T
 
             mMediator =
                     new TabGroupUiMediator(
-                            mActivity,
                             visibilityController,
                             mHandleBackPressChangedSupplier,
                             this,
@@ -260,8 +259,10 @@ public class TabGroupUiCoordinator implements TabGroupUiMediator.ResetHandler, T
                             mTabGridDialogControllerSupplier,
                             mOmniboxFocusStateSupplier,
                             sharedImageTilesCoordinator,
+                            sharedImageTilesConfigBuilder,
                             mThemeColorProvider,
-                            mBackgroundColorSupplier);
+                            onSnapshotTokenChange,
+                            tabStripTokenSupplier);
 
             if (serviceStatus.isAllowedToJoin()) {
                 mTabBubbler =

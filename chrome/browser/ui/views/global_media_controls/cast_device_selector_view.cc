@@ -118,10 +118,10 @@ CastDeviceSelectorView::CastDeviceSelectorView(
     : device_list_host_(std::move(device_list_host)),
       device_list_client_(this, std::move(device_list_client)),
       media_color_theme_(media_color_theme) {
-  SetBorder(views::CreateThemedRoundedRectBorder(
+  SetBorder(views::CreateRoundedRectBorder(
       kBackgroundBorderThickness, kBackgroundCornerRadius,
       media_color_theme_.device_selector_border_color_id));
-  SetBackground(views::CreateThemedRoundedRectBackground(
+  SetBackground(views::CreateRoundedRectBackground(
       media_color_theme_.device_selector_background_color_id,
       kBackgroundCornerRadius));
   SetLayoutManager(std::make_unique<views::BoxLayout>(

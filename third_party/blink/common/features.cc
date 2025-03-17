@@ -11,8 +11,6 @@
 #include "build/android_buildflags.h"
 #include "build/build_config.h"
 #include "build/chromecast_buildflags.h"
-#include "build/chromeos_buildflags.h"
-#include "services/network/public/cpp/features.h"
 #include "third_party/blink/public/common/features_generated.h"
 #include "third_party/blink/public/common/forcedark/forcedark_switches.h"
 #include "third_party/blink/public/common/interest_group/ad_auction_constants.h"
@@ -41,6 +39,22 @@ BASE_FEATURE_PARAM(int,
                    &kAdAuctionSignals,
                    "ad-auction-signals-max-size-bytes",
                    10000);
+
+// Serves as killswitch for changing CanCreateCanvasResourceProvider() to
+// create resource provider internally rather than Canvas2DLayerBridge.
+// TODO(crbug.com/40280152): Fix issues between interaction of this code and
+// CanvasRenderingContext2D::Restore() and re-enable.
+BASE_FEATURE(kAdjustCanCreateCanvas2dResourceProvider,
+             "AdjustCanCreateCanvas2dResourceProvider",
+             base::FEATURE_DISABLED_BY_DEFAULT);
+
+// Serves as killswitch for changing GetOrCreateCanvasResourceProvider() away
+// from using GetOrCreateCanvas2DLayerBridge() for 2D contexts.
+// TODO(crbug.com/401192130): Resolve crash and re-enable.
+// TODO(crbug.com/40280152): Eliminate post safe-rollout.
+BASE_FEATURE(kAdjustGetOrCreate2DCanvasProvider,
+             "AdjustGetOrCreate2DCanvasProvider",
+             base::FEATURE_DISABLED_BY_DEFAULT);
 
 // Avoids copying ResourceRequest::TrustedParams when possible.
 BASE_FEATURE(kAvoidTrustedParamsCopies,
@@ -231,12 +245,6 @@ BASE_FEATURE(kBoostRenderBlockingStyleLoadingTaskPriority,
              base::FEATURE_ENABLED_BY_DEFAULT);
 BASE_FEATURE(kBoostNonRenderBlockingStyleLoadingTaskPriority,
              "BoostNonRenderBlockingStyleLoadingTaskPriority",
-             base::FEATURE_ENABLED_BY_DEFAULT);
-
-// https://github.com/patcg-individual-drafts/topics
-// Kill switch for the Topics API.
-BASE_FEATURE(kBrowsingTopics,
-             "BrowsingTopics",
              base::FEATURE_ENABLED_BY_DEFAULT);
 
 // If enabled, the check for whether the IP address is publicly routable will be
@@ -881,6 +889,16 @@ BASE_FEATURE_PARAM(std::string,
                    "FledgeBiddingAndAuctionKeyConfig",
                    "");
 
+// See https://github.com/WICG/turtledove/issues/1334
+BASE_FEATURE(kFledgeOriginScopedKeys,
+             "FledgeOriginScopedKeys",
+             base::FEATURE_ENABLED_BY_DEFAULT);
+BASE_FEATURE_PARAM(std::string,
+                   kFledgeOriginScopedKeyConfig,
+                   &kFledgeOriginScopedKeys,
+                   "FledgeOriginScopedKeyConfig",
+                   "");
+
 // See in the header.
 BASE_FEATURE(kFledgeConsiderKAnonymity,
              "FledgeConsiderKAnonymity",
@@ -993,6 +1011,10 @@ BASE_FEATURE_PARAM(int,
 // privateAggregation.contributeToHistogramOnEvent.
 BASE_FEATURE(kFledgeEnforcePermissionPolicyContributeOnEvent,
              "FledgeEnforcePermissionPolicyContributeOnEvent",
+             base::FEATURE_DISABLED_BY_DEFAULT);
+
+BASE_FEATURE(kFledgeDisableLocalAdsAuctions,
+             "FledgeDisableLocalAdsAuctions",
              base::FEATURE_DISABLED_BY_DEFAULT);
 
 BASE_FEATURE(kForceHighPerformanceGPUForWebGL,
@@ -1122,6 +1144,10 @@ BASE_FEATURE(kInputPredictorTypeChoice,
              "InputPredictorTypeChoice",
              base::FEATURE_DISABLED_BY_DEFAULT);
 
+BASE_FEATURE(kInputScenarioPriorityBoost,
+             "InputScenarioPriorityBoost",
+             base::FEATURE_DISABLED_BY_DEFAULT);
+
 // When enabled, wake ups from throttleable TaskQueues are limited to 1 per
 // minute in a page that has been backgrounded for 5 minutes.
 //
@@ -1155,38 +1181,6 @@ BASE_FEATURE(kInteractiveDetectorIgnoreFcp,
              "InteractiveDetectorIgnoreFcp",
              base::FEATURE_DISABLED_BY_DEFAULT);
 
-// Kill switch for the Interest Group API, i.e. if disabled, the
-// API exposure will be disabled regardless of the OT config.
-BASE_FEATURE(kInterestGroupStorage,
-             "InterestGroupStorage",
-             base::FEATURE_ENABLED_BY_DEFAULT);
-// TODO(crbug.com/1197209): Adjust these limits in response to usage.
-BASE_FEATURE_PARAM(int,
-                   kInterestGroupStorageMaxOwners,
-                   &kInterestGroupStorage,
-                   "max_owners",
-                   1000);
-BASE_FEATURE_PARAM(int,
-                   kInterestGroupStorageMaxStoragePerOwner,
-                   &kInterestGroupStorage,
-                   "max_storage_per_owner",
-                   10 * 1024 * 1024);
-BASE_FEATURE_PARAM(int,
-                   kInterestGroupStorageMaxGroupsPerOwner,
-                   &kInterestGroupStorage,
-                   "max_groups_per_owner",
-                   2000);
-BASE_FEATURE_PARAM(int,
-                   kInterestGroupStorageMaxNegativeGroupsPerOwner,
-                   &kInterestGroupStorage,
-                   "max_negative_groups_per_owner",
-                   20000);
-BASE_FEATURE_PARAM(int,
-                   kInterestGroupStorageMaxOpsBeforeMaintenance,
-                   &kInterestGroupStorage,
-                   "max_ops_before_maintenance",
-                   1000);
-
 // Allow process isolation of iframes with the 'sandbox' attribute set. Whether
 // or not such an iframe will be isolated may depend on options specified with
 // the attribute. Note: At present, only iframes with origin-restricted
@@ -1206,6 +1200,17 @@ BASE_FEATURE_ENUM_PARAM(IsolateSandboxedIframesGrouping,
                         IsolateSandboxedIframesGrouping::kPerOrigin,
                         &isolated_sandboxed_iframes_grouping_types);
 
+// Serves as killswitch for migrating CanvasRenderingContext2D::IsPaintable()
+// from checking the existence of the canvas' Canvas2DLayerBridge to checking
+// for the existence of its resource provider.
+// NOTE: Do not check this feature directly: Check
+// CheckProviderInCanvas2DRenderingContextIsPaintable() instead.
+// TODO(crbug.com/40280152): Fix issues between interaction of this code and
+// CanvasRenderingContext2D::Restore() and re-enable.
+BASE_FEATURE(kIsPaintableChecksResourceProviderInsteadOfBridge,
+             "IsPaintableChecksResourceProviderInsteadOfBridge",
+             base::FEATURE_DISABLED_BY_DEFAULT);
+
 BASE_FEATURE(kKalmanDirectionCutOff,
              "KalmanDirectionCutOff",
              base::FEATURE_DISABLED_BY_DEFAULT);
@@ -1222,7 +1227,6 @@ BASE_FEATURE(kAttributionReportingInBrowserMigration,
              "AttributionReportingInBrowserMigration",
              base::FEATURE_DISABLED_BY_DEFAULT);
 
-// Killswitch M135.
 BASE_FEATURE(kLimitLayerMergeDistance,
              "LimitLayerMergeDistance",
              base::FEATURE_ENABLED_BY_DEFAULT);
@@ -1230,7 +1234,7 @@ BASE_FEATURE_PARAM(size_t,
                    kLayerMergeDistanceLimit,
                    &kLimitLayerMergeDistance,
                    "limit",
-                   16);
+                   0x10000000);
 
 BASE_FEATURE(kLCPCriticalPathPredictor,
              "LCPCriticalPathPredictor",
@@ -1663,7 +1667,7 @@ BASE_FEATURE(kLogUnexpectedIPCPostedToBackForwardCachedDocuments,
 // (Canvas2DImageChromium is disabled).
 BASE_FEATURE(kLowLatencyCanvas2dImageChromium,
              "LowLatencyCanvas2dImageChromium",
-#if BUILDFLAG(IS_CHROMEOS_ASH) || BUILDFLAG(IS_ANDROID)
+#if BUILDFLAG(IS_CHROMEOS) || BUILDFLAG(IS_ANDROID)
              base::FEATURE_ENABLED_BY_DEFAULT
 #else
              base::FEATURE_DISABLED_BY_DEFAULT
@@ -1861,6 +1865,10 @@ BASE_FEATURE(kNoThrottlingVisibleAgent,
              "NoThrottlingVisibleAgent",
              base::FEATURE_DISABLED_BY_DEFAULT);
 
+BASE_FEATURE(kNoThrowForCSPBlockedWorker,
+             "NoThrowForCSPBlockedWorker",
+             base::FEATURE_DISABLED_BY_DEFAULT);
+
 BASE_FEATURE(kOpenAllUrlsOrFilesOnDrop,
              "OpenAllUrlsOrFilesOnDrop",
              base::FEATURE_ENABLED_BY_DEFAULT);
@@ -2024,10 +2032,6 @@ const char kPrerender2MemoryAcceptablePercentOfSystemMemoryParamName[] =
 BASE_FEATURE(kPrerender2EarlyDocumentLifecycleUpdate,
              "Prerender2EarlyDocumentLifecycleUpdate",
              base::FEATURE_DISABLED_BY_DEFAULT);
-
-BASE_FEATURE(kPrerender2NoVarySearch,
-             "Prerender2NoVarySearch",
-             base::FEATURE_ENABLED_BY_DEFAULT);
 
 BASE_FEATURE(kPrerender2WarmUpCompositor,
              "Prerender2WarmUpCompositor",
@@ -2313,77 +2317,6 @@ BASE_FEATURE(kSetIntervalWithoutClamp,
              "SetIntervalWithoutClamp",
              base::FEATURE_ENABLED_BY_DEFAULT);
 
-// Enable the shared storage API. Note that enabling this feature does not
-// automatically expose this API to the web, it only allows the element to be
-// enabled by the runtime enabled feature, for origin trials.
-// https://github.com/pythagoraskitty/shared-storage/blob/main/README.md
-BASE_FEATURE(kSharedStorageAPI,
-             "SharedStorageAPI",
-             base::FEATURE_ENABLED_BY_DEFAULT);
-BASE_FEATURE_PARAM(size_t,
-                   kSharedStorageURLSelectionOperationInputURLSizeLimit,
-                   &kSharedStorageAPI,
-                   "url_selection_operation_input_url_size_limit",
-                   8);
-BASE_FEATURE_PARAM(int,
-                   kMaxSharedStoragePageSize,
-                   &kSharedStorageAPI,
-                   "MaxSharedStoragePageSize",
-                   4096);
-BASE_FEATURE_PARAM(int,
-                   kMaxSharedStorageCacheSize,
-                   &kSharedStorageAPI,
-                   "MaxSharedStorageCacheSize",
-                   1024);
-BASE_FEATURE_PARAM(int,
-                   kMaxSharedStorageInitTries,
-                   &kSharedStorageAPI,
-                   "MaxSharedStorageInitTries",
-                   2);
-BASE_FEATURE_PARAM(int,
-                   kMaxSharedStorageIteratorBatchSize,
-                   &kSharedStorageAPI,
-                   "MaxSharedStorageIteratorBatchSize",
-                   100);
-BASE_FEATURE_PARAM(int,
-                   kSharedStorageBitBudget,
-                   &kSharedStorageAPI,
-                   "SharedStorageBitBudget",
-                   12);
-BASE_FEATURE_PARAM(base::TimeDelta,
-                   kSharedStorageBudgetInterval,
-                   &kSharedStorageAPI,
-                   "SharedStorageBudgetInterval",
-                   base::Hours(24));
-BASE_FEATURE_PARAM(base::TimeDelta,
-                   kSharedStorageStalePurgeInitialInterval,
-                   &kSharedStorageAPI,
-                   "SharedStorageStalePurgeInitialInterval",
-                   base::Minutes(2));
-BASE_FEATURE_PARAM(base::TimeDelta,
-                   kSharedStorageStalePurgeRecurringInterval,
-                   &kSharedStorageAPI,
-                   "SharedStorageStalePurgeRecurringInterval",
-                   base::Hours(2));
-BASE_FEATURE_PARAM(base::TimeDelta,
-                   kSharedStorageStalenessThreshold,
-                   &kSharedStorageAPI,
-                   "SharedStorageStalenessThreshold",
-                   base::Days(30));
-BASE_FEATURE_PARAM(size_t,
-                   kSharedStorageMaxAllowedFencedFrameDepthForSelectURL,
-                   &kSharedStorageAPI,
-                   "SharedStorageMaxAllowedFencedFrameDepthForSelectURL",
-                   1);
-// NOTE: To preserve user privacy, the
-// `kSharedStorageExposeDebugMessageForSettingsStatus` feature param MUST remain
-// false by default.
-BASE_FEATURE_PARAM(bool,
-                   kSharedStorageExposeDebugMessageForSettingsStatus,
-                   &kSharedStorageAPI,
-                   "ExposeDebugMessageForSettingsStatus",
-                   false);
-
 BASE_FEATURE(kSharedStorageWorkletSharedBackingThreadImplementation,
              "SharedStorageWorkletSharedBackingThreadImplementation",
              base::FEATURE_DISABLED_BY_DEFAULT);
@@ -2544,6 +2477,12 @@ BASE_FEATURE(kThreadedBodyLoader,
 BASE_FEATURE(kThreadedPreloadScanner,
              "ThreadedPreloadScanner",
              base::FEATURE_DISABLED_BY_DEFAULT);
+
+BASE_FEATURE_PARAM(bool,
+                   kThrottleFrameRateOnInitialization,
+                   &features::kRenderBlockingFullFrameRate,
+                   "throttle-frame-rate-on-initialization",
+                   false);
 
 // Enable throttling of fetch() requests from service workers in the
 // installing state.  The limit of 3 was chosen to match the limit
@@ -2770,11 +2709,6 @@ BASE_FEATURE(kWebRtcUseMinMaxVEADimensions,
 
 // Allow access to WebSQL APIs.
 BASE_FEATURE(kWebSQLAccess, "kWebSQLAccess", base::FEATURE_DISABLED_BY_DEFAULT);
-
-// Allow access to WebSQL on Android WebView.
-BASE_FEATURE(kWebSQLWebViewAccess,
-             "WebSQLWebViewAccess",
-             base::FEATURE_DISABLED_BY_DEFAULT);
 
 // Kill switch for https://crbug.com/338955051.
 BASE_FEATURE(kWebUSBTransferSizeLimit,

@@ -4,13 +4,12 @@
 
 package org.chromium.chrome.browser.tasks.tab_management;
 
-import static org.chromium.chrome.browser.tasks.tab_management.TabGroupListBottomSheetProperties.ADD_TO_GROUP_VISIBLE;
-
 import android.content.Context;
 
 import androidx.annotation.IntDef;
 import androidx.annotation.VisibleForTesting;
 
+import org.chromium.base.Token;
 import org.chromium.build.annotations.NullMarked;
 import org.chromium.build.annotations.Nullable;
 import org.chromium.chrome.R;
@@ -29,8 +28,6 @@ import org.chromium.components.data_sharing.DataSharingService;
 import org.chromium.components.tab_group_sync.TabGroupSyncService;
 import org.chromium.ui.modelutil.LayoutViewBuilder;
 import org.chromium.ui.modelutil.MVCListAdapter;
-import org.chromium.ui.modelutil.PropertyModel;
-import org.chromium.ui.modelutil.PropertyModelChangeProcessor;
 import org.chromium.ui.modelutil.SimpleRecyclerViewAdapter;
 
 import java.lang.annotation.Retention;
@@ -47,7 +44,7 @@ public class TabGroupListBottomSheetCoordinator {
         int EXISTING_GROUP = 1;
     }
 
-    interface TabGroupParityBottomSheetCoordinatorDelegate {
+    interface TabGroupListBottomSheetCoordinatorDelegate {
         /** Requests to show the bottom sheet content. */
         boolean requestShowContent();
 
@@ -56,6 +53,16 @@ public class TabGroupListBottomSheetCoordinator {
 
         /** To be run on sheet close. */
         void onSheetClosed();
+    }
+
+    /** A callback to run after a tab group is created. */
+    public interface TabGroupCreationCallback {
+        /**
+         * Responds to tab group creation.
+         *
+         * @param tabGroupId The tab group ID of the newly-created tab group.
+         */
+        void onTabGroupCreated(Token tabGroupId);
     }
 
     private final TabGroupListBottomSheetView mView;
@@ -67,17 +74,19 @@ public class TabGroupListBottomSheetCoordinator {
     /**
      * @param context The {@link Context} to attach the bottom sheet to.
      * @param profile The current user profile.
-     * @param tabGroupCreationDialogManager Used to show the tab group creation dialog.
+     * @param tabGroupCreationCallback Used to follow up on tab group creation.
      * @param filter Used to read current tab groups.
      * @param bottomSheetController Used to interact with the bottom sheet.
+     * @param showNewGroupRow Whether the 'New Tab Group' row should be displayed.
      */
     public TabGroupListBottomSheetCoordinator(
             Context context,
             Profile profile,
-            TabGroupCreationDialogManager tabGroupCreationDialogManager,
+            TabGroupCreationCallback tabGroupCreationCallback,
             TabGroupModelFilter filter,
-            BottomSheetController bottomSheetController) {
-        mView = new TabGroupListBottomSheetView(context);
+            BottomSheetController bottomSheetController,
+            boolean showNewGroupRow) {
+        mView = new TabGroupListBottomSheetView(context, bottomSheetController, showNewGroupRow);
         mBottomSheetController = bottomSheetController;
 
         MVCListAdapter.ModelList modelList = new MVCListAdapter.ModelList();
@@ -122,22 +131,20 @@ public class TabGroupListBottomSheetCoordinator {
                 new TabGroupListBottomSheetMediator(
                         modelList,
                         filter,
-                        tabGroupCreationDialogManager,
+                        tabGroupCreationCallback,
                         faviconResolver,
                         tabGroupSyncService,
                         dataSharingService,
                         collaborationService,
                         bottomSheetController,
-                        createModel(),
-                        createDelegate());
-        PropertyModelChangeProcessor.create(
-                createModel(), mView, TabGroupListBottomSheetViewBinder::bind);
+                        createDelegate(),
+                        showNewGroupRow);
     }
 
     /** Creates the delegate. */
     @VisibleForTesting
-    TabGroupParityBottomSheetCoordinatorDelegate createDelegate() {
-        return new TabGroupParityBottomSheetCoordinatorDelegate() {
+    TabGroupListBottomSheetCoordinatorDelegate createDelegate() {
+        return new TabGroupListBottomSheetCoordinatorDelegate() {
             @Override
             public boolean requestShowContent() {
                 return mBottomSheetController.requestShowContent(mView, /* animate= */ true);
@@ -159,10 +166,8 @@ public class TabGroupListBottomSheetCoordinator {
      * Requests to show the bottom sheet.
      *
      * @param tabs The list of tabs to be added to a group.
-     * @param showAddToGroupRow Whether the 'Add To Group' row should be displayed.
      */
-    public void showBottomSheet(List<Tab> tabs, boolean showAddToGroupRow) {
-        mMediator.setShowAddToGroupRow(showAddToGroupRow);
+    public void showBottomSheet(List<Tab> tabs) {
         mMediator.requestShowContent(tabs);
     }
 
@@ -170,11 +175,5 @@ public class TabGroupListBottomSheetCoordinator {
     public void destroy() {
         mSimpleRecyclerViewAdapter.destroy();
         mTabListFaviconProvider.destroy();
-    }
-
-    private PropertyModel createModel() {
-        return new PropertyModel.Builder(TabGroupListBottomSheetProperties.ALL_KEYS)
-                .with(ADD_TO_GROUP_VISIBLE, true)
-                .build();
     }
 }

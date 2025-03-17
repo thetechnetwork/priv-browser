@@ -12,7 +12,6 @@
 #include "base/metrics/histogram_macros.h"
 #include "base/task/single_thread_task_runner.h"
 #include "build/build_config.h"
-#include "build/chromeos_buildflags.h"
 #include "cc/animation/animation_host.h"
 #include "cc/animation/animation_id_provider.h"
 #include "cc/mojo_embedder/async_layer_tree_frame_sink.h"
@@ -828,13 +827,6 @@ void WidgetBase::FinishRequestNewLayerTreeFrameSink(
     return;
   }
 
-  if (Platform::Current()->IsGpuCompositingDisabled()) {
-    // GPU compositing was disabled after the check in
-    // WidgetBase::RequestNewLayerTreeFrameSink(). Fail and let it retry.
-    std::move(callback).Run(nullptr, nullptr);
-    return;
-  }
-
   scoped_refptr<cc::RasterContextProviderWrapper>
       worker_context_provider_wrapper =
           Platform::Current()->SharedCompositorWorkerContextProvider(
@@ -870,7 +862,7 @@ void WidgetBase::FinishRequestNewLayerTreeFrameSink(
   attributes.enable_gles2_interface = false;
   attributes.enable_grcontext = false;
   attributes.enable_raster_interface = true;
-  attributes.enable_oop_rasterization = false;
+  attributes.enable_gpu_rasterization = false;
 
   constexpr bool automatic_flushes = false;
   constexpr bool support_locking = false;
@@ -1337,18 +1329,16 @@ void WidgetBase::UpdateCompositionInfo(bool immediate_request) {
   composition_character_bounds_ = character_bounds;
   composition_range_ = range;
 
-  // If using the new pipeline for CursorAnchorInfo data, send data from the
-  // frame widget.
-  if (RuntimeEnabledFeatures::CursorAnchorInfoMojoPipeEnabled()) {
+  // If the new pipeline for CursorAnchorInfo data is available, send data from
+  // the frame widget instead.
+  if (frame_widget->HasImeRenderWidgetHost()) {
     frame_widget->UpdateCursorAnchorInfo();
     return;
   }
-  std::optional<Vector<gfx::Rect>> line_bounds =
-      frame_widget->GetVisibleLineBoundsOnScreen();
   if (mojom::blink::WidgetInputHandlerHost* host =
           widget_input_handler_manager_->GetWidgetInputHandlerHost()) {
-    host->ImeCompositionRangeChanged(
-        composition_range_, composition_character_bounds_, line_bounds);
+    host->ImeCompositionRangeChanged(composition_range_,
+                                     composition_character_bounds_);
   }
 }
 

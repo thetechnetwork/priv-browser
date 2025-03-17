@@ -150,10 +150,6 @@
       [_presenter presentLensKeyboardTipBubble];
       break;
     }
-    case InProductHelpType::kParcelTracking: {
-      [_presenter presentParcelTrackingTipBubble];
-      break;
-    }
     case InProductHelpType::kPullToRefresh: {
       [_presenter
           presentPullToRefreshGestureInProductHelpWithDeviceSwitcherResultDispatcher:
@@ -171,6 +167,9 @@
     case InProductHelpType::kLensOverlayEntrypoint: {
       [_presenter presentLensOverlayTipBubble];
       break;
+    }
+    case InProductHelpType::kSettingsInOverflowMenu: {
+      [_presenter presentOverflowMenuSettingsBubble];
     }
   }
 }

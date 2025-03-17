@@ -23,6 +23,7 @@ import android.view.View.OnLayoutChangeListener;
 import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.view.ViewStub;
+import android.widget.ImageButton;
 
 import androidx.activity.BackEventCompat;
 import androidx.annotation.NonNull;
@@ -132,6 +133,7 @@ import org.chromium.chrome.browser.toolbar.home_button.HomeButtonCoordinator;
 import org.chromium.chrome.browser.toolbar.load_progress.LoadProgressCoordinator;
 import org.chromium.chrome.browser.toolbar.menu_button.MenuButtonCoordinator;
 import org.chromium.chrome.browser.toolbar.menu_button.MenuButtonState;
+import org.chromium.chrome.browser.toolbar.reload_button.ReloadButtonCoordinator;
 import org.chromium.chrome.browser.toolbar.top.ActionModeController;
 import org.chromium.chrome.browser.toolbar.top.ActionModeController.ActionBarDelegate;
 import org.chromium.chrome.browser.toolbar.top.NavigationPopup;
@@ -288,6 +290,8 @@ public class ToolbarManager
 
     private HomeButtonCoordinator mHomeButtonCoordinator;
     private ToggleTabStackButtonCoordinator mTabSwitcherButtonCoordinator;
+
+    private @Nullable ReloadButtonCoordinator mReloadButtonCoordinator;
 
     private BrowserStateBrowserControlsVisibilityDelegate mControlsVisibilityDelegate;
     private int mFullscreenFocusToken = TokenHolder.INVALID_TOKEN;
@@ -895,12 +899,25 @@ public class ToolbarManager
                             mTabModelSelectorSupplier);
         }
 
+        ImageButton reloadButton = mControlContainer.findViewById(R.id.refresh_button);
+        if (reloadButton != null) {
+            mReloadButtonCoordinator =
+                    new ReloadButtonCoordinator(
+                            reloadButton,
+                            ignoreCache -> {
+                                setUrlBarFocus(false, OmniboxFocusReason.UNFOCUS);
+                                mToolbarTabController.stopOrReloadCurrentTab(ignoreCache);
+                            });
+        }
+
         mToolbarLongPressMenuHandler =
                 new ToolbarLongPressMenuHandler(
                         /* context= */ mActivity,
                         profileSupplier,
                         mIsCustomTab,
                         mOmniboxFocusStateSupplier,
+                        mActivityLifecycleDispatcher,
+                        mWindowAndroid,
                         () -> getUrlBarTextWithoutAutocomplete(),
                         () -> getUrlBarViewRectProvider());
         OnLongClickListener onLongClickListener =
@@ -1593,7 +1610,8 @@ public class ToolbarManager
                         mDesktopWindowStateManager,
                         mTabStripTransitionDelegateSupplier,
                         onLongClickListener,
-                        progressBar);
+                        progressBar,
+                        mReloadButtonCoordinator);
 
         mHomepageStateListener =
                 () -> {
@@ -2098,6 +2116,7 @@ public class ToolbarManager
         mTabStripHeightSupplier = null;
         mToolbar.removeUrlExpansionObserver(mStatusBarColorController);
         mToolbar.destroy();
+        mToolbarLongPressMenuHandler.destroy();
 
         mIncognitoStateProvider.destroy();
 
@@ -2136,6 +2155,11 @@ public class ToolbarManager
 
             mMenuButtonCoordinator.destroy();
             mMenuButtonCoordinator = null;
+        }
+
+        if (mReloadButtonCoordinator != null) {
+            mReloadButtonCoordinator.destroy();
+            mReloadButtonCoordinator = null;
         }
 
         if (mOverviewModeMenuButtonCoordinator != null) {

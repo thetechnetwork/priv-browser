@@ -467,7 +467,9 @@ void HWNDMessageHandler::Init(HWND parent, const gfx::Rect& bounds) {
 }
 
 void HWNDMessageHandler::InitModalType(ui::mojom::ModalType modal_type) {
-  if (modal_type == ui::mojom::ModalType::kNone) {
+  // Windows only knows about window-level modality. Ignore other modalities:
+  // Child-modal is handled by the client. System-modal is not supported on Win.
+  if (modal_type != ui::mojom::ModalType::kWindow) {
     return;
   }
   // We implement modality by crawling up the hierarchy of windows starting
@@ -650,14 +652,21 @@ void HWNDMessageHandler::SetRegion(HRGN region) {
 void HWNDMessageHandler::StackAbove(HWND other_hwnd) {
   // Windows API allows to stack behind another windows only.
   DCHECK(other_hwnd);
-  HWND next_window = GetNextWindow(other_hwnd, GW_HWNDPREV);
-  SetWindowPos(hwnd(), next_window ? next_window : HWND_TOP, 0, 0, 0, 0,
-               SWP_NOSIZE | SWP_NOMOVE | SWP_NOACTIVATE);
+  HWND next_window = ::GetNextWindow(other_hwnd, GW_HWNDPREV);
+
+  // ::SetWindowPos can trigger a nested message loop with WindowPosChanged
+  // which can cause an unneeded resize.
+  base::AutoReset<bool> auto_reset(&ignore_window_pos_changes_, true);
+  ::SetWindowPos(hwnd(), next_window ? next_window : HWND_TOP, 0, 0, 0, 0,
+                 SWP_NOSIZE | SWP_NOMOVE | SWP_NOACTIVATE);
 }
 
 void HWNDMessageHandler::StackAtTop() {
-  SetWindowPos(hwnd(), HWND_TOP, 0, 0, 0, 0,
-               SWP_NOSIZE | SWP_NOMOVE | SWP_NOACTIVATE);
+  // ::SetWindowPos can trigger a nested message loop with WindowPosChanged
+  // which can cause an unneeded resize.
+  base::AutoReset<bool> auto_reset(&ignore_window_pos_changes_, true);
+  ::SetWindowPos(hwnd(), HWND_TOP, 0, 0, 0, 0,
+                 SWP_NOSIZE | SWP_NOMOVE | SWP_NOACTIVATE);
 }
 
 void HWNDMessageHandler::Show(ui::mojom::WindowShowState show_state,
@@ -674,7 +683,8 @@ void HWNDMessageHandler::Show(ui::mojom::WindowShowState show_state,
     SetWindowPlacement(hwnd(), &placement);
     native_show_state = SW_SHOWMAXIMIZED;
   } else {
-    const bool is_maximized = IsMaximized();
+    const bool is_maximized_or_arranged =
+        IsMaximized() || IsWindowArranged(hwnd());
 
     // Use SW_SHOW/SW_SHOWNA instead of SW_SHOWNORMAL/SW_SHOWNOACTIVATE so that
     // the window is not restored to its original position if it is maximized.
@@ -684,7 +694,8 @@ void HWNDMessageHandler::Show(ui::mojom::WindowShowState show_state,
     // position, some do not. See crbug.com/1296710
     switch (show_state) {
       case ui::mojom::WindowShowState::kInactive:
-        native_show_state = is_maximized ? SW_SHOWNA : SW_SHOWNOACTIVATE;
+        native_show_state =
+            is_maximized_or_arranged ? SW_SHOWNA : SW_SHOWNOACTIVATE;
         break;
       case ui::mojom::WindowShowState::kMaximized:
         native_show_state = SW_SHOWMAXIMIZED;
@@ -695,9 +706,11 @@ void HWNDMessageHandler::Show(ui::mojom::WindowShowState show_state,
       case ui::mojom::WindowShowState::kNormal:
         if ((GetWindowLong(hwnd(), GWL_EXSTYLE) & WS_EX_TRANSPARENT) ||
             (GetWindowLong(hwnd(), GWL_EXSTYLE) & WS_EX_NOACTIVATE)) {
-          native_show_state = is_maximized ? SW_SHOWNA : SW_SHOWNOACTIVATE;
+          native_show_state =
+              is_maximized_or_arranged ? SW_SHOWNA : SW_SHOWNOACTIVATE;
         } else {
-          native_show_state = is_maximized ? SW_SHOW : SW_SHOWNORMAL;
+          native_show_state =
+              is_maximized_or_arranged ? SW_SHOW : SW_SHOWNORMAL;
         }
         break;
       case ui::mojom::WindowShowState::kFullscreen:
@@ -1639,7 +1652,8 @@ void HWNDMessageHandler::ResetWindowRegion(bool force, bool redraw) {
     mi.cbSize = sizeof mi;
     GetMonitorInfo(monitor, &mi);
     RECT work_rect = mi.rcWork;
-    OffsetRect(&work_rect, -window_rect.left, -window_rect.top);
+    OffsetRect(&work_rect, static_cast<int>(-window_rect.left),
+               static_cast<int>(-window_rect.top));
     new_region.reset(CreateRectRgnIndirect(&work_rect));
   } else {
     SkPath window_mask;
@@ -2502,7 +2516,8 @@ void HWNDMessageHandler::OnNCPaint(HRGN rgn) {
     }
 
     // rgn_bounding_box is in screen coordinates. Map it to window coordinates.
-    OffsetRect(&dirty_region, -window_rect.left, -window_rect.top);
+    OffsetRect(&dirty_region, static_cast<int>(-window_rect.left),
+               static_cast<int>(-window_rect.top));
   }
 
   // We only do non-client painting if we're not using the system frame.
@@ -2518,7 +2533,8 @@ void HWNDMessageHandler::OnNCPaint(HRGN rgn) {
     ::GetClientRect(hwnd(), &client_rect);
     ::MapWindowPoints(hwnd(), nullptr, reinterpret_cast<POINT*>(&client_rect),
                       2);
-    ::OffsetRect(&client_rect, -window_rect.left, -window_rect.top);
+    ::OffsetRect(&client_rect, static_cast<int>(-window_rect.left),
+                 static_cast<int>(-window_rect.top));
     // client_rect now is in window space.
 
     base::win::ScopedGDIObject<HRGN> base(

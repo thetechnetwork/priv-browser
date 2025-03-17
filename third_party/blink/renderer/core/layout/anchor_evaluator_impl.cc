@@ -171,7 +171,7 @@ const PhysicalAnchorReference* PhysicalAnchorQuery::AnchorReference(
       const LayoutObject* layout_object = result->GetLayoutObject();
       // TODO(crbug.com/384523570): If the layout object has been detached, we
       // really shouldn't be here.
-      if (layout_object &&
+      if (layout_object && layout_object != &query_box &&
           (!result->is_out_of_flow ||
            layout_object->IsBeforeInPreOrder(query_box)) &&
           InSameAnchorScope(key, query_box, *layout_object)) {
@@ -197,9 +197,9 @@ void PhysicalAnchorQuery::Set(const AnchorKey& key,
                               const PhysicalRect& rect,
                               SetOptions options,
                               Element* element_for_display_lock) {
-  HeapHashSet<Member<Element>>* display_locks = nullptr;
+  GCedHeapHashSet<Member<Element>>* display_locks = nullptr;
   if (element_for_display_lock) {
-    display_locks = MakeGarbageCollected<HeapHashSet<Member<Element>>>();
+    display_locks = MakeGarbageCollected<GCedHeapHashSet<Member<Element>>>();
     display_locks->insert(element_for_display_lock);
   }
   Set(key, MakeGarbageCollected<PhysicalAnchorReference>(
@@ -251,9 +251,10 @@ void PhysicalAnchorQuery::SetFromChild(
       PhysicalRect rect = reference->rect;
       rect.offset += additional_offset;
 
-      HeapHashSet<Member<Element>>* display_locks = nullptr;
+      GCedHeapHashSet<Member<Element>>* display_locks = nullptr;
       if (reference->display_locks || element_for_display_lock) {
-        display_locks = MakeGarbageCollected<HeapHashSet<Member<Element>>>();
+        display_locks =
+            MakeGarbageCollected<GCedHeapHashSet<Member<Element>>>();
       }
       if (reference->display_locks) {
         *display_locks = *reference->display_locks;

@@ -1393,7 +1393,7 @@
             "os": "Ubuntu-22.04"
           },
           "service_account": "chromium-tester@chops-service-accounts.iam.gserviceaccount.com",
-          "shards": 9
+          "shards": 7
         },
         "test": "blink_web_tests",
         "test_id_prefix": "ninja://:blink_web_tests/"
@@ -1745,7 +1745,7 @@
             "os": "Ubuntu-22.04"
           },
           "service_account": "chromium-tester@chops-service-accounts.iam.gserviceaccount.com",
-          "shards": 20
+          "shards": 19
         },
         "test": "headless_shell_wpt",
         "test_id_prefix": "ninja://:headless_shell_wpt/"
@@ -2140,7 +2140,7 @@
     "gtest_tests": [
       {
         "args": [
-          "--enable-feature=OriginKeyedProcessesByDefault"
+          "--enable-features=OriginKeyedProcessesByDefault"
         ],
         "merge": {
           "script": "//testing/merge_scripts/standard_gtest_merge.py"
@@ -2158,7 +2158,7 @@
       },
       {
         "args": [
-          "--enable-feature=OriginKeyedProcessesByDefault"
+          "--enable-features=OriginKeyedProcessesByDefault"
         ],
         "merge": {
           "script": "//testing/merge_scripts/standard_gtest_merge.py"
@@ -2176,7 +2176,7 @@
       },
       {
         "args": [
-          "--enable-feature=OriginKeyedProcessesByDefault"
+          "--enable-features=OriginKeyedProcessesByDefault"
         ],
         "merge": {
           "script": "//testing/merge_scripts/standard_gtest_merge.py"
@@ -2193,7 +2193,7 @@
       },
       {
         "args": [
-          "--enable-feature=OriginKeyedProcessesByDefault"
+          "--enable-features=OriginKeyedProcessesByDefault"
         ],
         "merge": {
           "script": "//testing/merge_scripts/standard_gtest_merge.py"
@@ -2214,7 +2214,7 @@
         "args": [
           "--num-retries=3",
           "--write-run-histories-to=${ISOLATED_OUTDIR}/run_histories.json",
-          "--additional-driver-flag=--enable-feature=OriginKeyedProcessesByDefault"
+          "--additional-driver-flag=--enable-features=OriginKeyedProcessesByDefault"
         ],
         "merge": {
           "args": [
@@ -2242,7 +2242,7 @@
         "args": [
           "--num-retries=3",
           "--write-run-histories-to=${ISOLATED_OUTDIR}/run_histories.json",
-          "--additional-driver-flag=--enable-feature=OriginKeyedProcessesByDefault"
+          "--additional-driver-flag=--enable-features=OriginKeyedProcessesByDefault"
         ],
         "merge": {
           "args": [
@@ -2269,7 +2269,7 @@
       {
         "args": [
           "--test-launcher-filter-file=../../third_party/blink/web_tests/TestLists/chrome.filter",
-          "--additional-driver-flag=--enable-feature=OriginKeyedProcessesByDefault"
+          "--additional-driver-flag=--enable-features=OriginKeyedProcessesByDefault"
         ],
         "merge": {
           "args": [

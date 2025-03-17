@@ -97,18 +97,6 @@ chromium-metrics-reviews@google.com.
   <int value="3" label="Other Mode is Default"/>
 </enum>
 
-<enum name="DefaultWebClientState">
-  <int value="0" label="Not default">Chrome is not the default web client.</int>
-  <int value="1" label="Is default">Chrome is the default web client.</int>
-  <int value="2" label="Unknown default">
-    Chrome is in a unknown default state.
-  </int>
-  <int value="3" label="Other mode is default">
-    The current install of Chrome is not the default web client, yet another
-    side-by-side install of Chrome is.
-  </int>
-</enum>
-
 <enum name="OpenLinkAs">
   <int value="0" label="Open Link as Profile displayed."/>
   <int value="1" label="Open Link as Profile clicked."/>
@@ -717,6 +705,7 @@ chromium-metrics-reviews@google.com.
   <int value="-601472337" label="chrome://shimless-rma/"/>
   <int value="-566908909" label="chrome://suggestions/"/>
   <int value="-548156607" label="chrome://feedback/"/>
+  <int value="-543577801" label="chrome://history-side-panel.top-chrome/"/>
   <int value="-528306235" label="chrome://sync/"/>
   <int value="-525954994" label="chrome-untrusted://lens/"/>
   <int value="-516792794" label="chrome://downloads/"/>

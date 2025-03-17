@@ -74,6 +74,8 @@ id<GREYMatcher> ManageUMALinkMatcher() {
   AppLaunchConfiguration config = [super appConfigurationForTestCase];
   config.additional_args.push_back(
       "--disable-features=UpdatedFirstRunSequence");
+  config.additional_args.push_back(
+      "--disable-features=AnimatedDefaultBrowserPromoInFRE");
   return config;
 }
 
@@ -147,7 +149,7 @@ id<GREYMatcher> ManageUMALinkMatcher() {
       performAction:grey_tap()];
   // Skip sign-in.
   [[self elementInteractionWithGreyMatcher:
-             chrome_test_util::PromoStyleSecondaryActionButtonMatcher()
+             chrome_test_util::PromoScreenSecondaryButtonMatcher()
                       scrollViewIdentifier:
                           kPromoStyleScrollViewAccessibilityIdentifier]
       performAction:grey_tap()];
@@ -211,7 +213,7 @@ id<GREYMatcher> ManageUMALinkMatcher() {
       performAction:grey_tap()];
   // Skip sign-in.
   [[self elementInteractionWithGreyMatcher:
-             chrome_test_util::PromoStyleSecondaryActionButtonMatcher()
+             chrome_test_util::PromoScreenSecondaryButtonMatcher()
                       scrollViewIdentifier:
                           kPromoStyleScrollViewAccessibilityIdentifier]
       performAction:grey_tap()];
@@ -267,7 +269,7 @@ id<GREYMatcher> ManageUMALinkMatcher() {
       performAction:grey_tap()];
   // Skip sign-in.
   [[self elementInteractionWithGreyMatcher:
-             chrome_test_util::PromoStyleSecondaryActionButtonMatcher()
+             chrome_test_util::PromoScreenSecondaryButtonMatcher()
                       scrollViewIdentifier:
                           kPromoStyleScrollViewAccessibilityIdentifier]
       performAction:grey_tap()];
@@ -370,7 +372,7 @@ id<GREYMatcher> ManageUMALinkMatcher() {
       performAction:grey_tap()];
   // Refuse sync.
   [[self elementInteractionWithGreyMatcher:
-             chrome_test_util::PromoStyleSecondaryActionButtonMatcher()
+             chrome_test_util::PromoScreenSecondaryButtonMatcher()
                       scrollViewIdentifier:
                           kPromoStyleScrollViewAccessibilityIdentifier]
       performAction:grey_tap()];
@@ -462,7 +464,7 @@ id<GREYMatcher> ManageUMALinkMatcher() {
       performAction:grey_tap()];
   // Refuse sync.
   [[self elementInteractionWithGreyMatcher:
-             chrome_test_util::PromoStyleSecondaryActionButtonMatcher()
+             chrome_test_util::PromoScreenSecondaryButtonMatcher()
                       scrollViewIdentifier:
                           kPromoStyleScrollViewAccessibilityIdentifier]
       performAction:grey_tap()];
@@ -526,7 +528,7 @@ id<GREYMatcher> ManageUMALinkMatcher() {
             FRESigninIntentSigninWithPolicy];
   // Refuse sign-in.
   [[self elementInteractionWithGreyMatcher:
-             chrome_test_util::PromoStyleSecondaryActionButtonMatcher()
+             chrome_test_util::PromoScreenSecondaryButtonMatcher()
                       scrollViewIdentifier:
                           kPromoStyleScrollViewAccessibilityIdentifier]
       performAction:grey_tap()];
@@ -989,7 +991,7 @@ id<GREYMatcher> ManageUMALinkMatcher() {
 - (void)testHistorySyncSkipIfNoSignIn {
   // Skip sign-in.
   [[self elementInteractionWithGreyMatcher:
-             chrome_test_util::PromoStyleSecondaryActionButtonMatcher()
+             chrome_test_util::PromoScreenSecondaryButtonMatcher()
                       scrollViewIdentifier:
                           kPromoStyleScrollViewAccessibilityIdentifier]
       performAction:grey_tap()];
@@ -1265,7 +1267,7 @@ id<GREYMatcher> ManageUMALinkMatcher() {
       performAction:grey_tap()];
   // Refuse History Sync.
   [[self elementInteractionWithGreyMatcher:
-             chrome_test_util::PromoStyleSecondaryActionButtonMatcher()
+             chrome_test_util::PromoScreenSecondaryButtonMatcher()
                       scrollViewIdentifier:
                           kPromoStyleScrollViewAccessibilityIdentifier]
       performAction:grey_tap()];

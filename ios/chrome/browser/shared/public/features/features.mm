@@ -241,7 +241,7 @@ BASE_FEATURE(kLensOverlayEnableLVFEscapeHatch,
 
 BASE_FEATURE(kLensOverlayEnableLocationBarEntrypoint,
              "LensOverlayEnableLocationBarEntrypoint",
-             base::FEATURE_DISABLED_BY_DEFAULT);
+             base::FEATURE_ENABLED_BY_DEFAULT);
 
 BASE_FEATURE(kLensOverlayEnableLocationBarEntrypointOnSRP,
              "LensOverlayEnableLocationBarEntrypointOnSRP",
@@ -803,13 +803,6 @@ BASE_FEATURE(kMagicStack, "MagicStack", base::FEATURE_ENABLED_BY_DEFAULT);
 
 BASE_FEATURE(kTabResumption, "TabResumption", base::FEATURE_ENABLED_BY_DEFAULT);
 
-BASE_FEATURE(kTabResumption2,
-             "TabResumption2",
-             base::FEATURE_DISABLED_BY_DEFAULT);
-
-BASE_FEATURE(kTabResumption2Reason,
-             "TabResumption2Reason",
-             base::FEATURE_DISABLED_BY_DEFAULT);
 
 const char kMagicStackMostVisitedModuleParam[] = "MagicStackMostVisitedModule";
 
@@ -824,11 +817,6 @@ const char kSetUpListCompactedTimeThresholdDays[] =
 // feed.
 const char kDiscoverFeedIsNativeUIEnabled[] = "DiscoverFeedIsNativeUIEnabled";
 
-const char kTabResumptionParameterName[] = "variant";
-const char kTabResumptionMostRecentTabOnlyParam[] =
-    "tab-resumption-recent-tab-only";
-const char kTabResumptionAllTabsParam[] = "tab-resumption-all-tabs";
-
 const char kTabResumptionThresholdParameterName[] =
     "tab-resumption-sync-threshold";
 
@@ -836,52 +824,12 @@ bool IsTabResumptionEnabled() {
   return base::FeatureList::IsEnabled(kTabResumption);
 }
 
-bool IsTabResumptionEnabledForMostRecentTabOnly() {
-  CHECK(IsTabResumptionEnabled());
-  std::string feature_param = base::GetFieldTrialParamValueByFeature(
-      kTabResumption, kTabResumptionParameterName);
-  return feature_param == kTabResumptionMostRecentTabOnlyParam;
-}
-
-bool IsTabResumption2_0Enabled() {
-  if (!IsTabResumptionEnabled()) {
-    return false;
-  }
-  return base::FeatureList::IsEnabled(kTabResumption2);
-}
-
-bool IsTabResumption2ReasonEnabled() {
-  if (!IsTabResumption2_0Enabled()) {
-    return false;
-  }
-  return base::FeatureList::IsEnabled(kTabResumption2Reason);
-}
-
 const base::TimeDelta TabResumptionForXDevicesTimeThreshold() {
-  CHECK(!IsTabResumptionEnabledForMostRecentTabOnly());
-
   // Default to 12 hours.
   int threshold = base::GetFieldTrialParamByFeatureAsInt(
       kTabResumption, kTabResumptionThresholdParameterName,
       /*default_value*/ 12 * 3600);
   return base::Seconds(threshold);
-}
-
-BASE_FEATURE(kTabResumption1_5,
-             "TabResumption1_5",
-             base::FEATURE_ENABLED_BY_DEFAULT);
-
-bool IsTabResumption1_5Enabled() {
-  return IsTabResumptionEnabled() &&
-         base::FeatureList::IsEnabled(kTabResumption1_5);
-}
-
-const char kTR15SeeMoreButtonParam[] = "tr15-see-more-button";
-
-bool IsTabResumption1_5SeeMoreEnabled() {
-  return IsTabResumption1_5Enabled() &&
-         base::GetFieldTrialParamByFeatureAsBool(kTabResumption1_5,
-                                                 kTR15SeeMoreButtonParam, true);
 }
 
 BASE_FEATURE(kTabResumptionImages,
@@ -893,8 +841,7 @@ const char kTabResumptionImagesTypesSalient[] = "salient";
 const char kTabResumptionImagesTypesThumbnails[] = "thumbnails";
 
 bool IsTabResumptionImagesSalientEnabled() {
-  if (!IsTabResumption1_5Enabled() ||
-      !base::FeatureList::IsEnabled(kTabResumptionImages)) {
+  if (!base::FeatureList::IsEnabled(kTabResumptionImages)) {
     return false;
   }
   std::string image_type = base::GetFieldTrialParamByFeatureAsString(
@@ -904,8 +851,7 @@ bool IsTabResumptionImagesSalientEnabled() {
 }
 
 bool IsTabResumptionImagesThumbnailsEnabled() {
-  if (!IsTabResumption1_5Enabled() ||
-      !base::FeatureList::IsEnabled(kTabResumptionImages)) {
+  if (!base::FeatureList::IsEnabled(kTabResumptionImages)) {
     return false;
   }
   std::string image_type = base::GetFieldTrialParamByFeatureAsString(
@@ -1227,8 +1173,7 @@ BASE_FEATURE(kIOSPasskeysM2,
              base::FEATURE_DISABLED_BY_DEFAULT);
 
 bool IOSPasskeysM2Enabled() {
-  return syncer::IsWebauthnCredentialSyncEnabled() &&
-         base::FeatureList::IsEnabled(kIOSPasskeysM2);
+  return base::FeatureList::IsEnabled(kIOSPasskeysM2);
 }
 
 const char kFullscreenTransitionSlower[] = "SlowFullscreenTransitionSpeed";
@@ -1275,3 +1220,92 @@ BASE_FEATURE(kIPHAblation, "IPHAblation", base::FEATURE_DISABLED_BY_DEFAULT);
 bool IsIPHAblationEnabled() {
   return base::FeatureList::IsEnabled(kIPHAblation);
 }
+
+BASE_FEATURE(kIPHGestureRecognitionAblation,
+             "IPHGestureRecognitionAblation",
+             base::FEATURE_ENABLED_BY_DEFAULT);
+
+const char kIPHGestureRecognitionInsideTapAblation[] =
+    "IPHGestureRecognitionInsideTapAblation";
+const char kIPHGestureRecognitionOutsideTapAblation[] =
+    "IPHGestureRecognitionOutsideTapAblation";
+const char kIPHGestureRecognitionPanAblation[] =
+    "IPHGestureRecognitionPanAblation";
+const char kIPHGestureRecognitionSwipeAblation[] =
+    "IPHGestureRecognitionSwipeAblation";
+
+bool IsIPHGestureRecognitionInsideTapAblationEnabled() {
+  return base::GetFieldTrialParamByFeatureAsBool(
+      kIPHGestureRecognitionAblation, kIPHGestureRecognitionInsideTapAblation,
+      false);
+}
+
+bool IsIPHGestureRecognitionOutsideTapAblationEnabled() {
+  return base::GetFieldTrialParamByFeatureAsBool(
+      kIPHGestureRecognitionAblation, kIPHGestureRecognitionOutsideTapAblation,
+      false);
+}
+
+bool IsIPHGestureRecognitionPanAblationEnabled() {
+  return base::GetFieldTrialParamByFeatureAsBool(
+      kIPHGestureRecognitionAblation, kIPHGestureRecognitionPanAblation, false);
+}
+
+bool IsIPHGestureRecognitionSwipeAblationEnabled() {
+  return base::GetFieldTrialParamByFeatureAsBool(
+      kIPHGestureRecognitionAblation, kIPHGestureRecognitionSwipeAblation,
+      false);
+}
+
+BASE_FEATURE(kNonModalSignInPromo,
+             "NonModalSignInPromo",
+             base::FEATURE_DISABLED_BY_DEFAULT);
+
+bool IsNonModalSignInPromoEnabled() {
+  return base::FeatureList::IsEnabled(kNonModalSignInPromo);
+}
+
+BASE_FEATURE(kIOSOneTapMiniMapRestrictions,
+             "IOSOneTapMiniMapRestrictions",
+             base::FEATURE_DISABLED_BY_DEFAULT);
+
+const char kIOSOneTapMiniMapRestrictionCrossValidateParamName[] =
+    "ios-one-tap-minimap-cross-validate";
+constexpr base::FeatureParam<bool>
+    kIOSOneTapMiniMapRestrictionCrossValidateParam{
+        &kIOSOneTapMiniMapRestrictions,
+        /*name=*/kIOSOneTapMiniMapRestrictionCrossValidateParamName,
+        /*default_value=*/false};
+const char kIOSOneTapMiniMapRestrictionThreshholdParamName[] =
+    "ios-one-tap-minimap-threshhold";
+constexpr base::FeatureParam<double>
+    kIOSOneTapMiniMapRestrictionThreshholdParam{
+        &kIOSOneTapMiniMapRestrictions,
+        /*name=*/kIOSOneTapMiniMapRestrictionThreshholdParamName,
+        /*default_value=*/0};
+const char kIOSOneTapMiniMapRestrictionMinCharsParamName[] =
+    "ios-one-tap-minimap-min-chars";
+constexpr base::FeatureParam<int> kIOSOneTapMiniMapRestrictionMinCharsParam{
+    &kIOSOneTapMiniMapRestrictions,
+    /*name=*/kIOSOneTapMiniMapRestrictionMinCharsParamName,
+    /*default_value=*/0};
+const char kIOSOneTapMiniMapRestrictionMaxSectionsParamName[] =
+    "ios-one-tap-minimap-max-section";
+constexpr base::FeatureParam<int> kIOSOneTapMiniMapRestrictionMaxSectionsParam{
+    &kIOSOneTapMiniMapRestrictions,
+    /*name=*/kIOSOneTapMiniMapRestrictionMaxSectionsParamName,
+    /*default_value=*/0};
+const char kIOSOneTapMiniMapRestrictionLongestWordMinCharsParamName[] =
+    "ios-one-tap-minimap-longest-word-min-chars";
+constexpr base::FeatureParam<int>
+    kIOSOneTapMiniMapRestrictionLongestWordMinCharsParam{
+        &kIOSOneTapMiniMapRestrictions,
+        /*name=*/kIOSOneTapMiniMapRestrictionLongestWordMinCharsParamName,
+        /*default_value=*/0};
+const char kIOSOneTapMiniMapRestrictionMinAlphanumProportionParamName[] =
+    "ios-one-tap-minimap-min-alphanum-proportion";
+constexpr base::FeatureParam<double>
+    kIOSOneTapMiniMapRestrictionMinAlphanumProportionParam{
+        &kIOSOneTapMiniMapRestrictions,
+        /*name=*/kIOSOneTapMiniMapRestrictionMinAlphanumProportionParamName,
+        /*default_value=*/0};

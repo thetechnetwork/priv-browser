@@ -2,8 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+type AttributeType = chrome.autofillPrivate.AttributeType;
 type EntityInstance = chrome.autofillPrivate.EntityInstance;
 type EntityInstanceWithLabels = chrome.autofillPrivate.EntityInstanceWithLabels;
+type EntityType = chrome.autofillPrivate.EntityType;
+
+export type EntityInstancesChangedListener =
+    (entityInstances: EntityInstanceWithLabels[]) => void;
 
 /**
  * This interface defines the autofill API wrapper that combines entity data
@@ -25,6 +30,35 @@ export interface EntityDataManagerProxy {
    * Returns the user's entity instances with labels.
    */
   loadEntityInstances(): Promise<EntityInstanceWithLabels[]>;
+
+  /**
+   * Returns the entity instance by its guid.
+   */
+  getEntityInstanceByGuid(guid: string): Promise<EntityInstance>;
+
+  /**
+   * Returns a list of all possible entity types that exist.
+   */
+  getAllEntityTypes(): Promise<EntityType[]>;
+
+  /**
+   * Returns a list of all possible attribute types that can be set on an entity
+   * instance.
+   */
+  getAllAttributeTypesForEntityTypeName(entityTypeName: number):
+      Promise<AttributeType[]>;
+
+  /**
+   * Adds a listener to changes in the entity instances.
+   */
+  addEntityInstancesChangedListener(listener: EntityInstancesChangedListener):
+      void;
+
+  /**
+   * Remove a listener to changes in the entity instances.
+   */
+  removeEntityInstancesChangedListener(
+      listener: EntityInstancesChangedListener): void;
 }
 
 export class EntityDataManagerProxyImpl implements EntityDataManagerProxy {
@@ -38,6 +72,28 @@ export class EntityDataManagerProxyImpl implements EntityDataManagerProxy {
 
   loadEntityInstances() {
     return chrome.autofillPrivate.loadEntityInstances();
+  }
+
+  getEntityInstanceByGuid(guid: string) {
+    return chrome.autofillPrivate.getEntityInstanceByGuid(guid);
+  }
+
+  getAllEntityTypes() {
+    return chrome.autofillPrivate.getAllEntityTypes();
+  }
+
+  getAllAttributeTypesForEntityTypeName(entityTypeName: number) {
+    return chrome.autofillPrivate.getAllAttributeTypesForEntityTypeName(
+        entityTypeName);
+  }
+
+  addEntityInstancesChangedListener(listener: EntityInstancesChangedListener) {
+    chrome.autofillPrivate.onEntityInstancesChanged.addListener(listener);
+  }
+
+  removeEntityInstancesChangedListener(
+      listener: EntityInstancesChangedListener) {
+    chrome.autofillPrivate.onEntityInstancesChanged.removeListener(listener);
   }
 
   static getInstance() {

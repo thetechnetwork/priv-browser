@@ -81,6 +81,7 @@
 <translation id="131461803491198646">Rețeaua de domiciliu, nu de roaming</translation>
 <translation id="1327977588028644528">Gateway</translation>
 <translation id="1328223165223065150">Culoarea imaginii de fundal</translation>
+<translation id="1329478709358066995">Transcriere:</translation>
 <translation id="1330426557709298164">JPG</translation>
 <translation id="1337912285145772892">Potrivește în funcție de zona de scanare</translation>
 <translation id="1343442362630695901">lac sărat</translation>
@@ -126,7 +127,17 @@
 <translation id="1515129336378114413">pagina de pornire a browserului</translation>
 <translation id="1526389707933164996">Animație pentru screensaver</translation>
 <translation id="152892567002884378">Mărește volumul</translation>
+<translation id="1531038290222364269">Afișează filele</translation>
 <translation id="1539864135338521185">lapis lazuli</translation>
+<translation id="1548555207631326346">Alege o temă, apoi selectează cuvintele subliniate pentru a personaliza imaginile AI.<ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          Selectează Inspiră-mă pentru a obține mai multe opțiuni unice și variate de imagini AI.
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          Când creezi cu AI, solicitarea se trimite la serverele Google AI pentru a genera imagini și a îmbunătăți produsul, în conformitate cu <ph name="BEGIN_LINK_GOOGLE_PRIVACY_POLICY" />Politica de confidențialitate Google<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" />.
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          AI generativ este o funcție experimentală, în primele etape de dezvoltare și, momentan, are disponibilitate limitată.</translation>
 <translation id="1555130319947370107">Albastru</translation>
 <translation id="155865706765934889">Touchpad</translation>
 <translation id="1561927818299383735">culoarea iluminării din fundal</translation>
@@ -252,7 +263,6 @@
 <translation id="2011174342667534258">Versiunea SDK:</translation>
 <translation id="2016697457005847575">Încearcă pașii pentru remedierea erorilor</translation>
 <translation id="202500043506723828">EID</translation>
-<translation id="2041627599411887437">Alege o temă, apoi selectează cuvintele subliniate pentru a personaliza imaginile AI.</translation>
 <translation id="2045814230297767491">tacâmuri</translation>
 <translation id="2047316797244836561">Conectează-te la o rețea și reîncarcă pagina pentru a vedea screensaverul.</translation>
 <translation id="2056550196601855911">IPv4/IPv6</translation>
@@ -405,6 +415,7 @@
 <translation id="2787237339470862294">Această limbă nu este acceptată momentan</translation>
 <translation id="2787435249130282949">tastatură mai luminoasă</translation>
 <translation id="2805756323405976993">Aplicații</translation>
+<translation id="2822702442014805146">Se descarcă modelul pentru rezumat și crearea numelui</translation>
 <translation id="28232023175184696">Nu ne putem conecta la internet. Dă clic pentru a încerca din nou.</translation>
 <translation id="2855718259207180827">lână</translation>
 <translation id="2859243502336719778">Actualizare esențială</translation>
@@ -502,6 +513,7 @@
 <translation id="3373141842870501561">Imagine de fundal Earth Flow</translation>
 <translation id="33736539805963175">Fundal <ph name="LETTERS_COLOR" /> cu litera <ph name="LETTERS_LETTER" /></translation>
 <translation id="3383623117265110236">Exclusive</translation>
+<translation id="3395147534045164351">Activează / dezactivează locația de tragere</translation>
 <translation id="3404249063913988450">Activează screensaverul</translation>
 <translation id="3413935475507503304">Ca să continui cu actualizarea, dă clic pe Înainte.</translation>
 <translation id="3428551088151258685">în aer liber</translation>
@@ -651,6 +663,7 @@
 <translation id="4113067922640381334">Acum ai acces la noi <ph name="BEGIN_LINK_WALLPAPER_SUBPAGE" />imagini de fundal<ph name="END_LINK_WALLPAPER_SUBPAGE" /></translation>
 <translation id="4117637339509843559">Modul întunecat</translation>
 <translation id="4126551873361000548">Derulează înapoi cu 10 secunde</translation>
+<translation id="4128271910628504223">Introdu o solicitare, de exemplu „desenează o pădure în ceață”</translation>
 <translation id="4130035430755296270">Plasează cursorul pentru mai multe opțiuni de aspect</translation>
 <translation id="4130750466177569591">Sunt de acord</translation>
 <translation id="4131410914670010031">Alb-negru</translation>
@@ -824,6 +837,7 @@
 <translation id="4891842000192098784">Stres</translation>
 <translation id="4897058166682006107">Nivelul bateriei căștii stângi a dispozitivului este de <ph name="BATTERY_PERCENTAGE" /> %.</translation>
 <translation id="4905998861748258752">Activează funcția ca să selectezi opțiuni pentru screensaver</translation>
+<translation id="4910853326379896417">Descărcarea modelului pentru rezumatul înregistrării și crearea numelui s-a finalizat</translation>
 <translation id="4910858703033903787">Tipuri APN</translation>
 <translation id="4917385247580444890">Puternic</translation>
 <translation id="4917889632206600977">Oprită – Hârtie epuizată</translation>
@@ -858,8 +872,10 @@
 <translation id="5050042263972837708">Numele grupului</translation>
 <translation id="5051044138948155788">Aceasta este singura pagină. Astfel, vei accesa ecranul de pornire a scanării.</translation>
 <translation id="5053233795640754917">Întrerupe</translation>
+<translation id="5056587122125565772">Creează o imagine</translation>
 <translation id="5078711626843651677">Modelele vocale sunt stocate temporar pe dispozitiv până la finalizarea etichetării vorbitorilor. Poți dezactiva oricând această opțiune din Setări.</translation>
 <translation id="5078983345702708852">futurist</translation>
+<translation id="5085224064082122501">Nu se poate descărca modelul pentru rezumat și crearea numelui. Încearcă din nou sau repornește Chromebookul.</translation>
 <translation id="5087864757604726239">înapoi</translation>
 <translation id="5088172560898466307">Nume de gazdă server</translation>
 <translation id="5089810972385038852">Stat</translation>
@@ -1129,14 +1145,12 @@
 <translation id="6325525973963619867">Eșuat</translation>
 <translation id="6327262166342360252">Această imagine de fundal a fost creată cu AI folosind următorul text: <ph name="PROMPT" />.</translation>
 <translation id="6331191339300272798">Tema întunecată automată</translation>
-<translation id="6335228876613776082">Descărcarea modelului s-a finalizat</translation>
 <translation id="6340526405444716530">Personalizare</translation>
 <translation id="6348252528297699679">Poți dezactiva locația în Setări &gt; Confidențialitate și securitate &gt; Opțiuni de confidențialitate &gt; Accesul la locație. <ph name="LINK_BEGIN" />Află mai multe<ph name="LINK_END" /></translation>
 <translation id="6348738456043757611">Nume de utilizator și parolă</translation>
 <translation id="6352210854422428614">altă planetă</translation>
 <translation id="6359706544163531585">Dezactivează tema luminoasă</translation>
 <translation id="6359919876285606596">Această acțiune este definitivă și nu poate fi anulată</translation>
-<translation id="6368342879959028556">Când selectezi Creează cu AI, scrie un mesaj personalizat. Sau poți selecta „Imagini de fundal AI” pentru a alege o temă, apoi selectează cuvintele subliniate pentru a personaliza imaginea de fundal AI.</translation>
 <translation id="636850387210749493">Înscriere pentru întreprindere</translation>
 <translation id="6369221585240879141">Nu se pot crea nume de înregistrări pentru această limbă a transcrierii</translation>
 <translation id="6373461326814131011">iaz</translation>
@@ -1209,16 +1223,6 @@
 <translation id="6657240842932274095">Permiți serviciilor de sistem să-ți folosească locația?</translation>
 <translation id="6657585470893396449">Parolă</translation>
 <translation id="66621959568103627">roz corai</translation>
-<translation id="6667885109186363316"><ph name="SEA_PEN_INTRO_FIRST_PARAGRAPH" />
-          <ph name="LINE_BREAK" />
-          <ph name="LINE_BREAK" />
-          Selectează Inspiră-mă pentru a obține mai multe opțiuni unice și variate de imagini AI.
-          <ph name="LINE_BREAK" />
-          <ph name="LINE_BREAK" />
-          Când creezi cu AI, solicitarea se trimite la serverele Google AI pentru a genera imagini și a îmbunătăți produsul, în conformitate cu <ph name="BEGIN_LINK_GOOGLE_PRIVACY_POLICY" />Politica de confidențialitate Google<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" />.
-          <ph name="LINE_BREAK" />
-          <ph name="LINE_BREAK" />
-          AI generativ este o funcție experimentală, în primele etape de dezvoltare și momentan are disponibilitate limitată.</translation>
 <translation id="6673898378497337661">mărește luminozitatea tastaturii</translation>
 <translation id="6692996468359469499">Obține informații despre selecție</translation>
 <translation id="6694534975463174713">lacăt</translation>
@@ -1274,6 +1278,7 @@
 <translation id="6930597342185648547">Despre fundal</translation>
 <translation id="6939667434404433010">Caută numele înregistrării</translation>
 <translation id="6939766318048400022">Cafenea</translation>
+<translation id="6942253772720771875">Trimite feedback sau descrie problema</translation>
 <translation id="6943893908656559156">Identitate de la distanță (opțională)</translation>
 <translation id="6953137545147683679">auriu</translation>
 <translation id="6957231940976260713">Nume serviciu</translation>
@@ -1295,6 +1300,7 @@
 <translation id="7040230719604914234">Operator</translation>
 <translation id="7040729769968826896">Permite identificarea vorbitorilor</translation>
 <translation id="7041549558901442110">Dispozitivul nu este conectat.</translation>
+<translation id="704183341263526038">Jupiter</translation>
 <translation id="7046522406494308071">Resetezi toate comenzile rapide la valorile prestabilite?</translation>
 <translation id="7049916119678019302">Descarcă modelul de transcriere în Setări</translation>
 <translation id="7058278511608979688">Finalizează și salvează</translation>
@@ -1389,6 +1395,7 @@ Descarcă modelul de transcriere (până la 100 MB) pentru a obține aceste tran
 <translation id="7388345524791662148">Mai multe opțiuni pentru <ph name="RECORDING_NAME" /></translation>
 <translation id="7388959671917308825">Touchpad încorporat</translation>
 <translation id="7397270852490618635">Dezactivează tema luminoasă</translation>
+<translation id="7400166052988585408">Profesorul tău îți va bloca ecranul în <ph name="NUM_SECONDS" /> secunde</translation>
 <translation id="7401543881546089382">Ștergeți comanda rapidă</translation>
 <translation id="7405493795721832710"><ph name="DEVICE_NAME" /> este gata să fie actualizat</translation>
 <translation id="741244894080940828">conversie</translation>
@@ -1427,6 +1434,7 @@ Descarcă modelul de transcriere (până la 100 MB) pentru a obține aceste tran
 <translation id="7569444139234840525"><ph name="QUERY_TEXT" /> · /<ph name="PHONETICS" />/</translation>
 <translation id="7570674786725311828">Ecran tactil USB</translation>
 <translation id="757747079855995705">piatră</translation>
+<translation id="7584853321964440104">Nu se poate descărca. Încearcă din nou sau repornește Chromebookul.</translation>
 <translation id="7590883480672980941">Setări de introducere a textului</translation>
 <translation id="7595982850646262331">Timp rămas: <ph name="TIME_VALUE" /></translation>
 <translation id="7600430297804876776">Administratorul <ph name="MANAGER" /> a setat când se poate folosi acest <ph name="DEVICE_TYPE" /></translation>
@@ -1557,6 +1565,16 @@ Descarcă modelul de transcriere (până la 100 MB) pentru a obține aceste tran
 <translation id="8179976553408161302">Enter</translation>
 <translation id="8183975772394450380">plajă</translation>
 <translation id="819278132617411009">Folosește Google AI pentru productivitate</translation>
+<translation id="82003371436638355">Când selectezi Creează-ți propriul mesaj, scrie un mesaj personalizat. Sau poți selecta Alege o temă, apoi cuvintele subliniate pentru a personaliza fundalul AI.
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          Selectează Inspiră-mă pentru a obține mai multe opțiuni unice și variate de imagini AI.
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          Când creezi propriul fundal, solicitarea se trimite la serverele Google pentru a genera imagini și a îmbunătăți produsul, în conformitate cu <ph name="BEGIN_LINK_GOOGLE_PRIVACY_POLICY" />Termenii și condițiile și Politica de confidențialitate Google<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" />. Nu include conținut personal, sensibil sau confidențial.
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          AI-ul generativ poate să facă greșeli, inclusiv în legătură cu persoane, așadar verifică încă o dată răspunsurile <ph name="BEGIN_LINK_CREATE_YOUR_OWN_WALLPAPER" />Află mai multe<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" /></translation>
 <translation id="8200772114523450471">Reia</translation>
 <translation id="8206859287963243715">Celular</translation>
 <translation id="8208861521865154048">Avantaje</translation>
@@ -1578,6 +1596,7 @@ Descarcă modelul de transcriere (până la 100 MB) pentru a obține aceste tran
 <translation id="8312330582793120272">redă conținutul media</translation>
 <translation id="8318753676953949627">Nicio imagine</translation>
 <translation id="8320910311642849813">pădure</translation>
+<translation id="8322464149031882595">Dă clic pentru a merge înainte</translation>
 <translation id="8329018942023753850">aplicația calculator</translation>
 <translation id="8336739000755212683">Schimbă imaginea contului de pe dispozitiv</translation>
 <translation id="8339024191194156249">Află mai multe despre lansarea automată</translation>
@@ -1598,6 +1617,7 @@ Descarcă modelul de transcriere (până la 100 MB) pentru a obține aceste tran
 <translation id="8395584934117017006">Acest <ph name="DEVICE_TYPE" /> este gestionat de companie</translation>
 <translation id="8398927464629426868">Rata de încărcare sau de descărcare a dispozitivului</translation>
 <translation id="8403988360557588704">Pictură cu <ph name="ART_FEATURE" /> în stilul <ph name="ART_MOVEMENT" /></translation>
+<translation id="8409219750150841791">Rezumat generat:</translation>
 <translation id="8410244574650205435">Detectat automat</translation>
 <translation id="8420955526972171689">Rulează teste și remediază erorile hardware</translation>
 <translation id="8422748173858722634">IMEI</translation>
@@ -1642,6 +1662,7 @@ Descarcă modelul de transcriere (până la 100 MB) pentru a obține aceste tran
 <translation id="8626489604350149811">Mai multe acțiuni pentru <ph name="APN_NAME" /></translation>
 <translation id="86356131183441916">Mov deschis</translation>
 <translation id="8647595191512746911">Transcriere audio</translation>
+<translation id="8648578954147795914">Nume generate:</translation>
 <translation id="8650852232143958317">Ia-ți fișierele Gmail și Google Drive cu tine</translation>
 <translation id="8651481478098336970">dezactivează sunetul</translation>
 <translation id="8655295600908251630">Canal</translation>
@@ -1670,7 +1691,6 @@ Descarcă modelul de transcriere (până la 100 MB) pentru a obține aceste tran
 <translation id="8764414543112028321">WireGuard</translation>
 <translation id="87646919272181953">Album Google Foto</translation>
 <translation id="8775713578693478175">APN-ul modemului</translation>
-<translation id="877735394245039557">Se descarcă modelul</translation>
 <translation id="877985182522063539">A4</translation>
 <translation id="879568662008399081">Această rețea poate să aibă un portal captiv</translation>
 <translation id="8797082062139985406">Creează un nume folosind Google AI</translation>
@@ -1723,6 +1743,7 @@ Descarcă modelul de transcriere (până la 100 MB) pentru a obține aceste tran
 <translation id="8961025972867871808">pinguini</translation>
 <translation id="8968751544471797276">Rata de încărcare</translation>
 <translation id="8970109610781093811">Rulați din nou</translation>
+<translation id="8972061581514441296">Dă clic pentru a reveni</translation>
 <translation id="8983038754672563810">HSPA</translation>
 <translation id="8987565828374052507">{NUMBER_OF_PAGES,plural, =0{Scanează}=1{Scanează {NUMBER_OF_PAGES} pagină}few{Scanează {NUMBER_OF_PAGES} pagini}other{Scanează {NUMBER_OF_PAGES} de pagini}}</translation>
 <translation id="89945434909472341">sat</translation>
@@ -1784,6 +1805,7 @@ Descarcă modelul de transcriere (până la 100 MB) pentru a obține aceste tran
 <translation id="9218016617214286986">Afișează APN-uri cunoscute</translation>
 <translation id="932327136139879170">Pagina de pornire</translation>
 <translation id="939519157834106403">SSID</translation>
+<translation id="940663759301549538">Verifică dacă microfonul este conectat sau repornește Chromebookul</translation>
 <translation id="945522503751344254">Trimite feedback</translation>
 <translation id="950520315903467048">Lipsește tasta pentru <ph name="DIRECTION" />. <ph name="ASSIGN_INSTRUCTION" /></translation>
 <translation id="951780398843003443">Compară vocile în înregistrare, astfel încât transcrierea să reflecte ce a spus fiecare vorbitor și când</translation>

@@ -291,6 +291,8 @@ const PrefsUtil::TypedPrefMap& PrefsUtil::GetAllowlistedKeys() {
       settings_api::PrefType::kBoolean;
   (*s_allowlist)[password_manager::prefs::kCredentialsEnableAutosignin] =
       settings_api::PrefType::kBoolean;
+  (*s_allowlist)[password_manager::prefs::kAutomaticPasskeyUpgrades] =
+      settings_api::PrefType::kBoolean;
   (*s_allowlist)[password_manager::prefs::kPasswordSharingEnabled] =
       settings_api::PrefType::kBoolean;
   (*s_allowlist)[password_manager::prefs::kPasswordLeakDetectionEnabled] =
@@ -555,6 +557,8 @@ const PrefsUtil::TypedPrefMap& PrefsUtil::GetAllowlistedKeys() {
       settings_api::PrefType::kBoolean;
   (*s_allowlist)[::prefs::kLiveTranslateTargetLanguageCode] =
       settings_api::PrefType::kString;
+  (*s_allowlist)[::prefs::kAccessibilityAXTreeFixingEnabled] =
+      settings_api::PrefType::kBoolean;
   (*s_allowlist)[::prefs::kAccessibilityMainNodeAnnotationsEnabled] =
       settings_api::PrefType::kBoolean;
 #endif
@@ -1286,7 +1290,7 @@ const PrefsUtil::TypedPrefMap& PrefsUtil::GetAllowlistedKeys() {
         settings_api::PrefType::kBoolean;
     (*s_allowlist)[glic::prefs::kGlicTabContextEnabled] =
         settings_api::PrefType::kBoolean;
-    (*s_allowlist)[glic::prefs::kGlicSettingsPolicy] =
+    (*s_allowlist)[prefs::kGeminiSettings] =
         settings_api::PrefType::kNumber;
   }
 #endif

@@ -13,6 +13,8 @@
 #include "ui/views/layout/box_layout.h"
 #include "ui/views/widget/widget.h"
 
+using ::testing::Sequence;
+
 namespace ash {
 namespace {
 
@@ -22,7 +24,18 @@ class MockOnTaskPodController : public OnTaskPodController {
   MockOnTaskPodController() = default;
   ~MockOnTaskPodController() override = default;
 
+  MOCK_METHOD(void, MaybeNavigateToPreviousPage, (), (override));
+  MOCK_METHOD(void, MaybeNavigateToNextPage, (), (override));
   MOCK_METHOD(void, ReloadCurrentPage, (), (override));
+  MOCK_METHOD(void, ToggleTabStripVisibility, (bool), (override));
+  MOCK_METHOD(void,
+              SetSnapLocation,
+              (OnTaskPodSnapLocation snap_location),
+              (override));
+  MOCK_METHOD(void, OnPageNavigationContextChanged, (), (override));
+  MOCK_METHOD(bool, CanNavigateToPreviousPage, (), (override));
+  MOCK_METHOD(bool, CanNavigateToNextPage, (), (override));
+  MOCK_METHOD(bool, CanToggleTabStripVisibility, (), (override));
 };
 
 class OnTaskPodViewTest : public AshTestBase {
@@ -51,9 +64,94 @@ TEST_F(OnTaskPodViewTest, OrientationAndAlignment) {
             views::BoxLayout::CrossAxisAlignment::kStart);
 }
 
+TEST_F(OnTaskPodViewTest, NavigateBackButtonClickNavigatesToPreviousPage) {
+  EXPECT_CALL(mock_on_task_pod_controller_, MaybeNavigateToPreviousPage())
+      .Times(1);
+  LeftClickOn(on_task_pod_view_->get_back_button_for_testing());
+}
+
+TEST_F(OnTaskPodViewTest, BackButtonEnabledWhenCanNavigateToPreviousPage) {
+  EXPECT_CALL(mock_on_task_pod_controller_, CanNavigateToPreviousPage())
+      .WillOnce(testing::Return(true));
+  on_task_pod_view_->OnPageNavigationContextUpdate();
+  EXPECT_TRUE(on_task_pod_view_->get_back_button_for_testing()->GetEnabled());
+}
+
+TEST_F(OnTaskPodViewTest, BackButtonDisabledWhenCannotNavigateToPreviousPage) {
+  EXPECT_CALL(mock_on_task_pod_controller_, CanNavigateToPreviousPage())
+      .WillOnce(testing::Return(false));
+  on_task_pod_view_->OnPageNavigationContextUpdate();
+  EXPECT_FALSE(on_task_pod_view_->get_back_button_for_testing()->GetEnabled());
+}
+
+TEST_F(OnTaskPodViewTest, NavigateForwardButtonClickNavigatesToNextPage) {
+  EXPECT_CALL(mock_on_task_pod_controller_, MaybeNavigateToNextPage()).Times(1);
+  LeftClickOn(on_task_pod_view_->get_forward_button_for_testing());
+}
+
+TEST_F(OnTaskPodViewTest, ForwardButtonEnabledWhenCanNavigateToNextPage) {
+  EXPECT_CALL(mock_on_task_pod_controller_, CanNavigateToNextPage())
+      .WillOnce(testing::Return(true));
+  on_task_pod_view_->OnPageNavigationContextUpdate();
+  EXPECT_TRUE(
+      on_task_pod_view_->get_forward_button_for_testing()->GetEnabled());
+}
+
+TEST_F(OnTaskPodViewTest, ForwardButtonDisabledWhenCannotNavigateToNextPage) {
+  EXPECT_CALL(mock_on_task_pod_controller_, CanNavigateToNextPage())
+      .WillOnce(testing::Return(false));
+  on_task_pod_view_->OnPageNavigationContextUpdate();
+  EXPECT_FALSE(
+      on_task_pod_view_->get_forward_button_for_testing()->GetEnabled());
+}
+
 TEST_F(OnTaskPodViewTest, ReloadTabButtonClickTriggersTabReload) {
   EXPECT_CALL(mock_on_task_pod_controller_, ReloadCurrentPage()).Times(1);
   LeftClickOn(on_task_pod_view_->reload_tab_button_for_testing());
+}
+
+TEST_F(OnTaskPodViewTest,
+       PinTabStripButtonDisabledWhenCannotEnableShowOrHideTabStrip) {
+  EXPECT_CALL(mock_on_task_pod_controller_, CanToggleTabStripVisibility())
+      .WillOnce(testing::Return(false));
+  on_task_pod_view_->OnLockedModeUpdate();
+  EXPECT_FALSE(
+      on_task_pod_view_->pin_tab_strip_button_for_testing()->GetEnabled());
+}
+
+TEST_F(OnTaskPodViewTest, PinTabStripButtonClickTriggersShowOrHideTabStrip) {
+  Sequence s;
+  EXPECT_CALL(mock_on_task_pod_controller_, CanToggleTabStripVisibility())
+      .WillOnce(testing::Return(true));
+  on_task_pod_view_->OnLockedModeUpdate();
+  ASSERT_TRUE(
+      on_task_pod_view_->pin_tab_strip_button_for_testing()->GetEnabled());
+  EXPECT_CALL(mock_on_task_pod_controller_, ToggleTabStripVisibility(true))
+      .Times(1)
+      .InSequence(s);
+  EXPECT_CALL(mock_on_task_pod_controller_, ToggleTabStripVisibility(false))
+      .Times(1)
+      .InSequence(s);
+  auto* const pin_tab_strip_button =
+      on_task_pod_view_->pin_tab_strip_button_for_testing();
+  LeftClickOn(pin_tab_strip_button);
+  LeftClickOn(pin_tab_strip_button);
+}
+
+TEST_F(OnTaskPodViewTest, SnapPodButtonClickTogglesSnapLocation) {
+  Sequence s;
+  EXPECT_CALL(mock_on_task_pod_controller_,
+              SetSnapLocation(OnTaskPodSnapLocation::kTopRight))
+      .Times(1)
+      .InSequence(s);
+  EXPECT_CALL(mock_on_task_pod_controller_,
+              SetSnapLocation(OnTaskPodSnapLocation::kTopLeft))
+      .Times(1)
+      .InSequence(s);
+  auto* const snap_pod_button =
+      on_task_pod_view_->snap_pod_button_for_testing();
+  LeftClickOn(snap_pod_button);
+  LeftClickOn(snap_pod_button);
 }
 
 }  // namespace

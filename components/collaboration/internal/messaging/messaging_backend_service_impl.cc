@@ -489,15 +489,26 @@ std::vector<ActivityLogItem> MessagingBackendServiceImpl::GetActivityLog(
     return activity_log_for_testing_.at(params.collaboration_id);
   }
 
+  const bool show_activity_for_single_tab = params.local_tab_id.has_value();
   std::vector<ActivityLogItem> result;
   std::vector<collaboration_pb::Message> messages =
       store_->GetRecentMessagesForGroup(params.collaboration_id);
   int message_count = 0;
   for (const auto& message : messages) {
     std::optional<ActivityLogItem> activity_log_item =
-        ConvertMessageToActivityLogItem(message);
+        ConvertMessageToActivityLogItem(message, show_activity_for_single_tab);
     if (!activity_log_item) {
       continue;
+    }
+    // If local_tab_id was supplied, filter for activity on this tab.
+    if (show_activity_for_single_tab) {
+      if (!activity_log_item->activity_metadata.tab_metadata.has_value()) {
+        continue;
+      }
+      if (params.local_tab_id !=
+          activity_log_item->activity_metadata.tab_metadata->local_tab_id) {
+        continue;
+      }
     }
     result.emplace_back(*activity_log_item);
     if (params.result_length == 0) {
@@ -998,14 +1009,6 @@ void MessagingBackendServiceImpl::OnGroupMemberAdded(
                     collaboration_pb::COLLABORATION_MEMBER_ADDED,
                     DirtyType::kMessageOnly, event_time);
   message.set_affected_user_gaia_id(member_gaia_id.ToString());
-  std::optional<std::string> user_display_name =
-      GetDisplayNameForUserInGroup(group_data.group_token.group_id,
-                                   member_gaia_id, group_data, std::nullopt);
-
-  if (user_display_name) {
-    message.mutable_collaboration_data()->set_affected_user_name(
-        *user_display_name);
-  }
   store_->AddMessage(message);
 
   if (instant_message_delegate_) {
@@ -1030,13 +1033,6 @@ void MessagingBackendServiceImpl::OnGroupMemberRemoved(
                     collaboration_pb::COLLABORATION_MEMBER_REMOVED,
                     DirtyType::kNone, event_time);
   message.set_affected_user_gaia_id(member_gaia_id.ToString());
-  std::optional<std::string> user_display_name =
-      GetDisplayNameForUserInGroup(group_data.group_token.group_id,
-                                   member_gaia_id, group_data, std::nullopt);
-  if (user_display_name) {
-    message.mutable_collaboration_data()->set_affected_user_name(
-        *user_display_name);
-  }
   store_->AddMessage(message);
 }
 
@@ -1066,9 +1062,7 @@ void MessagingBackendServiceImpl::AddActivityLogForTesting(
 std::optional<std::string>
 MessagingBackendServiceImpl::GetDisplayNameForUserInGroup(
     const data_sharing::GroupId& group_id,
-    const GaiaId& gaia_id,
-    const std::optional<data_sharing::GroupData>& group_data,
-    const std::optional<collaboration_pb::Message>& db_message) {
+    const GaiaId& gaia_id) {
   std::optional<data_sharing::GroupMemberPartialData> group_member_data =
       data_sharing_service_->GetPossiblyRemovedGroupMember(group_id, gaia_id);
   // Try given name from live data first.
@@ -1076,55 +1070,27 @@ MessagingBackendServiceImpl::GetDisplayNameForUserInGroup(
     return group_member_data->given_name;
   }
 
-  // Then try given name from provided data.
-  if (group_data) {
-    for (const data_sharing::GroupMember& member : group_data->members) {
-      if (member.gaia_id == gaia_id) {
-        if (member.given_name.empty()) {
-          break;
-        }
-        return member.given_name;
-      }
-    }
-  }
-
-  // Then try given name from stored data.
-  if (db_message) {
-    if (db_message->affected_user_gaia_id() == gaia_id.ToString()) {
-      if (!db_message->collaboration_data().affected_user_name().empty()) {
-        return db_message->collaboration_data().affected_user_name();
-      }
-    }
-  }
-
   // Then try display name from live data.
   if (group_member_data && !group_member_data->display_name.empty()) {
     return group_member_data->display_name;
   }
 
-  // Then try display name from provided data.
-  if (group_data) {
-    for (const data_sharing::GroupMember& member : group_data->members) {
-      if (member.gaia_id == gaia_id) {
-        if (member.display_name.empty()) {
-          break;
-        }
-        return member.display_name;
-      }
-    }
-  }
-
   return std::nullopt;
 }
 
-int GetTitleStringRes(CollaborationEvent collaboration_event) {
+int GetTitleStringRes(CollaborationEvent collaboration_event,
+                      bool is_tab_activity) {
   switch (collaboration_event) {
     case CollaborationEvent::TAB_ADDED:
-      return IDS_DATA_SHARING_RECENT_ACTIVITY_TAB_ADDED;
+      return is_tab_activity
+                 ? IDS_DATA_SHARING_RECENT_ACTIVITY_MEMBER_ADDED_THIS_TAB
+                 : IDS_DATA_SHARING_RECENT_ACTIVITY_TAB_ADDED;
     case CollaborationEvent::TAB_REMOVED:
       return IDS_DATA_SHARING_RECENT_ACTIVITY_TAB_REMOVED;
     case CollaborationEvent::TAB_UPDATED:
-      return IDS_DATA_SHARING_RECENT_ACTIVITY_TAB_UPDATED;
+      return is_tab_activity
+                 ? IDS_DATA_SHARING_RECENT_ACTIVITY_MEMBER_CHANGED_THIS_TAB
+                 : IDS_DATA_SHARING_RECENT_ACTIVITY_TAB_UPDATED;
     case CollaborationEvent::TAB_GROUP_NAME_UPDATED:
       return IDS_DATA_SHARING_RECENT_ACTIVITY_TAB_GROUP_NAME_UPDATED;
     case CollaborationEvent::TAB_GROUP_COLOR_UPDATED:
@@ -1146,7 +1112,8 @@ int GetTitleStringRes(CollaborationEvent collaboration_event) {
 
 std::optional<ActivityLogItem>
 MessagingBackendServiceImpl::ConvertMessageToActivityLogItem(
-    const collaboration_pb::Message& message) {
+    const collaboration_pb::Message& message,
+    bool is_tab_activity) {
   switch (message.event_type()) {
     case collaboration_pb::TAB_GROUP_ADDED:
     case collaboration_pb::TAB_GROUP_REMOVED:
@@ -1166,8 +1133,8 @@ MessagingBackendServiceImpl::ConvertMessageToActivityLogItem(
 
   std::optional<std::string> user_name_for_display;
   if (gaia_id) {
-    user_name_for_display = GetDisplayNameForUserInGroup(
-        collaboration_group_id, *gaia_id, std::nullopt, message);
+    user_name_for_display =
+        GetDisplayNameForUserInGroup(collaboration_group_id, *gaia_id);
   }
 
   bool is_self =
@@ -1181,7 +1148,8 @@ MessagingBackendServiceImpl::ConvertMessageToActivityLogItem(
                            IDS_DATA_SHARING_RECENT_ACTIVITY_UNKNOWN_USER));
 
   item.title_text = l10n_util::GetStringFUTF16(
-      GetTitleStringRes(item.collaboration_event), user_to_show);
+      GetTitleStringRes(item.collaboration_event, is_tab_activity),
+      user_to_show);
 
   // By default, we use an empty description. This is special cased below.
   item.description_text = u"";
@@ -1621,7 +1589,7 @@ void MessagingBackendServiceImpl::DisplayInstantMessage(
     InstantMessage instant_message = base_message;
     instant_message.level = level;
     instant_message_delegate_->DisplayInstantaneousMessage(
-        instant_message,
+        {instant_message},
         base::BindOnce(&MessagingBackendServiceImpl::ClearMessageDirtyBit,
                        weak_ptr_factory_.GetWeakPtr(), db_message_uuid));
   }

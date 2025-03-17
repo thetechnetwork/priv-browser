@@ -20,7 +20,6 @@
 #include "chrome/browser/ui/startup/default_browser_prompt/default_browser_prompt.h"
 #include "chrome/browser/ui/startup/default_browser_prompt/default_browser_prompt_manager.h"
 #include "chrome/browser/ui/startup/default_browser_prompt/default_browser_prompt_prefs.h"
-#include "chrome/browser/ui/ui_features.h"
 #include "chrome/common/pref_names.h"
 #include "chrome/grit/branded_strings.h"
 #include "chrome/grit/generated_resources.h"
@@ -44,17 +43,7 @@ infobars::InfoBar* DefaultBrowserInfoBarDelegate::Create(
 DefaultBrowserInfoBarDelegate::DefaultBrowserInfoBarDelegate(
     base::PassKey<DefaultBrowserInfoBarDelegate>,
     Profile* profile)
-    : profile_(profile) {
-  if (!base::FeatureList::IsEnabled(features::kDefaultBrowserPromptRefresh)) {
-    // We want the info-bar to stick-around for few seconds and then be hidden
-    // on the next navigation after that.
-    base::SingleThreadTaskRunner::GetCurrentDefault()->PostDelayedTask(
-        FROM_HERE,
-        base::BindOnce(&DefaultBrowserInfoBarDelegate::AllowExpiry,
-                       weak_factory_.GetWeakPtr()),
-        base::Seconds(8));
-  }
-}
+    : profile_(profile) {}
 
 DefaultBrowserInfoBarDelegate::~DefaultBrowserInfoBarDelegate() {
   if (!action_taken_) {
@@ -63,10 +52,6 @@ DefaultBrowserInfoBarDelegate::~DefaultBrowserInfoBarDelegate() {
                               IGNORE_INFO_BAR,
                               NUM_INFO_BAR_USER_INTERACTION_TYPES);
   }
-}
-
-void DefaultBrowserInfoBarDelegate::AllowExpiry() {
-  should_expire_ = true;
 }
 
 infobars::InfoBarDelegate::InfoBarIdentifier
@@ -81,7 +66,7 @@ const gfx::VectorIcon& DefaultBrowserInfoBarDelegate::GetVectorIcon() const {
 
 bool DefaultBrowserInfoBarDelegate::ShouldExpire(
     const NavigationDetails& details) const {
-  return should_expire_ && ConfirmInfoBarDelegate::ShouldExpire(details);
+  return false;
 }
 
 void DefaultBrowserInfoBarDelegate::InfoBarDismissed() {

@@ -81,6 +81,7 @@
 <translation id="131461803491198646">الشبكة الرئيسية، بلا تجوال</translation>
 <translation id="1327977588028644528">المدخل</translation>
 <translation id="1328223165223065150">لون الخلفية</translation>
+<translation id="1329478709358066995">النص:</translation>
 <translation id="1330426557709298164">JPG</translation>
 <translation id="1337912285145772892">الملاءمة مع منطقة المسح الضوئي</translation>
 <translation id="1343442362630695901">بحيرة مالحة</translation>
@@ -126,7 +127,17 @@
 <translation id="1515129336378114413">الصفحة الرئيسية للمتصفّح</translation>
 <translation id="1526389707933164996">الصور المتحركة لشاشة الاستراحة</translation>
 <translation id="152892567002884378">رفع مستوى الصوت</translation>
+<translation id="1531038290222364269">إظهار علامات التبويب</translation>
 <translation id="1539864135338521185">لازورد</translation>
+<translation id="1548555207631326346">‏يمكنك اختيار مظهر والنقر على الكلمات التي تحتها خط لتخصيص صورك التي أنشأها الذكاء الاصطناعي (AI).<ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          للحصول على صور فريدة ومتنوعة تستند إلى الذكاء الاصطناعي، انقر على "أريد أفكارًا جديدة".
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          عند إنشاء الصور باستخدام الذكاء الاصطناعي، يتم إرسال الطلب إلى خوادم ذكاء Google الاصطناعي لإنشاء الصور وتحسين المنتج، ويتم إجراء ذلك مع مراعاة <ph name="BEGIN_LINK_GOOGLE_PRIVACY_POLICY" />سياسة خصوصية Google<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" />.
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          لا يزال الذكاء الاصطناعي التوليدي في المرحلة التجريبية ومراحل التطوير الأولى، ويتوفّر حاليًا بشكل محدود.</translation>
 <translation id="1555130319947370107">أزرق</translation>
 <translation id="155865706765934889">لوحة اللمس</translation>
 <translation id="1561927818299383735">لون الإضاءة الخلفية</translation>
@@ -252,7 +263,6 @@
 <translation id="2011174342667534258">‏إصدار حزمة تطوير البرامج (SDK):</translation>
 <translation id="2016697457005847575">تجربة خطوات تحديد المشاكل وحلّها</translation>
 <translation id="202500043506723828">EID</translation>
-<translation id="2041627599411887437">‏يمكنك اختيار مظهر والنقر على الكلمات التي تحتها خط لتخصيص صورك التي أنشأها الذكاء الاصطناعي (AI).</translation>
 <translation id="2045814230297767491">أدوات مائدة</translation>
 <translation id="2047316797244836561">يُرجى الاتصال بشبكة وإعادة تحميل الصفحة لعرض شاشة الاستراحة.</translation>
 <translation id="2056550196601855911">‫IPv4/IPv6</translation>
@@ -405,6 +415,7 @@
 <translation id="2787237339470862294">هذه اللغة غير متاحة في الوقت الحالي</translation>
 <translation id="2787435249130282949">إضاءة ساطعة للوحة المفاتيح</translation>
 <translation id="2805756323405976993">التطبيقات</translation>
+<translation id="2822702442014805146">جارٍ تنزيل نموذج إنشاء الملخّص والاسم</translation>
 <translation id="28232023175184696">تعذَّر الاتصال بالإنترنت. يُرجى النقر لإعادة المحاولة.</translation>
 <translation id="2855718259207180827">الصوف</translation>
 <translation id="2859243502336719778">تحديث مُهم</translation>
@@ -502,6 +513,7 @@
 <translation id="3373141842870501561">خلفية تعرض منظرًا انسيابيًا للأرض</translation>
 <translation id="33736539805963175">خلفية <ph name="LETTERS_COLOR" /> على شكل حرف <ph name="LETTERS_LETTER" /></translation>
 <translation id="3383623117265110236">مجموعة حصرية</translation>
+<translation id="3395147534045164351">تفعيل محاذاة الموقع الجغرافي أو إيقافها</translation>
 <translation id="3404249063913988450">تفعيل شاشة التوقف</translation>
 <translation id="3413935475507503304">لمواصلة عملية التحديث، انقر على "التالي".</translation>
 <translation id="3428551088151258685">خارجي</translation>
@@ -651,6 +663,7 @@
 <translation id="4113067922640381334">يمكنك الآن الوصول إلى <ph name="BEGIN_LINK_WALLPAPER_SUBPAGE" />خلفيات<ph name="END_LINK_WALLPAPER_SUBPAGE" /> جديدة.</translation>
 <translation id="4117637339509843559">الوضع الداكن</translation>
 <translation id="4126551873361000548">ترجيع بمقدار 10 ثوانٍ</translation>
+<translation id="4128271910628504223">يُرجى إدخال طلب، مثل "رسم غابة مليئة بالضباب"</translation>
 <translation id="4130035430755296270">استمِر في تمرير مؤشر الماوس هنا للاطّلاع على المزيد من خيارات التنسيق.</translation>
 <translation id="4130750466177569591">أوافق</translation>
 <translation id="4131410914670010031">أبيض وأسود</translation>
@@ -824,6 +837,7 @@
 <translation id="4891842000192098784">الإجهاد</translation>
 <translation id="4897058166682006107">مستوى شحن بطارية السماعة اليسرى هو %<ph name="BATTERY_PERCENTAGE" />.</translation>
 <translation id="4905998861748258752">فعِّل الميزة لتحديد خيارات شاشة الاستراحة.</translation>
+<translation id="4910853326379896417">اكتمل تنزيل نموذج إنشاء الملخّص والاسم</translation>
 <translation id="4910858703033903787">‏أنواع اسم نقطة الوصول (APN)</translation>
 <translation id="4917385247580444890">قوية</translation>
 <translation id="4917889632206600977">توقّفت الطابعة - نفد الورق</translation>
@@ -858,8 +872,10 @@
 <translation id="5050042263972837708">اسم المجموعة</translation>
 <translation id="5051044138948155788">هذه هي الصفحة الوحيدة وستؤدي إزالتها إلى نقلك إلى شاشة بدء المسح الضوئي.</translation>
 <translation id="5053233795640754917">إيقاف مؤقت</translation>
+<translation id="5056587122125565772">إنشاء صورة</translation>
 <translation id="5078711626843651677">تُخزَّن النماذج الصوتية مؤقتًا على الجهاز إلى أن تكتمل عملية تصنيف المتحدّثين. ويمكنك متى شئت إيقاف هذا الخيار من خلال "الإعدادات".</translation>
 <translation id="5078983345702708852">بتصميم مُبتكر</translation>
+<translation id="5085224064082122501">‏يتعذّر تنزيل نموذج إنشاء الملخّص والاسم. يُرجى إعادة المحاولة أو إعادة تشغيل جهاز Chromebook.</translation>
 <translation id="5087864757604726239">رجوع</translation>
 <translation id="5088172560898466307">اسم مضيف الخادم</translation>
 <translation id="5089810972385038852">الولاية</translation>
@@ -1129,14 +1145,12 @@
 <translation id="6325525973963619867">إخفاق</translation>
 <translation id="6327262166342360252">‏تم إنشاء هذه الخلفية بواسطة الذكاء الاصطناعي (AI) باستخدام النص التالي: "<ph name="PROMPT" />".</translation>
 <translation id="6331191339300272798">المظهر الداكن التلقائي</translation>
-<translation id="6335228876613776082">اكتمل تنزيل النموذج</translation>
 <translation id="6340526405444716530">التخصيص</translation>
 <translation id="6348252528297699679">لإيقاف إمكانية الوصول إلى الموقع الجغرافي، انتقِل إلى "الإعدادات" &gt; "الخصوصية والأمان" &gt; "عناصر التحكّم في الخصوصية" &gt; "الوصول إلى الموقع الجغرافي". <ph name="LINK_BEGIN" />مزيد من المعلومات<ph name="LINK_END" /></translation>
 <translation id="6348738456043757611">اسم المستخدم وكلمة المرور</translation>
 <translation id="6352210854422428614">كوكب مختلف</translation>
 <translation id="6359706544163531585">إيقاف المظهر الفاتح</translation>
 <translation id="6359919876285606596">هذا الإجراء نهائي ولا يمكن التراجع عنه</translation>
-<translation id="6368342879959028556">‏عند اختيار "الإنشاء باستخدام الذكاء الاصطناعي (AI)"، اكتب طلبًا مخصّصًا. أو يمكنك أيضًا اختيار "خلفيات قائمة على الذكاء الاصطناعي" لاختيار مظهر ثمّ النقر على الكلمات التي تحتها خط لتخصيص خلفيتك القائمة على الذكاء الاصطناعي.</translation>
 <translation id="636850387210749493">التسجيل في المؤسسة</translation>
 <translation id="6369221585240879141">يتعذّر إنشاء أسماء تسجيلات للغة الطلب الصوتي هذه</translation>
 <translation id="6373461326814131011">بِركة صناعية</translation>
@@ -1209,16 +1223,6 @@
 <translation id="6657240842932274095">هل تريد السماح لخدمات النظام باستخدام موقعك الجغرافي؟</translation>
 <translation id="6657585470893396449">كلمة المرور</translation>
 <translation id="66621959568103627">وردي مرجاني</translation>
-<translation id="6667885109186363316">‏<ph name="SEA_PEN_INTRO_FIRST_PARAGRAPH" />
-          <ph name="LINE_BREAK" />
-          <ph name="LINE_BREAK" />
-          للحصول على صور كثيرة ومتنوعة من إنشاء الذكاء الاصطناعي، انقر على "أريد أفكارًا جديدة".
-          <ph name="LINE_BREAK" />
-          <ph name="LINE_BREAK" />
-          عند إنشاء الصور باستخدام الذكاء الاصطناعي، يتم إرسال الطلب إلى خوادم الذكاء الاصطناعي من Google لإنشاء الصور وتحسين المنتج، ويخضع ذلك لـ <ph name="BEGIN_LINK_GOOGLE_PRIVACY_POLICY" />سياسة خصوصية Google<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" />.
-          <ph name="LINE_BREAK" />
-          <ph name="LINE_BREAK" />
-          ما زال الذكاء الاصطناعي التوليدي في المرحلة التجريبية ومراحل التطوير الأولى ويتوفّر حاليًا بشكل محدود.</translation>
 <translation id="6673898378497337661">زيادة سطوع لوحة المفاتيح</translation>
 <translation id="6692996468359469499">الحصول على معلومات ذات صلة باختيارك</translation>
 <translation id="6694534975463174713">رمز القفل</translation>
@@ -1274,6 +1278,7 @@
 <translation id="6930597342185648547">لمحة عن الخلفية</translation>
 <translation id="6939667434404433010">البحث عن اسم التسجيل</translation>
 <translation id="6939766318048400022">مقهى</translation>
+<translation id="6942253772720771875">يُرجى إخبارنا بملاحظاتك أو توضيح مشكلتك</translation>
 <translation id="6943893908656559156">الهوية عن بُعد (اختياري)</translation>
 <translation id="6953137545147683679">ذهبي</translation>
 <translation id="6957231940976260713">اسم الخدمة</translation>
@@ -1295,6 +1300,7 @@
 <translation id="7040230719604914234">مشغل شبكة الجوّال</translation>
 <translation id="7040729769968826896">السماح بتحديد هوية المتحدّث</translation>
 <translation id="7041549558901442110">الجهاز غير متصل.</translation>
+<translation id="704183341263526038">كوكب المشتري</translation>
 <translation id="7046522406494308071">هل تريد إعادة ضبط كل الاختصارات على الإعدادات التلقائية؟</translation>
 <translation id="7049916119678019302">تنزيل نموذج تحويل الصوت إلى نص من خلال "الإعدادات"</translation>
 <translation id="7058278511608979688">إنهاء وحفظ</translation>
@@ -1389,6 +1395,7 @@
 <translation id="7388345524791662148">خيارات إضافية حول "<ph name="RECORDING_NAME" />"</translation>
 <translation id="7388959671917308825">لوحة لمس مُدمَجة</translation>
 <translation id="7397270852490618635">إيقاف تشغيل المظهر الفاتح</translation>
+<translation id="7400166052988585408">سيقفل مُعلّمك شاشتك بعد <ph name="NUM_SECONDS" /> من الثواني</translation>
 <translation id="7401543881546089382">حذف الاختصار</translation>
 <translation id="7405493795721832710"><ph name="DEVICE_NAME" /> جاهز للتحديث</translation>
 <translation id="741244894080940828">التحويل</translation>
@@ -1427,6 +1434,7 @@
 <translation id="7569444139234840525"><ph name="QUERY_TEXT" /> · /<ph name="PHONETICS" />/</translation>
 <translation id="7570674786725311828">‏شاشة USB تعمل باللمس</translation>
 <translation id="757747079855995705">الحجر</translation>
+<translation id="7584853321964440104">‏يتعذر التنزيل. يُرجى إعادة المحاولة أو إعادة تشغيل جهاز Chromebook.</translation>
 <translation id="7590883480672980941">إعدادات الإدخال</translation>
 <translation id="7595982850646262331">الوقت المتبقّي: <ph name="TIME_VALUE" /></translation>
 <translation id="7600430297804876776">ضبطَ مشرف <ph name="MANAGER" /> وقتًا لاستخدام جهاز <ph name="DEVICE_TYPE" /> خلاله.</translation>
@@ -1557,6 +1565,16 @@
 <translation id="8179976553408161302">Enter</translation>
 <translation id="8183975772394450380">شاطئ</translation>
 <translation id="819278132617411009">‏استخدام تكنولوجيات الذكاء الاصطناعي من Google لتعزيز إنتاجيتك</translation>
+<translation id="82003371436638355">‏عند اختيار "إنشاء خلفيتك الخاصة"، يمكنك كتابة طلب مخصّص أو النقر على "اختيار مظهر" ثم اختيار الكلمات التي تحتها خط لتخصيص خلفيتك القائمة على الذكاء الاصطناعي.
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          للحصول على صور فريدة ومتنوعة تستند إلى الذكاء الاصطناعي، انقر على "أريد أفكارًا جديدة".
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          عند إنشاء خلفية خاصة بك، يتم إرسال الطلب إلى خوادم Google لإنشاء الصور وتحسين المنتج، ويتم إجراء ذلك مع مراعاة <ph name="BEGIN_LINK_GOOGLE_PRIVACY_POLICY" />بنود الخدمة وسياسة الخصوصية الساريتَين في Google<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" />. يُرجى عدم تضمين أي معلومات شخصية أو حسّاسة أو سرية.
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          قد يعرض الذكاء الاصطناعي التوليدي معلومات خاطئة، بما فيها تلك المتعلقة بالأشخاص، لذا ننصحك بالتحقّق من ردوده. <ph name="BEGIN_LINK_CREATE_YOUR_OWN_WALLPAPER" />مزيد من المعلومات<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" /></translation>
 <translation id="8200772114523450471">استئناف</translation>
 <translation id="8206859287963243715">خلوي</translation>
 <translation id="8208861521865154048">المزايا</translation>
@@ -1578,6 +1596,7 @@
 <translation id="8312330582793120272">تشغيل الوسائط</translation>
 <translation id="8318753676953949627">ما مِن صور.</translation>
 <translation id="8320910311642849813">غابة</translation>
+<translation id="8322464149031882595">يُرجى النقر للتقدّم إلى الأمام</translation>
 <translation id="8329018942023753850">تطبيق "الآلة الحاسبة"</translation>
 <translation id="8336739000755212683">تغيير صورة حساب الجهاز</translation>
 <translation id="8339024191194156249">مزيد من المعلومات عن الإطلاق التلقائي</translation>
@@ -1598,6 +1617,7 @@
 <translation id="8395584934117017006">تُدير المؤسسة جهاز <ph name="DEVICE_TYPE" /> هذا.</translation>
 <translation id="8398927464629426868">معدّل شحن الجهاز أو تفريغ شحنه حاليًا</translation>
 <translation id="8403988360557588704">رسمة <ph name="ART_FEATURE" /> بأسلوب <ph name="ART_MOVEMENT" /></translation>
+<translation id="8409219750150841791">الملخّص الذي تم إنشاؤه:</translation>
 <translation id="8410244574650205435">تم الرصد تلقائيًا</translation>
 <translation id="8420955526972171689">يمكنك إجراء اختبارات وتحديد مشاكل الجهاز وحلّها.</translation>
 <translation id="8422748173858722634">IMEI</translation>
@@ -1642,6 +1662,7 @@
 <translation id="8626489604350149811">مزيد من الإجراءات لـ "<ph name="APN_NAME" />"</translation>
 <translation id="86356131183441916">أرجواني فاتح</translation>
 <translation id="8647595191512746911">تحويل الصوت إلى نص</translation>
+<translation id="8648578954147795914">الأسماء التي تم إنشاؤها:</translation>
 <translation id="8650852232143958317">‏الوصول إلى حساب Gmail وملفاتك على Google Drive من أي مكان</translation>
 <translation id="8651481478098336970">كتم الصوت</translation>
 <translation id="8655295600908251630">القناة</translation>
@@ -1670,7 +1691,6 @@
 <translation id="8764414543112028321">WireGuard</translation>
 <translation id="87646919272181953">‏ألبوم "صور Google"</translation>
 <translation id="8775713578693478175">اسم نقطة وصول المودم</translation>
-<translation id="877735394245039557">جارٍ تنزيل النموذج</translation>
 <translation id="877985182522063539">A4</translation>
 <translation id="879568662008399081">قد يكون للشبكة مدخل مشروط الوصول إليه.</translation>
 <translation id="8797082062139985406">‏إنشاء اسم باستخدام الذكاء الاصطناعي من Google</translation>
@@ -1723,6 +1743,7 @@
 <translation id="8961025972867871808">طيور بطريق</translation>
 <translation id="8968751544471797276">معدّل الشحن</translation>
 <translation id="8970109610781093811">إعادة التشغيل مرة أخرى</translation>
+<translation id="8972061581514441296">يُرجى النقر للعودة</translation>
 <translation id="8983038754672563810">HSPA</translation>
 <translation id="8987565828374052507">{NUMBER_OF_PAGES,plural, =0{مسح ضوئي}=1{مسح صفحة واحدة ({NUMBER_OF_PAGES}) ضوئيًا}two{مسح صفحتَين ({NUMBER_OF_PAGES}) ضوئيًا}few{مسح {NUMBER_OF_PAGES} صفحات ضوئيًا}many{مسح {NUMBER_OF_PAGES} صفحة ضوئيًا}other{مسح {NUMBER_OF_PAGES} صفحة ضوئيًا}}</translation>
 <translation id="89945434909472341">قرية</translation>
@@ -1784,6 +1805,7 @@
 <translation id="9218016617214286986">‏عرض أسماء نقاط الوصول (APN) المعروفة</translation>
 <translation id="932327136139879170">الصفحة الرئيسية</translation>
 <translation id="939519157834106403">SSID</translation>
+<translation id="940663759301549538">‏يُرجى التأكّد من توصيل الميكروفون أو محاولة إعادة تشغيل جهاز Chromebook</translation>
 <translation id="945522503751344254">إرسال ملاحظات</translation>
 <translation id="950520315903467048">لم يتم تخصيص مفتاح لـ <ph name="DIRECTION" />. <ph name="ASSIGN_INSTRUCTION" /></translation>
 <translation id="951780398843003443">مقارنة الأصوات طوال مدة التسجيل ليعرض النص ما يقوله كل متحدّث ووقت الكلام</translation>

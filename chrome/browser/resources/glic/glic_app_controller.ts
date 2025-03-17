@@ -9,6 +9,7 @@ import {BrowserProxyImpl} from './browser_proxy.js';
 import {WebUiState} from './glic.mojom-webui.js';
 import type {PageInterface} from './glic.mojom-webui.js';
 import type {ApiHostEmbedder} from './glic_api_impl/glic_api_host.js';
+import {WebClientState} from './glic_api_impl/glic_api_host.js';
 import {exceptionFromTransferable} from './glic_api_impl/request_types.js';
 import type {TransferableException} from './glic_api_impl/request_types.js';
 import type {PageType, WebviewDelegate} from './webview.js';
@@ -71,6 +72,9 @@ export class GlicAppController implements PageInterface, WebviewDelegate,
   // Present only when loading or after loading is finished. Removed on error.
   private webview?: WebviewController;
 
+  private profileIsReady: boolean|undefined = undefined;
+  private profileIsReadyInitialState = Promise.withResolvers<void>();
+
   state: WebUiState|undefined;
 
   // When entering loading state, this represents the earliest timestamp at
@@ -105,10 +109,12 @@ export class GlicAppController implements PageInterface, WebviewDelegate,
 
   // WebviewDelegate implementation.
   webviewUnresponsive(): void {
+    console.error('webview unresponsive');
     this.setState(WebUiState.kUnresponsive);
   }
 
-  webviewError(): void {
+  webviewError(reason: string): void {
+    console.error(`webview exit. reason: ${reason}`);
     this.setState(WebUiState.kError);
   }
 
@@ -196,14 +202,29 @@ export class GlicAppController implements PageInterface, WebviewDelegate,
       WebUiState.kUnresponsive,
       {
         onEnter: () => {
-          this.destroyWebview();
-          // TODO(crbug.com/394162784): Create an unresponsive UI and permit
-          // transitioning back to being responsive.
-          this.showPanel('errorPanel');
+          // TODO(crbug.com/394162784): Create an unresponsive UI according to
+          // the design spec and remove the placeholder.
+          this.enterUnresponsiveUiPlaceholder();
         },
+        onExit: this.exitUnresponsiveUiPlaceholder,
       },
     ],
   ]);
+
+  private enterUnresponsiveUiPlaceholder(): void {
+    if (!this.webview) {
+      return;
+    }
+    this.webview.webview.style.webkitTransition = 'opacity 250ms';
+    this.webview.webview.style.opacity = '0.5';
+  }
+
+  private exitUnresponsiveUiPlaceholder(): void {
+    if (!this.webview) {
+      return;
+    }
+    this.webview.webview.style.opacity = '1';
+  }
 
   private cancelTimeout(): void {
     if (this.loadingTimer) {
@@ -213,27 +234,23 @@ export class GlicAppController implements PageInterface, WebviewDelegate,
   }
 
   private async beginLoad(): Promise<void> {
-    // Send this message but block on it only after webview cookies are synced
-    // to minimize latency. Enabling state is checked only when going online.
-    // This only applies when showing Glic in a tab (since the entry point
-    // button is removed when disabled) so the mild inconsistency doesn't
-    // matter.
-    const enabledCheck = this.browserProxy.handler.isProfileEnabled();
-
     // Time to show the loading panel if the web client is not ready.
     const showLoadingTime = performance.now() + kPreHoldLoadingTimeMs;
 
-    // Blocking on cookie syncing here introduces latency, we should consider
-    // ways to avoid it.
-    const {success} = await this.browserProxy.handler.prepareForClient();
+    // profileIsReady isn't available right away. Wait until it's ready.
+    await this.profileIsReadyInitialState.promise;
 
-    const isEnabled = (await enabledCheck).enabled;
+    const isEnabled = this.profileIsReady;
     if (!isEnabled) {
       this.setState(WebUiState.kUnavailable);
       return;
     }
 
+    // Blocking on cookie syncing here introduces latency, we should consider
+    // ways to avoid it.
+    const {success} = await this.browserProxy.handler.prepareForClient();
     if (!success) {
+      console.error('prepareForClient in beginLoad() failed.');
       this.setState(WebUiState.kError);
       return;
     }
@@ -272,6 +289,7 @@ export class GlicAppController implements PageInterface, WebviewDelegate,
     // `kMaxWaitTimeMs`. Switch to error state at that time unless interrupted
     // by `webClientReady`.
     this.loadingTimer = setTimeout(() => {
+      console.error('Exceeded timeout in finishLoading');
       this.setState(WebUiState.kError);
     }, kMaxWaitTimeMs - kMinHoldLoadingTimeMs);
   }
@@ -370,6 +388,22 @@ export class GlicAppController implements PageInterface, WebviewDelegate,
     }
   }
 
+  webClientStateChanged(state: WebClientState): void {
+    switch (state) {
+      case WebClientState.RESPONSIVE:
+        if (this.state === WebUiState.kUnresponsive) {
+          this.setState(WebUiState.kReady);
+        }
+        break;
+      case WebClientState.UNRESPONSIVE:
+        this.setState(WebUiState.kUnresponsive);
+        break;
+      case WebClientState.ERROR:
+        this.setState(WebUiState.kError);
+        break;
+    }
+  }
+
   // This may also be called when the panel is re-opened by webui after being
   // hidden, such as when an error panel is shown.
   // This will do nothing if the app is not in kReady state.
@@ -416,6 +450,26 @@ export class GlicAppController implements PageInterface, WebviewDelegate,
   intentToShow() {
     if (this.state === WebUiState.kError) {
       this.reload();
+    }
+  }
+
+  setProfileIsReady(profileIsReady: boolean) {
+    if (this.profileIsReady === profileIsReady) {
+      return;
+    }
+    const initialCall = this.profileIsReady === undefined;
+    this.profileIsReady = profileIsReady;
+
+    if (initialCall) {
+      this.profileIsReadyInitialState.resolve();
+    } else {
+      if (!profileIsReady) {
+        this.setState(WebUiState.kUnavailable);
+      } else {
+        if (this.state === WebUiState.kUnavailable) {
+          this.setState(WebUiState.kBeginLoad);
+        }
+      }
     }
   }
 }

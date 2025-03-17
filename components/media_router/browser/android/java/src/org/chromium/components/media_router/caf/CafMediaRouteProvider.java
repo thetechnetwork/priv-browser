@@ -28,6 +28,7 @@ import java.util.Map;
 
 /** A {@link MediaRouteProvider} implementation for Cast devices and applications, using Cast v3 API. */
 @NullMarked
+@SuppressWarnings("NullAway") // https://crbug.com/401584051
 public class CafMediaRouteProvider extends CafBaseMediaRouteProvider {
     private static final String TAG = "CafMRP";
 
@@ -161,8 +162,8 @@ public class CafMediaRouteProvider extends CafBaseMediaRouteProvider {
         }
 
         mMessageHandler.onSessionStarted();
-        assumeNonNull(sessionController().getSession());
-        sessionController().getSession().getRemoteMediaClient().requestStatus();
+        assumeNonNull(assumeNonNull(sessionController().getSession()).getRemoteMediaClient())
+                .requestStatus();
     }
 
     @Override
@@ -202,8 +203,7 @@ public class CafMediaRouteProvider extends CafBaseMediaRouteProvider {
         return null;
     }
 
-    private CafMediaRouteProvider(
-            @Nullable MediaRouter androidMediaRouter, MediaRouteManager manager) {
+    private CafMediaRouteProvider(MediaRouter androidMediaRouter, MediaRouteManager manager) {
         super(androidMediaRouter, manager);
         mSessionController = new CastSessionController(this);
         mMessageHandler = new CafMessageHandler(this, mSessionController);

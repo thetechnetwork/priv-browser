@@ -247,8 +247,7 @@ IndexedDBContextImpl::IndexedDBContextImpl(
       quota_client_remote.InitWithNewPipeAndPassReceiver();
   quota_manager_proxy_->RegisterClient(
       std::move(quota_client_remote),
-      storage::QuotaClientType::kIndexedDatabase,
-      {blink::mojom::StorageType::kTemporary});
+      storage::QuotaClientType::kIndexedDatabase);
   IDBTaskRunner()->PostTask(
       FROM_HERE, base::BindOnce(&IndexedDBContextImpl::BindPipesOnIDBSequence,
                                 weak_factory_.GetWeakPtr(),
@@ -801,8 +800,8 @@ void IndexedDBContextImpl::ShutdownOnIDBSequence(base::TimeTicks start_time) {
     if (!delete_bucket && bucket_locator.storage_key.IsThirdPartyContext()) {
       delete_bucket = std::ranges::any_of(
           origins_to_purge_on_shutdown_, [&](const url::Origin& origin) {
-            return net::SchemefulSite(origin) ==
-                   bucket_locator.storage_key.top_level_site();
+            return bucket_locator.storage_key.top_level_site().IsSameSiteWith(
+                origin);
           });
     }
 

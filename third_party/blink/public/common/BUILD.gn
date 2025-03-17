@@ -98,6 +98,10 @@ source_set("common_export") {
   sources = [ "common_export.h" ]
 }
 
+source_set("preloading_headers") {
+  sources = [ "navigation/preloading_headers.h" ]
+}
+
 source_set("headers") {
   visibility = [
     ":*",
@@ -271,7 +275,6 @@ source_set("headers") {
     "permissions/permission_utils.h",
     "permissions_policy/document_policy.h",
     "permissions_policy/document_policy_features.h",
-    "permissions_policy/permissions_policy.h",
     "permissions_policy/policy_helper_public.h",
     "permissions_policy/policy_value.h",
     "renderer_preferences/renderer_preferences.h",
@@ -323,6 +326,7 @@ source_set("headers") {
   public_deps = [
     ":make_generated_permissions_policy_helper",
     ":make_runtime_feature_state_contexts_headers",
+    ":preloading_headers",
     "//base",
     "//mojo/public/cpp/bindings",
     "//services/metrics/public/cpp:metrics_cpp",

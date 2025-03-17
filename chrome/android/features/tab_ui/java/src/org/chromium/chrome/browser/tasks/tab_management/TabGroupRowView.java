@@ -8,11 +8,9 @@ import static org.chromium.components.browser_ui.widget.BrowserUiListMenuUtils.b
 
 import android.content.Context;
 import android.content.res.Resources;
-import android.graphics.Rect;
 import android.graphics.drawable.GradientDrawable;
 import android.text.TextUtils;
 import android.util.AttributeSet;
-import android.view.TouchDelegate;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
@@ -41,7 +39,6 @@ import java.time.Clock;
 public class TabGroupRowView extends LinearLayout {
     private TabGroupFaviconCluster mTabGroupFaviconCluster;
     private View mColorView;
-    private View mMenuLayout;
     private TextView mTitleTextView;
     private TextView mSubtitleTextView;
     private FrameLayout mImageTilesContainer;
@@ -60,10 +57,7 @@ public class TabGroupRowView extends LinearLayout {
         mTitleTextView = findViewById(R.id.tab_group_title);
         mSubtitleTextView = findViewById(R.id.tab_group_subtitle);
         mImageTilesContainer = findViewById(R.id.image_tiles_container);
-        mListMenuButton = findViewById(R.id.more);
-        mMenuLayout = findViewById(R.id.tab_group_menu);
-
-        setTouchDelegate(getListMenuItemTouchDelegate());
+        mListMenuButton = findViewById(R.id.tab_group_menu);
     }
 
     void updateCornersForClusterData(ClusterData clusterData) {
@@ -97,26 +91,6 @@ public class TabGroupRowView extends LinearLayout {
                 timeAgoResolver.resolveTimeAgoText(event.timestampMs, event.eventType));
     }
 
-    private TouchDelegate getListMenuItemTouchDelegate() {
-        Rect rect = new Rect();
-        mListMenuButton.getHitRect(rect);
-
-        int touchSize =
-                mListMenuButton
-                        .getContext()
-                        .getResources()
-                        .getDimensionPixelSize(R.dimen.min_touch_target_size);
-        int halfWidthDelta = Math.max((touchSize - mListMenuButton.getWidth()) / 2, 0);
-        int halfHeightDelta = Math.max((touchSize - mListMenuButton.getHeight()) / 2, 0);
-
-        rect.left -= halfWidthDelta;
-        rect.right += halfWidthDelta;
-        rect.top -= halfHeightDelta;
-        rect.bottom += halfHeightDelta;
-
-        return new TouchDelegate(rect, mListMenuButton);
-    }
-
     void setColorIndex(@TabGroupColorId int colorIndex) {
         @ColorInt
         int color =
@@ -133,7 +107,7 @@ public class TabGroupRowView extends LinearLayout {
         mListMenuButton.setDelegate(() -> getListMenu(openRunnable, deleteRunnable, leaveRunnable));
         boolean shouldMenuBeVisible =
                 openRunnable != null || deleteRunnable != null || leaveRunnable != null;
-        mMenuLayout.setVisibility(shouldMenuBeVisible ? VISIBLE : GONE);
+        mListMenuButton.setVisibility(shouldMenuBeVisible ? VISIBLE : GONE);
     }
 
     void setSharedImageTilesView(@Nullable SharedImageTilesView sharedImageTilesView) {

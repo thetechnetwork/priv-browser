@@ -4,14 +4,14 @@
 
 package org.chromium.chrome.browser.tasks.tab_management;
 
-import static org.chromium.chrome.browser.tasks.tab_management.TabGroupListBottomSheetProperties.ADD_TO_GROUP_VISIBLE;
-
+import org.chromium.base.metrics.RecordUserAction;
 import org.chromium.build.annotations.NullMarked;
 import org.chromium.build.annotations.Nullable;
 import org.chromium.chrome.browser.tab.Tab;
 import org.chromium.chrome.browser.tabmodel.TabGroupModelFilter;
 import org.chromium.chrome.browser.tasks.tab_management.TabGroupListBottomSheetCoordinator.RowType;
-import org.chromium.chrome.browser.tasks.tab_management.TabGroupListBottomSheetCoordinator.TabGroupParityBottomSheetCoordinatorDelegate;
+import org.chromium.chrome.browser.tasks.tab_management.TabGroupListBottomSheetCoordinator.TabGroupCreationCallback;
+import org.chromium.chrome.browser.tasks.tab_management.TabGroupListBottomSheetCoordinator.TabGroupListBottomSheetCoordinatorDelegate;
 import org.chromium.components.browser_ui.bottomsheet.BottomSheetController;
 import org.chromium.components.browser_ui.bottomsheet.BottomSheetController.SheetState;
 import org.chromium.components.browser_ui.bottomsheet.BottomSheetController.StateChangeReason;
@@ -34,15 +34,15 @@ import java.util.List;
 @NullMarked
 public class TabGroupListBottomSheetMediator {
     private final BottomSheetController mBottomSheetController;
-    private final TabGroupParityBottomSheetCoordinatorDelegate mDelegate;
-    private final PropertyModel mModel;
+    private final TabGroupListBottomSheetCoordinatorDelegate mDelegate;
     private final ModelList mModelList;
     private final TabGroupModelFilter mFilter;
-    private final TabGroupCreationDialogManager mTabGroupCreationDialogManager;
+    private final TabGroupCreationCallback mTabGroupCreationCallback;
     private final FaviconResolver mFaviconResolver;
     private final @Nullable TabGroupSyncService mTabGroupSyncService;
     private final DataSharingService mDataSharingService;
     private final CollaborationService mCollaborationService;
+    private final boolean mShowNewGroup;
 
     private final BottomSheetObserver mBottomSheetObserver =
             new EmptyBottomSheetObserver() {
@@ -64,36 +64,36 @@ public class TabGroupListBottomSheetMediator {
     /**
      * @param modelList Side effect is adding items to this list.
      * @param filter Used to read current tab groups.
-     * @param tabGroupCreationDialogManager Used to show the tab group creation dialog.
+     * @param tabGroupCreationCallback Used to follow up on tab group creation.
      * @param faviconResolver Used to fetch favicon images for some tabs.
      * @param tabGroupSyncService Used to fetch synced copy of tab groups.
      * @param dataSharingService Used to fetch shared group data.
      * @param collaborationService Used to fetch collaboration group data.
      * @param bottomSheetController Used to interact with the bottom sheet.
-     * @param model Properties for the bottom sheet.
      * @param delegate Called on {@link BottomSheetObserver} calls.
+     * @param showNewGroupRow Whether the 'New Tab Group' row should be displayed.
      */
     public TabGroupListBottomSheetMediator(
             ModelList modelList,
             TabGroupModelFilter filter,
-            TabGroupCreationDialogManager tabGroupCreationDialogManager,
+            TabGroupCreationCallback tabGroupCreationCallback,
             FaviconResolver faviconResolver,
             @Nullable TabGroupSyncService tabGroupSyncService,
             DataSharingService dataSharingService,
             CollaborationService collaborationService,
             BottomSheetController bottomSheetController,
-            PropertyModel model,
-            TabGroupParityBottomSheetCoordinatorDelegate delegate) {
+            TabGroupListBottomSheetCoordinatorDelegate delegate,
+            boolean showNewGroupRow) {
         mModelList = modelList;
         mFilter = filter;
-        mTabGroupCreationDialogManager = tabGroupCreationDialogManager;
+        mTabGroupCreationCallback = tabGroupCreationCallback;
         mFaviconResolver = faviconResolver;
         mTabGroupSyncService = tabGroupSyncService;
         mDataSharingService = dataSharingService;
         mCollaborationService = collaborationService;
         mBottomSheetController = bottomSheetController;
-        mModel = model;
         mDelegate = delegate;
+        mShowNewGroup = showNewGroupRow;
     }
 
     /**
@@ -103,26 +103,16 @@ public class TabGroupListBottomSheetMediator {
      * @param tabs The tabs to be added to a tab group.
      */
     void requestShowContent(List<Tab> tabs) {
-        if (!mDelegate.requestShowContent()) return;
-        mBottomSheetController.addObserver(mBottomSheetObserver);
+        // Populate the list of tabs before sending the show-content request to the delegate.
+        // This allows us to know the height of the bottom sheet.
         populateList(tabs);
-    }
-
-    /**
-     * Sets whether to add the 'Add To Group' row upon next {@link #requestShowContent(List)} call.
-     */
-    void setShowAddToGroupRow(boolean showAddToGroupRow) {
-        mModel.set(ADD_TO_GROUP_VISIBLE, showAddToGroupRow);
+        if (!mDelegate.requestShowContent()) return; // Return early if content didn't actually show
+        mBottomSheetController.addObserver(mBottomSheetObserver);
     }
 
     /** Hides the bottom sheet. */
     void hide(@StateChangeReason int hideReason) {
         mDelegate.hide(hideReason);
-    }
-
-    /** Returns the model for the bottom sheet. */
-    PropertyModel getModel() {
-        return mModel;
     }
 
     /**
@@ -132,7 +122,7 @@ public class TabGroupListBottomSheetMediator {
      */
     private void populateList(List<Tab> tabs) {
         mModelList.clear();
-        if (mModel.get(ADD_TO_GROUP_VISIBLE)) {
+        if (mShowNewGroup) {
             insertAddGroupRow(tabs);
         }
 
@@ -166,11 +156,14 @@ public class TabGroupListBottomSheetMediator {
     }
 
     private void createNewGroupForTabs(List<Tab> tabs) {
+        RecordUserAction.record("TabGroupParity.BottomSheetRowSelection.NewGroup");
         assert !tabs.isEmpty();
         Tab tab = tabs.get(0);
 
         mFilter.mergeListOfTabsToGroup(tabs, tab, true);
         hide(StateChangeReason.INTERACTION_COMPLETE);
-        mTabGroupCreationDialogManager.showDialog(tab.getRootId(), mFilter);
+        var tabGroupId = tab.getTabGroupId();
+        if (tabGroupId == null) return;
+        mTabGroupCreationCallback.onTabGroupCreated(tabGroupId);
     }
 }

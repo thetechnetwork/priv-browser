@@ -7,9 +7,6 @@
 #include "content/browser/child_process_launcher_helper.h"
 #include "content/browser/child_process_launcher_helper_posix.h"
 
-static_assert(BUILDFLAG(IS_TVOS),
-              "child_process_launcher_helper_tvos.mm requires is_tvos");
-
 // TODO(crbug.com/391914246): Implement the ChildProcessLauncherHelper when
 // tvOS actually requires the functionality.
 namespace content {
@@ -75,6 +72,13 @@ void ChildProcessLauncherHelper::ForceNormalProcessTerminationSync(
 void ChildProcessLauncherHelper::SetProcessPriorityOnLauncherThread(
     base::Process process,
     base::Process::Priority priority) {
+  NOTREACHED();
+}
+
+base::File OpenFileToShare(const base::FilePath& path,
+                           base::MemoryMappedFile::Region* region) {
+  // Not used yet (until required files are described in the service manifest on
+  // tvOS).
   NOTREACHED();
 }
 

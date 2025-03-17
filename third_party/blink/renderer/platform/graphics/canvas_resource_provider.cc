@@ -42,7 +42,6 @@
 #include "third_party/blink/renderer/platform/graphics/accelerated_static_bitmap_image.h"
 #include "third_party/blink/renderer/platform/graphics/canvas_deferred_paint_record.h"
 #include "third_party/blink/renderer/platform/graphics/gpu/shared_gpu_context.h"
-#include "third_party/blink/renderer/platform/graphics/graphics_types.h"
 #include "third_party/blink/renderer/platform/graphics/memory_managed_paint_canvas.h"
 #include "third_party/blink/renderer/platform/graphics/memory_managed_paint_recorder.h"
 #include "third_party/blink/renderer/platform/graphics/skia/skia_utils.h"
@@ -99,7 +98,7 @@ static FlushForImageListener* GetFlushForImageListener() {
 namespace {
 
 // Serves as reverse-killswitch while we roll out the change for
-// CanvasResourceProviderSharedBitmap creation to require SW compositing.
+// CanvasResourceProviderSoftwareSharedImage creation to require SW compositing.
 // TODO(crbug.com/379996128): Eliminet post-safe rollout.
 BASE_FEATURE(kCanvasAllowCRPSharedBitmapWithGPUCompositing,
              "CanvasAllowCRPSharedBitmapWithGPUCompositing",
@@ -169,6 +168,7 @@ class CanvasResourceProviderBitmap : public CanvasResourceProvider {
   bool IsValid() const override { return GetSkSurface(); }
   bool IsAccelerated() const final { return false; }
   bool SupportsDirectCompositing() const override { return false; }
+  bool IsSingleBuffered() const override { return false; }
 
  private:
   scoped_refptr<CanvasResource> ProduceCanvasResource(FlushReason) override {
@@ -203,7 +203,7 @@ class CanvasResourceProviderSharedImage : public CanvasResourceProvider,
       const gfx::ColorSpace& color_space,
       WebGraphicsSharedImageInterfaceProvider* shared_image_interface_provider,
       CanvasResourceHost* resource_host)
-      : CanvasResourceProvider(kSharedBitmap,
+      : CanvasResourceProvider(kSharedImage,
                                size,
                                format,
                                alpha_type,
@@ -229,7 +229,11 @@ class CanvasResourceProviderSharedImage : public CanvasResourceProvider,
   base::WeakPtr<WebGraphicsSharedImageInterfaceProvider>
       shared_image_interface_provider_;
 
-  bool IsSharedBitmapGpuChannelLost() const override {
+  bool IsSoftwareSharedImageGpuChannelLost() const override {
+    if (!is_software_) {
+      return false;
+    }
+
     return !shared_image_interface_provider_ ||
            !shared_image_interface_provider_->SharedImageInterface();
   }
@@ -283,7 +287,7 @@ class CanvasResourceProviderSharedImage : public CanvasResourceProvider,
   bool SupportsDirectCompositing() const override { return true; }
   bool IsValid() const final {
     if (is_software_) {
-      return !IsSharedBitmapGpuChannelLost() && GetSkSurface();
+      return !IsSoftwareSharedImageGpuChannelLost() && GetSkSurface();
     }
 
     if (!use_oop_rasterization_)
@@ -292,7 +296,7 @@ class CanvasResourceProviderSharedImage : public CanvasResourceProvider,
       return !IsGpuContextLost();
   }
 
-  bool SupportsSingleBuffering() const override {
+  bool IsSingleBuffered() const override {
     return shared_image_usage_flags_.Has(
         gpu::SHARED_IMAGE_USAGE_CONCURRENT_READ_WRITE);
   }
@@ -852,7 +856,7 @@ class CanvasResourceProviderPassThrough final : public CanvasResourceProvider {
   bool IsValid() const final { return true; }
   bool IsAccelerated() const final { return true; }
   bool SupportsDirectCompositing() const override { return true; }
-  bool SupportsSingleBuffering() const override { return true; }
+  bool IsSingleBuffered() const override { return true; }
 
  private:
   scoped_refptr<CanvasResource> CreateResource() final {
@@ -904,10 +908,6 @@ class CanvasResourceProviderSwapChain final : public CanvasResourceProvider {
     resource_ = CanvasResourceSwapChain::Create(
         size, format, alpha_type, color_space, ContextProviderWrapper(),
         CreateWeakPtr());
-    // CanvasResourceProviderSwapChain can only operate in a single buffered
-    // mode so enable it as soon as possible.
-    TryEnableSingleBuffering();
-    DCHECK(IsSingleBuffered());
   }
   ~CanvasResourceProviderSwapChain() override = default;
 
@@ -920,7 +920,7 @@ class CanvasResourceProviderSwapChain final : public CanvasResourceProvider {
 
   bool IsAccelerated() const final { return true; }
   bool SupportsDirectCompositing() const override { return true; }
-  bool SupportsSingleBuffering() const override { return true; }
+  bool IsSingleBuffered() const override { return true; }
 
  private:
   void WillDraw() override {
@@ -1073,7 +1073,7 @@ CanvasResourceProvider::CreateSoftwareSharedImageProvider(
     CanvasResourceHost* resource_host) {
   if (!base::FeatureList::IsEnabled(
           kCanvasAllowCRPSharedBitmapWithGPUCompositing)) {
-    // CanvasResourceProviderSharedBitmap works only with the software
+    // CanvasResourceProviderSoftwareSharedImage works only with the software
     // compositor. However, this was not historically enforced. We are rolling
     // out this enforcement with a reverse killswitch.
     if (SharedGpuContext::IsGpuCompositingEnabled()) {
@@ -1807,7 +1807,7 @@ bool CanvasResourceProvider::IsGpuContextLost() const {
          raster_interface->GetGraphicsResetStatusKHR() != GL_NO_ERROR;
 }
 
-bool CanvasResourceProvider::IsSharedBitmapGpuChannelLost() const {
+bool CanvasResourceProvider::IsSoftwareSharedImageGpuChannelLost() const {
   return false;
 }
 
@@ -1890,7 +1890,7 @@ void CanvasResourceProvider::RecycleResource(
   // whether the state of the resource provider has changed such that the
   // resource has become unusable in the interim.
   if (resource->HasOneRef() && resource_recycling_enabled_ &&
-      !is_single_buffered_ && IsResourceUsable(resource.get())) {
+      !IsSingleBuffered() && IsResourceUsable(resource.get())) {
     RegisterUnusedResource(std::move(resource));
     MaybePostUnusedResourcesReclaimTask();
   }
@@ -1921,7 +1921,7 @@ void CanvasResourceProvider::MaybePostUnusedResourcesReclaimTask() {
     return;
   }
 
-  if (resource_recycling_enabled_ && !is_single_buffered_ &&
+  if (resource_recycling_enabled_ && !IsSingleBuffered() &&
       !unused_resources_reclaim_timer_.IsRunning() &&
       !canvas_resources_.empty()) {
     unused_resources_reclaim_timer_.Start(
@@ -1932,22 +1932,14 @@ void CanvasResourceProvider::MaybePostUnusedResourcesReclaimTask() {
 }
 
 void CanvasResourceProvider::ClearOldUnusedResources() {
-  bool cleared_resources =
-      WTF::EraseIf(canvas_resources_, [](const UnusedResource& resource) {
-        return base::TimeTicks::Now() - resource.last_use >=
-               kUnusedResourceExpirationTime;
-      });
-  // May have destroyed resources above, make sure that it gets to the other
-  // side. SharedImage destruction (which may be triggered by the removal of
-  // canvas resources above) is a deferred message, we need to flush pending
-  // work to ensure that it is not merely queued, but is executed on the service
-  // side.
-  if (cleared_resources && ContextProviderWrapper()) {
-    if (gpu::ContextSupport* context_support =
-            ContextProviderWrapper()->ContextProvider().ContextSupport()) {
-      context_support->FlushPendingWork();
-    }
-  }
+  WTF::EraseIf(canvas_resources_, [](const UnusedResource& resource) {
+    return base::TimeTicks::Now() - resource.last_use >=
+           kUnusedResourceExpirationTime;
+  });
+  // May have destroyed resources above that contains shared images.
+  // ClientSharedImage destructor calls DestroySharedImage which in turn ensures
+  // that the deferred destroy request from above is flushed. Thus,
+  // SharedImageInterface::Flush in not needed here explicitly.
 
   MaybePostUnusedResourcesReclaimTask();
 }
@@ -1977,17 +1969,11 @@ scoped_refptr<CanvasResource> CanvasResourceProvider::NewOrRecycledResource() {
   return resource;
 }
 
-void CanvasResourceProvider::TryEnableSingleBuffering() {
-  if (IsSingleBuffered() || !SupportsSingleBuffering())
-    return;
-  is_single_buffered_ = true;
-  ClearRecycledResources();
-}
-
 bool CanvasResourceProvider::ImportResource(
     scoped_refptr<CanvasResource>&& resource) {
-  if (!IsSingleBuffered() || !SupportsSingleBuffering())
+  if (!IsSingleBuffered()) {
     return false;
+  }
   canvas_resources_.clear();
   RegisterUnusedResource(std::move(resource));
   return true;
@@ -1995,8 +1981,9 @@ bool CanvasResourceProvider::ImportResource(
 
 scoped_refptr<CanvasResource> CanvasResourceProvider::GetImportedResource()
     const {
-  if (!IsSingleBuffered() || !SupportsSingleBuffering())
+  if (!IsSingleBuffered()) {
     return nullptr;
+  }
   DCHECK_LE(canvas_resources_.size(), 1u);
   if (canvas_resources_.empty())
     return nullptr;

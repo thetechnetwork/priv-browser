@@ -33,6 +33,7 @@
 #include "content/browser/devtools/protocol/devtools_mhtml_helper.h"
 #include "content/browser/devtools/protocol/emulation_handler.h"
 #include "content/browser/devtools/protocol/handler_helpers.h"
+#include "content/browser/devtools/protocol/page.h"
 #include "content/browser/manifest/manifest_manager_host.h"
 #include "content/browser/preloading/prerender/prerender_final_status.h"
 #include "content/browser/renderer_host/back_forward_cache_can_store_document_result.h"
@@ -445,6 +446,33 @@ void GotManifest(std::optional<std::string> manifest_id,
       std::move(parsed), manifest.Build());
 }
 
+std::string GetFrameStartedNavigatingNavigationTypeString(
+    const blink::mojom::NavigationType& navigation_type) {
+  switch (navigation_type) {
+    case blink::mojom::NavigationType::RELOAD:
+      return Page::FrameStartedNavigating::NavigationTypeEnum::Reload;
+    case blink::mojom::NavigationType::RELOAD_BYPASSING_CACHE:
+      return Page::FrameStartedNavigating::NavigationTypeEnum::
+          ReloadBypassingCache;
+    case blink::mojom::NavigationType::RESTORE:
+      return Page::FrameStartedNavigating::NavigationTypeEnum::Restore;
+    case blink::mojom::NavigationType::RESTORE_WITH_POST:
+      return Page::FrameStartedNavigating::NavigationTypeEnum::RestoreWithPost;
+    case blink::mojom::NavigationType::HISTORY_SAME_DOCUMENT:
+      return Page::FrameStartedNavigating::NavigationTypeEnum::
+          HistorySameDocument;
+    case blink::mojom::NavigationType::HISTORY_DIFFERENT_DOCUMENT:
+      return Page::FrameStartedNavigating::NavigationTypeEnum::
+          HistoryDifferentDocument;
+    case blink::mojom::NavigationType::SAME_DOCUMENT:
+      return Page::FrameStartedNavigating::NavigationTypeEnum::SameDocument;
+    case blink::mojom::NavigationType::DIFFERENT_DOCUMENT:
+      return Page::FrameStartedNavigating::NavigationTypeEnum::
+          DifferentDocument;
+    default:
+      NOTREACHED();
+  }
+}
 }  // namespace
 
 struct PageHandler::PendingScreenshotRequest {
@@ -616,6 +644,24 @@ void PageHandler::DidCloseJavaScriptDialog(bool success,
 
 Response PageHandler::Enable(
     std::optional<bool> enable_file_chooser_opened_event) {
+  if (!enabled_ && !host_->GetParentOrOuterDocument() &&
+      host_->frame_tree_node() &&
+      host_->frame_tree_node()->navigation_request()) {
+    // If the Page domain was not enabled, the page is the top level frame, and
+    // there is a penging navigation, emit `FrameStartedNavigating` event.
+    FrameTreeNode* frame_tree_node = host_->frame_tree_node();
+    NavigationRequest* navigation_request =
+        host_->frame_tree_node()->navigation_request();
+    frontend_->FrameStartedNavigating(
+        frame_tree_node->current_frame_host()
+            ->devtools_frame_token()
+            .ToString(),
+        navigation_request->common_params().url.spec(),
+        navigation_request->devtools_navigation_token().ToString(),
+        GetFrameStartedNavigatingNavigationTypeString(
+            navigation_request->common_params().navigation_type));
+  }
+
   enabled_ = true;
   return Response::FallThrough();
 }
@@ -935,47 +981,12 @@ void PageHandler::DidStartNavigating(
   if (!enabled_) {
     return;
   }
-  std::string navigation_type_str;
-  switch (navigation_type) {
-    case blink::mojom::NavigationType::RELOAD:
-      navigation_type_str =
-          Page::FrameStartedNavigating::NavigationTypeEnum::Reload;
-      break;
-    case blink::mojom::NavigationType::RELOAD_BYPASSING_CACHE:
-      navigation_type_str = Page::FrameStartedNavigating::NavigationTypeEnum::
-          ReloadBypassingCache;
-      break;
-    case blink::mojom::NavigationType::RESTORE:
-      navigation_type_str =
-          Page::FrameStartedNavigating::NavigationTypeEnum::Restore;
-      break;
-    case blink::mojom::NavigationType::RESTORE_WITH_POST:
-      navigation_type_str =
-          Page::FrameStartedNavigating::NavigationTypeEnum::RestoreWithPost;
-      break;
-    case blink::mojom::NavigationType::HISTORY_SAME_DOCUMENT:
-      navigation_type_str =
-          Page::FrameStartedNavigating::NavigationTypeEnum::HistorySameDocument;
-      break;
-    case blink::mojom::NavigationType::HISTORY_DIFFERENT_DOCUMENT:
-      navigation_type_str = Page::FrameStartedNavigating::NavigationTypeEnum::
-          HistoryDifferentDocument;
-      break;
-    case blink::mojom::NavigationType::SAME_DOCUMENT:
-      navigation_type_str =
-          Page::FrameStartedNavigating::NavigationTypeEnum::SameDocument;
-      break;
-    case blink::mojom::NavigationType::DIFFERENT_DOCUMENT:
-      navigation_type_str =
-          Page::FrameStartedNavigating::NavigationTypeEnum::DifferentDocument;
-      break;
-    default:
-      NOTREACHED();
-  }
 
   frontend_->FrameStartedNavigating(
-      ftn.current_frame_host()->devtools_frame_token().ToString(), url.spec(),
-      loader_id.ToString(), navigation_type_str);
+      ftn.current_frame_host()->devtools_frame_token().ToString(),
+      url.spec(),
+      loader_id.ToString(),
+      GetFrameStartedNavigatingNavigationTypeString(navigation_type));
 }
 
 void PageHandler::OnFrameDetached(const base::UnguessableToken& frame_id) {
@@ -1825,6 +1836,8 @@ Page::BackForwardCacheNotRestoredReason NotRestoredReasonToProtocol(
     case Reason::kWebViewDocumentStartJavascriptChanged:
       return Page::BackForwardCacheNotRestoredReasonEnum::
           WebViewDocumentStartJavascriptChanged;
+    case Reason::kCacheLimitPruned:
+      return Page::BackForwardCacheNotRestoredReasonEnum::CacheLimitPruned;
     case Reason::kBlocklistedFeatures:
       // Blocklisted features should be handled separately and be broken down
       // into sub reasons.
@@ -2014,7 +2027,7 @@ DisableForRenderFrameHostReasonToProtocol(
         case BackForwardCacheDisable::DisabledReasonId::kMediaSessionService:
           return Page::BackForwardCacheNotRestoredReasonEnum::
               ContentMediaSessionService;
-        case BackForwardCacheDisable::DisabledReasonId::kScreenReader:
+        case BackForwardCacheDisable::DisabledReasonId::kExtendedProperties:
           return Page::BackForwardCacheNotRestoredReasonEnum::
               ContentScreenReader;
         case BackForwardCacheDisable::DisabledReasonId::kDiscarded:
@@ -2124,6 +2137,7 @@ Page::BackForwardCacheNotRestoredReasonType MapNotRestoredReasonToType(
     case Reason::kWebViewMessageListenerInjected:
     case Reason::kWebViewSafeBrowsingAllowlistChanged:
     case Reason::kWebViewDocumentStartJavascriptChanged:
+    case Reason::kCacheLimitPruned:
       return Page::BackForwardCacheNotRestoredReasonTypeEnum::Circumstantial;
     case Reason::kCacheControlNoStore:
     case Reason::kCacheControlNoStoreCookieModified:

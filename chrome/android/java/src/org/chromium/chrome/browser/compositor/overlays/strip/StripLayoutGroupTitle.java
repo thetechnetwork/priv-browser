@@ -16,9 +16,8 @@ import org.chromium.base.Callback;
 import org.chromium.base.MathUtils;
 import org.chromium.base.Token;
 import org.chromium.chrome.R;
-import org.chromium.chrome.browser.data_sharing.ui.shared_image_tiles.SharedImageTilesColor;
+import org.chromium.chrome.browser.data_sharing.ui.shared_image_tiles.SharedImageTilesConfig;
 import org.chromium.chrome.browser.data_sharing.ui.shared_image_tiles.SharedImageTilesCoordinator;
-import org.chromium.chrome.browser.data_sharing.ui.shared_image_tiles.SharedImageTilesType;
 import org.chromium.chrome.browser.flags.ChromeFeatureList;
 import org.chromium.chrome.browser.tab.Tab;
 import org.chromium.chrome.browser.tasks.tab_management.TabBubbler;
@@ -34,8 +33,6 @@ import org.chromium.ui.resources.dynamics.ViewResourceAdapter;
  * onto the GL canvas.
  */
 public class StripLayoutGroupTitle extends StripLayoutView {
-
-    private final Context mContext;
 
     /** Delegate for additional group title functionality. */
     public interface StripLayoutGroupTitleDelegate extends StripLayoutViewOnClickHandler {
@@ -117,10 +114,10 @@ public class StripLayoutGroupTitle extends StripLayoutView {
     // Shared state
     private boolean mIsShared;
     @Nullable private SharedImageTilesCoordinator mSharedImageTilesCoordinator;
+    @Nullable private SharedImageTilesConfig.Builder mSharedImageTilesConfigBuilder;
     @Nullable private ViewResourceAdapter mAvatarResource;
     private float mAvatarWidthWithPadding;
     @ColorInt private final int mBubbleTint;
-    private boolean mShowBubble;
     @Nullable private TabBubbler mTabBubbler;
 
     // Reorder state
@@ -140,10 +137,9 @@ public class StripLayoutGroupTitle extends StripLayoutView {
             boolean incognito,
             int rootId,
             Token tabGroupId) {
-        super(incognito, delegate);
+        super(incognito, delegate, context);
         assert rootId != Tab.INVALID_TAB_ID : "Tried to create a group title for an invalid group.";
         mRootId = rootId;
-        mContext = context;
         mDelegate = delegate;
         mTabGroupId = tabGroupId;
         mBubbleTint = TabUiThemeUtil.getGroupTitleBubbleColor(mContext);
@@ -203,12 +199,17 @@ public class StripLayoutGroupTitle extends StripLayoutView {
      * @param out Rect to set the bounds.
      */
     public void getPaddedBoundsPx(Rect out) {
-        float dpToPx = mContext.getResources().getDisplayMetrics().density;
+        float dpToPx = getDpToPx();
         out.set(
-                (int) (getPaddedX() * dpToPx),
-                (int) (getPaddedY() * dpToPx),
-                (int) ((getPaddedX() + getPaddedWidth()) * dpToPx),
-                (int) ((getPaddedY() + getPaddedHeight()) * dpToPx));
+                Math.round(getPaddedX() * dpToPx),
+                Math.round(getPaddedY() * dpToPx),
+                Math.round((getPaddedX() + getPaddedWidth()) * dpToPx),
+                Math.round((getPaddedY() + getPaddedHeight()) * dpToPx));
+    }
+
+    @Override
+    public void getAnchorRect(Rect out) {
+        getPaddedBoundsPx(out);
     }
 
     /**
@@ -226,8 +227,8 @@ public class StripLayoutGroupTitle extends StripLayoutView {
 
         // Update the shared group avatar border color if a shared image tiles coordinator exists.
         if (mSharedImageTilesCoordinator != null) {
-            mSharedImageTilesCoordinator.updateColorStyle(
-                    new SharedImageTilesColor(SharedImageTilesColor.Style.TAB_GROUP, mColor));
+            mSharedImageTilesCoordinator.updateConfig(
+                    mSharedImageTilesConfigBuilder.setTabGroupColor(mColor).build());
         }
     }
 
@@ -356,12 +357,12 @@ public class StripLayoutGroupTitle extends StripLayoutView {
 
         // Initialize the shared image tiles coordinator if it doesn't exist.
         if (mSharedImageTilesCoordinator == null) {
+            mSharedImageTilesConfigBuilder =
+                    SharedImageTilesConfig.Builder.createThumbnail(mContext, mColor);
             mSharedImageTilesCoordinator =
                     new SharedImageTilesCoordinator(
                             mContext,
-                            SharedImageTilesType.SMALL,
-                            new SharedImageTilesColor(
-                                    SharedImageTilesColor.Style.TAB_GROUP, mColor),
+                            mSharedImageTilesConfigBuilder.build(),
                             dataSharingService,
                             collaborationService);
         }
@@ -437,20 +438,6 @@ public class StripLayoutGroupTitle extends StripLayoutView {
     }
 
     /**
-     * @param showBubble Whether the tab notification bubble should show.
-     */
-    public void setShowBubble(boolean showBubble) {
-        mShowBubble = showBubble;
-    }
-
-    /**
-     * @return Whether the notification bubble should show.
-     */
-    public boolean shouldShowBubble() {
-        return mShowBubble;
-    }
-
-    /**
      * @param tabBubbler The {@link TabBubbler} that responsible for managing shared group
      *     notification bubbles. The current {@link TabBubbler} is destroyed if set null.
      */
@@ -474,7 +461,7 @@ public class StripLayoutGroupTitle extends StripLayoutView {
      *     if the bubble is not shown.
      */
     public float getBubbleWidthWithPadding() {
-        return shouldShowBubble()
+        return getNotificationBubbleShown()
                 ? NOTIFICATION_BUBBLE_PADDING_DP + NOTIFICATION_BUBBLE_SIZE_DP
                 : 0;
     }
@@ -483,7 +470,7 @@ public class StripLayoutGroupTitle extends StripLayoutView {
      * @return Notification bubble drawX accounting for padding.
      */
     public float getBubbleDrawX() {
-        assert mShowBubble;
+        assert getNotificationBubbleShown();
         return LocalizationUtils.isLayoutRtl()
                 ? getPaddedX() + getTitleEndPadding()
                 : getPaddedX() + getPaddedWidth() - getTitleEndPadding() - getBubbleSize();
@@ -513,7 +500,7 @@ public class StripLayoutGroupTitle extends StripLayoutView {
     /**
      * @return Whether the group is shared.
      */
-    public boolean isGroupSharedForTesting() {
+    public boolean isGroupShared() {
         return mIsShared;
     }
 

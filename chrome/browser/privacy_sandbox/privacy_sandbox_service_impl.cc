@@ -922,21 +922,18 @@ void UpdateNoticeStorage(
       break;
     }
     case PromptAction::kConsentAccepted: {
-      notice_storage->SetNoticeActionTaken(
-          pref_service, notice_name, privacy_sandbox::NoticeActionTaken::kOptIn,
-          base::Time::Now());
+      notice_storage->SetNoticeActionTaken(pref_service, notice_name,
+                                           privacy_sandbox::NoticeEvent::kOptIn,
+                                           base::Time::Now());
       break;
     }
     case PromptAction::kConsentDeclined: {
       notice_storage->SetNoticeActionTaken(
-          pref_service, notice_name,
-          privacy_sandbox::NoticeActionTaken::kOptOut, base::Time::Now());
+          pref_service, notice_name, privacy_sandbox::NoticeEvent::kOptOut,
+          base::Time::Now());
       break;
     }
     case PromptAction::kConsentMoreInfoOpened: {
-      notice_storage->SetNoticeActionTaken(
-          pref_service, notice_name,
-          privacy_sandbox::NoticeActionTaken::kLearnMore, base::Time::Now());
       break;
     }
     // EEA and ROW notices
@@ -946,27 +943,23 @@ void UpdateNoticeStorage(
       break;
     }
     case PromptAction::kNoticeAcknowledge: {
-      notice_storage->SetNoticeActionTaken(
-          pref_service, notice_name, privacy_sandbox::NoticeActionTaken::kAck,
-          base::Time::Now());
+      notice_storage->SetNoticeActionTaken(pref_service, notice_name,
+                                           privacy_sandbox::NoticeEvent::kAck,
+                                           base::Time::Now());
       break;
     }
     case PromptAction::kNoticeOpenSettings: {
       notice_storage->SetNoticeActionTaken(
-          pref_service, notice_name,
-          privacy_sandbox::NoticeActionTaken::kSettings, base::Time::Now());
+          pref_service, notice_name, privacy_sandbox::NoticeEvent::kSettings,
+          base::Time::Now());
       break;
     }
     case PromptAction::kNoticeMoreInfoOpened:
-    // Ads API UX Enhancements
+      // Ads API UX Enhancements
     case PromptAction::kNoticeSiteSuggestedAdsMoreInfoOpened:
     case PromptAction::kNoticeAdsMeasurementMoreInfoOpened: {
-      notice_storage->SetNoticeActionTaken(
-          pref_service, notice_name,
-          privacy_sandbox::NoticeActionTaken::kLearnMore, base::Time::Now());
       break;
     }
-
     // Restricted notices
     case PromptAction::kRestrictedNoticeShown: {
       DCHECK(privacy_sandbox::IsRestrictedNoticeRequired());
@@ -976,16 +969,16 @@ void UpdateNoticeStorage(
     }
     case PromptAction::kRestrictedNoticeAcknowledge: {
       DCHECK(privacy_sandbox::IsRestrictedNoticeRequired());
-      notice_storage->SetNoticeActionTaken(
-          pref_service, notice_name, privacy_sandbox::NoticeActionTaken::kAck,
-          base::Time::Now());
+      notice_storage->SetNoticeActionTaken(pref_service, notice_name,
+                                           privacy_sandbox::NoticeEvent::kAck,
+                                           base::Time::Now());
       break;
     }
     case PromptAction::kRestrictedNoticeOpenSettings: {
       DCHECK(privacy_sandbox::IsRestrictedNoticeRequired());
       notice_storage->SetNoticeActionTaken(
-          pref_service, notice_name,
-          privacy_sandbox::NoticeActionTaken::kSettings, base::Time::Now());
+          pref_service, notice_name, privacy_sandbox::NoticeEvent::kSettings,
+          base::Time::Now());
       break;
     }
     default:
@@ -1377,8 +1370,8 @@ bool PrivacySandboxServiceImpl::IsPartOfManagedRelatedWebsiteSet(
     const net::SchemefulSite& site) const {
   if (privacy_sandbox::kPrivacySandboxFirstPartySetsUISampleSets.Get()) {
     return IsRelatedWebsiteSetsDataAccessManaged() ||
-           GetSampleRelatedWebsiteSets()[site] ==
-               net::SchemefulSite(GURL("https://chromium.org"));
+           GetSampleRelatedWebsiteSets()[site].IsSameSiteWith(
+               GURL("https://chromium.org"));
   }
 
   return first_party_sets_policy_service_->IsSiteInManagedSet(site);

@@ -28,7 +28,7 @@ import org.chromium.ui.util.XrUtils;
 @NullMarked
 public class XrLayoutStateObserver {
     private static final String TAG = "XrLayoutObserver";
-    private static final int XR_SYSUI_FADING_TIME_MS = 30;
+    private static final int XR_SYSUI_FADING_TIME_MS = 300;
 
     private final Activity mActivity;
     private final Supplier<CompositorViewHolder> mCompositorViewHolderSupplier;
@@ -97,10 +97,15 @@ public class XrLayoutStateObserver {
                             mToolbarContainerView = mActivity.findViewById(R.id.toolbar_container);
                         }
 
-                        if (layoutType == LayoutType.BROWSING) {
+                        // Verify that the layout is switching between the BROWSING and TAB_WITCHER
+                        // before performing any spatialization action.
+                        if (layoutType == LayoutType.BROWSING
+                                && layoutStateProvider.getNextLayoutType()
+                                        == LayoutType.TAB_SWITCHER) {
                             // Start spatialization.
                             beginSpatialization();
-                        } else if (layoutType == LayoutType.TAB_SWITCHER) {
+                        } else if (layoutType == LayoutType.TAB_SWITCHER
+                                && layoutStateProvider.getNextLayoutType() == LayoutType.BROWSING) {
                             // End spatialization.
                             endSpatialization();
                         }

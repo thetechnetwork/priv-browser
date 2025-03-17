@@ -31,6 +31,7 @@
 #include "content/public/browser/storage_partition.h"
 #include "sql/database.h"
 #include "sql/transaction.h"
+#include "third_party/abseil-cpp/absl/types/variant.h"
 #include "third_party/blink/public/mojom/aggregation_service/aggregatable_report.mojom-forward.h"
 
 namespace attribution_reporting {
@@ -75,11 +76,11 @@ enum class RateLimitResult : int;
 class CONTENT_EXPORT AttributionStorageSql {
  public:
   // Version number of the database.
-  static constexpr int kCurrentVersionNumber = 68;
+  static constexpr int kCurrentVersionNumber = 69;
 
   // Earliest version which can use a `kCurrentVersionNumber` database
   // without failing.
-  static constexpr int kCompatibleVersionNumber = 68;
+  static constexpr int kCompatibleVersionNumber = 69;
 
   // Latest version of the database that cannot be upgraded to
   // `kCurrentVersionNumber` without razing the database.
@@ -223,10 +224,12 @@ class CONTENT_EXPORT AttributionStorageSql {
   bool AdjustOfflineReportTimes(base::TimeDelta min_delay,
                                 base::TimeDelta max_delay);
   void ClearAllDataAllTime(bool delete_rate_limit_data);
-  void ClearDataWithFilter(base::Time delete_begin,
-                           base::Time delete_end,
-                           StoragePartition::StorageKeyMatcherFunction filter,
-                           bool delete_rate_limit_data);
+  void ClearDataWithFilter(
+      base::Time delete_begin,
+      base::Time delete_end,
+      absl::variant<StoragePartition::StorageKeyMatcherFunction, url::Origin>
+          filter_or_origin,
+      bool delete_rate_limit_data);
   [[nodiscard]] std::optional<AggregatableDebugSourceData>
       GetAggregatableDebugSourceData(StoredSource::Id);
   [[nodiscard]] AggregatableDebugRateLimitTable::Result
@@ -377,6 +380,16 @@ class CONTENT_EXPORT AttributionStorageSql {
   // Returns a negative value on failure.
   int64_t CountAggregatableReportsWithDestinationSite(
       const net::SchemefulSite& destination);
+  // Returns a negative value on failure.
+  int64_t CountUniqueDailyReportingOriginsPerReportingSiteForSource(
+      const net::SchemefulSite& reporting_site,
+      base::Time source_time);
+  // Returns a negative value on failure.
+  int64_t
+  CountUniqueDailyReportingOriginsPerDestinationAndReportingSiteForSource(
+      const net::SchemefulSite& destination_site,
+      const net::SchemefulSite& reporting_site,
+      base::Time source_time);
 
   // Stores the data associated with the aggregatable report, e.g. budget
   // consumed and dedup keys. The report itself will be stored in

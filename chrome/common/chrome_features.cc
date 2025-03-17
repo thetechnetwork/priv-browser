@@ -304,11 +304,18 @@ BASE_FEATURE(kForcedAppRelaunchOnPlaceholderUpdate,
 // of languages.
 BASE_FEATURE(kGeoLanguage, "GeoLanguage", base::FEATURE_DISABLED_BY_DEFAULT);
 
+#if BUILDFLAG(ENABLE_GLIC)
 // Controls whether the Glic feature is enabled.
 BASE_FEATURE(kGlic, "Glic", base::FEATURE_DISABLED_BY_DEFAULT);
+
+// Controls whether the actor component of Glic is enabled.
+BASE_FEATURE(kGlicActor, "GlicActor", base::FEATURE_DISABLED_BY_DEFAULT);
+
+// Controls whether the Glic feature is always detached.
+BASE_FEATURE(kGlicDetached, "GlicDetached", base::FEATURE_DISABLED_BY_DEFAULT);
+
 // Whether to sync @google.com account cookies. This is only for development and
 // testing.
-
 BASE_FEATURE(kGlicDevelopmentSyncGoogleCookies,
              "GlicDevelopmentCookies",
              base::FEATURE_DISABLED_BY_DEFAULT);
@@ -329,6 +336,18 @@ const base::FeatureParam<int> kGlicInitialWidth{&kGlic, "glic-initial-width",
                                                 350};
 const base::FeatureParam<int> kGlicInitialHeight{&kGlic, "glic-initial-height",
                                                  48};
+
+const base::FeatureParam<int> kGlicMaxHeightPercentOfScreen{
+    &kGlic, "glic-max-height-percent-of-screen", 60};
+
+const base::FeatureParam<int> kGlicFreInitialWidth{
+    &kGlic, "glic-fre-initial-width", 512};
+const base::FeatureParam<int> kGlicFreInitialHeight{
+    &kGlic, "glic-fre-initial-height", 512};
+
+// Quality value in the range [0, 100]. For use with gfx::JPEGCodec::Encode().
+const base::FeatureParam<int> kGlicScreenshotEncodeQuality{
+    &kGlic, "glic-screenshot-encode-quality", 100};
 
 const base::FeatureParam<std::string> kGlicDefaultHotkey{
     &kGlic, "glic-default-hotkey", ""};
@@ -351,6 +370,33 @@ BASE_FEATURE_PARAM(std::string,
 BASE_FEATURE(kGlicCSPConfig,
              "GlicCSPConfig",
              base::FEATURE_DISABLED_BY_DEFAULT);
+// TODO(crbug.com/378951332): Set appropriate default.
+const base::FeatureParam<std::string> kGlicAllowedOriginsOverride{
+    &kGlicCSPConfig, "glic-allowed-origins-override",
+    // Space-delimited set of allowed origins.
+    "https://*.google.com"};
+
+// Enable/disable Glic web client responsiveness check feature.
+BASE_FEATURE(kGlicClientResponsivenessCheck,
+             "GlicClientResponsivenessCheck",
+             base::FEATURE_ENABLED_BY_DEFAULT);
+// TODO(crbug.com/402184931): Set appropriate default for the 3 following
+// parameters.
+// Time interval for periodically sending responsiveness check to the web client
+// in milliseconds.
+const base::FeatureParam<int> kGlicClientResponsivenessCheckIntervalMs{
+    &kGlicClientResponsivenessCheck,
+    "glic-client-responsiveness-check-interval-ms", 1000};
+// Maximum time to wait for glicWebClientCheckResponsive response during a
+// responsiveness check before flagging the web client as unresponsive.
+const base::FeatureParam<int> kGlicClientResponsivenessCheckTimeoutMs{
+    &kGlicClientResponsivenessCheck,
+    "glic-client-responsiveness-check-timeout-ms", 500};
+// Maximum time for showing client unresponsive UI before going to the error
+// state.
+const base::FeatureParam<int> kGlicClientUnresponsiveUiMaxTimeMs{
+    &kGlicClientResponsivenessCheck, "glic-client-unresponsive-ui-max-time-ms",
+    5000};
 
 BASE_FEATURE(kGlicKeyboardShortcutNewBadge,
              "GlicKeyboardShortcutNewBadge",
@@ -359,13 +405,20 @@ BASE_FEATURE(kGlicKeyboardShortcutNewBadge,
 BASE_FEATURE(kGlicDebugWebview,
              "GlicDebugWebview",
              base::FEATURE_DISABLED_BY_DEFAULT);
-// TODO(crbug.com/378951332): Set appropriate default.
-const base::FeatureParam<std::string> kGlicAllowedOriginsOverride{
-    &kGlicCSPConfig, "glic-allowed-origins-override",
-    // Space-delimited set of allowed origins.
-    "https://*.google.com"};
 
 BASE_FEATURE(kGlicScrollTo, "GlicScrollTo", base::FEATURE_DISABLED_BY_DEFAULT);
+
+BASE_FEATURE(kGlicActInFocusedTab,
+             "GlicActInFocusedTab",
+             base::FEATURE_DISABLED_BY_DEFAULT);
+
+// Controls whether the Glic UI container can be resized by the user
+BASE_FEATURE(kGlicUserResize,
+             "GlicUserResize",
+             base::FEATURE_DISABLED_BY_DEFAULT);
+
+BASE_FEATURE(kGlicWarming, "GlicWarming", base::FEATURE_ENABLED_BY_DEFAULT);
+#endif  // BUILDFLAG(ENABLE_GLIC)
 
 BASE_FEATURE(kTabstripComboButton,
              "TabstripComboButton",
@@ -390,8 +443,6 @@ bool HasTabstripComboButtonWithReverseButtonOrder() {
   return IsTabstripComboButtonEnabled() &&
          features::kTabstripComboButtonHasReverseButtonOrder.Get();
 }
-
-BASE_FEATURE(kGlicWarming, "GlicWarming", base::FEATURE_ENABLED_BY_DEFAULT);
 
 // Force Privacy Guide to be available even if it would be unavailable
 // otherwise. This is meant for development and test purposes only.
@@ -524,11 +575,11 @@ const base::FeatureParam<base::TimeDelta>
     kHappinessTrackingSurveysForSecurityPageTime{
         &kHappinessTrackingSurveysForSecurityPage, "security-page-time",
         base::Seconds(15)};
-extern const base::FeatureParam<std::string>
+const base::FeatureParam<std::string>
     kHappinessTrackingSurveysForSecurityPageTriggerId{
         &kHappinessTrackingSurveysForSecurityPage, "security-page-trigger-id",
         ""};
-extern const base::FeatureParam<bool>
+const base::FeatureParam<bool>
     kHappinessTrackingSurveysForSecurityPageRequireInteraction{
         &kHappinessTrackingSurveysForSecurityPage,
         "security-page-require-interaction", false};
@@ -645,15 +696,9 @@ BASE_FEATURE(kHappinessTrackingOffice,
 
 // Enables HTTPS-First Mode in a balanced configuration that doesn't warn on
 // HTTP when HTTPS can't be reasonably expected.
-#if BUILDFLAG(IS_ANDROID)
-BASE_FEATURE(kHttpsFirstBalancedMode,
-             "HttpsFirstBalancedMode",
-             base::FEATURE_DISABLED_BY_DEFAULT);
-#else
 BASE_FEATURE(kHttpsFirstBalancedMode,
              "HttpsFirstBalancedMode",
              base::FEATURE_ENABLED_BY_DEFAULT);
-#endif
 
 // Automatically enables HTTPS-First Mode in a balanced configuration when
 // possible.
@@ -1098,44 +1143,44 @@ const base::FeatureParam<base::TimeDelta> kBackgroundPasswordCheckInterval{
 // value  will flaten the picks on rush hours, e.g: 1h will cause higher
 // picks than 4h.
 COMPONENT_EXPORT(CHROME_FEATURES)
-extern const base::FeatureParam<base::TimeDelta> kPasswordCheckOverdueInterval{
+const base::FeatureParam<base::TimeDelta> kPasswordCheckOverdueInterval{
     &kSafetyHub, "password-check-overdue-interval", base::Hours(4)};
 
 // Password check runs randomly based on the weight of each day. Parameters
 // below will be used to adjust weights, if necessary. Weight to randomly
 // schedule for Mondays.
 COMPONENT_EXPORT(CHROME_FEATURES)
-extern const base::FeatureParam<int> kPasswordCheckMonWeight{
+const base::FeatureParam<int> kPasswordCheckMonWeight{
     &kSafetyHub, "password-check-mon-weight", 8};
 
 // Weight to randomly schedule for Tuesdays.
 COMPONENT_EXPORT(CHROME_FEATURES)
-extern const base::FeatureParam<int> kPasswordCheckTueWeight{
+const base::FeatureParam<int> kPasswordCheckTueWeight{
     &kSafetyHub, "password-check-tue-weight", 9};
 
 // Weight to randomly schedule for Wednesdays.
 COMPONENT_EXPORT(CHROME_FEATURES)
-extern const base::FeatureParam<int> kPasswordCheckWedWeight{
+const base::FeatureParam<int> kPasswordCheckWedWeight{
     &kSafetyHub, "password-check-wed-weight", 9};
 
 // Weight to randomly schedule for Thursdays.
 COMPONENT_EXPORT(CHROME_FEATURES)
-extern const base::FeatureParam<int> kPasswordCheckThuWeight{
+const base::FeatureParam<int> kPasswordCheckThuWeight{
     &kSafetyHub, "password-check-thu-weight", 9};
 
 // Weight to randomly schedule for Fridays.
 COMPONENT_EXPORT(CHROME_FEATURES)
-extern const base::FeatureParam<int> kPasswordCheckFriWeight{
+const base::FeatureParam<int> kPasswordCheckFriWeight{
     &kSafetyHub, "password-check-fri-weight", 9};
 
 // Weight to randomly schedule for Saturdays.
 COMPONENT_EXPORT(CHROME_FEATURES)
-extern const base::FeatureParam<int> kPasswordCheckSatWeight{
+const base::FeatureParam<int> kPasswordCheckSatWeight{
     &kSafetyHub, "password-check-sat-weight", 6};
 
 // Weight to randomly schedule for Sundays.
 COMPONENT_EXPORT(CHROME_FEATURES)
-extern const base::FeatureParam<int> kPasswordCheckSunWeight{
+const base::FeatureParam<int> kPasswordCheckSunWeight{
     &kSafetyHub, "password-check-sun-weight", 6};
 
 // Engagement limits Notification permissions module.
@@ -1334,7 +1379,7 @@ const base::FeatureParam<std::string>
 const base::FeatureParam<std::string>
     kTrustSafetySentimentSurveyTrustedSurfaceTriggerId{
         &kTrustSafetySentimentSurvey, "trusted-surface-trigger-id", ""};
-extern const base::FeatureParam<std::string>
+const base::FeatureParam<std::string>
     kTrustSafetySentimentSurveyTransactionsTriggerId{
         &kTrustSafetySentimentSurvey, "transactions-trigger-id", ""};
 // The time the user must remain on settings after interacting with a privacy
@@ -1434,13 +1479,13 @@ const base::FeatureParam<std::string>
 const base::FeatureParam<std::string>
     kTrustSafetySentimentSurveyV2ControlGroupTriggerId{
         &kTrustSafetySentimentSurveyV2, "control-group-trigger-id", ""};
-extern const base::FeatureParam<std::string>
+const base::FeatureParam<std::string>
     kTrustSafetySentimentSurveyV2DownloadWarningUITriggerId{
         &kTrustSafetySentimentSurveyV2, "download-warning-ui-trigger-id", ""};
 const base::FeatureParam<std::string>
     kTrustSafetySentimentSurveyV2PasswordCheckTriggerId{
         &kTrustSafetySentimentSurveyV2, "password-check-trigger-id", ""};
-extern const base::FeatureParam<std::string>
+const base::FeatureParam<std::string>
     kTrustSafetySentimentSurveyV2PasswordProtectionUITriggerId{
         &kTrustSafetySentimentSurveyV2, "password-protection-ui-trigger-id",
         ""};
@@ -1461,7 +1506,7 @@ const base::FeatureParam<std::string>
 const base::FeatureParam<std::string>
     kTrustSafetySentimentSurveyV2PrivacyGuideTriggerId{
         &kTrustSafetySentimentSurveyV2, "privacy-guide-trigger-id", ""};
-extern const base::FeatureParam<std::string>
+const base::FeatureParam<std::string>
     kTrustSafetySentimentSurveyV2SafeBrowsingInterstitialTriggerId{
         &kTrustSafetySentimentSurveyV2, "safe-browsing-interstitial-trigger-id",
         ""};
@@ -1488,18 +1533,6 @@ BASE_FEATURE(kWebAppDontAddExistingAppsToSync,
 BASE_FEATURE(kWebAppManifestIconUpdating,
              "WebAppManifestIconUpdating",
              base::FEATURE_DISABLED_BY_DEFAULT);
-
-BASE_FEATURE(kWebAppSyncGeneratedIconBackgroundFix,
-             "WebAppSyncGeneratedIconBackgroundFix",
-             base::FEATURE_ENABLED_BY_DEFAULT);
-
-BASE_FEATURE(kWebAppSyncGeneratedIconRetroactiveFix,
-             "WebAppSyncGeneratedIconRetroactiveFix",
-             base::FEATURE_ENABLED_BY_DEFAULT);
-
-BASE_FEATURE(kWebAppSyncGeneratedIconUpdateFix,
-             "WebAppSyncGeneratedIconUpdateFix",
-             base::FEATURE_ENABLED_BY_DEFAULT);
 #endif  // !BUILDFLAG(IS_ANDROID)
 
 BASE_FEATURE(kWebAppManifestPolicyAppIdentityUpdate,
@@ -1524,7 +1557,7 @@ BASE_FEATURE(kRestrictedWebUICodeCache,
 
 // Defines a comma-separated list of resource names able to use the generated
 // code cache when RestrictedWebUICodeCache is enabled.
-extern const base::FeatureParam<std::string> kRestrictedWebUICodeCacheResources{
+const base::FeatureParam<std::string> kRestrictedWebUICodeCacheResources{
     &kRestrictedWebUICodeCache, "RestrictedWebUICodeCacheResources", ""};
 
 #if BUILDFLAG(IS_CHROMEOS)

@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import {ClientDelegateFactory, getNetworkInfoMojomToUI, getSessionConfigMojomToUI, getStudentActivityMojomToUI} from 'chrome-untrusted://boca-app/app/client_delegate.js';
-import type {Assignment, BocaValidPref, CaptionConfig, Config, Course, EndViewScreenSessionError, Identity, OnTaskConfig, Permission, PermissionSetting, RemoveStudentError, SessionResult, UpdateSessionError, ViewStudentScreenError, Window} from 'chrome-untrusted://boca-app/mojom/boca.mojom-webui.js';
+import type {Assignment, BocaValidPref, CaptionConfig, Config, Course, EndViewScreenSessionError, Identity, OnTaskConfig, Permission, PermissionSetting, RemoveStudentError, SessionResult, SetViewScreenSessionActiveError, UpdateSessionError, ViewStudentScreenError, Window} from 'chrome-untrusted://boca-app/mojom/boca.mojom-webui.js';
 import {PageHandlerRemote, SubmitAccessCodeError} from 'chrome-untrusted://boca-app/mojom/boca.mojom-webui.js';
 import type {TimeDelta} from 'chrome-untrusted://resources/mojo/mojo/public/mojom/base/time.mojom-webui.js';
 import type {Value} from 'chrome-untrusted://resources/mojo/mojo/public/mojom/base/values.mojom-webui.js';
@@ -294,6 +294,11 @@ class MockRemoteHandler extends PageHandlerRemote {
     id;
     return Promise.resolve({error: null});
   }
+  override setViewScreenSessionActive(id: string):
+      Promise<{error: SetViewScreenSessionActiveError | null}> {
+    id;
+    return Promise.resolve({error: null});
+  }
   override authenticateWebview() {
     return Promise.resolve({success: true});
   }
@@ -319,6 +324,10 @@ class MockRemoteHandler extends PageHandlerRemote {
     return Promise.resolve({success: true});
   }
   override openFeedbackDialog() {
+    return Promise.resolve();
+  }
+
+  override refreshWorkbook() {
     return Promise.resolve();
   }
 }
@@ -759,6 +768,16 @@ suite('ClientDelegateTest', function() {
       });
 
   test(
+      'client delegate should translate data for updating a view screen' +
+          ' session to active',
+      async () => {
+        const result =
+            await clientDelegateImpl.getInstance().setViewScreenSessionActive(
+                '1');
+        assertTrue(result);
+      });
+
+  test(
       'client delegate should respond correctly for authenticateWebview',
       async () => {
         const result =
@@ -798,5 +817,15 @@ suite('ClientDelegateTest', function() {
           openFeedbackDialogResponded = true;
         });
         assertTrue(openFeedbackDialogResponded);
+      });
+
+  test(
+      'client delegate should respond correctly for refresh workbook',
+      async () => {
+        let refreshWorkbookResponded = false;
+        await clientDelegateImpl.getInstance().refreshWorkbook().then(() => {
+          refreshWorkbookResponded = true;
+        });
+        assertTrue(refreshWorkbookResponded);
       });
 });

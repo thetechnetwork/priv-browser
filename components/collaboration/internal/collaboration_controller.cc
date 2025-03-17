@@ -8,12 +8,16 @@
 #include "base/functional/callback_helpers.h"
 #include "base/logging.h"
 #include "base/scoped_observation.h"
+#include "base/strings/stringprintf.h"
 #include "base/task/single_thread_task_runner.h"
 #include "base/time/time.h"
 #include "components/collaboration/internal/metrics.h"
 #include "components/collaboration/public/collaboration_flow_type.h"
 #include "components/collaboration/public/collaboration_service.h"
 #include "components/data_sharing/public/data_sharing_service.h"
+#include "components/data_sharing/public/logger.h"
+#include "components/data_sharing/public/logger_common.mojom.h"
+#include "components/data_sharing/public/logger_utils.h"
 #include "components/saved_tab_groups/public/saved_tab_group.h"
 #include "components/saved_tab_groups/public/tab_group_sync_service.h"
 #include "components/sync/service/sync_service.h"
@@ -27,6 +31,12 @@ class ControllerState;
 
 namespace {
 
+constexpr char kDebugCollaborationStateString[] =
+    "Collaboration State Change\n"
+    "  New State: %s\n"
+    "  Previous State: %s\n"
+    "  Error Type: %s\n";
+
 using ErrorInfo = CollaborationControllerDelegate::ErrorInfo;
 using Outcome = CollaborationControllerDelegate::Outcome;
 using ResultCallback = CollaborationControllerDelegate::ResultCallback;
@@ -35,10 +45,15 @@ using GroupDataOrFailureOutcome =
 using StateId = CollaborationController::StateId;
 using Flow = CollaborationController::Flow;
 
+constexpr base::TimeDelta kTimeoutWaitingForDataSharingGroup =
+    base::Seconds(20);
+
 std::string GetStateIdString(StateId state) {
   switch (state) {
     case StateId::kPending:
       return "Pending";
+    case StateId::kWaitingForPolicyUpdate:
+      return "WaitingForPolicyUpdate";
     case StateId::kAuthenticating:
       return "Authenticating";
     case StateId::kWaitingForServicesToInitialize:
@@ -64,6 +79,21 @@ std::string GetStateIdString(StateId state) {
     case StateId::kError:
       return "Error";
   }
+}
+
+std::string CreateStateTransitionLogString(
+    StateId previous,
+    StateId current,
+    const CollaborationControllerDelegate::ErrorInfo& error) {
+  std::string error_str =
+      error.type() != CollaborationControllerDelegate::ErrorInfo::Type::kUnknown
+          ? error.GetLogString()
+          : "[N/A]";
+  std::string log = base::StringPrintf(kDebugCollaborationStateString,
+                                       GetStateIdString(current),
+                                       GetStateIdString(previous), error_str);
+
+  return log;
 }
 
 }  // namespace
@@ -98,6 +128,11 @@ class ControllerState {
                              ErrorInfo(ErrorInfo::Type::kGenericError));
   }
 
+  virtual void HandleErrorWithMetrics(CollaborationServiceJoinEvent event) {
+    RecordJoinEvent(GetLogger(), event);
+    HandleError();
+  }
+
   virtual void HandleErrorWithType(ErrorInfo::Type type) {
     controller->TransitionTo(StateId::kError, ErrorInfo(type));
   }
@@ -130,6 +165,10 @@ class ControllerState {
     return controller->collaboration_service()->GetCurrentUserRoleForGroup(
                group_id) != data_sharing::MemberRole::kUnknown;
   }
+
+  data_sharing::Logger* GetLogger() {
+    return controller->data_sharing_service()->GetLogger();
+  }
 };
 
 namespace {
@@ -153,15 +192,22 @@ class PendingState : public ControllerState {
     if (controller->flow().type == FlowType::kJoin) {
       // Handle URL parsing errors.
       if (!controller->flow().join_token().IsValid()) {
-        RecordJoinEvent(CollaborationServiceJoinEvent::kParsingFailure);
+        RecordJoinEvent(GetLogger(),
+                        CollaborationServiceJoinEvent::kParsingFailure);
         HandleErrorWithType(ErrorInfo::Type::kInvalidUrl);
         return;
       }
     }
 
-    // Verify authentication status.
+    // Handle disabled by policy.
     ServiceStatus status =
         controller->collaboration_service()->GetServiceStatus();
+    if (!status.IsAllowedToJoin()) {
+      controller->TransitionTo(StateId::kWaitingForPolicyUpdate);
+      return;
+    }
+
+    // Verify authentication status.
     if (!status.IsAuthenticationValid()) {
       controller->TransitionTo(StateId::kAuthenticating);
       return;
@@ -175,6 +221,80 @@ class PendingState : public ControllerState {
   CollaborationController::FinishCallback exit_callback_;
 };
 
+class WaitingForPolicyUpdateState : public ControllerState,
+                                    public CollaborationService::Observer {
+ public:
+  WaitingForPolicyUpdateState(StateId id, CollaborationController* controller)
+      : ControllerState(id, controller) {}
+
+  void OnEnter(const ErrorInfo& error) override {
+    ServiceStatus status =
+        controller->collaboration_service()->GetServiceStatus();
+    if (status.collaboration_status == CollaborationStatus::kDisabledPending) {
+      RecordJoinOrShareOrManageEvent(
+          GetLogger(), controller->flow().type,
+          CollaborationServiceJoinEvent::kAccountInfoNotReadyOnSignin,
+          CollaborationServiceShareOrManageEvent::kAccountInfoNotReadyOnSignin);
+      pending_status_change_observer_.Observe(
+          controller->collaboration_service());
+      return;
+    }
+
+    HandleError();
+  }
+
+  void HandleError() override {
+    ServiceStatus status =
+        controller->collaboration_service()->GetServiceStatus();
+    if (status.signin_status == SigninStatus::kNotSignedIn) {
+      RecordJoinOrShareOrManageEvent(
+          GetLogger(), controller->flow().type,
+          CollaborationServiceJoinEvent::kDevicePolicyDisableSignin,
+          CollaborationServiceShareOrManageEvent::kDevicePolicyDisableSignin);
+      HandleErrorWithType(ErrorInfo::Type::kSigninDisabledByPolicy);
+      return;
+    }
+
+    RecordJoinOrShareOrManageEvent(
+        GetLogger(), controller->flow().type,
+        CollaborationServiceJoinEvent::kManagedAccountSignin,
+        CollaborationServiceShareOrManageEvent::kManagedAccountSignin);
+    HandleErrorWithType(ErrorInfo::Type::kSyncDisabledByPolicy);
+  }
+
+  void OnProcessingFinishedWithSuccess() override {
+    ServiceStatus status =
+        controller->collaboration_service()->GetServiceStatus();
+    if (status.IsAuthenticationValid()) {
+      controller->TransitionTo(StateId::kCheckingFlowRequirements);
+      return;
+    }
+    controller->TransitionTo(StateId::kAuthenticating);
+  }
+
+  // CollaborationService::Observer implementation.
+  void OnServiceStatusChanged(const ServiceStatusUpdate& update) override {
+    ServiceStatus status = update.new_status;
+    switch (status.collaboration_status) {
+      case CollaborationStatus::kDisabledPending:
+        break;
+      case CollaborationStatus::kDisabled:
+      case CollaborationStatus::kDisabledForPolicy:
+        HandleError();
+        break;
+      case CollaborationStatus::kAllowedToJoin:
+      case CollaborationStatus::kEnabledJoinOnly:
+      case CollaborationStatus::kEnabledCreateAndJoin:
+        OnProcessingFinishedWithSuccess();
+        break;
+    }
+  }
+
+ private:
+  base::ScopedObservation<CollaborationService, CollaborationService::Observer>
+      pending_status_change_observer_{this};
+};
+
 class AuthenticatingState : public ControllerState,
                             public CollaborationService::Observer {
  public:
@@ -183,10 +303,10 @@ class AuthenticatingState : public ControllerState,
 
   void OnEnter(const ErrorInfo& error) override {
     if (FlowType::kJoin == controller->flow().type) {
-      RecordJoinEvent(CollaborationServiceJoinEvent::kNotSignedIn);
+      RecordJoinEvent(GetLogger(), CollaborationServiceJoinEvent::kNotSignedIn);
     } else if (FlowType::kShareOrManage == controller->flow().type) {
       RecordShareOrManageEvent(
-          CollaborationServiceShareOrManageEvent::kNotSignedIn);
+          GetLogger(), CollaborationServiceShareOrManageEvent::kNotSignedIn);
     }
 
     controller->delegate()->ShowAuthenticationUi(
@@ -197,9 +317,11 @@ class AuthenticatingState : public ControllerState,
   void ProcessOutcome(Outcome outcome) override {
     if (Outcome::kCancel == outcome) {
       if (FlowType::kJoin == controller->flow().type) {
-        RecordJoinEvent(CollaborationServiceJoinEvent::kCanceledNotSignedIn);
+        RecordJoinEvent(GetLogger(),
+                        CollaborationServiceJoinEvent::kCanceledNotSignedIn);
       } else if (FlowType::kShareOrManage == controller->flow().type) {
         RecordShareOrManageEvent(
+            GetLogger(),
             CollaborationServiceShareOrManageEvent::kCanceledNotSignedIn);
       }
     }
@@ -210,6 +332,11 @@ class AuthenticatingState : public ControllerState,
   void OnProcessingFinishedWithSuccess() override {
     ServiceStatus status =
         controller->collaboration_service()->GetServiceStatus();
+    if (!status.IsAllowedToJoin()) {
+      controller->TransitionTo(StateId::kWaitingForPolicyUpdate);
+      return;
+    }
+
     if (!status.IsAuthenticationValid()) {
       // Set up the timeout exit task.
       base::SingleThreadTaskRunner::GetCurrentDefault()->PostDelayedTask(
@@ -221,19 +348,22 @@ class AuthenticatingState : public ControllerState,
           controller->collaboration_service());
       if (FlowType::kJoin == controller->flow().type) {
         RecordJoinEvent(
+            GetLogger(),
             CollaborationServiceJoinEvent::kSigninVerificationFailed);
       } else if (FlowType::kShareOrManage == controller->flow().type) {
         RecordShareOrManageEvent(
+            GetLogger(),
             CollaborationServiceShareOrManageEvent::kSigninVerificationFailed);
       }
       return;
     }
 
     if (FlowType::kJoin == controller->flow().type) {
-      RecordJoinEvent(CollaborationServiceJoinEvent::kSigninVerified);
+      RecordJoinEvent(GetLogger(),
+                      CollaborationServiceJoinEvent::kSigninVerified);
     } else if (FlowType::kShareOrManage == controller->flow().type) {
       RecordShareOrManageEvent(
-          CollaborationServiceShareOrManageEvent::kSigninVerified);
+          GetLogger(), CollaborationServiceShareOrManageEvent::kSigninVerified);
     }
     // TODO(crbug.com/380957996): Handle signin/sync changes during a flow.
     controller->delegate()->NotifySignInAndSyncStatusChange();
@@ -242,12 +372,20 @@ class AuthenticatingState : public ControllerState,
 
   // CollaborationService::Observer implementation.
   void OnServiceStatusChanged(const ServiceStatusUpdate& update) override {
-    if (update.new_status.IsAuthenticationValid()) {
+    ServiceStatus status = update.new_status;
+    if (!status.IsAllowedToJoin()) {
+      controller->TransitionTo(StateId::kWaitingForPolicyUpdate);
+      return;
+    }
+
+    if (status.IsAuthenticationValid()) {
       if (FlowType::kJoin == controller->flow().type) {
         RecordJoinEvent(
+            GetLogger(),
             CollaborationServiceJoinEvent::kSigninVerifiedInObserver);
       } else if (FlowType::kShareOrManage == controller->flow().type) {
         RecordShareOrManageEvent(
+            GetLogger(),
             CollaborationServiceShareOrManageEvent::kSigninVerifiedInObserver);
       }
       controller->delegate()->NotifySignInAndSyncStatusChange();
@@ -276,8 +414,10 @@ class WaitingForServicesToInitialize
     // Timeout waiting.
     base::SingleThreadTaskRunner::GetCurrentDefault()->PostDelayedTask(
         FROM_HERE,
-        base::BindOnce(&WaitingForServicesToInitialize::HandleError,
-                       weak_ptr_factory_.GetWeakPtr()),
+        base::BindOnce(
+            &WaitingForServicesToInitialize::HandleErrorWithMetrics,
+            weak_ptr_factory_.GetWeakPtr(),
+            CollaborationServiceJoinEvent::kTimeoutWaitingForServicesReady),
         base::Seconds(5));
     // TODO(crbug.com/392791204): Wait for tab group sync to be ready.
     is_data_sharing_ready_ =
@@ -287,9 +427,11 @@ class WaitingForServicesToInitialize
     } else {
       if (FlowType::kJoin == controller->flow().type) {
         RecordJoinEvent(
+            GetLogger(),
             CollaborationServiceJoinEvent::kDataSharingReadyWhenStarted);
       } else if (FlowType::kShareOrManage == controller->flow().type) {
-        RecordShareOrManageEvent(CollaborationServiceShareOrManageEvent::
+        RecordShareOrManageEvent(GetLogger(),
+                                 CollaborationServiceShareOrManageEvent::
                                      kDataSharingReadyWhenStarted);
       }
     }
@@ -303,9 +445,11 @@ class WaitingForServicesToInitialize
   // TabGroupSyncService::Observer implementation.
   void OnInitialized() override {
     if (FlowType::kJoin == controller->flow().type) {
-      RecordJoinEvent(CollaborationServiceJoinEvent::kTabGroupServiceReady);
+      RecordJoinEvent(GetLogger(),
+                      CollaborationServiceJoinEvent::kTabGroupServiceReady);
     } else if (FlowType::kShareOrManage == controller->flow().type) {
       RecordShareOrManageEvent(
+          GetLogger(),
           CollaborationServiceShareOrManageEvent::kTabGroupServiceReady);
     }
     is_tab_group_sync_ready_ = true;
@@ -316,9 +460,11 @@ class WaitingForServicesToInitialize
   void OnGroupDataModelLoaded() override {
     if (FlowType::kJoin == controller->flow().type) {
       RecordJoinEvent(
+          GetLogger(),
           CollaborationServiceJoinEvent::kDataSharingServiceReadyObserved);
     } else if (FlowType::kShareOrManage == controller->flow().type) {
-      RecordShareOrManageEvent(CollaborationServiceShareOrManageEvent::
+      RecordShareOrManageEvent(GetLogger(),
+                               CollaborationServiceShareOrManageEvent::
                                    kDataSharingServiceReadyObserved);
     }
 
@@ -331,9 +477,11 @@ class WaitingForServicesToInitialize
     if (is_tab_group_sync_ready_ && is_data_sharing_ready_) {
       if (FlowType::kJoin == controller->flow().type) {
         RecordJoinEvent(
+            GetLogger(),
             CollaborationServiceJoinEvent::kAllServicesReadyForFlow);
       } else if (FlowType::kShareOrManage == controller->flow().type) {
         RecordShareOrManageEvent(
+            GetLogger(),
             CollaborationServiceShareOrManageEvent::kAllServicesReadyForFlow);
       }
       OnProcessingFinishedWithSuccess();
@@ -358,7 +506,8 @@ class CheckingFlowRequirementsState : public ControllerState {
   void OnEnter(const ErrorInfo& error) override {
     switch (controller->flow().type) {
       case FlowType::kJoin: {
-        RecordJoinEvent(CollaborationServiceJoinEvent::kFlowRequirementsMet);
+        RecordJoinEvent(GetLogger(),
+                        CollaborationServiceJoinEvent::kFlowRequirementsMet);
 
         const data_sharing::GroupId group_id =
             controller->flow().join_token().group_id;
@@ -366,13 +515,14 @@ class CheckingFlowRequirementsState : public ControllerState {
         if (IsPeopleGroupInDataSharing(group_id)) {
           if (IsTabGroupInSync(group_id)) {
             RecordJoinEvent(
+                GetLogger(),
                 CollaborationServiceJoinEvent::kOpenedExistingGroup);
             controller->TransitionTo(StateId::kOpeningLocalTabGroup);
             return;
           }
 
-          RecordJoinEvent(CollaborationServiceJoinEvent::
-                              kFoundCollaborationWithoutTabGroup);
+          RecordJoinEvent(GetLogger(), CollaborationServiceJoinEvent::
+                                           kFoundCollaborationWithoutTabGroup);
           controller->TransitionTo(StateId::kWaitingForSyncAndDataSharingGroup);
           return;
         }
@@ -390,6 +540,7 @@ class CheckingFlowRequirementsState : public ControllerState {
       }
       case FlowType::kShareOrManage:
         RecordShareOrManageEvent(
+            GetLogger(),
             CollaborationServiceShareOrManageEvent::kFlowRequirementsMet);
 
         std::optional<tab_groups::SavedTabGroup> sync_group =
@@ -397,6 +548,7 @@ class CheckingFlowRequirementsState : public ControllerState {
                 controller->flow().either_id());
         if (!sync_group.has_value()) {
           RecordShareOrManageEvent(
+              GetLogger(),
               CollaborationServiceShareOrManageEvent::kSyncedTabGroupNotFound);
           HandleError();
           return;
@@ -424,10 +576,12 @@ class CheckingFlowRequirementsState : public ControllerState {
     // TODO(crbug.com/373403973): add version check once all platforms
     // implemented ReadNewGroup in SDK.
     if (!group_outcome.has_value()) {
-      RecordJoinEvent(CollaborationServiceJoinEvent::kReadNewGroupFailed);
+      RecordJoinEvent(GetLogger(),
+                      CollaborationServiceJoinEvent::kReadNewGroupFailed);
     }
 
-    RecordJoinEvent(CollaborationServiceJoinEvent::kReadNewGroupSuccess);
+    RecordJoinEvent(GetLogger(),
+                    CollaborationServiceJoinEvent::kReadNewGroupSuccess);
     OnProcessingFinishedWithSuccess();
   }
 
@@ -453,25 +607,28 @@ class AddingUserToGroupState : public ControllerState {
       CHECK_EQ(controller->flow().type, FlowType::kJoin)
           << "Only the join flow can transition into the AddingUserToGroup "
              "state.";
-      RecordJoinEvent(CollaborationServiceJoinEvent::kCanceled);
+      RecordJoinEvent(GetLogger(), CollaborationServiceJoinEvent::kCanceled);
     }
-    RecordJoinEvent(CollaborationServiceJoinEvent::kAddedUserToGroup);
+    RecordJoinEvent(GetLogger(),
+                    CollaborationServiceJoinEvent::kAddedUserToGroup);
 
     ControllerState::ProcessOutcome(outcome);
   }
 
   void OnProcessingFinishedWithSuccess() override {
-    RecordJoinEvent(CollaborationServiceJoinEvent::kAccepted);
+    RecordJoinEvent(GetLogger(), CollaborationServiceJoinEvent::kAccepted);
 
     const data_sharing::GroupId group_id =
         controller->flow().join_token().group_id;
     if (IsTabGroupInSync(group_id) && IsPeopleGroupInDataSharing(group_id)) {
-      RecordJoinEvent(CollaborationServiceJoinEvent::kGroupExistsWhenJoined);
+      RecordJoinEvent(GetLogger(),
+                      CollaborationServiceJoinEvent::kGroupExistsWhenJoined);
       controller->TransitionTo(StateId::kOpeningLocalTabGroup);
       return;
     }
 
-    RecordJoinEvent(CollaborationServiceJoinEvent::kOpenedNewGroup);
+    RecordJoinEvent(GetLogger(),
+                    CollaborationServiceJoinEvent::kOpenedNewGroup);
     controller->TransitionTo(StateId::kWaitingForSyncAndDataSharingGroup);
   }
 
@@ -482,19 +639,22 @@ class AddingUserToGroupState : public ControllerState {
     if (!preview_outcome.has_value() &&
         preview_outcome.error() == data_sharing::DataSharingService::
                                        DataPreviewActionFailure::kGroupFull) {
-      RecordJoinEvent(CollaborationServiceJoinEvent::kPreviewGroupFullError);
-      HandleError();
+      RecordJoinEvent(GetLogger(),
+                      CollaborationServiceJoinEvent::kPreviewGroupFullError);
+      HandleErrorWithType(ErrorInfo::Type::kGroupFull);
       return;
     }
 
     if (!preview_outcome.has_value() ||
         !preview_outcome.value().shared_tab_group_preview.has_value()) {
-      RecordJoinEvent(CollaborationServiceJoinEvent::kPreviewFailure);
+      RecordJoinEvent(GetLogger(),
+                      CollaborationServiceJoinEvent::kPreviewFailure);
       HandleErrorWithType(ErrorInfo::Type::kInvalidUrl);
       return;
     }
 
-    RecordJoinEvent(CollaborationServiceJoinEvent::kPreviewSuccess);
+    RecordJoinEvent(GetLogger(),
+                    CollaborationServiceJoinEvent::kPreviewSuccess);
     controller->delegate()->ShowJoinDialog(
         controller->flow().join_token(), preview_outcome.value(),
         base::BindOnce(&AddingUserToGroupState::ProcessOutcome,
@@ -514,9 +674,12 @@ class WaitingForSyncAndDataSharingGroup
       : ControllerState(id, controller) {
     base::SingleThreadTaskRunner::GetCurrentDefault()->PostDelayedTask(
         FROM_HERE,
-        base::BindOnce(&WaitingForSyncAndDataSharingGroup::HandleError,
-                       weak_ptr_factory_.GetWeakPtr()),
-        base::Seconds(10));
+        base::BindOnce(
+            &WaitingForSyncAndDataSharingGroup::HandleErrorWithMetrics,
+            weak_ptr_factory_.GetWeakPtr(),
+            CollaborationServiceJoinEvent::
+                kTimeoutWaitingForSyncAndDataSharingGroup),
+        kTimeoutWaitingForDataSharingGroup);
     tab_group_sync_observer_.Observe(controller->tab_group_sync_service());
     data_sharing_observer_.Observe(controller->data_sharing_service());
   }
@@ -532,11 +695,6 @@ class WaitingForSyncAndDataSharingGroup
     bool tab_group_exists = IsTabGroupInSync(group_id);
     bool people_group_exists = IsPeopleGroupInDataSharing(group_id);
     CHECK(!tab_group_exists || !people_group_exists);
-    // Force update sync.
-    if (!tab_group_exists) {
-      controller->sync_service()->TriggerRefresh(
-          {syncer::SHARED_TAB_GROUP_DATA});
-    }
     // Force update data sharing service.
     if (!IsPeopleGroupInDataSharing(group_id)) {
       controller->data_sharing_service()->ReadGroupDeprecated(
@@ -553,7 +711,8 @@ class WaitingForSyncAndDataSharingGroup
         group.collaboration_id().value() ==
             tab_groups::CollaborationId(group_id.value()) &&
         IsPeopleGroupInDataSharing(group_id)) {
-      RecordJoinEvent(CollaborationServiceJoinEvent::kTabGroupFetched);
+      RecordJoinEvent(GetLogger(),
+                      CollaborationServiceJoinEvent::kTabGroupFetched);
       ProcessOutcome(Outcome::kSuccess);
     }
   }
@@ -565,7 +724,8 @@ class WaitingForSyncAndDataSharingGroup
         controller->flow().join_token().group_id;
     if (group_data.group_token.group_id.value() == group_id.value() &&
         IsTabGroupInSync(group_id)) {
-      RecordJoinEvent(CollaborationServiceJoinEvent::kPeopleGroupFetched);
+      RecordJoinEvent(GetLogger(),
+                      CollaborationServiceJoinEvent::kPeopleGroupFetched);
       ProcessOutcome(Outcome::kSuccess);
     }
   }
@@ -588,7 +748,8 @@ class OpeningLocalTabGroupState : public ControllerState {
     // Only the join flow has a valid `group_id`.
     CHECK_EQ(controller->flow().type, FlowType::kJoin);
 
-    RecordJoinEvent(CollaborationServiceJoinEvent::kPromoteTabGroup);
+    RecordJoinEvent(GetLogger(),
+                    CollaborationServiceJoinEvent::kPromoteTabGroup);
     controller->delegate()->PromoteTabGroup(
         controller->flow().join_token().group_id,
         base::BindOnce(&OpeningLocalTabGroupState::ProcessOutcome,
@@ -606,7 +767,7 @@ class ShowingShareScreen : public ControllerState {
   void OnEnter(const ErrorInfo& error) override {
     CHECK_EQ(controller->flow().type, FlowType::kShareOrManage);
     RecordShareOrManageEvent(
-        CollaborationServiceShareOrManageEvent::kShareDialogShown);
+        GetLogger(), CollaborationServiceShareOrManageEvent::kShareDialogShown);
 
     controller->delegate()->ShowShareDialog(
         controller->flow().either_id(),
@@ -627,6 +788,7 @@ class ShowingShareScreen : public ControllerState {
     // behavior.
     if (outcome == Outcome::kFailure) {
       RecordShareOrManageEvent(
+          GetLogger(),
           CollaborationServiceShareOrManageEvent::kCollaborationIdMissing);
       HandleError();
       return;
@@ -634,6 +796,7 @@ class ShowingShareScreen : public ControllerState {
 
     if (!group_token.has_value() || !group_token.value().IsValid()) {
       RecordShareOrManageEvent(
+          GetLogger(),
           CollaborationServiceShareOrManageEvent::kCollaborationIdInvalid);
       controller->Exit();
       return;
@@ -658,7 +821,8 @@ class MakingTabGroupShared : public ControllerState {
         controller->tab_group_sync_service()->GetGroup(
             controller->flow().either_id());
     if (!group.has_value()) {
-      RecordShareOrManageEvent(CollaborationServiceShareOrManageEvent::
+      RecordShareOrManageEvent(GetLogger(),
+                               CollaborationServiceShareOrManageEvent::
                                    kTabGroupMissingBeforeMigration);
       HandleError();
       return;
@@ -672,7 +836,7 @@ class MakingTabGroupShared : public ControllerState {
         controller->flow().share_token();
 
     RecordShareOrManageEvent(
-        CollaborationServiceShareOrManageEvent::kTabGroupShared);
+        GetLogger(), CollaborationServiceShareOrManageEvent::kTabGroupShared);
 
     controller->tab_group_sync_service()->MakeTabGroupShared(
         local_group_id.value(), group_token.group_id.value(),
@@ -695,6 +859,7 @@ class MakingTabGroupShared : public ControllerState {
     if (result !=
         tab_groups::TabGroupSyncService::TabGroupSharingResult::kSuccess) {
       RecordShareOrManageEvent(
+          GetLogger(),
           CollaborationServiceShareOrManageEvent::kMigrationFailure);
       HandleError();
       return;
@@ -708,6 +873,7 @@ class MakingTabGroupShared : public ControllerState {
       const GroupDataOrFailureOutcome& group_outcome) {
     if (!group_outcome.has_value()) {
       RecordShareOrManageEvent(
+          GetLogger(),
           CollaborationServiceShareOrManageEvent::kReadGroupFailed);
       HandleError();
       return;
@@ -745,13 +911,14 @@ class SharingTabGroupUrl : public ControllerState {
         controller->data_sharing_service()->GetDataSharingUrl(group_data);
     if (!url) {
       RecordShareOrManageEvent(
+          GetLogger(),
           CollaborationServiceShareOrManageEvent::kUrlCreationFailed);
       HandleError();
       return;
     }
 
     RecordShareOrManageEvent(
-        CollaborationServiceShareOrManageEvent::kUrlReadyToShare);
+        GetLogger(), CollaborationServiceShareOrManageEvent::kUrlReadyToShare);
     controller->delegate()->OnUrlReadyToShare(
         group_token.group_id, *url,
         base::BindOnce(&SharingTabGroupUrl::ProcessOutcome,
@@ -769,6 +936,7 @@ class ShowingManageScreen : public ControllerState {
   void OnEnter(const ErrorInfo& error) override {
     CHECK_EQ(controller->flow().type, FlowType::kShareOrManage);
     RecordShareOrManageEvent(
+        GetLogger(),
         CollaborationServiceShareOrManageEvent::kManageDialogShown);
 
     controller->delegate()->ShowManageDialog(
@@ -843,6 +1011,10 @@ void CollaborationController::TransitionTo(StateId state,
                                            const ErrorInfo& error) {
   VLOG(2) << "Transition from " << GetStateIdString(current_state_->id)
           << " to " << GetStateIdString(state);
+  DATA_SHARING_LOG(
+      logger_common::mojom::LogSource::CollaborationService,
+      data_sharing_service()->GetLogger(),
+      CreateStateTransitionLogString(current_state_->id, state, error));
   DCHECK(IsValidStateTransition(current_state_->id, state));
   current_state_->OnExit();
   current_state_ = CreateStateObject(state);
@@ -887,6 +1059,8 @@ std::unique_ptr<ControllerState> CollaborationController::CreateStateObject(
   switch (state) {
     case StateId::kPending:
       return std::make_unique<PendingState>(state, this, base::DoNothing());
+    case StateId::kWaitingForPolicyUpdate:
+      return std::make_unique<WaitingForPolicyUpdateState>(state, this);
     case StateId::kAuthenticating:
       return std::make_unique<AuthenticatingState>(state, this);
     case StateId::kWaitingForServicesToInitialize:

@@ -1958,8 +1958,14 @@ public class RootUiCoordinator
         return null;
     }
 
+    /** Saves the relevant UI state when the activity is recreated on a device fold transition. */
+    public void prepareUiState() {
+        mFoldTransitionController.prepareUiState();
+    }
+
     /**
-     * Saves relevant information that will be used to restore the UI state after the activity is
+     * Saves relevant information preserved by {@code RootUiCoordinator#prepareUiState()} to the
+     * saved instance state bundle that will be used to restore the UI state after the activity is
      * recreated. This is expected to be invoked in {@code Activity#onSaveInstanceState(Bundle)}.
      *
      * @param outState The {@link Bundle} that is used to save state information.
@@ -2046,5 +2052,10 @@ public class RootUiCoordinator
     /** Returns the entry point for all scrim interactions. */
     public ObservableSupplier<ScrimManager> getScrimManagerSupplier() {
         return mScrimManagerSupplier;
+    }
+
+    /** Returns a supplier of the share delegate. */
+    public Supplier<ShareDelegate> getShareDelegateSupplier() {
+        return mShareDelegateSupplier;
     }
 }

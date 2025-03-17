@@ -415,6 +415,10 @@ bool IsZeroSuggestPrefetchingEnabled();
 bool IsZeroSuggestPrefetchingEnabledInContext(
     metrics::OmniboxEventProto::PageClassification page_classification);
 
+// Returns whether on-focus zero-suggest is enabled in the given context.
+bool IsOnFocusZeroSuggestEnabledInContext(
+    metrics::OmniboxEventProto::PageClassification page_classification);
+
 // Rich autocompletion.
 bool IsRichAutocompletionEnabled();
 bool RichAutocompletionShowAdditionalText();
@@ -743,12 +747,16 @@ extern const base::FeatureParam<int>
 // DB or TemplateURLService's copy of the URL.
 extern const base::FeatureParam<std::string> kGeminiUrlOverride;
 
-// Whether the expansion pack for the site search starter pack is enabled.
+// Whether the expansion pack (the StarterPackID::kGemini keyword/engine) for
+// the site search starter pack is enabled.
 bool IsStarterPackExpansionEnabled();
 
 // When true, enables an informational IPH message at the bottom of the Omnibox
 // directing users to certain starter pack engines.
 bool IsStarterPackIPHEnabled();
+
+// Whether the starter pack page scope is enabled.
+bool IsStarterPackPageEnabled();
 
 // <- Site Search Starter Pack
 // ---------------------------------------------------------
@@ -758,10 +766,10 @@ bool IsStarterPackIPHEnabled();
 // primitives are included.
 #if BUILDFLAG(IS_ANDROID)
 constexpr base::FeatureParam<bool> kAndroidHubSearchEnableBookmarkProvider{
-    &omnibox::kAndroidHubSearch, "enable_bookmark_provider", false};
+    &omnibox::kAndroidHubSearch, "enable_bookmark_provider", true};
 
 constexpr base::FeatureParam<bool> kAndroidHubSearchEnableHistoryProvider{
-    &omnibox::kAndroidHubSearch, "enable_history_provider", false};
+    &omnibox::kAndroidHubSearch, "enable_history_provider", true};
 #endif
 
 // <- Android Hub Search

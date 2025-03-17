@@ -23,11 +23,11 @@
 #include "base/values.h"
 #include "chrome/browser/autofill/autofill_entity_data_manager_factory.h"
 #include "chrome/browser/autofill_ai/autofill_ai_util.h"
+#include "chrome/browser/browser_process.h"
 #include "chrome/browser/extensions/api/autofill_private/autofill_ai_util.h"
 #include "chrome/browser/extensions/api/autofill_private/autofill_util.h"
 #include "chrome/browser/profiles/profile.h"
 #include "chrome/browser/ui/user_education/browser_user_education_interface.h"
-#include "chrome/browser/user_annotations/user_annotations_service_factory.h"
 #include "chrome/common/extensions/api/autofill_private.h"
 #include "components/autofill/content/browser/content_autofill_client.h"
 #include "components/autofill/content/browser/content_autofill_driver.h"
@@ -65,8 +65,6 @@
 #include "components/signin/public/identity_manager/account_info.h"
 #include "components/strings/grit/components_branded_strings.h"
 #include "components/strings/grit/components_strings.h"
-#include "components/user_annotations/user_annotations_service.h"
-#include "components/user_annotations/user_annotations_types.h"
 #include "content/public/browser/web_contents.h"
 #include "extensions/browser/extension_function.h"
 #include "extensions/browser/extension_function_registry.h"
@@ -99,8 +97,8 @@ static const char kErrorCardDataUnavailable[] = "Credit card data unavailable";
 static const char kErrorDataUnavailable[] = "Autofill data unavailable.";
 static const char kErrorAutofillAiUnavailable[] =
     "Autofill AI data unavailable.";
-static const char kErrorAutofillAiEntityOutOfBounds[] =
-    "The provided Autofill AI entity/attribute is out of bounds.";
+static const char kErrorAutofillAiTypeNameOutOfBounds[] =
+    "The provided Autofill AI entity/attribute type name is out of bounds.";
 static const char kErrorAutofillAiEntityInstanceNotFound[] =
     "The provided Autofill AI entity instance cannot be found.";
 static const char kErrorDeviceAuthUnavailable[] = "Device auth is unvailable";
@@ -332,21 +330,24 @@ ExtensionFunction::ResponseAction AutofillPrivateGetCountryListFunction::Run() {
   std::optional<api::autofill_private::GetCountryList::Params> parameters =
       api::autofill_private::GetCountryList::Params::Create(args());
   EXTENSION_FUNCTION_VALIDATE(parameters);
-  AddressDataManager* adm = address_data_manager();
-  if (!adm) {
-    return RespondNow(Error(kErrorDataUnavailable));
-  }
 
-  // Return an empty list if data is not loaded.
-  if (!adm->has_initial_load_finished()) {
-    autofill_util::CountryEntryList empty_list;
-    return RespondNow(ArgumentList(
-        api::autofill_private::GetCountryList::Results::Create(empty_list)));
-  }
+  autofill_util::CountryEntryList country_list;
+  if (parameters->for_account_storage) {
+    AddressDataManager* adm = address_data_manager();
+    if (!adm) {
+      return RespondNow(Error(kErrorDataUnavailable));
+    }
 
-  autofill_util::CountryEntryList country_list =
-      autofill_util::GenerateCountryList(
-          *adm, parameters->for_account_address_profile);
+    // Return an empty list if data is not loaded.
+    if (!adm->has_initial_load_finished()) {
+      return RespondNow(
+          ArgumentList(api::autofill_private::GetCountryList::Results::Create(
+              country_list)));
+    }
+    country_list = autofill_util::GenerateCountryListForAccountStorage(*adm);
+  } else {
+    country_list = autofill_util::GenerateCountryListForProfileStorage();
+  }
   return RespondNow(ArgumentList(
       api::autofill_private::GetCountryList::Results::Create(country_list)));
 }
@@ -803,6 +804,23 @@ AutofillPrivateRemoveVirtualCardFunction::Run() {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+// AutofillPrivateGetPayOverTimeIssuerListFunction
+
+ExtensionFunction::ResponseAction
+AutofillPrivateGetPayOverTimeIssuerListFunction::Run() {
+  PaymentsDataManager* paydm = payments_data_manager();
+  if (!paydm || !paydm->is_payments_data_loaded()) {
+    return RespondNow(Error(kErrorDataUnavailable));
+  }
+
+  autofill_util::PayOverTimeIssuerEntryList pay_over_time_issuer_list =
+      autofill_util::GeneratePayOverTimeIssuerList(*paydm);
+  return RespondNow(ArgumentList(
+      api::autofill_private::GetPayOverTimeIssuerList::Results::Create(
+          pay_over_time_issuer_list)));
+}
+
+////////////////////////////////////////////////////////////////////////////////
 // AutofillPrivateAuthenticateUserAndFlipMandatoryAuthToggleFunction
 
 ExtensionFunction::ResponseAction
@@ -999,100 +1017,6 @@ AutofillPrivateSetAutofillSyncToggleEnabledFunction::Run() {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// AutofillPrivateGetUserAnnotationsEntriesFunction
-
-ExtensionFunction::ResponseAction
-AutofillPrivateGetUserAnnotationsEntriesFunction::Run() {
-  Profile* profile =
-      Profile::FromBrowserContext(GetSenderWebContents()->GetBrowserContext());
-  user_annotations::UserAnnotationsService* user_annotations_service =
-      profile ? UserAnnotationsServiceFactory::GetForProfile(profile) : nullptr;
-  if (!user_annotations_service) {
-    return RespondNow(Error(kErrorAutofillAiUnavailable));
-  }
-
-  user_annotations_service->RetrieveAllEntries(base::BindOnce(
-      &AutofillPrivateGetUserAnnotationsEntriesFunction::OnEntriesRetrieved,
-      this));
-
-  return did_respond() ? AlreadyResponded() : RespondLater();
-}
-
-void AutofillPrivateGetUserAnnotationsEntriesFunction::OnEntriesRetrieved(
-    user_annotations::UserAnnotationsEntries response) {
-  std::vector<autofill_private::UserAnnotationsEntry> result;
-  result.reserve(response.size());
-  for (optimization_guide::proto::UserAnnotationsEntry& entry : response) {
-    result.emplace_back();
-    result.back().entry_id = entry.entry_id();
-    result.back().key = std::move(entry.key());
-    result.back().value = std::move(entry.value());
-  }
-  Respond(ArgumentList(
-      api::autofill_private::GetUserAnnotationsEntries::Results::Create(
-          result)));
-}
-
-////////////////////////////////////////////////////////////////////////////////
-// AutofillPrivateDeleteUserAnnotationsEntryFunction
-
-ExtensionFunction::ResponseAction
-AutofillPrivateDeleteUserAnnotationsEntryFunction::Run() {
-  std::optional<api::autofill_private::DeleteUserAnnotationsEntry::Params>
-      parameters =
-          api::autofill_private::DeleteUserAnnotationsEntry::Params::Create(
-              args());
-  EXTENSION_FUNCTION_VALIDATE(parameters);
-
-  Profile* profile =
-      Profile::FromBrowserContext(GetSenderWebContents()->GetBrowserContext());
-  user_annotations::UserAnnotationsService* user_annotations_service =
-      profile ? UserAnnotationsServiceFactory::GetForProfile(profile) : nullptr;
-
-  if (!user_annotations_service) {
-    return RespondNow(Error(kErrorAutofillAiUnavailable));
-  }
-
-  user_annotations_service->RemoveEntry(
-      parameters->entry_id,
-      base::BindOnce(
-          &AutofillPrivateDeleteUserAnnotationsEntryFunction::OnEntryDeleted,
-          this));
-
-  return did_respond() ? AlreadyResponded() : RespondLater();
-}
-
-void AutofillPrivateDeleteUserAnnotationsEntryFunction::OnEntryDeleted() {
-  Respond(NoArguments());
-}
-
-////////////////////////////////////////////////////////////////////////////////
-// AutofillPrivateHasUserAnnotationsEntriesFunction
-
-ExtensionFunction::ResponseAction
-AutofillPrivateHasUserAnnotationsEntriesFunction::Run() {
-  Profile* profile =
-      Profile::FromBrowserContext(GetSenderWebContents()->GetBrowserContext());
-  user_annotations::UserAnnotationsService* user_annotations_service =
-      profile ? UserAnnotationsServiceFactory::GetForProfile(profile) : nullptr;
-
-  if (!user_annotations_service) {
-    return RespondNow(WithArguments(false));
-  }
-
-  user_annotations_service->RetrieveAllEntries(base::BindOnce(
-      &AutofillPrivateHasUserAnnotationsEntriesFunction::OnEntriesRetrieved,
-      this));
-
-  return did_respond() ? AlreadyResponded() : RespondLater();
-}
-
-void AutofillPrivateHasUserAnnotationsEntriesFunction::OnEntriesRetrieved(
-    user_annotations::UserAnnotationsEntries response) {
-  Respond(WithArguments(response.size() > 0));
-}
-
-////////////////////////////////////////////////////////////////////////////////
 // AutofillPrivateIsUserEligibleForAutofillImprovementsFunction
 
 // TODO(crbug.com/393318914): Remove function.
@@ -1101,33 +1025,6 @@ AutofillPrivateIsUserEligibleForAutofillImprovementsFunction::Run() {
   Profile* profile =
       Profile::FromBrowserContext(GetSenderWebContents()->GetBrowserContext());
   return RespondNow(WithArguments(autofill_ai::IsUserEligible(profile)));
-}
-
-////////////////////////////////////////////////////////////////////////////////
-// AutofillPrivateDeleteAllUserAnnotationsEntriesFunction
-
-ExtensionFunction::ResponseAction
-AutofillPrivateDeleteAllUserAnnotationsEntriesFunction::Run() {
-  Profile* profile =
-      Profile::FromBrowserContext(GetSenderWebContents()->GetBrowserContext());
-  user_annotations::UserAnnotationsService* user_annotations_service =
-      profile ? UserAnnotationsServiceFactory::GetForProfile(profile) : nullptr;
-
-  if (!user_annotations_service) {
-    return RespondNow(Error(kErrorAutofillAiUnavailable));
-  }
-
-  user_annotations_service->RemoveAllEntries(
-      base::BindOnce(&AutofillPrivateDeleteAllUserAnnotationsEntriesFunction::
-                         OnAllEntriesDeleted,
-                     this));
-
-  return did_respond() ? AlreadyResponded() : RespondLater();
-}
-
-void AutofillPrivateDeleteAllUserAnnotationsEntriesFunction::
-    OnAllEntriesDeleted() {
-  Respond(NoArguments());
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1162,7 +1059,7 @@ AutofillPrivateAddOrUpdateEntityInstanceFunction::Run() {
       autofill_ai_util::PrivateApiEntityInstanceToEntityInstance(
           private_api_entity_instance);
   if (!entity_instance.has_value()) {
-    return RespondNow(Error(kErrorAutofillAiEntityOutOfBounds));
+    return RespondNow(Error(kErrorAutofillAiTypeNameOutOfBounds));
   }
 
   Profile* profile = Profile::FromBrowserContext(browser_context());
@@ -1217,9 +1114,9 @@ AutofillPrivateLoadEntityInstancesFunction::Run() {
     return RespondNow(Error(kErrorAutofillAiUnavailable));
   }
   std::vector<autofill_private::EntityInstanceWithLabels> result =
-      base::ToVector(entity_data_manager->GetEntityInstances(),
-                     &autofill_ai_util::
-                         EntityInstanceToPrivateApiEntityInstanceWithLabels);
+      autofill_ai_util::EntityInstancesToPrivateApiEntityInstancesWithLabels(
+          entity_data_manager->GetEntityInstances(),
+          g_browser_process->GetApplicationLocale());
   return RespondNow(ArgumentList(
       autofill_private::LoadEntityInstances::Results::Create(result)));
 }
@@ -1254,7 +1151,7 @@ AutofillPrivateGetEntityInstanceByGuidFunction::Run() {
   return RespondNow(ArgumentList(
       api::autofill_private::GetEntityInstanceByGuid::Results::Create(
           autofill_ai_util::EntityInstanceToPrivateApiEntityInstance(
-              entity_instance.value()))));
+              entity_instance.value(), autofill_client()->GetAppLocale()))));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1269,10 +1166,10 @@ AutofillPrivateGetAllEntityTypesFunction::Run() {
             base::to_underlying(entity_type.name());
         private_api_entity_type.type_name_as_string =
             base::UTF16ToUTF8(entity_type.GetNameForI18n());
-        private_api_entity_type.add_entity_string =
-            autofill_ai_util::GetAddEntityStringForI18n(entity_type);
-        private_api_entity_type.edit_entity_string =
-            autofill_ai_util::GetEditEntityStringForI18n(entity_type);
+        private_api_entity_type.add_entity_type_string =
+            autofill_ai_util::GetAddEntityTypeStringForI18n(entity_type);
+        private_api_entity_type.edit_entity_type_string =
+            autofill_ai_util::GetEditEntityTypeStringForI18n(entity_type);
         return private_api_entity_type;
       });
   return RespondNow(ArgumentList(
@@ -1280,20 +1177,19 @@ AutofillPrivateGetAllEntityTypesFunction::Run() {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// AutofillPrivateGetAllAttributeTypesForEntityFunction
+// AutofillPrivateGetAllAttributeTypesForEntityTypeNameFunction
 
 ExtensionFunction::ResponseAction
-AutofillPrivateGetAllAttributeTypesForEntityFunction::Run() {
-  std::optional<autofill_private::GetAllAttributeTypesForEntity::Params>
-      parameters =
-          autofill_private::GetAllAttributeTypesForEntity::Params::Create(
-              args());
+AutofillPrivateGetAllAttributeTypesForEntityTypeNameFunction::Run() {
+  std::optional<autofill_private::GetAllAttributeTypesForEntityTypeName::Params>
+      parameters = autofill_private::GetAllAttributeTypesForEntityTypeName::
+          Params::Create(args());
   EXTENSION_FUNCTION_VALIDATE(parameters);
 
   std::optional<EntityTypeName> entity_type_name =
       autofill::ToSafeEntityTypeName(parameters->entity_type_name);
   if (!entity_type_name.has_value()) {
-    return RespondNow(Error(kErrorAutofillAiEntityOutOfBounds));
+    return RespondNow(Error(kErrorAutofillAiTypeNameOutOfBounds));
   }
 
   EntityType entity_type(entity_type_name.value());
@@ -1305,10 +1201,13 @@ AutofillPrivateGetAllAttributeTypesForEntityFunction::Run() {
             base::to_underlying(attribute_type.name());
         private_api_attribute_type.type_name_as_string =
             base::UTF16ToUTF8(attribute_type.GetNameForI18n());
+        private_api_attribute_type.data_type = autofill_ai_util::
+            AttributeTypeDataTypeToPrivateApiAttributeTypeDataType(
+                attribute_type.data_type());
         return private_api_attribute_type;
       });
   return RespondNow(ArgumentList(
-      autofill_private::GetAllAttributeTypesForEntity::Results::Create(
+      autofill_private::GetAllAttributeTypesForEntityTypeName::Results::Create(
           result)));
 }
 

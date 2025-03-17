@@ -32,6 +32,10 @@ BASE_FEATURE(kApiPermissionsHostAccessRequests,
              "ApiPermissionsHostAccessRequests",
              base::FEATURE_ENABLED_BY_DEFAULT);
 
+BASE_FEATURE(kApiPrintingMarginsAndScale,
+             "ApiPrintingMarginsAndScale",
+             base::FEATURE_DISABLED_BY_DEFAULT);
+
 BASE_FEATURE(kApiUserScriptsExecute,
              "ApiUserScriptsExecute",
              base::FEATURE_ENABLED_BY_DEFAULT);
@@ -43,6 +47,10 @@ BASE_FEATURE(kApiUserScriptsMultipleWorlds,
 BASE_FEATURE(kApiOdfsConfigPrivate,
              "ApiOdfsConfigPrivate",
              base::FEATURE_ENABLED_BY_DEFAULT);
+
+BASE_FEATURE(kApiEnterpriseReportingPrivateOnDataMaskingRulesTriggered,
+             "ApiEnterpriseReportingPrivateOnDataMaskingRulesTriggered",
+             base::FEATURE_DISABLED_BY_DEFAULT);
 
 ///////////////////////////////////////////////////////////////////////////////
 // Other Features
@@ -64,10 +72,6 @@ BASE_FEATURE(kEnableWebHidInWebView,
 
 BASE_FEATURE(kExtensionDisableUnsupportedDeveloper,
              "ExtensionDisableUnsupportedDeveloper",
-             base::FEATURE_ENABLED_BY_DEFAULT);
-
-BASE_FEATURE(kExtensionDynamicURLRedirection,
-             "ExtensionDynamicURLRedirection",
              base::FEATURE_ENABLED_BY_DEFAULT);
 
 BASE_FEATURE(kExtensionIconVariants,
@@ -105,10 +109,6 @@ BASE_FEATURE(kExtensionSourceUrlEnforcement,
 
 BASE_FEATURE(kExtensionWARForRedirect,
              "ExtensionWARForRedirect",
-             base::FEATURE_ENABLED_BY_DEFAULT);
-
-BASE_FEATURE(kExtensionWebFileHandlers,
-             "ExtensionWebFileHandlers",
              base::FEATURE_ENABLED_BY_DEFAULT);
 
 BASE_FEATURE(kExtensionsManifestV3Only,
@@ -156,9 +156,12 @@ BASE_FEATURE(kTelemetryExtensionPendingApprovalApi,
              "TelemetryExtensionPendingApprovalApi",
              base::FEATURE_DISABLED_BY_DEFAULT);
 
-BASE_FEATURE(kNewWebstoreURL,
-             "NewWebstoreURL",
+#if BUILDFLAG(IS_WIN)
+// TODO(https://crbug.com/400119351): Remove this feature flag in M138.
+BASE_FEATURE(kWinRejectDotSpaceSuffixFilePaths,
+             "WinRejectDotSpaceSuffixFilePaths",
              base::FEATURE_ENABLED_BY_DEFAULT);
+#endif
 
 BASE_FEATURE(kDeclarativeNetRequestSafeRuleLimits,
              "DeclarativeNetRequestSafeDynamicRules",

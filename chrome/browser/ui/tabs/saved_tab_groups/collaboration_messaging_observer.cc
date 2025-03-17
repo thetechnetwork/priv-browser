@@ -68,7 +68,9 @@ std::optional<int> GetTabStripIndex(LocalTabID local_tab_id,
 
   TabStripModel* tab_strip_model =
       browser_with_local_group_id->tab_strip_model();
-  CHECK(tab_strip_model && tab_strip_model->SupportsTabGroups());
+  if (!tab_strip_model || !tab_strip_model->SupportsTabGroups()) {
+    return std::nullopt;
+  }
 
   const gfx::Range tab_indices = tab_strip_model->group_model()
                                      ->GetTabGroup(local_tab_group_id)
@@ -236,9 +238,11 @@ void CollaborationMessagingObserver::DispatchMessageForTests(
 }
 
 void CollaborationMessagingObserver::DisplayInstantaneousMessage(
-    InstantMessage message,
+    const std::vector<InstantMessage>& messages,
     InstantMessageSuccessCallback success_callback) {
-  instant_message_queue_processor_.Enqueue(message,
+  // TODO(b/400794347): Handle message batch.
+  CHECK_EQ(1u, messages.size());
+  instant_message_queue_processor_.Enqueue(messages[0],
                                            std::move(success_callback));
 }
 
@@ -313,8 +317,11 @@ void CollaborationMessagingObserver::ManageSharingForCurrentInstantMessage(
     saved_tab_groups::metrics::RecordSharedTabGroupManageType(
         saved_tab_groups::metrics::SharedTabGroupManageTypeDesktop::
             kManageGroupFromUserJoinNotification);
+
+    data_sharing::RequestInfo request_info(group_id.value(),
+                                           data_sharing::FlowType::kManage);
     DataSharingBubbleController::GetOrCreateForBrowser(browser)->Show(
-        group_id.value());
+        request_info);
   }
 }
 

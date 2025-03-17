@@ -63,11 +63,11 @@
 #include "components/autofill/core/browser/payments/credit_card_access_manager.h"
 #include "components/autofill/core/browser/payments/payments_service_url.h"
 #include "components/autofill/core/browser/payments/payments_util.h"
+#include "components/autofill/core/browser/permissions/autofill_ai/autofill_ai_permission_utils.h"
 #include "components/autofill/core/browser/studies/autofill_experiments.h"
 #include "components/autofill/core/common/autofill_constants.h"
 #include "components/autofill/core/common/autofill_features.h"
 #include "components/autofill/core/common/autofill_payments_features.h"
-#include "components/autofill_ai/core/browser/autofill_ai_features.h"
 #include "components/commerce/core/commerce_constants.h"
 #include "components/content_settings/core/common/features.h"
 #include "components/device_reauth/device_authenticator.h"
@@ -557,8 +557,6 @@ void AddAppearanceStrings(content::WebUIDataSource* html_source,
       {"tabSearchPosition", IDS_SETTINGS_TAB_SEARCH_POSITION},
       {"homePageNtp", IDS_SETTINGS_HOME_PAGE_NTP},
       {"changeHomePage", IDS_SETTINGS_CHANGE_HOME_PAGE},
-      {"themesGalleryUrl", IDS_THEMES_GALLERY_URL},
-      {"chooseFromWebStore", IDS_SETTINGS_WEB_STORE},
       {"pageZoom", IDS_SETTINGS_PAGE_ZOOM_LABEL},
       {"fontSize", IDS_SETTINGS_FONT_SIZE_LABEL},
       {"customizeFonts", IDS_SETTINGS_CUSTOMIZE_FONTS},
@@ -602,8 +600,6 @@ void AddAppearanceStrings(content::WebUIDataSource* html_source,
                           tabs::CanShowTabSearchPositionSetting());
   html_source->AddBoolean("tabSearchIsRightAlignedAtStartup",
                           tabs::GetTabSearchTrailingTabstrip(profile));
-  html_source->AddBoolean("toolbarPinningEnabled",
-                          features::IsToolbarPinningEnabled());
 
 #if BUILDFLAG(IS_LINUX)
   bool show_custom_chrome_frame = ui::OzonePlatform::GetInstance()
@@ -729,6 +725,9 @@ void AddDownloadsStrings(content::WebUIDataSource* html_source) {
 void AddGlicStrings(content::WebUIDataSource* html_source) {
   static constexpr webui::LocalizedString kLocalizedStrings[] = {
       {"glicPageTitle", IDS_SETTINGS_GLIC_PAGE_TITLE},
+      {"glicSectionTitle", IDS_SETTINGS_GLIC_SECTION_TITLE},
+      {"glicRowLabel", IDS_SETTINGS_GLIC_ROW_LABEL},
+      {"glicRowSublabel", IDS_SETTINGS_GLIC_ROW_SUBLABEL},
       {"glicPolicyDisabledMessage", IDS_SETTINGS_GLIC_POLICY_DISABLED_MESSAGE},
       {"glicPreferencesSection", IDS_SETTINGS_GLIC_PREFERENCES_SECTION},
       {"glicDataSection", IDS_SETTINGS_GLIC_DATA_SECTION},
@@ -748,6 +747,7 @@ void AddGlicStrings(content::WebUIDataSource* html_source) {
       {"glicActivityButton", IDS_SETTINGS_GLIC_DATA_ACTIVITY_BUTTON},
       {"glicActivityButtonSublabel",
        IDS_SETTINGS_GLIC_DATA_ACTIVITY_BUTTON_SUBLABEL},
+      {"glicActivityButtonUrl", IDS_SETTINGS_GLIC_DATA_ACTIVITY_BUTTON_URL},
       {"glicTabAccessWhenOn1", IDS_SETTINGS_GLIC_DATA_TAB_ACCESS_WHEN_ON_1},
       {"glicTabAccessWhenOn2", IDS_SETTINGS_GLIC_DATA_TAB_ACCESS_WHEN_ON_2},
       {"glicTabAccessConsider1", IDS_SETTINGS_GLIC_DATA_TAB_ACCESS_CONSIDER_1},
@@ -1334,40 +1334,31 @@ void AddAutofillStrings(content::WebUIDataSource* html_source,
       {"benefitsTermsTagForCreditCardListEntry",
        IDS_AUTOFILL_SETTINGS_PAGE_BENEFITS_TERMS_TAG_FOR_CREDIT_CARD_LIST_ENTRY},
       {"cardBenefitsLabel", IDS_AUTOFILL_SETTINGS_PAGE_CARD_BENEFITS_LABEL},
-      {"autofillAiPageTitle",
-       IDS_SETTINGS_AUTOFILL_PREDICTION_IMPROVEMENTS_PAGE_TITLE},
-      {"autofillAiDescription",
-       IDS_SETTINGS_AUTOFILL_PREDICTION_IMPROVEMENTS_DESCRIPTION},
+      {"autofillAiPageTitle", IDS_SETTINGS_AUTOFILL_AI_PAGE_TITLE},
+      {"autofillAiDescription", IDS_SETTINGS_AUTOFILL_AI_DESCRIPTION},
       {"autofillAiWhenOnSavedInfo",
-       IDS_SETTINGS_AUTOFILL_PREDICTION_IMPROVEMENTS_WHEN_ON_SAVED_INFO},
-      {"autofillAiUseToFill",
-       IDS_SETTINGS_AUTOFILL_PREDICTION_IMPROVEMENTS_WHEN_ON_USE_TO_FILL},
+       IDS_SETTINGS_AUTOFILL_AI_WHEN_ON_SAVED_INFO},
+      {"autofillAiUseToFill", IDS_SETTINGS_AUTOFILL_AI_WHEN_ON_USE_TO_FILL},
       {"autofillAiNewFeature",
-       IDS_SETTINGS_AUTOFILL_PREDICTION_IMPROVEMENTS_TO_CONSIDER_NEW_FEATURE},
+       IDS_SETTINGS_AUTOFILL_AI_TO_CONSIDER_NEW_FEATURE},
       {"autofillAiToConsiderDataUsage",
-       IDS_SETTINGS_AUTOFILL_PREDICTION_IMPROVEMENTS_TO_CONSIDER_DATA_USAGE},
+       IDS_SETTINGS_AUTOFILL_AI_TO_CONSIDER_DATA_USAGE},
       {"autofillAiToConsiderDataStorage",
-       IDS_SETTINGS_AUTOFILL_PREDICTION_IMPROVEMENTS_TO_CONSIDER_STORAGE},
+       IDS_SETTINGS_AUTOFILL_AI_TO_CONSIDER_STORAGE},
       {"autofillAiToConsiderDataImprovement",
-       IDS_SETTINGS_AUTOFILL_PREDICTION_IMPROVEMENTS_TO_CONSIDER_IMPROVEMENT},
-      {"autofillAiUserAnnotationsHeader",
-       IDS_SETTINGS_AUTOFILL_PREDICTION_IMPROVEMENTS_USER_ANNOTATIONS_HEADER},
-      // TODO(crbug.com/393318914): Rename string.
-      {"autofillAiUserAnnotationsNone",
-       IDS_SETTINGS_AUTOFILL_PREDICTION_IMPROVEMENTS_USER_ANNOTATIONS_NONE},
-      // TODO(crbug.com/393318914): Rename string.
-      {"autofillAiDeleteEntryDialogTitle",
-       IDS_SETTINGS_AUTOFILL_PREDICTION_IMPROVEMENTS_DELETE_ENTRY_DIALOG_TITLE},
-      // TODO(crbug.com/393318914): Rename string.
-      {"autofillAiDeleteEntryDialogText",
-       IDS_SETTINGS_AUTOFILL_PREDICTION_IMPROVEMENTS_DELETE_ENTRY_DIALOG_TEXT},
-      // TODO(crbug.com/393318914): Remove string.
-      {"autofillAiDeleteAllEntriesButtonLabel",
-       IDS_SETTINGS_AUTOFILL_PREDICTION_IMPROVEMENTS_DELETE_ALL_ENTRIES_BUTTON_LABEL},
-      {"autofillAiDeleteAllEntriesDialogTitle",
-       IDS_SETTINGS_AUTOFILL_PREDICTION_IMPROVEMENTS_DELETE_ALL_ENTRIES_DIALOG_TITLE},
-      {"autofillAiDeleteAllEntriesDialogText",
-       IDS_SETTINGS_AUTOFILL_PREDICTION_IMPROVEMENTS_DELETE_ALL_ENTRIES_DIALOG_TEXT},
+       IDS_SETTINGS_AUTOFILL_AI_TO_CONSIDER_IMPROVEMENT},
+      {"autofillAiEntityInstancesHeader",
+       IDS_SETTINGS_AUTOFILL_AI_ENTITY_INSTANCES_HEADER},
+      {"autofillAiEntityInstancesNone",
+       IDS_SETTINGS_AUTOFILL_AI_ENTITY_INSTANCES_NONE},
+      {"autofillAiMoreActionsForEntityInstance",
+       IDS_SETTINGS_AUTOFILL_AI_MORE_ACTIONS_FOR_ENTITY_INSTANCE},
+      {"autofillAiDeleteEntityInstanceDialogTitle",
+       IDS_SETTINGS_AUTOFILL_AI_DELETE_ENTITY_INSTANCE_DIALOG_TITLE},
+      {"autofillAiDeleteEntityInstanceDialogText",
+       IDS_SETTINGS_AUTOFILL_AI_DELETE_ENTITY_INSTANCE_DIALOG_TEXT},
+      {"autofillAiAddOrEditDialogValidationError",
+       IDS_SETTINGS_AUTOFILL_AI_ADD_OR_EDIT_DIALOG_VALIDATION_ERROR},
       {"autofillPayOverTimeSettingsLabel", IDS_AUTOFILL_BNPL_SETTINGS_LABEL},
   };
 
@@ -1478,17 +1469,18 @@ void AddAutofillStrings(content::WebUIDataSource* html_source,
                           base::FeatureList::IsEnabled(
                               autofill::features::kAutofillAiWithDataSchema));
 
+  auto* autofill_client =
+      autofill::ContentAutofillClient::FromWebContents(web_contents);
   html_source->AddBoolean(
       "userEligibleForAutofillAi",
-      autofill_ai::AutofillAiIsPlatformAndEnterprisePolicyEligible(
-          profile->GetPrefs()) &&
-          autofill_ai::IsUserEligible(profile));
+      autofill_client &&
+          autofill::MayPerformAutofillAiAction(
+              *autofill_client, autofill::AutofillAiAction::kOptIn));
 
   html_source->AddString(
       "autofillAiToggleSubLabel",
-      l10n_util::GetStringFUTF16(
-          IDS_SETTINGS_AUTOFILL_PREDICTION_IMPROVEMENTS_TOGGLE_SUB_LABEL,
-          chrome::kAutofillAiLearnMoreURL));
+      l10n_util::GetStringFUTF16(IDS_SETTINGS_AUTOFILL_AI_TOGGLE_SUB_LABEL,
+                                 chrome::kAutofillAiLearnMoreURL));
 
   html_source->AddString(
       "autofillPayOverTimeSettingsSublabel",
@@ -2844,14 +2836,20 @@ void AddSiteSettingsStrings(content::WebUIDataSource* html_source,
        IDS_SETTINGS_SITE_SETTINGS_DELETE_ALL_STORAGE_CONFIRMATION},
       {"siteSettingsDeleteDisplayedStorageConfirmation",
        IDS_SETTINGS_SITE_SETTINGS_DELETE_DISPLAYED_STORAGE_CONFIRMATION},
+      {"siteSettingsDeleteRwsStorageConfirmation",
+       IDS_SETTINGS_SITE_SETTINGS_DELETE_RWS_STORAGE_CONFIRMATION},
       {"siteSettingsDeleteAllStorageConfirmationInstalled",
        IDS_SETTINGS_SITE_SETTINGS_DELETE_ALL_STORAGE_CONFIRMATION_INSTALLED},
       {"siteSettingsDeleteDisplayedStorageConfirmationInstalled",
        IDS_SETTINGS_SITE_SETTINGS_DELETE_DISPLAYED_STORAGE_CONFIRMATION_INSTALLED},
+      {"siteSettingsDeleteRwsStorageConfirmationInstalled",
+       IDS_SETTINGS_SITE_SETTINGS_DELETE_RWS_STORAGE_CONFIRMATION_INSTALLED},
       {"siteSettingsClearAllStorageSignOut",
        IDS_SETTINGS_SITE_SETTINGS_CLEAR_ALL_STORAGE_SIGN_OUT},
       {"siteSettingsClearDisplayedStorageSignOut",
        IDS_SETTINGS_SITE_SETTINGS_CLEAR_DISPLAYED_STORAGE_SIGN_OUT},
+      {"siteSettingsClearRwsStorageSignOut",
+       IDS_SETTINGS_SITE_SETTINGS_CLEAR_RWS_STORAGE_SIGN_OUT},
       {"siteSettingsSiteDetailsSubpageAccessibilityLabel",
        IDS_SETTINGS_SITE_SETTINGS_SITE_DETAILS_SUBPAGE_ACCESSIBILITY_LABEL},
       {"relatedWebsiteSetsMoreActionsTitle",
@@ -3408,8 +3406,21 @@ void AddSiteSettingsStrings(content::WebUIDataSource* html_source,
        IDS_SITE_SETTINGS_NO_SMART_CARD_READERS_FOUND},
       {"siteSettingsResetSmartCardConfirmation",
        IDS_SITE_SETTINGS_RESET_SMART_CARD_CONFIRMATION},
-      {"allSitesShowRwsButton", IDS_ALL_SITES_SHOW_RWS_BUTTON},
-      {"allSitesRwsMembershipLabel", IDS_ALL_SITES_RWS_LABEL}};
+      {"siteSettingsLocalNetworkAccess",
+       IDS_SITE_SETTINGS_TYPE_LOCAL_NETWORK_ACCESS},
+      {"siteSettingsLocalNetworkAccessMidSentence",
+       IDS_SITE_SETTINGS_TYPE_LOCAL_NETWORK_ACCESS_MID_SENTENCE},
+      {"siteSettingsLocalNetworkAccessDescription",
+       IDS_SETTINGS_SITE_SETTINGS_LOCAL_NETWORK_ACCESS_DESCRIPTION},
+      {"siteSettingsLocalNetworkAccessAsk",
+       IDS_SETTINGS_SITE_SETTINGS_LOCAL_NETWORK_ACCESS_ASK},
+      {"siteSettingsLocalNetworkAccessBlock",
+       IDS_SETTINGS_SITE_SETTINGS_LOCAL_NETWORK_ACCESS_BLOCK},
+      {"siteSettingsLocalNetworkAccessAllowedExceptions",
+       IDS_SETTINGS_SITE_SETTINGS_LOCAL_NETWORK_ACCESS_ALLOWED_EXCEPTIONS},
+      {"siteSettingsLocalNetworkAccessBlockedExceptions",
+       IDS_SETTINGS_SITE_SETTINGS_LOCAL_NETWORK_ACCESS_BLOCKED_EXCEPTIONS},
+  };
   html_source->AddLocalizedStrings(kLocalizedStrings);
 
   // Tracking protection learn more links.

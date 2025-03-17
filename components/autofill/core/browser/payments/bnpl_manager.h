@@ -6,15 +6,20 @@
 #define COMPONENTS_AUTOFILL_CORE_BROWSER_PAYMENTS_BNPL_MANAGER_H_
 
 #include <cstdint>
+#include <memory>
 #include <optional>
 #include <string>
-#include <variant>
+#include <tuple>
+#include <vector>
 
 #include "base/memory/raw_ref.h"
 #include "base/memory/weak_ptr.h"
 #include "components/autofill/core/browser/foundations/autofill_client.h"
+#include "components/autofill/core/browser/payments/legal_message_line.h"
 #include "components/autofill/core/browser/payments/payments_autofill_client.h"
+#include "components/autofill/core/browser/payments/payments_window_manager.h"
 #include "components/autofill/core/browser/suggestions/suggestion.h"
+#include "third_party/abseil-cpp/absl/types/variant.h"
 
 namespace autofill {
 
@@ -27,6 +32,7 @@ using UpdateSuggestionsCallback =
                                  AutofillSuggestionTriggerSource)>;
 
 struct BnplFetchVcnResponseDetails;
+struct BnplFetchUrlResponseDetails;
 
 // Owned by PaymentsAutofillClient. There is one instance of this class per Web
 // Contents. This class manages the flow for BNPL to complete a payment
@@ -50,8 +56,9 @@ class BnplManager {
   // micros). `on_bnpl_vcn_fetched_callback` is the callback that should be run
   // if the flow is completed successfully, to fill the form with the VCN that
   // will facilitate the BNPL transaction.
-  void InitBnplFlow(uint64_t final_checkout_amount,
-                    OnBnplVcnFetchedCallback on_bnpl_vcn_fetched_callback);
+  virtual void InitBnplFlow(
+      uint64_t final_checkout_amount,
+      OnBnplVcnFetchedCallback on_bnpl_vcn_fetched_callback);
 
   // Notifies the BNPL manager that suggestion generation has been requested
   // with the given `trigger_source`. This must be called before
@@ -76,7 +83,7 @@ class BnplManager {
 
   // Returns if user has seen a BNPL suggestion before and if the BNPL
   // feature is enabled. Does not check for user's locale.
-  bool ShouldShowBnplSettingsToggle() const;
+  bool ShouldShowBnplSettings() const;
 
  private:
   friend class BnplManagerTestApi;
@@ -110,6 +117,12 @@ class BnplManager {
     // Context token shared between client and Payments server.
     std::string context_token;
 
+    // Terms and legal messages from the selected issuer. These messages will
+    // be set in `OnDidGetDetailsForCreateBnplPaymentInstrument()` when the
+    // server response is received after the user selects an unlinked
+    // buy-now-pay-later issuer.
+    LegalMessageLines legal_message_lines;
+
     // URL that the the partner redirected the user to after finishing the BNPL
     // flow on the partner website.
     GURL redirect_url;
@@ -134,11 +147,60 @@ class BnplManager {
   void OnVcnDetailsFetched(PaymentsAutofillClient::PaymentsRpcResult result,
                            const BnplFetchVcnResponseDetails& response_details);
 
+  // Cancels in-progress requests to `PaymentsNetworkInterface` and resets the
+  // BNPL flow state. Also invalidates `BnplManager` weak pointers from the
+  // factory.
+  void Reset();
+
+  // Runs after users select a BNPL issuer, and will redirect to plan selection
+  // or terms of services depending on the issuer.
+  void OnIssuerSelected(const BnplIssuer& selected_issuer);
+
+  // This function makes the appropriate call to the payments server to get info
+  // from the server for creating an instrument for the selected issuer.
+  void GetDetailsForCreateBnplPaymentInstrument();
+
+  // The callback after
+  // `PaymentsNetworkInterface::GetDetailsForCreateBnplPaymentInstrument` calls.
+  // The callback contains the result of the call as well as `context_token`
+  // for creating the instrument and `legal_message` for user action.
+  void OnDidGetDetailsForCreateBnplPaymentInstrument(
+      PaymentsAutofillClient::PaymentsRpcResult result,
+      std::string context_token,
+      std::unique_ptr<base::Value::Dict> legal_message);
+
+  // Runs when a linked issuer is selected by the user. Will load risk data
+  // if it is not cached, and then call the functions for fetching issuer
+  // redirect urls.
+  void LoadRiskDataForFetchingRedirectUrl();
+
+  // Runs after the risk data is loaded. Will set the risk data for the flow,
+  // and redirect to 'FetchRedirectUrl()' for sending the fetch redirect url
+  // request.
+  void OnRiskDataLoadedAfterIssuerSelectionDialogAcceptance(
+      const std::string& risk_data);
+
+  // Makes the appropriate call to the payments server to fetch the redirect
+  // urls from the selected issuer.
+  void FetchRedirectUrl();
+
+  // The callback after
+  // `PaymentsNetworkInterface::GetBnplPaymentInstrumentForFetchingUrl()` calls.
+  // The callback contains the result of the call as well as `context_token`
+  // and urls from the issuer for redirecting and result checking.
+  void OnRedirectUrlFetched(PaymentsAutofillClient::PaymentsRpcResult result,
+                            const BnplFetchUrlResponseDetails& response);
+
+  // The callback after `PaymentsWindowManager::InitBnplFlow()` calls.
+  // The callback contains the result of the flow and will continue to
+  // VCN fetching if successful.
+  void OnPopupWindowCompleted(PaymentsWindowManager::BnplFlowResult result);
+
   // Combines `responses` from suggestion shown event and amount extraction,
   // and try to show card suggestions with buy-now-pay-later suggestion.
   void MaybeUpdateSuggestionsWithBnpl(
       const AutofillSuggestionTriggerSource trigger_source,
-      std::vector<std::variant<SuggestionsShownResponse,
+      std::vector<absl::variant<SuggestionsShownResponse,
                                std::optional<uint64_t>>> responses);
 
   // Callback triggered when the user accepts the ToS dialog. It will first load
@@ -161,6 +223,13 @@ class BnplManager {
   // instrument.
   void CreateBnplPaymentInstrument();
 
+  // Callback after attempting to create a BNPL payment instrument. `result`
+  // indicates success/failure; `instrument_id` is the new ID if successful. If
+  // successful, stores the ID and fetches the redirect URL.
+  void OnBnplPaymentInstrumentCreated(
+      PaymentsAutofillClient::PaymentsRpcResult result,
+      std::string instrument_id);
+
   PaymentsAutofillClient& payments_autofill_client() {
     return *autofill_client_->GetPaymentsAutofillClient();
   }
@@ -179,7 +248,7 @@ class BnplManager {
   // Callback to collect the current shown suggestion list and checkout
   // amount, and insert BNPL suggestion if the amount is eligible.
   std::optional<base::RepeatingCallback<void(
-      std::variant<SuggestionsShownResponse, std::optional<uint64_t>>)>>
+      absl::variant<SuggestionsShownResponse, std::optional<uint64_t>>)>>
       update_suggestions_barrier_callback_;
 
   base::WeakPtrFactory<BnplManager> weak_factory_{this};

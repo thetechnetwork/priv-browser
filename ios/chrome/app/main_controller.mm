@@ -49,6 +49,7 @@
 #import "ios/chrome/app/blocking_scene_commands.h"
 #import "ios/chrome/app/change_profile_animator.h"
 #import "ios/chrome/app/change_profile_commands.h"
+#import "ios/chrome/app/chrome_overlay_window.h"
 #import "ios/chrome/app/deferred_initialization_runner.h"
 #import "ios/chrome/app/deferred_initialization_task_names.h"
 #import "ios/chrome/app/enterprise_app_agent.h"
@@ -214,6 +215,9 @@ NSString* const kPurgeWebSessionStates = @"PurgeWebSessionStates";
 // Constant for deffered memory experimentation.
 NSString* const kMemoryExperimentation = @"BeginMemoryExperimentation";
 
+// Constant for deferred automatic download deletion.
+NSString* const kAutoDeletionFileRemoval = @"AutoDeletionFileRemoval";
+
 // Adapted from chrome/browser/ui/browser_init.cc.
 void RegisterComponentsForUpdate() {
   component_updater::ComponentUpdateService* cus =
@@ -319,7 +323,7 @@ void RecordDiscardSceneStillConnected(NSSet<UISceneSession*>* scene_sessions,
 // Helper used to call -unloadProfileMarkedForDeletion:completion: from
 // a callback.
 void UnloadProfileMarkedForDeletion(MainController* controller,
-                                    std::string_view profile_name,
+                                    const std::string& profile_name,
                                     ProfileDeletedCallback completion) {
   [controller unloadProfileMarkedForDeletion:profile_name
                                   completion:std::move(completion)];
@@ -377,6 +381,9 @@ void DeleteProfileContinuation(base::OnceClosure done_closure,
 - (void)scheduleDeleteTempPasswordsDirectory;
 // Schedule the start of memory experimentation.
 - (void)scheduleMemoryExperimentation;
+// Schedules the removal of files that were scheduled for automatic deletion and
+// were downloaded more than 30 days ago.
+- (void)scheduleAutoDeletionFileRemoval;
 // Crashes the application if requested.
 - (void)crashIfRequested;
 // Initializes the application to the minimum initialization needed in all
@@ -994,8 +1001,15 @@ void DeleteProfileContinuation(base::OnceClosure done_closure,
 
       case ProfileInitStage::kChoiceScreen:
       case ProfileInitStage::kNormalUI:
-      case ProfileInitStage::kFinal:
         // Nothing to do.
+        break;
+
+      case ProfileInitStage::kFinal:
+        // Request the deletion of the data for all profiles marked for
+        // deletion when the first profile is successfully loaded.
+        GetApplicationContext()
+            ->GetProfileManager()
+            ->PurgeProfilesMarkedForDeletion(base::DoNothing());
         break;
     }
   }
@@ -1005,6 +1019,7 @@ void DeleteProfileContinuation(base::OnceClosure done_closure,
   // which should wait until all SceneStates have been mapped to Profiles.
   if (nextInitStage == ProfileInitStage::kFinal) {
     [profileState removeObserver:self];
+    [MetricsMediator logProfileLoadMetrics:profileState.profile];
     [self recordLaunchMetrics];
   }
 }
@@ -1404,6 +1419,7 @@ void DeleteProfileContinuation(base::OnceClosure done_closure,
   [self scheduleSaveFieldTrialValuesForExternals];
   [self scheduleEnterpriseManagedDeviceCheck];
   [self scheduleMemoryExperimentation];
+  [self scheduleAutoDeletionFileRemoval];
 #if BUILDFLAG(IOS_ENABLE_SANDBOX_DUMP)
   [self scheduleDumpDocumentsStatistics];
 #endif  // BUILDFLAG(IOS_ENABLE_SANDBOX_DUMP)
@@ -1445,6 +1461,15 @@ void DeleteProfileContinuation(base::OnceClosure done_closure,
                                         block:^{
                                           [startupTasks logSiriShortcuts];
                                         }];
+}
+
+- (void)scheduleAutoDeletionFileRemoval {
+  __weak StartupTasks* startupTasks = _startupTasks;
+  [_appState.deferredRunner
+      enqueueBlockNamed:kAutoDeletionFileRemoval
+                  block:^{
+                    [startupTasks removeFilesScheduledForAutoDeletion];
+                  }];
 }
 
 #if BUILDFLAG(IOS_ENABLE_SANDBOX_DUMP)
@@ -1588,11 +1613,9 @@ void DeleteProfileContinuation(base::OnceClosure done_closure,
       base::apple::ObjCCast<SceneDelegate>(scene.delegate);
   CHECK(sceneDelegate);
 
-  UIWindow* window = sceneDelegate.window;
-  UIViewController* rootViewController = window.rootViewController;
-
-  ChangeProfileAnimator* animator =
-      [[ChangeProfileAnimator alloc] initWithViewController:rootViewController];
+  ChangeProfileAnimator* animator = [[ChangeProfileAnimator alloc]
+      initWithWindow:base::apple::ObjCCast<ChromeOverlayWindow>(
+                         sceneDelegate.window)];
 
   ProfileAttributesStorageIOS* storage = manager->GetProfileAttributesStorage();
   const std::string sceneIdentifier =
@@ -1643,7 +1666,7 @@ void DeleteProfileContinuation(base::OnceClosure done_closure,
 
   // Wait for the profile to complete its initialisation.
   [animator waitForSceneState:sceneState
-             toInitReachStage:ProfileInitStage::kUIReady
+             toReachInitStage:ProfileInitStage::kUIReady
                  continuation:std::move(continuation)];
 }
 
@@ -1677,8 +1700,9 @@ void DeleteProfileContinuation(base::OnceClosure done_closure,
 
   __weak MainController* weakSelf = self;
   base::RepeatingClosure closure = BarrierClosure(
-      scenes.count, base::BindOnce(&UnloadProfileMarkedForDeletion, weakSelf,
-                                   profileName, std::move(completion)));
+      scenes.count,
+      base::BindOnce(&UnloadProfileMarkedForDeletion, weakSelf,
+                     std::string(profileName), std::move(completion)));
 
   for (SceneState* scene in scenes) {
     [self changeProfile:personalProfile

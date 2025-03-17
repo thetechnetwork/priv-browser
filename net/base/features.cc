@@ -128,21 +128,12 @@ BASE_FEATURE(kSplitCacheByNetworkIsolationKey,
              "SplitCacheByNetworkIsolationKey",
              base::FEATURE_DISABLED_BY_DEFAULT);
 
+// Note: Use of this feature is gated on the HTTP cache itself being
+// partitioned, which is controlled by the kSplitCacheByNetworkIsolationKey
+// feature.
 BASE_FEATURE(kSplitCacheByCrossSiteMainFrameNavigationBoolean,
              "SplitCacheByCrossSiteMainFrameNavigationBoolean",
-             base::FEATURE_DISABLED_BY_DEFAULT);
-
-BASE_FEATURE(kSplitCacheByMainFrameNavigationInitiator,
-             "SplitCacheByMainFrameNavigationInitiator",
-             base::FEATURE_DISABLED_BY_DEFAULT);
-
-BASE_FEATURE(kSplitCacheByNavigationInitiator,
-             "SplitCacheByNavigationInitiator",
-             base::FEATURE_DISABLED_BY_DEFAULT);
-
-BASE_FEATURE(kHttpCacheKeyingExperimentControlGroup2024,
-             "HttpCacheKeyingExperimentControlGroup2024",
-             base::FEATURE_DISABLED_BY_DEFAULT);
+             base::FEATURE_ENABLED_BY_DEFAULT);
 
 BASE_FEATURE(kSplitCodeCacheByNetworkIsolationKey,
              "SplitCodeCacheByNetworkIsolationKey",
@@ -208,7 +199,7 @@ BASE_FEATURE(kCookieSameSiteConsidersRedirectChain,
 
 BASE_FEATURE(kAllowSameSiteNoneCookiesInSandbox,
              "AllowSameSiteNoneCookiesInSandbox",
-             base::FEATURE_DISABLED_BY_DEFAULT);
+             base::FEATURE_ENABLED_BY_DEFAULT);
 
 BASE_FEATURE(kWaitForFirstPartySetsInit,
              "WaitForFirstPartySetsInit",
@@ -221,10 +212,6 @@ extern const base::FeatureParam<base::TimeDelta>
         &kWaitForFirstPartySetsInit,
         "kWaitForFirstPartySetsInitNavigationThrottleTimeout",
         base::Seconds(0)};
-
-BASE_FEATURE(kAncestorChainBitEnabledInPartitionedCookies,
-             "AncestorChainBitEnabledInPartitionedCookies",
-             base::FEATURE_ENABLED_BY_DEFAULT);
 
 BASE_FEATURE(kRequestStorageAccessNoCorsRequired,
              "RequestStorageAccessNoCorsRequired",
@@ -462,11 +449,6 @@ const base::FeatureParam<int> kIpPrivacyDebugExperimentArm{
     /*name=*/"IpPrivacyDebugExperimentArm",
     /*default_value=*/0};
 
-const base::FeatureParam<bool> kIpPrivacyCacheTokensByGeo{
-    &kEnableIpProtectionProxy,
-    /*name=*/"IpPrivacyCacheTokensByGeo",
-    /*default_value=*/false};
-
 const base::FeatureParam<bool> kIpPrivacyAlwaysCreateCore{
     &kEnableIpProtectionProxy,
     /*name=*/"IpPrivacyAlwaysCreateCore",
@@ -475,6 +457,11 @@ const base::FeatureParam<bool> kIpPrivacyAlwaysCreateCore{
 const base::FeatureParam<bool> kIpPrivacyOnlyInIncognito{
     &kEnableIpProtectionProxy,
     /*name=*/"IpPrivacyOnlyInIncognito",
+    /*default_value=*/false};
+
+const base::FeatureParam<bool> kIpPrivacyEnableUserBypass{
+    &kEnableIpProtectionProxy,
+    /*name=*/"IpPrivacyEnableUserBypass",
     /*default_value=*/false};
 
 BASE_FEATURE(kExcludeLargeBodyReports,
@@ -582,6 +569,14 @@ BASE_FEATURE(kDeviceBoundSessions,
 BASE_FEATURE(kPersistDeviceBoundSessions,
              "PersistDeviceBoundSessions",
              base::FEATURE_DISABLED_BY_DEFAULT);
+BASE_FEATURE_PARAM(bool,
+                   kDeviceBoundSessionsForceEnableForTesting,
+                   &kDeviceBoundSessions,
+                   "ForceEnableForTesting",
+                   false);
+BASE_FEATURE(kDeviceBoundSessionsRefreshQuota,
+             "DeviceBoundSessionsRefreshQuota",
+             base::FEATURE_ENABLED_BY_DEFAULT);
 
 BASE_FEATURE(kPartitionProxyChains,
              "PartitionProxyChains",
@@ -707,5 +702,9 @@ BASE_FEATURE(kUseCertTransparencyAwareApiForOsCertVerify,
 BASE_FEATURE(kSelfSignedLocalNetworkInterstitial,
              "SelfSignedLocalNetworkInterstitial",
              base::FEATURE_DISABLED_BY_DEFAULT);
+
+#if BUILDFLAG(CHROME_ROOT_STORE_SUPPORTED)
+BASE_FEATURE(kVerifyQWACs, "VerifyQWACs", base::FEATURE_DISABLED_BY_DEFAULT);
+#endif  // BUILDFLAG(CHROME_ROOT_STORE_SUPPORTED)
 
 }  // namespace net::features

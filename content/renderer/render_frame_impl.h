@@ -80,7 +80,6 @@
 #include "third_party/blink/public/common/loader/loading_behavior_flag.h"
 #include "third_party/blink/public/common/loader/url_loader_factory_bundle.h"
 #include "third_party/blink/public/common/permissions_policy/document_policy.h"
-#include "third_party/blink/public/common/permissions_policy/permissions_policy.h"
 #include "third_party/blink/public/common/renderer_preferences/renderer_preferences.h"
 #include "third_party/blink/public/common/subresource_load_metrics.h"
 #include "third_party/blink/public/common/tokens/tokens.h"
@@ -1243,6 +1242,10 @@ class CONTENT_EXPORT RenderFrameImpl
   // Resets membmers that are needed for the duration of commit (time between
   // CommitNavigation() and DidCommitNavigation().
   void ResetMembersUsedForDurationOfCommit();
+
+  // Actual implementation of AbortClientNavigation(), as one may be deferred in
+  // case the page is being instrumented by devtools,
+  void AbortClientNavigationImpl(bool for_new_navigation);
 
   // Stores the WebLocalFrame we are associated with.  This is null from the
   // constructor until BindToFrame() is called, and it is null after

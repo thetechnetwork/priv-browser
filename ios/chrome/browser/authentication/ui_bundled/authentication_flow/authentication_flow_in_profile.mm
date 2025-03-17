@@ -229,7 +229,7 @@ enum class AuthenticationFlowInProfileState {
       AuthenticationServiceFactory::GetForProfile(profile)->GetPrimaryIdentity(
           signin::ConsentLevel::kSignin);
   if (currentIdentity && ![currentIdentity isEqual:_identityToSignIn]) {
-    [_performer signOutProfile:profile];
+    [_performer signOutForAccountSwitchWithProfile:profile];
     return;
   }
   [self continueFlow];
@@ -354,16 +354,31 @@ enum class AuthenticationFlowInProfileState {
 
 #pragma mark - AuthenticationFlowPerformerDelegate
 
-- (void)didSignOut {
+- (void)didSignOutForAccountSwitch {
   CHECK_EQ(AuthenticationFlowInProfileState::kSignOutIfNeeded, _state,
            base::NotFatalUntil::M138);
   [self continueFlow];
 }
 
 - (void)didClearData {
-  // TODO(crbug.com/375605482): It might be relevant to split
-  // `AuthenticationFlowPerformer` into 2 classes. This would avoid having
-  // all those NOTREACHED methods.
+  // TODO(crbug.com/403183877): Split `AuthenticationFlowPerformer` into 2
+  // classes to avoid having all those NOTREACHED methods.
+  NOTREACHED();
+}
+
+- (void)didFetchUnsyncedDataWithUnsyncedDataTypes:
+    (syncer::DataTypeSet)unsyncedDataTypes {
+  // Unsynced data is checked by AuthenticationFlow before calling
+  // `AuthenticationFlowInProfile`.
+  // So unsynced data is checked when leaving a profile (for profile switching),
+  // or before sign-out (for account switching).
+  NOTREACHED();
+}
+
+- (void)didAcceptToLeavePrimaryAccount:(BOOL)acceptToContinue {
+  // Unsynced data confirmation dialog should not be shown. See the explaination
+  // in `-[AuthenticationFlowInProfile
+  // didFetchUnsyncedDataWithUnsyncedDataTypes:]`.
   NOTREACHED();
 }
 
@@ -380,6 +395,11 @@ enum class AuthenticationFlowInProfileState {
 }
 
 - (void)didCancelManagedConfirmation {
+  NOTREACHED();
+}
+
+- (void)didSwitchToProfileWithSuccess:(BOOL)success
+                    newProfileBrowser:(Browser*)newProfileBrowser {
   NOTREACHED();
 }
 

@@ -49,6 +49,7 @@
 #include "mojo/public/cpp/bindings/pending_receiver.h"
 #include "mojo/public/cpp/bindings/pending_remote.h"
 #include "mojo/public/cpp/bindings/remote.h"
+#include "services/network/public/cpp/features.h"
 #include "services/network/public/mojom/client_security_state.mojom.h"
 #include "services/network/public/mojom/url_loader_factory.mojom.h"
 #include "url/gurl.h"
@@ -65,7 +66,7 @@ using HandleKey = std::pair<uint64_t, AuctionWorkletManager::WorkletHandle*>;
 auction_worklet::mojom::AuctionWorkletPermissionsPolicyStatePtr
 GetAuctionWorkletPermissionsPolicyState(RenderFrameHostImpl* auction_runner_rfh,
                                         const GURL& worklet_script_url) {
-  const blink::PermissionsPolicy* permissions_policy =
+  const network::PermissionsPolicy* permissions_policy =
       auction_runner_rfh->GetPermissionsPolicy();
 
   url::Origin worklet_origin = url::Origin::Create(worklet_script_url);
@@ -312,7 +313,7 @@ AuctionWorkletManager::WorkletOwner::WorkletOwner(
     // pass to the worklet process.
     if (!base::FeatureList::IsEnabled(features::kFledgeUseKVv2SignalsCache)) {
       waiting_on_trusted_signals_kvv2_public_key_ = true;
-      worklet_manager->delegate()->GetBiddingAndAuctionServerKey(
+      worklet_manager->delegate()->GetTrustedKeyValueServerKey(
           url::Origin::Create(worklet_info_.signals_url.value_or(GURL())),
           std::move(worklet_info_.trusted_signals_coordinator),
           base::BindOnce(&AuctionWorkletManager::WorkletOwner::
@@ -1008,7 +1009,7 @@ AuctionWorkletManager::AuctionWorkletManager(
       delegate_(delegate),
       auction_network_events_proxy_(
           std::make_unique<AuctionNetworkEventsProxy>(GetFrameTreeNodeID())) {
-  if (base::FeatureList::IsEnabled(blink::features::kSharedStorageAPI)) {
+  if (base::FeatureList::IsEnabled(network::features::kSharedStorageAPI)) {
     auction_shared_storage_host_ = std::make_unique<AuctionSharedStorageHost>(
         static_cast<StoragePartitionImpl*>(
             delegate_->GetFrame()->GetProcess()->GetStoragePartition()));
@@ -1157,7 +1158,7 @@ AuctionWorkletManager::MaybeBindAuctionSharedStorageHost(
     const url::Origin& worklet_origin) {
   mojo::PendingRemote<auction_worklet::mojom::AuctionSharedStorageHost> remote;
 
-  const blink::PermissionsPolicy* permissions_policy =
+  const network::PermissionsPolicy* permissions_policy =
       auction_runner_rfh->GetPermissionsPolicy();
 
   if (auction_shared_storage_host_ &&

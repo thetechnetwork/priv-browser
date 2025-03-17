@@ -9,6 +9,7 @@
 #include <stdint.h>
 
 #include <algorithm>
+#include <optional>
 #include <ostream>
 #include <string_view>
 
@@ -59,7 +60,7 @@ constexpr auto k15DigitAmexNumberSegmentations = std::to_array({4, 6, 5});
 constexpr auto k16DigitNumberSegmentations = std::to_array({4, 4, 4, 4});
 
 // Suffix for GUID of a virtual card to differentiate it from it's corresponding
-// masked server card..
+// masked server card.
 constexpr char kVirtualCardIdentifierSuffix[] = "_vcn";
 
 std::u16string NetworkForFill(const std::string& network) {
@@ -309,7 +310,6 @@ int CreditCard::IconResourceId(Suggestion::Icon icon) {
     case Suggestion::Icon::kGoogleMonochrome:
     case Suggestion::Icon::kGooglePasswordManager:
     case Suggestion::Icon::kGooglePay:
-    case Suggestion::Icon::kGooglePayDark:
     case Suggestion::Icon::kHttpsInvalid:
     case Suggestion::Icon::kHttpWarning:
     case Suggestion::Icon::kIdCard:
@@ -1073,6 +1073,20 @@ std::u16string CreditCard::CardIdentifierStringAndDescriptiveExpiration(
       IDS_AUTOFILL_CREDIT_CARD_TWO_LINE_LABEL_FROM_NAME,
       CardNameAndLastFourDigits(customized_nickname),
       GetInfo(CREDIT_CARD_EXP_DATE_2_DIGIT_YEAR, app_locale));
+}
+
+std::optional<std::u16string> CreditCard::CardIdentifierForAutofillDisplay(
+    const std::u16string& customized_nickname) const {
+  if (!customized_nickname.empty()) {
+    return customized_nickname;
+  }
+  if (HasNonEmptyValidNickname()) {
+    return nickname_;
+  }
+  if (!product_description_.empty()) {
+    return product_description_;
+  }
+  return std::nullopt;
 }
 
 std::u16string CreditCard::DescriptiveExpiration(

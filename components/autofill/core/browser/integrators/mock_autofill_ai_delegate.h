@@ -24,21 +24,10 @@ class MockAutofillAiDelegate : public AutofillAiDelegate {
               GetSuggestions,
               (autofill::FormGlobalId, autofill::FieldGlobalId),
               (override));
-  MOCK_METHOD(bool,
-              IsFormAndFieldEligibleForAutofillAi,
-              (const FormStructure&, const AutofillField&),
-              (const override));
-  MOCK_METHOD(bool, IsUserEligible, (), (const override));
-  MOCK_METHOD(bool, IsUserEligibleForFillingAndImporting, (), (const override));
-  MOCK_METHOD(void,
-              MaybeImportForm,
-              (std::unique_ptr<FormStructure>,
-               base::OnceCallback<void(std::unique_ptr<FormStructure>,
-                                       bool autofill_ai_shows_bubble)>),
-              (override));
+  MOCK_METHOD(bool, MaybeImportForm, (const FormStructure&), (override));
   MOCK_METHOD(bool,
               ShouldDisplayIph,
-              (const AutofillField& field),
+              (autofill::FormGlobalId, autofill::FieldGlobalId),
               (const override));
   MOCK_METHOD(void,
               OnSuggestionsShown,

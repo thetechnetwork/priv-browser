@@ -25,6 +25,7 @@ import org.chromium.chrome.browser.tab.Tab;
 import org.chromium.chrome.browser.tab.TabObserver;
 import org.chromium.chrome.browser.ui.android.webid.AccountSelectionProperties.AccountProperties;
 import org.chromium.chrome.browser.ui.android.webid.AccountSelectionProperties.AddAccountButtonProperties;
+import org.chromium.chrome.browser.ui.android.webid.AccountSelectionProperties.ButtonData;
 import org.chromium.chrome.browser.ui.android.webid.AccountSelectionProperties.ContinueButtonProperties;
 import org.chromium.chrome.browser.ui.android.webid.AccountSelectionProperties.DataSharingConsentProperties;
 import org.chromium.chrome.browser.ui.android.webid.AccountSelectionProperties.ErrorProperties;
@@ -61,7 +62,10 @@ import org.chromium.url.GURL;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Contains the logic for the AccountSelection component. It sets the state of the model and reacts
@@ -215,17 +219,23 @@ class AccountSelectionMediator {
     private HeaderType mHeaderType;
     private String mRpForDisplay;
     private String mIdpForDisplay;
-    private IdentityProviderMetadata mIdpMetadata;
     private Bitmap mIdpBrandIcon;
     private Bitmap mRpBrandIcon;
     private boolean mIsAutoReauthn;
     private @RpContext.EnumType int mRpContext;
     private IdentityCredentialTokenError mError;
-    private @IdentityRequestDialogDisclosureField int[] mDisclosureFields;
     private UkmRecorder mUkmRecorder;
 
-    // All of the user's accounts.
+    // All of the user's accounts. Populated only when showAccounts() is invoked.
     private List<Account> mAccounts;
+
+    // All of the IDPs involved in the dialog. Populated only when showAccounts() is invoked, as
+    // otherwise `mIdpMetadataForLoginOrError` is used.
+    private List<IdentityProviderData> mIdpDataListForShowAccounts;
+
+    // The metadata of the IDP involved in the dialog when we show something different from
+    // showAccounts(): mismatch UI or error dialog.
+    private IdentityProviderMetadata mIdpMetadataForLoginOrError;
 
     // Whether the current state of the dialog involves multiple IDPs.
     private boolean mIsMultipleIdps;
@@ -535,9 +545,11 @@ class AccountSelectionMediator {
     }
 
     private void updateAccounts(
-            List<Account> accounts, boolean areAccountsClickable, boolean showAddAccountRow) {
+            List<Account> accounts,
+            List<IdentityProviderData> identityProviders,
+            boolean areAccountsClickable,
+            boolean skipAddAccountRows) {
         mSheetAccountItems.clear();
-        if (accounts == null) return;
         // In the request permission dialog, account is shown as an account chip instead of in the
         // accounts list. In the active mode verifying dialog, we do not show accounts.
         if (mRpMode == RpMode.ACTIVE
@@ -553,13 +565,17 @@ class AccountSelectionMediator {
                     new ListItem(AccountSelectionProperties.ITEM_TYPE_ACCOUNT, model));
         }
 
-        if (showAddAccountRow) {
-            // TODO(crbug.com/392142580): support multiple IDPs.
-            IdentityProviderMetadata metadata =
-                    accounts.get(0).getIdentityProviderData().getIdpMetadata();
-            final PropertyModel model = createAddAccountBtnItem(metadata);
-            mSheetAccountItems.add(
-                    new ListItem(AccountSelectionProperties.ITEM_TYPE_ADD_ACCOUNT, model));
+        // TODO(crbug.com/392142580): add multi IDP mismatch UI.
+        if (skipAddAccountRows) {
+            return;
+        }
+        for (IdentityProviderData identityProvider : identityProviders) {
+            if (identityProvider.getIdpMetadata().showUseDifferentAccountButton()) {
+                final PropertyModel model =
+                        createAddAccountBtnItem(identityProvider.getIdpMetadata());
+                mSheetAccountItems.add(
+                        new ListItem(AccountSelectionProperties.ITEM_TYPE_ADD_ACCOUNT, model));
+            }
         }
     }
 
@@ -579,25 +595,11 @@ class AccountSelectionMediator {
     }
 
     private void updateIdpBrandIcon(Bitmap bitmap) {
-        if (!isValidBrandIcon(bitmap)) {
-            return;
-        }
-        mIdpBrandIcon = bitmap;
-        updateHeader();
-
-        // Resizes bottom sheet to the desired height, taking the icon into account.
-        mBottomSheetController.expandSheet();
+        mIdpBrandIcon = isValidBrandIcon(bitmap) ? bitmap : null;
     }
 
     private void updateRpBrandIcon(Bitmap bitmap) {
-        if (!isValidBrandIcon(bitmap)) {
-            return;
-        }
-        mRpBrandIcon = bitmap;
-        updateHeader();
-
-        // Resizes bottom sheet to the desired height, taking the icon into account.
-        mBottomSheetController.expandSheet();
+        mRpBrandIcon = isValidBrandIcon(bitmap) ? bitmap : null;
     }
 
     private void maybeRecordAccountChooserResult(int result) {
@@ -668,7 +670,10 @@ class AccountSelectionMediator {
                 maybeRecordDisclosureDialogResult();
             }
             mHeaderType = HeaderType.VERIFY;
-            if (!updateSheet(Arrays.asList(account), /* areAccountsClickable= */ false)) {
+            if (!updateSheet(
+                    Arrays.asList(account),
+                    /* identityProviders= */ Collections.emptyList(),
+                    /* areAccountsClickable= */ false)) {
                 return false;
             }
             updateBackPressBehavior();
@@ -682,7 +687,10 @@ class AccountSelectionMediator {
 
     boolean showRequestPermissionModalSheet(Account account) {
         mHeaderType = HeaderType.REQUEST_PERMISSION_MODAL;
-        if (!updateSheet(Arrays.asList(account), /* areAccountsClickable= */ false)) {
+        if (!updateSheet(
+                Arrays.asList(account),
+                /* identityProviders= */ Collections.emptyList(),
+                /* areAccountsClickable= */ false)) {
             return false;
         }
         updateBackPressBehavior();
@@ -701,15 +709,12 @@ class AccountSelectionMediator {
             boolean isAutoReauthn,
             List<Account> newAccounts) {
         mRpForDisplay = rpForDisplay;
-        // Only show the IDP in the title if there is a single IDP in the list.
-        IdentityProviderData idpData = idpDataList.get(0);
-        mIdpForDisplay = idpDataList.size() == 1 ? idpData.getIdpForDisplay() : null;
         mAccounts = accounts;
-        mIdpMetadata = idpData.getIdpMetadata();
-        mIsMultipleIdps = idpDataList.size() > 1;
+        mIdpDataListForShowAccounts = idpDataList;
+        mIdpMetadataForLoginOrError = null;
+        mIsMultipleIdps = mIdpDataListForShowAccounts.size() > 1;
         mIsAutoReauthn = isAutoReauthn;
-        mRpContext = idpData.getRpContext();
-        mDisclosureFields = idpData.getDisclosureFields();
+        mRpContext = mIdpDataListForShowAccounts.get(0).getRpContext();
         mSelectedAccount = null;
         mLoadingDialogState =
                 mIsLoadingDialogLoginToIdpClosed
@@ -717,23 +722,23 @@ class AccountSelectionMediator {
                         : LoadingDialogResult.PROCEED;
         maybeRecordLoadingDialogResult();
 
-        if (accounts.size() == 1
-                && (isAutoReauthn || !mIdpMetadata.showUseDifferentAccountButton())) {
-            mSelectedAccount = accounts.get(0);
+        if (accounts.size() == 1) {
+            // An account is automatically 'selected' if auto reauthenticating or if that is the
+            // only option.
+            if (isAutoReauthn
+                    || (!mIsMultipleIdps
+                            && !mIdpDataListForShowAccounts
+                                    .get(0)
+                                    .getIdpMetadata()
+                                    .showUseDifferentAccountButton())) {
+                mSelectedAccount = accounts.get(0);
+            }
         }
 
         // Auto re-authn in active mode does not update the loading UI.
         if (mRpMode == RpMode.ACTIVE && isAutoReauthn) {
             mDelegate.onAccountSelected(mSelectedAccount);
             return true;
-        }
-
-        if (!mIsMultipleIdps) {
-            updateIdpBrandIcon(mIdpMetadata.getBrandIconBitmap());
-        }
-        // RP brand icon is fetched here, but not shown until the request permission dialog.
-        if (mRpMode == RpMode.ACTIVE) {
-            updateRpBrandIcon(idpData.getClientMetadata().getBrandIconBitmap());
         }
 
         if (!showAccountsInternal(newAccounts)) {
@@ -750,11 +755,14 @@ class AccountSelectionMediator {
             @RpContext.EnumType int rpContext) {
         mRpForDisplay = rpForDisplay;
         mIdpForDisplay = idpForDisplay;
-        mIdpMetadata = idpMetadata;
+        mIdpMetadataForLoginOrError = idpMetadata;
+        mIdpDataListForShowAccounts = null;
         mRpContext = rpContext;
-        mIsMultipleIdps = false;
         mHeaderType = HeaderProperties.HeaderType.SIGN_IN_TO_IDP_STATIC;
-        if (!updateSheet(/* accounts= */ null, /* areAccountsClickable= */ false)) {
+        if (!updateSheet(
+                /* accounts= */ Collections.emptyList(),
+                /* identityProviders= */ Collections.emptyList(),
+                /* areAccountsClickable= */ false)) {
             return false;
         }
         setComponentShowTime(SystemClock.elapsedRealtime());
@@ -770,16 +778,19 @@ class AccountSelectionMediator {
             IdentityCredentialTokenError error) {
         mRpForDisplay = rpForDisplay;
         mIdpForDisplay = idpForDisplay;
-        mIdpMetadata = idpMetadata;
+        mIdpMetadataForLoginOrError = idpMetadata;
+        mIdpDataListForShowAccounts = null;
         mRpContext = rpContext;
         mError = error;
-        mIsMultipleIdps = false;
         mHeaderType = HeaderProperties.HeaderType.SIGN_IN_ERROR;
         setComponentShowTime(SystemClock.elapsedRealtime());
 
         // Update the bottom sheet into an error bottom sheet for passive mode.
         if (mRpMode == RpMode.PASSIVE) {
-            if (!updateSheet(/* accounts= */ null, /* areAccountsClickable= */ false)) {
+            if (!updateSheet(
+                    /* accounts= */ Collections.emptyList(),
+                    /* identityProviders= */ Collections.emptyList(),
+                    /* areAccountsClickable= */ false)) {
                 return false;
             }
             updateIdpBrandIcon(idpMetadata.getBrandIconBitmap());
@@ -793,7 +804,8 @@ class AccountSelectionMediator {
                         mModalDialogManager,
                         dismissalCause -> {
                             if (dismissalCause == DialogDismissalCause.POSITIVE_BUTTON_CLICKED) {
-                                onClickGotItButton(mSelectedAccount);
+                                onClickGotItButton(
+                                        new ButtonData(mSelectedAccount, /* idpMetadata= */ null));
                             } else if (dismissalCause
                                     == DialogDismissalCause.NEGATIVE_BUTTON_CLICKED) {
                                 onMoreDetails();
@@ -840,9 +852,11 @@ class AccountSelectionMediator {
         mRpForDisplay = rpForDisplay;
         mIdpForDisplay = idpForDisplay;
         mRpContext = rpContext;
-        mIsMultipleIdps = false;
         mHeaderType = HeaderProperties.HeaderType.LOADING;
-        if (!updateSheet(/* accounts= */ null, /* areAccountsClickable= */ false)) {
+        if (!updateSheet(
+                /* accounts= */ Collections.emptyList(),
+                /* identityProviders= */ Collections.emptyList(),
+                /* areAccountsClickable= */ false)) {
             return false;
         }
         setComponentShowTime(SystemClock.elapsedRealtime());
@@ -913,7 +927,12 @@ class AccountSelectionMediator {
             // if we do not skip the next dialog. Also skip when request_permission
             // is false (controlled by the fields API).
             boolean shouldShowRequestPermissionDialog =
-                    !newlySignedInAccount.isSignIn() && mDisclosureFields.length > 0;
+                    !newlySignedInAccount.isSignIn()
+                            && newlySignedInAccount
+                                            .getIdentityProviderData()
+                                            .getDisclosureFields()
+                                            .length
+                                    > 0;
             if (shouldShowRequestPermissionDialog) {
                 return showRequestPermissionModalSheet(mSelectedAccount);
             }
@@ -924,14 +943,25 @@ class AccountSelectionMediator {
         }
 
         mHeaderType = mIsAutoReauthn ? HeaderType.VERIFY_AUTO_REAUTHN : HeaderType.SIGN_IN;
+        // Show the selected account's IDP or only show the IDP if there is just one.
+        if (mSelectedAccount != null) {
+            mIdpForDisplay = mSelectedAccount.getIdentityProviderData().getIdpForDisplay();
+        } else if (mIdpDataListForShowAccounts.size() == 1) {
+            mIdpForDisplay = mIdpDataListForShowAccounts.get(0).getIdpForDisplay();
+        } else {
+            mIdpForDisplay = null;
+        }
+
         // We want the accounts to be clickable if there is no preselected account or if we're not
         // going to show the disclosure text, which happens when the account is a signIn or when
         // fields is empty.
         if (!updateSheet(
                 mSelectedAccount != null ? Arrays.asList(mSelectedAccount) : mAccounts,
+                mSelectedAccount != null ? Collections.emptyList() : mIdpDataListForShowAccounts,
                 /* areAccountsClickable= */ mSelectedAccount == null
                         || mSelectedAccount.isSignIn()
-                        || mDisclosureFields.length == 0)) {
+                        || mSelectedAccount.getIdentityProviderData().getDisclosureFields().length
+                                == 0)) {
             return false;
         }
         updateBackPressBehavior();
@@ -952,22 +982,56 @@ class AccountSelectionMediator {
         return true;
     }
 
-    private boolean updateSheet(List<Account> accounts, boolean areAccountsClickable) {
-        boolean showUseDifferentAccountButton =
-                mHeaderType == HeaderType.SIGN_IN
-                        && areAccountsClickable
-                        && mIdpMetadata != null
-                        && mIdpMetadata.showUseDifferentAccountButton();
-        boolean isSingleAccountChooser =
-                accounts != null && accounts.size() == 1 && !accounts.get(0).isFilteredOut();
+    // Update the sheet so that it includes the provided accounts and identity providers. The
+    // identity providers are needed for use other account as well as for mismatch UI. Note that
+    // these may be empty lists, depending on the UI being displayed (loading UI, error, etc.). This
+    // is determined by querying the mHeaderType, which must be up to date.
+    private boolean updateSheet(
+            List<Account> accounts,
+            List<IdentityProviderData> identityProviders,
+            boolean areAccountsClickable) {
+        IdentityProviderMetadata firstAccountIdpMetadata =
+                !accounts.isEmpty()
+                        ? accounts.get(0).getIdentityProviderData().getIdpMetadata()
+                        : null;
 
+        boolean isSingleAccountChooser = accounts.size() == 1 && !accounts.get(0).isFilteredOut();
+
+        // Check everything we need to render to determine if multiple IDPs are involved or not.
+        Set<IdentityProviderData> distinctIdps =
+                new HashSet<IdentityProviderData>(identityProviders);
+        for (Account account : accounts) {
+            distinctIdps.add(account.getIdentityProviderData());
+        }
+        mIsMultipleIdps = distinctIdps.size() > 1;
+        IdentityProviderData uniqueIdp =
+                distinctIdps.size() == 1 ? distinctIdps.iterator().next() : null;
+
+        boolean showUseDifferentAccountInSingleAccountChooserActiveMode =
+                isSingleAccountChooser
+                        && mRpMode == RpMode.ACTIVE
+                        && mHeaderType == HeaderType.SIGN_IN
+                        && areAccountsClickable
+                        && firstAccountIdpMetadata != null
+                        && firstAccountIdpMetadata.showUseDifferentAccountButton();
         // We add the add account button alongside the accounts if supported in passive mode and in
         // the multi-account UI of active mode.
         updateAccounts(
                 accounts,
+                identityProviders,
                 areAccountsClickable,
-                (mRpMode == RpMode.PASSIVE || !isSingleAccountChooser)
-                        && showUseDifferentAccountButton);
+                showUseDifferentAccountInSingleAccountChooserActiveMode);
+        if (uniqueIdp != null) {
+            updateIdpBrandIcon(uniqueIdp.getIdpMetadata().getBrandIconBitmap());
+        } else {
+            updateIdpBrandIcon(null);
+        }
+        assert mRpMode == RpMode.PASSIVE || !mIsMultipleIdps;
+        // RP brand icon is set here, but only shown during the request permission dialog.
+        if (mRpMode == RpMode.ACTIVE && mIdpDataListForShowAccounts != null) {
+            updateRpBrandIcon(
+                    mIdpDataListForShowAccounts.get(0).getClientMetadata().getBrandIconBitmap());
+        }
         // If there is a change in the header, setFocusView() will be called and focus will land on
         // the header when screen reader is on. Since the header is updated before any item is
         // created, the header will always take precedence for focus. Do not reorder this
@@ -975,19 +1039,24 @@ class AccountSelectionMediator {
         updateHeader();
 
         boolean isDataSharingConsentVisible = false;
-        Callback<Account> continueButtonCallback = null;
+        Callback<ButtonData> continueButtonCallback = null;
         if (mHeaderType == HeaderType.SIGN_IN && mSelectedAccount != null) {
             // Only show the user data sharing consent text for sign up and only
             // if we're asked to request permission.
             isDataSharingConsentVisible =
-                    !mSelectedAccount.isSignIn() && mDisclosureFields.length > 0;
+                    !mSelectedAccount.isSignIn()
+                            && mSelectedAccount
+                                            .getIdentityProviderData()
+                                            .getDisclosureFields()
+                                            .length
+                                    > 0;
             continueButtonCallback = this::onClickAccountSelected;
         }
 
         if (mHeaderType == HeaderType.VERIFY_AUTO_REAUTHN) {
             assert mSelectedAccount != null;
             assert mSelectedAccount.isSignIn();
-            onAccountSelected(mSelectedAccount);
+            onAccountSelected(new ButtonData(mSelectedAccount, /* idpMetadata= */ null));
         }
 
         if (mHeaderType == HeaderType.SIGN_IN_TO_IDP_STATIC) {
@@ -996,7 +1065,7 @@ class AccountSelectionMediator {
             continueButtonCallback = this::onLoginToIdP;
         }
 
-        if (showUseDifferentAccountButton && isSingleAccountChooser && mRpMode == RpMode.ACTIVE) {
+        if (showUseDifferentAccountInSingleAccountChooserActiveMode) {
             assert !isDataSharingConsentVisible;
             mSelectedAccount = accounts.get(0);
             continueButtonCallback = this::onClickAccountSelected;
@@ -1024,14 +1093,22 @@ class AccountSelectionMediator {
                             ? createDataSharingConsentItem(
                                     mIdpForDisplay,
                                     mSelectedAccount.getIdentityProviderData().getClientMetadata(),
-                                    mDisclosureFields)
+                                    mSelectedAccount
+                                            .getIdentityProviderData()
+                                            .getDisclosureFields())
                             : null);
         }
         mModel.set(
                 ItemProperties.CONTINUE_BUTTON,
                 (continueButtonCallback != null)
                         ? createContinueBtnItem(
-                                mSelectedAccount, mIdpMetadata, continueButtonCallback)
+                                mSelectedAccount,
+                                mSelectedAccount != null
+                                        ? mSelectedAccount
+                                                .getIdentityProviderData()
+                                                .getIdpMetadata()
+                                        : mIdpMetadataForLoginOrError,
+                                continueButtonCallback)
                         : null);
         // On passive mode since the disclosure text is below the continue button, create the
         // disclosure text after creating the continue button so setFocusView() will focus
@@ -1044,7 +1121,9 @@ class AccountSelectionMediator {
                             ? createDataSharingConsentItem(
                                     mIdpForDisplay,
                                     mSelectedAccount.getIdentityProviderData().getClientMetadata(),
-                                    mDisclosureFields)
+                                    mSelectedAccount
+                                            .getIdentityProviderData()
+                                            .getDisclosureFields())
                             : null);
         }
         mModel.set(
@@ -1060,8 +1139,8 @@ class AccountSelectionMediator {
         // The add account button is added separately for active mode single account chooser.
         mModel.set(
                 ItemProperties.ADD_ACCOUNT_BUTTON,
-                showUseDifferentAccountButton && isSingleAccountChooser && mRpMode == RpMode.ACTIVE
-                        ? createAddAccountBtnItem(mIdpMetadata)
+                showUseDifferentAccountInSingleAccountChooserActiveMode
+                        ? createAddAccountBtnItem(firstAccountIdpMetadata)
                         : null);
         mModel.set(
                 ItemProperties.ACCOUNT_CHIP,
@@ -1142,8 +1221,10 @@ class AccountSelectionMediator {
     private void requestAvatarImage(PropertyModel accountModel) {
         Account account = accountModel.get(AccountProperties.ACCOUNT);
         final String name = account.getName();
-        final Bitmap picture = account.getPictureBitmap();
-
+        final Bitmap picture =
+                mIsMultipleIdps
+                        ? account.getCircledBadgedPictureBitmap()
+                        : account.getPictureBitmap();
         accountModel.set(
                 AccountProperties.AVATAR,
                 new AccountProperties.Avatar(name, picture, mDesiredAvatarSize));
@@ -1157,12 +1238,13 @@ class AccountSelectionMediator {
      * Event listener for when the user taps on an account or the continue button of the
      * bottomsheet, when it is an IdP sign-in sheet.
      */
-    void onLoginToIdP(Account account) {
-        // This method only has an Account to match the type of the event listener.
-        assert account == null;
+    void onLoginToIdP(ButtonData buttonData) {
+        assert buttonData.mIdpMetadata != null;
+        assert buttonData.mAccount == null;
         if (!shouldInputBeProcessed()) return;
         maybeRecordAccountChooserResult(AccountChooserResult.USE_OTHER_ACCOUNT_BUTTON);
-        mDelegate.onLoginToIdP(mIdpMetadata.getConfigUrl(), mIdpMetadata.getLoginUrl());
+        mDelegate.onLoginToIdP(
+                buttonData.mIdpMetadata.getConfigUrl(), buttonData.mIdpMetadata.getLoginUrl());
     }
 
     /** Event listener for when the user taps on the more details button of the bottomsheet. */
@@ -1176,26 +1258,29 @@ class AccountSelectionMediator {
      * Event listener for when the user taps on an account or the continue button of the
      * bottomsheet.
      *
-     * @param selectedAccount is the account that the user tapped on. If the user instead tapped on
+     * @param buttonData contains the account that the user tapped on. If the user instead tapped on
      *     the continue button, it is the account displayed if this was the single account chooser.
      */
-    void onClickAccountSelected(Account selectedAccount) {
+    void onClickAccountSelected(ButtonData buttonData) {
+        assert buttonData.mAccount != null;
         if (!shouldInputBeProcessed()) return;
         maybeRecordAccountChooserResult(AccountChooserResult.ACCOUNT_ROW);
-        onAccountSelected(selectedAccount);
+        onAccountSelected(buttonData);
     }
 
     /** Event listener for when the user taps on the got it button of the bottomsheet. */
-    void onClickGotItButton(Account account) {
+    void onClickGotItButton(ButtonData buttonData) {
         // This method only has an Account to match the type of the event listener. However, it
         // should be non-null because an account must have been selected in order to reach an error
         // dialog.
-        assert account != null;
+        assert buttonData.mIdpMetadata == null;
+        assert buttonData.mAccount != null;
         if (!shouldInputBeProcessed()) return;
         onDismissed(IdentityRequestDialogDismissReason.GOT_IT_BUTTON);
     }
 
-    void onAccountSelected(Account selectedAccount) {
+    void onAccountSelected(ButtonData buttonData) {
+        assert buttonData.mAccount != null;
         if (mWasDismissed) return;
 
         // There is an old selected account if an account was already selected from an account
@@ -1203,34 +1288,25 @@ class AccountSelectionMediator {
         // disclosure text or that the user has just signed into a new account on an IDP through
         // FedCM.
         Account oldSelectedAccount = mSelectedAccount;
-        mSelectedAccount = selectedAccount;
-        // If we were in multi IDP mode, we had not set the IDP brand icon yet. Set it now.
-        if (mIsMultipleIdps) {
-            updateIdpBrandIcon(
-                    mSelectedAccount
-                            .getIdentityProviderData()
-                            .getIdpMetadata()
-                            .getBrandIconBitmap());
-        }
-        mIsMultipleIdps = false;
+        mSelectedAccount = buttonData.mAccount;
 
         // If the account is a returning user or if the account is selected from UI which shows the
         // disclosure text or if the browser doesn't need to request permission because the IDP
         // prefers asking for permission by themselves, skip the disclosure UI and proceed to the
         // verifying sheet.
         if ((mRpMode == RpMode.PASSIVE && oldSelectedAccount != null)
-                || selectedAccount.isSignIn()
+                || mSelectedAccount.isSignIn()
                 || mHeaderType == HeaderType.REQUEST_PERMISSION_MODAL
-                || mDisclosureFields.length == 0) {
-            mDelegate.onAccountSelected(selectedAccount);
-            showVerifySheet(selectedAccount);
+                || mSelectedAccount.getIdentityProviderData().getDisclosureFields().length == 0) {
+            mDelegate.onAccountSelected(mSelectedAccount);
+            showVerifySheet(mSelectedAccount);
             return;
         }
 
         // At this point, the account is a non-returning user. If RP mode is button,
         // we'd request permission through the request permission modal dialog.
         if (mRpMode == RpMode.ACTIVE) {
-            showRequestPermissionModalSheet(selectedAccount);
+            showRequestPermissionModalSheet(mSelectedAccount);
             return;
         }
 
@@ -1267,6 +1343,7 @@ class AccountSelectionMediator {
                                 isAccountClickable && !account.isFilteredOut()
                                         ? this::onClickAccountSelected
                                         : null)
+                        .with(AccountProperties.SHOW_IDP, mIsMultipleIdps)
                         .build();
         requestAvatarImage(model);
         return model;
@@ -1275,7 +1352,7 @@ class AccountSelectionMediator {
     private PropertyModel createContinueBtnItem(
             Account account,
             IdentityProviderMetadata idpMetadata,
-            Callback<Account> onClickListener) {
+            Callback<ButtonData> onClickListener) {
         assert account != null
                 || mHeaderType == HeaderProperties.HeaderType.SIGN_IN_TO_IDP_STATIC
                 || mHeaderType == HeaderProperties.HeaderType.SIGN_IN_ERROR

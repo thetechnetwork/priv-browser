@@ -81,6 +81,7 @@
 <translation id="131461803491198646">ਘਰੇਲੂ ਨੈੱਟਵਰਕ, ਰੋਮਿੰਗ ਨਹੀਂ</translation>
 <translation id="1327977588028644528">ਗੇਟਵੇ</translation>
 <translation id="1328223165223065150">ਵਾਲਪੇਪਰ ਦਾ ਰੰਗ</translation>
+<translation id="1329478709358066995">ਪ੍ਰਤੀਲਿਪੀ:</translation>
 <translation id="1330426557709298164">JPG</translation>
 <translation id="1337912285145772892">ਸਕੈਨ ਕਰਨ ਯੋਗ ਖੇਤਰ ਵਿੱਚ ਫਿੱਟ ਕਰੋ</translation>
 <translation id="1343442362630695901">ਸਾਲਟ ਲੇਕ</translation>
@@ -126,7 +127,17 @@
 <translation id="1515129336378114413">ਬ੍ਰਾਊਜ਼ਰ ਦਾ ਹੋਮ ਪੇਜ</translation>
 <translation id="1526389707933164996">ਸਕ੍ਰੀਨ ਸੇਵਰ ਐਨੀਮੇਸ਼ਨ</translation>
 <translation id="152892567002884378">ਅਵਾਜ਼ ਵਧਾਓ</translation>
+<translation id="1531038290222364269">ਟੈਬਾਂ ਦਿਖਾਓ</translation>
 <translation id="1539864135338521185">ਲੈਪਿਸ ਲਜ਼ੂਲੀ</translation>
+<translation id="1548555207631326346">ਕੋਈ ਥੀਮ ਚੁਣੋ ਅਤੇ ਫਿਰ ਆਪਣੇ AI ਚਿੱਤਰਾਂ ਨੂੰ ਵਿਅਕਤੀਗਤ ਬਣਾਉਣ ਲਈ ਰੇਖਾਂਕਿਤ ਕੀਤੇ ਸ਼ਬਦ ਚੁਣੋ।<ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          ਹੋਰ ਵਿਲੱਖਣ ਅਤੇ ਵੱਖ-ਵੱਖ AI ਚਿੱਤਰਾਂ ਦੇ ਵਿਕਲਪ ਪ੍ਰਾਪਤ ਕਰਨ ਲਈ "ਮੈਨੂੰ ਪ੍ਰੇਰਿਤ ਕਰੋ" ਚੁਣੋ।
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          ਜਦੋਂ ਤੁਸੀਂ AI ਨਾਲ ਚਿੱਤਰ ਬਣਾਉਂਦੇ ਹੋ, ਤਾਂ <ph name="BEGIN_LINK_GOOGLE_PRIVACY_POLICY" />Google ਦੀ ਪਰਦੇਦਾਰੀ ਨੀਤੀ<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" /> ਦੇ ਅਧੀਨ, ਚਿੱਤਰ ਤਿਆਰ ਕਰਨ ਅਤੇ ਉਤਪਾਦ ਨੂੰ ਬਿਹਤਰ ਬਣਾਉਣ ਲਈ ਉਤਪ੍ਰੇਰਕ Google AI ਸਰਵਰਾਂ ਨੂੰ ਭੇਜਿਆ ਜਾਂਦਾ ਹੈ।
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          ਜਨਰੇਟਿਵ AI ਪ੍ਰਯੋਗਮਈ ਹੈ, ਸ਼ੁਰੂਆਤੀ ਵਿਕਾਸ ਵਿੱਚ ਹੈ ਅਤੇ ਫ਼ਿਲਹਾਲ ਇਸਦੀ ਉਪਲਬਧਤਾ ਸੀਮਤ ਹੈ।</translation>
 <translation id="1555130319947370107">ਨੀਲਾ</translation>
 <translation id="155865706765934889">ਟਚਪੈਡ</translation>
 <translation id="1561927818299383735">ਬੈਕਲਿਟ ਰੰਗ</translation>
@@ -252,7 +263,6 @@
 <translation id="2011174342667534258">SDK ਵਰਜਨ:</translation>
 <translation id="2016697457005847575">ਸਮੱਸਿਆਵਾਂ ਦੇ ਨਿਪਟਾਰੇ ਸੰਬੰਧੀ ਪੜਾਅ ਵਰਤ ਕੇ ਦੇਖੋ</translation>
 <translation id="202500043506723828">EID</translation>
-<translation id="2041627599411887437">ਕੋਈ ਥੀਮ ਚੁਣੋ ਅਤੇ ਫਿਰ ਆਪਣੇ AI ਚਿੱਤਰਾਂ ਨੂੰ ਵਿਅਕਤੀਗਤ ਬਣਾਉਣ ਲਈ ਰੇਖਾਂਕਿਤ ਕੀਤੇ ਸ਼ਬਦ ਚੁਣੋ।</translation>
 <translation id="2045814230297767491">ਕਟਲਰੀ</translation>
 <translation id="2047316797244836561">ਸਕ੍ਰੀਨ ਸੇਵਰ ਦੇਖਣ ਲਈ ਕਿਰਪਾ ਕਰਕੇ ਕਿਸੇ ਨੈੱਟਵਰਕ ਨਾਲ ਕਨੈਕਟ ਕਰੋ ਅਤੇ ਪੰਨੇ ਨੂੰ ਰੀਲੋਡ ਕਰੋ।</translation>
 <translation id="2056550196601855911">IPv4/IPv6</translation>
@@ -405,6 +415,7 @@
 <translation id="2787237339470862294">ਇਸ ਸਮੇਂ ਇਹ ਭਾਸ਼ਾ ਸਮਰਥਿਤ ਨਹੀਂ ਹੈ</translation>
 <translation id="2787435249130282949">ਕੀ-ਬੋਰਡ ਦੀ ਚਮਕ ਵਧਾਓ</translation>
 <translation id="2805756323405976993">ਐਪਸ</translation>
+<translation id="2822702442014805146">ਸਾਰਾਂਸ਼ ਅਤੇ ਨਾਮ ਬਣਾਉਣ ਦਾ ਮਾਡਲ ਡਾਊਨਲੋਡ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ</translation>
 <translation id="28232023175184696">ਇੰਟਰਨੈੱਟ ਨਾਲ ਕਨੈਕਟ ਨਹੀਂ ਕੀਤਾ ਸਕਦਾ। ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰਨ ਲਈ ਕਲਿੱਕ ਕਰੋ।</translation>
 <translation id="2855718259207180827">ਉੱਨ</translation>
 <translation id="2859243502336719778">ਜ਼ਰੂਰੀ ਅੱਪਡੇਟ</translation>
@@ -502,6 +513,7 @@
 <translation id="3373141842870501561">ਧਰਤੀ ਪ੍ਰਵਾਹ ਦਾ ਵਾਲਪੇਪਰ</translation>
 <translation id="33736539805963175">ਅੱਖਰ <ph name="LETTERS_LETTER" /> ਨਾਲ <ph name="LETTERS_COLOR" /> ਬੈਕਗ੍ਰਾਊਂਡ</translation>
 <translation id="3383623117265110236">ਵਿਸ਼ੇਸ਼</translation>
+<translation id="3395147534045164351">ਸਨੈਪ ਕਰਨ ਦੇ ਟਿਕਾਣੇ ਸੰਬੰਧੀ ਸੈਟਿੰਗ ਨੂੰ ਟੌਗਲ ਕਰੋ</translation>
 <translation id="3404249063913988450">ਸਕ੍ਰੀਨ ਸੇਵਰ ਚਾਲੂ ਕਰੋ</translation>
 <translation id="3413935475507503304">ਅੱਪਡੇਟ ਨਾਲ ਜਾਰੀ ਰੱਖਣ ਲਈ, 'ਅੱਗੇ 'ਤੇ ਕਲਿੱਕ ਕਰੋ।</translation>
 <translation id="3428551088151258685">ਆਊਟਡੋਰ</translation>
@@ -651,6 +663,7 @@
 <translation id="4113067922640381334">ਤੁਹਾਡੇ ਕੋਲ ਹੁਣ ਨਵੇਂ <ph name="BEGIN_LINK_WALLPAPER_SUBPAGE" />ਵਾਲਪੇਪਰਾਂ<ph name="END_LINK_WALLPAPER_SUBPAGE" /> ਤੱਕ ਪਹੁੰਚ ਹੈ</translation>
 <translation id="4117637339509843559">ਗੂੜ੍ਹਾ ਮੋਡ</translation>
 <translation id="4126551873361000548">10 ਸਕਿੰਟ ਪਿੱਛੇ ਕਰੋ</translation>
+<translation id="4128271910628504223">"ਧੁੰਦ ਵਾਲਾ ਜੰਗਲ ਬਣਾਓ" ਵਰਗਾ ਉਤਪ੍ਰੇਰਕ ਦਾਖਲ ਕਰੋ</translation>
 <translation id="4130035430755296270">ਖਾਕੇ ਸੰਬੰਧੀ ਹੋਰ ਵਿਕਲਪਾਂ ਲਈ ਕਰਸਰ ਘੁਮਾਉਂਦੇ ਰਹੋ</translation>
 <translation id="4130750466177569591">ਮੈਂ ਸਹਿਮਤ ਹਾਂ</translation>
 <translation id="4131410914670010031">ਕਾਲਾ ਅਤੇ ਚਿੱਟਾ</translation>
@@ -824,6 +837,7 @@
 <translation id="4891842000192098784">ਤਣਾਅ</translation>
 <translation id="4897058166682006107">ਡੀਵਾਈਸ ਦੇ ਖੱਬੇ ਪਾਸੇ ਵਾਲੇ ਬੱਡ ਦਾ ਬੈਟਰੀ ਪੱਧਰ <ph name="BATTERY_PERCENTAGE" />% ਹੈ।</translation>
 <translation id="4905998861748258752">ਸਕ੍ਰੀਨ ਸੇਵਰ ਵਿਕਲਪਾਂ ਨੂੰ ਚੁਣਨ ਲਈ ਵਿਸ਼ੇਸ਼ਤਾ ਨੂੰ ਚਾਲੂ ਕਰੋ</translation>
+<translation id="4910853326379896417">ਸਾਰਾਂਸ਼ ਅਤੇ ਨਾਮ ਬਣਾਉਣ ਵਾਲਾ ਮਾਡਲ ਡਾਊਨਲੋਡ ਹੋ ਗਿਆ</translation>
 <translation id="4910858703033903787">APN ਦੀਆਂ ਕਿਸਮਾਂ</translation>
 <translation id="4917385247580444890">ਮਜ਼ਬੂਤ</translation>
 <translation id="4917889632206600977">ਬੰਦ ਹੋ ਗਿਆ - ਕਾਗਜ਼ ਖਤਮ ਹੋ ਗਏ</translation>
@@ -858,8 +872,10 @@
 <translation id="5050042263972837708">ਗਰੁੱਪ ਦਾ ਨਾਮ</translation>
 <translation id="5051044138948155788">ਸਿਰਫ਼ ਇਹੀ ਪੰਨਾ ਹੈ। ਇਹ ਤੁਹਾਨੂੰ ਸਕੈਨਿੰਗ ਸ਼ੁਰੂ ਕਰਨ ਵਾਲੀ ਸਕ੍ਰੀਨ 'ਤੇ ਲੈ ਜਾਵੇਗਾ।</translation>
 <translation id="5053233795640754917">ਰੋਕੋ</translation>
+<translation id="5056587122125565772">ਚਿੱਤਰ ਬਣਾਓ</translation>
 <translation id="5078711626843651677">ਅਵਾਜ਼ੀ ਮਾਡਲ ਉਦੋਂ ਤੱਕ ਕੁਝ ਸਮੇਂ ਲਈ ਡੀਵਾਈਸ 'ਤੇ ਸਟੋਰ ਕੀਤੇ ਜਾਂਦੇ ਹਨ, ਜਦੋਂ ਤੱਕ ਸਪੀਕਰ ਲੇਬਲਬੱਧ ਕਰਨ ਦੀ ਪ੍ਰਕਿਰਿਆ ਪੂਰੀ ਨਹੀਂ ਹੋ ਜਾਂਦੀ। ਤੁਸੀਂ ਸੈਟਿੰਗਾਂ ਵਿੱਚ ਜਾ ਕੇ ਕਿਸੇ ਵੀ ਵੇਲੇ ਇਸਨੂੰ ਬੰਦ ਕਰ ਸਕਦੇ ਹੋ।</translation>
 <translation id="5078983345702708852">ਫਿਊਚਰਿਸਟਿਕ</translation>
+<translation id="5085224064082122501">ਸਾਰਾਂਸ਼ ਅਤੇ ਨਾਮ ਬਣਾਉਣ ਵਾਲਾ ਮਾਡਲ ਡਾਊਨਲੋਡ ਨਹੀਂ ਹੋਇਆ। ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ ਜਾਂ ਆਪਣੀ Chromebook ਨੂੰ ਮੁੜ-ਸ਼ੁਰੂ ਕਰਕੇ ਦੇਖੋ।</translation>
 <translation id="5087864757604726239">ਪਿੱਛੇ</translation>
 <translation id="5088172560898466307">ਸਰਵਰ ਹੋਸਟਨਾਮ</translation>
 <translation id="5089810972385038852">ਰਾਜ</translation>
@@ -1028,6 +1044,7 @@
 <translation id="5896602941605730551">ਚਲਾਓ</translation>
 <translation id="5901630391730855834">ਪੀਲਾ</translation>
 <translation id="5903200662178656908">ਡੀਵਾਈਸ ਕੀ-ਬੋਰਡ ਅਤੇ ਮਾਊਸ ਦਾ ਸੁਮੇਲ ਹੈ।</translation>
+<translation id="5903822368221507416">ਟੈਬਾਂ ਲੁਕਾਓ</translation>
 <translation id="5904994456462260490">ਨਵਾਂ APN ਸ਼ਾਮਲ ਕਰੋ</translation>
 <translation id="590746845088109442">ਬਿੱਲੀਆਂ</translation>
 <translation id="5907649332524363701">ਕੁੰਜੀ ਦਾ ਰੰਗ</translation>
@@ -1129,14 +1146,12 @@
 <translation id="6325525973963619867">ਅਸਫਲ ਰਿਹਾ</translation>
 <translation id="6327262166342360252">ਇਹ ਵਾਲਪੇਪਰ ਅੱਗੇ ਦਿੱਤੀ ਲਿਖਤ ਦੀ ਵਰਤੋਂ ਕਰ ਕੇ AI ਨਾਲ ਬਣਾਇਆ ਗਿਆ: "<ph name="PROMPT" />।"</translation>
 <translation id="6331191339300272798">ਸਵੈਚਲਿਤ ਗੂੜ੍ਹਾ ਥੀਮ</translation>
-<translation id="6335228876613776082">ਮਾਡਲ ਨੂੰ ਡਾਊਨਲੋਡ ਕੀਤਾ ਗਿਆ</translation>
 <translation id="6340526405444716530">ਵਿਅਕਤੀਗਤਕਰਨ</translation>
 <translation id="6348252528297699679">ਤੁਸੀਂ ਸੈਟਿੰਗਾਂ &gt; ਪਰਦੇਦਾਰੀ ਅਤੇ ਸੁਰੱਖਿਆ &gt; ਪਰਦੇਦਾਰੀ ਕੰਟਰੋਲ &gt; ਟਿਕਾਣਾ ਪਹੁੰਚ ਵਿੱਚ ਜਾ ਕੇ ਟਿਕਾਣੇ ਨੂੰ ਬੰਦ ਕਰ ਸਕਦੇ ਹੋ। <ph name="LINK_BEGIN" />ਹੋਰ ਜਾਣੋ<ph name="LINK_END" /></translation>
 <translation id="6348738456043757611">ਵਰਤੋਂਕਾਰ ਨਾਮ ਅਤੇ ਪਾਸਵਰਡ</translation>
 <translation id="6352210854422428614">ਵੱਖਰਾ ਗ੍ਰਹਿ</translation>
 <translation id="6359706544163531585">ਹਲਕਾ ਥੀਮ ਬੰਦ ਕਰੋ</translation>
 <translation id="6359919876285606596">ਇਹ ਕਾਰਵਾਈ ਸਥਾਈ ਹੈ ਅਤੇ ਇਸਨੂੰ ਅਣਕੀਤਾ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਦਾ</translation>
-<translation id="6368342879959028556">"AI ਨਾਲ ਬਣਾਓ" ਦੀ ਚੋਣ ਕਰਨ ਵੇਲੇ, ਵਿਉਂਤਿਆ ਉਤਪ੍ਰੇਰਕ ਲਿਖੋ। ਜਾਂ ਤੁਸੀਂ ਥੀਮ ਚੁਣਨ ਲਈ “AI ਵਾਲਪੇਪਰ” ਚੁਣ ਸਕਦੇ ਹੋ ਅਤੇ ਫਿਰ ਆਪਣੇ AI ਵਾਲਪੇਪਰ ਨੂੰ ਵਿਅਕਤੀਗਤ ਬਣਾਉਣ ਲਈ ਰੇਖਾਂਕਿਤ ਸ਼ਬਦਾਂ ਨੂੰ ਚੁਣ ਸਕਦੇ ਹੋ।</translation>
 <translation id="636850387210749493">ਐਂਟਰਪ੍ਰਾਈਜ਼ ਐਨਰੌਲਮੈਂਟ</translation>
 <translation id="6369221585240879141">ਇਸ ਪ੍ਰਤੀਲਿਪੀ ਭਾਸ਼ਾ ਲਈ ਰਿਕਾਰਡਿੰਗ ਨਾਮ ਬਣਾਏ ਨਹੀਂ ਜਾ ਸਕਦੇ</translation>
 <translation id="6373461326814131011">ਤਲਾਬ</translation>
@@ -1209,16 +1224,6 @@
 <translation id="6657240842932274095">ਕੀ ਸਿਸਟਮ ਸੇਵਾਵਾਂ ਨੂੰ ਤੁਹਾਡੇ ਟਿਕਾਣੇ ਦੀ ਵਰਤੋਂ ਕਰਨ ਦੀ ਆਗਿਆ ਦੇਣੀ ਹੈ?</translation>
 <translation id="6657585470893396449">ਪਾਸਵਰਡ</translation>
 <translation id="66621959568103627">ਕੋਰਲ ਗੁਲਾਬੀ</translation>
-<translation id="6667885109186363316"><ph name="SEA_PEN_INTRO_FIRST_PARAGRAPH" />
-          <ph name="LINE_BREAK" />
-          <ph name="LINE_BREAK" />
-          ਹੋਰ ਵਿਲੱਖਣ ਅਤੇ ਵੱਖ-ਵੱਖ AI ਚਿੱਤਰਾਂ ਦੇ ਵਿਕਲਪ ਪ੍ਰਾਪਤ ਕਰਨ ਲਈ "ਮੈਨੂੰ ਪ੍ਰੇਰਿਤ ਕਰੋ" ਚੁਣੋ।
-          <ph name="LINE_BREAK" />
-          <ph name="LINE_BREAK" />
-          ਜਦੋਂ ਤੁਸੀਂ AI ਨਾਲ ਚਿੱਤਰ ਬਣਾਉਂਦੇ ਹੋ, ਤਾਂ <ph name="BEGIN_LINK_GOOGLE_PRIVACY_POLICY" />Google ਦੀ ਪਰਦੇਦਾਰੀ ਨੀਤੀ<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" /> ਦੇ ਅਧੀਨ, ਚਿੱਤਰ ਤਿਆਰ ਕਰਨ ਅਤੇ ਉਤਪਾਦ ਨੂੰ ਬਿਹਤਰ ਬਣਾਉਣ ਲਈ ਉਤਪ੍ਰੇਰਕ Google AI ਸਰਵਰਾਂ ਨੂੰ ਭੇਜਿਆ ਜਾਂਦਾ ਹੈ।
-          <ph name="LINE_BREAK" />
-          <ph name="LINE_BREAK" />
-          ਜਨਰੇਟਿਵ AI ਪ੍ਰਯੋਗਮਈ ਹੈ, ਸ਼ੁਰੂਆਤੀ ਵਿਕਾਸ ਵਿੱਚ ਹੈ ਅਤੇ ਫ਼ਿਲਹਾਲ ਇਸਦੀ ਉਪਲਬਧਤਾ ਸੀਮਤ ਹੈ।</translation>
 <translation id="6673898378497337661">ਕੀ-ਬੋਰਡ ਦੀ ਚਮਕ ਵਧਾਓ</translation>
 <translation id="6692996468359469499">ਆਪਣੀ ਚੋਣ ਨਾਲ ਸੰਬੰਧਿਤ ਜਾਣਕਾਰੀ ਪ੍ਰਾਪਤ ਕਰੋ</translation>
 <translation id="6694534975463174713">ਲਾਕ</translation>
@@ -1274,6 +1279,7 @@
 <translation id="6930597342185648547">ਬੈਕਗ੍ਰਾਊਂਡ ਬਾਰੇ</translation>
 <translation id="6939667434404433010">ਰਿਕਾਰਡਿੰਗ ਦਾ ਨਾਮ ਖੋਜੋ</translation>
 <translation id="6939766318048400022">ਕੈਫ਼ੇ</translation>
+<translation id="6942253772720771875">ਆਪਣੇ ਵਿਚਾਰ ਸਾਂਝੇ ਕਰੋ ਜਾਂ ਆਪਣੀ ਸਮੱਸਿਆ ਦਾ ਵਰਣਨ ਕਰੋ</translation>
 <translation id="6943893908656559156">ਰਿਮੋਟ ਪਛਾਣ (ਵਿਕਲਪਿਕ)</translation>
 <translation id="6953137545147683679">ਸੋਨੇ ਰੰਗਾ</translation>
 <translation id="6957231940976260713">ਸੇਵਾ ਦਾ ਨਾਮ</translation>
@@ -1295,6 +1301,7 @@
 <translation id="7040230719604914234">ਓਪਰੇਟਰ</translation>
 <translation id="7040729769968826896">ਸਪੀਕਰ ਨੂੰ ਪਛਾਣਨ ਦੀ ਆਗਿਆ ਦਿਓ</translation>
 <translation id="7041549558901442110">ਡੀਵਾਈਸ ਕਨੈਕਟ ਨਹੀਂ ਹੈ।</translation>
+<translation id="704183341263526038">ਜੂਪੀਟਰ</translation>
 <translation id="7046522406494308071">ਕੀ ਸਾਰੇ ਸ਼ਾਰਟਕੱਟਾਂ ਨੂੰ ਪੂਰਵ-ਨਿਰਧਾਰਿਤ ਸੈਟਿੰਗਾਂ 'ਤੇ ਰੀਸੈੱਟ ਕਰਨਾ ਹੈ?</translation>
 <translation id="7049916119678019302">ਸੈਟਿੰਗਾਂ ਵਿੱਚ ਜਾ ਕੇ ਪ੍ਰਤੀਲਿਪੀਕਰਨ ਮਾਡਲ ਨੂੰ ਡਾਊਨਲੋਡ ਕਰੋ</translation>
 <translation id="7058278511608979688">ਸਮਾਪਤ ਕਰੋ ਅਤੇ ਰੱਖਿਅਤ ਕਰੋ</translation>
@@ -1389,6 +1396,7 @@
 <translation id="7388345524791662148"><ph name="RECORDING_NAME" /> ਲਈ ਹੋਰ ਵਿਕਲਪ</translation>
 <translation id="7388959671917308825">ਬਿਲਟ-ਇਨ ਟੱਚਪੈਡ</translation>
 <translation id="7397270852490618635">ਹਲਕਾ ਥੀਮ ਬੰਦ ਕਰੋ</translation>
+<translation id="7400166052988585408">ਤੁਹਾਡੇ ਅਧਿਆਪਕ ਵੱਲੋਂ ਤੁਹਾਡੀ ਸਕ੍ਰੀਨ <ph name="NUM_SECONDS" /> ਸਕਿੰਟ ਵਿੱਚ ਲਾਕ ਕੀਤੀ ਜਾਵੇਗੀ</translation>
 <translation id="7401543881546089382">ਸ਼ਾਰਟਕੱਟ ਮਿਟਾਓ</translation>
 <translation id="7405493795721832710"><ph name="DEVICE_NAME" /> ਅੱਪਡੇਟ ਕੀਤੇ ਜਾਣ ਲਈ ਤਿਆਰ ਹੈ</translation>
 <translation id="741244894080940828">ਰੂਪਾਂਤਰਨ</translation>
@@ -1427,6 +1435,7 @@
 <translation id="7569444139234840525"><ph name="QUERY_TEXT" /> · /<ph name="PHONETICS" />/</translation>
 <translation id="7570674786725311828">USB ਟੱਚਸਕ੍ਰੀਨ</translation>
 <translation id="757747079855995705">ਪੱਥਰ</translation>
+<translation id="7584853321964440104">ਡਾਊਨਲੋਡ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਦਾ। ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ ਜਾਂ ਆਪਣੀ Chromebook ਨੂੰ ਮੁੜ-ਸ਼ੁਰੂ ਕਰਕੇ ਦੇਖੋ।</translation>
 <translation id="7590883480672980941">ਇਨਪੁੱਟ ਸੈਟਿੰਗਾਂ</translation>
 <translation id="7595982850646262331"><ph name="TIME_VALUE" /> ਬਾਕੀ</translation>
 <translation id="7600430297804876776"><ph name="MANAGER" /> ਪ੍ਰਸ਼ਾਸਕ ਨੇ ਇਸ <ph name="DEVICE_TYPE" /> ਦੀ ਵਰਤੋਂ ਕਰਨ ਦਾ ਸਮਾਂ ਸੈੱਟ ਕੀਤਾ ਹੈ।</translation>
@@ -1557,6 +1566,16 @@
 <translation id="8179976553408161302">ਦਰਜ ਕਰੋ</translation>
 <translation id="8183975772394450380">ਬੀਚ</translation>
 <translation id="819278132617411009">ਜ਼ਿਆਦਾ ਬਿਹਤਰ ਤਰੀਕੇ ਨਾਲ ਕੰਮ ਕਰਨ ਲਈ Google AI ਵਰਤੋ</translation>
+<translation id="82003371436638355">"ਆਪਣਾ ਖੁਦ ਦਾ ਬਣਾਓ" ਦੀ ਚੋਣ ਕਰਨ ਵੇਲੇ, ਵਿਉਂਤਿਆ ਉਤਪ੍ਰੇਰਕ ਲਿਖੋ। ਜਾਂ ਤੁਸੀਂ “ਕੋਈ ਥੀਮ ਚੁਣੋ” ਚੁਣ ਸਕਦੇ ਹੋ ਅਤੇ ਫਿਰ ਆਪਣੇ AI ਵਾਲਪੇਪਰ ਨੂੰ ਵਿਅਕਤੀਗਤ ਬਣਾਉਣ ਲਈ ਰੇਖਾਂਕਿਤ ਸ਼ਬਦਾਂ ਨੂੰ ਚੁਣ ਸਕਦੇ ਹੋ।
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          ਹੋਰ ਵਿਲੱਖਣ ਅਤੇ ਵੱਖ-ਵੱਖ AI ਚਿੱਤਰਾਂ ਦੇ ਵਿਕਲਪ ਪ੍ਰਾਪਤ ਕਰਨ ਲਈ "ਮੈਨੂੰ ਪ੍ਰੇਰਿਤ ਕਰੋ" ਚੁਣੋ।
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          ਜਦੋਂ ਤੁਸੀਂ ਆਪਣਾ ਵਾਲਪੇਪਰ ਬਣਾਉਂਦੇ ਹੋ, ਤਾਂ <ph name="BEGIN_LINK_GOOGLE_PRIVACY_POLICY" />Google ਦੇ ਸੇਵਾ ਦੇ ਨਿਯਮਾਂ ਅਤੇ ਪਰਦੇਦਾਰੀ ਨੀਤੀ<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" /> ਦੇ ਅਧੀਨ, ਚਿੱਤਰ ਤਿਆਰ ਕਰਨ ਅਤੇ ਉਤਪਾਦ ਨੂੰ ਬਿਹਤਰ ਬਣਾਉਣ ਲਈ ਉਤਪ੍ਰੇਰਕ Google ਸਰਵਰਾਂ ਨੂੰ ਭੇਜਿਆ ਜਾਂਦਾ ਹੈ। ਕੋਈ ਵੀ ਨਿੱਜੀ, ਸੰਵੇਦਨਸ਼ੀਲ ਜਾਂ ਗੁਪਤ ਜਾਣਕਾਰੀ ਸ਼ਾਮਲ ਨਾ ਕਰੋ।
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          ਜਨਰੇਟਿਵ AI ਗਲਤੀਆਂ ਕਰ ਸਕਦਾ ਹੈ, ਜਿਸ ਵਿੱਚ ਲੋਕਾਂ ਬਾਰੇ ਜਾਣਕਾਰੀ ਵੀ ਸ਼ਾਮਲ ਹੈ, ਇਸ ਲਈ ਇਸ ਦੀ ਦੋਹਰੀ-ਜਾਂਚ ਕਰੋ। <ph name="BEGIN_LINK_CREATE_YOUR_OWN_WALLPAPER" />ਹੋਰ ਜਾਣੋ<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" /></translation>
 <translation id="8200772114523450471">ਦੁਬਾਰਾ ਸ਼ੁਰੂ ਕਰੋ</translation>
 <translation id="8206859287963243715">Cellular</translation>
 <translation id="8208861521865154048">ਫ਼ਾਇਦੇ</translation>
@@ -1578,6 +1597,7 @@
 <translation id="8312330582793120272">ਮੀਡੀਆ ਚਲਾਓ</translation>
 <translation id="8318753676953949627">ਕੋਈ ਚਿੱਤਰ ਨਹੀਂ</translation>
 <translation id="8320910311642849813">ਜੰਗਲ</translation>
+<translation id="8322464149031882595">ਅੱਗੇ ਜਾਣ ਲਈ ਕਲਿੱਕ ਕਰੋ</translation>
 <translation id="8329018942023753850">Calculator ਐਪ</translation>
 <translation id="8336739000755212683">ਡੀਵਾਈਸ ਦੇ ਖਾਤੇ ਦਾ ਚਿੱਤਰ ਬਦਲੋ</translation>
 <translation id="8339024191194156249">ਸਵੈ-ਲਾਂਚ ਬਾਰੇ ਹੋਰ ਜਾਣੋ</translation>
@@ -1598,6 +1618,7 @@
 <translation id="8395584934117017006">ਐਂਟਰਪ੍ਰਾਈਜ਼ ਵੱਲੋਂ ਇਸ <ph name="DEVICE_TYPE" /> ਦਾ ਪ੍ਰਬੰਧਨ ਕੀਤਾ ਜਾਂਦਾ ਹੈ</translation>
 <translation id="8398927464629426868">ਉਹ ਦਰ ਜਿਸ 'ਤੇ ਡੀਵਾਈਸ ਇਸ ਵੇਲੇ ਚਾਰਜ ਜਾਂ ਡਿਸਚਾਰਜ ਹੋ ਰਿਹਾ ਹੈ</translation>
 <translation id="8403988360557588704"><ph name="ART_MOVEMENT" /> ਸ਼ੈਲੀ ਵਿੱਚ <ph name="ART_FEATURE" /> ਦੀ ਇੱਕ ਪੇਂਟਿੰਗ</translation>
+<translation id="8409219750150841791">ਸਿਰਜਿਆ ਗਿਆ ਸਾਰਾਂਸ਼:</translation>
 <translation id="8410244574650205435">ਸਵੈਚਲਿਤ ਤੌਰ 'ਤੇ ਪਤਾ ਲਗਾਇਆ ਗਿਆ</translation>
 <translation id="8420955526972171689">ਹਾਰਡਵੇਅਰ ਸੰਬੰਧੀ ਸਮੱਸਿਆਵਾਂ ਲਈ ਟੈਸਟ ਅਤੇ ਸਮੱਸਿਆ-ਨਿਪਟਾਰਾ ਚਲਾਓ</translation>
 <translation id="8422748173858722634">IMEI</translation>
@@ -1642,6 +1663,7 @@
 <translation id="8626489604350149811"><ph name="APN_NAME" /> ਲਈ ਹੋਰ ਕਾਰਵਾਈਆਂ</translation>
 <translation id="86356131183441916">ਹਲਕਾ ਜਾਮਨੀ</translation>
 <translation id="8647595191512746911">ਆਡੀਓ ਪ੍ਰਤੀਲਿਪੀਕਰਨ</translation>
+<translation id="8648578954147795914">ਸਿਰਜੇ ਗਏ ਨਾਮ:</translation>
 <translation id="8650852232143958317">ਆਪਣੀਆਂ Gmail ਅਤੇ Google Drive ਫ਼ਾਈਲਾਂ ਨੂੰ ਆਪਣੇ ਨਿੱਜੀ ਖਾਤੇ ਵਿੱਚ ਲਿਜਾਓ</translation>
 <translation id="8651481478098336970">ਅਵਾਜ਼ ਮਿਊਟ ਕਰੋ</translation>
 <translation id="8655295600908251630">ਚੈਨਲ</translation>
@@ -1670,7 +1692,6 @@
 <translation id="8764414543112028321">WireGuard</translation>
 <translation id="87646919272181953">Google Photos ਐਲਬਮ</translation>
 <translation id="8775713578693478175">ਮੋਡੈਮ APN</translation>
-<translation id="877735394245039557">ਮਾਡਲ ਨੂੰ ਡਾਊਨਲੋਡ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ</translation>
 <translation id="877985182522063539">A4</translation>
 <translation id="879568662008399081">ਇਸ ਨੈੱਟਵਰਕ ਕੋਲ ਕੈਪਟਿਵ ਪੋਰਟਲ ਹੋ ਸਕਦਾ ਹੈ</translation>
 <translation id="8797082062139985406">Google AI ਦੀ ਵਰਤੋਂ ਕਰ ਕੇ ਨਾਮ ਬਣਾਓ</translation>
@@ -1723,6 +1744,7 @@
 <translation id="8961025972867871808">ਪੈਂਗੁਇਨ</translation>
 <translation id="8968751544471797276">ਚਾਰਜਿੰਗ ਦਰ</translation>
 <translation id="8970109610781093811">ਦੁਬਾਰਾ ਚਲਾਓ</translation>
+<translation id="8972061581514441296">ਵਾਪਸ ਜਾਣ ਲਈ ਕਲਿੱਕ ਕਰੋ</translation>
 <translation id="8983038754672563810">HSPA</translation>
 <translation id="8987565828374052507">{NUMBER_OF_PAGES,plural, =0{ਸਕੈਨ ਕਰੋ}=1{{NUMBER_OF_PAGES} ਪੰਨਾ ਸਕੈਨ ਕਰੋ}other{{NUMBER_OF_PAGES} ਪੰਨੇ ਸਕੈਨ ਕਰੋ}}</translation>
 <translation id="89945434909472341">ਪਿੰਡ</translation>
@@ -1784,6 +1806,7 @@
 <translation id="9218016617214286986">ਜਾਣੂ APN ਦਿਖਾਓ</translation>
 <translation id="932327136139879170">ਹੋਮ</translation>
 <translation id="939519157834106403">SSID</translation>
+<translation id="940663759301549538">ਪੱਕਾ ਕਰੋ ਕਿ ਤੁਹਾਡਾ ਮਾਈਕ ਕਨੈਕਟ ਹੈ ਜਾਂ ਆਪਣੀ Chromebook ਨੂੰ ਮੁੜ-ਸ਼ੁਰੂ ਕਰ ਕੇ ਦੇਖੋ</translation>
 <translation id="945522503751344254">ਪ੍ਰਤੀਕਰਮ ਭੇਜੋ</translation>
 <translation id="950520315903467048"><ph name="DIRECTION" /> ਲਈ ਕੁੰਜੀ ਮੌਜੂਦ ਨਹੀਂ ਹੈ। <ph name="ASSIGN_INSTRUCTION" /></translation>
 <translation id="951780398843003443">ਸਾਰੀ ਰਿਕਾਰਡਿੰਗ ਵਿੱਚ ਅਵਾਜ਼ਾਂ ਦੀ ਤੁਲਨਾ ਕਰਦੀ ਹੈ, ਤਾਂ ਜੋ ਪ੍ਰਤੀਲਿਪੀਕਰਨ ਇਹ ਦਰਸਾ ਸਕੇ ਕਿ ਹਰੇਕ ਸਪੀਕਰ ਨੇ ਕੀ ਅਤੇ ਕਦੋਂ ਕਿਹਾ ਹੈ</translation>

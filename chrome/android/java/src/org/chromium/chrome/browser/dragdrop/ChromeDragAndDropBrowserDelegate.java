@@ -45,13 +45,17 @@ public class ChromeDragAndDropBrowserDelegate implements DragAndDropBrowserDeleg
     private static boolean sDefinedItemWithPendingIntentForTesting;
     private static boolean sClipDataItemBuilderNotFound;
 
-    private final String[] mSupportedMimeTypes =
+    private final String[] mSupportedTabMimeTypes =
             new String[] {
                 MimeTypeUtils.CHROME_MIMETYPE_TAB,
                 ClipDescription.MIMETYPE_TEXT_PLAIN,
                 ClipDescription.MIMETYPE_TEXT_INTENT,
                 MimeTypeUtils.CHROME_MIMETYPE_LINK
             };
+
+    // TODO(crbug.com/384945274): Support dragging group to new instance.
+    private final String[] mSupportedGroupMimeTypes =
+            new String[] {MimeTypeUtils.CHROME_MIMETYPE_TAB_GROUP};
 
     private final Supplier<Activity> mActivitySupplier;
     private final boolean mSupportDropInChrome;
@@ -119,17 +123,32 @@ public class ChromeDragAndDropBrowserDelegate implements DragAndDropBrowserDeleg
     public ClipData buildClipData(@NonNull DropDataAndroid dropData) {
         assert dropData instanceof ChromeDropDataAndroid;
         ChromeDropDataAndroid chromeDropDataAndroid = (ChromeDropDataAndroid) dropData;
-        if (chromeDropDataAndroid.hasTab() && chromeDropDataAndroid.allowTabDragToCreateInstance) {
-            ClipData clipData =
-                    buildClipDataForTabTearing(
-                            chromeDropDataAndroid.tab, chromeDropDataAndroid.windowId);
+
+        // Dragging to create new instance.
+        // TODO(crbug.com/384945274): Support dragging group to new instance.
+        if (chromeDropDataAndroid.hasBrowserContent()
+                && chromeDropDataAndroid.allowDragToCreateInstance) {
+            ClipData clipData = null;
+            if (chromeDropDataAndroid instanceof ChromeTabDropDataAndroid) {
+                clipData =
+                        buildClipDataForTabTearing(
+                                ((ChromeTabDropDataAndroid) chromeDropDataAndroid).tab,
+                                chromeDropDataAndroid.windowId);
+            }
             if (clipData != null) return clipData;
         }
-        String text =
-                chromeDropDataAndroid.hasTab()
-                        ? chromeDropDataAndroid.buildTabClipDataText()
-                        : dropData.text;
-        return new ClipData(null, mSupportedMimeTypes, new Item(text));
+
+        // Dragging to existing instances.
+        if (chromeDropDataAndroid instanceof ChromeTabDropDataAndroid tabDropData) {
+            String text =
+                    chromeDropDataAndroid.hasBrowserContent()
+                            ? chromeDropDataAndroid.buildTabClipDataText()
+                            : dropData.text;
+            return new ClipData(null, mSupportedTabMimeTypes, new Item(text));
+        } else if (chromeDropDataAndroid instanceof ChromeTabGroupDropDataAndroid groupDropData) {
+            return new ClipData(null, mSupportedGroupMimeTypes, new Item(dropData.text));
+        }
+        return null;
     }
 
     private @Nullable ClipData buildClipDataForTabTearing(Tab tab, int sourceWindowId) {
@@ -151,8 +170,8 @@ public class ChromeDragAndDropBrowserDelegate implements DragAndDropBrowserDeleg
                             opts.toBundle());
             Item item = buildClipDataItemWithPendingIntent(pendingIntent);
             return item == null
-                    ? new ClipData(null, mSupportedMimeTypes, new Item(intent))
-                    : new ClipData(null, mSupportedMimeTypes, item);
+                    ? new ClipData(null, mSupportedTabMimeTypes, new Item(intent))
+                    : new ClipData(null, mSupportedTabMimeTypes, item);
         }
         return null;
     }
@@ -161,7 +180,7 @@ public class ChromeDragAndDropBrowserDelegate implements DragAndDropBrowserDeleg
     public int buildFlags(int originalFlag, DropDataAndroid dropData) {
         assert dropData instanceof ChromeDropDataAndroid;
         ChromeDropDataAndroid chromeDropData = (ChromeDropDataAndroid) dropData;
-        if (!chromeDropData.hasTab() || !chromeDropData.allowTabDragToCreateInstance) {
+        if (!chromeDropData.hasBrowserContent() || !chromeDropData.allowDragToCreateInstance) {
             return originalFlag;
         }
         return originalFlag

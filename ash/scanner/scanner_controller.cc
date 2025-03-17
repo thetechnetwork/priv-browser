@@ -122,7 +122,7 @@ std::u16string GetToastMessageForActionFailure(
 // Shows an action progress notification. Note that this will remove the
 // previous action notification if there is one.
 void ShowActionProgressNotification(
-    manta::proto::ScannerAction::ActionCase action_case) {
+    const ScannerActionViewModel& scanner_action) {
   message_center::RichNotificationData optional_fields;
   // Show an infinite loading progress bar.
   optional_fields.progress = -1;
@@ -132,13 +132,13 @@ void ShowActionProgressNotification(
   auto* message_center = message_center::MessageCenter::Get();
   message_center->RemoveNotification(kScannerActionNotificationId,
                                      /*by_user=*/false);
-  // TODO: crbug.com/375967525 - Finalize the action notification strings and
-  // icon.
+  // TODO: crbug.com/375967525 - Finalize the action notification strings.
   std::unique_ptr<message_center::Notification> notification =
       CreateSystemNotificationPtr(
           message_center::NOTIFICATION_TYPE_PROGRESS,
           kScannerActionNotificationId,
-          action_case == manta::proto::ScannerAction::kCopyToClipboard
+          scanner_action.GetActionCase() ==
+                  manta::proto::ScannerAction::kCopyToClipboard
               ? u"Copying text..."
               : u"Creating...",
           /*message=*/u"",
@@ -146,7 +146,7 @@ void ShowActionProgressNotification(
           message_center::NotifierId(
               message_center::NotifierType::SYSTEM_COMPONENT,
               kScannerNotifierId, NotificationCatalogName::kScannerAction),
-          optional_fields, /*delegate=*/nullptr, kCaptureModeIcon,
+          optional_fields, /*delegate=*/nullptr, scanner_action.GetIcon(),
           message_center::SystemNotificationWarningLevel::NORMAL);
   notification->SetSystemPriority();
   message_center->AddNotification(std::move(notification));
@@ -308,6 +308,7 @@ void OnFeedbackFormSendButtonClicked(const AccountId& account_id,
                                      base::Value::Dict action_dict,
                                      ScannerFeedbackInfo feedback_info,
                                      const std::string& user_description) {
+  RecordScannerFeatureUserState(ScannerFeatureUserState::kFeedbackSent);
   std::optional<std::string> pretty_printed_action = base::WriteJsonWithOptions(
       action_dict, base::JsonOptions::OPTIONS_PRETTY_PRINT);
   // JSON serialisation should always succeed as the depth of the Dict is fixed,
@@ -644,13 +645,14 @@ void ScannerController::ExecuteAction(
                      base::BindOnce(&ScannerController::OnActionFinished,
                                     weak_ptr_factory_.GetWeakPtr(), action_case,
                                     scanner_action.downscaled_jpeg_bytes())));
-  ShowActionProgressNotification(action_case);
+  ShowActionProgressNotification(scanner_action);
 }
 
 void ScannerController::OpenFeedbackDialog(
     const AccountId& account_id,
     manta::proto::ScannerAction action,
     scoped_refptr<base::RefCountedMemory> screenshot) {
+  RecordScannerFeatureUserState(ScannerFeatureUserState::kFeedbackFormOpened);
   base::Value::Dict action_dict = ScannerActionToDict(std::move(action));
 
   std::optional<std::string> user_facing_string = ValueToUserFacingString(

@@ -137,7 +137,9 @@
 #include "third_party/blink/renderer/platform/graphics/unaccelerated_static_bitmap_image.h"
 #include "third_party/blink/renderer/platform/graphics/video_frame_image_util.h"
 #include "third_party/blink/renderer/platform/graphics/web_graphics_context_3d_provider_util.h"
+#include "third_party/blink/renderer/platform/heap/disallow_new_wrapper.h"
 #include "third_party/blink/renderer/platform/heap/garbage_collected.h"
+#include "third_party/blink/renderer/platform/heap/member.h"
 #include "third_party/blink/renderer/platform/privacy_budget/identifiability_digest_helpers.h"
 #include "third_party/blink/renderer/platform/runtime_enabled_features.h"
 #include "third_party/blink/renderer/platform/scheduler/public/post_cross_thread_task.h"
@@ -231,33 +233,36 @@ base::Lock& WebGLContextLimitLock() {
 using WebGLRenderingContextBaseSet =
     HeapHashSet<WeakMember<WebGLRenderingContextBase>>;
 WebGLRenderingContextBaseSet& ActiveContexts() {
+  using WebGLRenderingContextBaseSetHolder =
+      DisallowNewWrapper<WebGLRenderingContextBaseSet>;
   DEFINE_THREAD_SAFE_STATIC_LOCAL(
-      ThreadSpecific<Persistent<WebGLRenderingContextBaseSet>>, active_contexts,
-      ());
-  Persistent<WebGLRenderingContextBaseSet>& active_contexts_persistent =
+      ThreadSpecific<Persistent<WebGLRenderingContextBaseSetHolder>>,
+      active_contexts, ());
+  Persistent<WebGLRenderingContextBaseSetHolder>& active_contexts_persistent =
       *active_contexts;
   if (!active_contexts_persistent) {
     active_contexts_persistent =
-        MakeGarbageCollected<WebGLRenderingContextBaseSet>();
+        MakeGarbageCollected<WebGLRenderingContextBaseSetHolder>();
     LEAK_SANITIZER_IGNORE_OBJECT(&active_contexts_persistent);
   }
-  return *active_contexts_persistent;
+  return active_contexts_persistent->Value();
 }
 
 using WebGLRenderingContextBaseMap =
     HeapHashMap<WeakMember<WebGLRenderingContextBase>, int>;
 WebGLRenderingContextBaseMap& ForciblyEvictedContexts() {
+  using WebGLRenderingContextBaseMapHolder =
+      DisallowNewWrapper<WebGLRenderingContextBaseMap>;
   DEFINE_THREAD_SAFE_STATIC_LOCAL(
-      ThreadSpecific<Persistent<WebGLRenderingContextBaseMap>>,
-      forcibly_evicted_contexts, ());
-  Persistent<WebGLRenderingContextBaseMap>&
-      forcibly_evicted_contexts_persistent = *forcibly_evicted_contexts;
-  if (!forcibly_evicted_contexts_persistent) {
-    forcibly_evicted_contexts_persistent =
-        MakeGarbageCollected<WebGLRenderingContextBaseMap>();
-    LEAK_SANITIZER_IGNORE_OBJECT(&forcibly_evicted_contexts_persistent);
+      ThreadSpecific<Persistent<WebGLRenderingContextBaseMapHolder>>, holder,
+      ());
+  Persistent<WebGLRenderingContextBaseMapHolder>& holder_persistent = *holder;
+  if (!holder_persistent) {
+    holder_persistent =
+        MakeGarbageCollected<WebGLRenderingContextBaseMapHolder>();
+    LEAK_SANITIZER_IGNORE_OBJECT(&holder_persistent);
   }
-  return *forcibly_evicted_contexts_persistent;
+  return holder_persistent->Value();
 }
 
 }  // namespace
@@ -681,11 +686,14 @@ void WebGLRenderingContextBase::ForceNextWebGLContextCreationToFail() {
 }
 
 ImageBitmap* WebGLRenderingContextBase::TransferToImageBitmapBase(
-    ScriptState* script_state) {
+    ScriptState* script_state,
+    ExceptionState& exception_state) {
   WebFeature feature = WebFeature::kOffscreenCanvasTransferToImageBitmapWebGL;
   UseCounter::Count(ExecutionContext::From(script_state), feature);
   if (!GetDrawingBuffer()) {
-    // Context is lost.
+    exception_state.ThrowDOMException(
+        DOMExceptionCode::kInvalidStateError,
+        "Cannot transfer to ImageBitmap because WebGL context is lost.");
     return nullptr;
   }
 
@@ -1430,12 +1438,6 @@ void WebGLRenderingContextBase::InitializeNewContext() {
       WTF::BindRepeating(&WebGLRenderingContextBase::OnErrorMessage,
                          WrapWeakPersistent(this)));
 
-  // If WebGL 2, the PRIMITIVE_RESTART_FIXED_INDEX should be always enabled.
-  // See the section <Primitive Restart is Always Enabled> in WebGL 2 spec:
-  // https://www.khronos.org/registry/webgl/specs/latest/2.0/#4.1.4
-  if (IsWebGL2())
-    ContextGL()->Enable(GL_PRIMITIVE_RESTART_FIXED_INDEX);
-
   // This ensures that the context has a valid "lastFlushID" and won't be
   // mistakenly identified as the "least recently used" context.
   ContextGL()->Flush();
@@ -1866,12 +1868,7 @@ bool WebGLRenderingContextBase::PaintRenderingResultsToCanvas(
   if (!resource_provider)
     return false;
 
-  if (Host()->LowLatencyEnabled() &&
-      resource_provider->SupportsSingleBuffering()) {
-    // It's possible single buffering isn't enabled yet because we haven't
-    // finished the first frame e.g. this gets called first due to drawImage.
-    resource_provider->TryEnableSingleBuffering();
-    DCHECK(resource_provider->IsSingleBuffered());
+  if (Host()->LowLatencyEnabled() && resource_provider->IsSingleBuffered()) {
     // Single buffered passthrough resource provider doesn't have backing
     // texture. We need to export the backbuffer mailbox directly without
     // copying.
@@ -6077,7 +6074,7 @@ void WebGLRenderingContextBase::TexImageHelperCanvasRenderingContextHost(
   SourceImageStatus source_image_status = kInvalidSourceImageStatus;
   scoped_refptr<Image> image = context_host->GetSourceImageForCanvas(
       FlushReason::kWebGLTexImage, &source_image_status,
-      gfx::SizeF(*params.width, *params.height), kDontChangeAlpha);
+      gfx::SizeF(*params.width, *params.height));
   if (source_image_status != kNormalSourceImageStatus)
     return;
 

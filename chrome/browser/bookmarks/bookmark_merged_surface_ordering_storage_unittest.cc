@@ -20,7 +20,7 @@
 #include "components/bookmarks/browser/bookmark_node.h"
 #include "components/bookmarks/test/bookmark_test_helpers.h"
 #include "components/bookmarks/test/test_bookmark_client.h"
-#include "components/sync/base/features.h"
+#include "components/signin/public/base/signin_switches.h"
 #include "testing/gmock/include/gmock/gmock.h"
 #include "testing/gtest/include/gtest/gtest.h"
 
@@ -54,7 +54,9 @@ class BookmarkMergedSurfaceOrderingStorageTest : public testing::Test {
  public:
   BookmarkMergedSurfaceOrderingStorageTest()
       : model_(TestBookmarkClient::CreateModel()),
-        service_(model_.get(), /*managed_bookmark_service=*/nullptr) {}
+        service_(model_.get(), /*managed_bookmark_service=*/nullptr) {
+    service_.LoadForTesting({});
+  }
 
   const BookmarkNode* CreateURLNode(const BookmarkNode* parent,
                                     const std::u16string& title,
@@ -70,7 +72,7 @@ class BookmarkMergedSurfaceOrderingStorageTest : public testing::Test {
 
  private:
   base::test::ScopedFeatureList features{
-      syncer::kSyncEnableBookmarksInTransportMode};
+      switches::kSyncEnableBookmarksInTransportMode};
   base::test::TaskEnvironment task_environment_{
       base::test::TaskEnvironment::TimeSource::MOCK_TIME};
   const std::unique_ptr<BookmarkModel> model_;
@@ -377,6 +379,7 @@ TEST(BookmarkMergedSurfaceOrderingStorageShutdownTest,
   std::unique_ptr<BookmarkModel> model(TestBookmarkClient::CreateModel());
   BookmarkMergedSurfaceService service(model.get(),
                                        /*managed_bookmark_service=*/nullptr);
+  service.LoadForTesting({});
   {
     base::test::TaskEnvironment task_environment{
         base::test::TaskEnvironment::TimeSource::MOCK_TIME};

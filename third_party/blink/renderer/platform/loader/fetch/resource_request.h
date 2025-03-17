@@ -58,11 +58,15 @@
 #include "third_party/blink/renderer/platform/weborigin/security_origin.h"
 #include "third_party/blink/renderer/platform/wtf/ref_counted.h"
 
+namespace network {
+class PermissionsPolicy;
+}  // namespace network
+
 namespace blink {
 
 class FeatureContext;
 class EncodedFormData;
-class PermissionsPolicy;
+struct IntegrityMetadataSet;
 
 // ResourceRequestHead represents request without request body.
 // See ResourceRequest below to see what request is.
@@ -403,8 +407,8 @@ class PLATFORM_EXPORT ResourceRequestHead {
   const String& GetFetchIntegrity() const { return fetch_integrity_; }
   void SetFetchIntegrity(const String& integrity, const FeatureContext*);
 
-  // The list of expected signatures is set as a side-effect of
-  // `SetFetchIntegrity()`.
+  // This is also called as a side-effect of `SetFetchIntegrity()`.
+  void SetExpectedSignatures(const IntegrityMetadataSet&);
   const WTF::Vector<String>& GetExpectedSignatures() const {
     return expected_signatures_;
   }
@@ -670,6 +674,14 @@ class PLATFORM_EXPORT ResourceRequestHead {
 #endif
   }
 
+  bool AllowsDeviceBoundSessions() const {
+    return allows_device_bound_sessions_;
+  }
+
+  void SetAllowsDeviceBoundSessions(bool allows_device_bound_sessions) {
+    allows_device_bound_sessions_ = allows_device_bound_sessions;
+  }
+
  private:
   const CacheControlHeader& GetCacheControlHeader() const;
 
@@ -823,6 +835,11 @@ class PLATFORM_EXPORT ResourceRequestHead {
 #if DCHECK_IS_ON()
   bool is_set_url_allowed_ = true;
 #endif
+
+  // Whether this request is allowed to register new device bound
+  // sessions or accept challenges on device bound sessions (e.g. due to
+  // an Origin Trial)
+  bool allows_device_bound_sessions_ = false;
 };
 
 class PLATFORM_EXPORT ResourceRequestBody {
@@ -904,7 +921,7 @@ class PLATFORM_EXPORT ResourceRequest final : public ResourceRequestHead {
   // `PermissionsPolicy::IsFeatureEnabledForSubresourceRequestAssumingOptIn()`
   // private for safety.
   bool IsFeatureEnabledForSubresourceRequestAssumingOptIn(
-      const PermissionsPolicy* policy,
+      const network::PermissionsPolicy* policy,
       network::mojom::PermissionsPolicyFeature feature,
       const url::Origin& origin);
 

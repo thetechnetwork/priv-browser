@@ -87,9 +87,11 @@ BASE_FEATURE(kReclaimOldPrepaintTiles,
 const base::FeatureParam<int> kReclaimDelayInSeconds{&kSmallerInterestArea,
                                                      "reclaim_delay_s", 30};
 
+// This feature can be removed once M136 hits stable as long as no issues are
+// reported that require it to be disabled in finch.
 BASE_FEATURE(kUseMapRectForPixelMovement,
              "UseMapRectForPixelMovement",
-             base::FEATURE_DISABLED_BY_DEFAULT);
+             base::FEATURE_ENABLED_BY_DEFAULT);
 
 BASE_FEATURE(kEvictionThrottlesDraw,
              "EvictionThrottlesDraw",
@@ -149,7 +151,7 @@ constexpr const char
 const base::FeatureParam<std::string> kScrollEventDispatchMode(
     &kWaitForLateScrollEvents,
     "mode",
-    kScrollEventDispatchModeDispatchScrollEventsImmediately);
+    kScrollEventDispatchModeDispatchScrollEventsUntilDeadline);
 
 BASE_FEATURE(kTreesInViz, "TreesInViz", base::FEATURE_DISABLED_BY_DEFAULT);
 
@@ -167,7 +169,7 @@ BASE_FEATURE(kThrottleFrameRateOnManyDidNotProduceFrame,
 
 BASE_FEATURE(kNewContentForCheckerboardedScrolls,
              "NewContentForCheckerboardedScrolls",
-             base::FEATURE_DISABLED_BY_DEFAULT);
+             base::FEATURE_ENABLED_BY_DEFAULT);
 
 BASE_FEATURE(kAllowLCDTextWithFilter,
              "AllowLCDTextWithFilter",
@@ -210,7 +212,7 @@ BASE_FEATURE(kThrottleMainFrameTo60Hz,
 
 BASE_FEATURE(kViewTransitionCaptureAndDisplay,
              "ViewTransitionCaptureAndDisplay",
-             base::FEATURE_ENABLED_BY_DEFAULT);
+             base::FEATURE_DISABLED_BY_DEFAULT);
 
 // When enabled, this flag stops the export of most of the
 // UKMs calculated by the DroppedFrameCounter.
@@ -228,5 +230,20 @@ BASE_FEATURE(kZeroScrollMetricsUpdate,
 BASE_FEATURE(kViewTransitionFloorTransform,
              "ViewTransitionFloorTransform",
              base::FEATURE_ENABLED_BY_DEFAULT);
+
+// The feature is the enabled for the cc infrastructure to set the frame rate
+// throttles from the main thread.
+// The experiment will be controlled by the feature flag
+// RenderBlockingFullFrameRate. Enabling the feature will not introduce any
+// behavioral change by itself.
+BASE_FEATURE(kRenderThrottleFrameRate,
+             "RenderThrottleFrameRate",
+             base::FEATURE_ENABLED_BY_DEFAULT);
+const base::FeatureParam<int> kRenderThrottledFrameIntervalHz{
+    &kRenderThrottleFrameRate, "render-throttled-frame-interval-hz", 30};
+
+BASE_FEATURE(kFastPathNoRaster,
+             "FastPathNoRaster",
+             base::FEATURE_DISABLED_BY_DEFAULT);
 
 }  // namespace features

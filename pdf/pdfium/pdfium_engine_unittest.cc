@@ -118,7 +118,13 @@ blink::WebMouseEvent CreateMoveWebMouseEventToPosition(
 
 base::FilePath GetReferenceFilePath(
     base::FilePath::StringViewType sub_directory,
-    std::string_view test_filename) {
+    std::string_view test_filename,
+    bool use_platform_suffix) {
+  if (use_platform_suffix) {
+    return base::FilePath(sub_directory)
+        .Append(GetTestDataPathWithPlatformSuffix(test_filename));
+  }
+
   return base::FilePath(sub_directory).AppendASCII(test_filename);
 }
 
@@ -284,21 +290,8 @@ class PDFiumEngineTest : public PDFiumTestBase {
     // `progressive_paints_`.
     engine.progressive_paints_.clear();
 
-    base::FilePath expectation_path =
-        GetReferenceFilePath(sub_directory, expected_png_filename);
-
-#if BUILDFLAG(IS_WIN) || BUILDFLAG(IS_MAC)
-    // Note that the expectation files without a suffix is typically generated
-    // on Linux, so there is no code here to add a suffix for Linux.
-    if (use_platform_suffix) {
-#if BUILDFLAG(IS_WIN)
-      constexpr std::wstring_view kSuffix = L"_win";
-#else
-      constexpr std::string_view kSuffix = "_mac";
-#endif  // BUILDFLAG(IS_WIN)
-      expectation_path = expectation_path.InsertBeforeExtension(kSuffix);
-    }
-#endif  // BUILDFLAG(IS_WIN) || BUILDFLAG(IS_MAC)
+    base::FilePath expectation_path = GetReferenceFilePath(
+        sub_directory, expected_png_filename, use_platform_suffix);
 
     EXPECT_TRUE(MatchesPngFile(bitmap.asImage().get(), expectation_path));
   }
@@ -743,6 +736,34 @@ TEST_P(PDFiumEngineTest, IncrementalLoadingFeatureDisabled) {
   EXPECT_FALSE(TryLoadIncrementally());
 }
 
+TEST_P(PDFiumEngineTest, GetPageSizeInPoints) {
+  NiceMock<MockTestClient> client;
+  InitializeEngineResult initialize_result = InitializeEngineWithoutLoading(
+      &client, FILE_PATH_LITERAL("variable_page_sizes.pdf"));
+  ASSERT_TRUE(initialize_result.engine);
+  PDFiumEngine& engine = *initialize_result.engine;
+
+  engine.PluginSizeUpdated({});
+  initialize_result.FinishLoading();
+
+  ASSERT_EQ(engine.GetNumberOfPages(), 7);
+  EXPECT_THAT(engine.GetPageSizeInPoints(/*page_index=*/0),
+              testing::Optional(gfx::SizeF(612.0f, 792.0f)));
+  EXPECT_THAT(engine.GetPageSizeInPoints(/*page_index=*/1),
+              testing::Optional(gfx::SizeF(595.0f, 842.0f)));
+  EXPECT_THAT(engine.GetPageSizeInPoints(/*page_index=*/2),
+              testing::Optional(gfx::SizeF(200.0f, 200.0f)));
+  EXPECT_THAT(engine.GetPageSizeInPoints(/*page_index=*/3),
+              testing::Optional(gfx::SizeF(1000.0f, 200.0f)));
+  EXPECT_THAT(engine.GetPageSizeInPoints(/*page_index=*/4),
+              testing::Optional(gfx::SizeF(200.0f, 1000.0f)));
+  EXPECT_THAT(engine.GetPageSizeInPoints(/*page_index=*/5),
+              testing::Optional(gfx::SizeF(1500.0f, 50.0f)));
+  EXPECT_THAT(engine.GetPageSizeInPoints(/*page_index=*/6),
+              testing::Optional(gfx::SizeF(50.0f, 1500.0f)));
+  EXPECT_THAT(engine.GetPageSizeInPoints(/*page_index=*/7), std::nullopt);
+}
+
 TEST_P(PDFiumEngineTest, RequestThumbnail) {
   TestClient client;
   std::unique_ptr<PDFiumEngine> engine = InitializeEngine(
@@ -1109,6 +1130,40 @@ TEST_P(PDFiumEngineTest, SelectTextAcrossEmptyPage) {
       "Hello, world!\nGoodbye, world!";
 #endif
   EXPECT_EQ(kExpectedAllSelection, engine->GetSelectedText());
+}
+
+TEST_P(PDFiumEngineTest, SelectTextWithDoubleClickOnEmptyPage) {
+  NiceMock<MockTestClient> client;
+  std::unique_ptr<PDFiumEngine> engine =
+      InitializeEngine(&client, FILE_PATH_LITERAL("blank.pdf"));
+  ASSERT_TRUE(engine);
+
+  // Plugin size chosen so all pages of the document are visible.
+  engine->PluginSizeUpdated({1024, 4096});
+
+  constexpr gfx::PointF kPosition(100, 100);
+  EXPECT_TRUE(engine->HandleInputEvent(MouseEventBuilder()
+                                           .CreateLeftClickAtPosition(kPosition)
+                                           .SetClickCount(2)
+                                           .Build()));
+  EXPECT_THAT(engine->GetSelectedText(), IsEmpty());
+}
+
+TEST_P(PDFiumEngineTest, SelectTextWithDoubleClickAtEndOfPage) {
+  NiceMock<MockTestClient> client;
+  std::unique_ptr<PDFiumEngine> engine =
+      InitializeEngine(&client, FILE_PATH_LITERAL("hello_world2.pdf"));
+  ASSERT_TRUE(engine);
+
+  // Plugin size chosen so all pages of the document are visible.
+  engine->PluginSizeUpdated({1024, 4096});
+
+  constexpr gfx::PointF kPosition(195, 130);
+  EXPECT_TRUE(engine->HandleInputEvent(MouseEventBuilder()
+                                           .CreateLeftClickAtPosition(kPosition)
+                                           .SetClickCount(2)
+                                           .Build()));
+  EXPECT_THAT(engine->GetSelectedText(), IsEmpty());
 }
 
 TEST_P(PDFiumEngineTest, DrawTextSelectionsHelloWorld) {
@@ -2147,8 +2202,9 @@ TEST_P(PDFiumEngineInkTest, LoadV2InkPathsForPage) {
   ASSERT_EQ(1, engine->GetNumberOfPages());
   EXPECT_TRUE(engine->ink_modeled_shape_map_for_testing().empty());
 
+  constexpr int kPageIndex = 0;
   std::map<InkModeledShapeId, ink::PartitionedMesh> ink_shapes =
-      engine->LoadV2InkPathsForPage(/*page_index=*/0);
+      engine->LoadV2InkPathsForPage(kPageIndex);
   ASSERT_EQ(1u, ink_shapes.size());
   const auto ink_shapes_it = ink_shapes.begin();
 
@@ -2160,6 +2216,9 @@ TEST_P(PDFiumEngineInkTest, LoadV2InkPathsForPage) {
   EXPECT_EQ(ink_shapes_it->first, pdf_shapes_it->first);
   EXPECT_EQ(1u, ink_shapes_it->second.Meshes().size());
   EXPECT_TRUE(pdf_shapes_it->second);
+
+  EXPECT_TRUE(engine->stroked_pages_unload_preventers_for_testing().contains(
+      kPageIndex));
 }
 
 INSTANTIATE_TEST_SUITE_P(All, PDFiumEngineInkTest, testing::Bool());
@@ -2229,7 +2288,7 @@ TEST_P(PDFiumEngineInkDrawTest, StrokeData) {
 
   // Verify the visibility of strokes for in-memory PDF.
   const base::FilePath kAppliedStroke2FilePath(
-      GetInkTestDataFilePath("applied_stroke2.png"));
+      GetInkTestDataFilePath(FILE_PATH_LITERAL("applied_stroke2.png")));
   CheckPdfRendering(page.GetPage(), kPageSizeInPoints, kAppliedStroke2FilePath);
   EXPECT_TRUE(engine->stroked_pages_unload_preventers_for_testing().contains(
       kPageIndex));
@@ -2251,7 +2310,7 @@ TEST_P(PDFiumEngineInkDrawTest, StrokeData) {
   engine->UpdateStrokeActive(kPageIndex, kHighlighterStrokeId,
                              /*active=*/false);
   const base::FilePath kAppliedStroke1FilePath(
-      GetInkTestDataFilePath("applied_stroke1.png"));
+      GetInkTestDataFilePath(FILE_PATH_LITERAL("applied_stroke1.png")));
   CheckPdfRendering(page.GetPage(), kPageSizeInPoints, kAppliedStroke1FilePath);
   saved_pdf_data = engine->GetSaveData();
   ASSERT_FALSE(saved_pdf_data.empty());
@@ -2317,7 +2376,7 @@ TEST_P(PDFiumEngineInkDrawTest, StrokeDiscardStroke) {
 
   // Verify the visibility of strokes for in-memory PDF.
   const base::FilePath kAppliedStroke1FilePath(
-      GetInkTestDataFilePath("applied_stroke1.png"));
+      GetInkTestDataFilePath(FILE_PATH_LITERAL("applied_stroke1.png")));
   CheckPdfRendering(page.GetPage(), kPageSizeInPoints, kAppliedStroke1FilePath);
   EXPECT_TRUE(engine->stroked_pages_unload_preventers_for_testing().contains(
       kPageIndex));
@@ -2357,7 +2416,7 @@ TEST_P(PDFiumEngineInkDrawTest, StrokeDiscardStroke) {
 
   // Verify the visibility of strokes for in-memory PDF.
   const base::FilePath kAppliedStroke3FilePath(
-      GetInkTestDataFilePath("applied_stroke3.png"));
+      GetInkTestDataFilePath(FILE_PATH_LITERAL("applied_stroke3.png")));
   CheckPdfRendering(page.GetPage(), kPageSizeInPoints, kAppliedStroke3FilePath);
   EXPECT_EQ(FPDFPage_CountObjects(page.GetPage()), 1);
   EXPECT_TRUE(engine->stroked_pages_unload_preventers_for_testing().contains(
@@ -2374,7 +2433,8 @@ TEST_P(PDFiumEngineInkDrawTest, LoadedV2InkPathsAndUpdateShapeActive) {
   // Check the initial loaded PDF.
   constexpr int kPageIndex = 0;
   constexpr gfx::Size kPageSizeInPoints(200, 200);
-  const base::FilePath kInkV2PngPath = GetInkTestDataFilePath("ink_v2.png");
+  const base::FilePath kInkV2PngPath =
+      GetInkTestDataFilePath(FILE_PATH_LITERAL("ink_v2.png"));
   PDFiumPage& page = GetPDFiumPageForTest(*engine, kPageIndex);
   CheckPdfRendering(page.GetPage(), kPageSizeInPoints, kInkV2PngPath);
   EXPECT_EQ(GetPdfMarkObjCountForTesting(engine->doc(),
@@ -2390,6 +2450,12 @@ TEST_P(PDFiumEngineInkDrawTest, LoadedV2InkPathsAndUpdateShapeActive) {
                                          kInkAnnotationIdentifierKeyV2),
             1);
 
+  // Attempt to unload the page before erasing. This would have caught
+  // https://crbug.com/402364794.
+  EXPECT_TRUE(engine->stroked_pages_unload_preventers_for_testing().contains(
+      kPageIndex));
+  page.Unload();
+
   // Erase the shape and check the rendering. Also check the save version.
   const auto ink_shapes_it = ink_shapes.begin();
   const InkModeledShapeId& shape_id = ink_shapes_it->first;
@@ -2403,6 +2469,12 @@ TEST_P(PDFiumEngineInkDrawTest, LoadedV2InkPathsAndUpdateShapeActive) {
   EXPECT_EQ(GetPdfMarkObjCountForTesting(engine->doc(),
                                          kInkAnnotationIdentifierKeyV2),
             0);
+
+  // Attempt to unload the page before undoing. This would have caught
+  // https://crbug.com/402454523.
+  EXPECT_TRUE(engine->stroked_pages_unload_preventers_for_testing().contains(
+      kPageIndex));
+  page.Unload();
 
   // Undo the erasure and check the rendering.
   engine->UpdateShapeActive(kPageIndex, shape_id, /*active=*/true);

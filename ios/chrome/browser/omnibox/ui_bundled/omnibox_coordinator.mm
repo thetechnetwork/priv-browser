@@ -22,6 +22,7 @@
 #import "ios/chrome/browser/location_bar/ui_bundled/location_bar_constants.h"
 #import "ios/chrome/browser/omnibox/model/omnibox_autocomplete_controller.h"
 #import "ios/chrome/browser/omnibox/model/omnibox_popup_controller.h"
+#import "ios/chrome/browser/omnibox/model/omnibox_text_controller.h"
 #import "ios/chrome/browser/omnibox/ui_bundled/keyboard_assist/omnibox_assistive_keyboard_delegate.h"
 #import "ios/chrome/browser/omnibox/ui_bundled/keyboard_assist/omnibox_assistive_keyboard_mediator.h"
 #import "ios/chrome/browser/omnibox/ui_bundled/keyboard_assist/omnibox_assistive_keyboard_views.h"
@@ -98,6 +99,8 @@
   OmniboxAutocompleteController* _omniboxAutocompleteController;
   /// Controller for the omnibox popup.
   OmniboxPopupController* _omniboxPopupController;
+  /// Controller for the omnibox text.
+  OmniboxTextController* _omniboxTextController;
 
   /// Object handling interactions in the keyboard accessory view.
   OmniboxAssistiveKeyboardMediator* _keyboardMediator;
@@ -164,6 +167,7 @@
   self.mediator.URLLoadingBrowserAgent =
       UrlLoadingBrowserAgent::FromBrowser(self.browser);
   self.viewController.pasteDelegate = self.mediator;
+  self.viewController.mutator = self.mediator;
 
   DCHECK(_client.get());
 
@@ -171,8 +175,7 @@
       HandlerForProtocol(self.browser->GetCommandDispatcher(), OmniboxCommands);
   _editView = std::make_unique<OmniboxViewIOS>(
       self.textField, std::move(_client), self.browser->GetProfile(),
-      omniboxHandler, self.focusDelegate, _toolbarHandler, self.viewController,
-      _isLensOverlay);
+      omniboxHandler, self.focusDelegate, _toolbarHandler, _isLensOverlay);
   self.pasteDelegate = [[OmniboxTextFieldPasteDelegate alloc] init];
   [self.textField setPasteDelegate:self.pasteDelegate];
 
@@ -210,6 +213,18 @@
   _omniboxAutocompleteController.omniboxPopupController =
       _omniboxPopupController;
 
+  _omniboxTextController = [[OmniboxTextController alloc]
+      initWithOmniboxController:_editView->controller()
+                 omniboxViewIOS:_editView.get()];
+  _omniboxTextController.delegate = self.mediator;
+  _omniboxTextController.omniboxAutocompleteController =
+      _omniboxAutocompleteController;
+  _omniboxTextController.textField = self.textField;
+  _omniboxAutocompleteController.omniboxTextController = _omniboxTextController;
+
+  self.mediator.omniboxTextController = _omniboxTextController;
+  _editView->SetOmniboxTextController(_omniboxTextController);
+
   self.popupCoordinator = [self createPopupCoordinator:self.presenterDelegate];
   [self.popupCoordinator start];
 }
@@ -217,6 +232,8 @@
 - (void)stop {
   [_omniboxAutocompleteController disconnect];
   _omniboxAutocompleteController = nil;
+  [_omniboxTextController disconnect];
+  _omniboxTextController = nil;
   _omniboxPopupController = nil;
 
   [self.popupCoordinator stop];
@@ -354,9 +371,7 @@
 }
 
 - (void)setThumbnailImage:(UIImage*)image {
-  if (_editView) {
-    _editView->SetThumbnailImage(image);
-  }
+  [self.mediator setThumbnailImage:image];
 }
 
 #pragma mark Scribble

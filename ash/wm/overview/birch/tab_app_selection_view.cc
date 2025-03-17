@@ -21,6 +21,7 @@
 #include "base/task/cancelable_task_tracker.h"
 #include "chromeos/ash/services/coral/public/mojom/coral_service.mojom.h"
 #include "components/prefs/pref_service.h"
+#include "ui/accessibility/ax_action_data.h"
 #include "ui/base/l10n/l10n_util.h"
 #include "ui/base/metadata/metadata_impl_macros.h"
 #include "ui/compositor/layer.h"
@@ -145,11 +146,17 @@ class TabAppSelectionView::TabAppSelectionItemView
 
   explicit TabAppSelectionItemView(InitParams params)
       : type_(params.type),
+        title_(base::UTF8ToUTF16(params.title)),
         identifier_(params.identifier),
         owner_(params.owner) {
     views::Builder<views::BoxLayoutView>(this)
         .SetAccessibleRole(ax::mojom::Role::kMenuItem)
-        .SetAccessibleName(base::UTF8ToUTF16(params.title))
+        .SetAccessibleName(
+            params.show_close_button
+                ? l10n_util::GetStringFUTF16(
+                      IDS_ASH_BIRCH_CORAL_ADDON_SELECTOR_ITEM_WITH_REMOVE_BUTTON,
+                      title_)
+                : title_)
         .SetBetweenChildSpacing(kItemChildSpacing)
         .SetCrossAxisAlignment(views::LayoutAlignment::kCenter)
         .SetFocusBehavior(views::View::FocusBehavior::ACCESSIBLE_ONLY)
@@ -171,6 +178,7 @@ class TabAppSelectionView::TabAppSelectionItemView
                 .CustomConfigure(base::BindOnce([](views::Label* label) {
                   TypographyProvider::Get()->StyleLabel(
                       TypographyToken::kCrosButton2, *label);
+                  label->GetViewAccessibility().SetIsIgnored(true);
                 })))
         .BuildChildren();
 
@@ -189,8 +197,8 @@ class TabAppSelectionView::TabAppSelectionItemView
       close_button_->layer()->SetOpacity(0.f);
       close_button_->SetEnabled(false);
       close_button_->SetID(TabAppSelectionView::kCloseButtonID);
-      close_button_->SetTooltipText(l10n_util::GetStringUTF16(
-          IDS_ASH_BIRCH_CORAL_SELECTOR_ITEM_CLOSE_BUTTON_TOOLTIP));
+      close_button_->SetTooltipText(l10n_util::GetStringFUTF16(
+          IDS_ASH_BIRCH_CORAL_SELECTOR_ITEM_CLOSE_BUTTON_TOOLTIP, title_));
       views::FocusRing::Get(close_button_)
           ->SetHasFocusPredicate(base::BindRepeating(
               [](const TabAppSelectionView* owner, const views::View* view) {
@@ -251,7 +259,7 @@ class TabAppSelectionView::TabAppSelectionItemView
       close_button_->layer()->SetOpacity(selected ? 1.f : 0.f);
       close_button_->SetEnabled(selected);
     }
-    SetBackground(selected_ ? views::CreateThemedSolidBackground(
+    SetBackground(selected_ ? views::CreateSolidBackground(
                                   cros_tokens::kCrosSysHoverOnSubtle)
                             : nullptr);
   }
@@ -261,6 +269,7 @@ class TabAppSelectionView::TabAppSelectionItemView
       return;
     }
     RemoveChildViewT(std::exchange(close_button_, nullptr));
+    SetAccessibleName(title_);
   }
 
   // views::BoxLayoutView:
@@ -278,6 +287,15 @@ class TabAppSelectionView::TabAppSelectionItemView
   void OnFocus() override { owner_->MoveFocus(this); }
   void OnBlur() override { owner_->MoveFocus(nullptr); }
 
+  bool HandleAccessibleAction(const ui::AXActionData& action_data) override {
+    // Override accessibility focus behavior.
+    if (action_data.action == ax::mojom::Action::kFocus) {
+      owner_->MoveFocus(this);
+      return true;
+    }
+    return views::BoxLayoutView::HandleAccessibleAction(action_data);
+  }
+
  private:
   void OnCloseButtonPressed() {
     // `this` will be destroyed.
@@ -285,6 +303,7 @@ class TabAppSelectionView::TabAppSelectionItemView
   }
 
   const InitParams::Type type_;
+  const std::u16string title_;
   const std::string identifier_;
 
   // True when the mouse is hovered over this view. The background is painted
@@ -328,7 +347,7 @@ class TabAppSelectionView::UserFeedbackView : public views::BoxLayoutView {
     SetOrientation(views::BoxLayout::Orientation::kHorizontal);
     SetInsideBorderInsets(kUserFeedbackInsets);
     SetMainAxisAlignment(views::LayoutAlignment::kCenter);
-    SetBackground(views::CreateThemedRoundedRectBackground(
+    SetBackground(views::CreateRoundedRectBackground(
         cros_tokens::kCrosSysSystemOnBaseOpaque,
         kUserFeedbackContainerCornerRadius, 0));
     SetBetweenChildSpacing(kUserFeedbackChildSpacing);
@@ -478,7 +497,7 @@ TabAppSelectionView::TabAppSelectionView(const base::Token& group_id,
   tab_app_items_view->SetCrossAxisAlignment(
       views::BoxLayout::CrossAxisAlignment::kStretch);
   tab_app_items_view->SetOrientation(views::BoxLayout::Orientation::kVertical);
-  tab_app_items_view->SetBackground(views::CreateThemedRoundedRectBackground(
+  tab_app_items_view->SetBackground(views::CreateRoundedRectBackground(
       cros_tokens::kCrosSysSystemOnBaseOpaque,
       kTabAppItemsContainerCornerRadius, 0));
 
@@ -656,6 +675,10 @@ std::optional<size_t> TabAppSelectionView::GetSelectedIndex() const {
 
 std::vector<views::View*> TabAppSelectionView::BuildFocusList() {
   std::vector<views::View*> focus_list;
+  focus_list.emplace_back(GetViewByID(ViewID::kUserFeedbackID));
+  focus_list.emplace_back(GetViewByID(ViewID::kThumbsUpID));
+  focus_list.emplace_back(GetViewByID(ViewID::kThumbsDownID));
+
   std::optional<size_t> selected_index = GetSelectedIndex();
   const raw_ptr<TabAppSelectionItemView>& item_view =
       selected_index ? item_views_[*selected_index] : item_views_[0];
@@ -663,9 +686,6 @@ std::vector<views::View*> TabAppSelectionView::BuildFocusList() {
   if (item_view->close_button()) {
     focus_list.emplace_back(item_view->close_button());
   }
-  focus_list.emplace_back(GetViewByID(ViewID::kUserFeedbackID));
-  focus_list.emplace_back(GetViewByID(ViewID::kThumbsUpID));
-  focus_list.emplace_back(GetViewByID(ViewID::kThumbsDownID));
 
   return focus_list;
 }

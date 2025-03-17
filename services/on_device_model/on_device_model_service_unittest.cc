@@ -84,34 +84,27 @@ class OnDeviceModelServiceTest : public testing::Test {
       ml::ModelBackendType backend_type = ml::ModelBackendType::kGpuBackend,
       ml::ModelPerformanceHint performance_hint =
           ml::ModelPerformanceHint::kHighestQuality) {
-    base::RunLoop run_loop;
     mojo::Remote<mojom::OnDeviceModel> remote;
     auto params = mojom::LoadModelParams::New();
     params->backend_type = backend_type;
     params->performance_hint = performance_hint;
     params->max_tokens = 8000;
-    service()->LoadModel(
-        std::move(params), remote.BindNewPipeAndPassReceiver(),
-        base::BindLambdaForTesting([&](mojom::LoadModelResult result) {
-          EXPECT_EQ(mojom::LoadModelResult::kSuccess, result);
-          run_loop.Quit();
-        }));
-    run_loop.Run();
+    base::test::TestFuture<mojom::LoadModelResult> future;
+    service()->LoadModel(std::move(params), remote.BindNewPipeAndPassReceiver(),
+                         future.GetCallback());
+    EXPECT_EQ(future.Get(), mojom::LoadModelResult::kSuccess);
     return remote;
   }
 
   mojo::Remote<mojom::OnDeviceModel> LoadAdaptationWithParams(
       mojom::OnDeviceModel& model,
       mojom::LoadAdaptationParamsPtr adaptation_params) {
-    base::RunLoop run_loop;
     mojo::Remote<mojom::OnDeviceModel> remote;
-    model.LoadAdaptation(
-        std::move(adaptation_params), remote.BindNewPipeAndPassReceiver(),
-        base::BindLambdaForTesting([&](mojom::LoadModelResult result) {
-          EXPECT_EQ(mojom::LoadModelResult::kSuccess, result);
-          run_loop.Quit();
-        }));
-    run_loop.Run();
+    base::test::TestFuture<mojom::LoadModelResult> future;
+    model.LoadAdaptation(std::move(adaptation_params),
+                         remote.BindNewPipeAndPassReceiver(),
+                         future.GetCallback());
+    EXPECT_EQ(future.Get(), mojom::LoadModelResult::kSuccess);
     return remote;
   }
 
@@ -145,7 +138,7 @@ class OnDeviceModelServiceTest : public testing::Test {
                                         const std::string& input) {
     TestResponseHolder response;
     mojo::Remote<mojom::Session> session;
-    model.StartSession(session.BindNewPipeAndPassReceiver());
+    model.StartSession(session.BindNewPipeAndPassReceiver(), nullptr);
     auto options = mojom::AppendOptions::New();
     options->input =
         mojom::Input::New(std::vector<ml::InputPiece>{ml::InputPiece(input)});
@@ -179,7 +172,7 @@ TEST_F(OnDeviceModelServiceTest, Append) {
 
   TestResponseHolder response;
   mojo::Remote<mojom::Session> session;
-  model->StartSession(session.BindNewPipeAndPassReceiver());
+  model->StartSession(session.BindNewPipeAndPassReceiver(), nullptr);
   session->Append(MakeInput("cheese"), {});
   session->Append(MakeInput("more"), {});
   session->Append(MakeInput("cheddar"), {});
@@ -195,7 +188,7 @@ TEST_F(OnDeviceModelServiceTest, CloneContextAndContinue) {
   auto model = LoadModel();
 
   mojo::Remote<mojom::Session> session;
-  model->StartSession(session.BindNewPipeAndPassReceiver());
+  model->StartSession(session.BindNewPipeAndPassReceiver(), nullptr);
   session->Append(MakeInput("cheese"), {});
   session->Append(MakeInput("more"), {});
 
@@ -243,8 +236,8 @@ TEST_F(OnDeviceModelServiceTest, MultipleSessionsAppend) {
   TestResponseHolder response1, response2, response3, response4, response5;
   mojo::Remote<mojom::Session> session1, session2, session3, session4, session5;
 
-  model->StartSession(session1.BindNewPipeAndPassReceiver());
-  model->StartSession(session2.BindNewPipeAndPassReceiver());
+  model->StartSession(session1.BindNewPipeAndPassReceiver(), nullptr);
+  model->StartSession(session2.BindNewPipeAndPassReceiver(), nullptr);
 
   session1->Append(MakeInput("cheese"), {});
   session1->Append(MakeInput("more"), {});
@@ -298,7 +291,7 @@ TEST_F(OnDeviceModelServiceTest, CountTokens) {
 
   TestResponseHolder response;
   mojo::Remote<mojom::Session> session;
-  model->StartSession(session.BindNewPipeAndPassReceiver());
+  model->StartSession(session.BindNewPipeAndPassReceiver(), nullptr);
   session->Append(MakeInput("cheese"), {});
   session->Append(MakeInput("more"), {});
 
@@ -316,7 +309,7 @@ TEST_F(OnDeviceModelServiceTest, AppendWithTokenLimits) {
 
   TestResponseHolder response;
   mojo::Remote<mojom::Session> session;
-  model->StartSession(session.BindNewPipeAndPassReceiver());
+  model->StartSession(session.BindNewPipeAndPassReceiver(), nullptr);
 
   std::string input = "big cheese";
   ContextClientWaiter client1;
@@ -345,12 +338,12 @@ TEST_F(OnDeviceModelServiceTest, MultipleSessionsWaitPreviousSession) {
 
   TestResponseHolder response1;
   mojo::Remote<mojom::Session> session1;
-  model->StartSession(session1.BindNewPipeAndPassReceiver());
+  model->StartSession(session1.BindNewPipeAndPassReceiver(), nullptr);
   session1->Append(MakeInput("1"), {});
   session1->Generate(mojom::GenerateOptions::New(), response1.BindRemote());
 
   mojo::Remote<mojom::Session> session2;
-  model->StartSession(session2.BindNewPipeAndPassReceiver());
+  model->StartSession(session2.BindNewPipeAndPassReceiver(), nullptr);
 
   // First session should not get canceled.
   session1.reset_on_disconnect();
@@ -376,38 +369,16 @@ TEST_F(OnDeviceModelServiceTest, LoadsAdaptation) {
   auto adaptation1 = LoadAdaptation(*model, weights1.Open());
   EXPECT_THAT(GetResponses(*model, "foo"), ElementsAre("Context: foo\n"));
   EXPECT_THAT(GetResponses(*adaptation1, "foo"),
-              ElementsAre("Adaptation: Adapt1\n", "Context: foo\n"));
+              ElementsAre("Adaptation: Adapt1 (0)\n", "Context: foo\n"));
 
   auto adaptation2 = LoadAdaptation(*model, weights2.Open());
   EXPECT_THAT(GetResponses(*model, "foo"), ElementsAre("Context: foo\n"));
   EXPECT_THAT(GetResponses(*adaptation1, "foo"),
-              ElementsAre("Adaptation: Adapt1\n", "Context: foo\n"));
+              ElementsAre("Adaptation: Adapt1 (0)\n", "Context: foo\n"));
   EXPECT_THAT(GetResponses(*adaptation2, "foo"),
-              ElementsAre("Adaptation: Adapt2\n", "Context: foo\n"));
-}
-
-TEST_F(OnDeviceModelServiceTest, DestroysAdaptationSession) {
-  FakeFile weights1("Adapt1");
-  FakeFile weights2("Adapt2");
-  auto model = LoadModel();
-  task_environment_.RunUntilIdle();
-  EXPECT_EQ(fake_ml::GetActiveNonCloneSessions(), 1);
-
-  auto adaptation1 = LoadAdaptation(*model, weights1.Open());
-  task_environment_.RunUntilIdle();
-  EXPECT_EQ(fake_ml::GetActiveNonCloneSessions(), 2);
-
-  auto adaptation2 = LoadAdaptation(*model, weights2.Open());
-  task_environment_.RunUntilIdle();
-  EXPECT_EQ(fake_ml::GetActiveNonCloneSessions(), 3);
-
-  adaptation1.reset();
-  task_environment_.RunUntilIdle();
-  EXPECT_EQ(fake_ml::GetActiveNonCloneSessions(), 2);
-
-  adaptation2.reset();
-  task_environment_.RunUntilIdle();
-  EXPECT_EQ(fake_ml::GetActiveNonCloneSessions(), 1);
+              ElementsAre("Adaptation: Adapt2 (1)\n", "Context: foo\n"));
+  EXPECT_THAT(GetResponses(*adaptation1, "foo"),
+              ElementsAre("Adaptation: Adapt1 (0)\n", "Context: foo\n"));
 }
 
 TEST_F(OnDeviceModelServiceTest, LoadsAdaptationWithPath) {
@@ -417,14 +388,16 @@ TEST_F(OnDeviceModelServiceTest, LoadsAdaptationWithPath) {
   auto adaptation1 = LoadAdaptation(*model, weights1.Path());
   EXPECT_THAT(GetResponses(*model, "foo"), ElementsAre("Context: foo\n"));
   EXPECT_THAT(GetResponses(*adaptation1, "foo"),
-              ElementsAre("Adaptation: Adapt1\n", "Context: foo\n"));
+              ElementsAre("Adaptation: Adapt1 (0)\n", "Context: foo\n"));
 
   auto adaptation2 = LoadAdaptation(*model, weights2.Path());
   EXPECT_THAT(GetResponses(*model, "foo"), ElementsAre("Context: foo\n"));
   EXPECT_THAT(GetResponses(*adaptation1, "foo"),
-              ElementsAre("Adaptation: Adapt1\n", "Context: foo\n"));
+              ElementsAre("Adaptation: Adapt1 (0)\n", "Context: foo\n"));
   EXPECT_THAT(GetResponses(*adaptation2, "foo"),
-              ElementsAre("Adaptation: Adapt2\n", "Context: foo\n"));
+              ElementsAre("Adaptation: Adapt2 (1)\n", "Context: foo\n"));
+  EXPECT_THAT(GetResponses(*adaptation1, "foo"),
+              ElementsAre("Adaptation: Adapt1 (0)\n", "Context: foo\n"));
 }
 
 TEST_F(OnDeviceModelServiceTest, LoadingAdaptationDoesNotCancelSession) {
@@ -432,7 +405,7 @@ TEST_F(OnDeviceModelServiceTest, LoadingAdaptationDoesNotCancelSession) {
   auto model = LoadModel();
 
   mojo::Remote<mojom::Session> session;
-  model->StartSession(session.BindNewPipeAndPassReceiver());
+  model->StartSession(session.BindNewPipeAndPassReceiver(), nullptr);
   session.reset_on_disconnect();
 
   LoadAdaptation(*model, weights1.Open());
@@ -475,7 +448,7 @@ TEST_F(OnDeviceModelServiceTest, Score) {
   auto model = LoadModel();
 
   mojo::Remote<mojom::Session> session;
-  model->StartSession(session.BindNewPipeAndPassReceiver());
+  model->StartSession(session.BindNewPipeAndPassReceiver(), nullptr);
   session->Append(MakeInput("hi"), {});
 
   {
@@ -495,7 +468,7 @@ TEST_F(OnDeviceModelServiceTest, AppendWithTokens) {
 
   TestResponseHolder response;
   mojo::Remote<mojom::Session> session;
-  model->StartSession(session.BindNewPipeAndPassReceiver());
+  model->StartSession(session.BindNewPipeAndPassReceiver(), nullptr);
   {
     std::vector<ml::InputPiece> pieces;
     pieces.push_back(ml::Token::kSystem);
@@ -524,15 +497,43 @@ TEST_F(OnDeviceModelServiceTest, AppendWithTokens) {
                                                 "Context: User: bye\n"));
 }
 
-TEST_F(OnDeviceModelServiceTest, AppendWithImages) {
+TEST_F(OnDeviceModelServiceTest, AppendWithImagesAdaptation) {
   auto model = LoadModel();
   auto params = mojom::LoadAdaptationParams::New();
   params->enable_image_input = true;
   auto adaptation = LoadAdaptationWithParams(*model, std::move(params));
 
-  TestResponseHolder response;
   mojo::Remote<mojom::Session> session;
-  adaptation->StartSession(session.BindNewPipeAndPassReceiver());
+  adaptation->StartSession(session.BindNewPipeAndPassReceiver(), nullptr);
+
+  std::vector<ml::InputPiece> pieces;
+  pieces.push_back("bleu");
+
+  SkBitmap moldy_cheese;
+  moldy_cheese.allocPixels(
+      SkImageInfo::Make(63, 42, kRGBA_8888_SkColorType, kOpaque_SkAlphaType),
+      0);
+  moldy_cheese.eraseColor(SK_ColorBLUE);
+  pieces.push_back(moldy_cheese);
+
+  pieces.push_back("cheese");
+
+  session->Append(MakeInput(std::move(pieces)), {});
+
+  TestResponseHolder response;
+  session->Generate(mojom::GenerateOptions::New(), response.BindRemote());
+  response.WaitForCompletion();
+
+  EXPECT_THAT(response.responses(),
+              ElementsAre("Context: bleu[Bitmap of size 63x42]cheese\n"));
+}
+
+TEST_F(OnDeviceModelServiceTest, AppendWithImages) {
+  auto model = LoadModel();
+  mojo::Remote<mojom::Session> session;
+  auto params = mojom::SessionParams::New();
+  params->capabilities.Put(CapabilityFlags::kImageInput);
+  model->StartSession(session.BindNewPipeAndPassReceiver(), std::move(params));
 
   {
     std::vector<ml::InputPiece> pieces;
@@ -550,6 +551,7 @@ TEST_F(OnDeviceModelServiceTest, AppendWithImages) {
     session->Append(MakeInput(std::move(pieces)), {});
   }
 
+  TestResponseHolder response;
   {
     std::vector<ml::InputPiece> pieces;
     pieces.push_back("bleu");
@@ -601,6 +603,23 @@ TEST_F(OnDeviceModelServiceTest, PerformanceHint) {
                          ml::ModelPerformanceHint::kFastestInference);
   EXPECT_THAT(GetResponses(*model, "foo"),
               ElementsAre("Fastest inference\n", "Context: foo\n"));
+}
+
+TEST_F(OnDeviceModelServiceTest, Capabilities) {
+  auto expect_capabilities = [&](const std::string& data,
+                                 const Capabilities& expected) {
+    FakeFile file(data);
+    ModelAssets assets;
+    assets.weights = file.Open();
+    base::test::TestFuture<const Capabilities&> future;
+    service()->GetCapabilities(std::move(assets), future.GetCallback());
+    EXPECT_EQ(expected, future.Take());
+  };
+  expect_capabilities("none", {});
+  expect_capabilities("image", {CapabilityFlags::kImageInput});
+  expect_capabilities("audio", {CapabilityFlags::kAudioInput});
+  expect_capabilities("image audio", {CapabilityFlags::kImageInput,
+                                      CapabilityFlags::kAudioInput});
 }
 
 }  // namespace

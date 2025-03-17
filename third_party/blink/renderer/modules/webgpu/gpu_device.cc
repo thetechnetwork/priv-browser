@@ -161,8 +161,11 @@ void GPUDevice::Initialize(wgpu::Device handle,
                            const GPUDeviceDescriptor* descriptor,
                            GPUDeviceLostInfo* lost_info) {
   SetHandle(std::move(handle));
-  features_ = MakeGarbageCollected<GPUSupportedFeatures>(
-      descriptor->requiredFeatures());
+
+  wgpu::SupportedFeatures features;
+  GetHandle().GetFeatures(&features);
+  features_ = MakeGarbageCollected<GPUSupportedFeatures>(features);
+
   queue_ = MakeGarbageCollected<GPUQueue>(this, GetHandle().GetQueue(),
                                           descriptor->defaultQueue()->label());
 
@@ -175,11 +178,7 @@ void GPUDevice::Initialize(wgpu::Device handle,
                       WebFeature::kWebGPUSubgroupsFeatures);
   }
 
-#ifdef WGPU_BREAKING_CHANGE_FLATTEN_LIMITS
   wgpu::Limits limits = {};
-#else
-  wgpu::SupportedLimits limits = {};
-#endif  // WGPU_BREAKING_CHANGE_FLATTEN_LIMITS
   GetHandle().GetLimits(&limits);
   limits_ = MakeGarbageCollected<GPUSupportedLimits>(limits);
 
@@ -699,9 +698,9 @@ void GPUDevice::OnPopErrorScopeCallback(
       return;
     case wgpu::PopErrorScopeStatus::Success:
       break;
-    case wgpu::PopErrorScopeStatus::EmptyStack:
+    case wgpu::PopErrorScopeStatus::Error:
       resolver->RejectWithDOMException(DOMExceptionCode::kOperationError,
-                                       "No error scopes to pop");
+                                       StringFromASCIIAndUTF8(message));
       return;
   }
   switch (type) {

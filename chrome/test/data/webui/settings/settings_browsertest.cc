@@ -98,6 +98,10 @@ IN_PROC_BROWSER_TEST_F(SettingsTest, AutofillAiSection) {
   RunTest("settings/autofill_ai_section_test.js", "mocha.run()");
 }
 
+IN_PROC_BROWSER_TEST_F(SettingsTest, AutofillAiAddOrEditDialog) {
+  RunTest("settings/autofill_ai_add_or_edit_dialog_test.js", "mocha.run()");
+}
+
 #if BUILDFLAG(IS_WIN) || BUILDFLAG(IS_LINUX) || BUILDFLAG(IS_MAC)
 IN_PROC_BROWSER_TEST_F(SettingsTest, AxAnnotationsSection) {
   RunTest("settings/ax_annotations_section_test.js", "mocha.run()");
@@ -297,6 +301,14 @@ IN_PROC_BROWSER_TEST_F(SettingsTest, PaymentsSectionIban) {
   RunTest("settings/payments_section_iban_test.js", "mocha.run()");
 }
 
+IN_PROC_BROWSER_TEST_F(SettingsTest, PaymentsSectionPayOverTime) {
+  RunTest("settings/payments_section_pay_over_time_test.js", "mocha.run()");
+}
+
+IN_PROC_BROWSER_TEST_F(SettingsTest, PaymentsSectionPaymentsList) {
+  RunTest("settings/payments_section_payments_list_test.js", "mocha.run()");
+}
+
 IN_PROC_BROWSER_TEST_F(SettingsTest, PeoplePage) {
   RunTest("settings/people_page_test.js", "mocha.run()");
 }
@@ -339,10 +351,6 @@ class SettingsGlicPageTest : public SettingsBrowserTest {
 
 IN_PROC_BROWSER_TEST_F(SettingsGlicPageTest, GlicSettingsPage) {
   RunTest("settings/glic_page_test.js", "mocha.run()");
-}
-
-IN_PROC_BROWSER_TEST_F(SettingsGlicPageTest, GlicDataSettingsPage) {
-  RunTest("settings/glic_data_page_test.js", "mocha.run()");
 }
 #endif
 
@@ -695,15 +703,9 @@ class SettingsCookiesPageTest : public SettingsBrowserTest {
       privacy_sandbox::kPrivacySandboxFirstPartySetsUI};
 };
 
-#if ((BUILDFLAG(IS_LINUX) || BUILDFLAG(IS_CHROMEOS)) && !defined(NDEBUG)) || \
-    BUILDFLAG(IS_MAC)
-#define MAYBE_CookiesPageTest DISABLED_CookiesPageTest
-#else
-#define MAYBE_CookiesPageTest CookiesPageTest
-#endif
-// TODO(crbug.com/40889245): fix flakiness on Linux and ChromeOS debug builds
-// and re-enable.
-IN_PROC_BROWSER_TEST_F(SettingsCookiesPageTest, MAYBE_CookiesPageTest) {
+// TODO(crbug.com/40889245): fix flakiness on almost all platforms and
+// re-enable.
+IN_PROC_BROWSER_TEST_F(SettingsCookiesPageTest, DISABLED_CookiesPageTest) {
   RunTest("settings/cookies_page_test.js", "runMochaSuite('CookiesPageTest')");
 }
 
@@ -1010,6 +1012,7 @@ class SettingsPrivacyPageTest : public SettingsBrowserTest {
 #endif
             features::kDbdRevampDesktop,
             features::kEnableCertManagementUIV2,
+            privacy_sandbox::kPrivacySandboxRelatedWebsiteSetsUi,
         },
         {});
     scoped_feature_list2_.InitAndEnableFeatureWithParameters(
@@ -1077,6 +1080,9 @@ IN_PROC_BROWSER_TEST_F(SettingsPrivacyPageTest, TrackingProtectionSubpage) {
           "runMochaSuite('TrackingProtectionSubpage')");
 }
 
+IN_PROC_BROWSER_TEST_F(SettingsPrivacyPageTest, AllSitesSubpage) {
+  RunTest("settings/privacy_page_test.js", "runMochaSuite('AllSitesSubpage')");
+}
 
 IN_PROC_BROWSER_TEST_F(SettingsPrivacyPageTest, PrivacyGuideRow) {
   RunTest("settings/privacy_page_test.js", "runMochaSuite('PrivacyGuideRow')");

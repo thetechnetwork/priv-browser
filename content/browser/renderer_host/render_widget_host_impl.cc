@@ -3049,10 +3049,9 @@ void RenderWidgetHostImpl::TextInputStateChanged(
 
 void RenderWidgetHostImpl::OnImeCompositionRangeChanged(
     const gfx::Range& range,
-    const std::optional<std::vector<gfx::Rect>>& character_bounds,
-    const std::optional<std::vector<gfx::Rect>>& line_bounds) {
+    const std::optional<std::vector<gfx::Rect>>& character_bounds) {
   if (view_) {
-    view_->ImeCompositionRangeChanged(range, character_bounds, line_bounds);
+    view_->ImeCompositionRangeChanged(range, character_bounds);
   }
 }
 
@@ -3341,29 +3340,6 @@ RenderWidgetHostImpl::BindAndGenerateCreateFrameWidgetParams() {
 
   params->visual_properties = GetInitialVisualProperties();
 
-  return params;
-}
-
-mojom::CreateFrameWidgetParamsPtr
-RenderWidgetHostImpl::BindAndGenerateCreateFrameWidgetParamsForNewWindow() {
-  auto params = mojom::CreateFrameWidgetParams::New();
-  params->routing_id = GetRoutingID();
-  mojo::PendingAssociatedRemote<blink::mojom::Widget> widget_remote;
-  params->widget = widget_remote.InitWithNewEndpointAndPassReceiver();
-  BindWidgetInterfaces(params->widget_host.InitWithNewEndpointAndPassReceiver(),
-                       std::move(widget_remote));
-  mojo::PendingAssociatedRemote<blink::mojom::FrameWidget> frame_widget_remote;
-  params->frame_widget =
-      frame_widget_remote.InitWithNewEndpointAndPassReceiver();
-  BindFrameWidgetInterfaces(
-      params->frame_widget_host.InitWithNewEndpointAndPassReceiver(),
-      std::move(frame_widget_remote));
-  // TODO(danakj): For some reason, there is no RenderWidgetHostView here, but
-  // it seems like there should be one? In the meantime we send some nonsense
-  // with semi-valid but incorrect screen info (it needs a RenderWidgetHostView
-  // to be correct). An updated VisualProperties will get to the RenderWidget
-  // eventually.
-  params->visual_properties.screen_infos = GetScreenInfos();
   return params;
 }
 

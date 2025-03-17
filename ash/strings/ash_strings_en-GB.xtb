@@ -22,6 +22,7 @@ Here are some things that you can try to get started.</translation>
 <translation id="1058009965971887428">Report feedback</translation>
 <translation id="1059120031266247284">Shared with you</translation>
 <translation id="1059194134494239015"><ph name="DISPLAY_NAME" />: <ph name="RESOLUTION" /></translation>
+<translation id="1060847216467038176"><ph name="ITEM_LABEL" /> with remove button</translation>
 <translation id="1062407476771304334">Replace</translation>
 <translation id="1073899992769346247">Replace or recharge the battery</translation>
 <translation id="1081015718268701546">Linux apps aren’t currently supported. Other apps will be saved.</translation>
@@ -73,7 +74,6 @@ Here are some things that you can try to get started.</translation>
 <translation id="1218444235442067213"><ph name="APP_NAME" />, Play Store app</translation>
 <translation id="1225748608451425081">Your Chromebook is locked due to a known issue. You will be able to sign in after: <ph name="TIME_LEFT" />.</translation>
 <translation id="1229194443904279055">Stop selecting</translation>
-<translation id="1230853660706736937">Search for text within images and see image previews</translation>
 <translation id="1235458158152011030">Known networks</translation>
 <translation id="1239161794459865856"><ph name="FEATURE_NAME" /> is connected.</translation>
 <translation id="1240638468526743569">An app</translation>
@@ -246,7 +246,6 @@ Here are some things that you can try to get started.</translation>
 <translation id="17722141032474077">Calculations</translation>
 <translation id="1774796056689732716">Calendar, <ph name="CURRENT_MONTH_YEAR" />, currently <ph name="DATE" /> is selected.</translation>
 <translation id="178347895271755507">Set up viewing your phone's recent photos, media and notifications</translation>
-<translation id="1785317913592722944">Remove item from suggested group</translation>
 <translation id="1786487376942610288">Switch between the maximum or current size of the picture-in-picture window</translation>
 <translation id="1787955149152357925">Off</translation>
 <translation id="1796561540704213354">Websites including pages you've visited and open pages</translation>
@@ -853,6 +852,7 @@ Connect your device to power.</translation>
 <translation id="3859364108019690">Can't stream apps</translation>
 <translation id="3861651314799684201">Press enter to record full screen</translation>
 <translation id="3870197372373144624">Try shutting down your device.</translation>
+<translation id="3879748587602334249">Download manager</translation>
 <translation id="3886872229787704059">Opened today</translation>
 <translation id="3891340733213178823">Press Ctrl+Shift+Q twice to sign out.</translation>
 <translation id="3892148308691398805">Copy text</translation>
@@ -878,6 +878,7 @@ Connect your device to power.</translation>
 <translation id="3958714870339660776">All day</translation>
 <translation id="3962859241508114581">Previous track</translation>
 <translation id="3963124517343721543">Easily continue where you left off by opening your previous windows and tabs. You'll also see personalised suggestions for things to do next.</translation>
+<translation id="3967822245660637423">Download complete</translation>
 <translation id="3969043077941541451">Off</translation>
 <translation id="3970324493235864154">View your phone's notifications</translation>
 <translation id="397105322502079400">Calculating...</translation>
@@ -1052,6 +1053,7 @@ One device connected.</translation>
 <translation id="450584155212756404">Dev channel</translation>
 <translation id="4513044611477939680">Quick Share</translation>
 <translation id="4513946894732546136">Feedback</translation>
+<translation id="4518096944902121253">No more actions for this language</translation>
 <translation id="4518404433291145981">To unlock your Chromebook, first unlock your phone</translation>
 <translation id="4525887279712865285">Show Quick Share settings</translation>
 <translation id="4527045527269911712">Bluetooth device "<ph name="DEVICE_NAME" />" would like permission to pair.</translation>
@@ -1193,6 +1195,7 @@ One device connected.</translation>
 <translation id="4946376291507881335">Capture</translation>
 <translation id="495046168593986294">Scroll up</translation>
 <translation id="4950800194215951939">Customise your gaming experience</translation>
+<translation id="495170559598752135">Actions</translation>
 <translation id="4952936045814352993">Locate phone is not available when alarm sounds are disabled</translation>
 <translation id="4953585991029886728">Edit text</translation>
 <translation id="4960324571663582548"><ph name="MANAGER" /> requires you to roll back your <ph name="DEVICE_TYPE" />. Your device will reset and all data will be deleted.</translation>
@@ -1227,6 +1230,7 @@ One device connected.</translation>
 <translation id="5043679421800073804">Click or tap last icon on shelf</translation>
 <translation id="504465286040788597">Previous paragraph</translation>
 <translation id="5045550434625856497">Incorrect password</translation>
+<translation id="5056587122125565772">Create image</translation>
 <translation id="5058794129231928255">Couldn't create Google Doc</translation>
 <translation id="5062496344832867502">ram</translation>
 <translation id="5068762093486106012">You'll get notified if you talk while muted. Audio never leaves your device.</translation>
@@ -1275,6 +1279,7 @@ You can also use the keyboard shortcut. First, highlight text, then press <ph na
 <translation id="5222676887888702881">Sign out</translation>
 <translation id="5228195526683428788">Split screen divider</translation>
 <translation id="5229343007215035173">Turn on/off Privacy Screen</translation>
+<translation id="5229860525743792999">Remove <ph name="ITEM_LABEL" /> from suggested group</translation>
 <translation id="5230516054153933099">Window</translation>
 <translation id="5234764350956374838">Dismiss</translation>
 <translation id="523505283826916779">Accessibility settings</translation>
@@ -1619,6 +1624,7 @@ No devices connected.</translation>
 <translation id="6319058840130157106">Move backwards between the bottom-right corner, Launcher, address bar, bookmarks bar, website that's open and downloads</translation>
 <translation id="6319503618073410818">View details in browser</translation>
 <translation id="6324916366299863871">Edit shortcut</translation>
+<translation id="6325525973963619867">Failed</translation>
 <translation id="6330012934079202188">Showing windows from all desks; press the Up arrow key to show windows from the current desk</translation>
 <translation id="6337159624125741244">Full-screen magnifier is on</translation>
 <translation id="6338485349199627913"><ph name="DISPLAY_NAME" /> is a managed session managed by <ph name="MANAGER" /></translation>
@@ -1683,6 +1689,7 @@ No devices connected.</translation>
 <translation id="6542891623636520977">Emojis, GIFs and more</translation>
 <translation id="6543942526104794893">Are you sure that you want to turn off facial gestures?</translation>
 <translation id="6545382064335350438">Your PIN still couldn't be verified. Try again.</translation>
+<translation id="6546062506073634094">Image search by content and image previews</translation>
 <translation id="6555373427270923730">Type a web address in the address bar, then press <ph name="MODIFIER" /><ph name="KEY" /></translation>
 <translation id="655633303491376835"><ph name="APP_NAME" />
 New install</translation>
@@ -1756,6 +1763,7 @@ New install</translation>
 <translation id="6757237461819837179">No media playing</translation>
 <translation id="6760438044935091345">Game Dashboard</translation>
 <translation id="6768043681523654438">storage</translation>
+<translation id="6769195697113506406">Image inserted</translation>
 <translation id="6777216307882431711">Powering connected USB-C devices</translation>
 <translation id="6781002679438061620">Desk 9</translation>
 <translation id="6782182743534150858">Desk 13</translation>
@@ -1878,6 +1886,7 @@ New install</translation>
 <translation id="7189412385142492784">How far is Venus</translation>
 <translation id="7198435252016571249">Camera snapped to the bottom-right corner. Conflict with system surface.</translation>
 <translation id="7219573373513695352">No devices connected</translation>
+<translation id="7228968829656641943">Select to search my screen. Press Tab then Space for keyboard navigation.</translation>
 <translation id="7229029500464092426">Memory <ph name="AVAILABLE_MEMORY" /> | <ph name="TOTAL_MEMORY" /> total</translation>
 <translation id="7239814253344511868">Both mouse buttons</translation>
 <translation id="7244725679040769470"><ph name="PERCENTAGE" />% battery left. Connect your device to power.</translation>
@@ -1910,6 +1919,7 @@ New install</translation>
 <translation id="735745346212279324">VPN disconnected</translation>
 <translation id="7360036564632145207">Changing your data access protection for peripherals setting can optimise performance</translation>
 <translation id="736045644501761622">Set wallpaper and style</translation>
+<translation id="7368041336688136012">You must be at least 18 years old to use Help me read, Help me write and create images with AI.</translation>
 <translation id="7371404428569700291">Record window</translation>
 <translation id="7372069265635026568">Memory <ph name="AVAILABLE_MEMORY" /> available out of <ph name="TOTAL_MEMORY" /> total</translation>
 <translation id="737315737514430195">This allows microphone access for all apps and websites with the microphone permission</translation>
@@ -1981,6 +1991,7 @@ To shut down the device, press and hold the power button on the device again.</t
 <translation id="7571361473021531288">Battery <ph name="BATTERY_PERCENTAGE" />% | <ph name="TIME" /> left</translation>
 <translation id="7573585051776738856">Active window docked on right.</translation>
 <translation id="7579778809502851308">Screen capture</translation>
+<translation id="7588317312481506627">Copied to clipboard.</translation>
 <translation id="7593891976182323525">Search or Shift</translation>
 <translation id="7598054670902114203">CPU usage snapshot, <ph name="CPU_USEAGE" />%. Temperature <ph name="TEMPERATURE" /> degrees celsius, current speed: <ph name="CPU_AVERAGE_CURRENT_FREQUENCY_GHZ" />GHz</translation>
 <translation id="7599378375976398913">Inserting selected result</translation>
@@ -2175,6 +2186,7 @@ To shut down the device, press and hold the power button on the device again.</t
 <translation id="8155628902202578800">Open info dialogue for <ph name="USER_EMAIL_ADDRESS" /></translation>
 <translation id="8167567890448493835">Using <ph name="LOCALE_NAME" /></translation>
 <translation id="8168435359814927499">Content</translation>
+<translation id="81817143961839203">Image insertion failed</translation>
 <translation id="8185090165691050712">Turn on/off menu to resize lock mode</translation>
 <translation id="8192727139462702395">When you turn off Bluetooth, these external devices will disconnect from your <ph name="DEVICE_TYPE" />:</translation>
 <translation id="8198456017687137612">Casting tab</translation>
@@ -2253,6 +2265,7 @@ To shut down the device, press and hold the power button on the device again.</t
 <translation id="8473301994082929012"><ph name="ORGANIZATION_NAME" /> has <ph name="FEATURE_STATE" /> <ph name="FEATURE_NAME" />.</translation>
 <translation id="8477270416194247200">Press Alt+Search or Shift to cancel.</translation>
 <translation id="8480418399907765580">Show toolbar</translation>
+<translation id="8487660088084188539">When you turn on these features, the input text, document content and web page URL may be sent to Google servers. This information is used to generate writing suggestions, generate summaries, answer questions and improve the product, subject to <ph name="LINK_TO_SERVICE_TERMS" />. Don't include anything personal, sensitive or confidential.</translation>
 <translation id="8487699605742506766">Hotspot</translation>
 <translation id="8491237443345908933">Open link in new tab</translation>
 <translation id="8492573885090281069"><ph name="DISPLAY_NAME" /> doesn't support <ph name="SPECIFIED_RESOLUTION" />. The resolution was changed to <ph name="FALLBACK_RESOLUTION" />. Click confirm to keep changes. The previous settings will be restored in <ph name="TIMEOUT_SECONDS" />.</translation>
@@ -2322,6 +2335,7 @@ To shut down the device, press and hold the power button on the device again.</t
 <translation id="8725066075913043281">Try again</translation>
 <translation id="8725214031272624704">Show list of available input methods</translation>
 <translation id="8730621377337864115">Done</translation>
+<translation id="8731188831050207755"><ph name="FILE_NAME" /> download unsuccessful.</translation>
 <translation id="8731487213223706745">Ends at <ph name="END_TIME" /> <ph name="DAYS_ELAPSED" /></translation>
 <translation id="8734991477317290293">It may be attempting to steal your keystrokes</translation>
 <translation id="8735678380411481005">Keyboard backlight colour</translation>

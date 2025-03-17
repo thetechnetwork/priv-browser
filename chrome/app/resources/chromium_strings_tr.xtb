@@ -31,6 +31,7 @@
 <translation id="1478370723027452770">Chrome for Testing ile ilgili yardım alın</translation>
 <translation id="1497802159252041924">Yükleme hatası: <ph name="INSTALL_ERROR" /></translation>
 <translation id="1524282610922162960">Chromium sekmesini paylaşın</translation>
+<translation id="1547469039832541117">Vurgulanan görevi sonlandırır.</translation>
 <translation id="1553461853655228091">Çevrenizin 3D haritasını oluşturmak için Chromium'un kameranıza erişim iznine ihtiyacı var</translation>
 <translation id="1555494096857516577">{NUM_EXTENSIONS,plural, =1{Bu uzantı artık desteklenmiyor. Chromium bunu kaldırmanızı öneriyor.}other{Bu uzantılar artık desteklenmiyor. Chromium bunları kaldırmanızı öneriyor}}</translation>
 <translation id="1574377791422810894">Chromium'un güvenlik araçları</translation>
@@ -116,6 +117,7 @@
 <translation id="2583187216237139145">Bu profil kullanılırken oluşturulan tüm Chromium verileri (yer işaretleri, geçmiş, şifreler ve diğer ayarlar gibi) iş profili yöneticisi tarafından kaldırılabilir. <ph name="LEARN_MORE" /></translation>
 <translation id="2592940277904433508">Chromium'u kullanmaya devam et</translation>
 <translation id="259935314519650377">İndirilen yükleyici önbelleğe alınamadı. Hata: <ph name="UNPACK_CACHING_ERROR_CODE" />.</translation>
+<translation id="2629740064077610681">Kuruluşunuz; yer işaretleri, geçmiş ve şifreler gibi tarama verilerini görüp yönetebilir. Diğer Chromium profillerindeki tarama verilerini göremez</translation>
 <translation id="2635452620547538388">Chromium verilerini kullanmak ve <ph name="ACCOUNT_EMAIL" /> hesabınıza kaydetmek için kimliğinizi doğrulayın</translation>
 <translation id="264613044588233783">Chromium daha hızlı çalışır ve JavaScript kullanan özellikler tasarlandığı şekilde çalışır (önerilir)</translation>
 <translation id="2648074677641340862">Yükleme sırasında bir işletim sistemi hatası oluştu. Lütfen Chromium'u yeniden indirin.</translation>
@@ -126,11 +128,9 @@
 <translation id="2738871930057338499">İnternet'e bağlanılamadı. HTTP 403 Yasak. Lütfen proxy yapılandırmanızı kontrol edin.</translation>
 <translation id="2753623023919742414">Aramak için tıklayın</translation>
 <translation id="2770231113462710648">Varsayılan tarayıcıyı şuna dönüştür:</translation>
-<translation id="277338894894732084">Daha sonra Chromium, formları otomatik olarak doldurmak için kayıtlı bilgileri kullanmak isteyip istemediğinizi sorar.</translation>
 <translation id="2785438272836277133">Bu uzantı kötü amaçlı yazılım içerdiği için güvenli değil. Kişisel bilgileriniz de dahil olmak üzere ziyaret ettiğiniz sitelerdeki verilerinizi artık görememesi ve değiştirememesi için bu uzantıyı Chromium'dan kaldırın.</translation>
 <translation id="2799223571221894425">Yeniden başlat</translation>
 <translation id="2803971713792056305">Chromium'unuz</translation>
-<translation id="2806241689335397269">Chromium; doğum tarihiniz, yaşınız ve pasaport numaranız gibi form bilgilerini kaydetmek isteyip istemediğinizi sorar.</translation>
 <translation id="2841525013647267359">Şu dilden çevir:</translation>
 <translation id="2846251086934905009">Yükleme hatası: Yükleyici tamamlanmadı. Yükleme işlemi iptal edildi.</translation>
 <translation id="2847479871509788944">Chromium'dan kaldır...</translation>
@@ -174,7 +174,6 @@
 <translation id="3387527074123400161">ChromiumOS</translation>
 <translation id="3406848076815591792">Mevcut Chromium profiline geçilsin mi?</translation>
 <translation id="3412460710772753638">Bu cihazdaki Şifre Yöneticisi'nde</translation>
-<translation id="3451656833730006755">Uzantılarınıza ve diğer öğelerinize tüm bilgisayarlarınızda erişmek için Chromium'da oturum açın</translation>
 <translation id="347328004046849135">Chromium, güvenliği ihlal edilmiş bir şifreyle oturum açtığınızda size haber verir</translation>
 <translation id="3474745554856756813">Bu işlem, <ph name="ITEMS_COUNT" /> öğeyi bu cihazdan silecektir. Verilerinizi daha sonra geri almak için Chromium'da <ph name="USER_EMAIL" /> hesabıyla oturum açın.</translation>
 <translation id="3497319089134299931"><ph name="SHORTCUT" />, Chromium profilleri arasında geçiş yapabilir</translation>
@@ -314,6 +313,7 @@
 <translation id="5579324208890605088">Başlatma hatası: Lütfen yükleyiciyi yönetici olarak değil, normal bir kullanıcı olarak çalıştırın.</translation>
 <translation id="5596627076506792578">Diğer seçenekler</translation>
 <translation id="5605834417512968703">Görsel Arama ile aramak istediğiniz öğeyi seçin veya Görsel Arama'dan çıkmak için Escape tuşuna basın</translation>
+<translation id="5618818588972826921">Görsel Arama ile aramak istediğiniz metni veya resmi seçin ya da Görsel Arama'dan çıkmak için Escape tuşuna basın</translation>
 <translation id="5623402015214259806">{0,plural, =0{Bir Chromium güncellemesi var}=1{Bir Chromium güncellemesi var}other{# gün önce kullanıma sunulmuş bir Chromium güncellemesi var}}</translation>
 <translation id="5643865575100044307">Chromium'u kapattığımda site verileri her zaman cihazımdan silinsin</translation>
 <translation id="5653831366781983928">Lütfen Chromium'u şimdi yeniden başlatın</translation>
@@ -378,6 +378,7 @@
 <translation id="6366160072964553914">Dosya çok indirilmediği ve tehlikeli olabileceği için Chromium bu indirme işlemini engelledi</translation>
 <translation id="6373523479360886564">Chromium'u kaldırmak istediğinizden emin misiniz?</translation>
 <translation id="6375219077595103062">Şifre Yöneticisi'ne kısayol ekleyin</translation>
+<translation id="6390800440335263989">Devam etmek için Chromium'da <ph name="EMAIL" /> hesabıyla oturum açın. Böylece kuruluşunuzun politikalarına uyabilirsiniz.</translation>
 <translation id="6400112897226594999">Bilgisayar ekranındaki Chromium logosu.</translation>
 <translation id="6403826409255603130">Chromium, Web sayfalarını ve uygulamaları yıldırım hızıyla çalıştıran bir Web tarayıcısıdır. Hızlı ve kararlı çalışır, kolay kullanılır. Chromium'da dahili olarak bulunan zararlı yazılım ve kimlik avı koruması sayesinde Web'de daha güvenli gezinin.</translation>
 <translation id="6436260184216827876">Görsel Arama kullanılamıyor. Daha sonra tekrar deneyin.</translation>
@@ -394,6 +395,7 @@
 <translation id="6539122709674868420"><ph name="TIMEOUT_DURATION" /> boyunca kullanılmadığında Chromium kuruluşunuz tarafından kapatılır. Tarama verileri silindi. Bu veriler geçmiş, otomatik doldurma ve indirilenleri içerebilir.</translation>
 <translation id="6542839706527980775">Her profil; yer işaretleri, geçmiş, şifreler ve benzeri gibi kendi Chromium bilgilerini içerir</translation>
 <translation id="6563921047760808519"><ph name="BEGIN_LINK" />Chromium'un verilerinizi nasıl gizli tuttuğu<ph name="END_LINK" /> hakkında daha fazla bilgi edinin</translation>
+<translation id="6564039629497156115">Bu ayarda yapılan değişiklikler, Chromium yeniden başlatıldığında uygulanır.</translation>
 <translation id="656935081669708576">Başka bir Chromium profilindeki şifreleri görmek için profil değiştirebilirsiniz</translation>
 <translation id="6570579332384693436">Yazım hatalarını düzeltmek için Chromium, metin alanlarına yazdığınız metinleri Google'a gönderir</translation>
 <translation id="6598877126913850652">Chromium bildirim ayarlarına git</translation>
@@ -453,9 +455,7 @@ Chromium ayarlarınızı kurtaramıyor.</translation>
 <translation id="7339898014177206373">Yeni pencere</translation>
 <translation id="734373864078049451">Web, yer işaretleri ve diğer Chromium bilgileriniz burada bulunur.</translation>
 <translation id="7349591376906416160">Sistem yöneticiniz Chromium'u <ph name="TARGET_URL_HOSTNAME" /> adresine erişmek için <ph name="ALTERNATIVE_BROWSER_NAME" /> tarayıcısını açacak şekilde yapılandırmış.</translation>
-<translation id="7355355292030546812">Dosya, <ph name="USER_EMAIL" /> dahil olmak üzere kişisel ve sosyal ağ hesaplarınıza zarar verebileceği için Chromium bu indirme işlemini engelledi</translation>
 <translation id="7384121030444253939">Bu uzantı artık desteklenmiyor. Chromium bunu kaldırmanızı öneriyor.</translation>
-<translation id="7389750180956889333">Chromium, formları daha iyi anlar ve sizin için daha hızlı bir şekilde otomatik olarak doldurabilir. <ph name="BEGIN_LINK" />Chrome otomatik doldurma<ph name="END_LINK" /> hakkında daha fazla bilgi edinin.</translation>
 <translation id="7449453770951226939"><ph name="PAGE_TITLE" /> - Chromium Dev</translation>
 <translation id="7450541714075000668">Metin kopyalandı</translation>
 <translation id="7451052299415159299">Chromium'un bu sitede kameranıza erişmesi için izin gerekiyor</translation>
@@ -506,6 +506,7 @@ Chromium ayarlarınızı kurtaramıyor.</translation>
 <translation id="813913629614996137">İlk kullanıma hazırlanıyor...</translation>
 <translation id="8166782796394721554">Chromium'un JavaScript ve WebAssembly motorunda ek korumayı etkinleştirin</translation>
 <translation id="81770708095080097">Bu dosya tehlikeli olduğu için Chromium tarafından engellendi.</translation>
+<translation id="8177472873527554730">Sayfada içerik bulunamadı</translation>
 <translation id="8200109504272824693">Chromium verilerini kullanmak ve <ph name="USER_EMAIL" /> hesabınıza kaydetmek için parolanızı girin</translation>
 <translation id="8221491193165283816">Genelde bildirimleri engelliyorsunuz. Bu sitenin size bildirim göndermesine izin vermek için burayı tıklayın.</translation>
 <translation id="8223363452568144035">Kameranızı kullanması için <ph name="BEGIN_LINK" />sistem ayarlarında<ph name="END_LINK" /> Chromium'a erişim izni verin</translation>
@@ -588,5 +589,6 @@ Chromium ayarlarınızı kurtaramıyor.</translation>
 <translation id="983803489796659991">Güncelleme sunucusunda uygulamanın karma verisi bulunmadığından yükleme işlemi başarısız oldu.</translation>
 <translation id="985498048907240953">Chromium'u hesap olmadan kullan</translation>
 <translation id="985602178874221306">The Chromium Authors</translation>
+<translation id="989970834842471429">Görsel Arama ile aramak istediğiniz metni veya resmi seçin</translation>
 <translation id="992780518932311116">Konumunuzu kullanması için <ph name="BEGIN_LINK" />sistem ayarlarında<ph name="END_LINK" /> Chromium'a erişim izni verin</translation>
 </translationbundle>

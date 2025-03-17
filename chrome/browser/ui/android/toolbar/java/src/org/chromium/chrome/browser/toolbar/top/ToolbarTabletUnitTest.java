@@ -21,8 +21,6 @@ import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Looper;
-import android.view.KeyEvent;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
@@ -61,7 +59,6 @@ import org.chromium.chrome.browser.toolbar.R;
 import org.chromium.chrome.browser.toolbar.ToolbarDataProvider;
 import org.chromium.chrome.browser.toolbar.ToolbarProgressBar;
 import org.chromium.chrome.browser.toolbar.ToolbarProgressBarAnimatingView;
-import org.chromium.chrome.browser.toolbar.ToolbarTabController;
 import org.chromium.chrome.browser.toolbar.adaptive.AdaptiveToolbarButtonVariant;
 import org.chromium.chrome.browser.toolbar.menu_button.MenuButtonCoordinator;
 import org.chromium.chrome.browser.toolbar.top.CaptureReadinessResult.TopToolbarAllowCaptureReason;
@@ -87,7 +84,6 @@ public final class ToolbarTabletUnitTest {
     @Mock private ToolbarColorObserver mToolbarColorObserver;
     @Mock private ToolbarDataProvider mToolbarDataProvider;
     @Mock private NewTabPageDelegate mNewTabPageDelegate;
-    @Mock private ToolbarTabController mToolbarTabController;
     private Activity mActivity;
     private ToolbarTablet mToolbarTablet;
     private LinearLayout mToolbarTabletLayout;
@@ -155,52 +151,6 @@ public final class ToolbarTabletUnitTest {
                 "Reloading button position is not as expected",
                 mReloadingButton,
                 mToolbarTabletLayout.getChildAt(3));
-    }
-
-    @Test
-    public void testReloadButton() {
-        mToolbarTablet.onFinishInflate();
-        mToolbarTablet.initialize(
-                mToolbarDataProvider,
-                mToolbarTabController,
-                mMenuButtonCoordinator,
-                mTabSwitcherButtonCoordinator,
-                null,
-                () -> false,
-                null,
-                null,
-                null,
-                mProgressBar);
-        mToolbarTablet.onNativeLibraryReady();
-
-        mToolbarTablet.onClick(mReloadingButton);
-
-        verify(mToolbarTabController).stopOrReloadCurrentTab(false);
-    }
-
-    @Test
-    public void testReloadButton_shiftDown() {
-        mToolbarTablet.onFinishInflate();
-        mToolbarTablet.initialize(
-                mToolbarDataProvider,
-                mToolbarTabController,
-                mMenuButtonCoordinator,
-                mTabSwitcherButtonCoordinator,
-                null,
-                () -> false,
-                null,
-                null,
-                null,
-                mProgressBar);
-        mToolbarTablet.onNativeLibraryReady();
-
-        MotionEvent shiftClick =
-                MotionEvent.obtain(
-                        0, 0, MotionEvent.ACTION_BUTTON_PRESS, 0, 0, KeyEvent.META_SHIFT_ON);
-        mToolbarTablet.getReloadButtonTouchListenerForTest().onTouch(mReloadingButton, shiftClick);
-        mToolbarTablet.onClick(mReloadingButton);
-
-        verify(mToolbarTabController).stopOrReloadCurrentTab(true);
     }
 
     @EnableFeatures(ChromeFeatureList.TAB_STRIP_INCOGNITO_MIGRATION)
@@ -409,7 +359,6 @@ public final class ToolbarTabletUnitTest {
 
     @Test
     public void testOnLongClick() {
-        longClickAndVerifyToast(R.id.refresh_button, R.string.refresh);
         longClickAndVerifyToast(R.id.bookmark_button, R.string.menu_bookmark);
         longClickAndVerifyToast(R.id.save_offline_button, R.string.menu_download);
     }
@@ -434,25 +383,6 @@ public final class ToolbarTabletUnitTest {
         mToolbarTablet.updateForwardButtonVisibility(false);
         assertFalse("Button should not be enabled", btn.isEnabled());
         assertFalse("Button should not be focused", btn.isFocusable());
-    }
-
-    @Test
-    public void testUpdateReloadButtonVisibility() {
-        ImageButton btn = mToolbarTablet.findViewById(R.id.refresh_button);
-        mToolbarTablet.updateReloadButtonVisibility(true);
-        assertTrue("Button should be enabled", btn.isEnabled());
-        assertEquals("Button drawable level is not as expected", 1, btn.getDrawable().getLevel());
-        assertEquals(
-                "Button description is not as expected",
-                mActivity.getResources().getString(R.string.accessibility_btn_stop_loading),
-                btn.getContentDescription());
-        mToolbarTablet.updateReloadButtonVisibility(false);
-        assertEquals("Button drawable level is not as expected", 0, btn.getDrawable().getLevel());
-        assertEquals(
-                "Button description is not as expected",
-                mActivity.getResources().getString(R.string.accessibility_btn_refresh),
-                btn.getContentDescription());
-        assertTrue("Button should be enabled", btn.isEnabled());
     }
 
     @Test
@@ -492,7 +422,8 @@ public final class ToolbarTabletUnitTest {
                         /* buttonVariant= */ AdaptiveToolbarButtonVariant.READER_MODE,
                         0,
                         0,
-                        false);
+                        false,
+                        /* hasErrorBadge= */ false);
         buttonData.setButtonSpec(buttonSpec);
         mToolbarTablet.updateOptionalButton(buttonData);
         Assert.assertEquals(
@@ -510,7 +441,8 @@ public final class ToolbarTabletUnitTest {
                         /* buttonVariant= */ AdaptiveToolbarButtonVariant.SHARE,
                         0,
                         R.string.adaptive_toolbar_button_preference_share,
-                        true);
+                        true,
+                        /* hasErrorBadge= */ false);
         buttonData.setButtonSpec(buttonSpec);
         mToolbarTablet.updateOptionalButton(buttonData);
         Assert.assertEquals(
@@ -531,7 +463,8 @@ public final class ToolbarTabletUnitTest {
                         /* buttonVariant= */ AdaptiveToolbarButtonVariant.VOICE,
                         0,
                         R.string.adaptive_toolbar_button_preference_voice_search,
-                        true);
+                        true,
+                        /* hasErrorBadge= */ false);
         buttonData.setButtonSpec(buttonSpec);
         mToolbarTablet.updateOptionalButton(buttonData);
         Assert.assertEquals(
@@ -552,12 +485,82 @@ public final class ToolbarTabletUnitTest {
                         /* buttonVariant= */ AdaptiveToolbarButtonVariant.NEW_TAB,
                         0,
                         R.string.new_tab_title,
-                        true);
+                        true,
+                        /* hasErrorBadge= */ false);
         buttonData.setButtonSpec(buttonSpec);
         mToolbarTablet.updateOptionalButton(buttonData);
         Assert.assertEquals(
                 mActivity.getResources().getString(R.string.new_tab_title),
                 mToolbarTablet.getOptionalButtonViewForTesting().getTooltipText());
+    }
+
+    @Test
+    public void testOptionalButtonWithErrorBadge() {
+        Drawable iconDrawable = AppCompatResources.getDrawable(mActivity, R.drawable.new_tab_icon);
+        OnClickListener clickListener = mock(OnClickListener.class);
+        OnLongClickListener longClickListener = mock(OnLongClickListener.class);
+        String contentDescription = mActivity.getString(R.string.actionbar_share);
+        ButtonDataImpl buttonData = new ButtonDataImpl();
+
+        ButtonSpec buttonSpec =
+                new ButtonSpec(
+                        iconDrawable,
+                        clickListener,
+                        longClickListener,
+                        contentDescription,
+                        true,
+                        null,
+                        /* buttonVariant= */ AdaptiveToolbarButtonVariant.READER_MODE,
+                        0,
+                        0,
+                        false,
+                        /* hasErrorBadge= */ false);
+        buttonData.setButtonSpec(buttonSpec);
+        mToolbarTablet.updateOptionalButton(buttonData);
+
+        Assert.assertEquals(
+                mActivity
+                        .getResources()
+                        .getDimensionPixelSize(
+                                R.dimen.optional_toolbar_tablet_button_padding_start),
+                mToolbarTablet.getOptionalButtonViewForTesting().getPaddingStart());
+        Assert.assertEquals(
+                mActivity
+                        .getResources()
+                        .getDimensionPixelSize(R.dimen.optional_toolbar_tablet_button_padding_top),
+                mToolbarTablet.getOptionalButtonViewForTesting().getPaddingTop());
+
+        // Test whether the paddings are set correctly.
+        buttonSpec =
+                new ButtonSpec(
+                        iconDrawable,
+                        clickListener,
+                        longClickListener,
+                        contentDescription,
+                        true,
+                        null,
+                        /* buttonVariant= */ AdaptiveToolbarButtonVariant.SHARE,
+                        0,
+                        0,
+                        false,
+                        /* hasErrorBadge= */ true);
+        buttonData.setButtonSpec(buttonSpec);
+        mToolbarTablet.updateOptionalButton(buttonData);
+
+        Assert.assertEquals(
+                mActivity
+                        .getResources()
+                        .getDimensionPixelSize(
+                                R.dimen
+                                        .optional_toolbar_tablet_button_with_error_badge_padding_start),
+                mToolbarTablet.getOptionalButtonViewForTesting().getPaddingStart());
+        Assert.assertEquals(
+                mActivity
+                        .getResources()
+                        .getDimensionPixelSize(
+                                R.dimen
+                                        .optional_toolbar_tablet_button_with_error_badge_padding_top),
+                mToolbarTablet.getOptionalButtonViewForTesting().getPaddingTop());
     }
 
     @Test
@@ -687,7 +690,8 @@ public final class ToolbarTabletUnitTest {
                         /* buttonVariant= */ AdaptiveToolbarButtonVariant.NEW_TAB,
                         0,
                         R.string.adaptive_toolbar_button_preference_new_tab,
-                        true);
+                        true,
+                        /* hasErrorBadge= */ false);
         buttonData.setButtonSpec(buttonSpec);
         mToolbarTablet.updateOptionalButton(buttonData);
 

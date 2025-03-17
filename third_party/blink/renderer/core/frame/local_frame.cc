@@ -215,6 +215,7 @@
 #include "third_party/blink/renderer/platform/graphics/paint/scoped_paint_chunk_properties.h"
 #include "third_party/blink/renderer/platform/heap/collection_support/heap_hash_set.h"
 #include "third_party/blink/renderer/platform/heap/collection_support/heap_vector.h"
+#include "third_party/blink/renderer/platform/heap/disallow_new_wrapper.h"
 #include "third_party/blink/renderer/platform/heap/garbage_collected.h"
 #include "third_party/blink/renderer/platform/heap/persistent.h"
 #include "third_party/blink/renderer/platform/image-encoders/image_encoder_utils.h"
@@ -263,9 +264,10 @@ constexpr unsigned kMaxDocumentChunkSize = 1000000;
 // of hashing the |frame_token| passed on creation of a LocalFrame object.
 using LocalFramesByTokenMap = HeapHashMap<uint64_t, WeakMember<LocalFrame>>;
 static LocalFramesByTokenMap& GetLocalFramesMap() {
-  DEFINE_STATIC_LOCAL(Persistent<LocalFramesByTokenMap>, map,
-                      (MakeGarbageCollected<LocalFramesByTokenMap>()));
-  return *map;
+  using LocalFramesByTokenMapHolder = DisallowNewWrapper<LocalFramesByTokenMap>;
+  DEFINE_STATIC_LOCAL(Persistent<LocalFramesByTokenMapHolder>, holder,
+                      (MakeGarbageCollected<LocalFramesByTokenMapHolder>()));
+  return holder->Value();
 }
 
 // Maximum number of burst download requests allowed.
@@ -1038,8 +1040,8 @@ bool LocalFrame::CanAccessEvent(
           target_document->domWindow()->GetSecurityOrigin());
     }
     case WebInputEventAttribution::kFocusedFrame:
-      return GetPage() ? GetPage()->GetFocusController().FocusedFrame() == this
-                       : false;
+      return GetPage() &&
+             GetPage()->GetFocusController().FocusedFrame() == this;
     case WebInputEventAttribution::kUnknown:
       return false;
   }
@@ -1149,7 +1151,7 @@ void LocalFrame::NotifyFrameWidgetCreated() {
 }
 
 bool LocalFrame::IsCaretBrowsingEnabled() const {
-  return GetSettings() ? GetSettings()->GetCaretBrowsingEnabled() : false;
+  return GetSettings() && GetSettings()->GetCaretBrowsingEnabled();
 }
 
 void LocalFrame::HookBackForwardCacheEviction() {
@@ -2287,6 +2289,11 @@ WebContentSettingsClient* LocalFrame::GetContentSettingsClient() {
   return Client() ? Client()->GetContentSettingsClient() : nullptr;
 }
 
+const mojom::RendererContentSettingsPtr& LocalFrame::GetContentSettings()
+    const {
+  return Loader().GetDocumentLoader()->GetContentSettings();
+}
+
 PluginData* LocalFrame::GetPluginData() const {
   if (!Loader().AllowPlugins())
     return nullptr;
@@ -2773,14 +2780,14 @@ void LocalFrame::NotifyUserActivation(
 
 // static
 bool LocalFrame::HasTransientUserActivation(LocalFrame* frame) {
-  return frame ? frame->Frame::HasTransientUserActivation() : false;
+  return frame && frame->Frame::HasTransientUserActivation();
 }
 
 // static
 bool LocalFrame::ConsumeTransientUserActivation(
     LocalFrame* frame,
     UserActivationUpdateSource update_source) {
-  return frame ? frame->ConsumeTransientUserActivation(update_source) : false;
+  return frame && frame->ConsumeTransientUserActivation(update_source);
 }
 
 void LocalFrame::NotifyUserActivation(
@@ -3278,8 +3285,7 @@ void LocalFrame::SetIsCapturingMediaCallback(
 }
 
 bool LocalFrame::IsCapturingMedia() const {
-  return is_capturing_media_callback_ ? is_capturing_media_callback_.Run()
-                                      : false;
+  return is_capturing_media_callback_ && is_capturing_media_callback_.Run();
 }
 
 SystemClipboard* LocalFrame::GetSystemClipboard() {

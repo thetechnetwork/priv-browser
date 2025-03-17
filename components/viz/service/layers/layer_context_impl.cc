@@ -198,10 +198,6 @@ base::expected<void, std::string> UpdatePropertyTreeNode(
   node.backdrop_mask_element_id = wire.backdrop_mask_element_id;
   node.backdrop_filters = wire.backdrop_filters;
 
-  node.subtree_has_copy_request = wire.subtree_has_copy_request;
-  node.closest_ancestor_with_copy_request_id =
-      wire.closest_ancestor_with_copy_request_id;
-
   return base::ok();
 }
 
@@ -381,11 +377,6 @@ base::expected<void, std::string> UpdateLayer(const mojom::Layer& wire,
     auto& tile_display_layer = static_cast<cc::TileDisplayLayerImpl&>(layer);
     tile_display_layer.SetSolidColor(wire.solid_color);
     tile_display_layer.SetIsBackdropFilterMask(wire.is_backdrop_filter_mask);
-    if (wire.is_backdrop_filter_mask) {
-      tile_display_layer.SetContentsResourceId(wire.resource_id.value(),
-                                               wire.texture_size.value(),
-                                               wire.uv_size.value());
-    }
   }
 
   const cc::PropertyTrees& property_trees =
@@ -884,10 +875,8 @@ LayerContextImpl::~LayerContextImpl() {
 }
 
 void LayerContextImpl::BeginFrame(const BeginFrameArgs& args) {
-  // TODO(rockot): Manage these flags properly.
-  last_begin_frame_args_ = args;
-
   if (base::FeatureList::IsEnabled(features::kTreeAnimationsInViz)) {
+    // TODO(vmiura): Manage these flags properly.
     const bool has_damage = true;
     compositor_sink_->SetLayerContextWantsBeginFrames(false);
     if (!host_impl_->CanDraw()) {
@@ -1154,6 +1143,7 @@ base::expected<void, std::string> LayerContextImpl::DoUpdateDisplayTree(
     for (auto& surface_range : *(update->surface_ranges)) {
       surface_ranges.insert(surface_range);
     }
+    layers.ClearSurfaceRanges();
     layers.SetSurfaceRanges(surface_ranges);
   }
 
@@ -1161,6 +1151,9 @@ base::expected<void, std::string> LayerContextImpl::DoUpdateDisplayTree(
       CreateOrUpdateLayers(*this, update->layers, update->layer_order, layers));
 
   if (update->local_surface_id_from_parent) {
+    layers.SetLocalSurfaceIdFromParent(*update->local_surface_id_from_parent);
+    host_impl_->UpdateChildLocalSurfaceId();
+    // TODO(zmo): Remove calling SetTargetLocalSurfaceId().
     host_impl_->SetTargetLocalSurfaceId(*update->local_surface_id_from_parent);
   }
 
@@ -1235,16 +1228,17 @@ base::expected<void, std::string> LayerContextImpl::DoUpdateDisplayTree(
     compositor_sink_->SetLayerContextWantsBeginFrames(true);
   } else {
     if (host_impl_->CanDraw()) {
-      host_impl_->WillBeginImplFrame(last_begin_frame_args_);
+      host_impl_->WillBeginImplFrame(update->begin_frame_args);
 
       cc::LayerTreeHostImpl::FrameData frame;
       const bool has_damage = true;
-      frame.begin_frame_ack = BeginFrameAck(last_begin_frame_args_, has_damage);
-      frame.origin_begin_main_frame_args = last_begin_frame_args_;
+      frame.begin_frame_ack =
+          BeginFrameAck(update->begin_frame_args, has_damage);
+      frame.origin_begin_main_frame_args = update->begin_frame_args;
       host_impl_->PrepareToDraw(&frame);
       host_impl_->DrawLayers(&frame);
       host_impl_->DidDrawAllLayers(frame);
-      host_impl_->DidFinishImplFrame(last_begin_frame_args_);
+      host_impl_->DidFinishImplFrame(update->begin_frame_args);
     }
   }
   return base::ok();

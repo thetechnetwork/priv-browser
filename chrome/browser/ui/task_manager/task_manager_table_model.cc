@@ -17,10 +17,13 @@
 #include <vector>
 
 #include "base/command_line.h"
+#include "base/i18n/message_formatter.h"
 #include "base/i18n/number_formatting.h"
 #include "base/i18n/rtl.h"
 #include "base/i18n/string_search.h"
 #include "base/i18n/time_formatting.h"
+#include "base/i18n/unicodestring.h"
+#include "base/numerics/safe_conversions.h"
 #include "base/process/process_handle.h"
 #include "base/strings/string_number_conversions.h"
 #include "base/strings/string_util.h"
@@ -29,6 +32,7 @@
 #include "base/values.h"
 #include "build/build_config.h"
 #include "chrome/browser/browser_process.h"
+#include "chrome/browser/task_manager/common/task_manager_features.h"
 #include "chrome/browser/task_manager/sampling/task_group.h"
 #include "chrome/browser/task_manager/task_manager_interface.h"
 #include "chrome/browser/task_manager/task_manager_observer.h"
@@ -40,6 +44,8 @@
 #include "components/nacl/common/nacl_switches.h"
 #include "components/prefs/scoped_user_pref_update.h"
 #include "content/public/common/result_codes.h"
+#include "third_party/icu/source/common/unicode/utypes.h"
+#include "third_party/icu/source/i18n/unicode/listformatter.h"
 #include "ui/base/l10n/l10n_util.h"
 #include "ui/base/models/image_model.h"
 #include "ui/base/models/table_model_observer.h"
@@ -711,21 +717,101 @@ int TaskManagerTableModel::CompareValues(size_t row1,
   }
 }
 
+std::u16string TaskManagerTableModel::GetAXNameForHeader(
+    const std::vector<std::u16string>& visible_column_titles) {
+  // Gate the header change for task manager behind feature flag. Clean it up
+  // once refreshed task manager is launched.
+  // TODO(crbug.com/364926055): Chromium Task Manager Refresh Cleanup.
+  if (!base::FeatureList::IsEnabled(features::kTaskManagerDesktopRefresh)) {
+    return TableModel::GetAXNameForHeader(visible_column_titles);
+  }
+
+  CHECK(!visible_column_titles.empty());
+  return FormatListToString(visible_column_titles);
+}
+
 std::u16string TaskManagerTableModel::GetAXNameForRow(
     size_t row,
     const std::vector<int>& visible_column_ids) {
+  // Gate the row change for task manager behind feature flag. Clean it up
+  // once refreshed task manager is launched.
+  // TODO(crbug.com/364926055): Chromium Task Manager Refresh Cleanup.
+  if (!base::FeatureList::IsEnabled(features::kTaskManagerDesktopRefresh)) {
+    return TableModel::GetAXNameForRow(row, visible_column_ids);
+  }
+
   DCHECK_LT(row, RowCount());
   DCHECK(!visible_column_ids.empty());
 
+  // Holds all visible column values for the `row`.
   std::vector<std::u16string> column_names;
   column_names.reserve(visible_column_ids.size());
-
   std::ranges::transform(
       visible_column_ids, std::back_inserter(column_names),
-      [this, row](const auto& ir) { return GetText(row, ir); });
-  std::erase_if(column_names, [](const auto& ir) { return ir.empty(); });
+      [this, row](const auto& col_id) { return GetText(row, col_id); });
+  std::erase_if(column_names,
+                [](const auto& column_name) { return column_name.empty(); });
 
-  return base::JoinString(column_names, u" ");
+  // Holds all other task titles in the same task group with the 'row'.
+  std::vector<std::u16string> other_task_titles;
+  if (IsTaskFirstInGroup(row)) {
+    const auto current_task = tasks_.begin() + row;
+    const base::ProcessId current_process_id =
+        observed_task_manager()->GetProcessId(tasks_[row]);
+    // Record the end of the column names for the task.
+    const auto mismatch_task = std::ranges::find_if_not(
+        current_task, tasks_.end(),
+        [this, current_process_id](const auto& task_id) {
+          return observed_task_manager()->GetProcessId(task_id) ==
+                 current_process_id;
+        });
+
+    if (mismatch_task - current_task > 1) {
+      const TaskIdList group_tasks =
+          observed_task_manager()->GetIdsOfTasksSharingSameProcess(tasks_[row]);
+      DCHECK(!group_tasks.empty());
+      other_task_titles.reserve(group_tasks.size() - 1);
+      // If there is at least one task other than the `row` in the same task
+      // group existing in `tasks_`, insert the connect text and the title of
+      // the other tasks.
+      // Add other tasks in the same task group in `other_task_titles` .
+      std::ranges::transform(
+          current_task + 1, mismatch_task,
+          std::back_inserter(other_task_titles), [this](const auto& task_id) {
+            return observed_task_manager()->GetTitle(task_id);
+          });
+    }
+  }
+
+  return base::i18n::MessageFormatter::FormatWithNamedArgs(
+      l10n_util::GetStringUTF16(IDS_TASK_MANAGER_TASK_GROUP_CONNECT_TEXT),
+      "NUM_TASKS", base::checked_cast<int>(other_task_titles.size()),
+      "TASK_ROW", FormatListToString(column_names), "OTHER_TASKS",
+      FormatListToString(other_task_titles));
+}
+
+std::u16string TaskManagerTableModel::FormatListToString(
+    base::span<const std::u16string> items) {
+  if (items.empty()) {
+    return std::u16string();
+  }
+
+  std::vector<icu::UnicodeString> strings;
+  strings.reserve(items.size());
+  for (const auto& item : items) {
+    strings.emplace_back(item.data(), item.size());
+  }
+
+  UErrorCode status = U_ZERO_ERROR;
+  const auto formatter =
+      base::WrapUnique(icu::ListFormatter::createInstance(status));
+  CHECK(U_SUCCESS(status));
+
+  icu::UnicodeString formatted;
+  formatter->format(strings.data(), strings.size(), formatted, status);
+  CHECK(U_SUCCESS(status));
+
+  return base::i18n::UnicodeStringToString16(formatted);
 }
 
 void TaskManagerTableModel::GetRowsGroupRange(size_t row_index,
@@ -806,9 +892,14 @@ void TaskManagerTableModel::OnTaskToBeRemoved(TaskId id) {
 }
 
 void TaskManagerTableModel::OnTasksRefreshed(const TaskIdList& task_ids) {
-  tasks_ = task_ids;
-  FilterTaskList(tasks_);
-  OnRefresh();
+  OnRefresh(task_ids);
+}
+
+void TaskManagerTableModel::OnTasksRefreshedWithBackgroundCalculations(
+    const TaskIdList& task_ids) {
+  if (base::FeatureList::IsEnabled(features::kTaskManagerDesktopRefresh)) {
+    OnRefresh(task_ids);
+  }
 }
 
 void TaskManagerTableModel::ActivateTask(size_t row_index) {
@@ -1041,7 +1132,7 @@ std::optional<size_t> TaskManagerTableModel::GetRowForActiveTask() {
 
 void TaskManagerTableModel::StartUpdating() {
   TaskManagerInterface::GetTaskManager()->AddObserver(this);
-  OnTasksRefreshed(observed_task_manager()->GetTaskIdsList());
+  OnRefresh(observed_task_manager()->GetTaskIdsList());
 
   // In order for the scrollbar of the TableView to work properly on startup of
   // the task manager, we must invoke TableModelObserver::OnModelChanged() which
@@ -1056,7 +1147,9 @@ void TaskManagerTableModel::StopUpdating() {
   observed_task_manager()->RemoveObserver(this);
 }
 
-void TaskManagerTableModel::OnRefresh() {
+void TaskManagerTableModel::OnRefresh(const TaskIdList& task_ids) {
+  tasks_ = task_ids;
+  FilterTaskList(tasks_);
   if (table_model_observer_) {
     table_model_observer_->OnItemsChanged(0, RowCount());
   }

@@ -17,6 +17,7 @@
 #include "base/sequence_checker.h"
 #include "base/time/time.h"
 #include "base/uuid.h"
+#include "components/saved_tab_groups/proto/shared_tab_group_data.pb.h"
 #include "components/saved_tab_groups/public/saved_tab_group.h"
 #include "components/saved_tab_groups/public/saved_tab_group_tab.h"
 #include "components/saved_tab_groups/public/types.h"
@@ -26,6 +27,10 @@
 #include "components/sync/protocol/unique_position.pb.h"
 
 class PrefService;
+
+namespace data_sharing {
+class Logger;
+}  // namespace data_sharing
 
 namespace syncer {
 class DataTypeLocalChangeProcessor;
@@ -50,7 +55,8 @@ class SharedTabGroupDataSyncBridge : public syncer::DataTypeSyncBridge {
       SyncBridgeTabGroupModelWrapper* model_wrapper,
       syncer::OnceDataTypeStoreFactory create_store_callback,
       std::unique_ptr<syncer::DataTypeLocalChangeProcessor> change_processor,
-      PrefService* pref_service);
+      PrefService* pref_service,
+      data_sharing::Logger* logger);
 
   SharedTabGroupDataSyncBridge(const SharedTabGroupDataSyncBridge&) = delete;
   SharedTabGroupDataSyncBridge& operator=(const SharedTabGroupDataSyncBridge&) =
@@ -96,6 +102,9 @@ class SharedTabGroupDataSyncBridge : public syncer::DataTypeSyncBridge {
 
   // Process updated local ID for the group.
   void ProcessTabGroupLocalIdChanged(const base::Uuid& group_guid);
+
+  void UntrackEntitiesForCollaboration(
+      const syncer::CollaborationId& collaboration_id);
 
  private:
   // Loads the data already stored in the DataTypeStore.
@@ -189,6 +198,13 @@ class SharedTabGroupDataSyncBridge : public syncer::DataTypeSyncBridge {
   // Notifies the model on committed tab groups if there are any.
   void ProcessCommittedTabGroups();
 
+  // Migration method to run after DB init when the shared tab group feature is
+  // enabled from a disabled state. Clears out any non-empty local tab group ID
+  // for the shared tab group entries and persists to DB. Run before the data is
+  // published to the model. See comments in the method for more details.
+  void FixLocalTabGroupIDsForSharedGroupsDuringFeatureEnabling(
+      std::vector<proto::SharedTabGroupData>& stored_entries);
+
   SEQUENCE_CHECKER(sequence_checker_);
 
   // In charge of actually persisting changes to disk, or loading previous data.
@@ -209,6 +225,12 @@ class SharedTabGroupDataSyncBridge : public syncer::DataTypeSyncBridge {
 
   // The model wrapper used to access and mutate SavedTabGroupModel.
   raw_ptr<SyncBridgeTabGroupModelWrapper> model_wrapper_;
+
+  // Whether shared tab group was enabled in last session. Used for migration.
+  const bool did_enable_shared_tab_groups_in_last_session_;
+
+  // Logger for logging to debug UI.
+  raw_ptr<data_sharing::Logger> logger_ = nullptr;
 
   // List of tab groups waiting for being committed to the server.
   std::vector<base::Uuid> tab_groups_waiting_for_commit_;

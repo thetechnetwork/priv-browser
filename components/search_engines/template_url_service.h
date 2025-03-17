@@ -51,6 +51,10 @@ struct TemplateURLData;
 class TemplateUrlServiceAndroid;
 #endif
 
+namespace regional_capabilities {
+class CountryIdHolder;
+}  // namespace regional_capabilities
+
 namespace search_engines {
 class SearchEngineChoiceService;
 class ChoiceScreenData;
@@ -561,11 +565,6 @@ class TemplateURLService final : public WebDataServiceConsumer,
   // data.
   void ClearSessionToken();
 
-  // Explicitly converts from ActiveStatus enum in sync protos to enum in
-  // TemplateURLData.
-  static TemplateURLData::ActiveStatus ActiveStatusFromSync(
-      sync_pb::SearchEngineSpecifics_ActiveStatus is_active);
-
   // Explicitly converts from ActiveStatus enum in TemplateURLData to enum in
   // sync protos.
   static sync_pb::SearchEngineSpecifics_ActiveStatus ActiveStatusToSync(
@@ -631,6 +630,12 @@ class TemplateURLService final : public WebDataServiceConsumer,
   FRIEND_TEST_ALL_PREFIXES(
       TemplateURLServiceSyncTestWithSeparateLocalAndAccountSearchEngines,
       ShouldNotDualWriteUponUpdateTemplateURLVisitTime);
+  FRIEND_TEST_ALL_PREFIXES(
+      TemplateURLServiceSyncTestWithSeparateLocalAndAccountSearchEngines,
+      ShouldNotDualWriteUponUpdateTemplateURLVisitTimeForLocalOnlyTemplateURL);
+  FRIEND_TEST_ALL_PREFIXES(
+      TemplateURLServiceSyncTestWithSeparateLocalAndAccountSearchEngines,
+      ShouldNotDualWriteUponUpdateTemplateURLVisitTimeForAccountOnlyTemplateURL);
 
   friend class InstantUnitTestBase;
   friend class Scoper;
@@ -877,10 +882,12 @@ class TemplateURLService final : public WebDataServiceConsumer,
   void LogSearchPolicyConflict(
       const OwnedTemplateURLVector& policy_search_engines);
 
-  int initial_keywords_database_country() {
+  const std::optional<regional_capabilities::CountryIdHolder>&
+  initial_keywords_database_country() {
     return initial_keywords_database_country_;
   }
-  int updated_keywords_database_country() {
+  const std::optional<regional_capabilities::CountryIdHolder>&
+  updated_keywords_database_country() {
     return updated_keywords_database_country_;
   }
 
@@ -1030,8 +1037,10 @@ class TemplateURLService final : public WebDataServiceConsumer,
   std::string postponed_deleted_default_engine_guid_;
 
   // TODO(b:380002162) - Remove these 2 properties when the bug is fixed.
-  int initial_keywords_database_country_ = country_codes::kCountryIDUnknown;
-  int updated_keywords_database_country_ = country_codes::kCountryIDUnknown;
+  std::optional<regional_capabilities::CountryIdHolder>
+      initial_keywords_database_country_;
+  std::optional<regional_capabilities::CountryIdHolder>
+      updated_keywords_database_country_;
 
 #if BUILDFLAG(IS_ANDROID)
   // Manage and fetch the java object that wraps this TemplateURLService on

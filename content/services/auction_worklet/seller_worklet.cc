@@ -49,7 +49,6 @@
 #include "content/services/auction_worklet/report_bindings.h"
 #include "content/services/auction_worklet/seller_lazy_filler.h"
 #include "content/services/auction_worklet/shared_storage_bindings.h"
-#include "content/services/auction_worklet/text_conversion_helpers.h"
 #include "content/services/auction_worklet/trusted_signals.h"
 #include "content/services/auction_worklet/trusted_signals_kvv2_manager.h"
 #include "content/services/auction_worklet/webidl_compat.h"
@@ -59,6 +58,7 @@
 #include "gin/dictionary.h"
 #include "mojo/public/cpp/bindings/pending_remote.h"
 #include "mojo/public/cpp/bindings/remote.h"
+#include "services/network/public/cpp/features.h"
 #include "services/network/public/mojom/url_loader_factory.mojom.h"
 #include "third_party/blink/public/common/features.h"
 #include "third_party/blink/public/common/interest_group/ad_auction_currencies.h"
@@ -239,8 +239,7 @@ bool AppendAuctionConfig(
           ? *auction_ad_config_non_shared_params.reporting_timeout
           : AuctionV8Helper::kScriptTimeout;
 
-  if (base::FeatureList::IsEnabled(blink::features::kFledgeReportingTimeout) &&
-      !auction_config_dict.Set("reportingTimeout",
+  if (!auction_config_dict.Set("reportingTimeout",
                                reporting_timeout.InMilliseconds())) {
     return false;
   }
@@ -905,6 +904,10 @@ SellerWorklet::V8State::CreateContextRecyclerAndRunTopLevel(
   v8::Local<v8::Context> context = context_recycler_scope.GetContext();
   TRACE_EVENT_NESTABLE_ASYNC_END0("fledge", "get_seller_context", trace_id);
 
+  // We want this before RunScript, both because it's meant to be visible
+  // to globals, and because we don't want to overwrite existing globals.
+  context_recycler->AddTextConversionHelpers();
+
   v8::Local<v8::UnboundScript> unbound_worklet_script =
       worklet_script_.Get(v8_helper_->isolate());
 
@@ -922,8 +925,7 @@ SellerWorklet::V8State::CreateContextRecyclerAndRunTopLevel(
       permissions_policy_state_->private_aggregation_allowed,
       /*reserved_once_allowed=*/true);
   context_recycler->AddRealTimeReportingBindings();
-  context_recycler->AddTextConversionHelpers();
-  if (base::FeatureList::IsEnabled(blink::features::kSharedStorageAPI)) {
+  if (base::FeatureList::IsEnabled(network::features::kSharedStorageAPI)) {
     context_recycler->AddSharedStorageBindings(
         shared_storage_host_remote_.is_bound()
             ? shared_storage_host_remote_.get()
@@ -1141,10 +1143,6 @@ void SellerWorklet::V8State::ScoreAd(
   }
   context_recycler->seller_browser_signals_lazy_filler()->FillInObject(
       browser_signal_render_url, &ad_components, browser_signals);
-  if (base::FeatureList::IsEnabled(features::kFledgeTextConversionHelpers)) {
-    context_recycler->text_conversion_helpers()->ReInitialize(context,
-                                                              browser_signals);
-  }
   // TODO(crbug.com/336164429): Construct the fields of browser signals lazily.
   if (!browser_signals_dict.Set("topWindowHostname",
                                 top_window_origin_.host()) ||
@@ -1680,6 +1678,10 @@ void SellerWorklet::V8State::ReportResult(
   v8::Local<v8::Context> context = context_recycler_scope.GetContext();
   AuctionV8Logger v8_logger(v8_helper_.get(), context);
 
+  // We want this before RunScript, both because it's meant to be visible
+  // to globals, and because we don't want to overwrite existing globals.
+  context_recycler.AddTextConversionHelpers();
+
   v8::LocalVector<v8::Value> args(isolate);
 
   context_recycler.EnsureAuctionConfigLazyFillers(
@@ -1703,12 +1705,6 @@ void SellerWorklet::V8State::ReportResult(
 
   v8::Local<v8::Object> browser_signals = v8::Object::New(isolate);
   gin::Dictionary browser_signals_dict(isolate, browser_signals);
-  context_recycler.AddTextConversionHelpers();
-  if (base::FeatureList::IsEnabled(features::kFledgeTextConversionHelpers)) {
-    context_recycler.text_conversion_helpers()->ReInitialize(context,
-                                                             browser_signals);
-  }
-
   context_recycler.AddSellerBrowserSignalsLazyFiller();
   // Passing null for ad_components here since we do not want creative scanning
   // info here.
@@ -1839,7 +1835,7 @@ void SellerWorklet::V8State::ReportResult(
       permissions_policy_state_->private_aggregation_allowed,
       /*reserved_once_allowed=*/false);
 
-  if (base::FeatureList::IsEnabled(blink::features::kSharedStorageAPI)) {
+  if (base::FeatureList::IsEnabled(network::features::kSharedStorageAPI)) {
     context_recycler.AddSharedStorageBindings(
         shared_storage_host_remote_.is_bound()
             ? shared_storage_host_remote_.get()
@@ -2302,19 +2298,38 @@ void SellerWorklet::OnDirectFromSellerAuctionSignalsDownloadedScoreAd(
   ScoreAdIfReady(task);
 }
 
+bool SellerWorklet::ScoreAdTaskHasInputs(
+    const SellerWorklet::ScoreAdTask& task) const {
+  return !task.waiting_for_signals_fetch &&
+         !task.direct_from_seller_request_seller_signals &&
+         !task.direct_from_seller_request_auction_signals;
+}
+
 bool SellerWorklet::IsReadyToScoreAd(const ScoreAdTask& task) const {
   // The first check should be implied by IsCodeReady(), but best to be safe.
   return trusted_signals_relation_ !=
              SignalsOriginRelation::kUnknownPermissionCrossOriginSignals &&
-         !task.waiting_for_signals_fetch &&
-         !task.direct_from_seller_request_seller_signals &&
-         !task.direct_from_seller_request_auction_signals && IsCodeReady();
+         ScoreAdTaskHasInputs(task) && IsCodeReady();
+}
+
+void SellerWorklet::DisableEagerJsCompilationIfOnlyWaitingOnJs(
+    const ScoreAdTask& task) {
+  if (ScoreAdTaskHasInputs(task) && worklet_loader_) {
+    for (size_t thread_index = 0; thread_index < v8_runners_.size();
+         ++thread_index) {
+      v8_runners_[thread_index]->PostTask(
+          FROM_HERE,
+          base::BindOnce(&AuctionV8Helper::DisableEagerJsCompilation,
+                         base::Unretained(v8_helpers_[thread_index].get())));
+    }
+  }
 }
 
 void SellerWorklet::ScoreAdIfReady(ScoreAdTaskList::iterator task) {
   DCHECK_CALLED_ON_VALID_SEQUENCE(user_sequence_checker_);
 
   if (!IsReadyToScoreAd(*task)) {
+    DisableEagerJsCompilationIfOnlyWaitingOnJs(*task);
     return;
   }
 

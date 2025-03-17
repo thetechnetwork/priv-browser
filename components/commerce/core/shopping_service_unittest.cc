@@ -22,7 +22,6 @@
 #include "components/commerce/core/commerce_utils.h"
 #include "components/commerce/core/feature_utils.h"
 #include "components/commerce/core/mock_account_checker.h"
-#include "components/commerce/core/mock_discounts_storage.h"
 #include "components/commerce/core/mock_tab_restore_service.h"
 #include "components/commerce/core/pref_names.h"
 #include "components/commerce/core/proto/shopping_page_types.pb.h"
@@ -43,6 +42,7 @@
 #include "components/sessions/core/serialized_navigation_entry.h"
 #include "components/sessions/core/tab_restore_service.h"
 #include "components/signin/public/base/consent_level.h"
+#include "components/signin/public/base/signin_switches.h"
 #include "components/signin/public/identity_manager/identity_test_environment.h"
 #include "components/sync/base/features.h"
 #include "components/sync/base/user_selectable_type.h"
@@ -128,7 +128,7 @@ class ShoppingServiceTest : public ShoppingServiceTestBase,
       // order to use account bookmarks.
       scoped_feature_list_.InitWithFeatures(
           /*enabled_features=*/{syncer::kReplaceSyncPromosWithSignInPromos,
-                                syncer::kSyncEnableBookmarksInTransportMode},
+                                switches::kSyncEnableBookmarksInTransportMode},
           /*disabled_features=*/{});
       bookmark_model_->CreateAccountPermanentFolders();
       identity_test_env_->MakePrimaryAccountAvailable(
@@ -154,11 +154,6 @@ class ShoppingServiceTest : public ShoppingServiceTestBase,
 
   bool ShouldEnableReplaceSyncPromosWithSignInPromos() const {
     return GetParam();
-  }
-
-  void SetDiscountsStorageForTesting(
-      std::unique_ptr<DiscountsStorage> storage) {
-    shopping_service_->SetDiscountsStorageForTesting(std::move(storage));
   }
 
  private:
@@ -2068,14 +2063,6 @@ TEST_P(ShoppingServiceTest, TestDiscountInfoResponse) {
                           OptimizationGuideDecision::kTrue,
                           opt_guide_->BuildDiscountsResponse(infos));
 
-  std::unique_ptr<MockDiscountsStorage> storage =
-      std::make_unique<MockDiscountsStorage>();
-  EXPECT_CALL(*storage, HandleServerDiscounts(GURL(kDiscountsUrl1), _, _));
-  SetDiscountsStorageForTesting(std::move(storage));
-
-  base::HistogramTester histogram_tester;
-  histogram_tester.ExpectTotalCount(kDiscountsFetchResultHistogramName, 0);
-
   base::RunLoop run_loop;
   shopping_service_->GetDiscountInfoForUrl(
       GURL(kDiscountsUrl1),
@@ -2101,9 +2088,6 @@ TEST_P(ShoppingServiceTest, TestDiscountInfoResponse) {
           },
           &run_loop));
   run_loop.Run();
-
-  histogram_tester.ExpectTotalCount(kDiscountsFetchResultHistogramName, 1);
-  histogram_tester.ExpectBucketCount(kDiscountsFetchResultHistogramName, 0, 1);
 }
 
 TEST_P(ShoppingServiceTest, TestDiscountInfoResponse_InfoWithoutId) {

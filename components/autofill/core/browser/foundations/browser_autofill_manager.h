@@ -258,6 +258,9 @@ class BrowserAutofillManager : public AutofillManager {
       const FormData& form,
       const FieldGlobalId& field_id,
       const std::u16string& old_value) override;
+  void OnLoadedServerPredictionsImpl(
+      base::span<const raw_ptr<FormStructure, VectorExperimental>> forms)
+      override;
   void Reset() override;
 
   // Retrieves the four digit combinations from the DOM of the current web page
@@ -522,7 +525,8 @@ class BrowserAutofillManager : public AutofillManager {
       const FormFieldData& field,
       bool should_offer_single_field_form_fill,
       OnGenerateSuggestionsCallback callback,
-      std::vector<std::vector<Suggestion>> suggestion_lists);
+      std::vector<Suggestion> plus_address_suggestions,
+      std::vector<Suggestion> single_field_suggestions);
 
   // Triggered when the user undoes the filling of an address profile using an
   // email override.

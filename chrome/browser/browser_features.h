@@ -36,6 +36,7 @@ BASE_DECLARE_FEATURE(kBookmarksTreeView);
 BASE_DECLARE_FEATURE(kBookmarkTriggerForPrerender2);
 BASE_DECLARE_FEATURE(kCertificateTransparencyAskBeforeEnabling);
 BASE_DECLARE_FEATURE(kCertVerificationNetworkTime);
+BASE_DECLARE_FEATURE(kClearUserDataUponProfileDestruction);
 
 BASE_DECLARE_FEATURE(kContentUsesBrowserThemeColorMode);
 
@@ -105,8 +106,6 @@ BASE_DECLARE_FEATURE(kSandboxExternalProtocolBlockedWarning);
 BASE_DECLARE_FEATURE(kSecretPortalKeyProviderUseForEncryption);
 BASE_DECLARE_FEATURE(kUseFreedesktopSecretKeyProviderForEncryption);
 #endif
-
-BASE_DECLARE_FEATURE(kSupportSearchSuggestionForPrerender2);
 
 BASE_DECLARE_FEATURE(kTriggerNetworkDataMigration);
 

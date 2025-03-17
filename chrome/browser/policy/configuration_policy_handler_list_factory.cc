@@ -62,7 +62,7 @@
 #include "chrome/common/channel_info.h"
 #include "chrome/common/chrome_switches.h"
 #include "chrome/common/pref_names.h"
-#include "components/autofill/core/browser/autofill_policy_handler.h"
+#include "components/autofill/core/browser/permissions/autofill_policy_handler.h"
 #include "components/autofill/core/common/autofill_prefs.h"
 #include "components/blocked_content/pref_names.h"
 #include "components/bookmarks/common/bookmark_pref_names.h"
@@ -260,10 +260,6 @@
 #include "chrome/browser/enterprise/signin/enterprise_signin_prefs.h"
 #include "components/device_signals/core/browser/pref_names.h"  // nogncheck due to crbug.com/1125897
 #endif  // BUILDFLAG(IS_WIN) || BUILDFLAG(IS_MAC) || BUILDFLAG(IS_LINUX)
-
-#if BUILDFLAG(ENABLE_GLIC)
-#include "chrome/browser/glic/glic_pref_names.h"
-#endif  // BUILDFLAG(ENABLE_GLIC)
 
 #if BUILDFLAG(IS_WIN) || BUILDFLAG(IS_MAC) || BUILDFLAG(IS_LINUX) || \
     BUILDFLAG(IS_ANDROID)
@@ -776,6 +772,9 @@ const PolicyToPreferenceMapEntry kSimplePolicyMap[] = {
   { key::kRelaunchNotificationPeriod,
     prefs::kRelaunchNotificationPeriod,
     base::Value::Type::INTEGER },
+  { key::kRelaunchSupersededReleaseAge,
+    prefs::kRelaunchSupersededReleaseAge,
+    base::Value::Type::INTEGER },
   { key::kRemoteDebuggingAllowed,
     prefs::kDevToolsRemoteDebuggingAllowed,
     base::Value::Type::BOOLEAN },
@@ -1156,6 +1155,21 @@ const PolicyToPreferenceMapEntry kSimplePolicyMap[] = {
   { key::kClassManagementEnabled,
     ash::prefs::kClassManagementToolsAvailabilitySetting,
     base::Value::Type::STRING},
+  { key::kClassManagementSendingContentEnabled,
+    ash::prefs::kClassManagementToolsSendingContentEligibilitySetting,
+    base::Value::Type::BOOLEAN},
+  { key::kClassManagementCaptionsEnabled,
+    ash::prefs::kClassManagementToolsCaptionEligibilitySetting,
+    base::Value::Type::BOOLEAN},
+  { key::kClassManagementClassroomIntegrationEnabled,
+    ash::prefs::kClassManagementToolsClassroomEligibilitySetting,
+    base::Value::Type::BOOLEAN},
+  { key::kClassManagementNetworkRestrictionEnabled,
+    ash::prefs::kClassManagementToolsNetworkRestrictionSetting,
+    base::Value::Type::BOOLEAN},
+  { key::kClassManagementViewScreenEnabled,
+    ash::prefs::kClassManagementToolsViewScreenEligibilitySetting,
+    base::Value::Type::BOOLEAN},
   { key::kDriveDisabled,
     drive::prefs::kDisableDrive,
     base::Value::Type::BOOLEAN },
@@ -1820,6 +1834,9 @@ const PolicyToPreferenceMapEntry kSimplePolicyMap[] = {
   { key::kGenAISmartGroupingSettings,
     ash::prefs::kGenAISmartGroupingSettings,
     base::Value::Type::INTEGER},
+  { key::kGenAiChromeOsSmartActionsSettings,
+    ash::prefs::kScannerEnterprisePolicyAllowed,
+    base::Value::Type::INTEGER},
 #endif // BUILDFLAG(IS_CHROMEOS)
 
 #if BUILDFLAG(IS_LINUX)
@@ -1892,12 +1909,6 @@ const PolicyToPreferenceMapEntry kSimplePolicyMap[] = {
     prefs::kNtlmV2Enabled,
     base::Value::Type::BOOLEAN },
 #endif  // !BUILDFLAG(IS_WIN)
-
-#if BUILDFLAG(IS_WIN) && BUILDFLAG(GOOGLE_CHROME_BRANDING)
-  { key::kThirdPartyBlockingEnabled,
-    prefs::kThirdPartyBlockingEnabled,
-    base::Value::Type::BOOLEAN },
-#endif  // BUILDFLAG(IS_WIN) && BUILDFLAG(GOOGLE_CHROME_BRANDING)
 
 #if BUILDFLAG(IS_WIN) || BUILDFLAG(IS_MAC)
   { key::kPrintPdfAsImageAvailability,
@@ -2136,6 +2147,9 @@ const PolicyToPreferenceMapEntry kSimplePolicyMap[] = {
   { key::kGetDisplayMediaSetSelectAllScreensAllowedForUrls,
     capture_policy::kManagedAccessToGetAllScreensMediaAllowedForUrls,
     base::Value::Type::LIST },
+  { key::kKioskChromeAppsForceAllowed,
+    prefs::kKioskChromeAppsForceAllowed,
+    base::Value::Type::BOOLEAN },
 #endif  // BUILDFLAG(IS_CHROMEOS)
 
 #if BUILDFLAG(IS_LINUX) || BUILDFLAG(IS_MAC) || BUILDFLAG(IS_CHROMEOS)
@@ -3334,6 +3348,9 @@ std::unique_ptr<ConfigurationPolicyHandlerList> BuildHandlerList(
                                        ash::prefs::kGenAIPhotoEditingSettings);
   gen_ai_default_policies.emplace_back(key::kGenAISmartGroupingSettings,
                                        ash::prefs::kGenAISmartGroupingSettings);
+  gen_ai_default_policies.emplace_back(
+      key::kGenAiChromeOsSmartActionsSettings,
+      ash::prefs::kScannerEnterprisePolicyAllowed);
 #endif  // BUILDFLAG(IS_CHROMEOS)
   handlers->AddHandler(std::make_unique<GenAiDefaultSettingsPolicyHandler>(
       std::move(gen_ai_default_policies)));
@@ -3346,13 +3363,6 @@ std::unique_ptr<ConfigurationPolicyHandlerList> BuildHandlerList(
           base::Value::Type::BOOLEAN),
       std::make_unique<PowerBatteryChargingOptimizationPolicyHandler>()));
 #endif  // BUILDFLAG(IS_CHROMEOS)
-
-#if BUILDFLAG(ENABLE_GLIC)
-  handlers->AddHandler(std::make_unique<IntRangePolicyHandler>(
-      key::kGlicSettings, glic::prefs::kGlicSettingsPolicy,
-      static_cast<int>(glic::prefs::SettingsPolicyState::kMinValue),
-      static_cast<int>(glic::prefs::SettingsPolicyState::kMaxValue), false));
-#endif
 
   return handlers;
 }

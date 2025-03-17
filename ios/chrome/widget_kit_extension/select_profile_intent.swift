@@ -17,11 +17,22 @@ struct ProfileQuery: EntityQuery {
   }
 
   func defaultResult() async -> ProfileDetail? {
-    if let firstAccount = try? await suggestedEntities().first {
-      return firstAccount
-    } else {
-      return ProfileDetail(id: "No account", gaia: "Default")
+    let noAccount = ProfileDetail(id: "No account", gaia: "Default")
+
+    guard let accounts = try? await suggestedEntities()
+    else { return noAccount }
+
+    // If available, return the primary account as default result.
+    guard let sharedDefaults: UserDefaults = AppGroupHelper.groupUserDefaults()
+    else { return noAccount }
+    guard let primaryAccount = sharedDefaults.object(forKey: "ios.primary_account") as? String
+    else { return noAccount }
+    for account in accounts {
+      if account.gaia == primaryAccount {
+        return ProfileDetail(id: account.id, gaia: account.gaia)
+      }
     }
+    return noAccount
   }
 }
 
@@ -46,6 +57,8 @@ struct ProfileDetail: AppEntity {
 
     var profilesDetail: [ProfileDetail] = []
 
+    profilesDetail.append(ProfileDetail(id: "No account", gaia: "Default"))
+
     for (key, value) in profiles {
       if let email = value["email"] as? String {
         profilesDetail.append(ProfileDetail(id: email, gaia: key))
@@ -64,7 +77,7 @@ struct SelectProfileIntent: WidgetConfigurationIntent {
   var profile: ProfileDetail?
 
   // Returns the avatar linked to the account.
-  func avatarForAccount(account: ProfileDetail?) -> Image? {
+  func avatar() -> Image? {
     guard let gaia = profile?.gaia
     else { return nil }
 
@@ -78,7 +91,7 @@ struct SelectProfileIntent: WidgetConfigurationIntent {
   }
 
   // Returns the gaiaID linked to the account.
-  func gaiaForAccount(account: ProfileDetail?) -> String? {
+  func gaia() -> String? {
     guard let gaia = profile?.gaia
     else { return nil }
 

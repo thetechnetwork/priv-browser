@@ -4,26 +4,36 @@
 
 #import "ios/chrome/browser/supervised_user/coordinator/parent_access_coordinator.h"
 
+#import <MaterialComponents/MaterialSnackbar.h>
+
 #import <optional>
 
 #import "base/functional/bind.h"
+#import "components/strings/grit/components_strings.h"
 #import "components/supervised_user/core/browser/supervised_user_utils.h"
 #import "ios/chrome/browser/shared/model/application_context/application_context.h"
 #import "ios/chrome/browser/shared/model/browser/browser.h"
 #import "ios/chrome/browser/shared/model/profile/profile_ios.h"
 #import "ios/chrome/browser/shared/public/commands/command_dispatcher.h"
 #import "ios/chrome/browser/shared/public/commands/parent_access_commands.h"
+#import "ios/chrome/browser/shared/public/commands/snackbar_commands.h"
+#import "ios/chrome/browser/shared/ui/util/snackbar_util.h"
 #import "ios/chrome/browser/supervised_user/coordinator/parent_access_mediator.h"
 #import "ios/chrome/browser/supervised_user/coordinator/parent_access_mediator_delegate.h"
 #import "ios/chrome/browser/supervised_user/model/parent_access_tab_helper.h"
 #import "ios/chrome/browser/supervised_user/model/parent_access_tab_helper_delegate.h"
 #import "ios/chrome/browser/supervised_user/model/supervised_user_error_container.h"
+#import "ios/chrome/browser/supervised_user/ui/constants.h"
 #import "ios/chrome/browser/supervised_user/ui/parent_access_bottom_sheet_view_controller.h"
+#import "ios/chrome/browser/supervised_user/ui/parent_access_bottom_sheet_view_controller_presentation_delegate.h"
 #import "ios/web/public/web_state.h"
+#import "ui/base/l10n/l10n_util.h"
 
-@interface ParentAccessCoordinator () <UIAdaptivePresentationControllerDelegate,
-                                       ParentAccessMediatorDelegate,
-                                       ParentAccessTabHelperDelegate>
+@interface ParentAccessCoordinator () <
+    UIAdaptivePresentationControllerDelegate,
+    ParentAccessMediatorDelegate,
+    ParentAccessTabHelperDelegate,
+    ParentAccessBottomSheetViewControllerPresentationDelegate>
 @end
 
 @implementation ParentAccessCoordinator {
@@ -32,6 +42,7 @@
   ParentAccessMediator* _mediator;
   GURL _targetURL;
   supervised_user::FilteringBehaviorReason _filteringBehaviorReason;
+  id<SnackbarCommands> _snackbarCommandsHandler;
 }
 
 - (instancetype)
@@ -73,9 +84,21 @@
                                              parentAccessURL:parentAccessURL];
   _mediator.delegate = self;
   _viewController = [[ParentAccessBottomSheetViewController alloc] init];
+
   // Do not use the bottom sheet default dismiss button.
   _viewController.showDismissBarButton = NO;
+
   _viewController.presentationController.delegate = self;
+  _viewController.presentationDelegate = self;
+
+  // Set up for a snackbar that will be displayed when the widget fails to load.
+  _snackbarCommandsHandler = HandlerForProtocol(
+      self.browser->GetCommandDispatcher(), SnackbarCommands);
+
+  // Dismiss existing snackbars that would appear on top of the bottom sheet.
+  [_snackbarCommandsHandler dismissAllSnackbars];
+
+  // Set the consumer, which starts navigation.
   _mediator.consumer = _viewController;
 
   [self.baseViewController presentViewController:_viewController
@@ -89,6 +112,7 @@
   [_viewController.presentingViewController dismissViewControllerAnimated:YES
                                                                completion:nil];
   _viewController = nil;
+  _snackbarCommandsHandler = nil;
 }
 
 #pragma mark - ParentAccessTabHelperDelegate
@@ -114,6 +138,7 @@
 #pragma mark - ParentAccessMediatorDelegate
 
 - (void)hideParentAccessBottomSheetOnTimeout {
+  [_snackbarCommandsHandler showSnackbarMessage:[self snackbarMessage]];
   [self hideParentAccessBottomSheetWithResult:supervised_user::
                                                   LocalApprovalResult::kError
                                     errorType:supervised_user::
@@ -128,6 +153,31 @@
   [self hideParentAccessBottomSheetWithResult:supervised_user::
                                                   LocalApprovalResult::kCanceled
                                     errorType:std::nullopt];
+}
+
+#pragma mark - ParentAccessBottomSheetViewControllerPresentationDelegate
+
+- (void)closeButtonTapped:(ParentAccessBottomSheetViewController*)controller {
+  [self hideParentAccessBottomSheetWithResult:supervised_user::
+                                                  LocalApprovalResult::kCanceled
+                                    errorType:std::nullopt];
+}
+
+#pragma mark - Private
+
+- (MDCSnackbarMessage*)snackbarMessage {
+  // Create a "Close" action for the snackbar. Tapping anywhere on the snackbar
+  // dismisses it, so an action handler is not required.
+  MDCSnackbarMessageAction* action = [[MDCSnackbarMessageAction alloc] init];
+  action.title = l10n_util::GetNSString(
+      IDS_PARENTAL_LOCAL_APPROVAL_SNACKBAR_GENERIC_ERROR_BACK_BUTTON);
+  action.accessibilityIdentifier = kParentAccessSnackbarClose;
+
+  MDCSnackbarMessage* message = CreateSnackbarMessage(l10n_util::GetNSString(
+      IDS_PARENTAL_LOCAL_APPROVAL_SNACKBAR_GENERIC_ERROR_TITLE));
+  message.action = action;
+  message.category = kParentAccessSnackbarCategory;
+  return message;
 }
 
 @end

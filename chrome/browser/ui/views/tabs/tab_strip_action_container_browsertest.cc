@@ -45,7 +45,9 @@ class TabStripActionContainerBrowserTest : public InProcessBrowserTest {
     feature_list_.InitWithFeatures(
         {
             features::kTabOrganization,
+#if BUILDFLAG(ENABLE_GLIC)
             features::kGlic,
+#endif
             features::kTabstripComboButton,
             features::kTabstripDeclutter,
             contextual_cueing::kContextualCueing,
@@ -60,6 +62,13 @@ class TabStripActionContainerBrowserTest : public InProcessBrowserTest {
 #if BUILDFLAG(ENABLE_GLIC)
     glic_test_environment_ =
         std::make_unique<glic::GlicTestEnvironment>(browser()->profile());
+#endif
+  }
+
+  void TearDownOnMainThread() override {
+    InProcessBrowserTest::TearDownOnMainThread();
+#if BUILDFLAG(ENABLE_GLIC)
+    glic_test_environment_.reset();
 #endif
   }
 

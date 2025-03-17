@@ -122,14 +122,19 @@ public class SingleCategorySettings extends BaseSiteSettingsFragment
     @IntDef({
         GlobalToggleLayout.BINARY_TOGGLE,
         GlobalToggleLayout.TRI_STATE_TOGGLE,
-        GlobalToggleLayout.TRI_STATE_COOKIE_TOGGLE
+        GlobalToggleLayout.TRI_STATE_COOKIE_TOGGLE,
+        GlobalToggleLayout.BINARY_RADIO_BUTTON
     })
     @Retention(RetentionPolicy.SOURCE)
     private @interface GlobalToggleLayout {
         int BINARY_TOGGLE = 0;
         int TRI_STATE_TOGGLE = 1;
         int TRI_STATE_COOKIE_TOGGLE = 2;
+        int BINARY_RADIO_BUTTON = 3;
     }
+
+    public static final String EMBEDDED_CONTENT_HELP_CENTER_URL =
+            "https://support.google.com/chrome/?p=embedded_content";
 
     // The key to use to pass which category this preference should display,
     // e.g. Location/Popups/All sites (if blank).
@@ -219,6 +224,7 @@ public class SingleCategorySettings extends BaseSiteSettingsFragment
 
     public static final String CARD_PREFERENCE_KEY = "card_preference";
     public static final String BINARY_TOGGLE_KEY = "binary_toggle";
+    public static final String BINARY_RADIO_BUTTON_KEY = "binary_radio_button";
     public static final String TRI_STATE_TOGGLE_KEY = "tri_state_toggle";
     public static final String TRI_STATE_COOKIE_TOGGLE = "tri_state_cookie_toggle";
 
@@ -301,6 +307,11 @@ public class SingleCategorySettings extends BaseSiteSettingsFragment
         public boolean isPreferenceControlledByCustodian(Preference preference) {
             return mCategory.isManagedByCustodian();
         }
+
+        @Override
+        public boolean isPreferenceClickDisabled(Preference preference) {
+            return mCategory.isToggleDisabled() || super.isPreferenceClickDisabled(preference);
+        }
     }
 
     private void getInfoForOrigins() {
@@ -356,12 +367,13 @@ public class SingleCategorySettings extends BaseSiteSettingsFragment
         if (mCategory.getType() == SiteSettingsCategory.Type.REQUEST_DESKTOP_SITE) {
             // REQUEST_DESKTOP_SITE has its own Allowed list header.
             resourceId = R.string.website_settings_allowed_group_heading_request_desktop_site;
-        } else if (toggleValue) {
-            resourceId = R.string.website_settings_allowed_group_heading;
-        } else {
+        } else if (!toggleValue
+                && !getSiteSettingsDelegate().isPermissionSiteSettingsRadioButtonFeatureEnabled()) {
             // When the toggle is set to Blocked, the Allowed list header should read 'Exceptions',
             // not 'Allowed' (because it shows exceptions from the rule).
             resourceId = R.string.website_settings_exceptions_group_heading;
+        } else {
+            resourceId = R.string.website_settings_allowed_group_heading;
         }
         allowedGroup.setTitle(getHeaderTitle(resourceId, numAllowed));
         allowedGroup.setExpanded(mAllowListExpanded);
@@ -382,6 +394,8 @@ public class SingleCategorySettings extends BaseSiteSettingsFragment
             resourceId = R.string.website_settings_blocked_group_heading_sound;
         } else if (mCategory.getType() == SiteSettingsCategory.Type.REQUEST_DESKTOP_SITE) {
             resourceId = R.string.website_settings_blocked_group_heading_request_desktop_site;
+        } else if (getSiteSettingsDelegate().isPermissionSiteSettingsRadioButtonFeatureEnabled()) {
+            resourceId = R.string.website_settings_not_allowed_group_heading;
         } else {
             resourceId = R.string.website_settings_blocked_group_heading;
         }
@@ -407,28 +421,43 @@ public class SingleCategorySettings extends BaseSiteSettingsFragment
     }
 
     private CharSequence getHeaderTitle(int resourceId, int count) {
-        SpannableStringBuilder spannable = new SpannableStringBuilder(getString(resourceId));
-        String prefCount = String.format(Locale.getDefault(), " - %d", count);
-        spannable.append(prefCount);
+        if (getSiteSettingsDelegate().isPermissionSiteSettingsRadioButtonFeatureEnabled()) {
+            SpannableStringBuilder spannable = new SpannableStringBuilder(getString(resourceId));
+            String prefCount = String.format(Locale.getDefault(), " (%d)", count);
+            spannable.append(prefCount);
 
-        // Color the first part of the title blue.
-        ForegroundColorSpan blueSpan =
-                new ForegroundColorSpan(
-                        SemanticColorUtils.getDefaultTextColorAccent1(getContext()));
-        spannable.setSpan(
-                blueSpan,
-                0,
-                spannable.length() - prefCount.length(),
-                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            // Color the title blue.
+            ForegroundColorSpan blueSpan =
+                    new ForegroundColorSpan(
+                            SemanticColorUtils.getDefaultTextColorAccent1(getContext()));
+            spannable.setSpan(blueSpan, 0, spannable.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 
-        // Gray out the total count of items.
-        final @ColorInt int gray = SemanticColorUtils.getDefaultTextColorSecondary(getContext());
-        spannable.setSpan(
-                new ForegroundColorSpan(gray),
-                spannable.length() - prefCount.length(),
-                spannable.length(),
-                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-        return spannable;
+            return spannable;
+        } else {
+            SpannableStringBuilder spannable = new SpannableStringBuilder(getString(resourceId));
+            String prefCount = String.format(Locale.getDefault(), " - %d", count);
+            spannable.append(prefCount);
+
+            // Color the first part of the title blue.
+            ForegroundColorSpan blueSpan =
+                    new ForegroundColorSpan(
+                            SemanticColorUtils.getDefaultTextColorAccent1(getContext()));
+            spannable.setSpan(
+                    blueSpan,
+                    0,
+                    spannable.length() - prefCount.length(),
+                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+            // Gray out the total count of items.
+            final @ColorInt int gray =
+                    SemanticColorUtils.getDefaultTextColorSecondary(getContext());
+            spannable.setSpan(
+                    new ForegroundColorSpan(gray),
+                    spannable.length() - prefCount.length(),
+                    spannable.length(),
+                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            return spannable;
+        }
     }
 
     @Override
@@ -457,6 +486,9 @@ public class SingleCategorySettings extends BaseSiteSettingsFragment
             mGlobalToggleLayout = GlobalToggleLayout.TRI_STATE_COOKIE_TOGGLE;
         } else if (WebsitePreferenceBridge.requiresTriStateContentSetting(contentType)) {
             mGlobalToggleLayout = GlobalToggleLayout.TRI_STATE_TOGGLE;
+        } else if (getSiteSettingsDelegate().isPermissionSiteSettingsRadioButtonFeatureEnabled()
+                && mCategory.getType() != SiteSettingsCategory.Type.ANTI_ABUSE) {
+            mGlobalToggleLayout = GlobalToggleLayout.BINARY_RADIO_BUTTON;
         }
 
         ViewGroup view = (ViewGroup) super.onCreateView(inflater, container, savedInstanceState);
@@ -572,8 +604,11 @@ public class SingleCategorySettings extends BaseSiteSettingsFragment
     @Override
     public boolean onPreferenceTreeClick(Preference preference) {
         // Do not show the toast if the System Location setting is disabled.
-        if (getPreferenceScreen().findPreference(BINARY_TOGGLE_KEY) != null
-                && mCategory.isManaged()) {
+        String preference_key =
+                getSiteSettingsDelegate().isPermissionSiteSettingsRadioButtonFeatureEnabled()
+                        ? BINARY_RADIO_BUTTON_KEY
+                        : BINARY_TOGGLE_KEY;
+        if (getPreferenceScreen().findPreference(preference_key) != null && mCategory.isManaged()) {
             showManagedToast();
             return false;
         }
@@ -623,7 +658,8 @@ public class SingleCategorySettings extends BaseSiteSettingsFragment
         BrowserContextHandle browserContextHandle =
                 getSiteSettingsDelegate().getBrowserContextHandle();
         PrefService prefService = UserPrefs.get(browserContextHandle);
-        if (BINARY_TOGGLE_KEY.equals(preference.getKey())) {
+        if (BINARY_RADIO_BUTTON_KEY.equals(preference.getKey())
+                || BINARY_TOGGLE_KEY.equals(preference.getKey())) {
             assert !mCategory.isManaged();
             boolean toggleValue = (boolean) newValue;
 
@@ -796,6 +832,12 @@ public class SingleCategorySettings extends BaseSiteSettingsFragment
                         ? R.string.website_settings_blocked_group_heading_request_desktop_site
                         : R.string.website_settings_allowed_group_heading_request_desktop_site;
             case SiteSettingsCategory.Type.JAVASCRIPT_OPTIMIZER:
+                BrowserContextHandle browserContextHandle =
+                        getSiteSettingsDelegate().getBrowserContextHandle();
+                if (WebsitePreferenceBridge.isJavascriptOptimizerOsProvidedSetting(
+                        browserContextHandle, mCategory.getContentSettingsType())) {
+                    return 0;
+                }
                 return isCategoryEnabled()
                         ? R.string.website_settings_add_site_description_javascript_optimizer_block
                         : R.string.website_settings_add_site_description_javascript_optimizer_allow;
@@ -844,6 +886,7 @@ public class SingleCategorySettings extends BaseSiteSettingsFragment
                 break;
             case GlobalToggleLayout.TRI_STATE_TOGGLE:
             case GlobalToggleLayout.BINARY_TOGGLE:
+            case GlobalToggleLayout.BINARY_RADIO_BUTTON:
                 setting =
                         WebsitePreferenceBridge.isCategoryEnabled(
                                         browserContextHandle, mCategory.getContentSettingsType())
@@ -898,8 +941,14 @@ public class SingleCategorySettings extends BaseSiteSettingsFragment
             case SiteSettingsCategory.Type.SITE_DATA:
             case SiteSettingsCategory.Type.FEDERATED_IDENTITY_API:
             case SiteSettingsCategory.Type.REQUEST_DESKTOP_SITE:
-            case SiteSettingsCategory.Type.JAVASCRIPT_OPTIMIZER:
                 allowSpecifyingExceptions = true;
+                break;
+            case SiteSettingsCategory.Type.JAVASCRIPT_OPTIMIZER:
+                BrowserContextHandle browserContextHandle =
+                        getSiteSettingsDelegate().getBrowserContextHandle();
+                allowSpecifyingExceptions =
+                        !WebsitePreferenceBridge.isJavascriptOptimizerOsProvidedSetting(
+                                browserContextHandle, ContentSettingsType.JAVASCRIPT_OPTIMIZER);
                 break;
             case SiteSettingsCategory.Type.BACKGROUND_SYNC:
             case SiteSettingsCategory.Type.AUTOMATIC_DOWNLOADS:
@@ -1122,6 +1171,13 @@ public class SingleCategorySettings extends BaseSiteSettingsFragment
                     return !binaryToggle.isChecked();
                 }
                 break;
+            case GlobalToggleLayout.BINARY_RADIO_BUTTON:
+                BinaryStatePermissionPreference binaryRadioButton =
+                        getPreferenceScreen().findPreference(BINARY_RADIO_BUTTON_KEY);
+                if (binaryRadioButton != null) {
+                    return !binaryRadioButton.isChecked();
+                }
+                break;
         }
         return false;
     }
@@ -1172,6 +1228,8 @@ public class SingleCategorySettings extends BaseSiteSettingsFragment
                 return R.string.website_settings_background_sync_page_description;
             } else if (mCategory.getType() == SiteSettingsCategory.Type.AUTOMATIC_DOWNLOADS) {
                 return R.string.website_settings_automatic_downloads_page_description;
+            } else if (mCategory.getType() == SiteSettingsCategory.Type.FILE_EDITING) {
+                return R.string.website_settings_file_editing_page_description;
             }
         }
         return -1;
@@ -1185,6 +1243,8 @@ public class SingleCategorySettings extends BaseSiteSettingsFragment
         // not needed for the current category and will be removed in the steps below.
         ChromeSwitchPreference binaryToggle =
                 assumeNonNull(screen.findPreference(BINARY_TOGGLE_KEY));
+        BinaryStatePermissionPreference binaryRadioButton =
+                assumeNonNull(screen.findPreference(BINARY_RADIO_BUTTON_KEY));
         TriStateSiteSettingsPreference triStateToggle =
                 assumeNonNull(screen.findPreference(TRI_STATE_TOGGLE_KEY));
         TriStateCookieSettingsPreference triStateCookieToggle =
@@ -1208,6 +1268,9 @@ public class SingleCategorySettings extends BaseSiteSettingsFragment
         if (mGlobalToggleLayout != GlobalToggleLayout.BINARY_TOGGLE) {
             screen.removePreference(binaryToggle);
         }
+        if (mGlobalToggleLayout != GlobalToggleLayout.BINARY_RADIO_BUTTON) {
+            screen.removePreference(binaryRadioButton);
+        }
         if (mGlobalToggleLayout != GlobalToggleLayout.TRI_STATE_TOGGLE) {
             screen.removePreference(triStateToggle);
         }
@@ -1217,6 +1280,9 @@ public class SingleCategorySettings extends BaseSiteSettingsFragment
         switch (mGlobalToggleLayout) {
             case GlobalToggleLayout.BINARY_TOGGLE:
                 configureBinaryToggle(binaryToggle, contentType);
+                break;
+            case GlobalToggleLayout.BINARY_RADIO_BUTTON:
+                configureBinaryRadioButton(binaryRadioButton, contentType);
                 break;
             case GlobalToggleLayout.TRI_STATE_TOGGLE:
                 configureTriStateToggle(triStateToggle, contentType);
@@ -1377,7 +1443,8 @@ public class SingleCategorySettings extends BaseSiteSettingsFragment
                         getContext(),
                         (widget) -> {
                             getSiteSettingsDelegate()
-                                    .launchStorageAccessHelpActivity(getActivity());
+                                    .launchUrlInCustomTab(
+                                            getActivity(), EMBEDDED_CONTENT_HELP_CENTER_URL);
                         });
         return SpanApplier.applySpans(
                 storageAccessRawString,
@@ -1401,14 +1468,15 @@ public class SingleCategorySettings extends BaseSiteSettingsFragment
     }
 
     private void maybeShowOsWarning(PreferenceScreen screen) {
-        if (isBlocked()) {
+        if (isBlocked() && !mCategory.shouldShowWarningWhenBlocked()) {
             return;
         }
 
         // Show the link to system settings since permission is disabled.
         ChromeBasePreference osWarning = new ChromeBasePreference(getStyledContext(), null);
         ChromeBasePreference osWarningExtra = new ChromeBasePreference(getStyledContext(), null);
-        mCategory.configurePermissionIsOffPreferences(
+
+        mCategory.configureWarningPreferences(
                 osWarning,
                 osWarningExtra,
                 getContext(),
@@ -1488,6 +1556,34 @@ public class SingleCategorySettings extends BaseSiteSettingsFragment
         // Set the checked value.
         binaryToggle.setChecked(
                 WebsitePreferenceBridge.isCategoryEnabled(browserContextHandle, contentType));
+    }
+
+    private void configureBinaryRadioButton(
+            BinaryStatePermissionPreference binaryRadioButton, int contentType) {
+        binaryRadioButton.setOnPreferenceChangeListener(this);
+
+        BrowserContextHandle browserContextHandle =
+                getSiteSettingsDelegate().getBrowserContextHandle();
+        @ContentSettingValues
+        int setting =
+                WebsitePreferenceBridge.getDefaultContentSetting(browserContextHandle, contentType);
+        int[] descriptionIds =
+                ContentSettingsResources.getBinaryStateSettingResourceIDs(contentType);
+        @ContentSettingValues
+        @Nullable Integer defaultEnabledValue =
+                ContentSettingsResources.getDefaultEnabledValue(contentType);
+        @ContentSettingValues
+        @Nullable Integer defaultDisabledValue =
+                ContentSettingsResources.getDefaultDisabledValue(contentType);
+
+        binaryRadioButton.setManagedPreferenceDelegate(
+                new SingleCategoryManagedPreferenceDelegate(
+                        getSiteSettingsDelegate().getManagedPreferenceDelegate()));
+        binaryRadioButton.initialize(
+                setting,
+                descriptionIds,
+                defaultEnabledValue != null ? defaultEnabledValue : ContentSettingValues.ASK,
+                defaultDisabledValue != null ? defaultDisabledValue : ContentSettingValues.BLOCK);
     }
 
     private void updateNotificationsSecondaryControls() {

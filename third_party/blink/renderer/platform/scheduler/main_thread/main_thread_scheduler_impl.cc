@@ -30,6 +30,7 @@
 #include "base/trace_event/trace_event.h"
 #include "base/trace_event/traced_value.h"
 #include "build/build_config.h"
+#include "components/performance_manager/scenario_api/performance_scenarios.h"
 #include "components/viz/common/frame_sinks/begin_frame_args.h"
 #include "third_party/blink/public/common/features.h"
 #include "third_party/blink/public/common/input/web_input_event.h"
@@ -397,7 +398,7 @@ MainThreadSchedulerImpl::MainThreadOnly::MainThreadOnly(
       last_frame_time(now),
       agent_group_schedulers(
           MakeGarbageCollected<
-              HeapHashSet<WeakMember<AgentGroupSchedulerImpl>>>()) {}
+              GCedHeapHashSet<WeakMember<AgentGroupSchedulerImpl>>>()) {}
 
 MainThreadSchedulerImpl::MainThreadOnly::~MainThreadOnly() = default;
 
@@ -463,7 +464,10 @@ MainThreadSchedulerImpl::SchedulingSettings::SchedulingSettings()
           base::FeatureList::IsEnabled(features::kDeferRendererTasksAfterInput)
               ? std::optional<features::TaskDeferralPolicy>(
                     features::kTaskDeferralPolicyParam.Get())
-              : std::nullopt) {}
+              : std::nullopt),
+      input_scenario_priority_boost_enabled(
+          base::FeatureList::IsEnabled(features::kInputScenarioPriorityBoost)) {
+}
 
 MainThreadSchedulerImpl::AnyThread::~AnyThread() = default;
 
@@ -1966,12 +1970,6 @@ void MainThreadSchedulerImpl::PostDelayedIdleTask(
   IdleTaskRunner()->PostDelayedIdleTask(location, delay, std::move(task));
 }
 
-void MainThreadSchedulerImpl::PostNonNestableIdleTask(
-    const base::Location& location,
-    Thread::IdleTask task) {
-  IdleTaskRunner()->PostNonNestableIdleTask(location, std::move(task));
-}
-
 void MainThreadSchedulerImpl::RemoveCancelledIdleTasks() {
   idle_helper_.RemoveCancelledIdleTasks();
 }
@@ -2257,6 +2255,28 @@ void MainThreadSchedulerImpl::OnTaskStarted(
   main_thread_only().task_priority_for_tracing =
       queue ? std::optional<TaskPriority>(queue->GetQueuePriority())
             : std::nullopt;
+
+  if (scheduling_settings().input_scenario_priority_boost_enabled) {
+    // Check if the input scenario has changed and update the main thread
+    // priority boost accordingly.
+    performance_scenarios::InputScenario input_scenario =
+        GetInputScenario(performance_scenarios::ScenarioScope::kCurrentProcess)
+            ->load(std::memory_order_relaxed);
+
+    switch (input_scenario) {
+      case performance_scenarios::InputScenario::kNoInput:
+        if (main_thread_only().main_thread_priority_boost.has_value()) {
+          main_thread_only().main_thread_priority_boost.reset();
+        }
+        break;
+      case performance_scenarios::InputScenario::kTyping:
+        if (!main_thread_only().main_thread_priority_boost.has_value()) {
+          main_thread_only().main_thread_priority_boost.emplace(
+              base::ThreadType::kDisplayCritical);
+        }
+        break;
+    }
+  }
 }
 
 void MainThreadSchedulerImpl::OnTaskCompleted(

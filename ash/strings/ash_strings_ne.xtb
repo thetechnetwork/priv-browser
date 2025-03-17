@@ -22,6 +22,7 @@
 <translation id="1058009965971887428">प्रतिक्रियाका बारेमा रिपोर्ट गर्नुहोस्</translation>
 <translation id="1059120031266247284">तपाईंसँग सेयर गरिएको</translation>
 <translation id="1059194134494239015"><ph name="DISPLAY_NAME" />: <ph name="RESOLUTION" /></translation>
+<translation id="1060847216467038176"><ph name="ITEM_LABEL" /> र यसलाई हटाउन क्लिक गर्नु पर्ने बटन</translation>
 <translation id="1062407476771304334">बदल्नुहोस्</translation>
 <translation id="1073899992769346247">ब्याट्री बदल्नुहोस् वा उक्त ब्याट्री रिचार्ज गर्नुहोस्</translation>
 <translation id="1081015718268701546">Linux एपहरू हाल प्रयोग गर्न मिल्दैन। अन्य एपहरू सेभ गरिने छन्।</translation>
@@ -73,7 +74,6 @@
 <translation id="1218444235442067213"><ph name="APP_NAME" />, Play Store एप</translation>
 <translation id="1225748608451425081">कुनै ज्ञात समस्याका कारण तपाईंको Chromebook लक गरिएको छ। तपाईं यति समयपछि साइन इन गर्न सक्नु हुने छ: <ph name="TIME_LEFT" />।</translation>
 <translation id="1229194443904279055">पाठ चयन गर्न छाड्नुहोस्</translation>
-<translation id="1230853660706736937">फोटोभित्रका टेक्स्ट खोज्ने र फोटोको प्रिभ्यू हेर्ने</translation>
 <translation id="1235458158152011030">ज्ञात नेटवर्कहरू</translation>
 <translation id="1239161794459865856"><ph name="FEATURE_NAME" /> कनेक्ट गरिएको छ।</translation>
 <translation id="1240638468526743569">कुनै एप</translation>
@@ -246,7 +246,6 @@
 <translation id="17722141032474077">हिसाबहरू</translation>
 <translation id="1774796056689732716">पात्रो, <ph name="CURRENT_MONTH_YEAR" />, हाल चयन गरिएको मिति: <ph name="DATE" />।</translation>
 <translation id="178347895271755507">आफ्नो फोनमा भएका हालसालैका फोटो, मिडिया तथा सूचनाहरू हेर्ने सुविधा सेटअप गर्नुहोस्</translation>
-<translation id="1785317913592722944">यो सामग्री सुझाइएको समूहबाट हटाउनुहोस्</translation>
 <translation id="1786487376942610288">Picture-in-picture विन्डोको अधिकतम वा हालको आकारका बिचमा अदलबदल गर्नुहोस्</translation>
 <translation id="1787955149152357925">अफ छ</translation>
 <translation id="1796561540704213354">तपाईंले हेर्नुभएका पेज र हाल खोलिएका पेजलगायतका वेबसाइटहरू</translation>
@@ -853,6 +852,7 @@
 <translation id="3859364108019690">एपहरू स्ट्रिम गर्न सकिएन</translation>
 <translation id="3861651314799684201">पूरा स्क्रिन रेकर्ड गर्न इन्टर थिच्नुहोस्</translation>
 <translation id="3870197372373144624">आफ्नो डिभाइस सट डाउन गरी हेर्नुहोस्।</translation>
+<translation id="3879748587602334249">डाउनलोड म्यानेजर</translation>
 <translation id="3886872229787704059">आज खोलिएको</translation>
 <translation id="3891340733213178823">साइन आउट गर्न Ctrl+Shift+Q लाई दुईपटक थिच्नुहोस्।</translation>
 <translation id="3892148308691398805">पाठ कपी गर्नुहोस्</translation>
@@ -878,6 +878,7 @@
 <translation id="3958714870339660776">दिनभर</translation>
 <translation id="3962859241508114581">अघिल्लो ट्र्याक</translation>
 <translation id="3963124517343721543">आफ्ना यसअघिका विन्डो तथा ट्याबहरू खोलेर आफूले छाडेकै ठाउँबाट सजिलैसँग जारी राख्नुहोस्। तपाईं यसपछि गर्न सकिने कार्यहरूका बारेमा पर्सनलाइज गरिएका सुझावहरू देख्नु हुने छ।</translation>
+<translation id="3967822245660637423">डाउनलोड पूर्ण भयो</translation>
 <translation id="3969043077941541451">अफ छ</translation>
 <translation id="3970324493235864154">आफ्नो फोनमा भएका सूचनाहरू हेर्नुहोस्</translation>
 <translation id="397105322502079400">हिसाब गर्दै...</translation>
@@ -1052,6 +1053,7 @@
 <translation id="450584155212756404">डेभ च्यानल</translation>
 <translation id="4513044611477939680">क्विक सेयर</translation>
 <translation id="4513946894732546136">पृष्ठपोषण</translation>
+<translation id="4518096944902121253">यो भाषामा थप कुनै पनि कार्य गर्न मिल्दैन</translation>
 <translation id="4518404433291145981">तपाईं आफ्नो Chromebook अनलक गर्न चाहनुहुन्छ भने सर्वप्रथम आफ्नो फोन अनलक गर्नुहोस्</translation>
 <translation id="4525887279712865285">क्विक सेयरसम्बन्धी सेटिङ देखाउनुहोस्</translation>
 <translation id="4527045527269911712">ब्लुटूथ यन्त्र "<ph name="DEVICE_NAME" />" जोडिनको लागि अनुमति चाहन्छ।</translation>
@@ -1193,6 +1195,7 @@
 <translation id="4946376291507881335">फोटो खिच्नुहोस्</translation>
 <translation id="495046168593986294">माथि स्क्रोल गर्नुहोस्</translation>
 <translation id="4950800194215951939">गेम खेल्ने उत्कृष्ट सुविधा कस्टमाइज गर्नुहोस्</translation>
+<translation id="495170559598752135">कार्यहरू</translation>
 <translation id="4952936045814352993">अलार्मका आवाजहरू अफ गरिएका बेला फोन रहेको स्थान पत्ता लगाउने सुविधा उपलब्ध हुँदैन</translation>
 <translation id="4953585991029886728">पाठ सम्पादन गर्नुहोस्</translation>
 <translation id="4960324571663582548"><ph name="MANAGER" /> का अनुसार तपाईंले <ph name="DEVICE_TYPE" /> मा अघिल्लो संस्करण रिस्टोर गर्नु पर्ने हुन्छ। तपाईंको डिभाइस रिसेट हुने छ र डिभाइसमा भएका सबै डेटा मेटाइने छ।</translation>
@@ -1227,6 +1230,7 @@
 <translation id="5043679421800073804">सेल्फमा भएको अन्तिम वस्तुमा क्लिक वा ट्याप गर्नुहोस्</translation>
 <translation id="504465286040788597">अघिल्लो अनुच्छेद</translation>
 <translation id="5045550434625856497">गलत पासवर्ड</translation>
+<translation id="5056587122125565772">फोटो बनाउनुहोस्</translation>
 <translation id="5058794129231928255">Google डकुमेन्ट बनाउन सकिएन</translation>
 <translation id="5062496344832867502">RAM</translation>
 <translation id="5068762093486106012">तपाईं म्युट गरिएका बेला बोल्नुभयो भने तपाईंलाई सूचित गरिने छ। अडियो तपाईंको डिभाइसमै रहन्छ।</translation>
@@ -1275,6 +1279,7 @@
 <translation id="5222676887888702881">साइन आउट गर्नुहोस्</translation>
 <translation id="5228195526683428788">स्प्लिट स्क्रिन डिभाइडर</translation>
 <translation id="5229343007215035173">प्राइभेसी स्क्रिन अन/अफ गर्नुहोस्</translation>
+<translation id="5229860525743792999">सिफारिस गरिएको समूहबाट <ph name="ITEM_LABEL" /> हटाउनुहोस्</translation>
 <translation id="5230516054153933099">विन्डो</translation>
 <translation id="5234764350956374838">खारेज गर्नुहोस्</translation>
 <translation id="523505283826916779">पहुँचक्षमता सेटिङहरू</translation>
@@ -1619,6 +1624,7 @@
 <translation id="6319058840130157106">पुछारको दायाँ कुना, लन्चर, एड्रेस बार, बुकमार्क बार, खुला रहेको वेबसाइट र डाउनलोड गरिएका सामग्रीमध्ये एकबाट अर्कोमा जान पछाडि जानुहोस्</translation>
 <translation id="6319503618073410818">ब्राउजरमा गई विवरण हेर्नुहोस्</translation>
 <translation id="6324916366299863871">सर्टकट सम्पादन गर्नुहोस्</translation>
+<translation id="6325525973963619867">चलाउन सकिएन</translation>
 <translation id="6330012934079202188">सबै डेस्कमा रहेका विन्डोहरू देखाइँदै छन्, हालको डेस्कमा रहेका विन्डोहरू देखाउन अप एरो की थिच्नुहोस्</translation>
 <translation id="6337159624125741244">फुल स्क्रिन म्याग्निफायर अन छ</translation>
 <translation id="6338485349199627913"><ph name="DISPLAY_NAME" /> <ph name="MANAGER" /> ले व्यवस्थापन गर्ने सत्र हो</translation>
@@ -1683,6 +1689,7 @@
 <translation id="6542891623636520977">इमोजी, GIF र थप कुराहरू</translation>
 <translation id="6543942526104794893">तपाईंले फेसियल जेस्चर अफ गर्न खोज्नुभएकै हो?</translation>
 <translation id="6545382064335350438">तपाईंको PIN अझै पनि पुष्टि गर्न सकिएन। फेरि प्रयास गर्नुहोस्।</translation>
+<translation id="6546062506073634094">फोटोमा भएको सामग्री र फोटोको प्रिभ्यूका आधारमा फोटो खोज्ने सुविधा</translation>
 <translation id="6555373427270923730">एड्रेस बारमा वेब ठेगाना टाइप गर्नुहोस् अनि <ph name="MODIFIER" /><ph name="KEY" /> थिच्नुहोस्</translation>
 <translation id="655633303491376835"><ph name="APP_NAME" />
 भर्खरै इन्स्टल गरिएको छ</translation>
@@ -1756,6 +1763,7 @@
 <translation id="6757237461819837179">कुनै मिडिया प्ले भइरहेको छैन</translation>
 <translation id="6760438044935091345">गेम ड्यासबोर्ड</translation>
 <translation id="6768043681523654438">भण्डारण</translation>
+<translation id="6769195697113506406">फोटो हालिएको छ</translation>
 <translation id="6777216307882431711">जडान गरिएका USB-C यन्त्रहरू चार्ज गर्दै</translation>
 <translation id="6781002679438061620">डेस्क ९</translation>
 <translation id="6782182743534150858">डेस्क १३</translation>
@@ -1878,6 +1886,7 @@
 <translation id="7189412385142492784">शुक्र ग्रह पृथ्वीबाट कति टाढा छ</translation>
 <translation id="7198435252016571249">क्यामेरा पुछारको दायाँ कुनामा स्न्याप गरियो। सिस्टमको सतहसँग बाझियो।</translation>
 <translation id="7219573373513695352">कुनै पनि डिभाइस कनेक्ट गरिएको छैन</translation>
+<translation id="7228968829656641943">आफ्नो स्क्रिनमा भएको आफूले खोज्न चाहेको क्षेत्र चयन गर्नुहोस्। किबोर्डमार्फत नेभिगेट गर्न ट्याब अनि स्पेस की थिच्नुहोस्।</translation>
 <translation id="7229029500464092426">कुल <ph name="TOTAL_MEMORY" /> मध्ये <ph name="AVAILABLE_MEMORY" /> मेमोरी प्रयोग गरिएको छ</translation>
 <translation id="7239814253344511868">माउसका दुवै बटन</translation>
 <translation id="7244725679040769470"><ph name="PERCENTAGE" />% ब्याट्री बाँकी छ। आफ्नो डिभाइस बिजुलीको स्रोतमा जोड्नुहोस्।</translation>
@@ -1910,6 +1919,7 @@
 <translation id="735745346212279324">VPN को जडान विच्छेद भयो</translation>
 <translation id="7360036564632145207">तपाईंले 'सहायक यन्त्रलाई डेटा प्रयोग गर्न रोक लगाउने सुविधा' का सेटिङ बदल्नुभयो भने ती यन्त्रहरूले अझ राम्रोसँग काम गर्न सक्छन्</translation>
 <translation id="736045644501761622">वालपेपर र शैली तय गर्नुहोस्</translation>
+<translation id="7368041336688136012">तपाईंको उमेर कम्तीमा १८ वर्ष पुगेको छ भने मात्र तपाईं "मलाई पढ्न मद्दत गर्नुहोस्" र "मलाई लेख्न मद्दत गर्नुहोस्" प्रयोग गर्न तथा AI प्रयोग गरी फोटो सिर्जना गर्न सक्नुहुन्छ।</translation>
 <translation id="7371404428569700291">विन्डोको भिडियो रेकर्ड गर्नुहोस्</translation>
 <translation id="7372069265635026568">कुल <ph name="TOTAL_MEMORY" /> भण्डारणमध्ये <ph name="AVAILABLE_MEMORY" /> भण्डारण उपलब्ध छ</translation>
 <translation id="737315737514430195">यसले माइक्रोफोन प्रयोग गर्ने अनुमति चाहिने सबै एप तथा वेबसाइटहरूलाई माइक्रोफोन प्रयोग गर्ने अनुमति दिन्छ</translation>
@@ -1981,6 +1991,7 @@
 <translation id="7571361473021531288"><ph name="BATTERY_PERCENTAGE" />% ब्याट्री बाँकी छ | <ph name="TIME" /> सम्म चल्छ</translation>
 <translation id="7573585051776738856">सक्रिय विन्डो दायाँतिर डक गरिएको छ।</translation>
 <translation id="7579778809502851308">स्क्रिन क्याप्चर</translation>
+<translation id="7588317312481506627">कपी गरेर क्लिपबोर्डमा पेस्ट गरियो।</translation>
 <translation id="7593891976182323525">सिफ्टको लागि खोज्नुहोस्</translation>
 <translation id="7598054670902114203">CPU को प्रयोगको स्न्यापसट, <ph name="CPU_USEAGE" />%. तापक्रम <ph name="TEMPERATURE" /> डिग्री सेल्सियस, हालको स्पिड: <ph name="CPU_AVERAGE_CURRENT_FREQUENCY_GHZ" />GHz</translation>
 <translation id="7599378375976398913">चयन गरिएको परिणाम हालिँदै छ</translation>
@@ -2175,6 +2186,7 @@
 <translation id="8155628902202578800"><ph name="USER_EMAIL_ADDRESS" /> को जानकारीको डायलग खोल्नुहोस्</translation>
 <translation id="8167567890448493835"><ph name="LOCALE_NAME" /> प्रयोग गर्दै</translation>
 <translation id="8168435359814927499">सामग्री</translation>
+<translation id="81817143961839203">फोटो हाल्न सकिएन</translation>
 <translation id="8185090165691050712">लक मोडको आकार बदल्न मेनु टगल गरी अन/अफ गर्नुहोस्</translation>
 <translation id="8192727139462702395">तपाईंले ब्लुटुथ अफ गर्नुभयो भने तपाईंको <ph name="DEVICE_TYPE" /> बाट यी बाह्य डिभाइसहरू डिस्कनेक्ट हुने छन्:</translation>
 <translation id="8198456017687137612">ट्याब कास्ट गरिँदै छ</translation>
@@ -2253,6 +2265,7 @@
 <translation id="8473301994082929012"><ph name="ORGANIZATION_NAME" /> सँग <ph name="FEATURE_STATE" /> <ph name="FEATURE_NAME" /> छ।</translation>
 <translation id="8477270416194247200">रद्द गर्न Alt+Search वा Shift बटनमा थिच्नुहोस्।</translation>
 <translation id="8480418399907765580">टुलबार देखाउनुहोस्</translation>
+<translation id="8487660088084188539">तपाईंले यी सुविधाहरू अन गरेका खण्डमा इन्पुट टेक्स्ट, डकुमेन्टमा भएको कन्टेन्ट र वेबपेजको URL Google का सर्भरहरूमा पठाइन सक्छ। यो जानकारी <ph name="LINK_TO_SERVICE_TERMS" />बमोजिम लेखनसम्बन्धी सुझाव दिन, सारांश बनाउन, प्रश्नहरूको जवाफ दिन र उत्पादनको गुणस्तर सुधार गर्न प्रयोग गरिन्छ। कुनै पनि व्यक्तिगत, संवेदनशील वा गोप्य जानकारी समावेश नगर्नुहोस्।</translation>
 <translation id="8487699605742506766">हटस्पट</translation>
 <translation id="8491237443345908933">यो लिंक नयाँ ट्याबमा खोल्नुहोस्</translation>
 <translation id="8492573885090281069"><ph name="DISPLAY_NAME" /> ले <ph name="SPECIFIED_RESOLUTION" /> समर्थन गर्दैन। रिजोल्युसन परिवर्तन गरी<ph name="FALLBACK_RESOLUTION" /> पारियो। परिवर्तनहरू सुरक्षित गर्न पुष्टि गर्नुहोस् नामक बटनमा क्लिक गर्नुहोस्। अघिल्ला सेटिङहरूलाई <ph name="TIMEOUT_SECONDS" /> भित्र पुनर्स्थापना गरिने छ।</translation>
@@ -2322,6 +2335,7 @@
 <translation id="8725066075913043281">पुन: प्रयास गर्नुहोस्</translation>
 <translation id="8725214031272624704">उपलब्ध इनपुट विधिहरूको सूची देखाउनुहोस्</translation>
 <translation id="8730621377337864115">गरियो</translation>
+<translation id="8731188831050207755"><ph name="FILE_NAME" /> डाउनलोड गर्न सकिएन।</translation>
 <translation id="8731487213223706745"><ph name="END_TIME" /> <ph name="DAYS_ELAPSED" /> मा समाप्त हुन्छ</translation>
 <translation id="8734991477317290293">यसले तपाईंका किस्ट्रोकहरू चोर्न खोजिरहेको हुन सक्छ</translation>
 <translation id="8735678380411481005">किबोर्डको ब्याकलाइटको रङ</translation>

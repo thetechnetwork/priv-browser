@@ -142,15 +142,11 @@ Regular profiles start at bucket 1, we don't consider non-regular profiles. -->
       summary="Consent notice with Topics API on Clank CCT."/>
 </variants>
 
-<!-- TODO(crbug.com/333408794): Add user action metrics for these. -->
-
 <variants name="PSNoticeAction">
   <variant name="Ack"
       summary="Got it or any other ack action on a privacy sandbox notice."/>
   <variant name="Closed"
       summary="Closed (x) action on a privacy sandbox notice"/>
-  <variant name="LearnMore"
-      summary="Learn more action on a privacy sandbox notice."/>
   <variant name="OptIn"
       summary="Turn it on or any other opt in action on a privacy sandbox
                notice."/>
@@ -228,7 +224,7 @@ Regular profiles start at bucket 1, we don't consider non-regular profiles. -->
 </histogram>
 
 <histogram name="Privacy.ClearBrowsingData.TabsEnabled" enum="BooleanEnabled"
-    expires_after="2025-07-06">
+    expires_after="2025-09-07">
   <owner>zalmashni@google.com</owner>
   <owner>chrome-browser-privacy-team@google.com</owner>
   <summary>
@@ -413,7 +409,7 @@ Regular profiles start at bucket 1, we don't consider non-regular profiles. -->
 <histogram name="Privacy.DIPS.BounceCategory{DIPSRedirectType}{DIPSCookieMode}"
     enum="DIPSRedirectCategory" expires_after="2025-08-10">
   <owner>rtarpine@chromium.org</owner>
-  <owner>src/chrome/browser/dips/OWNERS</owner>
+  <owner>src/content/browser/btm/OWNERS</owner>
   <summary>
     Whether a {DIPSRedirectType} redirect accessed cookies and whether its
     origin previously had user engagement. Recorded when redirecting between
@@ -430,7 +426,7 @@ Regular profiles start at bucket 1, we don't consider non-regular profiles. -->
 <histogram name="Privacy.DIPS.BounceStatusCode.{DIPSCachedResponseStatus}"
     enum="HttpResponseCode" expires_after="2025-08-10">
   <owner>liu@chromium.org</owner>
-  <owner>src/chrome/browser/dips/OWNERS</owner>
+  <owner>src/content/browser/btm/OWNERS</owner>
   <summary>
     The HTTP response status codes for each redirect within a DIPS-eligible
     redirect chain.
@@ -441,7 +437,7 @@ Regular profiles start at bucket 1, we don't consider non-regular profiles. -->
 <histogram name="Privacy.DIPS.ClearedSitesCount{DIPSCookieMode}" units="sites"
     expires_after="2025-07-13">
   <owner>wanderview@chromium.org</owner>
-  <owner>src/chrome/browser/dips/OWNERS</owner>
+  <owner>src/content/browser/btm/OWNERS</owner>
   <summary>
     The number of sites that may have had their storage cleared by DIPS.
 
@@ -467,7 +463,7 @@ Regular profiles start at bucket 1, we don't consider non-regular profiles. -->
     units="ms" expires_after="2025-07-13">
   <owner>etienneb@chromium.org</owner>
   <owner>jdh@chromium.org</owner>
-  <owner>src/chrome/browser/dips/OWNERS</owner>
+  <owner>src/content/browser/btm/OWNERS</owner>
   <summary>
     The time taken to execute the {DIPSDatabaseOperation} DIPS database
     operation.
@@ -480,7 +476,7 @@ Regular profiles start at bucket 1, we don't consider non-regular profiles. -->
 <histogram name="Privacy.DIPS.DatabaseEntryCount" units="entries"
     expires_after="2025-07-06">
   <owner>wanderview@chromium.org</owner>
-  <owner>src/chrome/browser/dips/OWNERS</owner>
+  <owner>src/content/browser/btm/OWNERS</owner>
   <summary>
     Number of entries present in the `bounces` table of the user's DIPS database
     (where there is 1 entry per eTLD+1). For each user profile, reported at
@@ -494,7 +490,7 @@ Regular profiles start at bucket 1, we don't consider non-regular profiles. -->
 <histogram name="Privacy.DIPS.DatabaseErrors" enum="SqliteLoggedResultCode"
     expires_after="2025-08-10">
   <owner>wanderview@chromium.org</owner>
-  <owner>src/chrome/browser/dips/OWNERS</owner>
+  <owner>src/content/browser/btm/OWNERS</owner>
   <summary>
     Errors reported by SQLite while initializing or using the DIPS database.
   </summary>
@@ -503,7 +499,7 @@ Regular profiles start at bucket 1, we don't consider non-regular profiles. -->
 <histogram name="Privacy.DIPS.DatabaseHealthMetricsTime" units="ms"
     expires_after="2025-07-06">
   <owner>wanderview@chromium.org</owner>
-  <owner>src/chrome/browser/dips/OWNERS</owner>
+  <owner>src/content/browser/btm/OWNERS</owner>
   <summary>
     The time taken to gather DIPS database health metrics. For each user
     profile, these metrics are reported at profile open (which usually happens
@@ -518,7 +514,7 @@ Regular profiles start at bucket 1, we don't consider non-regular profiles. -->
 <histogram name="Privacy.DIPS.DatabaseInit" units="attempts"
     expires_after="2026-01-27">
   <owner>wanderview@chromium.org</owner>
-  <owner>src/chrome/browser/dips/OWNERS</owner>
+  <owner>src/content/browser/btm/OWNERS</owner>
   <summary>
     Logs how many attempts it took to initialize the DIPS database. Logs a value
     of 0 if all attempts failed.
@@ -528,7 +524,7 @@ Regular profiles start at bucket 1, we don't consider non-regular profiles. -->
 <histogram name="Privacy.DIPS.DatabaseSize" units="KB"
     expires_after="2025-10-21">
   <owner>wanderview@chromium.org</owner>
-  <owner>src/chrome/browser/dips/OWNERS</owner>
+  <owner>src/content/browser/btm/OWNERS</owner>
   <summary>
     The size of the DIPS database file. For each user profile, reported at
     profile open (which usually happens at startup). Also reported approximately
@@ -543,7 +539,7 @@ Regular profiles start at bucket 1, we don't consider non-regular profiles. -->
     name="Privacy.DIPS.DeletionDomainLength.{DIPSCookiePartitionKeyState}"
     units="lengths" expires_after="2026-02-03">
   <owner>liu@chromium.org</owner>
-  <owner>src/chrome/browser/dips/OWNERS</owner>
+  <owner>src/content/browser/btm/OWNERS</owner>
   <summary>
     The length of a domain that will be cleared by bounce tracking mitigations.
     This metric is recorded after any invalid domain filtering, so it only
@@ -559,7 +555,7 @@ Regular profiles start at bucket 1, we don't consider non-regular profiles. -->
 <histogram name="Privacy.DIPS.DeletionLatency2" units="ms"
     expires_after="2025-08-10">
   <owner>wanderview@chromium.org</owner>
-  <owner>src/chrome/browser/dips/OWNERS</owner>
+  <owner>src/content/browser/btm/OWNERS</owner>
   <summary>
     The amount of time it takes to complete the DIPS deletion process.
 
@@ -574,7 +570,7 @@ Regular profiles start at bucket 1, we don't consider non-regular profiles. -->
 <histogram name="Privacy.DIPS.Deletion{DIPSCookieMode}"
     enum="DIPSDeletionAction" expires_after="2025-07-13">
   <owner>njeunje@chromium.org</owner>
-  <owner>src/chrome/browser/dips/OWNERS</owner>
+  <owner>src/content/browser/btm/OWNERS</owner>
   <summary>
     This is recorded each time we initiate a possible deletion of state on
     DIPS-eligible (incidental) sites. This metric will represents the action
@@ -586,9 +582,9 @@ Regular profiles start at bucket 1, we don't consider non-regular profiles. -->
 </histogram>
 
 <histogram name="Privacy.DIPS.DIPSErrorCodes" enum="DIPSErrorCode"
-    expires_after="2025-07-06">
+    expires_after="2025-09-07">
   <owner>wanderview@chromium.org</owner>
-  <owner>src/chrome/browser/dips/OWNERS</owner>
+  <owner>src/content/browser/btm/OWNERS</owner>
   <summary>
     Tracks certain errors that DIPS may encounter when running on a client.
 
@@ -604,7 +600,7 @@ Regular profiles start at bucket 1, we don't consider non-regular profiles. -->
 <histogram name="Privacy.DIPS.ServerBounceChainDelay" units="ms"
     expires_after="2025-08-10">
   <owner>liu@chromium.org</owner>
-  <owner>src/chrome/browser/dips/OWNERS</owner>
+  <owner>src/content/browser/btm/OWNERS</owner>
   <summary>
     The cumulative amount of time across all server redirects within a single
     DIPS-eligible redirect chain. This is effectively the sum of the
@@ -615,7 +611,7 @@ Regular profiles start at bucket 1, we don't consider non-regular profiles. -->
 <histogram name="Privacy.DIPS.ServerBounceDelay" units="ms"
     expires_after="2025-08-10">
   <owner>liu@chromium.org</owner>
-  <owner>src/chrome/browser/dips/OWNERS</owner>
+  <owner>src/content/browser/btm/OWNERS</owner>
   <summary>
     The amount of time between server redirects within a DIPS-eligible redirect
     chain. Each bounce within the redirect chain will be its own entry.
@@ -627,9 +623,9 @@ Regular profiles start at bucket 1, we don't consider non-regular profiles. -->
 </histogram>
 
 <histogram name="Privacy.DIPS.TimeFromNavigationCommitToClientBounce"
-    units="ms" expires_after="2025-06-29">
+    units="ms" expires_after="2025-08-31">
   <owner>rtarpine@chromium.org</owner>
-  <owner>src/chrome/browser/dips/OWNERS</owner>
+  <owner>src/content/browser/btm/OWNERS</owner>
   <summary>
     The amount of time after a navigation to a site commits until a renderer
     initiated navigation (without user activation) is started to a different
@@ -680,7 +676,7 @@ Regular profiles start at bucket 1, we don't consider non-regular profiles. -->
 </histogram>
 
 <histogram name="Privacy.QuickDelete.TabsEnabled" enum="BooleanEnabled"
-    expires_after="2025-07-06">
+    expires_after="2025-09-07">
   <owner>zalmashni@google.com</owner>
   <owner>chrome-browser-privacy-team@google.com</owner>
   <summary>
@@ -796,7 +792,7 @@ Regular profiles start at bucket 1, we don't consider non-regular profiles. -->
 </histogram>
 
 <histogram name="PrivacySandbox.ActivityTypeStorage.RecordsLength"
-    units="count" expires_after="2025-06-29">
+    units="count" expires_after="2025-08-31">
   <owner>jacobstanley@google.com</owner>
   <owner>koilos@google.com</owner>
   <summary>
@@ -1149,7 +1145,7 @@ Regular profiles start at bucket 1, we don't consider non-regular profiles. -->
 
 <histogram
     name="PrivacySandbox.AggregationService.{DelayType}.FinalRequestStatus"
-    enum="CombinedHttpResponseAndNetErrorCode" expires_after="2025-07-01">
+    enum="AggregationServiceObserverReportStatus" expires_after="2025-08-31">
   <owner>alexmt@chromium.org</owner>
   <owner>linnan@chromium.org</owner>
   <summary>
@@ -1168,7 +1164,7 @@ Regular profiles start at bucket 1, we don't consider non-regular profiles. -->
 
 <histogram
     name="PrivacySandbox.AggregationService.{DelayType}.NumRetriesBeforeSuccess"
-    units="retries" expires_after="2025-07-01">
+    units="retries" expires_after="2025-08-31">
   <owner>alexmt@chromium.org</owner>
   <owner>linnan@chromium.org</owner>
   <summary>
@@ -1326,7 +1322,7 @@ Regular profiles start at bucket 1, we don't consider non-regular profiles. -->
 <histogram
     name="PrivacySandbox.CookieDeprecationFacilitatedTesting.ReasonForEligibilityStoredInPrefs"
     enum="CookieDeprecationFacilitatedTestingProfileEligibility"
-    expires_after="2025-06-29">
+    expires_after="2025-08-31">
   <owner>linnan@chromium.org</owner>
   <owner>measurement-api-dev+metrics@google.com</owner>
   <summary>
@@ -1515,11 +1511,18 @@ Regular profiles start at bucket 1, we don't consider non-regular profiles. -->
 </histogram>
 
 <histogram name="PrivacySandbox.Notice.ClickIgnored.{PSNotice}"
-    enum="PrivacySandboxClickEvent" expires_after="2025-06-11">
+    enum="PrivacySandboxClickEvent" expires_after="2025-08-31">
   <owner>aashnas@google.com</owner>
   <owner>koilos@google.com</owner>
   <summary>Records the clicks ignored on a notice {PSNotice}.</summary>
   <token key="PSNotice" variants="PSNotice"/>
+</histogram>
+
+<histogram name="PrivacySandbox.Notice.CloseDialogCallbackState"
+    enum="PrivacySandboxDialogCallbackState" expires_after="2025-06-11">
+  <owner>chrstne@google.com</owner>
+  <owner>koilos@google.com</owner>
+  <summary>Records the the callback state when a notice is closed.</summary>
 </histogram>
 
 <histogram
@@ -1557,6 +1560,8 @@ Regular profiles start at bucket 1, we don't consider non-regular profiles. -->
   <token key="PSNoticeAction" variants="PSNoticeAction"/>
 </histogram>
 
+<!-- DO NOT USE. To be deprecated soon, use PrivacySandbox.Notice.NoticeEvent.{PSNotice} instead. -->
+
 <histogram name="PrivacySandbox.Notice.NoticeAction.{PSNotice}"
     enum="PrivacySandboxNoticeAction" expires_after="2025-08-10">
   <owner>chrstne@google.com</owner>
@@ -1578,6 +1583,18 @@ Regular profiles start at bucket 1, we don't consider non-regular profiles. -->
   <token key="PSNotice" variants="PSNotice"/>
 </histogram>
 
+<histogram name="PrivacySandbox.Notice.NoticeEvent.{PSNotice}"
+    enum="PrivacySandboxNoticeEvent" expires_after="2026-01-01">
+  <owner>chrstne@google.com</owner>
+  <owner>koilos@google.com</owner>
+  <summary>
+    Records the event performed on a notice {PSNotice} for a profile.
+  </summary>
+  <token key="PSNotice" variants="PSNotice"/>
+</histogram>
+
+<!-- DO NOT USE. To be deprecated soon, use PrivacySandbox.Notice.NoticeEvent.{PSNotice} instead. -->
+
 <histogram name="PrivacySandbox.Notice.NoticeShown.{PSNotice}" enum="Boolean"
     expires_after="2025-08-10">
   <owner>chrstne@google.com</owner>
@@ -1587,7 +1604,7 @@ Regular profiles start at bucket 1, we don't consider non-regular profiles. -->
 </histogram>
 
 <histogram name="PrivacySandbox.Notice.NoticeShownForFirstTime.{PSNotice}"
-    enum="Boolean" expires_after="2025-06-11">
+    enum="Boolean" expires_after="2025-08-31">
   <owner>chrstne@google.com</owner>
   <owner>koilos@google.com</owner>
   <summary>
@@ -1740,7 +1757,7 @@ Regular profiles start at bucket 1, we don't consider non-regular profiles. -->
 
 <histogram name="PrivacySandbox.PrivateAggregation.BudgetStorage.InitStatus"
     enum="PrivacySandboxPrivateAggregationBudgetStorageInitStatus"
-    expires_after="2025-06-30">
+    expires_after="2025-08-31">
   <owner>alexmt@chromium.org</owner>
   <owner>linnan@chromium.org</owner>
   <summary>
@@ -1765,7 +1782,7 @@ Regular profiles start at bucket 1, we don't consider non-regular profiles. -->
 
 <histogram
     name="PrivacySandbox.PrivateAggregation.BudgetStorage.ShutdownBeforeFinishingInitialization"
-    enum="Boolean" expires_after="2025-06-30">
+    enum="Boolean" expires_after="2025-08-31">
   <owner>alexmt@chromium.org</owner>
   <owner>linnan@chromium.org</owner>
   <summary>

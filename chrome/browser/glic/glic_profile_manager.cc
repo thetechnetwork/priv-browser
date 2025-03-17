@@ -17,6 +17,7 @@
 #include "chrome/browser/ui/browser.h"
 #include "chrome/browser/ui/browser_finder.h"
 #include "chrome/browser/ui/browser_list.h"
+#include "chrome/browser/ui/profiles/profile_picker.h"
 #include "chrome/common/chrome_features.h"
 #include "chrome/common/chrome_switches.h"
 
@@ -41,13 +42,13 @@ void AutoOpenGlicPanel() {
   }
 
   Browser* browser = nullptr;
-  InvocationSource pretend_source = InvocationSource::kOsButton;
+  mojom::InvocationSource pretend_source = mojom::InvocationSource::kOsButton;
   if (base::CommandLine::ForCurrentProcess()->GetSwitchValueASCII(
           ::switches::kGlicOpenOnStartup) == "attached") {
     // Attachment is best effort; FindLastActiveWithProfile() may return null
     // here.
     browser = chrome::FindLastActiveWithProfile(profile);
-    pretend_source = InvocationSource::kTopChromeButton;
+    pretend_source = mojom::InvocationSource::kTopChromeButton;
   }
   GlicKeyedServiceFactory::GetGlicKeyedService(profile)->ToggleUI(
       browser, /*prevent_close=*/true, pretend_source);
@@ -63,30 +64,25 @@ GlicProfileManager::GlicProfileManager() = default;
 
 GlicProfileManager::~GlicProfileManager() = default;
 
-void GlicProfileManager::CloseGlicWindow() {
-  if (active_glic_) {
-    active_glic_->ClosePanel();
-    active_glic_.reset();
-  }
-}
-
 Profile* GlicProfileManager::GetProfileForLaunch() const {
   if (g_forced_profile_for_launch_) {
     return g_forced_profile_for_launch_;
   }
 
-  // If there is an active glic window open, use that profile
-  if (active_glic_) {
-    return active_glic_->profile();
+  // If the glic window is currently showing detached use that profile.
+  if (last_active_glic_ && last_active_glic_->IsWindowDetached()) {
+    return last_active_glic_->profile();
   }
 
-  // Look for a profile to use for glic based on order of activation
+  // Look for a profile to based on most recently used browser windows
   for (Browser* browser : BrowserList::GetInstance()->OrderedByActivation()) {
     if (GlicEnabling::IsEnabledAndConsentForProfile(browser->profile())) {
       return browser->profile();
     }
   }
 
+  // TODO(https://crbug.com/379165457) Remove loaded profile look up once the
+  // pinned profile is implemented.
   // Look at the list of loaded profiles to use for glic
   if (g_browser_process->profile_manager()) {
     for (Profile* profile :
@@ -102,10 +98,10 @@ Profile* GlicProfileManager::GetProfileForLaunch() const {
 }
 
 void GlicProfileManager::SetActiveGlic(GlicKeyedService* glic) {
-  if (active_glic_ && active_glic_.get() != glic) {
-    active_glic_->ClosePanel();
+  if (last_active_glic_ && last_active_glic_.get() != glic) {
+    last_active_glic_->ClosePanel();
   }
-  active_glic_ = glic->GetWeakPtr();
+  last_active_glic_ = glic->GetWeakPtr();
 }
 
 bool GlicProfileManager::ShouldPreloadForProfile(Profile* profile) const {
@@ -134,10 +130,6 @@ bool GlicProfileManager::ShouldPreloadForProfile(Profile* profile) const {
   return true;
 }
 
-bool GlicProfileManager::HasActiveGlicService() const {
-  return active_glic_ != nullptr;
-}
-
 void GlicProfileManager::MaybeAutoOpenGlicPanel() {
   if (did_auto_open_ || !base::CommandLine::ForCurrentProcess()->HasSwitch(
                             ::switches::kGlicOpenOnStartup)) {
@@ -147,9 +139,34 @@ void GlicProfileManager::MaybeAutoOpenGlicPanel() {
   // TODO(391948342): Figure out why the FRE modal doesn't show when triggered
   // too early, and wait for that condition rather than delaying.
   base::SequencedTaskRunner::GetCurrentDefault()->PostDelayedTask(
-      FROM_HERE, base::BindOnce(&AutoOpenGlicPanel), base::Seconds(5));
+      FROM_HERE, base::BindOnce(&AutoOpenGlicPanel), base::Seconds(30));
 
   did_auto_open_ = true;
+}
+
+void GlicProfileManager::ShowProfilePicker() {
+  base::OnceCallback<void(Profile*)> callback = base::BindOnce(
+      &GlicProfileManager::DidSelectProfile, weak_ptr_factory_.GetWeakPtr());
+  // If the panel is not closed it will be on top of the profile picker.
+  if (last_active_glic_) {
+    last_active_glic_->ClosePanel();
+  }
+  ProfilePicker::Show(
+      ProfilePicker::Params::ForGlicManager(std::move(callback)));
+}
+
+void GlicProfileManager::DidSelectProfile(Profile* profile) {
+  // TODO(crbug.com/399727295) Remove once the profile picker calls this with
+  // fully initialized profiles.
+  if (!GlicEnabling::IsEnabledForProfile(profile)) {
+    return;
+  }
+  // Toggle glic but prevent close if it is already open for the selected
+  // profile.
+  GlicKeyedService* service =
+      GlicKeyedServiceFactory::GetGlicKeyedService(profile);
+  service->ToggleUI(nullptr, /*prevent_close=*/true,
+                    mojom::InvocationSource::kProfilePicker);
 }
 
 // static

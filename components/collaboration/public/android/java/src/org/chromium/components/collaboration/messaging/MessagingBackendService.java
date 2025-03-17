@@ -4,9 +4,8 @@
 
 package org.chromium.components.collaboration.messaging;
 
-import androidx.annotation.NonNull;
-
 import org.chromium.base.Callback;
+import org.chromium.build.annotations.NullMarked;
 import org.chromium.components.tab_group_sync.EitherId.EitherGroupId;
 import org.chromium.components.tab_group_sync.EitherId.EitherTabId;
 
@@ -18,6 +17,7 @@ import java.util.Optional;
  * //components/collaboration/public/messaging/messaging_backend_service.h. Used for accessing and
  * listening to messages related to collaboration and groups that need to be reflected in the UI.
  */
+@NullMarked
 public interface MessagingBackendService {
     /** An observer to be notified of persistent indicators that need to be shown in the UI. */
     interface PersistentMessageObserver {
@@ -42,8 +42,10 @@ public interface MessagingBackendService {
      */
     interface InstantMessageDelegate {
         /**
-         * Invoked when the frontend needs to display an instant message. When a decision has been
-         * made whether it can be displayed or not, invoke `successCallback` with `true` if it was
+         * Invoked when the frontend needs to display an instant message. If {@link messages}
+         * contains more than one message, it means that they are of the same type and are meant to
+         * be aggregated to be shown as a single message in the UI. When a decision has been made
+         * whether it can be displayed or not, invoke `successCallback` with `true` if it was
          * displayed, and `false` otherwise. This enables the backend to either: * Success: Clear
          * the message from internal storage. * Failure: Prepare the message to be redelivered at a
          * later time.
@@ -51,7 +53,8 @@ public interface MessagingBackendService {
          * <p>Note on memory safety: The successCallback is backed by an object in C++, and must NOT
          * be given to the garbage collector without invoking it first.
          */
-        void displayInstantaneousMessage(InstantMessage message, Callback<Boolean> successCallback);
+        void displayInstantaneousMessage(
+                List<InstantMessage> messages, Callback<Boolean> successCallback);
     }
 
     /** Sets the delegate for instant (one-off) messages. */
@@ -77,7 +80,6 @@ public interface MessagingBackendService {
      * @param type The type of message to query to. Pass Optional.empty() to return all message
      *     types.
      */
-    @NonNull
     List<PersistentMessage> getMessagesForTab(
             EitherTabId tabId, Optional</* @PersistentNotificationType */ Integer> type);
 
@@ -92,7 +94,6 @@ public interface MessagingBackendService {
      * @param groupId The ID of the group to scope messages to.
      * @param type The message type to query for. Pass Optional.empty() to return all message types.
      */
-    @NonNull
     List<PersistentMessage> getMessagesForGroup(
             EitherGroupId groupId, Optional</* @PersistentNotificationType */ Integer> type);
 
@@ -105,7 +106,6 @@ public interface MessagingBackendService {
      *
      * @param type The message type to query for. Pass Optional.empty() to return all message types.
      */
-    @NonNull
     List<PersistentMessage> getMessages(Optional</* @PersistentNotificationType */ Integer> type);
 
     /**
@@ -116,7 +116,6 @@ public interface MessagingBackendService {
      *
      * @param params The query params (e.g. collaboration ID).
      */
-    @NonNull
     List<ActivityLogItem> getActivityLog(ActivityLogQueryParams params);
 
     /**

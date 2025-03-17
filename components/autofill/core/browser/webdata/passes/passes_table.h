@@ -23,14 +23,15 @@ namespace autofill {
 // -----------------------------------------------------------------------------
 // loyalty_cards
 //
-//   guid                 Uniquely identifies the loyalty card instance (primary
-//                        key).
-//   merchant_name        The name of the loyalty card provider e.g. "Deutsche
-//                        Bahn".
-//   program_name         The name of the program from the loyalty card provider
-//                        e.g. "BahnBonus".
-//   program_logo         The url of the logo icon for the card.
-//   loyalty_card_number  A string representation of the loyalty card number.
+//   guid                         Uniquely identifies the loyalty card instance
+//                                (primary key).
+//   merchant_name                The name of the loyalty card provider e.g.
+//                                "Deutsche Bahn".
+//   program_name                 The name of the program from the loyalty card
+//                                provider e.g. "BahnBonus".
+//   program_logo                 The url of the logo icon for the card.
+//   unmasked_loyalty_card_suffix A string representation of the unmasked
+//                                loyalty card number suffix.
 class PassesTable : public WebDatabaseTable {
  public:
   PassesTable();
@@ -52,8 +53,9 @@ class PassesTable : public WebDatabaseTable {
   std::vector<LoyaltyCard> GetLoyaltyCards() const;
 
   // Inserts a new or updates an existing loyalty card into the database using
-  // the loyalty card id as a primary key. Returns `true` if the operation
-  // succeeded.
+  // the loyalty card id as a primary key. Returns `true` if the database
+  // operation succeeded. Returns `false` if the loyalty card's program logo URL
+  // is invalid or the database operation fails.
   bool AddOrUpdateLoyaltyCard(const LoyaltyCard& loyalty_card) const;
 
   // Attempts to retrieve a loyalty card from the database using the

@@ -49,25 +49,34 @@
 #include "chrome/browser/profiles/profile.h"
 #include "chrome/browser/profiles/profile_manager.h"
 #include "chrome/browser/screen_ai/public/optical_character_recognizer.h"
+#include "chrome/browser/search_engines/template_url_service_factory.h"
+#include "chrome/browser/signin/identity_manager_factory.h"
 #include "chrome/browser/ui/ash/capture_mode/lens_overlay_image_helper.h"
 #include "chrome/browser/ui/ash/capture_mode/search_results_view.h"
 #include "chrome/browser/ui/ash/system_web_apps/system_web_app_ui_utils.h"
 #include "chrome/browser/ui/webui/ash/cloud_upload/cloud_upload_util.h"
 #include "chrome/common/pref_names.h"
+#include "chromeos/ash/components/browser_context_helper/browser_context_helper.h"
 #include "chromeos/ash/components/login/login_state/login_state.h"
 #include "chromeos/ash/experiences/screenshot_area/screenshot_area.h"
 #include "chromeos/ash/services/recording/public/mojom/recording_service.mojom.h"
 #include "components/drive/file_errors.h"
+#include "components/lens/lens_metadata.mojom-shared.h"
 #include "components/lens/lens_overlay_mime_type.h"
 #include "components/lens/lens_overlay_permission_utils.h"
 #include "components/prefs/pref_service.h"
+#include "components/search/search.h"
+#include "components/search_engines/template_url_service.h"
 #include "components/services/app_service/public/cpp/app_launch_util.h"
+#include "components/signin/public/identity_manager/access_token_info.h"
 #include "content/public/browser/audio_service.h"
 #include "content/public/browser/browser_thread.h"
 #include "content/public/browser/download_manager.h"
 #include "content/public/browser/network_service_instance.h"
 #include "content/public/browser/service_process_host.h"
+#include "content/public/browser/storage_partition.h"
 #include "content/public/browser/video_capture_service.h"
+#include "google_apis/gaia/gaia_constants.h"
 #include "services/network/public/cpp/network_connection_tracker.h"
 #include "services/screen_ai/public/mojom/screen_ai_service.mojom.h"
 #include "services/video_capture/public/mojom/video_capture_service.mojom.h"
@@ -77,10 +86,17 @@
 #include "ui/aura/window.h"
 #include "ui/base/l10n/l10n_util.h"
 #include "ui/base/window_open_disposition.h"
+#include "ui/gfx/codec/jpeg_codec.h"
 
 namespace {
 
 ChromeCaptureModeDelegate* g_instance = nullptr;
+
+constexpr char kConsumerName[] = "ChromeCaptureModeDelegate";
+
+// The image quality when encoding the image being searched into the body of the
+// POST request.
+constexpr int kEncodingQualityJpeg = 40;
 
 ScreenshotArea ConvertToScreenshotArea(const aura::Window* window,
                                        const gfx::Rect& bounds) {
@@ -113,6 +129,39 @@ base::ScopedTempDir CreateTempDir() {
   base::ScopedTempDir temp_dir;
   CHECK(temp_dir.CreateUniqueTempDir());
   return temp_dir;
+}
+
+std::vector<unsigned char> EncodeImage(const gfx::Image& image,
+                                       std::string& content_type,
+                                       lens::mojom::ImageFormat& image_format) {
+  std::optional<std::vector<uint8_t>> data =
+      gfx::JPEGCodec::Encode(image.AsBitmap(), kEncodingQualityJpeg);
+
+  if (data) {
+    content_type = "image/jpeg";
+    image_format = lens::mojom::ImageFormat::JPEG;
+    return data.value();
+  }
+
+  // Get the front and end of the image bytes in order to store them in the
+  // search_args to be sent as part of the PostContent in the request
+  content_type = "image/png";
+  image_format = lens::mojom::ImageFormat::PNG;
+  auto bytes = image.As1xPNGBytes();
+  return {bytes->begin(), bytes->end()};
+}
+
+lens::mojom::ImageFormat EncodeImageIntoSearchArgs(
+    const gfx::Image& image,
+    size_t& encoded_size_bytes,
+    TemplateURLRef::SearchTermsArgs& search_args) {
+  lens::mojom::ImageFormat image_format;
+  std::string content_type;
+  std::vector<uint8_t> data = EncodeImage(image, content_type, image_format);
+  encoded_size_bytes = sizeof(unsigned char) * data.size();
+  search_args.image_thumbnail_content.assign(data.begin(), data.end());
+  search_args.image_thumbnail_content_type = content_type;
+  return image_format;
 }
 
 }  // namespace
@@ -582,6 +631,83 @@ void ChromeCaptureModeDelegate::SendRegionSearch(
       /*region_bytes=*/image);
 }
 
+void ChromeCaptureModeDelegate::GetPrimaryAccountAccessToken(
+    base::RepeatingCallback<void(const std::string& access_token)> callback) {
+  const user_manager::User* const active_user =
+      user_manager::UserManager::Get()->GetActiveUser();
+  CHECK(active_user);
+
+  Profile* profile = Profile::FromBrowserContext(
+      ash::BrowserContextHelper::Get()->GetBrowserContextByUser(active_user));
+  signin::IdentityManager* identity_manager =
+      IdentityManagerFactory::GetForProfile(profile);
+
+  if (!identity_manager ||
+      !identity_manager->HasPrimaryAccount(signin::ConsentLevel::kSignin)) {
+    // TODO: crbug.com/399914333 - Determine error handling for the access
+    // token.
+    return;
+  }
+
+  signin::ScopeSet scopes;
+  scopes.insert(GaiaConstants::kSupportContentOAuth2Scope);
+  primary_account_token_fetcher_ =
+      std::make_unique<signin::PrimaryAccountAccessTokenFetcher>(
+          kConsumerName, identity_manager, scopes,
+          base::BindOnce(
+              &ChromeCaptureModeDelegate::PrimaryAccountAccessTokenAvailable,
+              base::Unretained(this), std::move(callback)),
+          signin::PrimaryAccountAccessTokenFetcher::Mode::kImmediate,
+          signin::ConsentLevel::kSignin);
+}
+
+GURL ChromeCaptureModeDelegate::GetBaseSearchURLAndPostContent(
+    const gfx::Image& image,
+    gfx::Size image_original_size,
+    TemplateURLRef::PostContent* post_content) {
+  // What if the default search provider is not Google?
+  const user_manager::User* const active_user =
+      user_manager::UserManager::Get()->GetActiveUser();
+  CHECK(active_user);
+
+  Profile* profile = Profile::FromBrowserContext(
+      ash::BrowserContextHelper::Get()->GetBrowserContextByUser(active_user));
+  TemplateURLService* template_url_service =
+      TemplateURLServiceFactory::GetForProfile(profile);
+  DCHECK(template_url_service);
+  const TemplateURL* const default_provider =
+      template_url_service->GetDefaultSearchProvider();
+  DCHECK(default_provider);
+
+  // Encode the image into the search args.
+  TemplateURLRef::SearchTermsArgs search_args =
+      TemplateURLRef::SearchTermsArgs(std::u16string());
+  size_t encoded_size_bytes;
+  EncodeImageIntoSearchArgs(image, encoded_size_bytes, search_args);
+
+  if (search::DefaultSearchProviderIsGoogle(template_url_service)) {
+    search_args.processed_image_dimensions =
+        base::NumberToString(image.Size().width()) + "," +
+        base::NumberToString(image.Size().height());
+  }
+  search_args.image_original_size = image_original_size;
+
+  return GURL(default_provider->image_url_ref().ReplaceSearchTerms(
+      search_args, template_url_service->search_terms_data(), post_content));
+}
+
+scoped_refptr<network::SharedURLLoaderFactory>
+ChromeCaptureModeDelegate::GetSharedURLLoaderFactory() const {
+  const user_manager::User* const active_user =
+      user_manager::UserManager::Get()->GetActiveUser();
+  CHECK(active_user);
+
+  return ash::BrowserContextHelper::Get()
+      ->GetBrowserContextByUser(active_user)
+      ->GetDefaultStoragePartition()
+      ->GetURLLoaderFactoryForBrowserProcess();
+}
+
 void ChromeCaptureModeDelegate::SendMultimodalSearch(
     const SkBitmap& image,
     const gfx::Rect& region,
@@ -751,4 +877,22 @@ void ChromeCaptureModeDelegate::ResetOcr() {
   if (!pending_ocr_request_callback_.is_null()) {
     std::move(pending_ocr_request_callback_).Run(std::nullopt);
   }
+}
+
+void ChromeCaptureModeDelegate::PrimaryAccountAccessTokenAvailable(
+    base::RepeatingCallback<void(const std::string& access_token)> callback,
+    GoogleServiceAuthError error,
+    signin::AccessTokenInfo access_token_info) {
+  // Reset token fetcher for the next request.
+  DCHECK(primary_account_token_fetcher_);
+  primary_account_token_fetcher_.reset();
+
+  if (error.state() != GoogleServiceAuthError::NONE) {
+    // TODO: crbug.com/399914333 - Determine error handling for the access
+    // token.
+    return;
+  }
+
+  DCHECK(!access_token_info.token.empty());
+  std::move(callback).Run(access_token_info.token);
 }

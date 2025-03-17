@@ -24,6 +24,7 @@
 #import "ios/chrome/browser/lens_overlay/coordinator/lens_overlay_availability.h"
 #import "ios/chrome/browser/lens_overlay/coordinator/lens_overlay_mediator.h"
 #import "ios/chrome/browser/lens_overlay/coordinator/lens_overlay_mediator_delegate.h"
+#import "ios/chrome/browser/lens_overlay/coordinator/lens_overlay_tab_change_responder.h"
 #import "ios/chrome/browser/lens_overlay/coordinator/lens_result_page_mediator.h"
 #import "ios/chrome/browser/lens_overlay/model/lens_overlay_configuration_factory.h"
 #import "ios/chrome/browser/lens_overlay/model/lens_overlay_entrypoint.h"
@@ -95,11 +96,12 @@ const base::TimeDelta kSearchWithCameraTooltipHintDelay = base::Seconds(2.0);
 @interface LensOverlayCoordinator () <LensOverlayConsentPresenterDelegate,
                                       LensOverlayConsentViewControllerDelegate,
                                       LensOverlayCommands,
-                                      LensOverlayNetworkIssueDelegate,
+                                      LensOverlayNetworkIssuePresenterDelegate,
                                       LensOverlayMediatorDelegate,
                                       LensOverlayOverflowMenuDelegate,
                                       LensOverlayResultConsumer,
-                                      LensOverlayResultsPagePresenterDelegate>
+                                      LensOverlayResultsPagePresenterDelegate,
+                                      LensOverlayTabChangeResponder>
 
 // Whether the `_containerViewController` is currently presented.
 @property(nonatomic, assign, readonly) BOOL isLensOverlayVisible;
@@ -151,8 +153,8 @@ const base::TimeDelta kSearchWithCameraTooltipHintDelay = base::Seconds(2.0);
   /// Consent dialog presenter.
   LensOverlayConsentPresenter* _lensOverlayConsentPresenter;
 
-  /// Network issue alert presenter.
-  LensOverlayNetworkIssueAlertPresenter* _networkIssueAlertPresenter;
+  /// Network issue presenter.
+  LensOverlayNetworkIssuePresenter* _networkIssuePresenter;
 
   /// Presenter for the results page.
   LensOverlayResultsPagePresenter* _resultsPagePresenter;
@@ -193,9 +195,9 @@ const base::TimeDelta kSearchWithCameraTooltipHintDelay = base::Seconds(2.0);
   _mediator.templateURLService =
       ios::TemplateURLServiceFactory::GetForProfile(self.browser->GetProfile());
 
-  _networkIssueAlertPresenter = [[LensOverlayNetworkIssueAlertPresenter alloc]
+  _networkIssuePresenter = [[LensOverlayNetworkIssuePresenter alloc]
       initWithBaseViewController:_containerViewController];
-  _networkIssueAlertPresenter.delegate = self;
+  _networkIssuePresenter.delegate = self;
 
   return YES;
 }
@@ -215,8 +217,7 @@ const base::TimeDelta kSearchWithCameraTooltipHintDelay = base::Seconds(2.0);
       [[LensOverlayOverflowMenuFactory alloc] initWithBrowser:self.browser
                                          overflowMenuDelegate:self];
 
-  BOOL escapeHatchEnabled = IsLVFEscapeHatchEnabled();
-  config.useTrailingDismissButton = !escapeHatchEnabled;
+  config.useTrailingDismissButton = ![self shouldShowEscapeHatch];
 
   __weak __typeof(self) weakSelf = self;
   UIAction* searchWithCameraAction =
@@ -224,7 +225,7 @@ const base::TimeDelta kSearchWithCameraTooltipHintDelay = base::Seconds(2.0);
         [weakSelf didRequestSearchWithCamera];
       }];
   NSArray<UIAction*>* precedingMenuItems =
-      escapeHatchEnabled ? @[ searchWithCameraAction ] : @[];
+      [self shouldShowEscapeHatch] ? @[ searchWithCameraAction ] : @[];
 
   NSArray<UIAction*>* additionalMenuItems = @[
     [overflowMenuFactory openUserActivityAction],
@@ -248,8 +249,10 @@ const base::TimeDelta kSearchWithCameraTooltipHintDelay = base::Seconds(2.0);
     return;
   }
   Browser* browser = self.browser;
+  ProfileIOS* profile = browser->GetProfile();
   _mediator = [[LensOverlayMediator alloc]
-      initWithIsIncognito:browser->GetProfile()->IsOffTheRecord()];
+      initWithProfilePrefs:profile->GetPrefs()
+               isIncognito:profile->IsOffTheRecord()];
   _mediator.applicationHandler =
       HandlerForProtocol(browser->GetCommandDispatcher(), ApplicationCommands);
 
@@ -268,7 +271,7 @@ const base::TimeDelta kSearchWithCameraTooltipHintDelay = base::Seconds(2.0);
 #pragma mark - ChromeCoordinator
 
 - (void)start {
-  CHECK(IsLensOverlayAvailable());
+  CHECK(IsLensOverlayAvailable(self.browser->GetProfile()->GetPrefs()));
   [super start];
 
   Browser* browser = self.browser;
@@ -420,9 +423,7 @@ const base::TimeDelta kSearchWithCameraTooltipHintDelay = base::Seconds(2.0);
         [self showResultsBottomSheet];
       }
     } else {
-      if (IsLVFEscapeHatchEnabled()) {
-        [self scheduleTooltipHintDisplayIfNecessary];
-      }
+      [self scheduleTooltipHintDisplayIfNecessary];
     }
   }
 
@@ -515,7 +516,8 @@ const base::TimeDelta kSearchWithCameraTooltipHintDelay = base::Seconds(2.0);
     _associatedTabHelper->RecordSheetDimensionState(SheetDimensionStateHidden);
     _associatedTabHelper->ClearViewportSnapshot();
     _associatedTabHelper->UpdateSnapshot();
-    if (IsLensOverlaySameTabNavigationEnabled()) {
+    if (self.browser && IsLensOverlaySameTabNavigationEnabled(
+                            self.browser->GetProfile()->GetPrefs())) {
       _associatedTabHelper->ClearInvokationNavigationId();
     }
   }
@@ -635,27 +637,32 @@ const base::TimeDelta kSearchWithCameraTooltipHintDelay = base::Seconds(2.0);
   [_containerPresenter dismissContainerAnimated:NO completion:completion];
 }
 
-#pragma mark - LensOverlayNetworkIssueDelegate
+#pragma mark - LensOverlayNetworkIssuePresenterDelegate
 
-- (void)onNetworkIssueAlertWillShow {
+- (void)lensOverlayNetworkIssuePresenterWillShowAlert:
+    (LensOverlayNetworkIssuePresenter*)presenter {
   // Only one view controller may be presented at a time, so dismiss the bottom
   // sheet.
   [self stopResultPage];
 }
 
-- (void)onNetworkIssueAlertAcknowledged {
+- (void)lensOverlayNetworkIssuePresenterDidAcknowledgeAlert:
+    (LensOverlayNetworkIssuePresenter*)presenter {
   [self destroyLensUI:YES
                reason:lens::LensOverlayDismissalSource::kNetworkIssue];
 }
 
 #pragma mark - LensOverlayResultsPagePresenterDelegate
 
-- (void)onResultsPageWillInitiateGestureDrivenDismiss {
+- (void)lensOverlayResultsPagePresenterWillInitiateGestureDrivenDismiss:
+    (LensOverlayResultsPagePresenter*)presenter {
   [self destroyLensUI:YES
                reason:lens::LensOverlayDismissalSource::kBottomSheetDismissed];
 }
 
-- (void)onResultsPageDimensionStateChanged:(SheetDimensionState)state {
+- (void)lensOverlayResultsPagePresenter:
+            (LensOverlayResultsPagePresenter*)presenter
+                didUpdateDimensionState:(SheetDimensionState)state {
   if (_associatedTabHelper) {
     _associatedTabHelper->RecordSheetDimensionState(state);
   }
@@ -678,7 +685,9 @@ const base::TimeDelta kSearchWithCameraTooltipHintDelay = base::Seconds(2.0);
   }
 }
 
-- (void)onResultsPageVerticalOcclusionInsetsSettled:(CGFloat)offsetNeeded {
+- (void)lensOverlayResultsPagePresenter:
+            (LensOverlayResultsPagePresenter*)presenter
+          updateVerticalOcclusionOffset:(CGFloat)offsetNeeded {
   UIWindow* sceneWindow = self.browser->GetSceneState().window;
   CGFloat topOffset = kTopHeaderPadding + sceneWindow.safeAreaInsets.top;
   [_selectionViewController
@@ -687,8 +696,9 @@ const base::TimeDelta kSearchWithCameraTooltipHintDelay = base::Seconds(2.0);
                 animated:YES];
 }
 
-- (void)onResultsPageVisibleAreaLayoutGuideAdjusted:
-    (UILayoutGuide*)visibleAreaLayoutGuide {
+- (void)lensOverlayResultsPagePresenter:
+            (LensOverlayResultsPagePresenter*)presenter
+        didAdjustVisibleAreaLayoutGuide:(UILayoutGuide*)visibleAreaLayoutGuide {
   _selectionViewController.visibleAreaLayoutGuide = visibleAreaLayoutGuide;
 }
 
@@ -716,7 +726,8 @@ const base::TimeDelta kSearchWithCameraTooltipHintDelay = base::Seconds(2.0);
     _associatedTabHelper->RecordSheetDimensionState(
         _resultsPagePresenter.sheetDimension);
   }
-  if (IsLensOverlaySameTabNavigationEnabled()) {
+  if (IsLensOverlaySameTabNavigationEnabled(
+          self.browser->GetProfile()->GetPrefs())) {
     [self openURLInSameTab:URL];
   } else {
     [self openURLInNewTab:URL];
@@ -724,7 +735,7 @@ const base::TimeDelta kSearchWithCameraTooltipHintDelay = base::Seconds(2.0);
   }
 }
 
-- (void)respondToTabWillChange {
+- (void)prepareForBackgroundTabChange {
   if (!_associatedTabHelper) {
     return;
   }
@@ -759,7 +770,7 @@ const base::TimeDelta kSearchWithCameraTooltipHintDelay = base::Seconds(2.0);
   if (_resultMediator) {
     [_resultMediator handleSearchRequestErrored];
   } else {
-    [_networkIssueAlertPresenter showNoInternetAlert];
+    [_networkIssuePresenter showNoInternetAlert];
   }
 }
 
@@ -822,9 +833,10 @@ const base::TimeDelta kSearchWithCameraTooltipHintDelay = base::Seconds(2.0);
 }
 
 - (BOOL)shouldShowTooltipHint {
-  if (_isExiting || _isStopped) {
+  if (_isExiting || _isStopped || ![self shouldShowEscapeHatch]) {
     return NO;
   }
+
   if (_entrypoint != LensOverlayEntrypoint::kLocationBar) {
     return NO;
   }
@@ -865,11 +877,7 @@ const base::TimeDelta kSearchWithCameraTooltipHintDelay = base::Seconds(2.0);
 }
 
 - (void)scheduleTooltipHintDisplayIfNecessary {
-  if (_isExiting || _isStopped) {
-    return;
-  }
-
-  if (!IsLVFEscapeHatchEnabled() || ![self shouldShowTooltipHint]) {
+  if (_isExiting || _isStopped || ![self shouldShowTooltipHint]) {
     return;
   }
 
@@ -1030,8 +1038,9 @@ const base::TimeDelta kSearchWithCameraTooltipHintDelay = base::Seconds(2.0);
       HandlerForProtocol(browser->GetCommandDispatcher(), ApplicationCommands);
   _resultMediator.snackbarHandler =
       HandlerForProtocol(browser->GetCommandDispatcher(), SnackbarCommands);
-  _resultMediator.errorHandler = _networkIssueAlertPresenter;
+  _resultMediator.errorHandler = _networkIssuePresenter;
   _resultMediator.delegate = _mediator;
+  _resultMediator.tabChangeResponder = self;
   _mediator.resultConsumer = _resultMediator;
 
   _resultViewController = [[LensResultPageViewController alloc] init];
@@ -1128,6 +1137,15 @@ const base::TimeDelta kSearchWithCameraTooltipHintDelay = base::Seconds(2.0);
   return _resultViewController != nil;
 }
 
+- (BOOL)shouldShowEscapeHatch {
+  if (!self.browser) {
+    return NO;
+  }
+  return IsLVFEscapeHatchEnabled(self.browser->GetProfile()->GetPrefs()) &&
+         !lens::IsLVFEntrypoint(_entrypoint) &&
+         !lens::IsImageContextMenuEntrypoint(_entrypoint);
+}
+
 // Disconnect and destroy all of the owned view controllers.
 - (void)destroyViewControllersAndMediators {
   [self stopResultPage];
@@ -1142,7 +1160,7 @@ const base::TimeDelta kSearchWithCameraTooltipHintDelay = base::Seconds(2.0);
   _containerPresenter = nil;
   _resultsPagePresenter = nil;
   _lensOverlayConsentPresenter = nil;
-  _networkIssueAlertPresenter = nil;
+  _networkIssuePresenter = nil;
 }
 
 // The tab helper for the active web state.
@@ -1286,7 +1304,8 @@ const base::TimeDelta kSearchWithCameraTooltipHintDelay = base::Seconds(2.0);
 
   // The Lens overlay is locked to portrait. Skip displaying the restoration
   // window on landscape to avoid stretching the snapshot.
-  if (IsLandscape(sceneWindow) && !IsLensOverlayLandscapeOrientationEnabled()) {
+  if (IsLandscape(sceneWindow) && !IsLensOverlayLandscapeOrientationEnabled(
+                                      self.browser->GetProfile()->GetPrefs())) {
     return;
   }
 

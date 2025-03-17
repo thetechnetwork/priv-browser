@@ -213,23 +213,29 @@
         Chromium has features that help you manage your internet data and how quickly you're able to load webpages.
 <ph name="BEGIN_LINK">BEGIN_LINK</ph>Learn more<ph name="END_LINK">END_LINK</ph>
       </message>
-      <message name="IDS_IOS_BEST_FEATURES_LOCKED_INCOGNITO_FIRST_STEP" desc="The first step to setting up Locked Incognito tabs">
-          Open Chromium Settings
+      <message name="IDS_IOS_BEST_FEATURES_LENS_TITLE" desc="Title for the Lens Chrome iOS Best Features Promo">
+        Search with Google Lens
       </message>
-      <message name="IDS_IOS_BEST_FEATURES_LOCKED_INCOGNITO_SUBTITLE" desc="Subtitle for the Locked Incognito tabs Bling's Best Features Promo">
-          Keep your browsing private with device authentication when you close Chromium
+      <message name="IDS_IOS_BEST_FEATURES_LOCKED_INCOGNITO_FIRST_STEP" desc="The first step to setting up Locked Incognito tabs">
+        Open Chromium Settings
+      </message>
+      <message name="IDS_IOS_BEST_FEATURES_LOCKED_INCOGNITO_SUBTITLE" desc="Subtitle for the Locked Incognito tabs Chrome iOS Best Features Promo">
+        Keep your browsing private with device authentication when you close Chromium
       </message>
       <message name="IDS_IOS_BEST_FEATURES_LOCKED_INCOGNITO_THIRD_STEP" desc="The third step to setting up Locked Incognito tabs">
-          Turn on "Lock Icognito tabs when you close Chromium"
+        Turn on "Lock Icognito tabs when you close Chromium"
       </message>
-      <message name="IDS_IOS_BEST_FEATURES_NEVER_FORGET_PASSWORDS_CAPTION" desc="Caption for the Never Forget Passwords button on the Bling's Best Features Promo">
-          Save and autofill passwords in Chromium
+      <message name="IDS_IOS_BEST_FEATURES_NEVER_FORGET_PASSWORDS_CAPTION" desc="Caption for the Never Forget Passwords button on the Chrome iOS Best Features Promo">
+        Save and autofill passwords in Chromium
       </message>
       <message name="IDS_IOS_BEST_FEATURES_NEVER_FORGET_PASSWORDS_SECOND_STEP" desc="The second step to set up savine and autofill passwords">
-          Chromium will offer to save your password
+        Chromium will offer to save your password
       </message>
-      <message name="IDS_IOS_BEST_FEATURES_PASSWORDS_IN_OTHER_APPS_SUBTITLE" desc="Subtitle for the Passwords in other apps Bling's Best Features Promo">
-          To easily get your saved passwords in your other apps, choose Chromium for Autofill
+      <message name="IDS_IOS_BEST_FEATURES_PASSWORDS_IN_OTHER_APPS_SUBTITLE" desc="Subtitle for the Passwords in other apps Chrome iOS Best Features Promo">
+        To easily get your saved passwords in your other apps, choose Chromium for Autofill
+      </message>
+      <message name="IDS_IOS_BEST_FEATURES_SHARE_PASSWORDS_SUBTITLE" desc="Subtitle for the Share Passwords Chrome iOS Best Features Promo">
+        Easily and securely share a copy of a password with your family group in Google Password Manager
       </message>
       <message name="IDS_IOS_CALENDARS_USAGE_DESCRIPTION" desc="Specifies the reason for accessing the user's calendar while the app is in use [Length: unlimited] [iOS only].">
         This will be used to create events in your Apple Calendar from Chromium and Google Lens.
@@ -433,9 +439,6 @@ Things to consider:
       </message>
       <message name="IDS_IOS_GOOGLE_SERVICES_SETTINGS_ALLOW_SIGNIN_TEXT" desc="Feature title in the Google services Settings for the user to enable/disable Chrome express sign-in from the web [iOS only]">
         Allow Chromium sign-in
-      </message>
-      <message name="IDS_IOS_GOOGLE_SERVICES_SETTINGS_AUTO_TRACK_PACKAGES_FOOTER" desc="Parcel tracking feature setting page footer detailing how the data is shared. [iOS only]">
-        Chromium will detect package tracking numbers on sites you visit and show you package updates on the new tab page. Your data will be shared with Google to provide this feature and to improve Shopping for everyone.
       </message>
       <message name="IDS_IOS_GOOGLE_SERVICES_SETTINGS_IMPROVE_CHROME_TEXT" desc="Feature title in the settings for the user enable or disable. Related with 'Automatically sends usage statistics and crash reports to Google'. [iOS only]">
         Help improve Chromium's features and performance
@@ -769,9 +772,6 @@ Only someone with your passphrase can read your encrypted data. The passphrase i
       <message name="IDS_IOS_PARCEL_TRACKING_INFOBAR_PACKAGE_ALREADY_TRACKED_SUBTITLE" desc="Text for the subtitle string of the Parcel Tracking 'Package Already Tracked' infobar.">
         This package has already been tracked on Chromium.
       </message>
-      <message name="IDS_IOS_PARCEL_TRACKING_MODULE_HIDE_ALERT_DESCRIPTION" desc="Description for the alert dialog warning the user they are about to hide the parcel tracking module.">
-          If you hide "<ph name="Module_Name"><ex>Package Tracking</ex>$1</ph>", Chromium will no longer auto-track your future packages and will delete all your past package tracking data.
-      </message>
       <message name="IDS_IOS_PASSWORD_BOTTOM_SHEET_TITLE" desc="Title of the password bottom sheet. [iOS only]">
           Google Password Manager
       </message>
@@ -798,6 +798,9 @@ Only someone with your passphrase can read your encrypted data. The passphrase i
       </message>
       <message name="IDS_IOS_PASSWORD_CHECK_ERROR" desc="Description of the password check cell, explaining that Password Check failed. [iOS only]" meaning="Password Check failed due to some error.">
         Chromium can't check your passwords
+      </message>
+      <message name="IDS_IOS_PASSWORD_SETTINGS_PASSWORDS_IN_OTHER_APPS_DESCRIPTION" desc="Help text explaining the benefits of having Chromium set as a credential provider for other apps. [iOS Only]">
+        Sign in quickly to apps and sites by autofilling your passwords &amp; passkeys from Chromium
       </message>
       <message name="IDS_IOS_PASSWORD_SHARING_FAMILY_MEMBER_INELIGIBLE" desc="Info text in the recipient picker view of the password sharing flow explaining why one of the family members is not eligible to be a recipient. [iOS Only]">
         Your family member can't receive passwords right now. Ask them to update Chromium and sync their passwords. <ph name="BEGIN_LINK">BEGIN_LINK</ph>Learn more<ph name="END_LINK">END_LINK</ph>
@@ -930,6 +933,9 @@ For more settings that use data to improve your Chromium experience, go to <ph n
       </message>
       <message name="IDS_IOS_SETTINGS_ADD_PASSWORD_FOOTER_BRANDED" desc="Disclaimer telling users what will happen to their passwords">
         Your password will be saved to Password Manager for <ph name="EMAIL">$1<ex>example@gmail.com</ex></ph>.
+      </message>
+      <message name="IDS_IOS_SETTINGS_IN_OVERFLOW_MENU_IPH_TEXT" desc="An in product help message to inform the user that they can find Settings in the overflow menu.">
+        You can find Chromium settings and more here
       </message>
       <message name="IDS_IOS_SETTINGS_PASSWORDS_IN_OTHER_APPS_SHORTENED_STEP_2" desc="Text of the row indicating the second step of shortened instruction of turning on iOS auto-fill from Chrome password manager [iOS only]">
         Select Chromium

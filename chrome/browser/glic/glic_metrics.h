@@ -5,19 +5,100 @@
 #ifndef CHROME_BROWSER_GLIC_GLIC_METRICS_H_
 #define CHROME_BROWSER_GLIC_GLIC_METRICS_H_
 
+#include <set>
 #include <vector>
 
 #include "base/callback_list.h"
 #include "base/time/time.h"
 #include "base/timer/timer.h"
 #include "chrome/browser/glic/glic.mojom.h"
-#include "chrome/browser/glic/glic_enums.h"
 #include "components/prefs/pref_change_registrar.h"
 #include "services/metrics/public/cpp/ukm_source_id.h"
 
 class Profile;
 
 namespace glic {
+class GlicEnabling;
+
+// These values are persisted to logs. Entries should not be renumbered and
+// numeric values should never be reused.
+// LINT.IfChange(Error)
+enum class Error {
+  kResponseStartWithoutInput = 0,
+  kResponseStopWithoutInput = 1,
+  kResponseStartWhileHidingOrHidden = 2,
+  kWindowCloseWithoutWindowOpen = 3,
+  kMaxValue = kWindowCloseWithoutWindowOpen,
+};
+// LINT.ThenChange(//tools/metrics/histograms/metadata/glic/enums.xml:GlicResponseError)
+
+// LINT.IfChange(EntryPointImpression)
+enum class EntryPointImpression {
+  kBeforeFre = 0,
+  kAfterFreBrowserOnly = 1,
+  kAfterFreOsOnly = 2,
+  kAfterFreEnabled = 3,
+  kAfterFreDisabled = 4,
+  kNotPermitted = 5,
+  kMaxValue = kNotPermitted,
+};
+// LINT.ThenChange(//tools/metrics/histograms/metadata/glic/enums.xml:GlicEntryPointImpression)
+
+// LINT.IfChange(ResponseSegmentation)
+enum class ResponseSegmentation {
+  kUnknown = 0,
+  kOsButtonAttachedText = 1,
+  kOsButtonAttachedAudio = 2,
+  kOsButtonDetachedText = 3,
+  kOsButtonDetachedAudio = 4,
+  kOsButtonMenuAttachedText = 5,
+  kOsButtonMenuAttachedAudio = 6,
+  kOsButtonMenuDetachedText = 7,
+  kOsButtonMenuDetachedAudio = 8,
+  kOsHotkeyAttachedText = 9,
+  kOsHotkeyAttachedAudio = 10,
+  kOsHotkeyDetachedText = 11,
+  kOsHotkeyDetachedAudio = 12,
+  kButtonTopChromeAttachedText = 13,
+  kButtonTopChromeAttachedAudio = 14,
+  kButtonTopChromeDetachedText = 15,
+  kButtonTopChromeDetachedAudio = 16,
+  kFreAttachedText = 17,
+  kFreAttachedAudio = 18,
+  kFreDetachedText = 19,
+  kFreDetachedAudio = 20,
+  kProfilePickerAttachedText = 21,
+  kProfilePickerAttachedAudio = 22,
+  kProfilePickerDetachedText = 23,
+  kProfilePickerDetachedAudio = 24,
+  kNudgeAttachedText = 25,
+  kNudgeAttachedAudio = 26,
+  kNudgeDetachedText = 27,
+  kNudgeDetachedAudio = 28,
+  kThreeDotsMenuAttachedText = 29,
+  kThreeDotsMenuAttachedAudio = 30,
+  kThreeDotsMenuDetachedText = 31,
+  kThreeDotsMenuDetachedAudio = 32,
+  kUnsupportedAttachedText = 33,
+  kUnsupportedAttachedAudio = 34,
+  kUnsupportedDetachedText = 35,
+  kUnsupportedDetachedAudio = 36,
+  kMaxValue = kUnsupportedDetachedAudio,
+};
+// LINT.ThenChange(//tools/metrics/histograms/metadata/glic/enums.xml:GlicResponseSegmentation)
+
+// LINT.IfChange(GlicInputModesUsed)
+
+enum class InputModesUsed {
+  kNone = 0,
+  kOnlyText = 1,
+  kOnlyAudio = 2,
+  kTextAndAudio = 3,
+
+  kMaxValue = kTextAndAudio,
+};
+
+// LINT.ThenChange(//tools/metrics/histograms/metadata/glic/enums.xml:GlicInputModesUsed)
 
 class GlicEnabling;
 class GlicFocusedTabManager;
@@ -44,7 +125,7 @@ class GlicMetrics {
 
   // ----Public API called by other glic classes-----
   // Called when the glic window starts to open.
-  void OnGlicWindowOpen(bool attached, InvocationSource source);
+  void OnGlicWindowOpen(bool attached, mojom::InvocationSource source);
   // Called when the glic window finishes closing.
   void OnGlicWindowClose();
   // Called when the glic window attaches or detaches.
@@ -64,8 +145,8 @@ class GlicMetrics {
   // Stores the source id at the time that context is requested.
   void StoreSourceId();
 
-  // Called when enabled changes.
-  void OnEnabledChanged();
+  // Called when kGlicCompletedFre or GlicEnabling::IsAllowed() changes.
+  void OnMaybeEnabledAndConsentForProfileChanged();
 
   // Called when kGlicPinnedToTabstrip changes.
   void OnPinningPrefChanged();
@@ -74,13 +155,15 @@ class GlicMetrics {
   base::TimeTicks input_submitted_time_;
   mojom::WebClientMode input_mode_;
   bool did_request_context_ = false;
+  std::set<mojom::WebClientMode> inputs_modes_used_;
 
   // Session state. `session_start_time_` is a sentinel that is cleared in
   // OnGlicWindowClose() and is used to determine whether OnGlicWindowOpen was
   // called.
   int session_responses_ = 0;
   base::TimeTicks session_start_time_;
-  InvocationSource invocation_source_ = InvocationSource::kOsButton;
+  mojom::InvocationSource invocation_source_ =
+      mojom::InvocationSource::kOsButton;
 
   // Used to record impressions of glic entry points.
   base::RepeatingTimer impression_timer_;
@@ -98,15 +181,14 @@ class GlicMetrics {
   raw_ptr<Profile> profile_;
   raw_ptr<GlicEnabling> enabling_;
 
-  // Cache the last value so that we only emit metrics for changes to the last
-  // value.
+  // Whether Glic is enabled and FRE has been completed. Tracked to trigger
+  // metric(s) on change.
   bool is_enabled_ = false;
 
   // Set to true in OnResponseStarted() and set to false in OnResponseStopped().
   // This is a workaround and should be removed, see crbug.com/399151164.
   bool response_started_ = false;
 
-  // Holds subscriptions for callbacks.
   std::vector<base::CallbackListSubscription> subscriptions_;
 
   // Cache the last value of the kGlicPinnedToTabstrip pref so that we only emit

@@ -209,6 +209,7 @@ class CONTENT_EXPORT RenderWidgetHostViewAndroid
       bool request_unadjusted_movement) override;
   blink::mojom::PointerLockResult ChangePointerLock(
       bool request_unadjusted_movement) override;
+  bool IsPointerLocked() override;
   void UnlockPointer() override;
   void InvalidateLocalSurfaceIdAndAllocationGroup() override;
   void ClearFallbackSurfaceForCommitPending() override;
@@ -259,6 +260,7 @@ class CONTENT_EXPORT RenderWidgetHostViewAndroid
       std::optional<base::TimeDelta> deadline_override) override;
   void NotifyVirtualKeyboardOverlayRect(
       const gfx::Rect& keyboard_rect) override;
+  void OnPointerLockRelease() override;
 
   // ui::ViewAndroidObserver implementation:
   void OnAttachedToWindow() override;
@@ -373,11 +375,6 @@ class CONTENT_EXPORT RenderWidgetHostViewAndroid
   void OnUpdateTextInputStateCalled(TextInputManager* text_input_manager,
                                     RenderWidgetHostViewBase* updated_view,
                                     bool did_change_state) override;
-  void OnImeCompositionRangeChanged(
-      TextInputManager* text_input_manager,
-      RenderWidgetHostViewBase* updated_view,
-      bool character_bounds_changed,
-      const std::optional<std::vector<gfx::Rect>>& line_bounds) override;
   void OnImeCancelComposition(TextInputManager* text_input_manager,
                               RenderWidgetHostViewBase* updated_view) override;
   void OnTextSelectionChanged(TextInputManager* text_input_manager,
@@ -529,6 +526,9 @@ class CONTENT_EXPORT RenderWidgetHostViewAndroid
     void WasEvicted();
     void WasShownAfterEviction();
 
+    // Clears flags used to throttle SurfaceSync.
+    void Unthrottle();
+
    private:
     friend class RenderWidgetHostViewAndroidRotationTest;
 
@@ -540,9 +540,6 @@ class CONTENT_EXPORT RenderWidgetHostViewAndroid
     // fullscreen, and Picture-in-Picture mode.
     bool HandleScreenStateChanges(const cc::DeadlinePolicy& deadline_policy,
                                   bool force_fullscreen_sync = false);
-
-    // Clears flags used to throttle SurfaceSync.
-    void Unthrottle();
 
     // The ScreenState of the current world, the pending visual properties, or
     // the properties from before we entered Picture-in-Picture mode.

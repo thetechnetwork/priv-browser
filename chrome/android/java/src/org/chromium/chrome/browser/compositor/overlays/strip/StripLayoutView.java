@@ -4,6 +4,8 @@
 
 package org.chromium.chrome.browser.compositor.overlays.strip;
 
+import android.content.Context;
+import android.graphics.Rect;
 import android.graphics.RectF;
 import android.util.FloatProperty;
 
@@ -58,6 +60,9 @@ public abstract class StripLayoutView implements VirtualView {
                 }
             };
 
+    // The view's context.
+    protected Context mContext;
+
     // Position variables.
     protected final RectF mDrawBounds = new RectF();
     private float mIdealX;
@@ -84,13 +89,19 @@ public abstract class StripLayoutView implements VirtualView {
     // Event handlers.
     private final StripLayoutViewOnClickHandler mOnClickHandler;
 
+    // Tab group share properties.
+    private boolean mShowNotificationBubble;
+
     /**
      * @param incognito The incognito state of the view.
      * @param clickHandler StripLayoutViewOnClickHandler for this view.
+     * @param context The context for the view.
      */
-    protected StripLayoutView(boolean incognito, StripLayoutViewOnClickHandler clickHandler) {
+    protected StripLayoutView(
+            boolean incognito, StripLayoutViewOnClickHandler clickHandler, Context context) {
         mIsIncognito = incognito;
         mOnClickHandler = clickHandler;
+        mContext = context;
     }
 
     /**
@@ -216,6 +227,26 @@ public abstract class StripLayoutView implements VirtualView {
     }
 
     /**
+     * Sets whether the notification bubble is shown on the view. When set to true, a notification
+     * dot will appear on the view to indicate that this group has been updated by other members in
+     * the shared group.
+     *
+     * @param showBubble Whether to show the bubble.
+     */
+    public void setNotificationBubbleShown(boolean showBubble) {
+        mShowNotificationBubble = showBubble;
+    }
+
+    /**
+     * Checks whether the notification bubble is shown.
+     *
+     * @return Whether the notification bubble is shown.
+     */
+    public boolean getNotificationBubbleShown() {
+        return mShowNotificationBubble;
+    }
+
+    /**
      * Called if the visibility state has changed.
      *
      * @param newVisibility Whether or not this {@link StripLayoutView} should be drawn.
@@ -316,6 +347,24 @@ public abstract class StripLayoutView implements VirtualView {
         if (top != null) mTouchTargetInsetTop = top;
         if (bottom != null) mTouchTargetInsetBottom = bottom;
         updateTouchTargetBounds(mTouchTargetBounds);
+    }
+
+    protected float getDpToPx() {
+        return mContext.getResources().getDisplayMetrics().density;
+    }
+
+    /**
+     * Populates {@code out} with a {@link Rect} where a context menu should be located.
+     *
+     * @param out The output {@link Rect}.
+     */
+    public void getAnchorRect(Rect out) {
+        float dpToPx = getDpToPx();
+        out.set(
+                Math.round(getDrawX() * dpToPx),
+                Math.round(getDrawY() * dpToPx),
+                Math.round((getDrawX() + getWidth()) * dpToPx),
+                Math.round((getDrawY() + getHeight()) * dpToPx));
     }
 
     private void updateTouchTargetBounds(RectF outTarget) {

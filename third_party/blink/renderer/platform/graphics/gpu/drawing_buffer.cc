@@ -445,6 +445,8 @@ bool DrawingBuffer::PrepareTransferableResource(
         shared_image, viz::TransferableResource::ResourceSource::kDrawingBuffer,
         sync_token);
     out_resource->hdr_metadata = hdr_metadata_;
+    out_resource->is_low_latency_rendering = shared_image->usage().Has(
+        gpu::SHARED_IMAGE_USAGE_CONCURRENT_READ_WRITE);
   } else {
     // Populate the TransferableResource with a SharedImage for the software
     // compositor.
@@ -463,6 +465,8 @@ bool DrawingBuffer::PrepareTransferableResource(
         resource.sync_token);
 
     out_resource->hdr_metadata = hdr_metadata_;
+    out_resource->is_low_latency_rendering = resource.shared_image->usage().Has(
+        gpu::SHARED_IMAGE_USAGE_CONCURRENT_READ_WRITE);
 
     // This holds a ref on the DrawingBuffer that will keep it alive until the
     // mailbox is released (and while the release callback is running). It also
@@ -733,6 +737,10 @@ scoped_refptr<StaticBitmapImage> DrawingBuffer::TransferToStaticBitmapImage() {
     if (!black_bitmap.tryAllocN32Pixels(size_.width(), size_.height()))
       return nullptr;
     black_bitmap.eraseARGB(0, 0, 0, 0);
+
+    // Mark the bitmap as immutable to avoid an unnecessary copy in the
+    // following RasterFromBitmap() call.
+    black_bitmap.setImmutable();
     sk_sp<SkImage> black_image = SkImages::RasterFromBitmap(black_bitmap);
     if (!black_image)
       return nullptr;
@@ -743,15 +751,15 @@ scoped_refptr<StaticBitmapImage> DrawingBuffer::TransferToStaticBitmapImage() {
   DCHECK_EQ(size_.width(), shared_image->size().width());
   DCHECK_EQ(size_.height(), shared_image->size().height());
 
-  auto sk_color_type = viz::ToClosestSkColorType(shared_image->format());
+  auto format = shared_image->format();
 
   // TODO(xidachen): Create a small pool of recycled textures from
   // ImageBitmapRenderingContext's transferFromImageBitmap, and try to use them
   // in DrawingBuffer.
   return AcceleratedStaticBitmapImage::CreateFromCanvasSharedImage(
       std::move(shared_image), sync_token,
-      /* shared_image_texture_id = */ 0, size_, sk_color_type,
-      kPremul_SkAlphaType, nullptr, context_provider_->GetWeakPtr(),
+      /* shared_image_texture_id = */ 0, size_, format, kPremul_SkAlphaType,
+      gfx::ColorSpace::CreateSRGB(), context_provider_->GetWeakPtr(),
       base::PlatformThread::CurrentRef(),
       ThreadScheduler::Current()->CleanupTaskRunner(),
       std::move(release_callback));

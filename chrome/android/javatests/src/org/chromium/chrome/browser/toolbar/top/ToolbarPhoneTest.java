@@ -60,7 +60,6 @@ import org.chromium.base.test.util.CommandLineFlags;
 import org.chromium.base.test.util.Criteria;
 import org.chromium.base.test.util.CriteriaHelper;
 import org.chromium.base.test.util.DisableIf;
-import org.chromium.base.test.util.DisabledTest;
 import org.chromium.base.test.util.Features.EnableFeatures;
 import org.chromium.base.test.util.Restriction;
 import org.chromium.chrome.browser.browser_controls.BrowserControlsStateProvider.ControlsPosition;
@@ -352,10 +351,7 @@ public class ToolbarPhoneTest {
                         false);
 
         // Show a button, this will inflate the optional button view and create its coordinator.
-        ThreadUtils.runOnUiThreadBlocking(
-                () -> {
-                    mToolbar.updateOptionalButton(buttonData);
-                });
+        ThreadUtils.runOnUiThreadBlocking(() -> mToolbar.updateOptionalButton(buttonData));
 
         CriteriaHelper.pollUiThread(
                 () ->
@@ -400,10 +396,7 @@ public class ToolbarPhoneTest {
                         false);
 
         // Show a button, this will inflate the optional button view and create its coordinator.
-        ThreadUtils.runOnUiThreadBlocking(
-                () -> {
-                    mToolbar.updateOptionalButton(buttonData);
-                });
+        ThreadUtils.runOnUiThreadBlocking(() -> mToolbar.updateOptionalButton(buttonData));
 
         CriteriaHelper.pollUiThread(
                 () ->
@@ -430,7 +423,6 @@ public class ToolbarPhoneTest {
 
     @Test
     @MediumTest
-    @DisabledTest(message = "crbug.com/1473282")
     public void testOptionalButton_DrawnWhenVisible() {
         Drawable drawable =
                 AppCompatResources.getDrawable(
@@ -449,10 +441,7 @@ public class ToolbarPhoneTest {
                         false);
 
         // Show a button, this will inflate the optional button view and create its coordinator.
-        ThreadUtils.runOnUiThreadBlocking(
-                () -> {
-                    mToolbar.updateOptionalButton(buttonData);
-                });
+        ThreadUtils.runOnUiThreadBlocking(() -> mToolbar.updateOptionalButton(buttonData));
 
         CriteriaHelper.pollUiThread(() -> mToolbar.getOptionalButtonViewForTesting() != null);
         ViewUtils.onViewWaiting(
@@ -603,13 +592,13 @@ public class ToolbarPhoneTest {
                         AdaptiveToolbarButtonVariant.UNKNOWN,
                         0,
                         false);
-        mToolbar.updateOptionalButton(buttonData);
-        verify(mOptionalButtonCoordinator).updateButton(buttonData);
+        ThreadUtils.runOnUiThreadBlocking(() -> mToolbar.updateOptionalButton(buttonData));
+        verify(mOptionalButtonCoordinator).updateButton(buttonData, false);
 
         mOmnibox.requestFocus();
-        verify(mOptionalButtonCoordinator).updateButton(null);
+        verify(mOptionalButtonCoordinator).updateButton(null, false);
         mOmnibox.clearFocus();
-        verify(mOptionalButtonCoordinator, times(2)).updateButton(buttonData);
+        verify(mOptionalButtonCoordinator, times(2)).updateButton(buttonData, false);
     }
 
     @Test

@@ -396,24 +396,6 @@ Element* HTMLFormControlElement::interestTargetElement() {
       html_names::kInteresttargetAttr);
 }
 
-AtomicString HTMLFormControlElement::popoverTargetAction() const {
-  auto attribute_value =
-      FastGetAttribute(html_names::kPopovertargetactionAttr).LowerASCII();
-  // ReflectEmpty="toggle", ReflectMissing="toggle"
-  if (attribute_value.IsNull() || attribute_value.empty()) {
-    return keywords::kToggle;
-  } else if (attribute_value == keywords::kToggle ||
-             attribute_value == keywords::kShow ||
-             attribute_value == keywords::kHide) {
-    return attribute_value;  // ReflectOnly
-  } else {
-    return keywords::kToggle;  // ReflectInvalid = "toggle"
-  }
-}
-void HTMLFormControlElement::setPopoverTargetAction(const AtomicString& value) {
-  setAttribute(html_names::kPopovertargetactionAttr, value);
-}
-
 void HTMLFormControlElement::DefaultEventHandler(Event& event) {
   // Buttons that aren't form participants might be Invoker buttons or Popover
   // buttons.
@@ -428,15 +410,12 @@ void HTMLFormControlElement::DefaultEventHandler(Event& event) {
 
     if (popover.popover) {
       bool event_target_was_nested_popover = false;
-      if (RuntimeEnabledFeatures::PopoverButtonNestingBehaviorEnabled()) {
-        if (auto* target_node = event.target()->ToNode()) {
-          bool button_is_ancestor_of_popover =
-              IsShadowIncludingAncestorOf(*popover.popover);
-          event_target_was_nested_popover =
-              button_is_ancestor_of_popover &&
-              popover.popover->IsShadowIncludingInclusiveAncestorOf(
-                  *target_node);
-        }
+      if (auto* target_node = event.target()->ToNode()) {
+        bool button_is_ancestor_of_popover =
+            IsShadowIncludingAncestorOf(*popover.popover);
+        event_target_was_nested_popover =
+            button_is_ancestor_of_popover &&
+            popover.popover->IsShadowIncludingInclusiveAncestorOf(*target_node);
       }
 
       if (!event_target_was_nested_popover) {

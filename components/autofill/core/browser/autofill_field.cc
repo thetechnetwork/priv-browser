@@ -13,6 +13,7 @@
 #include "base/containers/contains.h"
 #include "base/containers/fixed_flat_set.h"
 #include "base/feature_list.h"
+#include "base/no_destructor.h"
 #include "base/notreached.h"
 #include "base/strings/string_number_conversions.h"
 #include "base/strings/string_util.h"
@@ -195,6 +196,27 @@ DenseSet<HtmlFieldType> BelievedHtmlTypes(FieldType heuristic_prediction,
 
 }  // namespace
 
+// LINT.IfChange(PredictionSourceTranslation)
+
+std::string_view AutofillPredictionSourceToStringView(
+    AutofillPredictionSource source) {
+  switch (source) {
+    case AutofillPredictionSource::kHeuristics:
+      return "Heuristics";
+    case AutofillPredictionSource::kServerCrowdsourcing:
+      return "ServerCrowdsourcing";
+    case AutofillPredictionSource::kServerOverride:
+      return "ServerOverride";
+    case AutofillPredictionSource::kAutocomplete:
+      return "AutocompleteAttribute";
+    case AutofillPredictionSource::kRationalization:
+      return "Rationalization";
+  }
+  NOTREACHED();
+}
+
+// LINT.ThenChange(/tools/metrics/histograms/metadata/autofill/histograms.xml:AutofillPredictionSources)
+
 AutofillField::AutofillField() {
   local_type_predictions_.fill(NO_SERVER_DATA);
 }
@@ -232,13 +254,8 @@ FieldType AutofillField::heuristic_type() const {
 FieldType AutofillField::heuristic_type(HeuristicSource s) const {
   // Special handling for ML model predictions.
   if (s == HeuristicSource::kAutofillMachineLearning) {
-#if !BUILDFLAG(USE_INTERNAL_AUTOFILL_PATTERNS)
-    HeuristicSource regex_heuristic_source = HeuristicSource::kLegacyRegexes;
-#else
-    HeuristicSource regex_heuristic_source = HeuristicSource::kDefaultRegexes;
-#endif
     FieldType regex_type =
-        local_type_predictions_[static_cast<size_t>(regex_heuristic_source)];
+        local_type_predictions_[static_cast<size_t>(HeuristicSource::kRegexes)];
     if (regex_type == FieldType::NO_SERVER_DATA) {
       regex_type = FieldType::UNKNOWN_TYPE;
     }
@@ -589,6 +606,21 @@ bool AutofillField::ShouldSuppressSuggestionsAndFillingByDefault() const {
 
 void AutofillField::SetPasswordRequirements(PasswordRequirementsSpec spec) {
   password_requirements_ = std::move(spec);
+}
+
+base::optional_ref<const std::u16string> AutofillField::format_string() const {
+  if (form_control_type() == FormControlType::kInputDate) {
+    static const base::NoDestructor<std::u16string> kFormat(u"YYYY-MM-DD");
+    return *kFormat;
+  }
+  if (form_control_type() == FormControlType::kInputMonth) {
+    static const base::NoDestructor<std::u16string> kFormat(u"YYYY-MM");
+    return *kFormat;
+  }
+  if (format_string_source_ == FormatStringSource::kUnset) {
+    return std::nullopt;
+  }
+  return format_string_;
 }
 
 bool AutofillField::IsCreditCardPrediction() const {

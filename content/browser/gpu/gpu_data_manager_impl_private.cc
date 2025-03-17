@@ -71,6 +71,7 @@
 #include "media/media_buildflags.h"
 #include "media/mojo/clients/mojo_video_decoder.h"
 #include "media/mojo/mojom/video_encode_accelerator.mojom.h"
+#include "ui/base/ui_base_features.h"
 #include "ui/base/ui_base_switches.h"
 #include "ui/display/screen.h"
 #include "ui/gfx/switches.h"
@@ -225,7 +226,7 @@ void EnableIntelShaderCache() {
 //  \tools\metrics\histograms\enums.xml
 enum class CanvasOopRasterAndGpuAcceleration {
   kAccelOop = 0,
-  kAccelNoOop = 1,
+  kAccelNoOop = 1,  // obsolete
   kNoAccelOop = 2,
   kNoAccelNoOop = 3,
   kMaxValue = kNoAccelNoOop,
@@ -241,20 +242,15 @@ void RecordCanvasAcceleratedOopRasterHistogram(
               .status_values[gpu::GPU_FEATURE_TYPE_ACCELERATED_2D_CANVAS] ==
           gpu::kGpuFeatureStatusEnabled &&
       !command_line.HasSwitch(switches::kDisableAccelerated2dCanvas);
-  bool oopr_canvas =
-      gpu_feature_info
-          .status_values[gpu::GPU_FEATURE_TYPE_CANVAS_OOP_RASTERIZATION] ==
-      gpu::kGpuFeatureStatusEnabled;
 
   CanvasOopRasterAndGpuAcceleration oop_acceleration_state =
       CanvasOopRasterAndGpuAcceleration::kNoAccelNoOop;
   if (!gpu_compositing_disabled) {
-    if (accelerated_canvas && oopr_canvas)
+    if (accelerated_canvas) {
       oop_acceleration_state = CanvasOopRasterAndGpuAcceleration::kAccelOop;
-    else if (accelerated_canvas && !oopr_canvas)
-      oop_acceleration_state = CanvasOopRasterAndGpuAcceleration::kAccelNoOop;
-    else if (!accelerated_canvas && oopr_canvas)
+    } else {
       oop_acceleration_state = CanvasOopRasterAndGpuAcceleration::kNoAccelOop;
+    }
   }
   UMA_HISTOGRAM_ENUMERATION("GPU.CanvasOopRaster.OopRasterAndGpuAcceleration",
                             oop_acceleration_state);
@@ -1238,6 +1234,12 @@ void GpuDataManagerImplPrivate::UpdateGpuFeatureInfo(
     RecordCanvasAcceleratedOopRasterHistogram(gpu_feature_info_,
                                               IsGpuCompositingDisabled());
   }
+
+  is_gpu_rasterization_for_ui_enabled_ =
+      features::IsUiGpuRasterizationEnabled() &&
+      gpu_feature_info_
+              .status_values[gpu::GPU_FEATURE_TYPE_GPU_TILE_RASTERIZATION] ==
+          gpu::kGpuFeatureStatusEnabled;
 }
 
 void GpuDataManagerImplPrivate::UpdateGpuExtraInfo(
@@ -1387,6 +1389,10 @@ bool GpuDataManagerImplPrivate::HardwareAccelerationEnabled() const {
     default:
       return false;
   }
+}
+
+bool GpuDataManagerImplPrivate::IsGpuRasterizationForUIEnabled() const {
+  return is_gpu_rasterization_for_ui_enabled_;
 }
 
 void GpuDataManagerImplPrivate::OnGpuBlocked() {

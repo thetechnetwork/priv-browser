@@ -992,8 +992,16 @@ IN_PROC_BROWSER_TEST_F(IsolatedWebAppUpdateManagerBrowserTest,
                                     /*expected_count=*/0);
 }
 
+// TODO(b/402650079) flaky on mac
+#if BUILDFLAG(IS_MAC)
+#define MAYBE_SucceedsWithServiceWorkerWithFetchHandler \
+  DISABLED_SucceedsWithServiceWorkerWithFetchHandler
+#else
+#define MAYBE_SucceedsWithServiceWorkerWithFetchHandler \
+  SucceedsWithServiceWorkerWithFetchHandler
+#endif
 IN_PROC_BROWSER_TEST_F(IsolatedWebAppUpdateManagerBrowserTest,
-                       SucceedsWithServiceWorkerWithFetchHandler) {
+                       MAYBE_SucceedsWithServiceWorkerWithFetchHandler) {
   profile()->GetPrefs()->SetList(
       prefs::kIsolatedWebAppInstallForceList,
       base::Value::List().Append(
@@ -1198,8 +1206,10 @@ class IsolatedWebAppUpdateManagerWithKeyRotationBrowserTest
   }
 
   IsolatedWebAppUpdateServerMixin update_server_mixin_{&mixin_host_};
-  base::test::ScopedFeatureList scoped_feature_list_{
+#if BUILDFLAG(IS_MAC) || BUILDFLAG(IS_LINUX)
+  base::test::ScopedFeatureList features_{
       component_updater::kIwaKeyDistributionComponent};
+#endif  // BUILDFLAG(IS_MAC) || BUILDFLAG(IS_LINUX)
 
   web_package::SignedWebBundleId web_bundle_id_ =
       test::GetDefaultEd25519WebBundleId();

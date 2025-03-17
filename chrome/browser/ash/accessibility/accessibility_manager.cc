@@ -113,7 +113,7 @@
 #include "ui/events/devices/input_device_event_observer.h"
 #include "ui/events/keycodes/keyboard_codes_posix.h"
 #include "ui/gfx/animation/animation.h"
-#include "ui/native_theme/native_theme_features.h"
+#include "ui/native_theme/features/native_theme_features.h"
 #include "ui/strings/grit/ui_strings.h"
 #include "ui/views/widget/widget.h"
 #include "ui/views/widget/widget_observer.h"
@@ -781,6 +781,10 @@ void AccessibilityManager::OnSpokenFeedbackChanged() {
 
   const bool enabled = profile_->GetPrefs()->GetBoolean(
       prefs::kAccessibilitySpokenFeedbackEnabled);
+
+  content::BrowserAccessibilityState* browser_ax_state =
+      content::BrowserAccessibilityState::GetInstance();
+  browser_ax_state->SetKnownScreenReaderAppActive(enabled);
 
   if (IsUserBrowserContext(profile_)) {
     user_manager::KnownUser known_user(g_browser_process->local_state());

@@ -37,6 +37,8 @@
 #include "components/browser_sync/browser_sync_switches.h"
 #include "components/keyed_service/content/browser_context_dependency_manager.h"
 #include "components/keyed_service/core/keyed_service.h"
+#include "components/signin/public/base/signin_prefs.h"
+#include "components/signin/public/base/signin_switches.h"
 #include "components/sync/base/client_tag_hash.h"
 #include "components/sync/base/command_line_switches.h"
 #include "components/sync/base/data_type.h"
@@ -2332,7 +2334,7 @@ class SingleClientBookmarksWithAccountStorageSyncTest
 
  private:
   base::test::ScopedFeatureList features_override_{
-      syncer::kSyncEnableBookmarksInTransportMode};
+      switches::kSyncEnableBookmarksInTransportMode};
 };
 
 IN_PROC_BROWSER_TEST_F(SingleClientBookmarksWithAccountStorageSyncTest,
@@ -2772,7 +2774,8 @@ class SingleClientBookmarksSyncTestWithEnabledMigrateSyncingUserToSignedIn
     } else {
       features_override_.InitWithFeatures(
           /*enabled_features=*/{syncer::kReplaceSyncPromosWithSignInPromos,
-                                switches::kMigrateSyncingUserToSignedIn},
+                                switches::kMigrateSyncingUserToSignedIn,
+                                switches::kSyncEnableBookmarksInTransportMode},
           /*disabled_features=*/{});
     }
   }
@@ -2795,6 +2798,13 @@ IN_PROC_BROWSER_TEST_F(
                   kSingleProfileIndex, GetSyncService(kSingleProfileIndex),
                   GetFakeServer())
                   .Wait());
+
+  // Enable account storage for bookmarks.
+  SigninPrefs prefs(*GetProfile(kSingleProfileIndex)->GetPrefs());
+  const GaiaId gaia_id =
+      GetSyncService(kSingleProfileIndex)->GetSyncAccountInfoForPrefs().gaia;
+  prefs.SetBookmarksExplicitBrowserSignin(gaia_id, true);
+  ASSERT_TRUE(prefs.GetBookmarksExplicitBrowserSignin(gaia_id));
 
   BookmarkModel* model = GetBookmarkModel(kSingleProfileIndex);
 

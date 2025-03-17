@@ -4798,7 +4798,7 @@ chromium-metrics-reviews@google.com.
 </histogram>
 
 <histogram name="Network.Wifi.Synced.UpdateOperation.Result"
-    enum="BooleanSuccess" expires_after="2025-06-01">
+    enum="BooleanSuccess" expires_after="2025-09-07">
   <owner>jonmann@chromium.org</owner>
   <owner>crisrael@google.com</owner>
   <owner>chromeos-cross-device-eng@google.com</owner>
@@ -4897,23 +4897,8 @@ chromium-metrics-reviews@google.com.
   </summary>
 </histogram>
 
-<histogram name="NetworkService.DeletedOldCacheData" enum="Boolean"
-    expires_after="2024-12-30">
-  <owner>wfh@chromium.org</owner>
-  <owner>mmenke@chromium.org</owner>
-  <summary>
-    Reports whether or not any old cache data was found and deleted from the
-    http_cache_path when creating a network context within the network service.
-    This is reported each time a network context is created in the network
-    service with a valid http_cache_path and http_cache_enabled is set to true.
-
-    Warning: this histogram was expired from 2023-11-12 to 2024-01-02; data may
-    be missing.
-  </summary>
-</histogram>
-
 <histogram name="NetworkService.GrantSandboxResult"
-    enum="NetworkServiceSandboxGrantResult" expires_after="2024-09-01">
+    enum="NetworkServiceSandboxGrantResult" expires_after="2026-03-01">
   <owner>wfh@chromium.org</owner>
   <owner>mmenke@chromium.org</owner>
   <summary>
@@ -4981,7 +4966,7 @@ chromium-metrics-reviews@google.com.
 </histogram>
 
 <histogram name="NetworkService.IpProtection.AreAuthTokensAvailable"
-    enum="BooleanSuccess" expires_after="2025-06-29">
+    enum="BooleanSuccess" expires_after="2025-08-31">
   <owner>djmitche@chromium.org</owner>
   <owner>ashleynewson@chromium.org</owner>
   <owner>src/android_webview/OWNERS</owner>
@@ -5001,7 +4986,7 @@ chromium-metrics-reviews@google.com.
   </summary>
 </histogram>
 
-<histogram name="NetworkService.IpProtection.EmptyTokenCache"
+<histogram name="NetworkService.IpProtection.EmptyTokenCache2"
     enum="IpProtectionProxyLayer" expires_after="2025-07-06">
   <owner>djmitche@chromium.org</owner>
   <owner>ashleynewson@chromium.org</owner>
@@ -5009,7 +4994,8 @@ chromium-metrics-reviews@google.com.
   <owner>src/chrome/browser/ip_protection/OWNERS</owner>
   <summary>
     Records which token cache (if any) was empty when calling
-    `IpProtectionConfigCache::AreAuthTokensAvailable()`.
+    `IpProtectionConfigCache::AreAuthTokensAvailable()`. This metric is NOT
+    emitted if the cache has never been filled.
   </summary>
 </histogram>
 
@@ -5034,9 +5020,9 @@ chromium-metrics-reviews@google.com.
     If the value is `Not Available`, it means that the a new geo was observed,
     but there was no tokens already in the cache that matched this new geo.
 
-    This histogram will only be emitted to if the MaskedDomainList and
-    EnableIpPrivacyProxy features are enabled, the IpPrivacyCacheTokensByGeo
-    feature parameter is enabled, and a platform-dependent sign-in is complete.
+    This histogram will only be emitted if the MaskedDomainList and
+    EnableIpPrivacyProxy features are enabled and a platform-dependent sign-in
+    is complete.
   </summary>
 </histogram>
 
@@ -5075,6 +5061,18 @@ chromium-metrics-reviews@google.com.
   </summary>
 </histogram>
 
+<histogram
+    name="NetworkService.IpProtection.GetProbabilisticRevealTokensResult"
+    enum="ProbabilisticRevealTokensResult" expires_after="2025-09-01">
+  <owner>ryankalla@google.com</owner>
+  <owner>kiln-eng@google.com</owner>
+  <owner>src/chrome/browser/ip_protection/OWNERS</owner>
+  <summary>
+    The result of a call to `IpProtectionProbabilisticRevealTokenFetcher::
+    TryGetProbabilisticRevealTokens()`.
+  </summary>
+</histogram>
+
 <histogram name="NetworkService.IpProtection.GetProxyListResult"
     enum="IpProtectionGetProxyListResult" expires_after="2025-08-24">
   <owner>ashleynewson@chromium.org</owner>
@@ -5093,6 +5091,42 @@ chromium-metrics-reviews@google.com.
     This histogram will only be emitted if the MaskedDomainList and
     EnableIpPrivacyProxy features are enabled. Some kind of platform-dependent
     signin is also required.
+  </summary>
+</histogram>
+
+<histogram
+    name="NetworkService.IpProtection.IsProbabilisticRevealTokenAvailableOnInitialRequest"
+    enum="BooleanSuccess" expires_after="2025-09-01">
+  <owner>ryankalla@google.com</owner>
+  <owner>kiln-eng@google.com</owner>
+  <owner>src/chrome/browser/ip_protection/OWNERS</owner>
+  <summary>
+    The result of a call to
+    `IpProtectionProbabilisticRevealTokenManager::IsTokenAvailable()` when
+    `IpProtectionProbabilisticRevealTokenManager::GetToken()` is determining if
+    the token cache contains any non-expired tokens. If this fails, the request
+    will not include a probabilistic reveal token.
+
+    This histogram is only emitted the first time `GetToken()` is called after
+    the PRT manager is constructed.
+  </summary>
+</histogram>
+
+<histogram
+    name="NetworkService.IpProtection.IsProbabilisticRevealTokenAvailableOnSubsequentRequest"
+    enum="BooleanSuccess" expires_after="2025-09-01">
+  <owner>ryankalla@google.com</owner>
+  <owner>kiln-eng@google.com</owner>
+  <owner>src/chrome/browser/ip_protection/OWNERS</owner>
+  <summary>
+    The result of a call to
+    `IpProtectionProbabilisticRevealTokenManager::IsTokenAvailable()` when
+    `IpProtectionProbabilisticRevealTokenManager::GetToken()` is determining if
+    the token cache contains any non-expired tokens. If this fails, the request
+    will not include a probabilistic reveal token.
+
+    This histogram is not emitted the first time `GetToken()` is called after
+    the PRT manager is constructed, but is emitted on all subsequent calls.
   </summary>
 </histogram>
 
@@ -5119,6 +5153,19 @@ chromium-metrics-reviews@google.com.
   </summary>
 </histogram>
 
+<histogram
+    name="NetworkService.IpProtection.ProbabilisticRevealTokensRequestTime"
+    units="ms" expires_after="2025-09-01">
+  <owner>ryankalla@google.com</owner>
+  <owner>kiln-eng@google.com</owner>
+  <owner>src/chrome/browser/ip_protection/OWNERS</owner>
+  <summary>
+    Records the elapsed time for successful requests by
+    IpProtectionProbabilisticRevealTokenFetcher for a batch of probabilistic
+    reveal tokens.
+  </summary>
+</histogram>
+
 <histogram name="NetworkService.IpProtection.ProtectionIsAvailableForRequest"
     enum="BooleanAvailable" expires_after="2025-08-24">
   <owner>ashleynewson@chromium.org</owner>
@@ -5139,7 +5186,7 @@ chromium-metrics-reviews@google.com.
 
 <histogram
     name="NetworkService.IpProtection.ProxyAllowList.FlatbufferBuildTime"
-    units="ms" expires_after="2025-06-08">
+    units="ms" expires_after="2025-09-07">
   <owner>djmitche@chromium.org</owner>
   <owner>src/chrome/browser/ip_protection/OWNERS</owner>
   <summary>
@@ -5218,15 +5265,16 @@ chromium-metrics-reviews@google.com.
   <owner>djmitche@chromium.org</owner>
   <owner>src/components/ip_protection/OWNERS</owner>
   <summary>
-    The result of IpProtectionProxyDelegate::OnResolveProxy's analysis of a
-    request. The enum values are in the order the checks occur, so for example
-    if the request does not match the MDL and the feature is not enabled,
-    `kNoMdlMatch` will be recorded, as that is checked first.
-
-    When the `MaskedDomainList` feature is disabled, this will always be
-    `kMdlNotPopulated`. Otherwise, when `EnableIpPrivacyProxy` is disabled, this
-    will be `kNoMdlMatch` or `kFeatureDisabled`, depending on whether the
-    request matches the MDL.
+    The result of determining whether a request should be proxied (as
+    implemented in IpProtectionProxyDelegate::ClassifyRequest). The enum values
+    are in the order the checks occur, so for example, if the MaskedDomainList
+    feature is disabled, &quot;The MDL is not populated&quot; value will be
+    emitted because that is checked first. If that feature is enabled and the
+    request does not match the MDL, then the &quot;The request did not match the
+    MDL&quot; value will be recorded. &quot;The IP Protection setting is
+    disabled&quot; value will be recorded if the feature is enabled and the
+    request matched the MDL, but IP Protection was disabled via user settings or
+    enterprise policy, and so on.
 
     This histogram is emitted for every request that undergoes proxy resolution.
   </summary>
@@ -5256,7 +5304,7 @@ chromium-metrics-reviews@google.com.
 </histogram>
 
 <histogram name="NetworkService.IpProtection.TokenBatchGenerationTime"
-    units="ms" expires_after="2025-07-06">
+    units="ms" expires_after="2025-09-07">
   <owner>ashleynewson@chromium.org</owner>
   <owner>src/android_webview/OWNERS</owner>
   <owner>src/chrome/browser/ip_protection/OWNERS</owner>
@@ -5352,7 +5400,7 @@ chromium-metrics-reviews@google.com.
 </histogram>
 
 <histogram name="NetworkService.MaskedDomainList.DiskUsage" units="KB"
-    expires_after="2025-06-08">
+    expires_after="2025-09-07">
   <owner>djmitche@chromium.org</owner>
   <owner>src/chrome/browser/ip_protection/OWNERS</owner>
   <summary>
@@ -5376,7 +5424,7 @@ chromium-metrics-reviews@google.com.
 </histogram>
 
 <histogram name="NetworkService.MaskedDomainList.FirstUpdateTime" units="ms"
-    expires_after="2025-03-10">
+    expires_after="2025-09-07">
   <owner>ashleynewson@chromium.org</owner>
   <owner>src/android_webview/browser/ip_protection/OWNERS</owner>
   <owner>src/chrome/browser/ip_protection/OWNERS</owner>
@@ -5412,13 +5460,15 @@ chromium-metrics-reviews@google.com.
   </summary>
 </histogram>
 
-<histogram name="NetworkService.MaskedDomainList.Size" units="KB"
+<histogram name="NetworkService.MaskedDomainList.Size2" units="KB"
     expires_after="2025-08-10">
   <owner>aakallam@chromium.org</owner>
   <owner>src/chrome/browser/ip_protection/OWNERS</owner>
   <summary>
     Record the size of the Masked Domain List proto in KB. Emitted when the raw
-    proto bytes are received from Component Updater and parsed.
+    proto bytes are received from Component Updater and parsed. The previous
+    version of this histogram sometimes recorded the value in MB and was not
+    usable.
   </summary>
 </histogram>
 
@@ -5540,7 +5590,7 @@ chromium-metrics-reviews@google.com.
 </histogram>
 
 <histogram name="NetworkService.TimeToGrantCacheAccess" units="ms"
-    expires_after="2025-01-05">
+    expires_after="2026-03-01">
   <owner>wfh@chromium.org</owner>
   <owner>mmenke@chromium.org</owner>
   <summary>
@@ -5554,7 +5604,7 @@ chromium-metrics-reviews@google.com.
 </histogram>
 
 <histogram name="NetworkService.TimeToGrantDataAccess" units="ms"
-    expires_after="2024-12-30">
+    expires_after="2026-03-01">
   <owner>wfh@chromium.org</owner>
   <owner>mmenke@chromium.org</owner>
   <summary>
@@ -5572,7 +5622,7 @@ chromium-metrics-reviews@google.com.
 </histogram>
 
 <histogram name="NetworkService.TimeToGrantSharedDictionaryAccess" units="ms"
-    expires_after="2025-08-10">
+    expires_after="2026-03-01">
   <owner>horo@chromium.org</owner>
   <owner>src/net/extras/shared_dictionary/OWNERS</owner>
   <summary>
@@ -5587,7 +5637,7 @@ chromium-metrics-reviews@google.com.
 </histogram>
 
 <histogram name="NetworkService.TimeToMigrateData" units="ms"
-    expires_after="2024-03-17">
+    expires_after="2026-03-01">
   <owner>wfh@chromium.org</owner>
   <owner>mmenke@chromium.org</owner>
   <summary>

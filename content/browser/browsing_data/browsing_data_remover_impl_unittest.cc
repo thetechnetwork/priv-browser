@@ -35,10 +35,10 @@
 #include "base/test/test_future.h"
 #include "base/threading/sequence_bound.h"
 #include "base/time/time.h"
-#include "content/browser/dips/dips_service_impl.h"
-#include "content/browser/dips/dips_storage.h"
-#include "content/browser/dips/dips_test_utils.h"
-#include "content/browser/dips/dips_utils.h"
+#include "content/browser/btm/btm_service_impl.h"
+#include "content/browser/btm/btm_storage.h"
+#include "content/browser/btm/btm_test_utils.h"
+#include "content/browser/btm/btm_utils.h"
 #include "content/public/browser/browser_context.h"
 #include "content/public/browser/browser_task_traits.h"
 #include "content/public/browser/browser_thread.h"
@@ -58,6 +58,7 @@
 #include "content/public/test/test_storage_partition.h"
 #include "content/public/test/test_utils.h"
 #include "net/cookies/canonical_cookie.h"
+#include "net/cookies/cookie_access_params.h"
 #include "net/cookies/cookie_deletion_info.h"
 #include "net/cookies/cookie_store.h"
 #include "net/http/http_network_session.h"
@@ -2000,7 +2001,7 @@ class BrowsingDataRemoverImplSharedStorageTest
     : public BrowsingDataRemoverImplTest {
  public:
   BrowsingDataRemoverImplSharedStorageTest() {
-    feature_list_.InitAndEnableFeature(blink::features::kSharedStorageAPI);
+    feature_list_.InitAndEnableFeature(network::features::kSharedStorageAPI);
   }
 
  private:

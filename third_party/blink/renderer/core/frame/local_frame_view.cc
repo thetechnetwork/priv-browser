@@ -67,6 +67,7 @@
 #include "third_party/blink/renderer/core/css/style_change_reason.h"
 #include "third_party/blink/renderer/core/display_lock/display_lock_document_state.h"
 #include "third_party/blink/renderer/core/display_lock/display_lock_utilities.h"
+#include "third_party/blink/renderer/core/dom/scroll_marker_group_pseudo_element.h"
 #include "third_party/blink/renderer/core/dom/static_node_list.h"
 #include "third_party/blink/renderer/core/editing/drag_caret.h"
 #include "third_party/blink/renderer/core/editing/frame_selection.h"
@@ -351,6 +352,7 @@ void LocalFrameView::Trace(Visitor* visitor) const {
   visitor->Trace(pending_snap_updates_);
   visitor->Trace(pending_perform_snap_);
   visitor->Trace(disconnected_elements_with_remembered_size_);
+  visitor->Trace(pending_scroll_marker_selection_updates_);
 }
 
 void LocalFrameView::ForAllChildViewsAndPlugins(
@@ -1714,33 +1716,6 @@ float LocalFrameView::InputEventsScaleFactor() const {
          frame_->GetPage()->GetChromeClient().InputEventsScaleForEmulation();
 }
 
-void LocalFrameView::NotifyPageThatContentAreaWillPaint() const {
-  Page* page = frame_->GetPage();
-  if (!page)
-    return;
-
-  if (RuntimeEnabledFeatures::
-          ScrollableAreasWithScrollNodeOptimizationEnabled()) {
-    for (const auto& scrollable_area : scrollable_areas_with_scroll_node_) {
-      // TODO(pdr): This check is the same for all areas and can be moved out of
-      // the loop.
-      if (!scrollable_area->ScrollbarsCanBeActive()) {
-        continue;
-      }
-      scrollable_area->ContentAreaWillPaint();
-    }
-  } else {
-    for (const auto& scrollable_area : scrollable_areas_.Values()) {
-      // TODO(pdr): This check is the same for all areas and can be moved out of
-      // the loop.
-      if (!scrollable_area->ScrollbarsCanBeActive()) {
-        continue;
-      }
-      scrollable_area->ContentAreaWillPaint();
-    }
-  }
-}
-
 void LocalFrameView::UpdateDocumentDraggableRegions() const {
   Document* document = frame_->GetDocument();
   if (!document->HasDraggableRegions() ||
@@ -2443,14 +2418,18 @@ bool LocalFrameView::RunViewTransitionSteps(
 
         DCHECK_GE(document->Lifecycle().GetState(),
                   DocumentLifecycle::kPrePaintClean);
-        auto* transition = ViewTransitionUtils::GetTransition(*document);
-        if (!transition)
-          return;
 
-        if (target_state == DocumentLifecycle::kPaintClean)
-          transition->RunViewTransitionStepsDuringMainFrame();
-        else
-          transition->RunViewTransitionStepsOutsideMainFrame();
+        if (target_state == DocumentLifecycle::kPaintClean) {
+          ViewTransitionUtils::ForEachTransition(
+              *document, [](ViewTransition& transition) {
+                transition.RunViewTransitionStepsDuringMainFrame();
+              });
+        } else {
+          ViewTransitionUtils::ForEachTransition(
+              *document, [](ViewTransition& transition) {
+                transition.RunViewTransitionStepsOutsideMainFrame();
+              });
+        }
 
         re_run_lifecycle |= document->Lifecycle().GetState() <
                                 DocumentLifecycle::kPrePaintClean ||
@@ -2543,6 +2522,8 @@ bool LocalFrameView::RunStyleAndLayoutLifecyclePhases(
 
   // Fire scrollsnapchanging events based on the new layout if necessary.
   EnqueueScrollSnapChangingFromImplIfNecessary();
+
+  ExecutePendingScrollMarkerSelectionUpdates();
 
   EnqueueScrollEvents();
 
@@ -2965,6 +2946,8 @@ void LocalFrameView::PushPaintArtifactToCompositor(bool repainted) {
 
   paint_artifact_compositor_->SetLCDTextPreference(
       page->GetSettings().GetLCDTextPreference());
+  paint_artifact_compositor_->SetDevicePixelRatio(
+      frame_->GetDocument()->DevicePixelRatio());
 
   SCOPED_UMA_AND_UKM_TIMER(GetUkmAggregator(),
                            LocalFrameUkmAggregator::kCompositingCommit);
@@ -5008,7 +4991,7 @@ DarkModeFilter& LocalFrameView::EnsureDarkModeFilter() {
 void LocalFrameView::AddPendingTransformUpdate(LayoutObject& object) {
   if (!pending_transform_updates_) {
     pending_transform_updates_ =
-        MakeGarbageCollected<HeapHashSet<Member<LayoutObject>>>();
+        MakeGarbageCollected<GCedHeapHashSet<Member<LayoutObject>>>();
   }
   pending_transform_updates_->insert(&object);
 }
@@ -5027,7 +5010,7 @@ bool LocalFrameView::RemovePendingTransformUpdate(const LayoutObject& object) {
 void LocalFrameView::AddPendingOpacityUpdate(LayoutObject& object) {
   if (!pending_opacity_updates_) {
     pending_opacity_updates_ =
-        MakeGarbageCollected<HeapHashSet<Member<LayoutObject>>>();
+        MakeGarbageCollected<GCedHeapHashSet<Member<LayoutObject>>>();
   }
   pending_opacity_updates_->insert(&object);
 }
@@ -5088,8 +5071,8 @@ void LocalFrameView::RemoveAllPendingUpdates() {
 
 void LocalFrameView::AddPendingStickyUpdate(PaintLayerScrollableArea* object) {
   if (!pending_sticky_updates_) {
-    pending_sticky_updates_ =
-        MakeGarbageCollected<HeapHashSet<Member<PaintLayerScrollableArea>>>();
+    pending_sticky_updates_ = MakeGarbageCollected<
+        GCedHeapHashSet<Member<PaintLayerScrollableArea>>>();
   }
   pending_sticky_updates_->insert(object);
 }
@@ -5117,8 +5100,8 @@ void LocalFrameView::ExecutePendingStickyUpdates() {
 
 void LocalFrameView::AddPendingSnapUpdate(PaintLayerScrollableArea* object) {
   if (!pending_snap_updates_) {
-    pending_snap_updates_ =
-        MakeGarbageCollected<HeapHashSet<Member<PaintLayerScrollableArea>>>();
+    pending_snap_updates_ = MakeGarbageCollected<
+        GCedHeapHashSet<Member<PaintLayerScrollableArea>>>();
   }
   pending_snap_updates_->insert(object);
 }
@@ -5131,6 +5114,9 @@ void LocalFrameView::RemovePendingSnapUpdate(PaintLayerScrollableArea* object) {
 
 void LocalFrameView::ExecutePendingSnapUpdates() {
   if (pending_snap_updates_) {
+    // Some scroll containers might be mid-scroll animation. Defer snapping
+    // those containers until after the scroll animation is done.
+    HeapHashSet<Member<PaintLayerScrollableArea>> deferred_updates;
     // Iteration order of the objects doesn't matter as the snap-areas are
     // contained within each scroll-container.
     for (PaintLayerScrollableArea* scrollable_area : *pending_snap_updates_) {
@@ -5139,12 +5125,16 @@ void LocalFrameView::ExecutePendingSnapUpdates() {
       if (SnapCoordinator::UpdateSnapContainerData(*snap_container)) {
         if (!pending_perform_snap_) {
           pending_perform_snap_ = MakeGarbageCollected<
-              HeapHashSet<Member<PaintLayerScrollableArea>>>();
+              GCedHeapHashSet<Member<PaintLayerScrollableArea>>>();
         }
-        pending_perform_snap_->insert(scrollable_area);
+        if (scrollable_area->HasRunningAnimation()) {
+          deferred_updates.insert(scrollable_area);
+        } else {
+          pending_perform_snap_->insert(scrollable_area);
+        }
       }
     }
-    pending_snap_updates_->clear();
+    pending_snap_updates_->swap(deferred_updates);
   }
 
   if (pending_perform_snap_ && !ShouldDeferLayoutSnap()) {
@@ -5158,6 +5148,35 @@ void LocalFrameView::ExecutePendingSnapUpdates() {
 void LocalFrameView::NotifyElementWithRememberedSizeDisconnected(
     Element* element) {
   disconnected_elements_with_remembered_size_.insert(element);
+}
+
+void LocalFrameView::AddPendingScrollMarkerSelectionUpdate(
+    ScrollMarkerGroupPseudoElement* scroll_marker_group,
+    bool apply_snap) {
+  if (!pending_scroll_marker_selection_updates_) {
+    pending_scroll_marker_selection_updates_ = MakeGarbageCollected<
+        GCedHeapHashMap<Member<ScrollMarkerGroupPseudoElement>, bool>>();
+  }
+  pending_scroll_marker_selection_updates_->insert(scroll_marker_group,
+                                                   apply_snap);
+}
+
+void LocalFrameView::RemovePendingScrollMarkerSelectionUpdate(
+    ScrollMarkerGroupPseudoElement* scroll_marker_group) {
+  if (pending_scroll_marker_selection_updates_) {
+    pending_scroll_marker_selection_updates_->erase(scroll_marker_group);
+  }
+}
+
+void LocalFrameView::ExecutePendingScrollMarkerSelectionUpdates() {
+  if (pending_scroll_marker_selection_updates_) {
+    for (const auto& update : *pending_scroll_marker_selection_updates_) {
+      ScrollMarkerGroupPseudoElement* scroll_marker_group = update.key;
+      scroll_marker_group->ScrollSelectedIntoView(
+          /*apply_snap_alignment*/ update.value);
+    }
+    pending_scroll_marker_selection_updates_->clear();
+  }
 }
 
 }  // namespace blink

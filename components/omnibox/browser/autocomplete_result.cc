@@ -397,11 +397,19 @@ void AutocompleteResult::SortAndCull(
   CompareWithDemoteByType<AutocompleteMatch> comparing_object(
       page_classification);
 
-  const bool is_zero_suggest = input.IsZeroSuggest();
+  bool is_zero_suggest = input.IsZeroSuggest();
   const bool use_grouping_for_non_zps =
       base::FeatureList::IsEnabled(omnibox::kGroupingFrameworkForNonZPS) &&
       !is_zero_suggest;
-  const bool use_grouping = is_zero_suggest || use_grouping_for_non_zps;
+  bool use_grouping = is_zero_suggest || use_grouping_for_non_zps;
+
+  if (is_zero_suggest && OmniboxFieldTrial::IsStarterPackPageEnabled()) {
+    // Keep the the '@page' featured search suggestion showing in zero suggest.
+    // TODO(crbug.com/400812940): Replace this with a more permanent solution if
+    //  we decide to surface such a dedicated suggestion as an entry-point.
+    is_zero_suggest = false;
+    use_grouping = false;
+  }
 
   MergeSuggestionGroupsMap(omnibox::BuildDefaultGroupsForInput(input));
   // Grouping requires all matches have a group ID. To keep providers 'dumb',
@@ -421,6 +429,20 @@ void AutocompleteResult::SortAndCull(
     // but shouldn't be shown otherwise. Filter them out.
     std::erase_if(matches_,
                   [&](const auto& match) { return match.relevance == 0; });
+  }
+
+  // Used to determine how many search / url suggestions should appear in zps
+  // if kOmniboxUrlSuggestionsOnFocus is enabled.
+  auto url_suggestions_on_focus_config =
+      omnibox_feature_configs::OmniboxUrlSuggestionsOnFocus::Get();
+  size_t max_search_suggestions = 8u;
+  size_t max_url_suggestions = 0u;
+  size_t max_suggestions = 8u;
+  if (url_suggestions_on_focus_config.enabled) {
+    max_search_suggestions =
+        url_suggestions_on_focus_config.max_search_suggestions;
+    max_url_suggestions = url_suggestions_on_focus_config.max_url_suggestions;
+    max_suggestions = url_suggestions_on_focus_config.max_suggestions;
   }
 
   // If at zero suggest or `kGroupingFrameworkForNonZPS` is enabled and the
@@ -502,8 +524,8 @@ void AutocompleteResult::SortAndCull(
           }
         }
       } else if (omnibox::IsSearchResultsPage(page_classification)) {
-        sections.push_back(
-            std::make_unique<DesktopSRPZpsSection>(suggestion_groups_map_));
+        sections.push_back(std::make_unique<DesktopSRPZpsSection>(
+            suggestion_groups_map_, max_suggestions, max_search_suggestions));
 #if BUILDFLAG(ENABLE_EXTENSIONS)
         if (base::FeatureList::IsEnabled(
                 extensions_features::kExperimentalOmniboxLabs)) {
@@ -513,8 +535,8 @@ void AutocompleteResult::SortAndCull(
         }
 #endif
       } else {
-        sections.push_back(
-            std::make_unique<DesktopWebZpsSection>(suggestion_groups_map_));
+        sections.push_back(std::make_unique<DesktopWebZpsSection>(
+            suggestion_groups_map_, max_suggestions, max_url_suggestions));
 #if BUILDFLAG(ENABLE_EXTENSIONS)
         if (base::FeatureList::IsEnabled(
                 extensions_features::kExperimentalOmniboxLabs)) {

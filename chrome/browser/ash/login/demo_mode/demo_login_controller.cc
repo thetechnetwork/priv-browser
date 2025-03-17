@@ -236,7 +236,7 @@ void SendDemoAccountRequest(
                                kMaxResponseSize);
 }
 
-void LogServerResponseError(std::string error_response, bool is_setup) {
+void LogServerResponseError(const std::string& error_response, bool is_setup) {
   if (error_response.empty()) {
     return;
   }
@@ -441,7 +441,10 @@ void DemoLoginController::OnSetupDemoAccountComplete(
                                   std::move(response_body));
   } else {
     OnSetupDemoAccountError(result);
-    LogServerResponseError(*response_body, /*is_setup*/ true);
+    // `response_body` could be nullptr when network is not connected.
+    if (response_body) {
+      LogServerResponseError(*response_body, /*is_setup*/ true);
+    }
   }
 }
 
@@ -464,13 +467,15 @@ void DemoLoginController::HandleSetupDemoAcountResponse(
   }
 
   // Report success to the metrics.
-  DemoSessionMetricsRecorder::Get()->ReportDemoAccountSetupResult(
+  DemoSessionMetricsRecorder::ReportDemoAccountSetupResult(
       ResultCode::kSuccess);
 
   UserLoginPermissionTracker::Get()->SetDemoUser(
       gaia::CanonicalizeEmail(*email));
   DCHECK_EQ(State::kSetupDemoAccountInProgress, state_);
   state_ = State::kLoginDemoAccount;
+  DemoSessionMetricsRecorder::SetCurrentSessionType(
+      DemoSessionMetricsRecorder::SessionType::kSignedInDemoSession);
 
   auto* local_state = g_browser_process->local_state();
   local_state->SetString(prefs::kDemoAccountGaiaId, *gaia_id);
@@ -493,10 +498,12 @@ void DemoLoginController::OnSetupDemoAccountError(
   DCHECK_EQ(State::kSetupDemoAccountInProgress, state_);
 
   // Report error to the metrics.
-  DemoSessionMetricsRecorder::Get()->ReportDemoAccountSetupResult(result_code);
+  DemoSessionMetricsRecorder::ReportDemoAccountSetupResult(result_code);
 
   // Login public account session when set up failed.
   state_ = State::kLoginToMGS;
+  DemoSessionMetricsRecorder::SetCurrentSessionType(
+      DemoSessionMetricsRecorder::SessionType::kFallbackMGS);
   configure_auto_login_callback_.Run();
 
   if (setup_failed_callback_for_testing_) {
@@ -588,9 +595,12 @@ void DemoLoginController::OnCleanUpDemoAccountComplete(
 
   if (result == ResultCode::kSuccess) {
     // Report success to the metrics.
-    DemoSessionMetricsRecorder::Get()->ReportDemoAccountCleanupResult(result);
+    DemoSessionMetricsRecorder::ReportDemoAccountCleanupResult(result);
   } else {
-    LogServerResponseError(*response_body, /*is_setup*/ false);
+    // `response_body` could be nullptr when network is not connected.
+    if (response_body) {
+      LogServerResponseError(*response_body, /*is_setup*/ false);
+    }
     OnCleanUpDemoAccountError(result);
   }
   url_loader_.reset();
@@ -601,8 +611,7 @@ void DemoLoginController::OnCleanUpDemoAccountComplete(
 void DemoLoginController::OnCleanUpDemoAccountError(
     const ResultCode result_code) {
   // Report error to the metrics.
-  DemoSessionMetricsRecorder::Get()->ReportDemoAccountCleanupResult(
-      result_code);
+  DemoSessionMetricsRecorder::ReportDemoAccountCleanupResult(result_code);
 
   LOG(ERROR) << "Failed to clean up demo account. Result code: "
              << static_cast<int>(result_code);

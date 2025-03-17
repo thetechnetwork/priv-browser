@@ -148,6 +148,14 @@ BASE_FEATURE_PARAM(std::string,
                    /*name=*/"MaskedDomainListExperimentalVersion",
                    /*default_value=*/"");
 
+// When enabled, the MaskedDomainList will be split into two separate lists,
+// one for regular browsing and one for incognito browsing.
+BASE_FEATURE_PARAM(bool,
+                   kSplitMaskedDomainList,
+                   &kMaskedDomainList,
+                   /*name=*/"SplitMaskedDomainList",
+                   /*default_value=*/false);
+
 // When enabled, if the MaskedDomainList is used at all, it will use the
 // flatbuffer implementation (the `MaskedDomainList` class) instead of the
 // `UrlMatcherWithBypass` implementation.
@@ -203,6 +211,12 @@ BASE_FEATURE_PARAM(base::TimeDelta,
                    "reduce-accept-language-cache-duration",
                    base::Days(30));
 
+// Enables support for the `Variants` response header and reduce
+// Accept-Language HTTP header only.
+BASE_FEATURE(kReduceAcceptLanguageHTTP,
+             "ReduceAcceptLanguageHTTP",
+             base::FEATURE_DISABLED_BY_DEFAULT);
+
 // Reduce PNA preflight response waiting time to 200ms.
 // See: https://wicg.github.io/private-network-access/#cors-preflight
 BASE_FEATURE(kPrivateNetworkAccessPreflightShortTimeout,
@@ -214,6 +228,26 @@ BASE_FEATURE(kPrivateNetworkAccessPreflightShortTimeout,
 BASE_FEATURE(kPrivateNetworkAccessPermissionPrompt,
              "PrivateNetworkAccessPermissionPrompt",
              base::FEATURE_ENABLED_BY_DEFAULT);
+
+// Enables Local Network Access checks.
+// Blocks local network requests without user permission to prevent exploitation
+// of vulnerable local devices.
+//
+// This feature is being built as a replacement for Private Network Access
+// (PNA), and if this is on PNA features may stop working.
+//
+// Public explainer:
+// https://github.com/explainers-by-googlers/local-network-access
+BASE_FEATURE(kLocalNetworkAccessChecks,
+             "LocalNetworkAccessChecks",
+             base::FEATURE_DISABLED_BY_DEFAULT);
+
+// If true, local network access checks will only be warnings.
+BASE_FEATURE_PARAM(bool,
+                   kLocalNetworkAccessChecksWarn,
+                   &kLocalNetworkAccessChecks,
+                   /*name=*/"LocalNetworkAccessChecksWarn",
+                   /*default_value=*/true);
 
 // If enabled, then the network service will parse the Cookie-Indices header.
 // This does not currently control changing cache behavior according to the
@@ -281,6 +315,13 @@ BASE_FEATURE(kSharedZstd, "SharedZstd", base::FEATURE_ENABLED_BY_DEFAULT);
 BASE_FEATURE(kReduceTransferSizeUpdatedIPC,
              "ReduceTransferSizeUpdatedIPC",
              base::FEATURE_ENABLED_BY_DEFAULT);
+
+// Enables content decoding in the renderer process.
+// See https://crbug.com/391950057 and this doc for more details.
+// https://docs.google.com/document/d/1LwgPlrtQtUhGz_ilTsRun-7o4TuHo9jbXll6FRq-dKk/edit?usp=sharing
+BASE_FEATURE(kRendererSideContentDecoding,
+             "RendererSideContentDecoding",
+             base::FEATURE_DISABLED_BY_DEFAULT);
 
 // This feature allows skipping TPCD mitigation checks when the cookie access
 // is tagged as being used for advertising purposes. This means that cookies
@@ -356,10 +397,6 @@ BASE_FEATURE(kStorageAccessHeaders,
              "StorageAccessHeaders",
              base::FEATURE_ENABLED_BY_DEFAULT);
 
-BASE_FEATURE(kStorageAccessHeadersTrial,
-             "StorageAccessHeadersTrial",
-             base::FEATURE_ENABLED_BY_DEFAULT);
-
 BASE_FEATURE(kSRIMessageSignatureEnforcement,
              "SRIMessageSignatureEnforcement",
              base::FEATURE_DISABLED_BY_DEFAULT);
@@ -411,9 +448,123 @@ BASE_FEATURE_PARAM(std::string,
                    &kDeprecateUnloadByAllowList,
                    "allowlist",
                    "");
+// When enabled, a `Sec-Fetch-Frame-Top` header will be emitted on
+// outgoing requests.
+BASE_FEATURE(kFrameAncestorHeaders,
+             "FrameAncestorHeaders",
+             base::FEATURE_DISABLED_BY_DEFAULT);
 
 BASE_FEATURE(kUpdateRequestForCorsRedirect,
              "UpdateRequestForCorsRedirect",
              base::FEATURE_ENABLED_BY_DEFAULT);
+
+// https://github.com/patcg-individual-drafts/topics
+// Kill switch for the Topics API.
+BASE_FEATURE(kBrowsingTopics,
+             "BrowsingTopics",
+             base::FEATURE_ENABLED_BY_DEFAULT);
+
+// Enable the shared storage API. Note that enabling this feature does not
+// automatically expose this API to the web, it only allows the element to be
+// enabled by the runtime enabled feature, for origin trials.
+// https://github.com/pythagoraskitty/shared-storage/blob/main/README.md
+BASE_FEATURE(kSharedStorageAPI,
+             "SharedStorageAPI",
+             base::FEATURE_ENABLED_BY_DEFAULT);
+BASE_FEATURE_PARAM(size_t,
+                   kSharedStorageURLSelectionOperationInputURLSizeLimit,
+                   &kSharedStorageAPI,
+                   "url_selection_operation_input_url_size_limit",
+                   8);
+BASE_FEATURE_PARAM(int,
+                   kMaxSharedStoragePageSize,
+                   &kSharedStorageAPI,
+                   "MaxSharedStoragePageSize",
+                   4096);
+BASE_FEATURE_PARAM(int,
+                   kMaxSharedStorageCacheSize,
+                   &kSharedStorageAPI,
+                   "MaxSharedStorageCacheSize",
+                   1024);
+BASE_FEATURE_PARAM(int,
+                   kMaxSharedStorageInitTries,
+                   &kSharedStorageAPI,
+                   "MaxSharedStorageInitTries",
+                   2);
+BASE_FEATURE_PARAM(int,
+                   kMaxSharedStorageIteratorBatchSize,
+                   &kSharedStorageAPI,
+                   "MaxSharedStorageIteratorBatchSize",
+                   100);
+BASE_FEATURE_PARAM(int,
+                   kSharedStorageBitBudget,
+                   &kSharedStorageAPI,
+                   "SharedStorageBitBudget",
+                   12);
+BASE_FEATURE_PARAM(base::TimeDelta,
+                   kSharedStorageBudgetInterval,
+                   &kSharedStorageAPI,
+                   "SharedStorageBudgetInterval",
+                   base::Hours(24));
+BASE_FEATURE_PARAM(base::TimeDelta,
+                   kSharedStorageStalePurgeInitialInterval,
+                   &kSharedStorageAPI,
+                   "SharedStorageStalePurgeInitialInterval",
+                   base::Minutes(2));
+BASE_FEATURE_PARAM(base::TimeDelta,
+                   kSharedStorageStalePurgeRecurringInterval,
+                   &kSharedStorageAPI,
+                   "SharedStorageStalePurgeRecurringInterval",
+                   base::Hours(2));
+BASE_FEATURE_PARAM(base::TimeDelta,
+                   kSharedStorageStalenessThreshold,
+                   &kSharedStorageAPI,
+                   "SharedStorageStalenessThreshold",
+                   base::Days(30));
+BASE_FEATURE_PARAM(size_t,
+                   kSharedStorageMaxAllowedFencedFrameDepthForSelectURL,
+                   &kSharedStorageAPI,
+                   "SharedStorageMaxAllowedFencedFrameDepthForSelectURL",
+                   1);
+// NOTE: To preserve user privacy, the
+// `kSharedStorageExposeDebugMessageForSettingsStatus` feature param MUST remain
+// false by default.
+BASE_FEATURE_PARAM(bool,
+                   kSharedStorageExposeDebugMessageForSettingsStatus,
+                   &kSharedStorageAPI,
+                   "ExposeDebugMessageForSettingsStatus",
+                   false);
+
+// Kill switch for the Interest Group API, i.e. if disabled, the
+// API exposure will be disabled regardless of the OT config.
+BASE_FEATURE(kInterestGroupStorage,
+             "InterestGroupStorage",
+             base::FEATURE_ENABLED_BY_DEFAULT);
+// TODO(crbug.com/40176812): Adjust these limits in response to usage.
+BASE_FEATURE_PARAM(int,
+                   kInterestGroupStorageMaxOwners,
+                   &kInterestGroupStorage,
+                   "max_owners",
+                   1000);
+BASE_FEATURE_PARAM(int,
+                   kInterestGroupStorageMaxStoragePerOwner,
+                   &kInterestGroupStorage,
+                   "max_storage_per_owner",
+                   10 * 1024 * 1024);
+BASE_FEATURE_PARAM(int,
+                   kInterestGroupStorageMaxGroupsPerOwner,
+                   &kInterestGroupStorage,
+                   "max_groups_per_owner",
+                   2000);
+BASE_FEATURE_PARAM(int,
+                   kInterestGroupStorageMaxNegativeGroupsPerOwner,
+                   &kInterestGroupStorage,
+                   "max_negative_groups_per_owner",
+                   20000);
+BASE_FEATURE_PARAM(int,
+                   kInterestGroupStorageMaxOpsBeforeMaintenance,
+                   &kInterestGroupStorage,
+                   "max_ops_before_maintenance",
+                   1000);
 
 }  // namespace network::features

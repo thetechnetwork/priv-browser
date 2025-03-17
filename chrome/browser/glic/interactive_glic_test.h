@@ -12,15 +12,16 @@
 #include "base/path_service.h"
 #include "base/test/scoped_feature_list.h"
 #include "chrome/browser/glic/glic.mojom.h"
-#include "chrome/browser/glic/glic_cookie_synchronizer.h"
+#include "chrome/browser/glic/glic_enabling.h"
 #include "chrome/browser/glic/glic_keyed_service.h"
 #include "chrome/browser/glic/glic_keyed_service_factory.h"
 #include "chrome/browser/glic/glic_pref_names.h"
 #include "chrome/browser/glic/glic_test_environment.h"
 #include "chrome/browser/glic/glic_test_util.h"
-#include "chrome/browser/glic/glic_view.h"
-#include "chrome/browser/glic/glic_window_controller.h"
+#include "chrome/browser/glic/host/glic_cookie_synchronizer.h"
 #include "chrome/browser/glic/interactive_test_util.h"
+#include "chrome/browser/glic/widget/glic_view.h"
+#include "chrome/browser/glic/widget/glic_window_controller.h"
 #include "chrome/browser/signin/identity_manager_factory.h"
 #include "chrome/browser/signin/identity_test_environment_profile_adaptor.h"
 #include "chrome/browser/ui/browser.h"
@@ -33,9 +34,9 @@
 #include "components/feature_engagement/public/feature_constants.h"
 #include "testing/gtest/include/gtest/gtest.h"
 #include "ui/base/interaction/interactive_test.h"
+#include "ui/events/test/event_generator.h"
 #include "url/gurl.h"
 #include "url/url_util.h"
-
 
 namespace glic::test {
 
@@ -114,7 +115,7 @@ class InteractiveGlicTestT : public T {
     // use the embedded test server to get the right URL and it's not started
     // at that time.
     std::ostringstream path;
-    path << "/glic/test_client/index.html";
+    path << glic_page_path_;
 
     // Append the query parameters to the URL.
     bool first_param = true;
@@ -139,8 +140,20 @@ class InteractiveGlicTestT : public T {
 
     Browser* browser = InProcessBrowserTest::browser();
 
-    glic_test_environment_ =
-        std::make_unique<glic::GlicTestEnvironment>(browser->profile());
+    // Individual test could disable the glic feature.
+    if (GlicEnabling::IsProfileEligible(browser->profile())) {
+      glic_test_environment_ =
+          std::make_unique<glic::GlicTestEnvironment>(browser->profile());
+    }
+  }
+
+  void TearDownOnMainThread() override {
+    T::TearDownOnMainThread();
+    glic_test_environment_.reset();
+  }
+
+  void SetGlicPagePath(const std::string& glic_page_path) {
+    glic_page_path_ = glic_page_path;
   }
 
   // Ensures that the WebContents for some combination of glic host and contents
@@ -228,7 +241,8 @@ class InteractiveGlicTestT : public T {
   // Ensures a mock glic button is present and then clicks it. Works even if the
   // element is off-screen.
   auto ClickMockGlicElement(
-      const WebContentsInteractionTestUtil::DeepQuery& where) {
+      const WebContentsInteractionTestUtil::DeepQuery& where,
+      const bool click_closes_window = false) {
     auto steps = Api::Steps(
         // Note: Elements on the test client don't need to be in the viewport to
         // be used. Ideally we would wait until the element is visible, but not
@@ -242,7 +256,12 @@ class InteractiveGlicTestT : public T {
         // CheckJsResultAt( {"#contextAccessIndicator"}, " ... with reason
         // kSequenceDestroyed; step type kShown; id ElementIdentifier
         // kGlicContentsElementId.
-        Api::ExecuteJsAt(kGlicContentsElementId, where, "(el)=>el.click()"));
+        Api::ExecuteJsAt(
+            kGlicContentsElementId, where, "(el)=>el.click()",
+            click_closes_window
+                ? InteractiveBrowserTestApi::ExecuteJsMode::kFireAndForget
+                : InteractiveBrowserTestApi::ExecuteJsMode::
+                      kWaitForCompletion));
 
     Api::AddDescriptionPrefix(steps, "ClickMockGlicElement");
     return steps;
@@ -263,6 +282,22 @@ class InteractiveGlicTestT : public T {
         Api::WaitForHide(kGlicViewElementId)));
     Api::AddDescriptionPrefix(steps, "CloseGlicWindow");
     return steps;
+  }
+
+  auto SimulateAcceleratorPress(const ui::Accelerator& accelerator) {
+    return Api::Do([this, accelerator] {
+      gfx::NativeWindow target_window =
+          window_controller().GetGlicWidget()->GetNativeWindow();
+#if (USE_AURA)
+      ui::test::EventGenerator event_generator(target_window->GetRootWindow(),
+                                               target_window);
+#else
+      ui::test::EventGenerator event_generator(target_window);
+#endif
+      event_generator.set_target(ui::test::EventGenerator::Target::WINDOW);
+      event_generator.PressAndReleaseKeyAndModifierKeys(
+          accelerator.key_code(), accelerator.modifiers());
+    });
   }
 
   auto CheckControllerHasWidget(bool expect_widget) {
@@ -290,6 +325,10 @@ class InteractiveGlicTestT : public T {
     return Api::CheckResult(
         [this] { return window_controller().attached_browser(); }, new_browser,
         "attached to the other browser");
+  }
+
+  glic::GlicTestEnvironment& glic_test_environment() {
+    return *glic_test_environment_;
   }
 
  protected:
@@ -324,6 +363,9 @@ class InteractiveGlicTestT : public T {
   // are here for convenience to make the methods above more readable.
   using Api = InteractiveBrowserTestApi;
   using Test = InProcessBrowserTest;
+
+  // This is the default test file. Tests can override with a different path.
+  std::string glic_page_path_ = "/glic/test_client/index.html";
 
   base::test::ScopedFeatureList features_;
 

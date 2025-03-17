@@ -21,6 +21,7 @@ const base::Feature* const kAllFeatures[] = {
     &kIPHAccountSettingsHistorySync,
     &kIPHAndroidTabDeclutter,
     &kIPHAdaptiveButtonInTopToolbarCustomizationNewTabFeature,
+    &kIPHAdaptiveButtonInTopToolbarCustomizationOpenInBrowserFeature,
     &kIPHAdaptiveButtonInTopToolbarCustomizationShareFeature,
     &kIPHAdaptiveButtonInTopToolbarCustomizationVoiceSearchFeature,
     &kIPHAdaptiveButtonInTopToolbarCustomizationAddToBookmarksFeature,
@@ -143,7 +144,6 @@ const base::Feature* const kAllFeatures[] = {
     &kIPHiOSPromoNonModalAppSwitcherDefaultBrowserFeature,
     &kIPHiOSPromoNonModalShareDefaultBrowserFeature,
     &kIPHiOSPromoPasswordManagerWidgetFeature,
-    &kIPHiOSParcelTrackingFeature,
     &kIPHiOSPullToRefreshFeature,
     &kIPHiOSReplaceSyncPromosWithSignInPromos,
     &kIPHiOSTabGridSwipeRightForIncognito,
@@ -169,6 +169,7 @@ const base::Feature* const kAllFeatures[] = {
     &kIPHiOSDefaultBrowserBannerPromoFeature,
     &kIPHiOSReminderNotificationsOverflowMenuBubbleFeature,
     &kIPHiOSReminderNotificationsOverflowMenuNewBadgeFeature,
+    &kIPHiOSSettingsInOverflowMenuBubbleFeature,
 #endif  // BUILDFLAG(IS_IOS)
 #if BUILDFLAG(IS_WIN) || BUILDFLAG(IS_APPLE) || BUILDFLAG(IS_LINUX) || \
     BUILDFLAG(IS_CHROMEOS) || BUILDFLAG(IS_FUCHSIA)
@@ -244,11 +245,12 @@ const base::Feature* const kAllFeatures[] = {
 
 #if BUILDFLAG(IS_WIN) || BUILDFLAG(IS_APPLE) || BUILDFLAG(IS_LINUX) || \
     BUILDFLAG(IS_CHROMEOS) || BUILDFLAG(IS_ANDROID) || BUILDFLAG(IS_FUCHSIA)
+    &kIPHAutofillAiOptInFeature,
+    &kIPHAutofillBnplAffirmOrZipSuggestionFeature,
     &kIPHAutofillCardInfoRetrievalSuggestionFeature,
     &kIPHAutofillCreditCardBenefitFeature,
     &kIPHAutofillDisabledVirtualCardSuggestionFeature,
     &kIPHAutofillExternalAccountProfileSuggestionFeature,
-    &kIPHAutofillPredictionImprovementsFeature,
     &kIPHAutofillVirtualCardCVCSuggestionFeature,
     &kIPHAutofillVirtualCardSuggestionFeature,
     &kIPHCookieControlsFeature,

@@ -14,8 +14,8 @@
 #include "base/command_line.h"
 #include "base/functional/bind.h"
 #include "base/memory/raw_ptr.h"
+#include "base/strings/escape.h"
 #include "base/strings/string_number_conversions.h"
-#include "base/strings/utf_string_conversions.h"
 #include "base/test/bind.h"
 #include "base/test/metrics/histogram_tester.h"
 #include "base/test/scoped_feature_list.h"
@@ -236,9 +236,9 @@ class PaymentsNetworkInterfaceTest : public PaymentsNetworkInterfaceTestBase,
   }
 
   void OnDidCreateBnplPaymentInstrument(PaymentsRpcResult result,
-                                        std::u16string instrument_id) {
+                                        std::string instrument_id) {
     result_ = result;
-    instrument_id_ = base::UTF16ToUTF8(instrument_id);
+    instrument_id_ = std::move(instrument_id);
   }
 
   void OnDidGetBnplPaymentInstrumentForFetchingVcn(
@@ -2039,14 +2039,20 @@ TEST_P(PaymentsNetworkInterfaceTestWithPaymentsRpcResultParam,
       NOTREACHED();
   }
 
-  AssertIncludedInRequest("\"external_customer_id\":\"555666777888\"");
-  AssertIncludedInRequest("\"instrument_id\":\"INSTRUMENT_ID\"");
-  AssertIncludedInRequest("\"value\":\"RISK_DATA\"");
+  AssertIncludedInRequest(base::EscapeUrlEncodedData(
+      "\"external_customer_id\":\"555666777888\"", /*use_plus=*/true));
+  AssertIncludedInRequest(base::EscapeUrlEncodedData(
+      "\"instrument_id\":\"INSTRUMENT_ID\"", /*use_plus=*/true));
   AssertIncludedInRequest(
-      "\"get_payment_instrument_context_token\":\"CONTEXT_TOKEN\"");
-  AssertIncludedInRequest(
-      "\"redirect_response_url\":\"http://redirect-url.test/\"");
-  AssertIncludedInRequest("\"issuer_id\":\"ISSUER_ID\"");
+      base::EscapeUrlEncodedData("\"value\":\"RISK_DATA\"", /*use_plus=*/true));
+  AssertIncludedInRequest(base::EscapeUrlEncodedData(
+      "\"get_payment_instrument_context_token\":\"CONTEXT_TOKEN\"",
+      /*use_plus=*/true));
+  AssertIncludedInRequest(base::EscapeUrlEncodedData(
+      "\"redirect_response_url\":\"http://redirect-url.test/\"",
+      /*use_plus=*/true));
+  AssertIncludedInRequest(base::EscapeUrlEncodedData(
+      "\"issuer_id\":\"ISSUER_ID\"", /*use_plus=*/true));
 
   EXPECT_EQ(result, result_);
   if (result == PaymentsRpcResult::kSuccess) {

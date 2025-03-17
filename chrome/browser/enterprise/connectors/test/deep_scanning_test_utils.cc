@@ -461,29 +461,6 @@ void EventReportValidator::ExpectDangerousDownloadEvent(
           });
 }
 
-void EventReportValidator::ExpectPasswordBreachEvent(
-    const std::string& expected_trigger,
-    const std::vector<std::pair<std::string, std::u16string>>&
-        expected_identities,
-    const std::string& expected_profile_username,
-    const std::string& expected_profile_identifier) {
-  event_key_ = enterprise_connectors::kKeyPasswordBreachEvent;
-  trigger_ = expected_trigger;
-  password_breach_identities_ = expected_identities;
-  username_ = expected_profile_username;
-  profile_identifier_ = expected_profile_identifier;
-  EXPECT_CALL(*client_, UploadSecurityEventReport)
-      .WillOnce(
-          [this](bool include_device_info, base::Value::Dict report,
-                 base::OnceCallback<void(policy::CloudPolicyClient::Result)>
-                     callback) {
-            ValidateReport(&report);
-            if (!done_closure_.is_null()) {
-              done_closure_.Run();
-            }
-          });
-}
-
 void EventReportValidator::ValidateReport(const base::Value::Dict* report) {
   DCHECK(report);
 
@@ -553,8 +530,8 @@ void EventReportValidator::ValidateFederatedOrigin(
 }
 
 void EventReportValidator::ValidateIdentities(const base::Value::Dict* value) {
-  const base::Value::List* identities = value->FindList(
-      SafeBrowsingPrivateEventRouter::kKeyPasswordBreachIdentities);
+  const base::Value::List* identities =
+      value->FindList(kKeyPasswordBreachIdentities);
   if (!password_breach_identities_) {
     EXPECT_EQ(nullptr, identities);
   } else {
@@ -566,10 +543,9 @@ void EventReportValidator::ValidateIdentities(const base::Value::Dict* value) {
       for (const auto& actual_identity : *identities) {
         const base::Value::Dict& actual_identity_dict =
             actual_identity.GetDict();
-        const std::string* url = actual_identity_dict.FindString(
-            SafeBrowsingPrivateEventRouter::kKeyPasswordBreachIdentitiesUrl);
+        const std::string* url =
+            actual_identity_dict.FindString(kKeyPasswordBreachIdentitiesUrl);
         const std::string* actual_username = actual_identity_dict.FindString(
-            SafeBrowsingPrivateEventRouter::
                 kKeyPasswordBreachIdentitiesUsername);
         EXPECT_NE(nullptr, actual_username);
         const std::u16string username = base::UTF8ToUTF16(*actual_username);

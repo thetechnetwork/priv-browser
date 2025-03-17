@@ -8,6 +8,7 @@
 <translation id="1010200102790553230">Էջը բեռնել ավելի ուշ</translation>
 <translation id="1010225406377140704">Կապվեք ուղարկողի հետ՝ խնդրելով նոր հղում ուղարկել</translation>
 <translation id="1011206368273183593">Ֆայլերի նախապատրաստում</translation>
+<translation id="1012264210825687872">Ձեր պատվերը վերանայելուց հետո դուք պետք է մուտք գործեք<ph name="BNPL_ISSUER_NAME" /> հաշիվ։ Այդ հաշիվն ավտոմատ կկապվի Google Pay-ի հետ։</translation>
 <translation id="1014509239502131234">Արդյունքը հետարկվում է</translation>
 <translation id="1015730422737071372">Տրամադրել լրացուցիչ տեղեկություններ</translation>
 <translation id="1019413721762100891">Անջատ</translation>
@@ -141,6 +142,7 @@
 <translation id="1230244617745022071"><ph name="SOURCE" /> (ավտոմատ հայտնաբերված)</translation>
 <translation id="1232569758102978740">Անանուն</translation>
 <translation id="1236081509407217141">Թույլատրե՞լ VR պարամետրը</translation>
+<translation id="1236689197410206751">AfterPay</translation>
 <translation id="1240347957665416060">Ձեր սարքի անունը</translation>
 <translation id="124116460088058876">Այլ լեզուներ</translation>
 <translation id="1243027604378859286">Հեղինակ՝</translation>
@@ -255,6 +257,7 @@
 <translation id="1419305130220238697">«Կառավարել ներբեռնումները Chrome-ում» կոճակ․ ակտիվացրեք՝ Chrome-ում ձեր ներբեռնած ֆայլերը կառավարելու համար</translation>
 <translation id="1420345875188552368">Ավտոմատ վճարման ձեր պահված եղանակը կարող է օգտագործվել այս վճարման համար։ Էլեկտրոնային դրամապանակները Chrome-ում անջատելու համար բացեք ձեր <ph name="BEGIN_LINK1" />վճարման կարգավորումները<ph name="END_LINK1" /></translation>
 <translation id="1420920093772172268"><ph name="TURN_ON_BLUETOOTH_LINK" />՝ զուգակցումը թույլատրելու համար</translation>
+<translation id="1421484961346698724">Հաշիվը հեռացվել է</translation>
 <translation id="14222610277930434">Հաճախ եք այցելում</translation>
 <translation id="1422930527989633628">Կարող է հայցել մոտակա Bluetooth սարքերը հայտնաբերելու թույլտվություն</translation>
 <translation id="1426410128494586442">Այո</translation>
@@ -630,6 +633,7 @@
 <translation id="2082238445998314030"><ph name="RESULT_NUMBER" />-ից <ph name="TOTAL_RESULTS" /> արդյունք</translation>
 <translation id="2083256696566019397">Թույլատրել ամեն այցի ժամանակ</translation>
 <translation id="2085876078937250610">Պահել…</translation>
+<translation id="2090451897496479509">Լրացուցիչ տեղեկությունների համար կապվեք մատակարարի հետ</translation>
 <translation id="2091887806945687916">Ձայն</translation>
 <translation id="2093982008204312032">Google Chrome-ը փորձում է անջատել Windows Hello-ն՝ գաղտնաբառեր լրացնելու համար։</translation>
 <translation id="2094505752054353250">Տիրույթի անհամապատասխանություն</translation>
@@ -664,6 +668,7 @@
 <translation id="2145193671493396738">Տնտեսական նորություններ</translation>
 <translation id="214556005048008348">Չեղարկել վճարումը</translation>
 <translation id="2147117373852943630">Երաժշտական գործիքներ</translation>
+<translation id="2147254250314124496"><ph name="EMBEDDED_URL" />-ն ուզում է օգտագործել ձեր մասին տեղեկությունները, որոնք պահել է</translation>
 <translation id="2148613324460538318">Ավելացնել քարտ</translation>
 <translation id="2148716181193084225">Այսօր</translation>
 <translation id="2149968176347646218">Կապը պաշտպանված չէ</translation>
@@ -695,6 +700,7 @@
 <translation id="2187317261103489799">Որոշել (կանխադրված)</translation>
 <translation id="2188375229972301266">Մի քանի անցք ներքևում</translation>
 <translation id="2194856509914051091">Կարևոր տեղեկություններ</translation>
+<translation id="2198071643181968308">Իմանալ ավելին<ph name="BNPL_ISSUER_NAME" /> հավելվածի մասին</translation>
 <translation id="2200678913752027654">«Վատն է» կոճակ․ սեղմեք Enter՝ բացելու մի ձև, որտեղ կարող եք մանրամասնել, թե ինչու չեք հավանել այս առաջարկը</translation>
 <translation id="2202627062836089804">ձեր քարտի հետևի կողմում</translation>
 <translation id="2204482073374652408">Թարմացումն ավարտվեց</translation>
@@ -841,6 +847,7 @@
 <translation id="2451607499823206582">Հետագծում</translation>
 <translation id="2452098632681057184">Էկոլոգիա և շրջակա միջավայր</translation>
 <translation id="2452837234288608067">Չհաջողվեց կատարել այս հարցումը։ Նորից փորձեք։</translation>
+<translation id="2453045048779611513">Ձեր կազմակերպությունը թույլատրել է պահել ոչ բոլոր տվյալները</translation>
 <translation id="2456755709261364512">Ձեր մարտկոցի լիցքը պետք է <ph name="REQUIRED_BATTERY_PRECENT" />%-ից բարձր լինի</translation>
 <translation id="2461385121573678775">Chrome Enterprise Core-ը ձեզ տրամադրում է կենտրոնացված գործիք՝ ամպային սերվերից դիտարկիչի վերաբերյալ կանոնները կազմաձևելու համար</translation>
 <translation id="2461822463642141190">Ընթացիկ</translation>
@@ -1092,6 +1099,7 @@
 <translation id="2942492342931589800">Ոչ պաշտոնական</translation>
 <translation id="2942515540157583425">Աշխատանք ՏՏ և տեխնիկական ոլորտում</translation>
 <translation id="2943895734390379394">Վերբեռնման օրը և ժամը՝</translation>
+<translation id="2947281105969315778">Ներդիրների խմբերով կիսվելու կամ դրանց միանալու համար դուք պետք է մուտք գործեք Chrome</translation>
 <translation id="2948083400971632585">Դուք կարող եք անջատել կապակցման համար օգտագործվող պրոքսի-սերվերները ները կարգավորումների էջից:</translation>
 <translation id="2949183777371959169">Անտեսված է, քանի որ սարքը գրանցված չէ Chrome դիտարկիչի ամպային կառավարման համակարգում։</translation>
 <translation id="2951588413176968965">Իմ փոստարկղը</translation>
@@ -1310,6 +1318,7 @@
 <translation id="33073482541490531">Գաղտնաբառը, որ հենց նոր օգտագործեցիք, կոտրվել է տվյալների արտահոսքի պատճառով։ Գաղտնաբառերի կառավարիչը խորհուրդ է տալիս անհապաղ փոխել այն։</translation>
 <translation id="3307649904964670439">«Անհատականացնել Chrome-ը» կոճակ․ ակտիվացրեք՝ դիտարկիչի տեսքն անհատականացնելու համար</translation>
 <translation id="3308006649705061278">Ստորաբաժանում (OU)</translation>
+<translation id="3317077846337994567">Տարաժամկետ վճարումն այս պահին հասանելի չէ։ Փորձեք ավելի ուշ։</translation>
 <translation id="3318016344440038475">Հեռուստատեսային կատակերգություններ</translation>
 <translation id="3324687287337751929">4 x 6 դյույմ</translation>
 <translation id="3324983252691184275">Բոսորագույն</translation>
@@ -1438,6 +1447,7 @@
 <translation id="3536227077203206203">Տրվել է մեկանգամյա թույլտվություն</translation>
 <translation id="3537165859691846083">Letter Plus</translation>
 <translation id="353816159217417898">Էկրան (էջակալված)</translation>
+<translation id="3541016556608204104">Ավելին Chrome Enterprise Connectors-ի մասին</translation>
 <translation id="3542628208405253498">Քարտի պատկեր</translation>
 <translation id="3542768452570884558">Բացել հղումը նոր պատուհանում</translation>
 <translation id="3543935938072367282">Ինքնալրացման շնորհիվ վճարեք ավելի արագ</translation>
@@ -1802,6 +1812,7 @@
 <translation id="415440494507469262">Ավելացնել ներդիր համեմատման աղյուսակում</translation>
 <translation id="4159784952369912983">Մանուշակագույն</translation>
 <translation id="4165422751765527461">Բացում է Օգնության կենտրոնի հոդվածը նոր ներդիրում</translation>
+<translation id="4165584779486830267">Այժմ կարող եք ժամանակի ընթացքում վճարել՝ օգտագործելով Affirm կամ Zip։</translation>
 <translation id="4165986682804962316">Կայքի կարգավորումներ</translation>
 <translation id="4169535189173047238">Չեղարկել</translation>
 <translation id="4171400957073367226">Հաստատող ստորագրությունը սխալ է</translation>
@@ -1952,6 +1963,7 @@
 <translation id="4378154925671717803">Հեռախոս</translation>
 <translation id="4384395682990721132">A4x3</translation>
 <translation id="4387692837058041921">Ֆայլի վերբեռնումը Microsoft OneDrive դադարեցվել է</translation>
+<translation id="4389931020843542579">Ներդիրների խումբը բեռնվում է</translation>
 <translation id="4390472908992056574">Լուսանցք</translation>
 <translation id="4395550503472021297">Այս կանոնը վերահսկում է հետևյալ կանոնների կանխադրված գործողությունները՝ <ph name="POLICIES" /></translation>
 <translation id="4397978002248035985">Բացում է ելնող պատուհան՝ բանկի էջով, որում կարող եք հաստատել ձեր ինքնությունը</translation>
@@ -2322,6 +2334,7 @@
 <translation id="5097501891273180634">A2</translation>
 <translation id="5106405387002409393">Chrome-ին ձեր սարքի <ph name="PERMISSION" />ն օգտագործելու թույլտվություն է անհրաժեշտ</translation>
 <translation id="510644072453496781">Ստվարաթուղթ (վերջ)</translation>
+<translation id="5106648964679263509">Վիրտուալ քարտի տվյալները <ph name="BNPL_ISSUER_NAME" />-ի համար լրացվել են</translation>
 <translation id="5108881358339761672">Կայքը պաշտպանված չէ</translation>
 <translation id="5109892411553231226">Կառավարել վճարման եղանակները</translation>
 <translation id="5112422516732747637">A5</translation>
@@ -2519,6 +2532,7 @@
             <ph name="LIST_ITEM" />ձևերում լրացված տեղեկությունները։
           <ph name="END_LIST" /></translation>
 <translation id="5443468954631487277">Հակառակ հերթականությամբ՝ երեսի կողմով վերև</translation>
+<translation id="5445340838622821110">Երբ վճարում եք ժամանակի ընթացքում, լրացվում է մեկանգամյա վիրտուալ քարտի համարը։ Այս համարը միայն այս գնման համար է։ <ph name="IDS_AUTOFILL_BNPL_FILLED_CARD_INFORMATION_BUBBLE_LEARN_MORE_LINK_LABEL" /></translation>
 <translation id="5447235695608032700">Թույլատրեք <ph name="SITE" /> կայքին օգտագործել ձեր մասին պահված տեղեկությունները</translation>
 <translation id="5452270690849572955">Այս <ph name="HOST_NAME" /> էջը չհաջողվեց գտնել</translation>
 <translation id="5452923259299906094">Վճարեք էլեկտրոնային դրամապանակով և Pix-ով</translation>
@@ -2766,6 +2780,7 @@
 <translation id="5910140988253729859">Հետարկել ինքնալրացումը</translation>
 <translation id="5911020115933784199">Միջոցառումներ և ժամանակացույցներ</translation>
 <translation id="5911110632211230665">Արգելվում է բացել</translation>
+<translation id="5914465277418006379"><ph name="MEMBER_FIRST_NAME" /> օգտատերն ավելացրել է այս ներդիրը</translation>
 <translation id="5915189366813702112">Աշխատանքի ճկուն կազմակերպում</translation>
 <translation id="59174027418879706">Միացված</translation>
 <translation id="5918373444239520146">Գաջեթներ և դյուրակիր Էլեկտրոնիկա</translation>
@@ -2846,6 +2861,7 @@
 <translation id="604124094241169006">Ավտոմատ</translation>
 <translation id="6041777658117377052">Խցիկի ջերմաստիճանը</translation>
 <translation id="6042308850641462728">Ավելին</translation>
+<translation id="6043357981274314628">Պատրաստ է:</translation>
 <translation id="6044573915096792553">Չափ 12</translation>
 <translation id="6045164183059402045">Էջքի ձևանմուշ</translation>
 <translation id="6047927260846328439">Այս բովանդակությունը կարող է ձեզ խաբեությամբ ստիպել ծրագիր տեղադրել կամ անձնական տեղեկություններ հայտնել։ <ph name="BEGIN_LINK" />Միևնույն է ցուցադրել<ph name="END_LINK" /></translation>
@@ -2869,7 +2885,6 @@
 <translation id="6062937464449575061">Այլևս չհետագծել գինը</translation>
 <translation id="6063415549109819824">Հիփոթեքային վարկեր</translation>
 <translation id="6070432475334343308">Ֆայլերից մեկը կամ մի քանիսը չեն վերբեռնվել <ph name="CLOUD_PROVIDER" />-ի <ph name="FOLDER_NAME" /> պանակ</translation>
-<translation id="6080696365213338172">Դուք բովանդակությունն օգտագործում եք ադմինիստրատորի տրամադրած վկայագրի միջոցով: <ph name="DOMAIN" />-ին տրամադրած տվյալները կարող են միջամտվել ձեր ադմինիստրատորի կողմից:</translation>
 <translation id="6085149458302186532">Պիտակներ (գունավոր)</translation>
 <translation id="6087312102907839798">Նմանատիպ որոնումներ</translation>
 <translation id="6089505343295765444">Ձեր Chrome-ի պատմությունից ջնջված ներդիրները կցուցադրվեն համեմատման աղյուսակներում</translation>
@@ -3011,11 +3026,11 @@
 <translation id="6322182122604171028">Չհաջողվեց օգտագործել Windows Hello-ն</translation>
 <translation id="6326947323444967009">Դարձրեք Chrome-ը համակարգի կանխադրված դիտարկիչ iOS-ի կարգավորումներում</translation>
 <translation id="6328639280570009161">Անջատեք ցանցի գործողությունների կանխատեսումը</translation>
-<translation id="6328784461820205019">«Ձեր կապը պաշտպանված չէ» կամ «&lt;span class="error-code"&gt;NET::ERR_CERT_AUTHORITY_INVALID&lt;/span&gt;» կամ «&lt;span class="error-code"&gt;ERR_CERT_COMMON_NAME_INVALID&lt;/span&gt;» կամ «&lt;span class="error-code"&gt;NET::ERR_CERT_WEAK_SIGNATURE_ALGORITHM&lt;/span&gt;» կամ «&lt;span class="error-code"&gt;ERR_CERT_SYMANTEC_LEGACY&lt;/span&gt;» կամ «SSL հավաստագրի սխալ»</translation>
 <translation id="6335029926534404762">Սպորտային կոշիկներ</translation>
 <translation id="6337133576188860026">Կազատվի մինչև <ph name="SIZE" /> տարածք։ Դրանից հետո որոշ կայքեր հնարավոր է՝ ավելի դանդաղ բեռնվեն։</translation>
 <translation id="6337534724793800597">Զտել կանոններն ըստ անվան</translation>
 <translation id="633770708279464947"><ph name="SECURE_DNS_SALT" /> կանոնի արժեքը անվավեր է և չի կարող օգտագործվել։</translation>
+<translation id="6338645927051849741">Գաղտնաբառ • Google գաղտնաբառերի կառավարիչ</translation>
 <translation id="6340739886198108203">Ադմինիստրատորը խորհուրդ չի տալիս սքրինշոթներ կամ տեսագրություններ անել, երբ էկրանին կոնֆիդենցիալ բովանդակություն է երևում։</translation>
 <translation id="6341434961864773665">{0,plural, =1{Ադմինիստրատորը խորհուրդ չի տալիս այս ֆայլը վերբեռնել <ph name="DESTINATION_NAME" />}one{Ադմինիստրատորը խորհուրդ չի տալիս այս ֆայլը վերբեռնել <ph name="DESTINATION_NAME" />}other{Ադմինիստրատորը խորհուրդ չի տալիս այս ֆայլերը վերբեռնել <ph name="DESTINATION_NAME" />}}</translation>
 <translation id="6342069812937806050">Հենց նոր</translation>
@@ -3025,6 +3040,7 @@
 <translation id="6351658970066645919">Ջնջել այցելությունների պատմությունը</translation>
 <translation id="6353505687280762741">{COUNT,plural, =0{Չկա}=1{1 գաղտնաբառ (հետևյալ տիրույթների համար՝ <ph name="DOMAIN_LIST" />, համաժամացված է)}=2{2 գաղտնաբառ (հետևյալ տիրույթների համար՝ <ph name="DOMAIN_LIST" />, համաժամացված են)}one{# գաղտնաբառ (հետևյալ տիրույթների համար՝ <ph name="DOMAIN_LIST" />, համաժամացված են)}other{# գաղտնաբառ (հետևյալ տիրույթների համար՝ <ph name="DOMAIN_LIST" />, համաժամացված են)}}</translation>
 <translation id="6355392890578844978">Ձեր դիտարկիչը չի կառավարվում որևէ ընկերության կամ կազմակերպության կողմից։ Սարքում արվող գործողությունները կարող են կառավարվել Chromium-ից դուրս։ <ph name="BEGIN_LINK" />Իմանալ ավելին<ph name="END_LINK" /></translation>
+<translation id="6357546827188504216">«<ph name="GROUP_TITLE_1" />» և «<ph name="GROUP_TITLE_2" />» ներդիրների խմբերն այլևս հասանելի չեն</translation>
 <translation id="6358088212770985041">փոփոխել վճարման եղանակները</translation>
 <translation id="6358450015545214790">Ի՞նչ է սա նշանակում:</translation>
 <translation id="6360213755783740931">Իմանալ ավելին Վնասագրերից պաշտպանության մասին</translation>
@@ -3338,6 +3354,7 @@
 <translation id="6917795328362592458">Գաղտնաբառը, որ հենց նոր օգտագործեցիք, կոտրվել է տվյալների արտահոսքի պատճառով։ Ձեր հաշիվները պաշտպանելու համար Գաղտնաբառերի կառավարիչը խորհուրդ է տալիս ստուգել պահված գաղտնաբառերը։</translation>
 <translation id="6917873303492266709">Ներդիրների խմբերով կիսվելու, դրանց միանալու կամ դրանցում համատեղ աշխատելու համար բացեք կարգավորումները և միացրեք «Թույլատրել մուտքը Chrome-ում» կարգավորումը։</translation>
 <translation id="6921197121276419421">Վեբ ծրագրերի տեղադրումը թույլատրված է</translation>
+<translation id="69238565902785824">Ձեր հաշիվը միացված պահելը կօգնի ձեզ ավելի արագ վճարել<ph name="BNPL_ISSUER_NAME" />, բայց դուք կարող եք անջատել այն՝ գնալով <ph name="IDS_AUTOFILL_BNPL_TOS_LINK_TEXT_WALLET_LINK_TEXT" /></translation>
 <translation id="6924013822850225188">Ընտրեք՝ արդյոք ցուցադրել քարտի առավելությունները վճարում կատարելիս (գործում են բանկի պայմանները)</translation>
 <translation id="6925267999184670015">B+ (Հյուսիսային Ամերիկա)</translation>
 <translation id="6926216138694948720">Բոդի արտ</translation>
@@ -3403,6 +3420,7 @@
 <translation id="701757816833614688">Կրթություն գեղարվեստի և դիզայնի ոլորտում</translation>
 <translation id="702275896380648118">Այս կայքը որոշում է ձեր նախասիրությունները և դրանց հիման վրա գովազդ է առաջարկում այլ կայքերի։ Այս կայքը Chrome-ից նաև ստանում է գովազդի թեմաների մասին տվյալներ՝ ձեզ ավելի համապատասխան գովազդ ցուցադրելու համար։</translation>
 <translation id="7023162328967545559">Ադմինիստրատորի նախազգուշացում</translation>
+<translation id="7023765275461720661">Կապե՞լ հաշիվը և վճարել <ph name="BNPL_ISSUER_NAME" />-ի միջոցով</translation>
 <translation id="7029809446516969842">Գաղտնաբառեր</translation>
 <translation id="7030164307377592766">փոխել վճարման եղանակների լրացման կարգավորումները</translation>
 <translation id="7031646650991750659">Ինչ Google Play հավելվածներ եք դուք տեղադրել</translation>
@@ -3624,6 +3642,7 @@
 <translation id="741204030948306876">Լավ</translation>
 <translation id="7416351320495623771">Գաղտնաբառերի կառավարում…</translation>
 <translation id="7416898721136759658">Դրամաշնորհներ, կրթաթոշակներ և ֆինանսական օգնություն</translation>
+<translation id="741772962178517671">Affirm</translation>
 <translation id="7418620734632363981">Ծրագրավորում</translation>
 <translation id="7419091773564635591">Համակարգիչներ և էլեկտրոնիկա</translation>
 <translation id="7419106976560586862">Պրոֆիլի ուղի</translation>
@@ -3670,6 +3689,7 @@
 <translation id="7485085230273446323">Բիզնես և արդյունաբերություն</translation>
 <translation id="7485870689360869515">Տվյալներ չեն գտնվել:</translation>
 <translation id="7486880426035242089">OneDrive-ում</translation>
+<translation id="7489255442002627311"><ph name="BNPL_ISSUER_NAME" /> ծառայությունը կստուգի ձեր համապատասխանությունը պահանջներին (դա չի ազդի ձեր վարկային վարկանիշի վրա)։ Հաստատման դեպքում <ph name="BNPL_ISSUER_NAME" /> ծառայությունը կառաջարկի ձեզ ընտրել վճարային պլան՝ գնումն ավարտելու համար։</translation>
 <translation id="7489392576326061356">Շամպուններ և կոնդիցիոներներ</translation>
 <translation id="7495528107193238112">Այս բովանդակությունն արգելափակված է։ Խնդիրը վերացնելու համար դիմեք կայքի սեփականատիրոջը։</translation>
 <translation id="749865518782565832">Սանտեխնիկական աշխատանքներ</translation>
@@ -3726,6 +3746,7 @@
 <translation id="7569983096843329377">Սև</translation>
 <translation id="7574998639136359461">Ձմեռային սպորտաձևերի մարզագույք</translation>
 <translation id="7575207903026901870">Հուշումը հեռացնելու կոճակ։ Սեղմեք Enter՝ հեռացնելու համար։</translation>
+<translation id="7575800019233204241">«Ձեր կապը պաշտպանված չէ» կամ «&lt;span class="error-code"&gt;NET::ERR_CERT_AUTHORITY_INVALID&lt;/span&gt;» կամ «&lt;span class="error-code"&gt;ERR_CERT_COMMON_NAME_INVALID&lt;/span&gt;» կամ «&lt;span class="error-code"&gt;NET::ERR_CERT_WEAK_SIGNATURE_ALGORITHM&lt;/span&gt;» կամ «SSL հավաստագրի սխալ»</translation>
 <translation id="7575887283389198269">Բջջային հեռախոսներ</translation>
 <translation id="7578104083680115302">Պահեք քարտերը Google-ում, որպեսզի արագ կատարեք վճարումներ կայքերում և հավելվածներում ձեր բոլոր սարքերով:</translation>
 <translation id="7579442726219254162">Անհայտ փոփոխական («<ph name="VARIABLE" />») «<ph name="APPLICATION_ID" />» կառավարվող կազմաձևում։</translation>
@@ -3912,6 +3933,7 @@
 <translation id="791107458486222637">Արդյունքը վերարկվում է</translation>
 <translation id="791551905239004656">Նկարչություն և գունավորում</translation>
 <translation id="7916162853251942238">Ֆլեքսոգրաֆիկ հիմք</translation>
+<translation id="791698251820376781">Ձեր կազմակերպությունը թույլ չի տալիս ձեզ մուտք գործել</translation>
 <translation id="7926503317156566022">Ավիացիոն արդյունաբերություն</translation>
 <translation id="793209273132572360">Թարմացնե՞լ հասցեն</translation>
 <translation id="7932579305932748336">Ծածկույթ</translation>
@@ -4235,7 +4257,6 @@
 <translation id="8473626140772740486">300 x 450 մմ</translation>
 <translation id="8473863474539038330">Հասցեներ և այլ տեղեկություններ</translation>
 <translation id="8474910779563686872">Ցուցադրել մշակողի տվյալները</translation>
-<translation id="8476959635632921417">Ձեր բոլոր սարքերում այս հասցեն օգտագործելու համար հաստատեք ձեր ինքնությունը</translation>
 <translation id="8479754468255770962">Ամրակ ներքևի ձախ կողմում</translation>
 <translation id="8483229036294884935">Այս հասցեն կհեռացվի ձեր Google հաշվից, <ph name="ACCOUNT" /></translation>
 <translation id="8488350697529856933">Վերաբերում է՝</translation>
@@ -4618,11 +4639,13 @@
 <translation id="9183425211371246419"><ph name="HOST_NAME" />-ն օգտագործում է չաջակցվող հաղորդակարգ:</translation>
 <translation id="918454845714257218">Ստուգեք կոդը <ph name="SIDE_OF_CARD" /> և նորից փորձեք</translation>
 <translation id="9186203289258525843">«Դարձնել Chrome-ը կանխադրված դիտարկիչ» կոճակ․ ակտիվացրեք՝ Chrome-ը համակարգի կանխադրված դիտարկիչը դարձնելու համար</translation>
+<translation id="9189468832660648522"><ph name="MEMBER_FIRST_NAME" /> օգտատերը փոփոխել է այս ներդիրը</translation>
 <translation id="9189789270972826888">Եթե քարտի տվյալները չեն լրացվել, ներքևում սեղմեք քարտի տվյալների վրա, որպեսզի պատճենեք և տեղադրեք։ <ph name="IDS_AUTOFILL_FILLED_CARD_INFORMATION_BUBBLE_LEARN_MORE_LINK_LABEL" /></translation>
 <translation id="9190557999028587593">4 շաբաթից հին թեմաներն ավտոմատ ջնջվում են</translation>
 <translation id="9191834167571392248">Անցք ներքևի ձախ կողմում</translation>
 <translation id="9192361865877479444">Մետաղ (անփայլ)</translation>
 <translation id="9192947025498305328">Էկոլոգիապես մաքուր կոսմետիկա</translation>
+<translation id="9195969368671142407">Դա նշանակում է, որ դուք չեք կարող կիսվել ներդիրների խմբերով կամ միանալ դրանց</translation>
 <translation id="9199905725844810519">Տպումն արգելափակված է</translation>
 <translation id="9201904868909900493">Հարցումը բացվում է…</translation>
 <translation id="9204089334327209740">Երբ վերբեռնումն ավարտվի, դուք կարող եք փոփոխել ձեր ֆայլերը <ph name="CLOUD_PROVIDER" />-ում։ Լոկալ պահոցը, այդ թվում՝ աղբարկղի ֆայլերը, ավտոմատ կհեռացվեն։</translation>

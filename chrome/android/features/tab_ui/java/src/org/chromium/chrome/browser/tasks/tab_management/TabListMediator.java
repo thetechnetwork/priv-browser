@@ -108,6 +108,7 @@ import org.chromium.ui.modelutil.MVCListAdapter.ListItem;
 import org.chromium.ui.modelutil.PropertyModel;
 import org.chromium.ui.modelutil.PropertyModel.WritableObjectPropertyKey;
 import org.chromium.ui.modelutil.SimpleRecyclerViewAdapter;
+import org.chromium.ui.util.XrUtils;
 import org.chromium.url.GURL;
 
 import java.lang.annotation.Retention;
@@ -210,14 +211,10 @@ class TabListMediator implements TabListNotificationHandler {
         }
 
         @Override
-        public boolean equals(Object other) {
-            if (this == other) return true;
-
-            if (other instanceof TabActionButtonData otherData) {
-                return this.type == otherData.type
-                        && Objects.equals(this.tabActionListener, otherData.tabActionListener);
-            }
-            return false;
+        public boolean equals(Object obj) {
+            return (obj instanceof TabActionButtonData other)
+                    && type == other.type
+                    && Objects.equals(tabActionListener, other.tabActionListener);
         }
 
         @Override
@@ -669,7 +666,7 @@ class TabListMediator implements TabListNotificationHandler {
                         // model match when doing the update afterwards. When moving a tab between
                         // groups, the new tab being added to an existing group is handled in
                         // didMergeTabToGroup().
-                        if (filter.getRelatedTabCountForRootId(movedTab.getRootId()) == 1
+                        if (filter.getTabCountForGroup(movedTab.getTabGroupId()) <= 1
                                 && movedTab != previousGroupTab) {
                             int currentSelectedTabId =
                                     TabModelUtils.getCurrentTabId(filter.getTabModel());
@@ -1060,7 +1057,7 @@ class TabListMediator implements TabListNotificationHandler {
                         TabGroupModelFilter filter = mCurrentTabGroupModelFilterSupplier.get();
                         if (mActionsOnAllRelatedTabs
                                 && filter != null
-                                && filter.tabGroupExistsForRootId(tab.getRootId())) {
+                                && filter.tabGroupExists(tab.getTabGroupId())) {
                             int groupIndex = filter.indexOf(tab);
                             Tab groupTab = filter.getTabAt(groupIndex);
                             if (!groupTab.isClosing()) {
@@ -1629,7 +1626,13 @@ class TabListMediator implements TabListNotificationHandler {
      * Span count is computed based on screen width for tablets and orientation for phones. When in
      * multi-window mode on phone, the span count is fixed to 2 to keep tab card size reasonable.
      */
-    private int getSpanCount(int screenWidthDp) {
+    @VisibleForTesting
+    int getSpanCount(int screenWidthDp) {
+        if (XrUtils.isXrDevice()) {
+            // The layout span count is restricted to medium on XR immersive devices to display
+            // larger tab thumbnails, despite the large screen width.
+            return TabListCoordinator.GRID_LAYOUT_SPAN_COUNT_MEDIUM;
+        }
         if (DeviceFormFactor.isNonMultiDisplayContextOnTablet(mActivity)) {
             return screenWidthDp < TabListCoordinator.MAX_SCREEN_WIDTH_COMPACT_DP
                     ? TabListCoordinator.GRID_LAYOUT_SPAN_COUNT_COMPACT
@@ -2038,16 +2041,12 @@ class TabListMediator implements TabListNotificationHandler {
         }
 
         TabGroupModelFilter filter = mCurrentTabGroupModelFilterSupplier.get();
-        String storedTitle = filter.getTabGroupTitle(tab.getRootId());
-        if (TextUtils.isEmpty(storedTitle)) {
-            if (useDefault) {
-                return TabGroupTitleUtils.getDefaultTitle(
-                        mActivity, filter.getRelatedTabCountForRootId(tab.getRootId()));
-            } else {
-                return "";
-            }
+        if (useDefault) {
+            return TabGroupTitleUtils.getDisplayableTitle(mActivity, filter, tab.getTabGroupId());
+        } else {
+            String storedTitle = filter.getTabGroupTitle(tab.getRootId());
+            return TextUtils.isEmpty(storedTitle) ? "" : storedTitle;
         }
-        return storedTitle;
     }
 
     int selectedTabId() {

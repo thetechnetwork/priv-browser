@@ -19,6 +19,7 @@ import android.view.ContextThemeWrapper;
 import android.view.MotionEvent;
 import android.view.MotionEvent.PointerCoords;
 import android.view.MotionEvent.PointerProperties;
+import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
 import androidx.test.annotation.UiThreadTest;
@@ -69,6 +70,7 @@ import org.chromium.chrome.browser.tabmodel.TabModelSelector;
 import org.chromium.chrome.browser.tabmodel.TabModelUtils;
 import org.chromium.chrome.browser.tabmodel.TabWindowManager;
 import org.chromium.chrome.browser.theme.TopUiThemeColorProvider;
+import org.chromium.chrome.browser.toolbar.ToolbarManager;
 import org.chromium.chrome.browser.util.ChromeAccessibilityUtil;
 import org.chromium.chrome.test.ChromeJUnit4ClassRunner;
 import org.chromium.chrome.test.ChromeTabbedActivityTestRule;
@@ -93,6 +95,8 @@ public class LayoutManagerTest implements MockTabModelDelegate {
     @Mock private HubLayoutDependencyHolder mHubLayoutDependencyHolder;
     @Mock private TabWindowManager mTabWindowManager;
     @Mock private ObservableSupplier<CompositorViewHolder> mCompositorViewHolderSupplier;
+    @Mock private ToolbarManager mToolbarManager;
+    @Mock private ViewGroup mContentView;
 
     private TabModelSelector mTabModelSelector;
     private OneshotSupplierImpl<TabSwitcher> mTabSwitcherSupplier;
@@ -217,7 +221,9 @@ public class LayoutManagerTest implements MockTabModelDelegate {
                         tabContentManagerSupplier,
                         () -> mTopUiThemeColorProvider,
                         mHubLayoutDependencyHolder,
-                        mCompositorViewHolderSupplier);
+                        mCompositorViewHolderSupplier,
+                        mContentView,
+                        mToolbarManager);
 
         tabContentManagerSupplier.set(tabContentManager);
         mManager = mManagerPhone;

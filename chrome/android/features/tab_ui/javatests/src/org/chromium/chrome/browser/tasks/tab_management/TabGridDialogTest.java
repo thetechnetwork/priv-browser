@@ -114,6 +114,7 @@ import org.chromium.base.ThreadUtils;
 import org.chromium.base.test.params.ParameterAnnotations;
 import org.chromium.base.test.params.ParameterizedRunner;
 import org.chromium.base.test.util.Batch;
+import org.chromium.base.test.util.CallbackHelper;
 import org.chromium.base.test.util.CommandLineFlags;
 import org.chromium.base.test.util.Criteria;
 import org.chromium.base.test.util.CriteriaHelper;
@@ -129,13 +130,13 @@ import org.chromium.base.test.util.TestAnimations.EnableAnimations;
 import org.chromium.chrome.browser.ChromeTabbedActivity;
 import org.chromium.chrome.browser.app.bookmarks.BookmarkEditActivity;
 import org.chromium.chrome.browser.browser_controls.BrowserControlsStateProvider;
-import org.chromium.chrome.browser.flags.ChromeFeatureList;
 import org.chromium.chrome.browser.flags.ChromeSwitches;
 import org.chromium.chrome.browser.homepage.HomepagePolicyManager;
 import org.chromium.chrome.browser.hub.HubContainerView;
 import org.chromium.chrome.browser.layouts.LayoutTestUtils;
 import org.chromium.chrome.browser.layouts.LayoutType;
 import org.chromium.chrome.browser.night_mode.ChromeNightModeTestUtils;
+import org.chromium.chrome.browser.preferences.Pref;
 import org.chromium.chrome.browser.profiles.Profile;
 import org.chromium.chrome.browser.tab.Tab;
 import org.chromium.chrome.browser.tab.TabLaunchType;
@@ -171,6 +172,7 @@ import org.chromium.url.GURL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 /** End-to-end tests for TabGridDialog component. */
 @RunWith(ParameterizedRunner.class)
@@ -204,7 +206,8 @@ public class TabGridDialogTest {
             ChromeRenderTestRule.Builder.withPublicCorpus()
                     .setBugComponent(
                             ChromeRenderTestRule.Component.UI_BROWSER_MOBILE_TAB_SWITCHER_GRID)
-                    .setRevision(16)
+                    .setRevision(18)
+                    .setDescription("Update dialog background color.")
                     .build();
 
     @Rule public final MockitoRule mMockitoRule = MockitoJUnit.rule();
@@ -967,7 +970,7 @@ public class TabGridDialogTest {
     @MediumTest
     @RequiresRestart("Share sheet is sometimes persistent when calling pressBack to retract")
     @DisableIf.Build(sdk_equals = Build.VERSION_CODES.S_V2, message = "crbug.com/40263769")
-    public void testDialogSelectionEditor_ShareActionView() {
+    public void testDialogSelectionEditor_ShareActionView() throws TimeoutException {
         final ChromeTabbedActivity cta = sActivityTestRule.getActivity();
         createTabs(cta, false, 2);
 
@@ -986,12 +989,19 @@ public class TabGridDialogTest {
         openDialogFromTabSwitcherAndVerify(cta, 2, null);
         openSelectionEditorAndVerify(cta, 2);
 
+        CallbackHelper callbackHelper = new CallbackHelper();
+        TabListEditorShareAction.setIntentCallbackForTesting(
+                intent -> {
+                    callbackHelper.notifyCalled();
+                });
         // Share tabs
         mSelectionEditorRobot
                 .actionRobot
                 .clickItemAtAdapterPosition(1)
                 .clickToolbarMenuButton()
                 .clickToolbarMenuItem("Share tab");
+
+        callbackHelper.waitForOnly();
 
         CriteriaHelper.pollUiThread(
                 () ->
@@ -1601,7 +1611,6 @@ public class TabGridDialogTest {
     @Test
     @MediumTest
     @Feature({"RenderTest"})
-    @DisableFeatures({ChromeFeatureList.LOGO_POLISH})
     @RequiresRestart("Group creation modal dialog is sometimes persistent when dismissing")
     @ParameterAnnotations.UseMethodParameter(NightModeTestUtils.NightModeParams.class)
     @DisabledTest(message = "crbug.com/385205037, flaky due to thumbnails")
@@ -1909,6 +1918,9 @@ public class TabGridDialogTest {
     @DisableIf.Device(DeviceFormFactor.TABLET)
     @RequiresRestart
     public void testDialogSetup_WithStartSurface() throws Exception {
+        ThreadUtils.runOnUiThreadBlocking(
+                () -> mPrefService.setBoolean(Pref.DID_SYNC_TAB_GROUPS_IN_LAST_SESSION, false));
+
         // Create a tab group with 2 tabs.
         finishActivity(sActivityTestRule.getActivity());
         createThumbnailBitmapAndWriteToFile(0, mBrowserControlsStateProvider);

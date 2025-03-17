@@ -98,8 +98,7 @@ class RecentActivityBubbleDialogViewInteractiveUiTest
 
   void SetUp() override {
     scoped_feature_list_.InitWithFeatures(
-        {tab_groups::kTabGroupsSaveV2,
-         tab_groups::kTabGroupSyncServiceDesktopMigration,
+        {tab_groups::kTabGroupSyncServiceDesktopMigration,
          data_sharing::features::kDataSharingFeature,
          collaboration::features::kCollaborationMessaging},
         {});
@@ -216,7 +215,7 @@ class RecentActivityBubbleDialogViewInteractiveUiTest
   auto TriggerCurrentTabDialog(std::vector<ActivityLogItem> activity_log) {
     return WithView(kTabStripElementId, [&, activity_log](TabStrip* tab_strip) {
       bubble_coordinator_.ShowForCurrentTab(
-          tab_strip, browser()->tab_strip_model()->GetWebContentsAt(0),
+          tab_strip, browser()->tab_strip_model()->GetWebContentsAt(0), {},
           activity_log, browser()->profile());
     });
   }
@@ -301,7 +300,11 @@ IN_PROC_BROWSER_TEST_F(RecentActivityBubbleDialogViewInteractiveUiTest,
   std::vector<ActivityLogItem> activity_log;
   activity_log.emplace_back(CreateActivityForTab(group_id, tab));
   activity_log.emplace_back(CreateActivityForTab(group_id, tab));
-  activity_log.emplace_back(CreateActivityForTab(group_id, tab2));
+
+  auto activity_without_avatar = CreateActivityForTab(group_id, tab2);
+  activity_without_avatar.activity_metadata.triggering_user->avatar_url =
+      GURL("");
+  activity_log.emplace_back(activity_without_avatar);
 
   RunTestSequence(
       WaitForShow(kTabGroupHeaderElementId), FinishTabstripAnimations(),

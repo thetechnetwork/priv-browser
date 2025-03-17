@@ -523,6 +523,12 @@ class CORE_EXPORT LayoutBox : public LayoutBoxModelObject {
     return MarginBoxOutsets().right;
   }
 
+  // Get the scroll marker group associated with this box, if any.
+  LayoutBlock* GetScrollMarkerGroup();
+
+  // Get the scroller that owns this scroll marker group.
+  LayoutBlock* ScrollerFromScrollMarkerGroup() const;
+
   void QuadsInAncestorInternal(Vector<gfx::QuadF>&,
                                const LayoutBoxModelObject* ancestor,
                                MapCoordinatesFlags) const override;
@@ -980,6 +986,15 @@ class CORE_EXPORT LayoutBox : public LayoutBoxModelObject {
     NOTREACHED();
   }
 
+  // Get the LayoutBox for the actual content. That's usually `this`, but if the
+  // element creates multiple boxes (e.g. fieldsets and their anonymous content
+  // child box), it may return something else. The box returned will be the one
+  // that's created according to display type, scrollable overflow, and so on.
+  virtual LayoutBox* ContentLayoutBox() {
+    NOT_DESTROYED();
+    return this;
+  }
+
   ShapeOutsideInfo* GetShapeOutsideInfo() const;
 
   // CustomLayoutChild only exists if this LayoutBox is a IsCustomItem (aka. a
@@ -1036,7 +1051,7 @@ class CORE_EXPORT LayoutBox : public LayoutBoxModelObject {
         const PhysicalSize& size,
         const PhysicalRect& visual_overflow_rect);
 
-    void UpdateBackgroundPaintLocation();
+    void UpdateBackgroundPaintLocation(bool needs_root_element_group);
 
    protected:
     friend class LayoutBox;
@@ -1205,11 +1220,11 @@ class CORE_EXPORT LayoutBox : public LayoutBoxModelObject {
   const BoxStrut& OutOfFlowInsetsForGetComputedStyle() const;
 
   Element* AccessibilityAnchor() const;
-  const HeapHashSet<Member<Element>>* DisplayLocksAffectedByAnchors() const;
+  const GCedHeapHashSet<Member<Element>>* DisplayLocksAffectedByAnchors() const;
   void NotifyContainingDisplayLocksForAnchorPositioning(
-      const HeapHashSet<Member<Element>>*
+      const GCedHeapHashSet<Member<Element>>*
           past_display_locks_affected_by_anchors,
-      const HeapHashSet<Member<Element>>* display_locks_affected_by_anchors)
+      const GCedHeapHashSet<Member<Element>>* display_locks_affected_by_anchors)
       const;
   bool NeedsAnchorPositionScrollAdjustmentInX() const;
   bool NeedsAnchorPositionScrollAdjustmentInY() const;
@@ -1367,7 +1382,8 @@ class CORE_EXPORT LayoutBox : public LayoutBoxModelObject {
   }
 
   bool BackgroundClipBorderBoxIsEquivalentToPaddingBox() const;
-  BackgroundPaintLocation ComputeBackgroundPaintLocation() const;
+  BackgroundPaintLocation ComputeBackgroundPaintLocation(
+      bool needs_root_element_group) const;
 
   // Compute the border-box size from physical fragments.
   PhysicalSize ComputeSize() const;
@@ -1421,26 +1437,32 @@ struct DowncastTraits<LayoutBox> {
 };
 
 inline LayoutBox* LayoutBox::PreviousSiblingBox() const {
+  NOT_DESTROYED();
   return To<LayoutBox>(PreviousSibling());
 }
 
 inline LayoutBox* LayoutBox::NextSiblingBox() const {
+  NOT_DESTROYED();
   return To<LayoutBox>(NextSibling());
 }
 
 inline LayoutBox* LayoutBox::ParentBox() const {
+  NOT_DESTROYED();
   return To<LayoutBox>(Parent());
 }
 
 inline LayoutBox* LayoutBox::FirstChildBox() const {
+  NOT_DESTROYED();
   return To<LayoutBox>(SlowFirstChild());
 }
 
 inline LayoutBox* LayoutBox::LastChildBox() const {
+  NOT_DESTROYED();
   return To<LayoutBox>(SlowLastChild());
 }
 
 inline LayoutBox* LayoutBox::PreviousSiblingMultiColumnBox() const {
+  NOT_DESTROYED();
   DCHECK(IsLayoutMultiColumnSpannerPlaceholder() || IsLayoutMultiColumnSet());
   LayoutBox* previous_box = PreviousSiblingBox();
   if (previous_box->IsLayoutFlowThread())
@@ -1449,11 +1471,13 @@ inline LayoutBox* LayoutBox::PreviousSiblingMultiColumnBox() const {
 }
 
 inline LayoutBox* LayoutBox::NextSiblingMultiColumnBox() const {
+  NOT_DESTROYED();
   DCHECK(IsLayoutMultiColumnSpannerPlaceholder() || IsLayoutMultiColumnSet());
   return NextSiblingBox();
 }
 
 inline wtf_size_t LayoutBox::FirstInlineFragmentItemIndex() const {
+  NOT_DESTROYED();
   if (!IsInLayoutNGInlineFormattingContext())
     return 0u;
   return first_fragment_item_index_;

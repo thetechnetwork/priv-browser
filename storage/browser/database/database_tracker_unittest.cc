@@ -104,10 +104,8 @@ class TestQuotaManagerProxy : public QuotaManagerProxy {
             base::SequencedTaskRunner::GetCurrentDefault(),
             /*profile_path=*/base::FilePath()) {}
 
-  void RegisterClient(
-      mojo::PendingRemote<mojom::QuotaClient> client,
-      QuotaClientType client_type,
-      const base::flat_set<blink::mojom::StorageType>& storage_types) override {
+  void RegisterClient(mojo::PendingRemote<mojom::QuotaClient> client,
+                      QuotaClientType client_type) override {
     EXPECT_FALSE(registered_client_);
     registered_client_.Bind(std::move(client));
   }
@@ -139,7 +137,6 @@ class TestQuotaManagerProxy : public QuotaManagerProxy {
                             bool enabled) override {}
   void GetUsageAndQuota(
       const blink::StorageKey& storage_key,
-      blink::mojom::StorageType type,
       scoped_refptr<base::SequencedTaskRunner> callback_task_runner,
       UsageAndQuotaCallback callback) override {}
 

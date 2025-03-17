@@ -181,15 +181,15 @@ bool IsProminentFloatingType(IconButton::Type type) {
 std::unique_ptr<views::Background> CreateThemedBackground(
     ui::ColorId color_id,
     IconButton::Type type) {
-  return views::CreateThemedRoundedRectBackground(
-      color_id, GetButtonSizeOnType(type) / 2);
+  return views::CreateRoundedRectBackground(color_id,
+                                            GetButtonSizeOnType(type) / 2);
 }
 
 // Create a solid color fully rounded rect background for icon button.
 std::unique_ptr<views::Background> CreateSolidBackground(
     ui::ColorVariant color,
     IconButton::Type type) {
-  return views::CreateSolidOrThemedRoundedRectBackground(
+  return views::CreateRoundedRectBackground(
       color, gfx::RoundedCornersF(GetButtonSizeOnType(type) / 2));
 }
 
@@ -683,11 +683,6 @@ void IconButton::OnEnabledStateChanged() {
   UpdateBackground();
 }
 
-SkColor IconButton::GetBackgroundColor() const {
-  DCHECK(background());
-  return background()->get_color();
-}
-
 bool IconButton::IsToggledOn() const {
   return toggled_ &&
          (GetEnabled() ||
@@ -718,14 +713,8 @@ std::pair<ui::ImageModel, ui::ImageModel> IconButton::VectorImages(
     return {ui::ImageModel(), ui::ImageModel()};
   }
 
-  ui::ImageModel new_normal_image_model;
-  if (auto sk_color = color.GetSkColor()) {
-    new_normal_image_model =
-        ui::ImageModel::FromVectorIcon(*icon, *sk_color, icon_size);
-  } else {
-    new_normal_image_model =
-        ui::ImageModel::FromVectorIcon(*icon, *color.GetColorId(), icon_size);
-  }
+  ui::ImageModel new_normal_image_model =
+      ui::ImageModel::FromVectorIcon(*icon, color, icon_size);
 
   ui::ImageModel disabled_image_model = ui::ImageModel::FromVectorIcon(
       *icon, cros_tokens::kCrosSysDisabled, icon_size);

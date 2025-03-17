@@ -58,7 +58,6 @@ blink_core_sources_layout = [
   "column_spanner_path.h",
   "constraint_space.cc",
   "constraint_space.h",
-  "constraint_space_builder.cc",
   "constraint_space_builder.h",
   "content_change_type.h",
   "custom/css_layout_definition.cc",
@@ -434,6 +433,7 @@ blink_core_sources_layout = [
   "masonry/masonry_layout_algorithm.h",
   "masonry/masonry_node.cc",
   "masonry/masonry_node.h",
+  "masonry/masonry_running_positions.cc",
   "masonry/masonry_running_positions.h",
   "masonry/masonry_item_group.h",
   "mathml/layout_mathml_block.cc",
@@ -657,6 +657,8 @@ blink_core_sources_layout = [
   "text_utils.h",
   "traced_layout_object.cc",
   "traced_layout_object.h",
+  "tree_traversal_utils.cc",
+  "tree_traversal_utils.h",
   "unpositioned_float.h",
 ]
 
@@ -756,7 +758,6 @@ blink_core_tests_layout = [
   "inline/physical_line_box_fragment_test.cc",
   "inline/ruby_utils_test.cc",
   "inline/score_line_breaker_test.cc",
-  "inline/transformed_string_test.cc",
   "inline_layout_test.cc",
   "layout_block_flow_test.cc",
   "layout_block_test.cc",

@@ -166,6 +166,10 @@ function addPrivacyChildRoutes(r: Partial<SettingsRoutes>) {
     r.SITE_SETTINGS_WEB_APP_INSTALLATION =
         r.SITE_SETTINGS.createChild('webApplications');
   }
+  if (loadTimeData.getBoolean('enableLocalNetworkAccessSetting')) {
+    r.SITE_SETTINGS_LOCAL_NETWORK_ACCESS =
+        r.SITE_SETTINGS.createChild('localNetworkAccess');
+  }
 }
 
 /**
@@ -218,6 +222,14 @@ function createRoutes(): SettingsRoutes {
       if (loadTimeData.getBoolean('showCompareControl')) {
         r.COMPARE = r.AI.createChild('/ai/compareProducts');
       }
+      // <if expr="enable_glic">
+      if (loadTimeData.getBoolean('showGlicSettings')) {
+        r.GLIC_SECTION = r.AI.createSection(
+            '/ai/glicSection', 'glicSection',
+            loadTimeData.getString('glicPageTitle'));
+        r.GEMINI = r.GLIC_SECTION.createChild('/ai/gemini');
+      }
+      // </if>
     }
   }
 
@@ -244,14 +256,6 @@ function createRoutes(): SettingsRoutes {
     if (loadTimeData.getBoolean('autofillAiFeatureEnabled')) {
       r.AUTOFILL_AI = r.AUTOFILL.createChild('/autofillAi');
     }
-
-    // <if expr="enable_glic">
-    if (visibility.glic !== false &&
-        loadTimeData.getBoolean('showGlicSettings')) {
-      r.GLIC = r.BASIC.createSection(
-          '/glic', 'glic', loadTimeData.getString('glicPageTitle'));
-    }
-    // </if>
 
     // <if expr="is_win or is_macosx">
     r.PASSKEYS = r.AUTOFILL.createChild('/passkeys');

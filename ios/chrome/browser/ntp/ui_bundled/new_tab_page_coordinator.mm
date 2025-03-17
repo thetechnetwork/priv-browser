@@ -25,12 +25,10 @@
 #import "components/signin/public/base/signin_metrics.h"
 #import "components/signin/public/identity_manager/objc/identity_manager_observer_bridge.h"
 #import "components/signin/public/identity_manager/tribool.h"
-#import "components/supervised_user/core/common/features.h"
 #import "components/sync/service/sync_service.h"
 #import "ios/chrome/app/profile/profile_init_stage.h"
 #import "ios/chrome/app/profile/profile_state.h"
 #import "ios/chrome/app/profile/profile_state_observer.h"
-#import "ios/chrome/browser/authentication/ui_bundled/account_menu/account_menu_coordinator.h"
 #import "ios/chrome/browser/authentication/ui_bundled/enterprise/enterprise_utils.h"
 #import "ios/chrome/browser/bubble/ui_bundled/bubble_view_controller_presenter.h"
 #import "ios/chrome/browser/context_menu/ui_bundled/link_preview/link_preview_coordinator.h"
@@ -356,20 +354,12 @@
   }
 
   // Update the feed if the account is subject to parental controls.
-  if (base::FeatureList::IsEnabled(
-          supervised_user::
-              kReplaceSupervisionSystemCapabilitiesWithAccountCapabilitiesOnIOS)) {
-    signin::IdentityManager* identityManager =
-        IdentityManagerFactory::GetForProfile(self.browser->GetProfile());
-    signin::Tribool capability =
-        supervised_user::IsPrimaryAccountSubjectToParentalControls(
-            identityManager);
-    [self
-        updateFeedWithIsSupervisedUser:(capability == signin::Tribool::kTrue)];
-  } else {
-    // Update asynchronously using system capabilities.
-    [self updateFeedVisibilityForSupervision];
-  }
+  signin::IdentityManager* identityManager =
+      IdentityManagerFactory::GetForProfile(self.browser->GetProfile());
+  signin::Tribool capability =
+      supervised_user::IsPrimaryAccountSubjectToParentalControls(
+          identityManager);
+  [self updateFeedWithIsSupervisedUser:(capability == signin::Tribool::kTrue)];
 
   [self configureNTPMediator];
   if (self.NTPMediator.feedHeaderVisible) {
@@ -740,30 +730,37 @@
 
 // Configures `self.headerViewController`.
 - (void)configureHeaderViewController {
-  DCHECK(self.headerViewController);
+  NewTabPageHeaderViewController* headerViewController =
+      self.headerViewController;
+  DCHECK(headerViewController);
   DCHECK(self.NTPMediator);
   DCHECK(self.NTPMetricsRecorder);
 
-  self.headerViewController.isGoogleDefaultSearchEngine =
+  headerViewController.isGoogleDefaultSearchEngine =
       [self isGoogleDefaultSearchEngine];
-  // TODO(crbug.com/40670043): Use HandlerForProtocol after commands protocol
-  // clean up.
-  self.headerViewController.dispatcher =
-      static_cast<id<ApplicationCommands, BrowserCoordinatorCommands,
-                     OmniboxCommands, FakeboxFocuser, LensCommands>>(
-          self.browser->GetCommandDispatcher());
-  self.headerViewController.commandHandler = self;
-  self.headerViewController.customizationDelegate = self;
-  self.headerViewController.delegate = self.NTPViewController;
-  self.headerViewController.layoutGuideCenter =
+
+  CommandDispatcher* dispatcher = self.browser->GetCommandDispatcher();
+  headerViewController.fakeboxFocuserHandler =
+      HandlerForProtocol(dispatcher, FakeboxFocuser);
+  headerViewController.lensHandler =
+      HandlerForProtocol(dispatcher, LensCommands);
+  headerViewController.applicationHandler =
+      HandlerForProtocol(dispatcher, ApplicationCommands);
+  headerViewController.browserCoordinatorHandler =
+      HandlerForProtocol(dispatcher, BrowserCoordinatorCommands);
+
+  headerViewController.commandHandler = self;
+  headerViewController.customizationDelegate = self;
+  headerViewController.delegate = self.NTPViewController;
+  headerViewController.layoutGuideCenter =
       LayoutGuideCenterForBrowser(self.browser);
-  self.headerViewController.toolbarDelegate = self.toolbarDelegate;
-  self.headerViewController.baseViewController = self.baseViewController;
-  self.headerViewController.NTPMetricsRecorder = self.NTPMetricsRecorder;
-  [self.headerViewController setLogoVendor:self.logoVendor];
+  headerViewController.toolbarDelegate = self.toolbarDelegate;
+  headerViewController.baseViewController = self.baseViewController;
+  headerViewController.NTPMetricsRecorder = self.NTPMetricsRecorder;
+  [headerViewController setLogoVendor:self.logoVendor];
 }
 
-// Configures `self.contentSuggestionsCoordiantor`.
+// Configures `self.contentSuggestionsCoordinator`.
 - (void)configureContentSuggestionsCoordinator {
   self.contentSuggestionsCoordinator.webState = self.webState;
   self.contentSuggestionsCoordinator.delegate = self;
@@ -953,15 +950,16 @@
     return;
   }
 
-  if (self.prefService->GetInteger(
+  PrefService* localState = GetApplicationContext()->GetLocalState();
+  if (localState->GetInteger(
           prefs::kNTPHomeCustomizationNewBadgeImpressionCount) <=
       kCustomizationNewBadgeMaxImpressionCount) {
     base::RecordAction(
         base::UserMetricsAction(kNTPCustomizationNewBadgeTappedAction));
     // Set the new badge impression count to `INT_MAX` to ensure it isn't shown
     // again, even if we increase the max impression count.
-    self.prefService->SetInteger(
-        prefs::kNTPHomeCustomizationNewBadgeImpressionCount, INT_MAX);
+    localState->SetInteger(prefs::kNTPHomeCustomizationNewBadgeImpressionCount,
+                           INT_MAX);
 
     [self.headerViewController hideBadgeOnCustomizationMenu];
   }
@@ -1408,13 +1406,6 @@
   [self dismissCustomizationMenu];
 }
 
-- (void)parcelTrackingOpened {
-  RecordMagicStackClick(ContentSuggestionsModuleType::kParcelTracking,
-                        [self isStartSurface]);
-  RecordHomeAction(IOSHomeActionType::kParcelTracking, [self isStartSurface]);
-  [self dismissCustomizationMenu];
-}
-
 - (void)priceTrackingPromoOpened {
   RecordMagicStackClick(ContentSuggestionsModuleType::kPriceTrackingPromo,
                         [self isStartSurface]);
@@ -1541,7 +1532,6 @@
     case signin::PrimaryAccountChangeEvent::Type::kSet:
     case signin::PrimaryAccountChangeEvent::Type::kCleared: {
       [self.contentSuggestionsCoordinator refresh];
-      [self updateFeedVisibilityForSupervision];
       break;
     }
     case signin::PrimaryAccountChangeEvent::Type::kNone:
@@ -1571,14 +1561,10 @@
 
 - (void)onIsSubjectToParentalControlsCapabilityChanged:
     (supervised_user::CapabilityUpdateState)capabilityUpdateState {
-  if (base::FeatureList::IsEnabled(
-          supervised_user::
-              kReplaceSupervisionSystemCapabilitiesWithAccountCapabilitiesOnIOS)) {
-    BOOL isSubjectToParentalControl =
-        (capabilityUpdateState ==
-         supervised_user::CapabilityUpdateState::kSetToTrue);
-    [self updateFeedWithIsSupervisedUser:isSubjectToParentalControl];
-  }
+  BOOL isSubjectToParentalControl =
+      (capabilityUpdateState ==
+       supervised_user::CapabilityUpdateState::kSetToTrue);
+  [self updateFeedWithIsSupervisedUser:isSubjectToParentalControl];
 }
 
 #pragma mark - SceneStateObserver
@@ -1716,37 +1702,6 @@
   viewControllerConfig.signInPromoDelegate = self;
 
   return viewControllerConfig;
-}
-
-// Updates the visibility of the content suggestions on the NTP if the account
-// is subject to parental controls.
-// TODO(crbug.com/346756363): Remove this method as we deprecate getting
-// supervision status from SystemIdentityManager.
-- (void)updateFeedVisibilityForSupervision {
-  if (!base::FeatureList::IsEnabled(
-          supervised_user::
-              kReplaceSupervisionSystemCapabilitiesWithAccountCapabilitiesOnIOS)) {
-    DCHECK(self.prefService);
-    DCHECK(self.authService);
-
-    id<SystemIdentity> identity =
-        self.authService->GetPrimaryIdentity(signin::ConsentLevel::kSignin);
-    if (!identity) {
-      [self updateFeedWithIsSupervisedUser:NO];
-      return;
-    }
-
-    using CapabilityResult = SystemIdentityCapabilityResult;
-
-    __weak NewTabPageCoordinator* weakSelf = self;
-    GetApplicationContext()
-        ->GetSystemIdentityManager()
-        ->IsSubjectToParentalControls(
-            identity, base::BindOnce(^(CapabilityResult result) {
-              const bool isSupervisedUser = result == CapabilityResult::kTrue;
-              [weakSelf updateFeedWithIsSupervisedUser:isSupervisedUser];
-            }));
-  }
 }
 
 // Toggles feed visibility between hidden or expanded using the feed header

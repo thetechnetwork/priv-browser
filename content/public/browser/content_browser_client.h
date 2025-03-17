@@ -81,7 +81,6 @@
 #include "services/video_effects/public/cpp/buildflags.h"
 #include "storage/browser/file_system/file_system_context.h"
 #include "third_party/blink/public/common/mediastream/media_devices.h"
-#include "third_party/blink/public/common/permissions_policy/permissions_policy.h"
 #include "third_party/blink/public/common/user_agent/user_agent_metadata.h"
 #include "third_party/blink/public/mojom/ai/ai_manager.mojom-forward.h"
 #include "third_party/blink/public/mojom/browsing_topics/browsing_topics.mojom-forward.h"
@@ -271,6 +270,7 @@ class UsbDelegate;
 class VideoOverlayWindow;
 class VideoPictureInPictureWindowController;
 class VpnServiceProxy;
+class WebAuthenticationDelegate;
 class WebContents;
 class WebContentsViewDelegate;
 class WebUIBrowserInterfaceBrokerRegistry;
@@ -287,7 +287,6 @@ struct SocketPermissionRequest;
 class TtsEnvironmentAndroid;
 #else
 class AuthenticatorRequestClientDelegate;
-class WebAuthenticationDelegate;
 #endif  // BUILDFLAG(IS_ANDROID)
 
 #if BUILDFLAG(IS_CHROMEOS)
@@ -1294,6 +1293,18 @@ class CONTENT_EXPORT ContentBrowserClient {
   // Called from the GeneratedCodeCache thread.
   virtual std::string GetWebUIHostnameForCodeCacheMetrics(
       const GURL& webui_url) const;
+
+  // Returns true if WebUI bundled code caching is supported for
+  // `webui_lock_url`.
+  virtual bool IsWebUIBundledCodeCachingEnabled(
+      const GURL& webui_lock_url) const;
+
+  // Gets a mapping from the WebUI resource URL to its corresponding bundled
+  // bytecode cache resource ID. These mappings are used at load-time in
+  // renderers to get the appropriate bytecode cache during WebUI resource
+  // fetch. This mapping is propagated once to renderers once shortly after
+  // process-lock to ensure it's available for all subsequent resource fetches.
+  virtual base::flat_map<GURL, int> GetWebUIResourceUrlToCodeCacheMap() const;
 
   // Informs the embedder that a certificate error has occurred. If
   // |overridable| is true and if |strict_enforcement| is false, the user
@@ -2332,12 +2343,12 @@ class CONTENT_EXPORT ContentBrowserClient {
       content::RenderFrameHost* rfh,
       const url::Origin& caller_origin);
 
-#if !BUILDFLAG(IS_ANDROID)
   // Returns an embedder-provided subclass of WebAuthenticationDelegate. This
   // allows the embedder to customize the implementation of the Web
   // Authentication API.
   virtual WebAuthenticationDelegate* GetWebAuthenticationDelegate();
 
+#if !BUILDFLAG(IS_ANDROID)
   // Returns an AuthenticatorRequestClientDelegate subclass instance to provide
   // embedder-specific configuration for a single Web Authentication API request
   // being serviced in a given RenderFrame. The instance is guaranteed to be
@@ -3208,6 +3219,10 @@ class CONTENT_EXPORT ContentBrowserClient {
   virtual std::optional<network::CrossOriginEmbedderPolicy>
   MaybeOverrideLocalURLCrossOriginEmbedderPolicy(
       content::NavigationHandle* navigation_handle);
+
+  // Returns true if subframe zoom should be enabled for one or more features in
+  // a higher layer.
+  virtual bool ShouldEnableSubframeZoom();
 };
 
 }  // namespace content

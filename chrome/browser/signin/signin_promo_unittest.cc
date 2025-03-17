@@ -21,6 +21,7 @@
 #include "components/autofill/core/browser/test_utils/test_profiles.h"
 #include "components/signin/public/base/consent_level.h"
 #include "components/signin/public/base/signin_metrics.h"
+#include "components/signin/public/base/signin_pref_names.h"
 #include "components/signin/public/base/signin_prefs.h"
 #include "components/signin/public/base/signin_switches.h"
 #include "components/signin/public/identity_manager/identity_manager.h"
@@ -30,6 +31,7 @@
 #include "components/sync/base/pref_names.h"
 #include "components/sync/base/user_selectable_type.h"
 #include "components/sync/test/mock_sync_service.h"
+#include "components/sync_bookmarks/switches.h"
 #include "content/public/test/browser_task_environment.h"
 #include "google_apis/gaia/gaia_id.h"
 #include "services/network/test/test_url_loader_factory.h"
@@ -88,6 +90,48 @@ TEST(SigninPromoTest, SigninURLForDice) {
                               GURL("https://continue_url/")));
 }
 
+TEST(SigninPromoTest, IsSignInPromo_AutofillTypes) {
+  EXPECT_TRUE(IsSignInPromo(signin_metrics::AccessPoint::kPasswordBubble));
+  EXPECT_TRUE(IsSignInPromo(signin_metrics::AccessPoint::kAddressBubble));
+}
+TEST(SigninPromoTest, IsSignInPromo_ExtensionsWithExplicitSignin) {
+  base::test::ScopedFeatureList feature_list;
+  feature_list.InitWithFeatures(
+      /*enabled_features=*/{switches::kEnableExtensionsExplicitBrowserSignin},
+      /*disabled_features=*/{});
+
+  EXPECT_TRUE(
+      IsSignInPromo(signin_metrics::AccessPoint::kExtensionInstallBubble));
+}
+
+TEST(SigninPromoTest, IsSignInPromo_ExtensionsWithoutExplicitSignin) {
+  base::test::ScopedFeatureList feature_list;
+  feature_list.InitWithFeatures(
+      /*enabled_features=*/{},
+      /*disabled_features=*/{switches::kEnableExtensionsExplicitBrowserSignin});
+
+  EXPECT_FALSE(
+      IsSignInPromo(signin_metrics::AccessPoint::kExtensionInstallBubble));
+}
+
+TEST(SigninPromoTest, IsSignInPromo_BookmarksWithExplicitSignin) {
+  base::test::ScopedFeatureList feature_list;
+  feature_list.InitWithFeatures(
+      /*enabled_features=*/{switches::kSyncEnableBookmarksInTransportMode},
+      /*disabled_features=*/{});
+
+  EXPECT_TRUE(IsSignInPromo(signin_metrics::AccessPoint::kBookmarkBubble));
+}
+
+TEST(SigninPromoTest, IsSignInPromo_BookmarksWithoutExplicitSignin) {
+  base::test::ScopedFeatureList feature_list;
+  feature_list.InitWithFeatures(
+      /*enabled_features=*/{},
+      /*disabled_features=*/{switches::kSyncEnableBookmarksInTransportMode});
+
+  EXPECT_FALSE(IsSignInPromo(signin_metrics::AccessPoint::kBookmarkBubble));
+}
+
 class ShowPromoTest : public testing::Test {
  public:
   ShowPromoTest() {
@@ -133,6 +177,25 @@ TEST_F(ShowPromoTest, DoNotShowAddressSignInPromoWithoutImprovedBrowserSignin) {
                                             autofill::test::StandardProfile()));
 }
 
+TEST_F(ShowPromoTest, DoNotShowBookmarkSignInPromoWithoutExplicitSignIn) {
+  base::test::ScopedFeatureList feature_list;
+  feature_list.InitWithFeatures(
+      /*enabled_features=*/{},
+      /*disabled_features=*/{switches::kSyncEnableBookmarksInTransportMode});
+
+  EXPECT_FALSE(ShouldShowBookmarkSignInPromo(*profile()));
+}
+
+TEST_F(ShowPromoTest, DoNotShowBookmarkSignInPromoWithoutMinimizeDeletion) {
+  base::test::ScopedFeatureList feature_list;
+  feature_list.InitWithFeatures(
+      /*enabled_features=*/{},
+      /*disabled_features=*/{
+          switches::kSyncMinimizeDeletionsDuringBookmarkBatchUpload});
+
+  EXPECT_FALSE(ShouldShowBookmarkSignInPromo(*profile()));
+}
+
 #if !BUILDFLAG(IS_ANDROID)
 class ShowSyncPromoTest : public ShowPromoTest {
  protected:
@@ -175,12 +238,15 @@ TEST_F(ShowSyncPromoTest, DoNotShowPromoWithSyncingAccount) {
 #endif  // !BUILDFLAG(IS_CHROMEOS)
 
 #if BUILDFLAG(ENABLE_DICE_SUPPORT)
-class ShowSigninPromoTestExplicitBrowserSignin : public ShowPromoTest {
+class ShowSigninPromoTestWithFeatureFlags : public ShowPromoTest {
  public:
   void SetUp() override {
     ShowPromoTest::SetUp();
     feature_list.InitWithFeatures(
-        /*enabled_features=*/{switches::kImprovedSigninUIOnDesktop},
+        /*enabled_features=*/
+        {switches::kImprovedSigninUIOnDesktop,
+         switches::kSyncEnableBookmarksInTransportMode,
+         switches::kSyncMinimizeDeletionsDuringBookmarkBatchUpload},
         /*disabled_features=*/{});
     ON_CALL(*sync_service(), GetDataTypesForTransportOnlyMode())
         .WillByDefault(testing::Return(syncer::DataTypeSet::All()));
@@ -201,48 +267,43 @@ class ShowSigninPromoTestExplicitBrowserSignin : public ShowPromoTest {
   base::test::ScopedFeatureList feature_list;
 };
 
-TEST_F(ShowSigninPromoTestExplicitBrowserSignin, ShowPromoWithNoAccount) {
+TEST_F(ShowSigninPromoTestWithFeatureFlags, ShowPromoWithNoAccount) {
   EXPECT_TRUE(ShouldShowPasswordSignInPromo(*profile()));
 }
 
-TEST_F(ShowSigninPromoTestExplicitBrowserSignin,
-       ShowPromoWithWebSignedInAccount) {
+TEST_F(ShowSigninPromoTestWithFeatureFlags, ShowPromoWithWebSignedInAccount) {
   MakeAccountAvailable(identity_manager(), "test@email.com");
   EXPECT_TRUE(ShouldShowPasswordSignInPromo(*profile()));
 }
 
-TEST_F(ShowSigninPromoTestExplicitBrowserSignin,
-       ShowPromoWithSignInPausedAccount) {
+TEST_F(ShowSigninPromoTestWithFeatureFlags, ShowPromoWithSignInPendingAccount) {
   AccountInfo info = MakePrimaryAccountAvailable(
       identity_manager(), "test@email.com", ConsentLevel::kSignin);
-  UpdatePersistentErrorOfRefreshTokenForAccount(
-      identity_manager(), info.account_id,
-      GoogleServiceAuthError(
-          GoogleServiceAuthError::State::USER_NOT_SIGNED_UP));
+  signin::SetInvalidRefreshTokenForPrimaryAccount(identity_manager());
   EXPECT_TRUE(ShouldShowPasswordSignInPromo(*profile()));
 }
 
-TEST_F(ShowSigninPromoTestExplicitBrowserSignin,
+TEST_F(ShowSigninPromoTestWithFeatureFlags,
        DoNotShowPromoWithAlreadySignedInAccount) {
   MakePrimaryAccountAvailable(identity_manager(), "test@email.com",
                               ConsentLevel::kSignin);
   EXPECT_FALSE(ShouldShowPasswordSignInPromo(*profile()));
 }
 
-TEST_F(ShowSigninPromoTestExplicitBrowserSignin,
+TEST_F(ShowSigninPromoTestWithFeatureFlags,
        DoNotShowPromoWithAlreadySyncingAccount) {
   MakePrimaryAccountAvailable(identity_manager(), "test@email.com",
                               ConsentLevel::kSync);
   EXPECT_FALSE(ShouldShowPasswordSignInPromo(*profile()));
 }
 
-TEST_F(ShowSigninPromoTestExplicitBrowserSignin,
+TEST_F(ShowSigninPromoTestWithFeatureFlags,
        DoNotShowPromoWithOffTheRecordProfile) {
   EXPECT_FALSE(ShouldShowPasswordSignInPromo(
       *profile()->GetPrimaryOTRProfile(/*create_if_needed=*/true)));
 }
 
-TEST_F(ShowSigninPromoTestExplicitBrowserSignin,
+TEST_F(ShowSigninPromoTestWithFeatureFlags,
        DoNotShowPromoWithLocalSyncEnabled) {
   ASSERT_TRUE(ShouldShowPasswordSignInPromo(*profile()));
 
@@ -252,8 +313,7 @@ TEST_F(ShowSigninPromoTestExplicitBrowserSignin,
   EXPECT_FALSE(ShouldShowPasswordSignInPromo(*profile()));
 }
 
-TEST_F(ShowSigninPromoTestExplicitBrowserSignin,
-       DoNotShowPromoWithoutSyncAllowed) {
+TEST_F(ShowSigninPromoTestWithFeatureFlags, DoNotShowPromoWithoutSyncAllowed) {
   ASSERT_TRUE(ShouldShowPasswordSignInPromo(*profile()));
 
   ON_CALL(*sync_service(), GetDisableReasons())
@@ -263,7 +323,7 @@ TEST_F(ShowSigninPromoTestExplicitBrowserSignin,
   EXPECT_FALSE(ShouldShowPasswordSignInPromo(*profile()));
 }
 
-TEST_F(ShowSigninPromoTestExplicitBrowserSignin,
+TEST_F(ShowSigninPromoTestWithFeatureFlags,
        DoNotShowPromoWithTypeManagedByPolicy) {
   ASSERT_TRUE(ShouldShowPasswordSignInPromo(*profile()));
 
@@ -274,7 +334,7 @@ TEST_F(ShowSigninPromoTestExplicitBrowserSignin,
   EXPECT_FALSE(ShouldShowPasswordSignInPromo(*profile()));
 }
 
-TEST_F(ShowSigninPromoTestExplicitBrowserSignin,
+TEST_F(ShowSigninPromoTestWithFeatureFlags,
        DoNotShowPromoWithoutTransportOnlyDataType) {
   ASSERT_TRUE(ShouldShowPasswordSignInPromo(*profile()));
 
@@ -284,7 +344,17 @@ TEST_F(ShowSigninPromoTestExplicitBrowserSignin,
   EXPECT_FALSE(ShouldShowPasswordSignInPromo(*profile()));
 }
 
-TEST_F(ShowSigninPromoTestExplicitBrowserSignin,
+TEST_F(ShowSigninPromoTestWithFeatureFlags,
+       DoNotShowBookmarkPromoAfterSyncingAccount) {
+  ASSERT_TRUE(ShouldShowBookmarkSignInPromo(*profile()));
+
+  profile()->GetPrefs()->SetString(prefs::kGoogleServicesLastSyncingGaiaId,
+                                   "test_gaia");
+
+  EXPECT_FALSE(ShouldShowBookmarkSignInPromo(*profile()));
+}
+
+TEST_F(ShowSigninPromoTestWithFeatureFlags,
        DoNotShowPasswordPromoAfterFiveTimesShown) {
   ASSERT_TRUE(ShouldShowPasswordSignInPromo(*profile()));
 
@@ -295,7 +365,7 @@ TEST_F(ShowSigninPromoTestExplicitBrowserSignin,
   EXPECT_TRUE(ShouldShowAddressSignInPromo(*profile(), CreateAddress()));
 }
 
-TEST_F(ShowSigninPromoTestExplicitBrowserSignin,
+TEST_F(ShowSigninPromoTestWithFeatureFlags,
        DoNotShowAddressPromoAfterFiveTimesShown) {
   ASSERT_TRUE(ShouldShowAddressSignInPromo(*profile(), CreateAddress()));
 
@@ -306,7 +376,7 @@ TEST_F(ShowSigninPromoTestExplicitBrowserSignin,
   EXPECT_TRUE(ShouldShowPasswordSignInPromo(*profile()));
 }
 
-TEST_F(ShowSigninPromoTestExplicitBrowserSignin,
+TEST_F(ShowSigninPromoTestWithFeatureFlags,
        DoNotShowPromoAfterTwoTimesDismissed) {
   ASSERT_TRUE(ShouldShowAddressSignInPromo(*profile(), CreateAddress()));
 
@@ -317,7 +387,7 @@ TEST_F(ShowSigninPromoTestExplicitBrowserSignin,
   EXPECT_FALSE(ShouldShowAddressSignInPromo(*profile(), CreateAddress()));
 }
 
-TEST_F(ShowSigninPromoTestExplicitBrowserSignin,
+TEST_F(ShowSigninPromoTestWithFeatureFlags,
        ShowPromoAfterTwoTimesDismissedByDifferentAccounts) {
   profile()->GetPrefs()->SetInteger(
       prefs::kAutofillSignInPromoDismissCountPerProfile, 1);
@@ -328,7 +398,7 @@ TEST_F(ShowSigninPromoTestExplicitBrowserSignin,
   EXPECT_TRUE(ShouldShowAddressSignInPromo(*profile(), CreateAddress()));
 }
 
-TEST_F(ShowSigninPromoTestExplicitBrowserSignin,
+TEST_F(ShowSigninPromoTestWithFeatureFlags,
        DoNotShowAddressIfProfileMigrationBlocked) {
   autofill::AutofillProfile address = autofill::test::StandardProfile();
   autofill::PersonalDataManagerFactory::GetForBrowserContext(profile())
@@ -337,7 +407,7 @@ TEST_F(ShowSigninPromoTestExplicitBrowserSignin,
   EXPECT_FALSE(ShouldShowAddressSignInPromo(*profile(), address));
 }
 
-TEST_F(ShowSigninPromoTestExplicitBrowserSignin,
+TEST_F(ShowSigninPromoTestWithFeatureFlags,
        DoNotShowAddressIfCountryNotEligibleForAccountStorage) {
   const std::string non_eligible_country_code("IR");
 
@@ -349,7 +419,29 @@ TEST_F(ShowSigninPromoTestExplicitBrowserSignin,
       *profile(), CreateAddress(non_eligible_country_code)));
 }
 
-TEST_F(ShowSigninPromoTestExplicitBrowserSignin,
+TEST_F(ShowSigninPromoTestWithFeatureFlags,
+       OnlyShowBookmarkPromoInSignInPendingWithAccountStorageEnabled) {
+  MakePrimaryAccountAvailable(identity_manager(), "test@email.com",
+                              ConsentLevel::kSignin);
+  signin::SetInvalidRefreshTokenForPrimaryAccount(identity_manager());
+
+  // Promo is showing in sign in pending with account storage enabled.
+  ON_CALL(*sync_service()->GetMockUserSettings(), GetSelectedTypes())
+      .WillByDefault(testing::Return(syncer::UserSelectableTypeSet(
+          {syncer::UserSelectableType::kBookmarks})));
+  EXPECT_TRUE(ShouldShowBookmarkSignInPromo(*profile()));
+
+  // Promo is not showing in sign in pending with account storage disabled.
+  ON_CALL(*sync_service()->GetMockUserSettings(), GetSelectedTypes())
+      .WillByDefault(testing::Return(syncer::UserSelectableTypeSet()));
+  EXPECT_FALSE(ShouldShowBookmarkSignInPromo(*profile()));
+
+  // Promo is showing when not in sign in pending with account storage disabled.
+  ClearPrimaryAccount(identity_manager());
+  EXPECT_TRUE(ShouldShowBookmarkSignInPromo(*profile()));
+}
+
+TEST_F(ShowSigninPromoTestWithFeatureFlags,
        RecordSignInPromoShownWithoutAccount) {
   // Add an account without cookies. The per-profile pref will be recorded.
   AccountInfo account =
@@ -373,7 +465,7 @@ TEST_F(ShowSigninPromoTestExplicitBrowserSignin,
   EXPECT_TRUE(ShouldShowAddressSignInPromo(*profile(), CreateAddress()));
 }
 
-TEST_F(ShowSigninPromoTestExplicitBrowserSignin,
+TEST_F(ShowSigninPromoTestWithFeatureFlags,
        RecordSignInPromoShownWithoutAccount_PromoShouldShowForDifferentType) {
   // Add an account without cookies. The per-profile pref will be recorded.
   AccountInfo account =
@@ -395,8 +487,23 @@ TEST_F(ShowSigninPromoTestExplicitBrowserSignin,
   EXPECT_TRUE(ShouldShowAddressSignInPromo(*profile(), CreateAddress()));
 }
 
-TEST_F(ShowSigninPromoTestExplicitBrowserSignin,
-       RecordSignInPromoShownWithAccount) {
+TEST_F(ShowSigninPromoTestWithFeatureFlags,
+       RecordSignInPromoShownWithoutAccount_BookmarkPromoAlwaysShown) {
+  // Add an account without cookies. The per-profile pref will be recorded.
+  MakeAccountAvailable(identity_manager(), "test@email.com");
+  ASSERT_TRUE(ShouldShowBookmarkSignInPromo(*profile()));
+
+  // Show the bookmark promo five times. This does not influence whether it is
+  // shown again or not.
+  for (int i = 0; i < 5; i++) {
+    RecordSignInPromoShown(signin_metrics::AccessPoint::kBookmarkBubble,
+                           profile());
+  }
+
+  EXPECT_TRUE(ShouldShowBookmarkSignInPromo(*profile()));
+}
+
+TEST_F(ShowSigninPromoTestWithFeatureFlags, RecordSignInPromoShownWithAccount) {
   // Test setup for adding an account with cookies.
   ScopedTestingLocalState local_state(TestingBrowserProcess::GetGlobal());
   network::TestURLLoaderFactory url_loader_factory =
@@ -439,7 +546,7 @@ TEST_F(ShowSigninPromoTestExplicitBrowserSignin,
                    .GetAddressSigninPromoImpressionCount(account.gaia));
 }
 
-TEST_F(ShowSigninPromoTestExplicitBrowserSignin,
+TEST_F(ShowSigninPromoTestWithFeatureFlags,
        RecordSignInPromoShownWithAccount_PromoShouldShowForDifferentType) {
   // Test setup for adding an account with cookies.
   ScopedTestingLocalState local_state(TestingBrowserProcess::GetGlobal());
@@ -493,6 +600,57 @@ TEST_F(ShowSigninPromoTestExplicitBrowserSignin,
 
   EXPECT_FALSE(ShouldShowAddressSignInPromo(*profile.get(), CreateAddress()));
   EXPECT_TRUE(ShouldShowPasswordSignInPromo(*profile.get()));
+}
+
+TEST_F(ShowSigninPromoTestWithFeatureFlags,
+       RecordSignInPromoShownWithAccount_BookmarkPromoAlwaysShown) {
+  // Test setup for adding an account with cookies.
+  ScopedTestingLocalState local_state(TestingBrowserProcess::GetGlobal());
+  network::TestURLLoaderFactory url_loader_factory =
+      network::TestURLLoaderFactory();
+
+  TestingProfile::Builder builder;
+  builder.AddTestingFactories(
+      IdentityTestEnvironmentProfileAdaptor::
+          GetIdentityTestEnvironmentFactoriesWithAppendedFactories(
+              {TestingProfile::TestingFactory{
+                   ChromeSigninClientFactory::GetInstance(),
+                   base::BindRepeating(&BuildChromeSigninClientWithURLLoader,
+                                       &url_loader_factory)},
+               TestingProfile::TestingFactory{
+                   SyncServiceFactory::GetInstance(),
+                   base::BindRepeating([](content::BrowserContext* context) {
+                     return static_cast<std::unique_ptr<KeyedService>>(
+                         std::make_unique<syncer::MockSyncService>());
+                   })}}));
+
+  std::unique_ptr<TestingProfile> profile = builder.Build();
+  auto identity_test_env_adaptor =
+      std::make_unique<IdentityTestEnvironmentProfileAdaptor>(profile.get());
+  auto* identity_test_env = identity_test_env_adaptor->identity_test_env();
+  identity_test_env->SetTestURLLoaderFactory(&url_loader_factory);
+
+  ON_CALL(*static_cast<syncer::MockSyncService*>(
+              SyncServiceFactory::GetForProfile(profile.get())),
+          GetDataTypesForTransportOnlyMode())
+      .WillByDefault(testing::Return(syncer::DataTypeSet::All()));
+
+  // Add an account with cookies, which will record the per-account prefs.
+  identity_test_env->MakeAccountAvailable(
+      identity_test_env->CreateAccountAvailabilityOptionsBuilder()
+          .WithAccessPoint(signin_metrics::AccessPoint::kUnknown)
+          .WithCookie(true)
+          .Build("test@email.com"));
+  ASSERT_TRUE(ShouldShowBookmarkSignInPromo(*profile.get()));
+
+  // Show the bookmark promo five times. This does not influence whether it is
+  // shown again or not.
+  for (int i = 0; i < 5; i++) {
+    RecordSignInPromoShown(signin_metrics::AccessPoint::kBookmarkBubble,
+                           profile.get());
+  }
+
+  EXPECT_TRUE(ShouldShowBookmarkSignInPromo(*profile.get()));
 }
 
 #endif  // BUILDFLAG(ENABLE_DICE_SUPPORT)

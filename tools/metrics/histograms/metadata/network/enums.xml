@@ -662,7 +662,8 @@ chromium-metrics-reviews@google.com.
       label="The MDL is not populated, so an eligility decision could not be
              made"/>
   <int value="1" label="The request did not match the MDL"/>
-  <int value="2" label="The EnableIpProtectionProxy feature is not enabled"/>
+  <int value="2"
+      label="DEPRECATED: The EnableIpProtectionProxy feature is not enabled"/>
   <int value="3" label="The IP Protection setting is disabled"/>
   <int value="4" label="Proxy List is unavailable"/>
   <int value="5"
@@ -671,6 +672,8 @@ chromium-metrics-reviews@google.com.
       label="Proxy List is available but tokens in the cache have been
              exhausted"/>
   <int value="7" label="The request was resolved to the IP Protection proxies"/>
+  <int value="8"
+      label="A site exception created by User Bypass disables protections"/>
 </enum>
 
 <enum name="IpProtectionTokenBatchRequestError">
@@ -1568,9 +1571,33 @@ chromium-metrics-reviews@google.com.
   <int value="62" label="is_ad_tagged"/>
   <int value="63" label="keepalive_token"/>
   <int value="64" label="expected_signatures"/>
+  <int value="65" label="permissions_policy"/>
+  <int value="66" label="client_side_content_decoding_enabled"/>
 </enum>
 
 <!-- LINT.ThenChange(//services/network/prefetch_matches.cc:FieldsForUma) -->
+
+<!-- LINT.IfChange(ProbabilisticRevealTokensResult) -->
+
+<enum name="ProbabilisticRevealTokensResult">
+  <int value="0" label="Success"/>
+  <int value="1" label="Net Not Ok"/>
+  <int value="2" label="Net Ok Null Response"/>
+  <int value="3" label="Null Response"/>
+  <int value="4" label="Response Parsing Failed"/>
+  <int value="5" label="Invalid Token Version"/>
+  <int value="6" label="Invalid Token Size"/>
+  <int value="7" label="Too Few Tokens"/>
+  <int value="8" label="Too Many Tokens"/>
+  <int value="9" label="Expiration Too Soon"/>
+  <int value="10" label="Expiration Too Late"/>
+  <int value="11" label="Invalid Public Key"/>
+  <int value="12" label="Invalid Num Tokens With Signal"/>
+  <int value="13" label="Request Backed Off"/>
+  <int value="14" label="No Google Chrome Branding"/>
+</enum>
+
+<!-- LINT.ThenChange(//components/ip_protection/common/ip_protection_data_types.h:TryGetProbabilisticRevealTokensStatus) -->
 
 <enum name="PSimSetupFlowResult">
   <int value="0" label="SUCCESS"/>

@@ -145,49 +145,23 @@
   [super stop];
 }
 
-#pragma mark - SigninCoordinator
+#pragma mark - InterruptibleChromeCoordinator
 
-- (void)interruptWithAction:(SigninCoordinatorInterrupt)action
-                 completion:(ProceduralBlock)completion {
+- (void)interruptAnimated:(BOOL)animated {
   if (_addAccountSigninCoordinator) {
     CHECK(!_identityChooserCoordinator);
     CHECK(!_activityOverlayCoordinator);
-    [_addAccountSigninCoordinator interruptWithAction:action
-                                           completion:completion];
+    [_addAccountSigninCoordinator interruptAnimated:animated];
   } else if (_identityChooserCoordinator) {
     CHECK(!_activityOverlayCoordinator);
     [self stopIdentityChooserCoordinator];
-    [self runCompletionWithSigninResult:SigninCoordinatorResultInterrupted
-                     completionIdentity:nil];
-    if (completion) {
-      completion();
-    }
-  } else if (action == SigninCoordinatorInterrupt::UIShutdownNoDismiss) {
-    CHECK(!IsInterruptibleCoordinatorAlwaysDismissedEnabled(),
-          base::NotFatalUntil::M136);
-    // In case of `UIShutdownNoDismiss`, everything should be done
-    // synchronously. So we should not wait for the mediator interruption to be
-    // done. The coordinator needs to finish itself, and then call the interrupt
-    // completion.
-    _mediator.delegate = nil;
-    [_mediator interruptWithAction:action completion:nil];
-    // Drop the activity overlay if it exists.
-    [self stopActivityOverlay];
-    [self runCompletionWithSigninResult:SigninCoordinatorResultInterrupted
-                     completionIdentity:nil];
-    if (completion) {
-      completion();
-    }
   } else {
-    if (IsInterruptibleCoordinatorStoppedSynchronouslyEnabled()) {
-      [_mediator interruptWithAction:action completion:nil];
-      if (completion) {
-        completion();
-      }
-    } else {
-      [_mediator interruptWithAction:action completion:completion];
-    }
+    [self stopActivityOverlay];
   }
+  _mediator.delegate = nil;
+  [_mediator interrupt];
+  [self runCompletionWithSigninResult:SigninCoordinatorResultInterrupted
+                   completionIdentity:nil];
 }
 
 #pragma mark - IdentityChooserCoordinatorDelegate
@@ -273,7 +247,9 @@
                                          identity:_identity
                                       accessPoint:self.accessPoint
                                 postSignInActions:postSigninActions
-                         presentingViewController:self.baseViewController];
+                         presentingViewController:self.baseViewController
+                                       anchorView:nil
+                                       anchorRect:CGRectNull];
   authenticationFlow.precedingHistorySync = YES;
   [_mediator startSignInOnlyFlowWithAuthenticationFlow:authenticationFlow];
 }

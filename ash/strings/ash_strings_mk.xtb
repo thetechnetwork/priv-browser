@@ -22,6 +22,7 @@
 <translation id="1058009965971887428">Пријавување повратни информации</translation>
 <translation id="1059120031266247284">Споделено со вас</translation>
 <translation id="1059194134494239015"><ph name="DISPLAY_NAME" />: <ph name="RESOLUTION" /></translation>
+<translation id="1060847216467038176"><ph name="ITEM_LABEL" /> со копче за отстранување</translation>
 <translation id="1062407476771304334">Замени</translation>
 <translation id="1073899992769346247">Заменете ја или наполнете ја батеријата</translation>
 <translation id="1081015718268701546">Апликациите за Linux не се поддржани во моментов. Другите апликации ќе се зачуваат.</translation>
@@ -73,7 +74,6 @@
 <translation id="1218444235442067213"><ph name="APP_NAME" />, апликација од Play Store</translation>
 <translation id="1225748608451425081">Вашиот Chromebook е заклучен поради познат проблем. Ќе може да се најавите по: <ph name="TIME_LEFT" />.</translation>
 <translation id="1229194443904279055">Сопрете со избирање</translation>
-<translation id="1230853660706736937">Пребарувајте текст на слики и гледајте прегледи на слики</translation>
 <translation id="1235458158152011030">Познати мрежи</translation>
 <translation id="1239161794459865856"><ph name="FEATURE_NAME" /> е поврзана.</translation>
 <translation id="1240638468526743569">Некоја апликација</translation>
@@ -246,7 +246,6 @@
 <translation id="17722141032474077">Пресметки</translation>
 <translation id="1774796056689732716">Календар, <ph name="CURRENT_MONTH_YEAR" />, моментално е избран <ph name="DATE" />.</translation>
 <translation id="178347895271755507">Поставете прегледување на неодамнешните фотографии, аудиовизуелни содржини и известувања на телефонот</translation>
-<translation id="1785317913592722944">Отстрани ја ставката од предложената група</translation>
 <translation id="1786487376942610288">Менувај меѓу максималната и тековната големина на прозорецот за „Слика во слика“</translation>
 <translation id="1787955149152357925">Исклучено</translation>
 <translation id="1796561540704213354">Веб-сајтовите, заедно со страниците што сте ги посетиле, како и отворените страници</translation>
@@ -854,6 +853,7 @@
 <translation id="3859364108019690">Не може да се стримуваат апликации</translation>
 <translation id="3861651314799684201">Притиснете Enter за да го снимите целиот екран</translation>
 <translation id="3870197372373144624">Обидете се со исклучување на уредот.</translation>
+<translation id="3879748587602334249">Управник со преземања</translation>
 <translation id="3886872229787704059">Отворено денес</translation>
 <translation id="3891340733213178823">Притиснете Ctrl+Shift+Q двапати за да се одјавите.</translation>
 <translation id="3892148308691398805">Копирај текст</translation>
@@ -879,6 +879,7 @@
 <translation id="3958714870339660776">Цел ден</translation>
 <translation id="3962859241508114581">Претходна песна</translation>
 <translation id="3963124517343721543">Лесно продолжете каде што сте застанале така што ќе ги отворите претходните прозорци и картички. Ќе видите и персонализирани предлози за работи што може да ги направите следно.</translation>
+<translation id="3967822245660637423">Преземањето е завршено</translation>
 <translation id="3969043077941541451">Исклучи</translation>
 <translation id="3970324493235864154">Прегледајте ги известувањата на телефонот</translation>
 <translation id="397105322502079400">Се пресметува…</translation>
@@ -1053,6 +1054,7 @@
 <translation id="450584155212756404">Dev Channel</translation>
 <translation id="4513044611477939680">Брзо споделување</translation>
 <translation id="4513946894732546136">Повратни информации</translation>
+<translation id="4518096944902121253">Нема веќе дејства за јазиков</translation>
 <translation id="4518404433291145981">За да го отклучите вашиот Chromebook, прво отклучете го телефонот</translation>
 <translation id="4525887279712865285">Прикажи ги поставките за „Брзо споделување“</translation>
 <translation id="4527045527269911712">Уредот Bluetooth „<ph name="DEVICE_NAME" />“ бара дозвола за спарување.</translation>
@@ -1194,6 +1196,7 @@
 <translation id="4946376291507881335">Сликајте</translation>
 <translation id="495046168593986294">Оди нагоре</translation>
 <translation id="4950800194215951939">Приспособете го вашето доживување при играње игри</translation>
+<translation id="495170559598752135">Дејства</translation>
 <translation id="4952936045814352993">„Лоцирај го телефонот“ не е достапна кога се оневозможени звуците на алармите</translation>
 <translation id="4953585991029886728">Измени текст</translation>
 <translation id="4960324571663582548"><ph name="MANAGER" /> бара да го вратите вашиот <ph name="DEVICE_TYPE" /> на претходна верзија. Уредот ќе се ресетира и сите податоци ќе се избришат.</translation>
@@ -1228,6 +1231,7 @@
 <translation id="5043679421800073804">Кликнете или допрете ја последната икона на полицата</translation>
 <translation id="504465286040788597">Претходен пасус</translation>
 <translation id="5045550434625856497">Погрешна лозинка</translation>
+<translation id="5056587122125565772">Создавање слика</translation>
 <translation id="5058794129231928255">Не можеше да се создаде документ на Docs</translation>
 <translation id="5062496344832867502">ram</translation>
 <translation id="5068762093486106012">Ќе добиете известување ако зборувате додека е исклучен звукот. Аудиото никогаш не излегува од вашиот уред.</translation>
@@ -1276,6 +1280,7 @@
 <translation id="5222676887888702881">Одјави се</translation>
 <translation id="5228195526683428788">Разделник на поделен екран</translation>
 <translation id="5229343007215035173">Вклучување/Исклучување „Заштита на приватноста“</translation>
+<translation id="5229860525743792999">Отстранете <ph name="ITEM_LABEL" /> од предложената група</translation>
 <translation id="5230516054153933099">Прозорец</translation>
 <translation id="5234764350956374838">Отфрли</translation>
 <translation id="523505283826916779">Поставки за пристапност</translation>
@@ -1620,6 +1625,7 @@
 <translation id="6319058840130157106">Движење наназад меѓу долниот десен агол, „Стартерот“, лентата за адреси, лентата со обележувачи, отворениот веб-сајт и преземањата</translation>
 <translation id="6319503618073410818">Прикажи ги деталите во прелистувач</translation>
 <translation id="6324916366299863871">Изменете ја кратенката</translation>
+<translation id="6325525973963619867">Неуспешно</translation>
 <translation id="6330012934079202188">Се прикажуваат прозорци од сите работни површина, притиснете го копчето со стрелка за нагоре за да се прикажат прозорци од тековната работна површина</translation>
 <translation id="6337159624125741244">„Лупата за цел екран“ е вклучена</translation>
 <translation id="6338485349199627913"><ph name="DISPLAY_NAME" /> е управувана сесија со којашто управува <ph name="MANAGER" /></translation>
@@ -1684,6 +1690,7 @@
 <translation id="6542891623636520977">Емоџија, GIF-датотеки и друго</translation>
 <translation id="6543942526104794893">Дали сигурно сакате да ги исклучите движењата на лицето?</translation>
 <translation id="6545382064335350438">PIN-кодот сѐ уште не може да се потврди. Обидете се повторно.</translation>
+<translation id="6546062506073634094">„Пребарување со слики“ според содржини и прегледи на слики</translation>
 <translation id="6555373427270923730">Напишете веб-адреса во лентата за адреси, а потоа притиснете <ph name="MODIFIER" /><ph name="KEY" /></translation>
 <translation id="655633303491376835"><ph name="APP_NAME" />
 Нова инсталација</translation>
@@ -1757,6 +1764,7 @@
 <translation id="6757237461819837179">Нема пуштени аудиовизуелни содржини</translation>
 <translation id="6760438044935091345">Контролна табла за игри</translation>
 <translation id="6768043681523654438">простор</translation>
+<translation id="6769195697113506406">Вметната е слика</translation>
 <translation id="6777216307882431711">Се напојуваат поврзани USB-C уреди</translation>
 <translation id="6781002679438061620">Работна површина 9</translation>
 <translation id="6782182743534150858">Работна површина 13</translation>
@@ -1879,6 +1887,7 @@
 <translation id="7189412385142492784">Колку е оддалечена Венера</translation>
 <translation id="7198435252016571249">Камерата е поставена во долниот десен агол. Конфликт со површината на системот.</translation>
 <translation id="7219573373513695352">Не се поврзани уреди</translation>
+<translation id="7228968829656641943">Изберете да го пребарување својот екран. Притиснете Tab, па Space за навигација со тастатурата.</translation>
 <translation id="7229029500464092426">Меморија: <ph name="AVAILABLE_MEMORY" /> | вкупно: <ph name="TOTAL_MEMORY" /></translation>
 <translation id="7239814253344511868">Двете копчиња на глувчето</translation>
 <translation id="7244725679040769470">Престануваат уште <ph name="PERCENTAGE" /> % од батеријата. Приклучете го уредот во струја.</translation>
@@ -1911,6 +1920,7 @@
 <translation id="735745346212279324">VPN е исклучен</translation>
 <translation id="7360036564632145207">Ако ја промените поставката за заштита на пристапот до податоци за перфиферните уреди, перформансите може да се оптимизираат</translation>
 <translation id="736045644501761622">Поставете тапет и стил</translation>
+<translation id="7368041336688136012">Мора да имате најмалку 18 години за да ги користите „Помош при читање“ и „Помош при пишување“, како и да создавате слики со AI.</translation>
 <translation id="7371404428569700291">Снимање прозорец</translation>
 <translation id="7372069265635026568">Достапна меморија: <ph name="AVAILABLE_MEMORY" /> од вкупно: <ph name="TOTAL_MEMORY" /></translation>
 <translation id="737315737514430195">Ова дозволува пристап до микрофонот за сите апликации и веб-сајтови со дозвола за микрофонот</translation>
@@ -1982,6 +1992,7 @@
 <translation id="7571361473021531288">Батерија: <ph name="BATTERY_PERCENTAGE" /> % | преостанато време: <ph name="TIME" /></translation>
 <translation id="7573585051776738856">Активниот прозорец е приклучен на док на десната страна.</translation>
 <translation id="7579778809502851308">Снимање на екранот</translation>
+<translation id="7588317312481506627">Копирано во привремената меморија.</translation>
 <translation id="7593891976182323525">Search или Shift</translation>
 <translation id="7598054670902114203">Слика на состојбата на користење CPU: <ph name="CPU_USEAGE" /> %. Температура: <ph name="TEMPERATURE" /> целзиусови степени, тековна брзина: <ph name="CPU_AVERAGE_CURRENT_FREQUENCY_GHZ" /> GHz</translation>
 <translation id="7599378375976398913">Вметнување избран резултат</translation>
@@ -2176,6 +2187,7 @@
 <translation id="8155628902202578800">Отвори го дијалогот со податоци за <ph name="USER_EMAIL_ADDRESS" /></translation>
 <translation id="8167567890448493835">Се користи <ph name="LOCALE_NAME" /></translation>
 <translation id="8168435359814927499">Содржина</translation>
+<translation id="81817143961839203">Вметнувањето слика не успеа</translation>
 <translation id="8185090165691050712">Вклучете/исклучете го менито во режим на заклучување промени на големината</translation>
 <translation id="8192727139462702395">Кога ќе го исклучите Bluetooth, ќе се прекине врската меѓу овие надворешни уреди и вашиот <ph name="DEVICE_TYPE" />:</translation>
 <translation id="8198456017687137612">Картичка за емитување</translation>
@@ -2254,6 +2266,7 @@
 <translation id="8473301994082929012"><ph name="ORGANIZATION_NAME" /> има <ph name="FEATURE_STATE" /> <ph name="FEATURE_NAME" />.</translation>
 <translation id="8477270416194247200">Притиснете Alt+„Пребарување“ или Shift за да откажете.</translation>
 <translation id="8480418399907765580">Прикажете го алатникот</translation>
+<translation id="8487660088084188539">Кога ќе ги вклучите функцииве, внесениот текст, содржините на документот и URL-адресата на веб-страницата може да се испраќаат до серверите на Google. Податоциве се користат за да се генерираат предлози за пишување, да се генерираат резимеа, да се одговара на прашања и да се подобрува производот, што подлежи на <ph name="LINK_TO_SERVICE_TERMS" />. Не внесувајте лични, чувствителни или доверливи податоци.</translation>
 <translation id="8487699605742506766">Точка на пристап</translation>
 <translation id="8491237443345908933">Отвора линк во нова картичка</translation>
 <translation id="8492573885090281069"><ph name="DISPLAY_NAME" /> не поддржува <ph name="SPECIFIED_RESOLUTION" />. Резолуцијата се смени во <ph name="FALLBACK_RESOLUTION" />. Кликнете „Потврди“ за да ги задржите промените. Претходната поставка ќе се врати за <ph name="TIMEOUT_SECONDS" />.</translation>
@@ -2323,6 +2336,7 @@
 <translation id="8725066075913043281">Обидете се повторно</translation>
 <translation id="8725214031272624704">Прикажување список на достапни методи за внесување</translation>
 <translation id="8730621377337864115">Готово</translation>
+<translation id="8731188831050207755">Преземањето на <ph name="FILE_NAME" /> е неуспешно.</translation>
 <translation id="8731487213223706745">Завршува во <ph name="END_TIME" /> <ph name="DAYS_ELAPSED" /></translation>
 <translation id="8734991477317290293">Можеби се обидува да ви ги украде ударите на тастатурата</translation>
 <translation id="8735678380411481005">Боја на заднинско светло на тастатура</translation>

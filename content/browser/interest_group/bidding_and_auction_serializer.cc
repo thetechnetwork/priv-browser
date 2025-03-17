@@ -32,6 +32,7 @@
 #include "content/browser/interest_group/interest_group_caching_storage.h"
 #include "content/browser/interest_group/interest_group_features.h"
 #include "content/browser/interest_group/storage_interest_group.h"
+#include "content/public/common/content_features.h"
 #include "content/public/common/content_switches.h"
 #include "content/services/auction_worklet/public/mojom/bidder_worklet.mojom.h"
 #include "third_party/abseil-cpp/absl/numeric/bits.h"
@@ -966,6 +967,15 @@ BiddingAndAuctionData BiddingAndAuctionSerializer::Build() {
       cbor::Value(!debug_report_in_lockout_);
   message_elements_size +=
       TaggedStringLength(constexpr_strlen("enableDebugReporting")) + 1;
+
+  if (base::FeatureList::IsEnabled(
+          blink::features::kFledgeEnableSampleDebugReportOnCookieSetting)) {
+    bool for_debugging_only_sampling = ShouldSampleDebugReport();
+    message_obj[cbor::Value("enableSampledDebugReporting")] =
+        cbor::Value(for_debugging_only_sampling);
+    message_elements_size +=
+        TaggedStringLength(constexpr_strlen("enableSampledDebugReporting")) + 1;
+  }
 
   std::string debug_key =
       base::CommandLine::ForCurrentProcess()->GetSwitchValueASCII(

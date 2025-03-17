@@ -59,7 +59,6 @@
 #include "components/autofill/core/browser/metrics/autofill_metrics_utils.h"
 #include "components/autofill/core/browser/metrics/log_event.h"
 #include "components/autofill/core/browser/metrics/prediction_quality_metrics.h"
-#include "components/autofill/core/browser/metrics/shadow_prediction_metrics.h"
 #include "components/autofill/core/common/autocomplete_parsing_util.h"
 #include "components/autofill/core/common/autofill_constants.h"
 #include "components/autofill/core/common/autofill_features.h"
@@ -78,7 +77,6 @@
 #include "components/autofill/core/common/logging/log_buffer.h"
 #include "components/autofill/core/common/signatures.h"
 #include "components/autofill/core/common/unique_ids.h"
-#include "components/autofill_ai/core/browser/autofill_ai_features.h"
 #include "components/security_state/core/security_state.h"
 #include "components/version_info/version_info.h"
 #include "url/origin.h"
@@ -95,35 +93,22 @@ bool HasAllowedScheme(const GURL& url) {
   return url.SchemeIsHTTPOrHTTPS();
 }
 
-std::string ServerTypesToString(const AutofillField* field) {
-  const std::vector<
-      AutofillQueryResponse::FormSuggestion::FieldSuggestion::FieldPrediction>&
-      server_types = field->server_predictions();
+std::string ServerTypesToString(const AutofillField& field) {
+  std::vector<std::string_view> server_types =
+      base::ToVector(field.server_predictions(), [](const auto& prediction) {
+        return FieldTypeToStringView(
+            ToSafeFieldType(prediction.type(), NO_SERVER_DATA));
+      });
 
   if (server_types.empty()) {
     return "pending";
   }
 
-  std::ostringstream buffer;
-  for (const auto& field_prediction : server_types) {
-    if (buffer.tellp() > 0) {  // Add comma if buffer is not empty.
-      buffer << ", ";
-    }
-    FieldType server_type =
-        ToSafeFieldType(field_prediction.type(), NO_SERVER_DATA);
-    buffer << FieldTypeToStringView(server_type);
-  }
-  return "[" + buffer.str() + "]";
+  return base::StrCat({"[", base::JoinString(server_types, ", "), "]"});
 }
 
-HeuristicSource GetAvailableRegexHeuristicSource() {
-#if BUILDFLAG(USE_INTERNAL_AUTOFILL_PATTERNS)
-  return GetActiveRegexFeatures().empty()
-             ? HeuristicSource::kDefaultRegexes
-             : HeuristicSource::kExperimentalRegexes;
-#else
-  return HeuristicSource::kLegacyRegexes;
-#endif
+std::string_view ToYesOrNo(bool value) {
+  return value ? "Yes" : "No";
 }
 
 }  // namespace
@@ -213,8 +198,6 @@ void FormStructure::DetermineHeuristicTypes(
       base::FeatureList::IsEnabled(features::kAutofillPageLanguageDetection)
           ? current_page_language_
           : LanguageCode();
-  // The `PatternFile` parameter is overwritten again immediately before
-  // parsing and doesn't matter here.
   ParsingContext context(client_country_, page_language,
 #if BUILDFLAG(USE_INTERNAL_AUTOFILL_PATTERNS)
                          PatternFile::kDefault,
@@ -222,17 +205,8 @@ void FormStructure::DetermineHeuristicTypes(
                          PatternFile::kLegacy,
 #endif
                          GetActiveRegexFeatures(), log_manager);
-
-  // The active heuristic source might not be a pattern source.
-  std::optional<FieldCandidatesMap> active_predictions;
-  HeuristicSource active_heuristic_source = GetActiveHeuristicSource();
-  if (std::optional<PatternFile> pattern_file =
-          HeuristicSourceToPatternFile(active_heuristic_source)) {
-    context.pattern_file = *pattern_file;
-    active_predictions = ParseFieldTypesWithPatterns(context);
-    AssignBestFieldTypes(*active_predictions, active_heuristic_source);
-  }
-  DetermineNonActiveHeuristicTypes(std::move(active_predictions), context);
+  FieldCandidatesMap regex_predictions = ParseFieldTypesWithPatterns(context);
+  AssignBestFieldTypes(regex_predictions, HeuristicSource::kRegexes);
 
   UpdateAutofillCount();
   AssignSections(fields_);
@@ -256,22 +230,6 @@ void FormStructure::DetermineHeuristicTypes(
   }
 
   LogDetermineHeuristicTypesMetrics();
-}
-
-void FormStructure::DetermineNonActiveHeuristicTypes(
-    std::optional<FieldCandidatesMap> active_predictions,
-    ParsingContext& context) {
-#if BUILDFLAG(USE_INTERNAL_AUTOFILL_PATTERNS)
-  if (GetActiveHeuristicSource() == HeuristicSource::kDefaultRegexes) {
-    return;
-  }
-  // When a non-default source is active, shadow predictions between this
-  // non-default source and default are emitted. Compute default predictions.
-  context.pattern_file = PatternFile::kDefault;
-  context.active_features.clear();
-  AssignBestFieldTypes(ParseFieldTypesWithPatterns(context),
-                       HeuristicSource::kDefaultRegexes);
-#endif
 }
 
 // static
@@ -642,8 +600,11 @@ void FormStructure::RetrieveFromCache(const FormStructure& cached_form,
     field->set_previously_autofilled(cached_field->previously_autofilled());
     field->set_did_trigger_suggestions(cached_field->did_trigger_suggestions());
     field->set_was_focused(cached_field->was_focused());
-    field->set_format_string_unless_overruled(
-        cached_field->format_string(), cached_field->format_string_source());
+    if (base::optional_ref<const std::u16string> format_string =
+            cached_field->format_string()) {
+      field->set_format_string_unless_overruled(
+          *format_string, cached_field->format_string_source());
+    }
 
     // During form parsing, we don't care for heuristic field classifications
     // and information derived from the autocomplete attribute as those are
@@ -746,24 +707,6 @@ void FormStructure::SetFieldTypesFromAutocompleteAttribute() {
             field_rank_map[field->GetFieldSignature()],
     });
   }
-}
-
-bool FormStructure::SetSectionsFromAutocompleteOrReset() {
-  bool has_autocomplete = false;
-  for (const auto& field : fields_) {
-    if (!field->parsed_autocomplete()) {
-      field->set_section(Section());
-      continue;
-    }
-
-    field->set_section(Section::FromAutocomplete(
-        {.section = field->parsed_autocomplete()->section,
-         .mode = field->parsed_autocomplete()->mode}));
-    if (field->section()) {
-      has_autocomplete = true;
-    }
-  }
-  return has_autocomplete;
 }
 
 FieldCandidatesMap FormStructure::ParseFieldTypesWithPatterns(
@@ -988,6 +931,10 @@ std::ostream& operator<<(std::ostream& buffer, const FormStructure& form) {
                  " (", url::Origin::Create(form.source_url()).Serialize(),
                  ")"});
   buffer << "\n Target URL:" << form.target_url();
+  if (base::FeatureList::IsEnabled(features::kAutofillAiServerModel)) {
+    buffer << "\n May run AutofillAI model: "
+           << ToYesOrNo(form.may_run_autofill_ai_model());
+  }
   for (size_t i = 0; i < form.field_count(); ++i) {
     buffer << "\n Field " << i << ": ";
     const AutofillField* field = form.field(i);
@@ -1013,8 +960,8 @@ std::ostream& operator<<(std::ostream& buffer, const FormStructure& form) {
     buffer << "\n  Name: " << field->parseable_name();
 
     auto type = field->Type().ToStringView();
-    auto regex_heuristic_type = FieldTypeToStringView(
-        field->heuristic_type(GetAvailableRegexHeuristicSource()));
+    auto regex_heuristic_type =
+        FieldTypeToStringView(field->heuristic_type(HeuristicSource::kRegexes));
     std::string ml_heuristic_part;
     if (features::kAutofillModelPredictionsAreActive.Get()) {
       auto ml_heuristic_type = FieldTypeToStringView(
@@ -1026,7 +973,7 @@ std::ostream& operator<<(std::ostream& buffer, const FormStructure& form) {
                           FieldTypeToStringView(field->heuristic_type())});
       }
     }
-    std::string server_type = ServerTypesToString(field);
+    std::string server_type = ServerTypesToString(*field);
     const char* is_override =
         field->server_type_prediction_is_override() ? " (manual override)" : "";
     auto html_type_description =
@@ -1051,7 +998,7 @@ std::ostream& operator<<(std::ostream& buffer, const FormStructure& form) {
     buffer << "\n  Label: " << truncated_label;
 
     buffer << "\n  Is empty: "
-           << (field->value(ValueSemantics::kCurrent).empty() ? "Yes" : "No");
+           << ToYesOrNo(field->value(ValueSemantics::kCurrent).empty());
   }
   return buffer;
 }
@@ -1079,6 +1026,10 @@ LogBuffer& operator<<(LogBuffer& buffer, const FormStructure& form) {
                  " (", url::Origin::Create(form.source_url()).Serialize(),
                  ")"});
   buffer << Tr{} << "Target URL:" << form.target_url();
+  if (base::FeatureList::IsEnabled(features::kAutofillAiServerModel)) {
+    buffer << Tr{} << "May run AutofillAI model: "
+           << ToYesOrNo(form.may_run_autofill_ai_model());
+  }
   for (size_t i = 0; i < form.field_count(); ++i) {
     buffer << Tag{"tr"};
     buffer << Tag{"td"} << "Field " << i << ": " << CTag{};
@@ -1108,8 +1059,8 @@ LogBuffer& operator<<(LogBuffer& buffer, const FormStructure& form) {
     buffer << Tr{} << "Placeholder:" << field->placeholder();
 
     auto type = field->Type().ToStringView();
-    auto regex_heuristic_type = FieldTypeToStringView(
-        field->heuristic_type(GetAvailableRegexHeuristicSource()));
+    auto regex_heuristic_type =
+        FieldTypeToStringView(field->heuristic_type(HeuristicSource::kRegexes));
     std::string ml_heuristic_part;
     if (features::kAutofillModelPredictionsAreActive.Get()) {
       auto ml_heuristic_type = FieldTypeToStringView(
@@ -1121,7 +1072,7 @@ LogBuffer& operator<<(LogBuffer& buffer, const FormStructure& form) {
                           FieldTypeToStringView(field->heuristic_type())});
       }
     }
-    std::string server_type = ServerTypesToString(field);
+    std::string server_type = ServerTypesToString(*field);
     if (field->server_type_prediction_is_override()) {
       server_type += " (manual override)";
     }
@@ -1153,7 +1104,7 @@ LogBuffer& operator<<(LogBuffer& buffer, const FormStructure& form) {
     buffer << Tr{} << "Label:" << truncated_label;
 
     buffer << Tr{} << "Is empty:"
-           << (field->value(ValueSemantics::kCurrent).empty() ? "Yes" : "No");
+           << ToYesOrNo(field->value(ValueSemantics::kCurrent).empty());
     buffer << Tr{} << "Is focusable:"
            << (field->IsFocusable() ? "Yes (focusable)" : "No (unfocusable)");
     buffer << Tr{} << "Is visible:"

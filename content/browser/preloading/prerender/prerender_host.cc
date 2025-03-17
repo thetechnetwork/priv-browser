@@ -44,6 +44,7 @@
 #include "net/http/http_request_headers.h"
 #include "third_party/blink/public/common/client_hints/enabled_client_hints.h"
 #include "third_party/blink/public/common/features.h"
+#include "third_party/blink/public/common/navigation/preloading_headers.h"
 #include "url/origin.h"
 
 namespace content {
@@ -118,10 +119,10 @@ bool PrerenderHost::AreHttpRequestHeadersCompatible(
   // `potential_activation_headers` doesn't contain it. Remove "Purpose" and
   // "Sec-Purpose" matching from consideration so that activation works with the
   // header.
-  prerender_headers.RemoveHeader("Purpose");
-  potential_activation_headers.RemoveHeader("Purpose");
-  prerender_headers.RemoveHeader("Sec-Purpose");
-  potential_activation_headers.RemoveHeader("Sec-Purpose");
+  prerender_headers.RemoveHeader(blink::kPurposeHeaderName);
+  potential_activation_headers.RemoveHeader(blink::kPurposeHeaderName);
+  prerender_headers.RemoveHeader(blink::kSecPurposeHeaderName);
+  potential_activation_headers.RemoveHeader(blink::kSecPurposeHeaderName);
 
   prerender_headers.RemoveHeader("RTT");
   potential_activation_headers.RemoveHeader("RTT");
@@ -528,8 +529,7 @@ void PrerenderHost::ReadyToCommitNavigation(
     return;
   }
 
-  if (base::FeatureList::IsEnabled(blink::features::kPrerender2NoVarySearch) &&
-      navigation_request->response() &&
+  if (navigation_request->response() &&
       navigation_request->response()->parsed_headers &&
       navigation_request->response()
           ->parsed_headers->no_vary_search_with_parse_error) {
@@ -1197,7 +1197,6 @@ void PrerenderHost::SetFailureReason(
     case PrerenderFinalStatus::kTabClosedWithoutUserGesture:
     case PrerenderFinalStatus::kSpeculationRuleRemoved:
     case PrerenderFinalStatus::kOtherPrerenderedPageActivated:
-    case PrerenderFinalStatus::kBrowsingDataRemoved:
       return;
     case PrerenderFinalStatus::kDestroyed:
     case PrerenderFinalStatus::kLowEndDevice:
@@ -1266,6 +1265,7 @@ void PrerenderHost::SetFailureReason(
     case PrerenderFinalStatus::kWindowClosed:
     case PrerenderFinalStatus::kSlowNetwork:
     case PrerenderFinalStatus::kPrerenderFailedDuringPrefetch:
+    case PrerenderFinalStatus::kBrowsingDataRemoved:
       if (attempt_) {
         attempt_->SetFailureReason(
             ToPreloadingFailureReason(reason.final_status()));
@@ -1487,6 +1487,10 @@ bool PrerenderHost::ShouldAbortNavigationBecausePrefetchUnavailable() const {
       case PrefetchStatus::kPrefetchNotStarted:
       case PrefetchStatus::kPrefetchIneligibleUserHasCookies:
       case PrefetchStatus::kPrefetchIneligibleUserHasServiceWorker:
+      case PrefetchStatus::
+          kPrefetchIneligibleUserHasServiceWorkerNoFetchHandler:
+      case PrefetchStatus::kPrefetchIneligibleRedirectFromServiceWorker:
+      case PrefetchStatus::kPrefetchIneligibleRedirectToServiceWorker:
       case PrefetchStatus::kPrefetchIneligibleSchemeIsNotHttps:
       case PrefetchStatus::kPrefetchIneligibleNonDefaultStoragePartition:
       case PrefetchStatus::kPrefetchNotFinishedInTime:
@@ -1519,6 +1523,9 @@ bool PrerenderHost::ShouldAbortNavigationBecausePrefetchUnavailable() const {
     switch (prefetch_eligibility) {
       // Prefetch is not available if SW exists, but prerender is.
       case PreloadingEligibility::kUserHasServiceWorker:
+      case PreloadingEligibility::kUserHasServiceWorkerNoFetchHandler:
+      case PreloadingEligibility::kRedirectFromServiceWorker:
+      case PreloadingEligibility::kRedirectToServiceWorker:
         // Prefetch is not available for HTTP, but prerender is available
         // for HTTPS/HTTP.
       case PreloadingEligibility::kSchemeIsNotHttps:
@@ -1558,7 +1565,7 @@ bool PrerenderHost::ShouldAbortNavigationBecausePrefetchUnavailable() const {
     }
   };
   // If a prerender navigation reached to `PrefetchURLLoaderInterceptor`, it is
-  // blocked by `PrefetchMatchResolver2` and prefetch ahead of prerender. So, we
+  // blocked by `PrefetchMatchResolver` and prefetch ahead of prerender. So, we
   // should've got prefetch eligibility when it reached to
   // `PrerenderURLLoaderThrottle`. Therefore, if prefetch eligibility is
   // `PreloadingEligibility::kUnspecified`, it implies that the navigation is

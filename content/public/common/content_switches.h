@@ -43,7 +43,6 @@ CONTENT_EXPORT extern const char
 CONTENT_EXPORT extern const char kDisableBackgroundTimerThrottling[];
 CONTENT_EXPORT extern const char kDisableBackForwardCache[];
 CONTENT_EXPORT extern const char kDisableBlinkFeatures[];
-CONTENT_EXPORT extern const char kDisableDatabases[];
 CONTENT_EXPORT extern const char kDisableDisplayList2dCanvas[];
 extern const char kDisableDomainBlockingFor3DAPIs[];
 CONTENT_EXPORT extern const char kDisableInProcessStackTraces[];
@@ -173,6 +172,7 @@ CONTENT_EXPORT extern const char kProcessType[];
 CONTENT_EXPORT extern const char kProtectedAudiencesConsentedDebugToken[];
 CONTENT_EXPORT extern const char kPullToRefresh[];
 CONTENT_EXPORT extern const char kReduceAcceptLanguage[];
+CONTENT_EXPORT extern const char kReduceAcceptLanguageHTTP[];
 CONTENT_EXPORT extern const char kReduceUserAgentMinorVersion[];
 CONTENT_EXPORT extern const char kReduceUserAgentPlatformOsCpu[];
 CONTENT_EXPORT extern const char kRegisterPepperPlugins[];

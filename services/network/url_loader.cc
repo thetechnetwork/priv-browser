@@ -61,12 +61,14 @@
 #include "net/cookies/static_cookie_policy.h"
 #include "net/device_bound_sessions/session.h"
 #include "net/dns/public/secure_dns_policy.h"
+#include "net/filter/filter_source_stream.h"
 #include "net/http/http_connection_info.h"
 #include "net/http/http_request_headers.h"
 #include "net/http/http_response_headers.h"
 #include "net/http/http_util.h"
 #include "net/http/structured_headers.h"
 #include "net/log/net_log_source_type.h"
+#include "net/log/net_log_util.h"
 #include "net/log/net_log_with_source.h"
 #include "net/ssl/client_cert_store.h"
 #include "net/ssl/ssl_connection_status_flags.h"
@@ -86,6 +88,7 @@
 #include "services/network/public/cpp/cors/origin_access_list.h"
 #include "services/network/public/cpp/cross_origin_resource_policy.h"
 #include "services/network/public/cpp/empty_url_loader_client.h"
+#include "services/network/public/cpp/features.h"
 #include "services/network/public/cpp/header_util.h"
 #include "services/network/public/cpp/ip_address_space_util.h"
 #include "services/network/public/cpp/loading_params.h"
@@ -781,9 +784,8 @@ URLLoader::URLLoader(
       request.url, request.priority, this, traffic_annotation,
       /*is_for_websockets=*/false, request.net_log_create_info);
 
-  TRACE_EVENT(
-      "loading", "URLLoader::URLLoader",
-      perfetto::Flow::ProcessScoped(url_request_->net_log().source().id));
+  TRACE_EVENT("loading", "URLLoader::URLLoader",
+              net::NetLogWithSourceToFlow(url_request_->net_log()));
 
   // |cors_exempt_headers| must be merged here to avoid breaking CORS checks.
   // They are non-empty when the values are given by the UA code, therefore
@@ -831,6 +833,7 @@ URLLoader::URLLoader(
       request.referrer_policy,
       /*upgrade_if_insecure=*/request.upgrade_if_insecure,
       /*is_ad_tagged=*/request.is_ad_tagged,
+      request.client_side_content_decoding_enabled,
       /*isolation_info=*/
       GetIsolationInfo(factory_params_->isolation_info,
                        factory_params_->automatically_assign_isolation_info,
@@ -852,7 +855,7 @@ URLLoader::URLLoader(
                 shared_dictionary_manager->MaybeCreateSharedDictionaryGetter(
                     request.load_flags, request_destination_))
           : std::nullopt,
-      request.socket_tag);
+      request.socket_tag, request.allows_device_bound_sessions);
 
   if (context.ShouldRequireIsolationInfo()) {
     DCHECK(!url_request_->isolation_info().IsEmpty());
@@ -892,6 +895,7 @@ void URLLoader::ConfigureRequest(
     net::ReferrerPolicy referrer_policy,
     bool upgrade_if_insecure,
     bool is_ad_tagged,
+    bool client_side_content_decoding_enabled,
     std::optional<net::IsolationInfo> isolation_info,
     bool force_main_frame_for_same_site_cookies,
     net::SecureDnsPolicy secure_dns_policy,
@@ -904,7 +908,8 @@ void URLLoader::ConfigureRequest(
     bool priority_incremental,
     net::CookieSettingOverrides cookie_setting_overrides,
     std::optional<net::SharedDictionaryGetter> shared_dictionary_getter,
-    net::SocketTag socket_tag) {
+    net::SocketTag socket_tag,
+    bool allows_device_bound_sessions) {
   url_request_->set_method(method);
   url_request_->set_site_for_cookies(site_for_cookies);
   url_request_->set_force_ignore_site_for_cookies(
@@ -916,6 +921,8 @@ void URLLoader::ConfigureRequest(
   url_request_->set_referrer_policy(referrer_policy);
   url_request_->set_upgrade_if_insecure(upgrade_if_insecure);
   url_request_->set_ad_tagged(is_ad_tagged);
+  url_request_->set_client_side_content_decoding_enabled(
+      client_side_content_decoding_enabled);
 
   if (isolation_info) {
     url_request_->set_isolation_info(std::move(isolation_info).value());
@@ -988,6 +995,8 @@ void URLLoader::ConfigureRequest(
         &mojom::DeviceBoundSessionAccessObserver::OnDeviceBoundSessionAccessed,
         Clone(*device_bound_session_observer_)));
   }
+
+  url_request_->set_allows_device_bound_sessions(allows_device_bound_sessions);
 }
 
 // This class is used to manage the queue of pending file upload operations
@@ -1320,9 +1329,8 @@ void URLLoader::OnDoneBeginningTrustTokenOperation(
 }
 
 void URLLoader::ScheduleStart() {
-  TRACE_EVENT(
-      "loading", "URLLoader::ScheduleStart",
-      perfetto::Flow::ProcessScoped(url_request_->net_log().source().id));
+  TRACE_EVENT("loading", "URLLoader::ScheduleStart",
+              net::NetLogWithSourceToFlow(url_request_->net_log()));
   bool defer = false;
   if (resource_scheduler_client_) {
     resource_scheduler_request_handle_ =
@@ -1415,9 +1423,8 @@ void URLLoader::SetupPipeHandlesAndWatchers(
 }
 
 URLLoader::~URLLoader() {
-  TRACE_EVENT(
-      "loading", "URLLoader::~URLLoader",
-      perfetto::Flow::ProcessScoped(url_request_->net_log().source().id));
+  TRACE_EVENT("loading", "URLLoader::~URLLoader",
+              net::NetLogWithSourceToFlow(url_request_->net_log()));
   if (keepalive_ && keepalive_statistics_recorder_) {
     keepalive_statistics_recorder_->OnLoadFinished(
         *factory_params_->top_frame_id, keepalive_request_size_);
@@ -1531,6 +1538,7 @@ PrivateNetworkAccessCheckResult URLLoader::PrivateNetworkAccessCheck(
 
   bool is_warning = false;
   switch (result) {
+    case PrivateNetworkAccessCheckResult::kLNAAllowedByPolicyWarn:
     case PrivateNetworkAccessCheckResult::kAllowedByPolicyWarn:
       is_warning = true;
       break;
@@ -1696,6 +1704,12 @@ mojom::URLResponseHeadPtr URLLoader::BuildResponseHead() const {
       private_network_access_checker_.ClientAddressSpace();
 
   response->load_with_storage_access = ShouldSetLoadWithStorageAccess();
+  if (url_request_->client_side_content_decoding_enabled() &&
+      response->headers) {
+    response->client_side_content_decoding_types =
+        net::FilterSourceStream::GetContentEncodingTypes(
+            url_request_->accepted_stream_types(), *response->headers);
+  }
 
   return response;
 }
@@ -1778,8 +1792,7 @@ void URLLoader::OnReceivedRedirect(net::URLRequest* url_request,
       // TODO(https://crbug.com/379030052): the `CookieSettingOverride`s for
       // Storage Access API and Storage Access Headers should be handled
       // consistently during a same-site, cross-origin redirect.
-      bool cross_site =
-          net::SchemefulSite(origin) != net::SchemefulSite(pending_origin);
+      bool cross_site = !net::SchemefulSite::IsSameSite(origin, pending_origin);
       storage_access_redirect_kind =
           cross_site ? kCrossSite : kCrossOriginSameSite;
       if (cross_site ||
@@ -2237,6 +2250,9 @@ void URLLoader::ContinueOnResponseStartedImmediately() {
       response_->mime_type.assign("text/plain");
     }
   }
+  // TODO(crbug.com/402337002): When client side content decoding is enabled,
+  // we need to run MIME sniffing after decoding the first 1024 bytes of the
+  // body.
 
   StartReading();
 }
@@ -2747,10 +2763,9 @@ void URLLoader::DeleteSelf() {
 }
 
 void URLLoader::SendResponseToClient() {
-  TRACE_EVENT(
-      "loading", "network::URLLoader::SendResponseToClient",
-      perfetto::Flow::ProcessScoped(url_request_->net_log().source().id), "url",
-      url_request_->url());
+  TRACE_EVENT("loading", "network::URLLoader::SendResponseToClient",
+              net::NetLogWithSourceToFlow(url_request_->net_log()), "url",
+              url_request_->url());
   DCHECK_EQ(emitted_devtools_raw_request_, emitted_devtools_raw_response_);
   response_->emitted_extra_info = emitted_devtools_raw_request_;
 

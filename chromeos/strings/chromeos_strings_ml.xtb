@@ -81,6 +81,7 @@
 <translation id="131461803491198646">ഹോം നെറ്റ്‍വര്‍ക്ക്, റോമിംഗ് അല്ല</translation>
 <translation id="1327977588028644528">ഗേറ്റ്‌വേ</translation>
 <translation id="1328223165223065150">വാൾപേപ്പറിനിന്റെ നിറം</translation>
+<translation id="1329478709358066995">ട്രാൻസ്‌ക്രിപ്റ്റ് ചെയ്യുക:</translation>
 <translation id="1330426557709298164">JPG</translation>
 <translation id="1337912285145772892">സ്‌കാൻ ഏരിയയ്‌ക്ക് അനുയോജ്യമാക്കുക</translation>
 <translation id="1343442362630695901">സാൾട്ട് ലേക്ക്</translation>
@@ -126,7 +127,17 @@
 <translation id="1515129336378114413">ബ്രൗസർ ഹോം</translation>
 <translation id="1526389707933164996">സ്ക്രീൻ സേവർ ആനിമേഷൻ</translation>
 <translation id="152892567002884378">ശബ്ദം കൂട്ടുക</translation>
+<translation id="1531038290222364269">ടാബുകൾ കാണിക്കുക</translation>
 <translation id="1539864135338521185">ലാപിസ് ലസുലി</translation>
+<translation id="1548555207631326346">നിങ്ങളുടെ AI ചിത്രങ്ങൾ വ്യക്തിപരമാക്കാൻ ഒരു തീം തിരഞ്ഞെടുത്ത്, അടിവരയിട്ട വാക്കുകൾ തിരഞ്ഞെടുക്കുക.<ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          കൂടുതൽ തനതും വ്യത്യസ്‌തവുമായ AI ചിത്ര ഓപ്ഷനുകൾ ലഭിക്കുന്നതിന് "എന്നെ പ്രചോദിപ്പിക്കൂ" തിരഞ്ഞെടുക്കുക.
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          നിങ്ങൾ AI ഉപയോഗിച്ച് സൃഷ്‌ടിക്കുമ്പോൾ, <ph name="BEGIN_LINK_GOOGLE_PRIVACY_POLICY" /> Google-ന്റെ സ്വകാര്യതാ നയത്തിന്<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" /> വിധേയമായി, ചിത്രങ്ങൾ ജനറേറ്റ് ചെയ്യാനും ഉൽപ്പന്നം മെച്ചപ്പെടുത്താനും പ്രോംപ്റ്റ് Google AI സെർവറുകളിലേക്ക് അയയ്ക്കും.
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          ജനറേറ്റീവ് AI പരീക്ഷണാത്മകവും പ്രാരംഭ ഘട്ടത്തിലുള്ളതുമാണ്, നിലവിൽ ഇതിന്റെ ലഭ്യത പരിമിതമാണ്.</translation>
 <translation id="1555130319947370107">നീല</translation>
 <translation id="155865706765934889">ടച്ച്‌പാഡ്</translation>
 <translation id="1561927818299383735">ബാക്ക്‌ലൈറ്റിന്റെ നിറം</translation>
@@ -252,7 +263,6 @@
 <translation id="2011174342667534258">SDK പതിപ്പ്:</translation>
 <translation id="2016697457005847575">ട്രബിള്‍ഷൂട്ടിംഗ് ഘട്ടങ്ങൾ പരീക്ഷിക്കുക</translation>
 <translation id="202500043506723828">EID</translation>
-<translation id="2041627599411887437">നിങ്ങളുടെ AI ചിത്രങ്ങൾ വ്യക്തിപരമാക്കാൻ ഒരു തീം തിരഞ്ഞെടുത്ത്, അടിവരയിട്ട വാക്കുകൾ തിരഞ്ഞെടുക്കുക.</translation>
 <translation id="2045814230297767491">കട്ട്ലറി</translation>
 <translation id="2047316797244836561">സ്ക്രീൻ സേവർ കാണാൻ ഒരു നെറ്റ്‌വർക്കിലേക്ക് കണക്റ്റ് ചെയ്‌ത് പേജ് റീലോഡ് ചെയ്യുക.</translation>
 <translation id="2056550196601855911">IPv4/IPv6</translation>
@@ -405,6 +415,7 @@
 <translation id="2787237339470862294">ഈ ഭാഷ ഇപ്പോൾ പിന്തുണയ്ക്കുന്നില്ല</translation>
 <translation id="2787435249130282949">തെളിച്ചമുള്ള കീബോർഡ്</translation>
 <translation id="2805756323405976993">ആപ്പുകൾ</translation>
+<translation id="2822702442014805146">സംഗ്രഹവും പേര് സൃഷ്ടിക്കലും മോഡൽ ഡൗൺലോഡ് പുരോഗമിക്കുന്നു</translation>
 <translation id="28232023175184696">ഇന്റർനെറ്റിലേക്ക് കണക്റ്റ് ചെയ്യാനാകുന്നില്ല. വീണ്ടും ശ്രമിക്കാൻ ക്ലിക്ക് ചെയ്യുക.</translation>
 <translation id="2855718259207180827">കമ്പിളി</translation>
 <translation id="2859243502336719778">നിർണ്ണായക അപ്ഡേറ്റ്</translation>
@@ -502,6 +513,7 @@
 <translation id="3373141842870501561">എർത്ത് ഫ്ലോ വാൾപേപ്പർ</translation>
 <translation id="33736539805963175"><ph name="LETTERS_COLOR" /> പശ്ചാത്തലത്തിലുള്ള <ph name="LETTERS_LETTER" /> എന്ന അക്ഷരം</translation>
 <translation id="3383623117265110236">എക്‌സ്ക്ലൂസീവ്</translation>
+<translation id="3395147534045164351">സ്‌നാപ്പ് ലൊക്കേഷൻ ടോഗിൾ ചെയ്യുക</translation>
 <translation id="3404249063913988450">സ്ക്രീൻ സേവർ പ്രവർത്തനക്ഷമമാക്കുക</translation>
 <translation id="3413935475507503304">അപ്‌ഡേറ്റുമായി മുന്നോട്ട് പോകാൻ, 'അടുത്തത്' ക്ലിക്ക് ചെയ്യുക.</translation>
 <translation id="3428551088151258685">ഔട്ട്ഡോർ</translation>
@@ -651,6 +663,7 @@
 <translation id="4113067922640381334">നിങ്ങൾക്ക് ഇപ്പോൾ പുതിയ <ph name="BEGIN_LINK_WALLPAPER_SUBPAGE" />വാൾപേപ്പറുകളിലേക്ക്<ph name="END_LINK_WALLPAPER_SUBPAGE" /> ആക്സസ് ഉണ്ട്</translation>
 <translation id="4117637339509843559">ഡാർക്ക് മോഡ്</translation>
 <translation id="4126551873361000548">10 സെക്കൻഡ് പിന്നോട്ട് നീക്കുക</translation>
+<translation id="4128271910628504223">"മൂടൽമഞ്ഞുള്ള ഒരു കാട് വരയ്ക്കുക" എന്നത് പോലുള്ള ഒരു പ്രോംപ്റ്റ് നൽകുക</translation>
 <translation id="4130035430755296270">കൂടുതൽ ലേഔട്ട് ഓപ്ഷനുകൾക്ക് ഹോവർ ചെയ്യുന്നത് തുടരുക</translation>
 <translation id="4130750466177569591">ഞാന്‍ അംഗീകരിക്കുന്നു</translation>
 <translation id="4131410914670010031">കറുപ്പും വെള്ളയും</translation>
@@ -824,6 +837,7 @@
 <translation id="4891842000192098784">സമ്മർദ്ദം</translation>
 <translation id="4897058166682006107">ഉപകരണത്തിന്റെ ഇടത് ബഡിൽ <ph name="BATTERY_PERCENTAGE" />% ബാറ്ററിയുണ്ട്.</translation>
 <translation id="4905998861748258752">സ്ക്രീൻ സേവർ ഓപ്ഷനുകൾ തിരഞ്ഞെടുക്കാൻ ഫീച്ചർ ഓണാക്കുക</translation>
+<translation id="4910853326379896417">സംഗ്രഹവും പേര് സൃഷ്ടിക്കലും മോഡൽ ഡൗൺലോഡ് പൂർത്തിയായി</translation>
 <translation id="4910858703033903787">APN തരങ്ങൾ</translation>
 <translation id="4917385247580444890">ശക്തം</translation>
 <translation id="4917889632206600977">പ്രിന്റ് ജോലി നിർത്തി - പേപ്പറില്ല</translation>
@@ -858,8 +872,10 @@
 <translation id="5050042263972837708">ഗ്രൂപ്പിന്‍റെ പേര്</translation>
 <translation id="5051044138948155788">ഇത് അവസാനത്തെ പേജാണ്. ഇത് നീക്കം ചെയ്യുന്നത് നിങ്ങളെ സ്‌കാനിംഗിന്റെ ആരംഭ സ്ക്രീനിലേക്ക് കൊണ്ടുപോകും.</translation>
 <translation id="5053233795640754917">താൽക്കാലികമായി നിർത്തുക</translation>
+<translation id="5056587122125565772">ചിത്രം സൃഷ്ടിക്കുക</translation>
 <translation id="5078711626843651677">സ്പീക്കർ ലേബലിംഗ് പൂർത്തിയാകുന്നത് വരെ ശബ്‌ദ മോഡലുകൾ ഉപകരണത്തിൽ താൽക്കാലികമായി സംഭരിക്കും. ക്രമീകരണത്തിൽ ഏതുസമയത്തും നിങ്ങൾക്ക് ഇത് ഓഫാക്കാം.</translation>
 <translation id="5078983345702708852">ഫ്യൂച്ചറിസ്റ്റിക്</translation>
+<translation id="5085224064082122501">സംഗ്രഹവും പേര് സൃഷ്ടിക്കലും മോഡൽ ഡൗൺലോഡ് ചെയ്യാനാകുന്നില്ല. വീണ്ടും ശ്രമിക്കുക അല്ലെങ്കിൽ നിങ്ങളുടെ Chromebook റീസ്റ്റാർട്ട് ചെയ്യുക.</translation>
 <translation id="5087864757604726239">തിരികെ</translation>
 <translation id="5088172560898466307">സെർവർ ഹോസ്റ്റ്‌നാമം</translation>
 <translation id="5089810972385038852">സ്റ്റേറ്റ്</translation>
@@ -1129,14 +1145,12 @@
 <translation id="6325525973963619867">പരാജയപ്പെട്ടു</translation>
 <translation id="6327262166342360252">ഇനിപ്പറയുന്ന ടെക്‌സ്റ്റ് ഉൾപ്പെടുത്തി, AI ഉപയോഗിച്ചാണ് ഈ വാൾപേപ്പർ സൃഷ്‌ടിച്ചത്: "<ph name="PROMPT" />."</translation>
 <translation id="6331191339300272798">സ്വയമേവയുള്ള ഡാർക്ക് തീം</translation>
-<translation id="6335228876613776082">മോഡലിന്റെ ഡൗൺലോഡ് പൂർത്തിയായി</translation>
 <translation id="6340526405444716530">വ്യക്തിപരമാക്കൽ</translation>
 <translation id="6348252528297699679">ക്രമീകരണം &gt; സ്വകാര്യതയും സുരക്ഷയും &gt; സ്വകാര്യതാ നിയന്ത്രണങ്ങൾ &gt; ലൊക്കേഷൻ ആക്‌സസ് എന്നിങ്ങനെ പോയി നിങ്ങൾക്ക് ലൊക്കേഷൻ ഓഫാക്കാം. <ph name="LINK_BEGIN" />കൂടുതലറിയുക<ph name="LINK_END" /></translation>
 <translation id="6348738456043757611">ഉപയോക്തൃനാമവും പാസ്‍വേഡും</translation>
 <translation id="6352210854422428614">മറ്റൊരു ഗ്രഹം</translation>
 <translation id="6359706544163531585">ലൈറ്റ് തീം പ്രവർത്തനരഹിതമാക്കുക</translation>
 <translation id="6359919876285606596">ഈ പ്രവർത്തനം ശാശ്വതമാണ്, പഴയപടിയാക്കാനാകില്ല</translation>
-<translation id="6368342879959028556">“AI ഉപയോഗിച്ച് സൃഷ്ടിക്കുക” തിരഞ്ഞെടുക്കുമ്പോൾ, ഒരു ഇഷ്‌ടാനുസൃത പ്രോംപ്റ്റ് എഴുതുക. അല്ലെങ്കിൽ നിങ്ങൾക്ക് "AI വാൾപേപ്പറുകൾ" തിരഞ്ഞെടുത്ത ശേഷം, നിങ്ങളുടെ AI വാൾപേപ്പർ വ്യക്തിപരമാക്കാൻ ഒരു തീം തിരഞ്ഞെടുത്ത്, അടിവരയിട്ട വാക്കുകൾ തിരഞ്ഞെടുക്കാം.</translation>
 <translation id="636850387210749493">സംരംഭ വിവരപ്പട്ടിക</translation>
 <translation id="6369221585240879141">ഈ ട്രാൻസ്ക്രിപ്റ്റ് ഭാഷയ്‌ക്കായി റെക്കോർഡിംഗ് പേരുകൾ സൃഷ്ടിക്കാനാകില്ല</translation>
 <translation id="6373461326814131011">കുളം</translation>
@@ -1209,16 +1223,6 @@
 <translation id="6657240842932274095">നിങ്ങളുടെ ലൊക്കേഷൻ ഉപയോഗിക്കാൻ സിസ്റ്റം സർവീസുകളെ അനുവദിക്കണോ?</translation>
 <translation id="6657585470893396449">പാസ്‌വേഡ്</translation>
 <translation id="66621959568103627">കോറൽ പിങ്ക്</translation>
-<translation id="6667885109186363316"><ph name="SEA_PEN_INTRO_FIRST_PARAGRAPH" />
-          <ph name="LINE_BREAK" />
-          <ph name="LINE_BREAK" />
-          തനതും വ്യത്യസ്‌തവുമായ കൂടുതൽ AI ചിത്ര ഓപ്‌ഷനുകൾ ലഭിക്കുന്നതിന് "എന്നെ പ്രചോദിപ്പിക്കൂ" തിരഞ്ഞെടുക്കുക.
-          <ph name="LINE_BREAK" />
-          <ph name="LINE_BREAK" />
-          നിങ്ങൾ AI ഉപയോഗിച്ച് സൃഷ്‌ടിക്കുമ്പോൾ, <ph name="BEGIN_LINK_GOOGLE_PRIVACY_POLICY" />Google-ന്റെ സ്വകാര്യതാ നയത്തിന്<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" /> വിധേയമായി, ചിത്രങ്ങൾ ജനറേറ്റ് ചെയ്യാനും ഉൽപ്പന്നം മെച്ചപ്പെടുത്താനും പ്രോംപ്‌റ്റ് Google AI സെർവറുകളിലേക്ക് അയയ്‌ക്കും.
-          <ph name="LINE_BREAK" />
-          <ph name="LINE_BREAK" />
-          ജനറേറ്റീവ് AI പരീക്ഷണാത്മകവും പ്രാരംഭ ഘട്ടത്തിലുള്ളതുമാണ്, നിലവിൽ ഇതിന്റെ ലഭ്യത പരിമിതമാണ്.</translation>
 <translation id="6673898378497337661">കീബോർഡിന്റെ തെളിച്ചം കൂട്ടുക</translation>
 <translation id="6692996468359469499">നിങ്ങളുടെ തിരഞ്ഞെടുക്കലുമായി ബന്ധപ്പെട്ട വിവരങ്ങൾ നേടുക</translation>
 <translation id="6694534975463174713">ലോക്ക്</translation>
@@ -1274,6 +1278,7 @@
 <translation id="6930597342185648547">പശ്ചാത്തലത്തെ കുറിച്ച്</translation>
 <translation id="6939667434404433010">റെക്കോർഡിംഗ് പേര് തിരയുക</translation>
 <translation id="6939766318048400022">കഫേ</translation>
+<translation id="6942253772720771875">നിങ്ങളുടെ ഫീഡ്ബാക്ക് പങ്കിടുക അല്ലെങ്കിൽ പ്രശ്നം വിവരിക്കുക</translation>
 <translation id="6943893908656559156">റിമോട്ട് ഐഡന്റിറ്റി (ഓപ്‌ഷണൽ)</translation>
 <translation id="6953137545147683679">സ്വർണ്ണം</translation>
 <translation id="6957231940976260713">സേവനത്തിന്‍റെ പേര്</translation>
@@ -1295,6 +1300,7 @@
 <translation id="7040230719604914234">ഓപ്പറേറ്റർ</translation>
 <translation id="7040729769968826896">സ്‌പീക്കർ തിരിച്ചറിയൽ അനുവദിക്കുക</translation>
 <translation id="7041549558901442110">ഉപകരണം കണക്റ്റ് ചെയ്തിട്ടില്ല.</translation>
+<translation id="704183341263526038">വ്യാഴം</translation>
 <translation id="7046522406494308071">എല്ലാ കുറുക്കുവഴികളും ഡിഫോൾട്ടുകളിലേക്ക് റീസെറ്റ് ചെയ്യണോ?</translation>
 <translation id="7049916119678019302">ക്രമീകരണത്തിൽ ട്രാൻസ്‌ക്രിപ്ഷൻ മോഡൽ ഡൗൺലോഡ് ചെയ്യുക</translation>
 <translation id="7058278511608979688">അവസാനിപ്പിച്ച് സംരക്ഷിക്കുക</translation>
@@ -1389,6 +1395,7 @@
 <translation id="7388345524791662148"><ph name="RECORDING_NAME" /> എന്നതിനുള്ള കൂടുതൽ ഓപ്‌ഷനുകൾ</translation>
 <translation id="7388959671917308825">ബിൽറ്റ് ഇൻ ടച്ച്‌പാഡ്</translation>
 <translation id="7397270852490618635">ലൈറ്റ് തീം ഓഫാക്കുക</translation>
+<translation id="7400166052988585408"><ph name="NUM_SECONDS" /> സെക്കൻഡിനകം ടീച്ചർ നിങ്ങളുടെ സ്ക്രീൻ ലോക്ക് ചെയ്യും</translation>
 <translation id="7401543881546089382">കുറുക്കുവഴി ഇല്ലാതാക്കുക</translation>
 <translation id="7405493795721832710"><ph name="DEVICE_NAME" /> അപ്ഡേറ്റ് ചെയ്യാൻ തയ്യാറാണ്</translation>
 <translation id="741244894080940828">പരിവർത്തനം</translation>
@@ -1427,6 +1434,7 @@
 <translation id="7569444139234840525"><ph name="QUERY_TEXT" /> · /<ph name="PHONETICS" />/</translation>
 <translation id="7570674786725311828">USB ടച്ച്സ്ക്രീൻ</translation>
 <translation id="757747079855995705">സ്‌റ്റോൺ</translation>
+<translation id="7584853321964440104">ഡൗൺലോഡ് ചെയ്യാനാകുന്നില്ല. വീണ്ടും ശ്രമിക്കുക അല്ലെങ്കിൽ നിങ്ങളുടെ Chromebook റീസ്റ്റാർട്ട് ചെയ്യുക.</translation>
 <translation id="7590883480672980941">ഇൻപുട്ട് ക്രമീകരണം</translation>
 <translation id="7595982850646262331"><ph name="TIME_VALUE" /> ശേഷിക്കുന്നു</translation>
 <translation id="7600430297804876776">ഈ <ph name="DEVICE_TYPE" /> ഉപയോഗിക്കാനാകുന്ന സമയം <ph name="MANAGER" /> അഡ്മിൻ സജ്ജീകരിച്ചു.</translation>
@@ -1557,6 +1565,16 @@
 <translation id="8179976553408161302">Enter</translation>
 <translation id="8183975772394450380">ബീച്ച്</translation>
 <translation id="819278132617411009">ഉൽപ്പാദനക്ഷമത വർദ്ധിപ്പിക്കാൻ Google AI ഉപയോഗിക്കൂ</translation>
+<translation id="82003371436638355">"നിങ്ങളുടേതായ ഒന്ന് സൃഷ്ടിക്കുക" തിരഞ്ഞെടുക്കുമ്പോൾ, ഒരു ഇഷ്ടാനുസൃത പ്രോംപ്റ്റ് എഴുതുക. അല്ലെങ്കിൽ നിങ്ങളുടെ AI ചിത്രങ്ങൾ വ്യക്തിപരമാക്കാൻ "ഒരു തീം തിരഞ്ഞെടുത്ത്", അടിവരയിട്ട വാക്കുകൾ തിരഞ്ഞെടുക്കുക.
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          കൂടുതൽ തനതും വ്യത്യസ്‌തവുമായ AI ചിത്ര ഓപ്ഷനുകൾ ലഭിക്കുന്നതിന് "എന്നെ പ്രചോദിപ്പിക്കൂ" തിരഞ്ഞെടുക്കുക.
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          നിങ്ങളുടേതായ വാൾപേപ്പർ സൃഷ്‌ടിക്കുമ്പോൾ, <ph name="BEGIN_LINK_GOOGLE_PRIVACY_POLICY" />Google-ന്റെ സേവന നിബന്ധനകൾക്കും സ്വകാര്യതാ നയത്തിനും<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" /> വിധേയമായി, ചിത്രങ്ങൾ ജനറേറ്റ് ചെയ്യാനും ഉൽപ്പന്നം മെച്ചപ്പെടുത്താനും പ്രോംപ്റ്റ് Google സെർവറുകളിലേക്ക് അയയ്ക്കും. വ്യക്തിപരമോ സൂക്ഷ്‌മമായി കൈകാര്യം ചെയ്യേണ്ടതോ രസഹ്യാത്മകമോ ആയ കാര്യങ്ങളൊന്നും ഉൾപ്പെടുത്തരുത്.
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          ആളുകളെ കുറിച്ച് ഉൾപ്പെടെ, ജനറേറ്റീവ് AI-യ്ക്ക് തെറ്റുകൾ സംഭവിക്കാം, അതിനാൽ ഇത് വീണ്ടും പരിശോധിക്കുക. <ph name="BEGIN_LINK_CREATE_YOUR_OWN_WALLPAPER" />കൂടുതലറിയുക<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" /></translation>
 <translation id="8200772114523450471">പുനരാരംഭിക്കുക</translation>
 <translation id="8206859287963243715">സെല്ലുലാര്‍‌</translation>
 <translation id="8208861521865154048">പെർക്കുകൾ</translation>
@@ -1578,6 +1596,7 @@
 <translation id="8312330582793120272">മീഡിയ പ്ലേ ചെയ്യുക</translation>
 <translation id="8318753676953949627">ഇമേജുകളൊന്നുമില്ല</translation>
 <translation id="8320910311642849813">വനം</translation>
+<translation id="8322464149031882595">മുന്നോട്ട് പോകാൻ ക്ലിക്ക് ചെയ്യുക</translation>
 <translation id="8329018942023753850">Calculator ആപ്പ്</translation>
 <translation id="8336739000755212683">ഉപകരണ അക്കൗണ്ട് ചിത്രം മാറ്റുക</translation>
 <translation id="8339024191194156249">സ്വയമേവയുള്ള ലോഞ്ചിനെ കുറിച്ച് കൂടുതലറിയുക</translation>
@@ -1598,6 +1617,7 @@
 <translation id="8395584934117017006">ഈ <ph name="DEVICE_TYPE" /> എന്റർപ്രൈസ് മാനേജ് ചെയ്യുന്നു</translation>
 <translation id="8398927464629426868">ഉപകരണം നിലവിൽ ചാർജ് ചെയ്യുന്നതോ ഡിസ്‌ചാർജ് ചെയ്യുന്നതോ ആയ റേറ്റ്</translation>
 <translation id="8403988360557588704"><ph name="ART_MOVEMENT" /> സ്റ്റൈലിലുള്ള <ph name="ART_FEATURE" /> എന്നതിന്റെ പെയിന്റിംഗ്</translation>
+<translation id="8409219750150841791">ജനറേറ്റ് ചെയ്ത സംഗ്രഹം:</translation>
 <translation id="8410244574650205435">സ്വയമേവ കണ്ടെത്തി</translation>
 <translation id="8420955526972171689">ഹാര്‍ഡ്‍വെയര്‍ പ്രശ്‌നങ്ങൾ കണ്ടെത്താൻ ടെസ്റ്റുകളും ട്രബിള്‍ഷൂട്ടിംഗും റൺ ചെയ്യുക</translation>
 <translation id="8422748173858722634">IMEI</translation>
@@ -1642,6 +1662,7 @@
 <translation id="8626489604350149811"><ph name="APN_NAME" /> എന്നതിനുള്ള കൂടുതൽ പ്രവർത്തനങ്ങൾ</translation>
 <translation id="86356131183441916">ഇളം പർപ്പിൾ</translation>
 <translation id="8647595191512746911">ഓഡിയോ ട്രാൻസ്‌ക്രിപ്ഷൻ</translation>
+<translation id="8648578954147795914">ജനറേറ്റ് ചെയ്ത പേരുകൾ:</translation>
 <translation id="8650852232143958317">Gmail, Google Drive ഫയലുകൾ കൈമാറൂ</translation>
 <translation id="8651481478098336970">വോളിയം മ്യൂട്ട് ചെയ്യുക</translation>
 <translation id="8655295600908251630">ചാനല്‍</translation>
@@ -1670,7 +1691,6 @@
 <translation id="8764414543112028321">WireGuard</translation>
 <translation id="87646919272181953">Google Photos ആൽബം</translation>
 <translation id="8775713578693478175">മോഡം APN</translation>
-<translation id="877735394245039557">മോഡലിന്റെ ഡൗൺലോഡ് പുരോഗമിക്കുന്നു</translation>
 <translation id="877985182522063539">A4</translation>
 <translation id="879568662008399081">ഈ നെറ്റ്‌വർക്കിന് ക്യാപ്റ്റീവ് പോർട്ടൽ ഉണ്ടായിരിക്കാം</translation>
 <translation id="8797082062139985406">Google AI ഉപയോഗിച്ച് പേര് സൃഷ്ടിക്കുക</translation>
@@ -1723,6 +1743,7 @@
 <translation id="8961025972867871808">പെൻഗ്വിനുകൾ</translation>
 <translation id="8968751544471797276">ചാർജ് ചെയ്യൽ റേറ്റ്</translation>
 <translation id="8970109610781093811">വീണ്ടും പ്രവർത്തിപ്പിക്കുക</translation>
+<translation id="8972061581514441296">മടങ്ങാൻ ക്ലിക്ക് ചെയ്യുക</translation>
 <translation id="8983038754672563810">HSPA</translation>
 <translation id="8987565828374052507">{NUMBER_OF_PAGES,plural, =0{സ്‌കാൻ ചെയ്യുക}=1{{NUMBER_OF_PAGES} പേജ് സ്‌കാൻ ചെയ്യുക}other{{NUMBER_OF_PAGES} പേജ് സ്‌കാൻ ചെയ്യുക}}</translation>
 <translation id="89945434909472341">ഗ്രാമം</translation>
@@ -1784,6 +1805,7 @@
 <translation id="9218016617214286986">അറിയാവുന്ന APN-കൾ കാണിക്കുക</translation>
 <translation id="932327136139879170">ഹോം</translation>
 <translation id="939519157834106403">SSID</translation>
+<translation id="940663759301549538">മൈക്ക് കണക്റ്റ് ചെയ്തിട്ടുണ്ടെന്ന് ഉറപ്പാക്കുക അല്ലെങ്കിൽ Chromebook റീസ്റ്റാർട്ട് ചെയ്ത് നോക്കുക</translation>
 <translation id="945522503751344254">ഫീഡ്‌ബാക്ക് അയയ്‌ക്കുക</translation>
 <translation id="950520315903467048"><ph name="DIRECTION" /> എന്നതിനുള്ള കീ നൽകിയിട്ടില്ല. <ph name="ASSIGN_INSTRUCTION" /></translation>
 <translation id="951780398843003443">റെക്കോർഡിംഗിലുടനീളമുള്ള ശബ്ദങ്ങൾ താരതമ്യം ചെയ്യുക, അതുവഴി ട്രാൻസ്ക്രിപ്റ്റ് ഓരോ സ്പീക്കറും എന്ത് പറഞ്ഞുവെന്നതും എപ്പോൾ പറഞ്ഞുവെന്നതും പ്രതിഫലിപ്പിക്കുന്നു</translation>

@@ -5510,9 +5510,9 @@ Called by update_use_counter_feature_enum.py.-->
       label="OBSOLETE_V8DeviceProperties_UniqueId_AttributeGetter"/>
   <int value="4944"
       label="SharedStorageAPI_SelectURLOverallPageloadBudgetInsufficient"/>
-  <int value="4945" label="V8LanguageTranslator_Translate_Method"/>
-  <int value="4946" label="V8Translation_CanTranslate_Method"/>
-  <int value="4947" label="V8Translation_CreateTranslator_Method"/>
+  <int value="4945" label="OBSOLETE_V8LanguageTranslator_Translate_Method"/>
+  <int value="4946" label="OBSOLETE_V8Translation_CanTranslate_Method"/>
+  <int value="4947" label="OBSOLETE_V8Translation_CreateTranslator_Method"/>
   <int value="4948" label="IdentityDigitalCredentialsDeepLink"/>
   <int value="4949"
       label="V8WebView_GetExperimentalMediaIntegrityTokenProvider_Method"/>
@@ -5687,8 +5687,9 @@ Called by update_use_counter_feature_enum.py.-->
   <int value="5108" label="HTMLSearchElement"/>
   <int value="5109" label="HTMLUnsafeMethods"/>
   <int value="5110"
-      label="V8GPUSupportedLimits_MaxInterStageShaderComponents_AttributeGetter"/>
-  <int value="5111" label="MaxInterStageShaderComponentsRequiredLimit"/>
+      label="OBSOLETE_V8GPUSupportedLimits_MaxInterStageShaderComponents_AttributeGetter"/>
+  <int value="5111"
+      label="OBSOLETE_MaxInterStageShaderComponentsRequiredLimit"/>
   <int value="5112" label="ShowPickerSelect"/>
   <int value="5113" label="AudioContextPlayoutStats"/>
   <int value="5114" label="ThirdPartyCookieBlocked"/>
@@ -5934,6 +5935,46 @@ Called by update_use_counter_feature_enum.py.-->
   <int value="5331" label="WebAppManifestUpdate"/>
   <int value="5332" label="CSSEnvironmentVariable_PreferredTextScale"/>
   <int value="5333" label="ButtonTypeAttrInvalidWithCommandOrCommandfor"/>
+  <int value="5334" label="CSSVarFallbackCycle"/>
+  <int value="5335" label="CSSAttrFallbackCycle"/>
+  <int value="5336" label="CSSRainbowGradientPattern"/>
+  <int value="5337" label="WebAppManifestStartUrl"/>
+  <int value="5338" label="WebAppManifestDisplay"/>
+  <int value="5339" label="WebAppManifestIcons"/>
+  <int value="5340" label="WebAppManifestScreenshots"/>
+  <int value="5341" label="WebAppManifestScope"/>
+  <int value="5342" label="WebAppManifestLockScreen"/>
+  <int value="5343" label="WebAppManifestNoteTaking"/>
+  <int value="5344" label="WebAppManifestPermissionsPolicy"/>
+  <int value="5345" label="WebAppManifestPrefer_Related_Applications"/>
+  <int value="5346" label="WebAppManifestThemeColor"/>
+  <int value="5347" label="WebAppManifestBackgroundColor"/>
+  <int value="5348" label="WebAppManifestTranslations"/>
+  <int value="5349" label="WebAppManifestTabStrip"/>
+  <int value="5350" label="WebAppManifestVersion"/>
+  <int value="5351" label="WebAppManifestRelated_Applications"/>
+  <int value="5352" label="InstalledManifestApplied"/>
+  <int value="5353" label="SRIHashAssertion"/>
+  <int value="5354" label="SRIPublicKeyAssertion"/>
+  <int value="5355" label="ViewTransitionChangeRootElement"/>
+  <int value="5356" label="CSPBlockedWorkerCreation"/>
+  <int value="5357"
+      label="V8Navigator_ClearOriginJoinedAdInterestGroups_Method"/>
+  <int value="5358" label="WebAppManifestDisplayMinimalUI"/>
+  <int value="5359" label="WebAppManifestDisplayBrowser"/>
+  <int value="5360" label="WebAppManifestDisplayFullscreen"/>
+  <int value="5361" label="WebAppManifestDisplayStandalone"/>
+  <int value="5362" label="BlockingAttributeFullFrameRateToken"/>
+  <int value="5363" label="CrossOriginOwnerInterestGroupSubframeCheckFailed"/>
+  <int value="5364" label="PreferredAudioOutputDevices"/>
+  <int value="5365" label="SharedStorageAPI_SelectURL_Method_CalledWithOneURL"/>
+  <int value="5366" label="V8AIRewriter_MeasureInputUsage_Method"/>
+  <int value="5367" label="V8AIRewriter_InputQuota_AttributeGetter"/>
+  <int value="5368" label="V8AISummarizer_MeasureInputUsage_Method"/>
+  <int value="5369" label="V8AISummarizer_InputQuota_AttributeGetter"/>
+  <int value="5370" label="V8AIWriter_MeasureInputUsage_Method"/>
+  <int value="5371" label="V8AIWriter_InputQuota_AttributeGetter"/>
+  <int value="5372" label="SpeculationRulesTargetHintBlank"/>
 </enum>
 
 <!-- LINT.ThenChange(//third_party/blink/public/mojom/use_counter/metrics/web_feature.mojom:WebFeature) -->
@@ -6444,6 +6485,12 @@ Called by update_permissions_policy_enum.py.-->
   <int value="2" label="User does not sign in"/>
 </enum>
 
+<enum name="FedCmUserAction">
+  <int value="0" label="User signed in"/>
+  <int value="1" label="User ignored the UI"/>
+  <int value="2" label="User closed the UI"/>
+</enum>
+
 <enum name="FedCmUserInfoStatus">
   <int value="0" label="Success"/>
   <int value="1" label="Caller is not same origin with config URL"/>
@@ -6598,13 +6645,6 @@ Called by update_permissions_policy_enum.py.-->
   <int value="7"
       label="At least one tag in the first, second, and third groupings was
              encountered"/>
-</enum>
-
-<enum name="IntersectionObservationUpdateType">
-  <int value="0" label="No update"/>
-  <int value="1" label="Scroll only"/>
-  <int value="2" label="CachedRectInvalid"/>
-  <int value="3" label="Full update"/>
 </enum>
 
 <enum name="KeyboardLockMethods">
@@ -7428,7 +7468,7 @@ Called by update_use_counter_css.py.-->
   <int value="807" label="masonry-track"/>
   <int value="808" label="masonry-slack"/>
   <int value="809" label="caret-animation"/>
-  <int value="810" label="view-transition-capture-mode"/>
+  <int value="810" label="view-transition-capture-mode (obsolete)"/>
   <int value="811" label="interactivity"/>
   <int value="812" label="masonry-fill"/>
   <int value="813" label="masonry-direction"/>
@@ -7465,6 +7505,7 @@ Called by update_use_counter_css.py.-->
   <int value="844" label="row-rule-style"/>
   <int value="845" label="gap-rule-paint-order"/>
   <int value="846" label="row-rule-width"/>
+  <int value="847" label="row-rule-color"/>
 </enum>
 
 <!-- LINT.ThenChange(//third_party/blink/public/mojom/use_counter/metrics/css_property_id.mojom:CSSSampleId) -->
@@ -7488,7 +7529,8 @@ Called by update_use_counter_css.py.-->
   <int value="1" label="Failed or has not been registered"/>
   <int value="2" label="Recently attached to layout tree"/>
   <int value="3"
-      label="Intersection visibility has recently become fully visible"/>
+      label="(Obsolete) Intersection visibility has recently become fully
+             visible. Deprecated as of 2024-09."/>
   <int value="4" label="Invalid style"/>
   <int value="5" label="Untrusted event"/>
   <int value="6" label="Intersection with viewport changed"/>
@@ -7857,7 +7899,7 @@ Called by update_use_counter_feature_enum.py.-->
   <int value="294" label="ScrollButtons"/>
   <int value="295" label="ScrollMarkers"/>
   <int value="296" label="DRAFT_PopoverHint"/>
-  <int value="297" label="DRAFT_RegExpEscape"/>
+  <int value="297" label="RegexpEscape"/>
   <int value="298" label="Float16array"/>
   <int value="299" label="AppFileHandlers"/>
   <int value="300" label="AppProtocolHandlers"/>
@@ -7866,6 +7908,10 @@ Called by update_use_counter_feature_enum.py.-->
   <int value="303" label="BeforeInstallPrompt"/>
   <int value="304" label="AppShareTargets"/>
   <int value="305" label="AppShortcuts"/>
+  <int value="306" label="FetchLater"/>
+  <int value="307" label="DRAFT_WasmBranchHinting"/>
+  <int value="308" label="DRAFT_ExplicitResourceManagement"/>
+  <int value="309" label="LaunchHandler"/>
 </enum>
 
 <!-- LINT.ThenChange(//third_party/blink/public/mojom/use_counter/metrics/webdx_feature.mojom:WebDXFeature) -->

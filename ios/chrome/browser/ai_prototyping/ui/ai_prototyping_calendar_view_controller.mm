@@ -13,9 +13,10 @@
 #import "ui/base/l10n/l10n_util.h"
 
 @implementation AIPrototypingCalendarViewController {
-  UITextView* _responseContainer;
+  UITextField* _selectedTextField;
+  UITextView* _promptField;
   UIButton* _submitButton;
-  UITextField* _promptField;
+  UITextView* _responseContainer;
 }
 
 // Synthesized from `AIPrototypingViewControllerProtocol`.
@@ -40,26 +41,45 @@
 
   UIColor* primaryColor = [UIColor colorNamed:kTextPrimaryColor];
 
-  // Title.
+  // Title. Outside the scroll view to allow something to drag onto to change
+  // detents of the sheet.
   UILabel* label = [[UILabel alloc] init];
   label.translatesAutoresizingMaskIntoConstraints = NO;
   label.font = [UIFont preferredFontForTextStyle:UIFontTextStyleTitle2];
   label.text = l10n_util::GetNSString(IDS_IOS_AI_PROTOTYPING_CALENDAR_HEADER);
+  [self.view addSubview:label];
 
-  // Optional user query.
-  _promptField = [[UITextField alloc] init];
-  _promptField.translatesAutoresizingMaskIntoConstraints = NO;
-  _promptField.placeholder = l10n_util::GetNSString(
+  // Wrapper scrollview to allow for scrolling in case the prompt field becomes
+  // too big to fit.
+  UIScrollView* scrollView = [[UIScrollView alloc] init];
+  scrollView.translatesAutoresizingMaskIntoConstraints = NO;
+  [self.view addSubview:scrollView];
+
+  // Selected date/time text field.
+  _selectedTextField = [[UITextField alloc] init];
+  _selectedTextField.translatesAutoresizingMaskIntoConstraints = NO;
+  _selectedTextField.placeholder = l10n_util::GetNSString(
+      IDS_IOS_AI_PROTOTYPING_CALENDAR_SELECTED_TEXT_PLACEHOLDER);
+  UIView* selectedTextFieldContainer = [self textFieldContainer];
+  [selectedTextFieldContainer addSubview:_selectedTextField];
+
+  // Optional user prompt. Label is separate since it is now a `UITextView` (no
+  // placeholder).
+  UILabel* promptFieldLabel = [[UILabel alloc] init];
+  promptFieldLabel.translatesAutoresizingMaskIntoConstraints = NO;
+  promptFieldLabel.text = l10n_util::GetNSString(
       IDS_IOS_AI_PROTOTYPING_CALENDAR_PROMPT_PLACEHOLDER);
 
-  UIView* promptFieldContainer = [[UIView alloc] init];
-  promptFieldContainer.translatesAutoresizingMaskIntoConstraints = NO;
-  promptFieldContainer.layer.cornerRadius = kCornerRadius;
-  promptFieldContainer.layer.masksToBounds = YES;
-  promptFieldContainer.layer.borderColor =
-      [[UIColor colorNamed:kTextPrimaryColor] CGColor];
-  promptFieldContainer.layer.borderWidth = kBorderWidth;
-  [promptFieldContainer addSubview:_promptField];
+  _promptField = [[UITextView alloc] init];
+  _promptField.translatesAutoresizingMaskIntoConstraints = NO;
+  _promptField.scrollEnabled = NO;
+  _promptField.layer.cornerRadius = kCornerRadius;
+  _promptField.layer.masksToBounds = YES;
+  _promptField.layer.borderColor = [primaryColor CGColor];
+  _promptField.layer.borderWidth = kBorderWidth;
+  _promptField.textContainer.lineBreakMode = NSLineBreakByWordWrapping;
+  _promptField.font =
+      [UIFont preferredFontForTextStyle:UIFontTextStyleFootnote];
 
   // Submit button.
   _submitButton = [UIButton buttonWithType:UIButtonTypeSystem];
@@ -82,38 +102,61 @@
   _responseContainer.layer.borderColor = [primaryColor CGColor];
   _responseContainer.layer.borderWidth = kBorderWidth;
   _responseContainer.textContainer.lineBreakMode = NSLineBreakByWordWrapping;
+  _responseContainer.text =
+      l10n_util::GetNSString(IDS_IOS_AI_PROTOTYPING_RESULT_PLACEHOLDER);
 
   UIStackView* stackView = [[UIStackView alloc] initWithArrangedSubviews:@[
-    label, promptFieldContainer, _submitButton, _responseContainer
+    selectedTextFieldContainer, promptFieldLabel, _promptField, _submitButton,
+    _responseContainer
   ]];
   stackView.translatesAutoresizingMaskIntoConstraints = NO;
   stackView.axis = UILayoutConstraintAxisVertical;
   stackView.spacing = kMainStackViewSpacing;
-  [self.view addSubview:stackView];
+  [scrollView addSubview:stackView];
 
   // Constraints.
   [NSLayoutConstraint activateConstraints:@[
-    [stackView.topAnchor constraintEqualToAnchor:self.view.topAnchor
-                                        constant:kMainStackTopInset],
-    [stackView.leadingAnchor constraintEqualToAnchor:self.view.leadingAnchor
+    [label.leadingAnchor constraintEqualToAnchor:self.view.leadingAnchor
+                                        constant:kHorizontalInset],
+    [label.trailingAnchor constraintEqualToAnchor:self.view.trailingAnchor
+                                         constant:-kHorizontalInset],
+    [label.topAnchor constraintEqualToAnchor:self.view.topAnchor
+                                    constant:kMainStackTopInset],
+
+    [scrollView.leadingAnchor constraintEqualToAnchor:self.view.leadingAnchor],
+    [scrollView.trailingAnchor
+        constraintEqualToAnchor:self.view.trailingAnchor],
+    [scrollView.bottomAnchor constraintEqualToAnchor:self.view.bottomAnchor],
+    [scrollView.topAnchor constraintEqualToAnchor:label.bottomAnchor
+                                         constant:kMainStackViewSpacing],
+
+    [stackView.topAnchor constraintEqualToAnchor:scrollView.topAnchor],
+    [stackView.bottomAnchor
+        constraintLessThanOrEqualToAnchor:scrollView.bottomAnchor],
+    [stackView.leadingAnchor constraintEqualToAnchor:scrollView.leadingAnchor
                                             constant:kHorizontalInset],
-    [stackView.trailingAnchor constraintEqualToAnchor:self.view.trailingAnchor
+    [stackView.trailingAnchor constraintEqualToAnchor:scrollView.trailingAnchor
                                              constant:-kHorizontalInset],
+    [stackView.centerXAnchor constraintEqualToAnchor:scrollView.centerXAnchor],
     [_responseContainer.heightAnchor
-        constraintGreaterThanOrEqualToAnchor:self.view.heightAnchor
+        constraintGreaterThanOrEqualToAnchor:scrollView.heightAnchor
                                   multiplier:
                                       kResponseContainerHeightMultiplier],
 
-    [promptFieldContainer.heightAnchor
-        constraintEqualToAnchor:_promptField.heightAnchor
+    [selectedTextFieldContainer.heightAnchor
+        constraintEqualToAnchor:_selectedTextField.heightAnchor
                        constant:kVerticalInset],
-    [promptFieldContainer.widthAnchor
-        constraintEqualToAnchor:_promptField.widthAnchor
+    [selectedTextFieldContainer.widthAnchor
+        constraintEqualToAnchor:_selectedTextField.widthAnchor
                        constant:kHorizontalInset],
-    [promptFieldContainer.centerXAnchor
-        constraintEqualToAnchor:_promptField.centerXAnchor],
-    [promptFieldContainer.centerYAnchor
-        constraintEqualToAnchor:_promptField.centerYAnchor],
+    [selectedTextFieldContainer.centerXAnchor
+        constraintEqualToAnchor:_selectedTextField.centerXAnchor],
+    [selectedTextFieldContainer.centerYAnchor
+        constraintEqualToAnchor:_selectedTextField.centerYAnchor],
+
+    [_promptField.heightAnchor
+        constraintGreaterThanOrEqualToAnchor:_selectedTextField.heightAnchor
+                                    constant:kVerticalInset],
 
   ]];
 }
@@ -134,13 +177,26 @@
 - (void)onSubmitButtonPressed:(UIButton*)button {
   [self disableSubmitButton];
   [self updateResponseField:@""];
-  [_mutator executeEnhancedCalendarQueryWithPrompt:_promptField.text];
+  [_mutator executeEnhancedCalendarQueryWithPrompt:_promptField.text
+                                      selectedText:_selectedTextField.text];
 }
 
 // Disable submit button, and style it accordingly.
 - (void)disableSubmitButton {
   _submitButton.enabled = NO;
   _submitButton.backgroundColor = [UIColor colorNamed:kDisabledTintColor];
+}
+
+// Creates a text field container.
+- (UIView*)textFieldContainer {
+  UIView* container = [[UIView alloc] init];
+  container.layer.masksToBounds = YES;
+  container.layer.cornerRadius = kCornerRadius;
+  container.layer.borderColor =
+      [[UIColor colorNamed:kTextPrimaryColor] CGColor];
+  container.layer.borderWidth = kBorderWidth;
+  container.translatesAutoresizingMaskIntoConstraints = NO;
+  return container;
 }
 
 @end

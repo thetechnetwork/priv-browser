@@ -19,10 +19,11 @@
 #include "content/browser/preloading/prefetch/prefetch_status.h"
 #include "content/browser/preloading/prefetch/prefetch_streaming_url_loader_common_types.h"
 #include "content/browser/preloading/prefetch/prefetch_type.h"
-#include "content/browser/preloading/preload_pipeline_info.h"
+#include "content/browser/preloading/preload_pipeline_info_impl.h"
 #include "content/common/content_export.h"
 #include "content/public/browser/global_routing_id.h"
 #include "content/public/browser/prefetch_request_status_listener.h"
+#include "content/public/browser/preload_pipeline_info.h"
 #include "content/public/browser/preloading.h"
 #include "content/public/browser/preloading_data.h"
 #include "net/http/http_no_vary_search_data.h"
@@ -51,6 +52,7 @@ class PreloadingAttempt;
 class ProxyLookupClientImpl;
 class RenderFrameHost;
 class RenderFrameHostImpl;
+class ServiceWorkerClient;
 
 // Holds the relevant size information of the prefetched response. The struct is
 // installed onto `PrefetchContainer`, and gets passed into
@@ -121,6 +123,7 @@ class CONTENT_EXPORT PrefetchContainer {
       const blink::mojom::Referrer& referrer,
       const std::optional<url::Origin>& referring_origin,
       std::optional<net::HttpNoVarySearchData> no_vary_search_hint,
+      scoped_refptr<PreloadPipelineInfo> preload_pipeline_info,
       base::WeakPtr<PreloadingAttempt> attempt = nullptr,
       std::optional<PreloadingHoldbackStatus> holdback_status_override =
           std::nullopt);
@@ -223,10 +226,7 @@ class CONTENT_EXPORT PrefetchContainer {
   // Each callback is called at most once in the lifecycle of a container.
   //
   // Be careful about using this. This is designed only for
-  // `PrefetchMatchResolver2`.
-  //
-  // These callback are called only if `kPrefetchNewWaitLoop` is enabled.
-  // Observer interface to listen to lifecycle events of `PrefetchContainer`.
+  // `PrefetchMatchResolver`.
   class Observer : public base::CheckedObserver {
    public:
     // Called at the head of dtor.
@@ -418,8 +418,7 @@ class CONTENT_EXPORT PrefetchContainer {
   // Returns the URL loader being used for prefetching the current redirect hop.
   // This method should be used during prefetching and shouldn't be called for
   // serving purpose.
-  const base::WeakPtr<PrefetchStreamingURLLoader>& GetStreamingURLLoader()
-      const;
+  base::WeakPtr<PrefetchStreamingURLLoader> GetStreamingURLLoader() const;
 
   bool IsStreamingURLLoaderDeletionScheduledForTesting() const;
 
@@ -444,11 +443,6 @@ class CONTENT_EXPORT PrefetchContainer {
 
   // The |PrefetchDocumentManager| that requested |this|.
   PrefetchDocumentManager* GetPrefetchDocumentManager() const;
-
-  // Called when |PrefetchService::GetPrefetchToServe| and
-  // |PrefetchService::ReturnPrefetchToServe| with |this|.
-  void OnGetPrefetchToServe(bool blocked_until_head);
-  void OnReturnPrefetchToServe(bool served, const GURL& navigated_url);
 
   // Returns whether or not this prefetch has been considered to serve for a
   // navigation in the past. If it has, then it shouldn't be used for any future
@@ -487,7 +481,7 @@ class CONTENT_EXPORT PrefetchContainer {
     // This received non redirect header and is not expired.
     //
     // Note that it needs more checks to serve, e.g. cookie check. See also e.g.
-    // `PrefetchMatchResolver2::OnDeterminedHead()`.
+    // `PrefetchMatchResolver::OnDeterminedHead()`.
     kServable,
 
     // Not other states.
@@ -516,7 +510,6 @@ class CONTENT_EXPORT PrefetchContainer {
   // This method must be called at most once in the lifecycle of
   // `PrefetchContainer`.
   void OnDeterminedHead();
-  void OnDeterminedHead2();
   // Unblocks waiting `PrefetchMatchResolver`.
   //
   // This method can be called multiple times.
@@ -568,6 +561,12 @@ class CONTENT_EXPORT PrefetchContainer {
 
   void DisablePrecogLoggingForTest() { attempt_ = nullptr; }
 
+  // Set a callback for waiting for prefetch completion in tests.
+  using PrefetchResponseCompletedCallbackForTesting =
+      base::RepeatingCallback<void(base::WeakPtr<PrefetchContainer>)>;
+  static void SetPrefetchResponseCompletedCallbackForTesting(
+      PrefetchResponseCompletedCallbackForTesting callback);
+
   const std::optional<net::HttpNoVarySearchData>& GetNoVarySearchData() const {
     return no_vary_search_data_;
   }
@@ -580,12 +579,11 @@ class CONTENT_EXPORT PrefetchContainer {
   //
   // - Roughly speaking, when non-redirect header received and
   //   `PrefetchService`/`PrefetchContainer` detected cookies change of the head
-  //   of redirect chain. `PrefetchMatchResolver`/`PrefetchMatchResolver2`
-  //   propagates it to other waiting prefetches as they share domain.
+  //   of redirect chain. `PrefetchMatchResolver` propagates it to other waiting
+  //   prefetches as they share domain.
   // - When `PrefetchURLLoaderInterceptor::MaybeCreateLoader()` handles
   //   redirects in the serving prefetch.
-  void OnDetectedCookiesChange();
-  void OnDetectedCookiesChange2(
+  void OnDetectedCookiesChange(
       std::optional<bool>
           is_unblock_for_cookies_changed_triggered_by_this_prefetch_container);
 
@@ -683,7 +681,8 @@ class CONTENT_EXPORT PrefetchContainer {
     const SinglePrefetch& GetCurrentSinglePrefetchToServe() const;
 
     // See the comment for `PrefetchResponseReader::CreateRequestHandler()`.
-    PrefetchRequestHandler CreateRequestHandler();
+    std::pair<PrefetchRequestHandler, base::WeakPtr<ServiceWorkerClient>>
+    CreateRequestHandler();
 
     // See the corresponding functions on `PrefetchResponseReader`.
     // These apply to the current `SinglePrefetch` (and so, may change as the
@@ -717,12 +716,12 @@ class CONTENT_EXPORT PrefetchContainer {
   // Records metrics when serving result is determined.
   //
   // This is eventually called once for every `PrefetchContainer` put in
-  // `PrefetchMatchResolver2::candidates_`, i.e. those potentially matching
+  // `PrefetchMatchResolver::candidates_`, i.e. those potentially matching
   // and expected to become servable at the head of
-  // `PrefetchMatchResolver2::FindPrefetch()`.
+  // `PrefetchMatchResolver::FindPrefetch()`.
   //
   // This can be called multiple times, because this can be called for multiple
-  // `PrefetchMatchResolver2`s.
+  // `PrefetchMatchResolver`s.
   void OnUnregisterCandidate(const GURL& navigated_url,
                              bool is_served,
                              std::optional<base::TimeDelta> blocked_duration);
@@ -772,6 +771,12 @@ class CONTENT_EXPORT PrefetchContainer {
   MakeSelfOwnedNetworkServiceDevToolsObserver();
 
   bool is_in_dtor() const { return is_in_dtor_; }
+
+  void OnServiceWorkerStateDetermined(
+      PrefetchServiceWorkerState service_worker_state);
+  PrefetchServiceWorkerState service_worker_state() const {
+    return service_worker_state_;
+  }
 
  protected:
   friend class PrefetchContainerTestBase;
@@ -847,6 +852,9 @@ class CONTENT_EXPORT PrefetchContainer {
   // The ID of the RenderFrameHost/Document that triggered the prefetch.
   // This will be empty when browser-initiated prefetch.
   const GlobalRenderFrameHostId referring_render_frame_host_id_;
+
+  PrefetchServiceWorkerState service_worker_state_ =
+      PrefetchServiceWorkerState::kAllowed;
 
   // The origin and URL that initiates the prefetch request.
   // For renderer-initiated prefetch, this is calculated by referring
@@ -983,8 +991,8 @@ class CONTENT_EXPORT PrefetchContainer {
   //
   // Note that we distinguish the primary one and inherited ones because we send
   // CDP events with id of `preload_pipeline_info_`.
-  scoped_refptr<PreloadPipelineInfo> preload_pipeline_info_;
-  std::vector<scoped_refptr<PreloadPipelineInfo>>
+  scoped_refptr<PreloadPipelineInfoImpl> preload_pipeline_info_;
+  std::vector<scoped_refptr<PreloadPipelineInfoImpl>>
       inherited_preload_pipeline_infos_;
 
   // `PreloadingAttempt` is used to track the lifecycle of the preloading event,
@@ -1013,12 +1021,6 @@ class CONTENT_EXPORT PrefetchContainer {
   // A timer used to limit the maximum amount of time that a navigation can be
   // blocked waiting for the head of this prefetch to be received.
   std::unique_ptr<base::OneShotTimer> block_until_head_timer_;
-
-  // Callback for non-blocking call `StartBlockUntilHead()`.
-  //
-  // TODO(crbug.com/353490734): Remove it.
-  base::OnceCallback<void(PrefetchContainer&)>
-      on_maybe_determined_head_callback_;
 
   // Additional headers for WebView initiated prefetch.
   // This must be empty for non-WebView initiated prefetches.

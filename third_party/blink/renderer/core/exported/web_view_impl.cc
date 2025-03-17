@@ -206,8 +206,6 @@
 #undef pow
 #include <cmath>  // for std::pow
 
-#include "build/chromeos_buildflags.h"
-
 // The following constants control parameters for automated scaling of webpages
 // (such as due to a double tap gesture or find in page etc.). These are
 // experimentally determined.
@@ -1596,12 +1594,6 @@ void WebView::ApplyWebPreferences(const web_pref::WebPreferences& prefs,
   settings->SetHyperlinkAuditingEnabled(prefs.hyperlink_auditing_enabled);
   settings->SetCookieEnabled(prefs.cookie_enabled);
 
-  // By default, allow Android WebView to enable WebSQL. Rollout for disabling
-  // will happen via Finch.
-  if (base::FeatureList::IsEnabled(blink::features::kWebSQLWebViewAccess)) {
-    RuntimeEnabledFeatures::SetDatabaseEnabled(prefs.databases_enabled);
-  }
-
   // By default, allow_universal_access_from_file_urls is set to false and thus
   // we mitigate attacks from local HTML files by not granting file:// URLs
   // universal access. Only test shell will enable this.
@@ -1844,6 +1836,7 @@ void WebView::ApplyWebPreferences(const web_pref::WebPreferences& prefs,
   settings->SetPictureInPictureEnabled(prefs.picture_in_picture_enabled &&
                                        ::features::UseSurfaceLayerForVideo());
 
+  settings->SetRootScrollbarThemeColor(prefs.root_scrollbar_theme_color);
   settings->SetLazyLoadEnabled(prefs.lazy_load_enabled);
   settings->SetInForcedColors(prefs.in_forced_colors);
   settings->SetIsForcedColorsDisabled(prefs.is_forced_colors_disabled);
@@ -3677,7 +3670,7 @@ void WebViewImpl::SetIsActive(bool active) {
 }
 
 bool WebViewImpl::IsActive() const {
-  return GetPage() ? GetPage()->GetFocusController().IsActive() : false;
+  return GetPage() && GetPage()->GetFocusController().IsActive();
 }
 
 void WebViewImpl::SetWindowFeatures(const WebWindowFeatures& features) {

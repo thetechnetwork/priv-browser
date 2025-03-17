@@ -45,7 +45,7 @@
 #include "ui/events/blink/blink_features.h"
 #include "ui/gfx/switches.h"
 #include "ui/gl/gl_switches.h"
-#include "ui/native_theme/native_theme_features.h"
+#include "ui/native_theme/features/native_theme_features.h"
 #include "ui/native_theme/native_theme_utils.h"
 
 #if BUILDFLAG(IS_ANDROID)
@@ -346,12 +346,11 @@ void SetRuntimeFeaturesFromChromiumFeatures() {
 #endif
           {"CompressionDictionaryTransport",
            raw_ref(network::features::kCompressionDictionaryTransport)},
+          {"ClipboardChangeEvent", raw_ref(features::kClipboardChangeEvent)},
           {"CompressionDictionaryTransportBackend",
            raw_ref(network::features::kCompressionDictionaryTransportBackend)},
           {"CookieDeprecationFacilitatedTesting",
            raw_ref(features::kCookieDeprecationFacilitatedTesting)},
-          {"Database", raw_ref(blink::features::kWebSQLAccess),
-           kSetOnlyIfOverridden},
           {"DocumentPolicyIncludeJSCallStacksInCrashReports",
            raw_ref(blink::features::
                        kDocumentPolicyIncludeJSCallStacksInCrashReports),
@@ -450,7 +449,6 @@ void SetRuntimeFeaturesFromCommandLine(const base::CommandLine& command_line) {
       {wrf::EnableAutomationControlled, switches::kEnableAutomation, true},
       {wrf::EnableAutomationControlled, switches::kHeadless, true},
       {wrf::EnableAutomationControlled, switches::kRemoteDebuggingPipe, true},
-      {wrf::EnableDatabase, switches::kDisableDatabases, false},
       {wrf::EnableFileSystem, switches::kDisableFileSystem, false},
       {wrf::EnableNetInfoDownlinkMax,
        switches::kEnableNetworkInformationDownlinkMax, true},
@@ -578,11 +576,11 @@ void ResolveInvalidConfigurations() {
   // Topics API cannot be enabled without the support of the browser process.
   // The Document API should be additionally gated by the
   // `kBrowsingTopicsDocumentAPI` feature.
-  if (!base::FeatureList::IsEnabled(blink::features::kBrowsingTopics)) {
+  if (!base::FeatureList::IsEnabled(network::features::kBrowsingTopics)) {
     LOG_IF(WARNING, WebRuntimeFeatures::IsTopicsAPIEnabled())
         << "Topics cannot be enabled in this configuration. Use --"
         << switches::kEnableFeatures << "="
-        << blink::features::kBrowsingTopics.name << " in addition.";
+        << network::features::kBrowsingTopics.name << " in addition.";
     WebRuntimeFeatures::EnableTopicsAPI(false);
     WebRuntimeFeatures::EnableTopicsDocumentAPI(false);
     WebRuntimeFeatures::EnableTopicsImgAPI(false);
@@ -599,12 +597,12 @@ void ResolveInvalidConfigurations() {
     }
   }
 
-  if (!base::FeatureList::IsEnabled(blink::features::kSharedStorageAPI)) {
+  if (!base::FeatureList::IsEnabled(network::features::kSharedStorageAPI)) {
     LOG_IF(WARNING, WebRuntimeFeatures::IsSharedStorageAPIEnabled())
         << "SharedStorage cannot be enabled in this "
            "configuration. Use --"
         << switches::kEnableFeatures << "="
-        << blink::features::kSharedStorageAPI.name << " in addition.";
+        << network::features::kSharedStorageAPI.name << " in addition.";
     WebRuntimeFeatures::EnableSharedStorageAPI(false);
   }
 
@@ -619,13 +617,13 @@ void ResolveInvalidConfigurations() {
     WebRuntimeFeatures::EnableAttributionReporting(false);
   }
 
-  if (!base::FeatureList::IsEnabled(blink::features::kInterestGroupStorage)) {
+  if (!base::FeatureList::IsEnabled(network::features::kInterestGroupStorage)) {
     LOG_IF(WARNING,
            WebRuntimeFeatures::IsAdInterestGroupAPIEnabledByRuntimeFlag())
         << "AdInterestGroupAPI cannot be enabled in this "
            "configuration. Use --"
         << switches::kEnableFeatures << "="
-        << blink::features::kInterestGroupStorage.name << " in addition.";
+        << network::features::kInterestGroupStorage.name << " in addition.";
     WebRuntimeFeatures::EnableAdInterestGroupAPI(false);
     WebRuntimeFeatures::EnableFledge(false);
   }

@@ -6,88 +6,28 @@
 
 #include "base/metrics/histogram_functions.h"
 #include "base/metrics/user_metrics.h"
+#include "chrome/browser/background/glic/glic_launcher_configuration.h"
 #include "chrome/browser/browser_process.h"
+#include "chrome/browser/glic/fre/glic_fre_controller.h"
 #include "chrome/browser/glic/glic_enabling.h"
-#include "chrome/browser/glic/glic_focused_tab_manager.h"
-#include "chrome/browser/glic/glic_fre_controller.h"
 #include "chrome/browser/glic/glic_pref_names.h"
-#include "chrome/browser/glic/glic_window_controller.h"
+#include "chrome/browser/glic/host/context/glic_focused_tab_manager.h"
+#include "chrome/browser/glic/widget/glic_window_controller.h"
 #include "components/prefs/pref_service.h"
 #include "content/public/browser/render_frame_host.h"
 #include "content/public/browser/web_contents.h"
 #include "services/metrics/public/cpp/ukm_builders.h"
 #include "services/metrics/public/cpp/ukm_recorder.h"
 #include "services/metrics/public/cpp/ukm_source_id.h"
+#include "ui/base/accelerators/accelerator.h"
 
 namespace glic {
 
 namespace {
 
-// These values are persisted to logs. Entries should not be renumbered and
-// numeric values should never be reused.
-// LINT.IfChange(Error)
-enum class Error {
-  kResponseStartWithoutInput = 0,
-  kResponseStopWithoutInput = 1,
-  kResponseStartWhileHidingOrHidden = 2,
-  kWindowCloseWithoutWindowOpen = 3,
-  kMaxValue = kWindowCloseWithoutWindowOpen,
-};
-// LINT.ThenChange(//tools/metrics/histograms/metadata/glic/enums.xml:GlicResponseError)
-
-// LINT.IfChange(EntryPointImpression)
-enum class EntryPointImpression {
-  kBeforeFre = 0,
-  kAfterFreBrowserOnly = 1,
-  kAfterFreOsOnly = 2,
-  kAfterFreEnabled = 3,
-  kAfterFreDisabled = 4,
-  kMaxValue = kAfterFreDisabled,
-};
-// LINT.ThenChange(//tools/metrics/histograms/metadata/glic/enums.xml:GlicEntryPointImpression)
-
-// LINT.IfChange(ResponseSegmentation)
-enum class ResponseSegmentation {
-  kUnknown = 0,
-  kOsButtonAttachedText = 1,
-  kOsButtonAttachedAudio = 2,
-  kOsButtonDetachedText = 3,
-  kOsButtonDetachedAudio = 4,
-  kOsButtonMenuAttachedText = 5,
-  kOsButtonMenuAttachedAudio = 6,
-  kOsButtonMenuDetachedText = 7,
-  kOsButtonMenuDetachedAudio = 8,
-  kOsHotkeyAttachedText = 9,
-  kOsHotkeyAttachedAudio = 10,
-  kOsHotkeyDetachedText = 11,
-  kOsHotkeyDetachedAudio = 12,
-  kButtonTopChromeAttachedText = 13,
-  kButtonTopChromeAttachedAudio = 14,
-  kButtonTopChromeDetachedText = 15,
-  kButtonTopChromeDetachedAudio = 16,
-  kFreAttachedText = 17,
-  kFreAttachedAudio = 18,
-  kFreDetachedText = 19,
-  kFreDetachedAudio = 20,
-  kProfilePickerAttachedText = 21,
-  kProfilePickerAttachedAudio = 22,
-  kProfilePickerDetachedText = 23,
-  kProfilePickerDetachedAudio = 24,
-  kNudgeAttachedText = 25,
-  kNudgeAttachedAudio = 26,
-  kNudgeDetachedText = 27,
-  kNudgeDetachedAudio = 28,
-  kChroMenuAttachedText = 29,
-  kChroMenuAttachedAudio = 30,
-  kChroMenuDetachedText = 31,
-  kChroMenuDetachedAudio = 32,
-  kMaxValue = kChroMenuDetachedAudio,
-};
-// LINT.ThenChange(//tools/metrics/histograms/metadata/glic/enums.xml:GlicResponseSegmentation)
-
 ResponseSegmentation GetResponseSegmentation(bool attached,
                                              mojom::WebClientMode mode,
-                                             InvocationSource source) {
+                                             mojom::InvocationSource source) {
   if (mode == mojom::WebClientMode::kUnknown) {
     return ResponseSegmentation::kUnknown;
   }
@@ -102,28 +42,31 @@ ResponseSegmentation GetResponseSegmentation(bool attached,
     entry += 2;
   }
   switch (source) {
-    case InvocationSource::kOsButton:
+    case mojom::InvocationSource::kOsButton:
       break;
-    case InvocationSource::kOsButtonMenu:
+    case mojom::InvocationSource::kOsButtonMenu:
       entry += 4;
       break;
-    case InvocationSource::kOsHotkey:
+    case mojom::InvocationSource::kOsHotkey:
       entry += 8;
       break;
-    case InvocationSource::kTopChromeButton:
+    case mojom::InvocationSource::kTopChromeButton:
       entry += 12;
       break;
-    case InvocationSource::kFre:
+    case mojom::InvocationSource::kFre:
       entry += 16;
       break;
-    case InvocationSource::kProfilePicker:
+    case mojom::InvocationSource::kProfilePicker:
       entry += 20;
       break;
-    case InvocationSource::kNudge:
+    case mojom::InvocationSource::kNudge:
       entry += 24;
       break;
-    case InvocationSource::kChroMenu:
+    case mojom::InvocationSource::kThreeDotsMenu:
       entry += 28;
+      break;
+    case mojom::InvocationSource::kUnsupported:
+      entry += 32;
       break;
   }
   return static_cast<ResponseSegmentation>(entry);
@@ -140,12 +83,19 @@ GlicMetrics::GlicMetrics(Profile* profile, GlicEnabling* enabling)
   no_url_source_id_ = ukm::NoURLSourceId();
   source_id_ = no_url_source_id_;
 
-  is_enabled_ = enabling_->IsEnabled();
-  subscriptions_.push_back(enabling_->RegisterEnableChanged(base::BindRepeating(
-      &GlicMetrics::OnEnabledChanged, base::Unretained(this))));
+  subscriptions_.push_back(
+      enabling_->RegisterAllowedChanged(base::BindRepeating(
+          &GlicMetrics::OnMaybeEnabledAndConsentForProfileChanged,
+          base::Unretained(this))));
 
+  is_enabled_ = enabling_->IsEnabledAndConsentForProfile(profile_);
   is_pinned_ = profile_->GetPrefs()->GetBoolean(prefs::kGlicPinnedToTabstrip);
   pref_registrar_.Init(profile_->GetPrefs());
+  pref_registrar_.Add(
+      prefs::kGlicCompletedFre,
+      base::BindRepeating(
+          &GlicMetrics::OnMaybeEnabledAndConsentForProfileChanged,
+          base::Unretained(this)));
   pref_registrar_.Add(prefs::kGlicPinnedToTabstrip,
                       base::BindRepeating(&GlicMetrics::OnPinningPrefChanged,
                                           base::Unretained(this)));
@@ -156,6 +106,7 @@ void GlicMetrics::OnUserInputSubmitted(mojom::WebClientMode mode) {
   base::RecordAction(base::UserMetricsAction("GlicResponseInputSubmit"));
   input_submitted_time_ = base::TimeTicks::Now();
   input_mode_ = mode;
+  inputs_modes_used_.insert(mode);
 }
 
 void GlicMetrics::OnResponseStarted() {
@@ -252,7 +203,8 @@ void GlicMetrics::OnResponseRated(bool positive) {
   base::UmaHistogramBoolean("Glic.Response.Rated", positive);
 }
 
-void GlicMetrics::OnGlicWindowOpen(bool attached, InvocationSource source) {
+void GlicMetrics::OnGlicWindowOpen(bool attached,
+                                   mojom::InvocationSource source) {
   base::RecordAction(base::UserMetricsAction("GlicSessionBegin"));
   session_start_time_ = base::TimeTicks::Now();
   invocation_source_ = source;
@@ -273,13 +225,26 @@ void GlicMetrics::OnGlicWindowClose() {
     base::UmaHistogramEnumeration("Glic.Metrics.Error",
                                   Error::kWindowCloseWithoutWindowOpen);
   } else {
-    base::TimeDelta open_time = base::TimeTicks() - session_start_time_;
+    base::TimeDelta open_time = base::TimeTicks::Now() - session_start_time_;
     base::UmaHistogramCustomTimes("Glic.Session.Duration", open_time,
                                   /*min=*/base::Seconds(1),
                                   /*max=*/base::Days(10), /*buckets=*/50);
   }
   session_responses_ = 0;
   session_start_time_ = base::TimeTicks();
+
+  InputModesUsed modes_used = InputModesUsed::kNone;
+  if (!inputs_modes_used_.empty()) {
+    if (inputs_modes_used_.size() == 2) {
+      modes_used = InputModesUsed::kTextAndAudio;
+    } else {
+      modes_used = inputs_modes_used_.contains(mojom::WebClientMode::kAudio)
+                       ? InputModesUsed::kOnlyAudio
+                       : InputModesUsed::kOnlyText;
+    }
+  }
+  inputs_modes_used_.clear();
+  base::UmaHistogramEnumeration("Glic.Session.InputModesUsed", modes_used);
 }
 
 void GlicMetrics::SetControllers(GlicWindowController* window_controller,
@@ -306,9 +271,9 @@ void GlicMetrics::OnImpressionTimerFired() {
                                   EntryPointImpression::kBeforeFre);
     return;
   }
-  if (!is_enabled_) {
+  if (!enabling_->IsAllowed()) {
     base::UmaHistogramEnumeration("Glic.EntryPoint.Impression",
-                                  EntryPointImpression::kAfterFreDisabled);
+                                  EntryPointImpression::kNotPermitted);
     return;
   }
 
@@ -325,10 +290,15 @@ void GlicMetrics::OnImpressionTimerFired() {
     impression = EntryPointImpression::kAfterFreDisabled;
   }
   base::UmaHistogramEnumeration("Glic.EntryPoint.Impression", impression);
+
+  ui::Accelerator saved_hotkey =
+      glic::GlicLauncherConfiguration::GetGlobalHotkey();
+  base::UmaHistogramBoolean("Glic.OsEntrypoint.Settings.ShortcutStatus",
+                            saved_hotkey != ui::Accelerator());
 }
 
-void GlicMetrics::OnEnabledChanged() {
-  bool is_enabled = enabling_->IsEnabled();
+void GlicMetrics::OnMaybeEnabledAndConsentForProfileChanged() {
+  bool is_enabled = enabling_->IsEnabledAndConsentForProfile(profile_);
   if (is_enabled == is_enabled_) {
     // No change, early exit.
     return;

@@ -24,6 +24,7 @@
 #include "base/feature_list.h"
 #include "base/functional/bind.h"
 #include "base/functional/callback.h"
+#include "base/metrics/histogram_functions.h"
 #include "base/no_destructor.h"
 #include "base/notreached.h"
 #include "base/task/sequenced_task_runner.h"
@@ -39,11 +40,11 @@
 #include "skia/ext/skia_utils_win.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkColor.h"
-#include "third_party/skia/include/core/SkColorPriv.h"
 #include "third_party/skia/include/core/SkPath.h"
 #include "third_party/skia/include/core/SkRefCnt.h"
 #include "third_party/skia/include/core/SkShader.h"
 #include "third_party/skia/include/core/SkSurface.h"
+#include "third_party/skia/include/private/chromium/SkPMColor.h"
 #include "ui/base/ui_base_features.h"
 #include "ui/base/ui_base_switches.h"
 #include "ui/color/color_provider.h"
@@ -352,6 +353,12 @@ NativeThemeWin::NativeThemeWin(bool configure_web_instance,
   if (configure_web_instance) {
     ConfigureWebInstance();
   }
+
+#if BUILDFLAG(IS_WIN)
+  base::UmaHistogramEnumeration("Accessibility.WinHighContrastTheme",
+                                GetPlatformHighContrastColorScheme(),
+                                PlatformHighContrastColorScheme::kMaxValue);
+#endif
 }
 
 void NativeThemeWin::ConfigureWebInstance() {
@@ -849,12 +856,12 @@ void NativeThemeWin::PaintIndirect(cc::PaintCanvas* destination_canvas,
   for (int i = 0; i < pixel_count; i++) {
     if (pixels[i] == placeholder_value) {
       // Pixel wasn't touched - make it fully transparent.
-      pixels[i] = SkPackARGB32(0, 0, 0, 0);
-    } else if (SkGetPackedA32(pixels[i]) == 0) {
+      pixels[i] = SkPMColorSetARGB(0, 0, 0, 0);
+    } else if (SkPMColorGetA(pixels[i]) == 0) {
       // Pixel was touched but has incorrect alpha of 0, make it fully opaque.
       pixels[i] =
-          SkPackARGB32(0xFF, SkGetPackedR32(pixels[i]),
-                       SkGetPackedG32(pixels[i]), SkGetPackedB32(pixels[i]));
+          SkPMColorSetARGB(0xFF, SkPMColorGetR(pixels[i]),
+                           SkPMColorGetG(pixels[i]), SkPMColorGetB(pixels[i]));
     }
   }
 

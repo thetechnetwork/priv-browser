@@ -12,7 +12,6 @@
 #include "pdf/pdf_ink_ids.h"
 #include "pdf/ui/thumbnail.h"
 #include "third_party/ink/src/ink/geometry/partitioned_mesh.h"
-#include "third_party/skia/include/core/SkBitmap.h"
 #include "ui/gfx/geometry/rect.h"
 #include "ui/gfx/geometry/vector2d.h"
 
@@ -24,6 +23,10 @@ class PointF;
 
 namespace ink {
 class Stroke;
+}
+
+namespace ui {
+class Cursor;
 }
 
 namespace chrome_pdf {
@@ -52,6 +55,10 @@ class PdfInkModuleClient {
   // screen coordinates for the 0-based page index.  Must be non-empty for any
   // non-negative page index returned from `VisiblePageIndexFromPoint()`.
   virtual gfx::Rect GetPageContentsRect(int page_index) = 0;
+
+  // Gets the page size in points for `page_index`.  Must be non-empty for any
+  // non-negative page index returned from `VisiblePageIndexFromPoint()`.
+  virtual gfx::SizeF GetPageSizeInPoints(int page_index) = 0;
 
   // Gets the thumbnail size for `page_index`. The size must be non-empty for
   // any valid page index.
@@ -100,8 +107,8 @@ class PdfInkModuleClient {
   // Notifies the client that a stroke has finished drawing or erasing.
   virtual void StrokeFinished() {}
 
-  // Asks the client to change the cursor to `bitmap`.
-  virtual void UpdateInkCursorImage(SkBitmap bitmap) {}
+  // Asks the client to change the cursor to `cursor`.
+  virtual void UpdateInkCursor(const ui::Cursor& cursor) {}
 
   // Notifies that an existing shape identified by `id` on the page at
   // `page_index` should update its active state.

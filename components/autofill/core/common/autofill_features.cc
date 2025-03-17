@@ -51,7 +51,40 @@ BASE_FEATURE(kAutofillAddressUserPerceptionSurvey,
              "AutofillAddressUserPerceptionSurvey",
              base::FEATURE_DISABLED_BY_DEFAULT);
 
-// Enables the second iteration Autofill with AI.
+// If enabled, no GeoIp requirements are imposed for AutfillAi. Intended for
+// Dogfood and testing only.
+BASE_FEATURE(kAutofillAiIgnoreGeoIp,
+             "AutofillAiIgnoreGeoIp",
+             base::FEATURE_DISABLED_BY_DEFAULT);
+
+// If enabled, the client may trigger the server model for AutofillAI type
+// predictions.
+BASE_FEATURE(kAutofillAiServerModel,
+             "AutofillAiServerModel",
+             base::FEATURE_DISABLED_BY_DEFAULT);
+
+// The maximum duration for which an AutofillAI server model response is kept in
+// the local cache. NOTE: It is advisable to choose a value that is at least as
+// large as the cache duration for Autofill server responses to limit cases in
+// which the model is run multiple times for the same form.
+const base::FeatureParam<base::TimeDelta> kAutofillAiServerModelCacheAge{
+    &kAutofillAiServerModel, "autofill_ai_model_cache_age", base::Days(7)};
+
+// The maximum size of the AutofillAI server model cache.
+const base::FeatureParam<int> kAutofillAiServerModelCacheSize{
+    &kAutofillAiServerModel, "autofill_ai_model_cache_size", 100};
+
+// The timeout for running the AutofillAI server model.
+const base::FeatureParam<base::TimeDelta>
+    kAutofillAiServerModelExecutionTimeout{
+        &kAutofillAiServerModel, "autofill_ai_model_execution_timeout",
+        base::Seconds(10)};
+
+// Whether the page's full URL is included in the data sent to the model.
+const base::FeatureParam<bool> kAutofillAiServerModelSendPageUrl{
+    &kAutofillAiServerModel, "autofill_ai_model_send_page_url", false};
+
+// Enables the second iteration AutofillAI.
 // This feature is independent of `autofill_ai::kAutofillAi`.
 BASE_FEATURE(kAutofillAiWithDataSchema,
              "AutofillAiWithDataSchema",
@@ -182,6 +215,13 @@ BASE_FEATURE(kAutofillEnableLoyaltyCardsFilling,
              "AutofillEnableLoyaltyCardsFilling",
              base::FEATURE_DISABLED_BY_DEFAULT);
 
+// When enabled, extracts <input type=date>, which may be filled by Autofill AI.
+// This is a kill switch.
+// TODO(crbug.com/396325496): Clean up after M137 branch (April 28, 2025).
+BASE_FEATURE(kAutofillExtractInputDate,
+             "AutofillExtractInputDate",
+             base::FEATURE_ENABLED_BY_DEFAULT);
+
 // If enabled, only non-ad frames are extracted.
 // Otherwise, non-ad frames as well as *visible* ad frames are extracted.
 // "Extracted" means that FormFieldData::child_frames is populated, which is
@@ -208,6 +248,13 @@ BASE_FEATURE(kAutofillImproveAddressFieldSwapping,
              "AutofillImproveAddressFieldSwapping",
              base::FEATURE_DISABLED_BY_DEFAULT);
 
+// When enabled, new `negative_pattern` regex values will be used
+// in order to reduce false positive classifications of city fields.
+// TODO(crbug.com/330508437): Clean up when launched.
+BASE_FEATURE(kAutofillImproveCityFieldClassification,
+             "AutofillImproveCityFieldClassification",
+             base::FEATURE_DISABLED_BY_DEFAULT);
+
 // When enabled, Autofill will try to reuse the result of previous form
 // extractions in subsequent functions that needs the form extracted, provided
 // we have guarantees that in the meantime the form couldn't have changed.
@@ -221,7 +268,7 @@ BASE_FEATURE(kAutofillOptimizeFormExtraction,
 // TODO: crbug.com/40227496 - Clean up when launched.
 BASE_FEATURE(kAutofillFixValueSemantics,
              "AutofillFixValueSemantics",
-             base::FEATURE_DISABLED_BY_DEFAULT);
+             base::FEATURE_ENABLED_BY_DEFAULT);
 
 // If enabled, AutofillField::value(kInitial) for <select> fields returns the
 // initial values. Otherwise, it is identical to AutofillField::value(kCurrent).
@@ -229,7 +276,7 @@ BASE_FEATURE(kAutofillFixValueSemantics,
 // TODO: crbug.com/40227496 - Clean up when launched.
 BASE_FEATURE(kAutofillFixInitialValueOfSelect,
              "AutofillFixInitialValueOfSelect",
-             base::FEATURE_DISABLED_BY_DEFAULT);
+             base::FEATURE_ENABLED_BY_DEFAULT);
 
 // If enabled, AutofillField::value(kCurrent) is not reset for form import.
 // Otherwise, AutofillField::value(kCurrent) is reset to the empty string for
@@ -240,7 +287,7 @@ BASE_FEATURE(kAutofillFixInitialValueOfSelect,
 // TODO: crbug.com/40227496 - Clean up when launched.
 BASE_FEATURE(kAutofillFixCurrentValueInImport,
              "AutofillFixCurrentValueInImport",
-             base::FEATURE_DISABLED_BY_DEFAULT);
+             base::FEATURE_ENABLED_BY_DEFAULT);
 
 // When enabled, focusing on a credit card number field that was traditionally
 // autofilled will yield all credit card suggestions.
@@ -382,13 +429,6 @@ BASE_FEATURE(kAutofillDisambiguateContradictingFieldTypes,
              "AutofillDisambiguateContradictingFieldTypes",
              base::FEATURE_DISABLED_BY_DEFAULT);
 
-// Controls whether the `AutofillPopupHideHelper` will hide the keyboard
-// accessory when the Chrome native view is resized on Android.
-BASE_DECLARE_FEATURE(kAutofillDoNotHideKeyboardAccessoryOnMainFrameResized);
-BASE_FEATURE(kAutofillDoNotHideKeyboardAccessoryOnMainFrameResized,
-             "AutofillDoNotHideKeyboardAccessoryOnMainFrameResized",
-             base::FEATURE_ENABLED_BY_DEFAULT);
-
 // If enabled, whenever form controls are removed from the DOM, the ChromeClient
 // is informed about this. This enables Autofill to trigger a reparsing of
 // forms.
@@ -426,6 +466,13 @@ BASE_FEATURE(kAutofillSupportPhoneticNameForJP,
 BASE_FEATURE(kAutofillSupportLastNamePrefix,
              "AutofillSupportLastNamePrefix",
              base::FEATURE_DISABLED_BY_DEFAULT);
+
+// Kill switch that ignores duplicate AskForValuesToFill() which in
+// AutofillAgent as to work around the broken focus-event handling.
+// TODO(crbug.com/40284788): Clean up after M138 branch (26 May 2025).
+BASE_FEATURE(kAutofillThrottleAskForValuesToFill,
+             "AutofillThrottleAskForValuesToFill",
+             base::FEATURE_ENABLED_BY_DEFAULT);
 
 // Enables using a custom address model for the Netherlands, overriding the
 // legacy one.
@@ -537,11 +584,6 @@ BASE_FEATURE(kAutofillStructuredFieldsDisableAddressLines,
 BASE_FEATURE(kAutofillSilentProfileUpdateForInsufficientImport,
              "AutofillSilentProfileUpdateForInsufficientImport",
              base::FEATURE_DISABLED_BY_DEFAULT);
-
-// Causes Autofill to announce the Compose popup less assertively.
-BASE_FEATURE(kComposePopupAnnouncePolitely,
-             "ComposePopupAnnouncePolitely",
-             base::FEATURE_ENABLED_BY_DEFAULT);
 
 // Controls an ablation study in which autofill for addresses and payment data
 // can be suppressed.

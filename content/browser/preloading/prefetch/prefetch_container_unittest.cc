@@ -16,10 +16,10 @@
 #include "content/browser/preloading/prefetch/prefetch_status.h"
 #include "content/browser/preloading/prefetch/prefetch_test_util_internal.h"
 #include "content/browser/preloading/prefetch/prefetch_type.h"
-#include "content/browser/preloading/preload_pipeline_info.h"
 #include "content/browser/renderer_host/render_frame_host_impl.h"
 #include "content/public/browser/browser_context.h"
 #include "content/public/browser/global_routing_id.h"
+#include "content/public/browser/preload_pipeline_info.h"
 #include "content/public/browser/storage_partition.h"
 #include "content/public/browser/web_contents.h"
 #include "content/public/common/content_features.h"
@@ -78,7 +78,7 @@ class PrefetchContainerTestBase : public RenderViewHostTestHarness {
                      blink::mojom::SpeculationEagerness::kEager),
         blink::mojom::Referrer(),
         /*no_vary_search_hint=*/std::nullopt, prefetch_document_manager,
-        base::MakeRefCounted<PreloadPipelineInfo>(
+        PreloadPipelineInfo::Create(
             /*planned_max_preloading_type=*/PreloadingType::kPrefetch));
   }
 
@@ -90,7 +90,10 @@ class PrefetchContainerTestBase : public RenderViewHostTestHarness {
         PrefetchType(PreloadingTriggerType::kEmbedder,
                      /*use_prefetch_proxy=*/true),
         blink::mojom::Referrer(), std::move(referring_origin),
-        /*no_vary_search_hint=*/std::nullopt, /*attempt=*/nullptr);
+        /*no_vary_search_hint=*/std::nullopt,
+        PreloadPipelineInfo::Create(
+            /*planned_max_preloading_type=*/PreloadingType::kPrefetch),
+        /*attempt=*/nullptr);
   }
 
   bool SetCookie(const GURL& url, const std::string& value) {
@@ -284,7 +287,7 @@ TEST_P(PrefetchContainerTest, CreatePrefetchContainer) {
       blink::mojom::Referrer(),
       /*no_vary_search_hint=*/std::nullopt,
       /*prefetch_document_manager=*/nullptr,
-      base::MakeRefCounted<PreloadPipelineInfo>(
+      PreloadPipelineInfo::Create(
           /*planned_max_preloading_type=*/PreloadingType::kPrefetch));
 
   EXPECT_EQ(prefetch_container.GetReferringRenderFrameHostId(),
@@ -310,7 +313,10 @@ TEST_P(PrefetchContainerTest, CreatePrefetchContainer_Embedder) {
       PrefetchType(PreloadingTriggerType::kEmbedder,
                    /*use_prefetch_proxy=*/false),
       blink::mojom::Referrer(), /*referring_origin=*/std::nullopt,
-      /*no_vary_search_hint=*/std::nullopt, /*attempt=*/nullptr);
+      /*no_vary_search_hint=*/std::nullopt,
+      PreloadPipelineInfo::Create(
+          /*planned_max_preloading_type=*/PreloadingType::kPrefetch),
+      /*attempt=*/nullptr);
 
   EXPECT_EQ(prefetch_container.GetReferringRenderFrameHostId(),
             GlobalRenderFrameHostId());
@@ -866,87 +872,7 @@ TEST_P(PrefetchContainerTest, IneligibleRedirect) {
             PrefetchStatus::kPrefetchFailedIneligibleRedirect);
 }
 
-TEST_P(PrefetchContainerTest, BlockUntilHeadHistograms) {
-  base::test::ScopedFeatureList scoped_feature_list;
-  scoped_feature_list.InitWithFeatures({}, {features::kPrefetchNewWaitLoop});
-
-  struct TestCase {
-    blink::mojom::SpeculationEagerness eagerness;
-    bool block_until_head;
-    base::TimeDelta block_until_head_duration;
-    bool served;
-  };
-
-  std::vector<TestCase> test_cases{
-      {blink::mojom::SpeculationEagerness::kEager, true, base::Milliseconds(10),
-       true},
-      {blink::mojom::SpeculationEagerness::kModerate, false,
-       base::Milliseconds(20), false},
-      {blink::mojom::SpeculationEagerness::kConservative, true,
-       base::Milliseconds(40), false}};
-
-  base::HistogramTester histogram_tester;
-  for (const auto& test_case : test_cases) {
-    PrefetchContainer prefetch_container(
-        *main_rfhi(), blink::DocumentToken(), GURL("https://test.com"),
-        PrefetchType(PreloadingTriggerType::kSpeculationRule,
-                     /*use_prefetch_proxy=*/true, test_case.eagerness),
-        blink::mojom::Referrer(),
-        /*no_vary_search_hint=*/std::nullopt,
-        /*prefetch_document_manager=*/nullptr,
-        base::MakeRefCounted<PreloadPipelineInfo>(
-            /*planned_max_preloading_type=*/PreloadingType::kPrefetch));
-
-    prefetch_container.OnGetPrefetchToServe(test_case.block_until_head);
-    if (test_case.block_until_head) {
-      task_environment()->FastForwardBy(test_case.block_until_head_duration);
-    }
-    prefetch_container.OnReturnPrefetchToServe(test_case.served,
-                                               GURL("https://test.com"));
-  }
-
-  histogram_tester.ExpectBucketCount(
-      "PrefetchProxy.AfterClick.WasBlockedUntilHeadWhenServing.Eager", true, 1);
-  histogram_tester.ExpectBucketCount(
-      "PrefetchProxy.AfterClick.WasBlockedUntilHeadWhenServing.Eager", false,
-      0);
-
-  histogram_tester.ExpectBucketCount(
-      "PrefetchProxy.AfterClick.WasBlockedUntilHeadWhenServing.Moderate", true,
-      0);
-  histogram_tester.ExpectBucketCount(
-      "PrefetchProxy.AfterClick.WasBlockedUntilHeadWhenServing.Moderate", false,
-      1);
-
-  histogram_tester.ExpectBucketCount(
-      "PrefetchProxy.AfterClick.WasBlockedUntilHeadWhenServing.Conservative",
-      true, 1);
-  histogram_tester.ExpectBucketCount(
-      "PrefetchProxy.AfterClick.WasBlockedUntilHeadWhenServing.Conservative",
-      false, 0);
-
-  histogram_tester.ExpectUniqueTimeSample(
-      "PrefetchProxy.AfterClick.BlockUntilHeadDuration.Served.Eager",
-      base::Milliseconds(10), 1);
-  histogram_tester.ExpectTotalCount(
-      "PrefetchProxy.AfterClick.BlockUntilHeadDuration.NotServed.Eager", 0);
-
-  histogram_tester.ExpectTotalCount(
-      "PrefetchProxy.AfterClick.BlockUntilHeadDuration.Served.Moderate", 0);
-  histogram_tester.ExpectTotalCount(
-      "PrefetchProxy.AfterClick.BlockUntilHeadDuration.NotServed.Moderate", 0);
-
-  histogram_tester.ExpectTotalCount(
-      "PrefetchProxy.AfterClick.BlockUntilHeadDuration.Served.Conservative", 0);
-  histogram_tester.ExpectUniqueTimeSample(
-      "PrefetchProxy.AfterClick.BlockUntilHeadDuration.NotServed.Conservative",
-      base::Milliseconds(40), 1);
-}
-
 TEST_P(PrefetchContainerTest, BlockUntilHeadHistograms2) {
-  base::test::ScopedFeatureList scoped_feature_list;
-  scoped_feature_list.InitWithFeatures({features::kPrefetchNewWaitLoop}, {});
-
   struct TestCase {
     blink::mojom::SpeculationEagerness eagerness;
     bool is_served;
@@ -970,7 +896,7 @@ TEST_P(PrefetchContainerTest, BlockUntilHeadHistograms2) {
         blink::mojom::Referrer(),
         /*no_vary_search_hint=*/std::nullopt,
         /*prefetch_document_manager=*/nullptr,
-        base::MakeRefCounted<PreloadPipelineInfo>(
+        PreloadPipelineInfo::Create(
             /*planned_max_preloading_type=*/PreloadingType::kPrefetch));
 
     prefetch_container.OnUnregisterCandidate(
@@ -1178,11 +1104,13 @@ TEST_P(PrefetchContainerTest, MultipleStreamingURLLoaders) {
 
   base::WeakPtr<PrefetchResponseReader> weak_first_response_reader =
       reader.GetCurrentResponseReaderToServeForTesting();
-  PrefetchRequestHandler first_request_handler = reader.CreateRequestHandler();
+  PrefetchRequestHandler first_request_handler =
+      reader.CreateRequestHandler().first;
 
   base::WeakPtr<PrefetchResponseReader> weak_second_response_reader =
       reader.GetCurrentResponseReaderToServeForTesting();
-  PrefetchRequestHandler second_request_handler = reader.CreateRequestHandler();
+  PrefetchRequestHandler second_request_handler =
+      reader.CreateRequestHandler().first;
 
   // `CreateRequestHandler()` itself doesn't make the PrefetchContainer
   // non-servable.
@@ -1383,7 +1311,24 @@ TEST_P(PrefetchContainerLifetimeTest, Lifetime) {
       content = "Body";
       break;
     case BodySize::kLarge:
-      content = std::string(16 * producer_pipe_capacity, '-');
+      // Set the minimum data size that makes write to data pipe fail
+      // incomplete.
+      //
+      // - `features::kPrefetchReusableBodySizeLimit` (multiple of
+      //   `producer_pipe_capacity`) is used to fill buffer of
+      //   `PrefetchDataPipeTee`. `PrefetchDataPipeTee` doesn't close the
+      //   producer pipe at this stage and tries to read one more time (but it
+      //   will discard the next one as the limit exceeded).
+      // - `producer_pipe_capacity` is used to fill data pipe after the above
+      //   buffer becomes full. The data is sent to `PrefetchDataPipeTee` (*)
+      //   and `PrefetchDataPipeTee` tries to read it, but discards it. At this
+      //   timing, `PrefetchDataPipeTee` closes the producer pipe (**).
+      // - 1 is used to make the write incomplete as the producer tries to send
+      //   one more byte after (**).
+      size_t limit =
+          static_cast<size_t>(features::kPrefetchReusableBodySizeLimit.Get()) +
+          producer_pipe_capacity;
+      content = std::string(limit + 1, '-');
       break;
   }
 
@@ -1460,7 +1405,7 @@ TEST_P(PrefetchContainerLifetimeTest, Lifetime) {
         ASSERT_TRUE(prefetch_container);
         EXPECT_EQ(prefetch_container->GetServableState(base::TimeDelta::Max()),
                   PrefetchContainer::ServableState::kServable);
-        request_handler = reader.CreateRequestHandler();
+        request_handler = reader.CreateRequestHandler().first;
         ASSERT_TRUE(request_handler);
         break;
 
@@ -1514,13 +1459,13 @@ TEST_P(PrefetchContainerLifetimeTest, Lifetime) {
         if (!done.count(Event::kPrefetchOnComplete) ||
             body_size == BodySize::kLarge) {
           // Not servable.
-          ASSERT_FALSE(reader2.CreateRequestHandler());
+          ASSERT_FALSE(reader2.CreateRequestHandler().first);
         } else {
           // As the first client is already served, the body pipe producer
           // should be also completed.
           EXPECT_TRUE(producer_completed);
 
-          auto request_handler2 = reader2.CreateRequestHandler();
+          auto request_handler2 = reader2.CreateRequestHandler().first;
           ASSERT_TRUE(request_handler2);
 
           auto serving_url_loader_client2 =

@@ -59,7 +59,7 @@ using signin_ui::SigninCompletionCallback;
 namespace {
 
 // The states of the sign-in flow state machine.
-// TODO(crbug.com/375605482): Need to remove steps from `kSignOutIfNeeded` to
+// TODO(crbug.com/403183877): Need to remove steps from `kSignOutIfNeeded` to
 // `kCompleteWithFailure` can be replaced with `AuthenticationFlowInProfile`
 // even without multi profile.
 enum class AuthenticationState {
@@ -67,10 +67,9 @@ enum class AuthenticationState {
   // Check if there are unsynced data with the primary account, in the current
   // profile.
   kCheckUnsyncedData,
-  // Display unsynced data confirmation, if there are any (based on
-  // `kCheckUnsyncedData` step).
-  // The dialog needs to be shown weither there is profile switching or not.
-  kAskUnsyncedDataConfirmationIfNeeded,
+  // Display confirmation dialog when the user is already signed in, based on
+  // unsynced data and if the primary account is a managed account.
+  kShowLeavingPrimaryAccountConfirmationIfNeeded,
   kFetchManagedStatus,
   kFetchProfileSeparationPoliciesIfNeeded,
   kShowManagedConfirmationIfNeeded,
@@ -94,6 +93,15 @@ enum class CancelationReason {
   kUserCanceled,
   // Canceled, but not by the user.
   kFailed,
+};
+
+// Used by `RecordUnsyncedDataHistogramIfNeeded()` to know which histogram to
+// record the unsynced data types.
+enum class UnsyncedDataTypeHistogram {
+  // `Sync.UnsyncedDataOnAccountSwitching` histogram.
+  kUnsyncedDataOnAccountSwitching,
+  // `Sync.UnsyncedDataOnProfileSwitching` histogram.
+  kUnsyncedDataOnProfileSwitching,
 };
 
 // Name for `Signin.IOSIdentityAvailableInProfile` histogram.
@@ -197,6 +205,25 @@ void RecordIOSIdentityAvailableInProfile(
                                 identity_available);
 }
 
+// Records histogram for the unsync data.
+void RecordUnsyncedDataHistogramIfNeeded(UnsyncedDataTypeHistogram histogram,
+                                         syncer::DataTypeSet set) {
+  const char* histogram_name = nullptr;
+  switch (histogram) {
+    case UnsyncedDataTypeHistogram::kUnsyncedDataOnAccountSwitching:
+      histogram_name = "Sync.UnsyncedDataOnAccountSwitching";
+      break;
+    case UnsyncedDataTypeHistogram::kUnsyncedDataOnProfileSwitching:
+      histogram_name = "Sync.UnsyncedDataOnProfileSwitching";
+      break;
+  }
+  CHECK(histogram_name);
+  for (syncer::DataType type : set) {
+    base::UmaHistogramEnumeration(histogram_name,
+                                  syncer::DataTypeHistogramValue(type));
+  }
+}
+
 }  // namespace
 
 @interface AuthenticationFlow ()
@@ -210,7 +237,13 @@ void RecordIOSIdentityAvailableInProfile(
 @end
 
 @implementation AuthenticationFlow {
+  // View used to display dialogs.
   UIViewController* _presentingViewController;
+  // Anchor based on the sign-in button that triggered sign-in.
+  // Used to display popover dialog (like the unsynced data confirmation dialog)
+  // with a regular window size (like iPad).
+  UIView* _anchorView;
+  CGRect _anchorRect;
   SigninCompletionCallback _signInCompletion;
   AuthenticationFlowPerformer* _performer;
 
@@ -253,9 +286,10 @@ void RecordIOSIdentityAvailableInProfile(
 
   // `YES` if the profile switching is done.
   BOOL _didSwitchProfile;
-  // `YES` if the user is signed in and there are unsynced data in the current
-  // profile.
-  std::optional<BOOL> _hasUnsyncedData;
+  // List of unsynced data types in the current profile. If there is no primary
+  // account the set is empty.
+  // The value is set during `kCheckUnsyncedData` step.
+  std::optional<syncer::DataTypeSet> _unsyncedDataTypes;
   // The lifetime of this ScopedClosureRunner denotes a batch of primary account
   // changes. UI listens to batched changes to avoid visual artifacts during an
   // account switch.
@@ -271,7 +305,9 @@ void RecordIOSIdentityAvailableInProfile(
                        identity:(id<SystemIdentity>)identity
                     accessPoint:(signin_metrics::AccessPoint)accessPoint
               postSignInActions:(PostSignInActionSet)postSignInActions
-       presentingViewController:(UIViewController*)presentingViewController {
+       presentingViewController:(UIViewController*)presentingViewController
+                     anchorView:(UIView*)anchorView
+                     anchorRect:(CGRect)anchorRect {
   if ((self = [super init])) {
     DCHECK(browser);
     DCHECK(presentingViewController);
@@ -281,6 +317,8 @@ void RecordIOSIdentityAvailableInProfile(
     _accessPoint = accessPoint;
     _postSignInActions = postSignInActions;
     _presentingViewController = presentingViewController;
+    _anchorView = anchorView;
+    _anchorRect = anchorRect;
     _state = AuthenticationState::kBegin;
     _cancelationReason = CancelationReason::kNotCanceled;
     _profileSeparationDataMigrationSettings =
@@ -313,18 +351,11 @@ void RecordIOSIdentityAvailableInProfile(
   });
 }
 
-- (void)interruptWithAction:(SigninCoordinatorInterrupt)action {
+- (void)interrupt {
   if (_state == AuthenticationState::kDone) {
     return;
   }
-  __weak __typeof(self) weakSelf = self;
-  [_performer interruptWithAction:action
-                       completion:^() {
-                         [weakSelf performerInterrupted];
-                       }];
-}
-
-- (void)performerInterrupted {
+  [_performer interrupt];
   if (_state != AuthenticationState::kDone) {
     // The performer might not have been able to continue the flow if it was
     // waiting for a callback (e.g. waiting for AccountReconcilor). In this
@@ -346,7 +377,7 @@ void RecordIOSIdentityAvailableInProfile(
   switch (_state) {
     case AuthenticationState::kBegin:
     case AuthenticationState::kCheckUnsyncedData:
-    case AuthenticationState::kAskUnsyncedDataConfirmationIfNeeded:
+    case AuthenticationState::kShowLeavingPrimaryAccountConfirmationIfNeeded:
     case AuthenticationState::kFetchManagedStatus:
     case AuthenticationState::kFetchProfileSeparationPoliciesIfNeeded:
     case AuthenticationState::kShowManagedConfirmationIfNeeded:
@@ -377,8 +408,9 @@ void RecordIOSIdentityAvailableInProfile(
     case AuthenticationState::kBegin:
       return AuthenticationState::kCheckUnsyncedData;
     case AuthenticationState::kCheckUnsyncedData:
-      return AuthenticationState::kAskUnsyncedDataConfirmationIfNeeded;
-    case AuthenticationState::kAskUnsyncedDataConfirmationIfNeeded:
+      return AuthenticationState::
+          kShowLeavingPrimaryAccountConfirmationIfNeeded;
+    case AuthenticationState::kShowLeavingPrimaryAccountConfirmationIfNeeded:
       return AuthenticationState::kFetchManagedStatus;
     case AuthenticationState::kFetchManagedStatus:
       return AuthenticationState::kFetchProfileSeparationPoliciesIfNeeded;
@@ -454,8 +486,8 @@ void RecordIOSIdentityAvailableInProfile(
       [self checkUnsyncedDataStep];
       return;
 
-    case AuthenticationState::kAskUnsyncedDataConfirmationIfNeeded:
-      [self askUnsyncedDataConfirmationIfNeededStep];
+    case AuthenticationState::kShowLeavingPrimaryAccountConfirmationIfNeeded:
+      [self showLeavingPrimaryAccountConfirmationIfNeededStep];
       return;
 
     case AuthenticationState::kFetchManagedStatus:
@@ -532,24 +564,39 @@ void RecordIOSIdentityAvailableInProfile(
   CHECK(![currentIdentity isEqual:_identityToSignIn],
         base::NotFatalUntil::M140);
   if (!currentIdentity) {
-    _hasUnsyncedData = NO;
+    _unsyncedDataTypes = syncer::DataTypeSet();
     [self continueFlow];
     return;
   }
-  // TODO(crbug.com/375604649): Need to check for unsynced data and set
-  // `_hasUnsyncedData`.
-  _hasUnsyncedData = NO;
-  [self continueFlow];
+  syncer::SyncService* syncService =
+      SyncServiceFactory::GetForProfile([self originalProfile]);
+  [_performer fetchUnsyncedDataWithSyncService:syncService];
 }
 
-- (void)askUnsyncedDataConfirmationIfNeededStep {
-  CHECK(_hasUnsyncedData.has_value(), base::NotFatalUntil::M140);
-  if (!_hasUnsyncedData.value()) {
+- (void)showLeavingPrimaryAccountConfirmationIfNeededStep {
+  CHECK(_unsyncedDataTypes.has_value(), base::NotFatalUntil::M140);
+  ProfileIOS* profile = _browser->GetProfile()->GetOriginalProfile();
+  AuthenticationService* authenticationService =
+      AuthenticationServiceFactory::GetForProfile(profile);
+  signin::IdentityManager* identityManager =
+      IdentityManagerFactory::GetForProfile(profile);
+  PrefService* profilePrefService = profile->GetPrefs();
+  SignedInUserState signedInUserState = GetSignedInUserState(
+      authenticationService, identityManager, profilePrefService);
+  if (!ForceLeavingPrimaryAccountConfirmationDialog(
+          signedInUserState, profile->GetProfileName()) &&
+      _unsyncedDataTypes.value().empty()) {
     [self continueFlow];
     return;
   }
-  // TODO(crbug.com/375604649): Need to display the unsynced data dialog.
-  [self continueFlow];
+  [_performer
+      showLeavingPrimaryAccountConfirmationWithBaseViewController:
+          _presentingViewController
+                                                          browser:_browser
+                                                signedInUserState:
+                                                    signedInUserState
+                                                       anchorView:_anchorView
+                                                       anchorRect:_anchorRect];
 }
 
 // Fetches ManagedAccountsSigninRestriction policy, if needed.
@@ -613,7 +660,7 @@ void RecordIOSIdentityAvailableInProfile(
   }
   [_performer
       showManagedConfirmationForHostedDomain:_identityToSignInHostedDomain
-                                   userEmail:_identityToSignIn.userEmail
+                                    identity:_identityToSignIn
                               viewController:_presentingViewController
                                      browser:_browser
                    skipBrowsingDataMigration:skipBrowsingDataMigration
@@ -636,6 +683,7 @@ void RecordIOSIdentityAvailableInProfile(
 // If the identity is assigned to the current profile this step is a no-op.
 - (void)switchProfileIfNeededStep {
   CHECK(!_didSwitchProfile);
+  CHECK(_unsyncedDataTypes.has_value());
   ProfileIOS* profile = [self originalProfile];
   signin::IdentityManager* identityManager =
       IdentityManagerFactory::GetForProfile(profile);
@@ -663,21 +711,18 @@ void RecordIOSIdentityAvailableInProfile(
   if (isValidIdentityInProfile) {
     // If the identity is in the current profile, the flow should continue,
     // without switching profile.
+    RecordUnsyncedDataHistogramIfNeeded(
+        UnsyncedDataTypeHistogram::kUnsyncedDataOnAccountSwitching,
+        _unsyncedDataTypes.value());
     [self continueFlow];
     return;
   }
+  RecordUnsyncedDataHistogramIfNeeded(
+      UnsyncedDataTypeHistogram::kUnsyncedDataOnProfileSwitching,
+      _unsyncedDataTypes.value());
   SceneState* sceneState = _browser->GetSceneState();
-  __weak __typeof(self) weakSelf = self;
-  OnProfileSwitchCompletion completion = base::BindOnce(
-      [](__typeof(self) strong_self, bool success,
-         Browser* new_profile_browser) {
-        [strong_self onSwitchToProfileWithSuccess:success
-                                newProfileBrowser:new_profile_browser];
-      },
-      weakSelf);
   [_performer switchToProfileWithIdentity:_identityToSignIn
-                               sceneState:sceneState
-                               completion:std::move(completion)];
+                               sceneState:sceneState];
 }
 
 // Signs out, if the user is already signed in with a different identity.
@@ -697,7 +742,7 @@ void RecordIOSIdentityAvailableInProfile(
       IdentityManagerFactory::GetForProfile(profile);
   _accountSwitchingBatchClosureRunner =
       identityManager->StartBatchOfPrimaryAccountChanges();
-  [_performer signOutProfile:profile];
+  [_performer signOutForAccountSwitchWithProfile:profile];
 }
 
 // Sets the primary identity for the current profile.
@@ -772,6 +817,8 @@ void RecordIOSIdentityAvailableInProfile(
 
 // Runs `_signInCompletion` asynchronously when the flow failed.
 - (void)completeWithFailureStep {
+  // TODO(crbug.com/375605482): If there was a primary identity at the beginning
+  // of the flow, this primary identity should be restored if possible.
   DCHECK(_signInCompletion)
       << "`completeSignInWithResult` should not be called twice.";
   if (_didSignIn) {
@@ -836,12 +883,26 @@ void RecordIOSIdentityAvailableInProfile(
 
 #pragma mark AuthenticationFlowPerformerDelegate
 
-- (void)didSignOut {
+- (void)didSignOutForAccountSwitch {
   [self continueFlow];
 }
 
 - (void)didClearData {
   [self continueFlow];
+}
+
+- (void)didFetchUnsyncedDataWithUnsyncedDataTypes:
+    (syncer::DataTypeSet)unsyncedDataTypes {
+  _unsyncedDataTypes = unsyncedDataTypes;
+  [self continueFlow];
+}
+
+- (void)didAcceptToLeavePrimaryAccount:(BOOL)acceptToContinue {
+  if (acceptToContinue) {
+    [self continueFlow];
+  } else {
+    [self cancelFlowWithReason:CancelationReason::kUserCanceled];
+  }
 }
 
 - (void)didFetchManagedStatus:(NSString*)hostedDomain {
@@ -891,6 +952,38 @@ void RecordIOSIdentityAvailableInProfile(
 
 - (void)didCancelManagedConfirmation {
   [self cancelFlowWithReason:CancelationReason::kUserCanceled];
+}
+
+- (void)didSwitchToProfileWithSuccess:(BOOL)success
+                    newProfileBrowser:(Browser*)newProfileBrowser {
+  CHECK(AreSeparateProfilesForManagedAccountsEnabled());
+  CHECK(!_didSwitchProfile);
+  if (!success) {
+    NSError* error = ios::provider::CreateMissingIdentitySigninError();
+    [self handleAuthenticationError:error];
+    return;
+  }
+  // TODO(crbug.com/375605482): Need to block user until
+  // `AuthenticationFlowInProfile` is done? Probably with a blur animation.
+  // With the profile switching `_browser` and `_presentingViewController` are
+  // not valid anymore.
+  _browser = nullptr;
+  _presentingViewController = nil;
+  // The sign-in flow is passed to `authenticationFlowInProfile`, with the
+  // completion block. `AuthenticationFlowInProfile` retains itself until the
+  // sign-in is done. There is no need to own this instance.
+  AuthenticationFlowInProfile* authenticationFlowInProfile =
+      [[AuthenticationFlowInProfile alloc]
+            initWithBrowser:newProfileBrowser
+                   identity:_identityToSignIn
+          isManagedIdentity:_identityToSignInHostedDomain.length > 0
+                accessPoint:_accessPoint
+          postSignInActions:self.postSignInActions];
+  authenticationFlowInProfile.precedingHistorySync = self.precedingHistorySync;
+  [authenticationFlowInProfile startSignInWithCompletion:_signInCompletion];
+  _signInCompletion = nil;
+  _didSwitchProfile = YES;
+  [self continueFlow];
 }
 
 - (void)didRegisterForUserPolicyWithDMToken:(NSString*)dmToken
@@ -947,40 +1040,6 @@ void RecordIOSIdentityAvailableInProfile(
   }
 
   return YES;
-}
-
-// Called when the profile switching succeeded or failed (according to
-// `success`).
-- (void)onSwitchToProfileWithSuccess:(BOOL)success
-                   newProfileBrowser:(Browser*)newProfileBrowser {
-  CHECK(AreSeparateProfilesForManagedAccountsEnabled());
-  CHECK(!_didSwitchProfile);
-  if (!success) {
-    NSError* error = ios::provider::CreateMissingIdentitySigninError();
-    [self handleAuthenticationError:error];
-    return;
-  }
-  // TODO(crbug.com/375605482): Need to block user until
-  // `AuthenticationFlowInProfile` is done? Probably with a blur animation.
-  // With the profile switching `_browser` and `_presentingViewController` are
-  // not valid anymore.
-  _browser = nullptr;
-  _presentingViewController = nil;
-  // The sign-in flow is passed to `authenticationFlowInProfile`, with the
-  // completion block. `AuthenticationFlowInProfile` retains itself until the
-  // sign-in is done. There is no need to own this instance.
-  AuthenticationFlowInProfile* authenticationFlowInProfile =
-      [[AuthenticationFlowInProfile alloc]
-            initWithBrowser:newProfileBrowser
-                   identity:_identityToSignIn
-          isManagedIdentity:_identityToSignInHostedDomain.length > 0
-                accessPoint:_accessPoint
-          postSignInActions:self.postSignInActions];
-  authenticationFlowInProfile.precedingHistorySync = self.precedingHistorySync;
-  [authenticationFlowInProfile startSignInWithCompletion:_signInCompletion];
-  _signInCompletion = nil;
-  _didSwitchProfile = YES;
-  [self continueFlow];
 }
 
 #pragma mark - Used for testing

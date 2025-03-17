@@ -12,8 +12,8 @@
 #include "build/build_config.h"
 #include "build/config/chromebox_for_meetings/buildflags.h"
 #include "content/common/buildflags.h"
+#include "content/public/common/btm_utils.h"
 #include "content/public/common/buildflags.h"
-#include "content/public/common/dips_utils.h"
 
 namespace features {
 
@@ -177,10 +177,10 @@ BASE_FEATURE(kBrokerFileOperationsOnDiskCacheInNetworkService,
 // Allows pages with cache-control:no-store to enter the back/forward cache.
 // Feature params can specify whether pages with cache-control:no-store can be
 // restored if cookies change / if HTTPOnly cookies change.
-// TODO(crbug.com/40189625): Enable this feature.
+// TODO(crbug.com/40189625): Remove this feature and clean up.
 BASE_FEATURE(kCacheControlNoStoreEnterBackForwardCache,
              "CacheControlNoStoreEnterBackForwardCache",
-             base::FEATURE_DISABLED_BY_DEFAULT);
+             base::FEATURE_ENABLED_BY_DEFAULT);
 
 // This killswitch is distinct from the OT.
 // It allows us to remotely disable the feature, and get it to stop working even
@@ -188,12 +188,6 @@ BASE_FEATURE(kCacheControlNoStoreEnterBackForwardCache,
 // calls gated by the killswitch will fail graceully.
 BASE_FEATURE(kCapturedSurfaceControlKillswitch,
              "CapturedSurfaceControlKillswitch",
-             base::FEATURE_ENABLED_BY_DEFAULT);
-
-// If enabled, CSC permissions are sticky - as all other permissions.
-// If disabled, CSC permissions are scoped to the capture session's duration.
-BASE_FEATURE(kCapturedSurfaceControlStickyPermissions,
-             "CapturedSurfaceControlStickyPermissions",
              base::FEATURE_ENABLED_BY_DEFAULT);
 
 // Clear the window.name property for the top-level cross-site navigations that
@@ -267,7 +261,7 @@ const base::FeatureParam<int> kCreateSpeculativeRFHDelayMs{
 // See crbug.com/40285083 for more info.
 BASE_FEATURE(kDeleteStaleSessionCookiesOnStartup,
              "DeleteStaleSessionCookiesOnStartup",
-             base::FEATURE_DISABLED_BY_DEFAULT);
+             base::FEATURE_ENABLED_BY_DEFAULT);
 
 // When a device bound session
 // (https://github.com/w3c/webappsec-dbsc/blob/main/README.md) is
@@ -443,6 +437,11 @@ BASE_FEATURE(kFedCmButtonMode,
              "FedCmButtonMode",
              base::FEATURE_ENABLED_BY_DEFAULT);
 
+// Enables cooldown on ignore in FedCM API.
+BASE_FEATURE(kFedCmCooldownOnIgnore,
+             "FedCmCooldownOnIgnore",
+             base::FEATURE_DISABLED_BY_DEFAULT);
+
 // Enables usage of the FedCM Delegation API.
 BASE_FEATURE(kFedCmDelegation,
              "FedCmDelegation",
@@ -605,19 +604,6 @@ const char kIsolateOriginsFieldTrialParamName[] = "OriginsList";
 BASE_FEATURE(kLazyInitializeMediaControls,
              "LazyInitializeMediaControls",
              base::FEATURE_ENABLED_BY_DEFAULT);
-
-// Enables Local Network Access checks.
-// Blocks local network requests without user permission to prevent exploitation
-// of vulnerable local devices.
-//
-// This feature is being built as a replacement for Private Network Access
-// (PNA), and if this is on PNA features may stop working.
-//
-// Public explainer:
-// https://github.com/explainers-by-googlers/local-network-access
-BASE_FEATURE(kLocalNetworkAccessChecks,
-             "LocalNetworkAccessChecks",
-             base::FEATURE_DISABLED_BY_DEFAULT);
 
 BASE_FEATURE(kLogJsConsoleMessages,
              "LogJsConsoleMessages",
@@ -1184,6 +1170,15 @@ BASE_FEATURE(kTouchDragAndContextMenu,
 const base::FeatureParam<int> kTouchDragMovementThresholdDip{
     &kTouchDragAndContextMenu, "DragAndDropMovementThresholdDipParam", 60};
 #endif
+
+// Controls whether the browser should track and reuse free and empty renderer
+// processes. When enabled, the browser maintains a list of renderer processes
+// that are currently not hosting any frames and are thus eligible for reuse
+// when a new renderer process is needed. Currently, only background renderer
+// processes are considered for reuse.
+BASE_FEATURE(kTrackEmptyRendererProcessesForReuse,
+             "TrackEmptyRendererProcessesForReuse",
+             base::FEATURE_DISABLED_BY_DEFAULT);
 
 // This feature is for a reverse Origin Trial, enabling SharedArrayBuffer for
 // sites as they migrate towards requiring cross-origin isolation for these

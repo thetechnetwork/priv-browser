@@ -65,16 +65,16 @@ AcceleratedStaticBitmapImage::CreateFromCanvasSharedImage(
     const gpu::SyncToken& sync_token,
     GLuint shared_image_texture_id,
     const gfx::Size& size,
-    SkColorType sk_color_type,
+    viz::SharedImageFormat format,
     SkAlphaType alpha_type,
-    sk_sp<SkColorSpace> sk_color_space,
+    const gfx::ColorSpace& color_space,
     base::WeakPtr<WebGraphicsContext3DProviderWrapper> context_provider_wrapper,
     base::PlatformThreadRef context_thread_ref,
     scoped_refptr<base::SingleThreadTaskRunner> context_task_runner,
     viz::ReleaseCallback release_callback) {
   return base::AdoptRef(new AcceleratedStaticBitmapImage(
       std::move(shared_image), sync_token, shared_image_texture_id, size,
-      sk_color_type, alpha_type, std::move(sk_color_space),
+      format, alpha_type, color_space.ToSkColorSpace(),
       ImageOrientationEnum::kDefault, std::move(context_provider_wrapper),
       context_thread_ref, std::move(context_task_runner),
       std::move(release_callback)));
@@ -118,7 +118,8 @@ AcceleratedStaticBitmapImage::CreateFromExternalSharedImage(
       shared_gpu_context, shared_image);
 
   return base::AdoptRef(new AcceleratedStaticBitmapImage(
-      std::move(shared_image), sync_token, 0u, size, sk_color_type, alpha_type,
+      std::move(shared_image), sync_token, 0u, size,
+      viz::SkColorTypeToSinglePlaneSharedImageFormat(sk_color_type), alpha_type,
       std::move(sk_color_space), ImageOrientationEnum::kDefault,
       shared_gpu_context, base::PlatformThreadRef(),
       ThreadScheduler::Current()->CleanupTaskRunner(),
@@ -130,7 +131,7 @@ AcceleratedStaticBitmapImage::AcceleratedStaticBitmapImage(
     const gpu::SyncToken& sync_token,
     GLuint shared_image_texture_id,
     const gfx::Size& size,
-    SkColorType sk_color_type,
+    viz::SharedImageFormat format,
     SkAlphaType alpha_type,
     sk_sp<SkColorSpace> sk_color_space,
     const ImageOrientation& orientation,
@@ -140,10 +141,10 @@ AcceleratedStaticBitmapImage::AcceleratedStaticBitmapImage(
     viz::ReleaseCallback release_callback)
     : StaticBitmapImage(orientation),
       shared_image_(std::move(shared_image)),
-      sk_image_info_(SkImageInfo::Make(gfx::SizeToSkISize(size),
-                                       sk_color_type,
-                                       alpha_type,
-                                       std::move(sk_color_space))),
+      size_(size),
+      format_(format),
+      alpha_type_(alpha_type),
+      sk_color_space_(std::move(sk_color_space)),
       context_provider_wrapper_(std::move(context_provider_wrapper)),
       mailbox_ref_(
           base::MakeRefCounted<MailboxRef>(sync_token,
@@ -321,8 +322,8 @@ void AcceleratedStaticBitmapImage::InitializeTextureBacking(
     DCHECK_EQ(shared_image_texture_id, 0u);
     skia_context_provider_wrapper_ = context_provider_wrapper;
     texture_backing_ = sk_make_sp<MailboxTextureBacking>(
-        shared_image_->mailbox(), mailbox_ref_, sk_image_info_,
-        std::move(context_provider_wrapper));
+        shared_image_->mailbox(), mailbox_ref_, GetSize(), GetSkColorType(),
+        GetAlphaType(), GetSkColorSpace(), std::move(context_provider_wrapper));
     return;
   }
 
@@ -370,8 +371,8 @@ void AcceleratedStaticBitmapImage::InitializeTextureBacking(
   if (sk_image) {
     skia_context_provider_wrapper_ = context_provider_wrapper;
     texture_backing_ = sk_make_sp<MailboxTextureBacking>(
-        std::move(sk_image), mailbox_ref_, sk_image_info_,
-        std::move(context_provider_wrapper));
+        std::move(sk_image), mailbox_ref_, GetSize(), GetSkColorType(),
+        GetAlphaType(), GetSkColorSpace(), std::move(context_provider_wrapper));
   }
 }
 
@@ -432,7 +433,8 @@ void AcceleratedStaticBitmapImage::Transfer() {
 }
 
 bool AcceleratedStaticBitmapImage::CurrentFrameKnownToBeOpaque() {
-  return sk_image_info_.isOpaque();
+  return SkAlphaTypeIsOpaque(GetAlphaType()) ||
+         SkColorTypeIsAlwaysOpaque(GetSkColorType());
 }
 
 }  // namespace blink

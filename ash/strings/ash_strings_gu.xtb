@@ -22,6 +22,7 @@
 <translation id="1058009965971887428">પ્રતિસાદની જાણ કરો</translation>
 <translation id="1059120031266247284">તમારી સાથે શેર કર્યું</translation>
 <translation id="1059194134494239015"><ph name="DISPLAY_NAME" />: <ph name="RESOLUTION" /></translation>
+<translation id="1060847216467038176">'કાઢી નાખો' બટન સાથે <ph name="ITEM_LABEL" /></translation>
 <translation id="1062407476771304334">બદલો</translation>
 <translation id="1073899992769346247">બૅટરી બદલો અથવા તેને રિચાર્જ કરો</translation>
 <translation id="1081015718268701546">હાલમાં Linux ઍપને સપોર્ટ કરવામાં આવતો નથી. અન્ય ઍપ સાચવવામાં આવશે.</translation>
@@ -73,7 +74,6 @@
 <translation id="1218444235442067213"><ph name="APP_NAME" />, Play Store ઍપ</translation>
 <translation id="1225748608451425081">એક જાણીતી સમસ્યાને કારણે તમારું Chromebook લૉક થઈ ગયું છે. અહીં જણાવેલા સમય પછી તમે સાઇન ઇન કરી શકશો: <ph name="TIME_LEFT" />.</translation>
 <translation id="1229194443904279055">પસંદ કરવાનું બંધ કરો</translation>
-<translation id="1230853660706736937">છબીઓમાં જ ટેક્સ્ટ શોધો અને છબીના પ્રીવ્યૂ જુઓ</translation>
 <translation id="1235458158152011030">જાણીતા નેટવર્ક્સ</translation>
 <translation id="1239161794459865856"><ph name="FEATURE_NAME" /> કનેક્ટ કરેલું છે.</translation>
 <translation id="1240638468526743569">ઍપ</translation>
@@ -246,7 +246,6 @@
 <translation id="17722141032474077">ગણતરીઓ</translation>
 <translation id="1774796056689732716">કૅલેન્ડર, <ph name="CURRENT_MONTH_YEAR" />, હાલમાં <ph name="DATE" /> પસંદ કરેલી છે.</translation>
 <translation id="178347895271755507">તમારા ફોનના તાજેતરના ફોટા, મીડિયા અને નોટિફિકેશન જોવાની સુવિધાનું સેટઅપ કરવાની પ્રક્રિયા કરો</translation>
-<translation id="1785317913592722944">સૂચવેલા ગ્રૂપમાંથી આઇટમ કાઢી નાખો</translation>
 <translation id="1786487376942610288">ચિત્ર-માં-ચિત્ર વિન્ડોના મહત્તમ અથવા વર્તમાન કદ વચ્ચે સ્વિચ કરો</translation>
 <translation id="1787955149152357925">બંધ છે</translation>
 <translation id="1796561540704213354">વેબસાઇટ જેમાં તમે મુલાકાત લીધેલા પેજ અને ખોલેલા પેજ શામેલ છે</translation>
@@ -853,6 +852,7 @@
 <translation id="3859364108019690">ઍપ સ્ટ્રીમ કરી શકતા નથી</translation>
 <translation id="3861651314799684201">પૂર્ણ સ્ક્રીન રેકોર્ડ કરવા માટે Enter કી દબાવો</translation>
 <translation id="3870197372373144624">તમારું ડિવાઇસ શટ ડાઉન કરવાનો પ્રયાસ કરો.</translation>
+<translation id="3879748587602334249">ડાઉનલોડ મેનેજર</translation>
 <translation id="3886872229787704059">આજે ખોલેલી</translation>
 <translation id="3891340733213178823">સાઇન આઉટ કરવા માટે બે વાર Ctrl+Shift+Q દબાવો.</translation>
 <translation id="3892148308691398805">ટેક્સ્ટ કૉપિ કરો</translation>
@@ -878,6 +878,7 @@
 <translation id="3958714870339660776">આખો દિવસ</translation>
 <translation id="3962859241508114581">પાછલું ટ્રૅક</translation>
 <translation id="3963124517343721543">તમારી અગાઉની વિન્ડો અને ટૅબ ખોલીને તમે જ્યાંથી છોડ્યું હતું, ત્યાંથી સરળતાથી ચાલુ રાખો. આગળ કરવા લાયક કાર્યો માટે મનગમતા બનાવેલા સૂચનો પણ તમને જોવા મળશે.</translation>
+<translation id="3967822245660637423">ડાઉનલોડ પૂર્ણ</translation>
 <translation id="3969043077941541451">બંધ</translation>
 <translation id="3970324493235864154">તમારા ફોનના નોટિફિકેશન જુઓ</translation>
 <translation id="397105322502079400">ગણના કરી રહ્યું છે...</translation>
@@ -1052,6 +1053,7 @@
 <translation id="450584155212756404">Dev ચૅનલ</translation>
 <translation id="4513044611477939680">ક્વિક શેર</translation>
 <translation id="4513946894732546136">પ્રતિસાદ</translation>
+<translation id="4518096944902121253">આ ભાષા માટે વધુ કોઈ ક્રિયા ઉપલબ્ધ નથી</translation>
 <translation id="4518404433291145981">તમારી Chromebook અનલૉક કરવા માટે, પહેલાં તમારો ફોન અનલૉક કરો</translation>
 <translation id="4525887279712865285">ક્વિક શેરના સેટિંગ બતાવો</translation>
 <translation id="4527045527269911712">Bluetooth ડિવાઇસ "<ph name="DEVICE_NAME" />" ને જોડી બનાવવા માટે પરવાનગી જોઈએ છે.</translation>
@@ -1193,6 +1195,7 @@
 <translation id="4946376291507881335">કૅપ્ચર કરો</translation>
 <translation id="495046168593986294">ઉપર સ્ક્રોલ કરો</translation>
 <translation id="4950800194215951939">તમારા ગેમિંગ અનુભવને કસ્ટમાઇઝ કરો</translation>
+<translation id="495170559598752135">ક્રિયાઓ</translation>
 <translation id="4952936045814352993">અલાર્મના સાઉન્ડ બંધ હોય ત્યારે ફોન શોધવાની સુવિધા ઉપલબ્ધ હોતી નથી</translation>
 <translation id="4953585991029886728">ટેક્સ્ટમાંમાં ફેરફાર કરો</translation>
 <translation id="4960324571663582548"><ph name="MANAGER" /> માટે જરૂરી છે કે તમે તમારું <ph name="DEVICE_TYPE" /> અગાઉના વર્ઝન પર પાછું વાળો. તમારું ડિવાઇસ રીસેટ થશે અને બધો ડેટા ડિલીટ કરાશે.</translation>
@@ -1227,6 +1230,7 @@
 <translation id="5043679421800073804">શેલ્ફ પર છેલ્લા આઇકન પર ક્લિક અથવા ટૅપ કરો</translation>
 <translation id="504465286040788597">પહેલાંનો ફકરો</translation>
 <translation id="5045550434625856497">ખોટો પાસવર્ડ</translation>
+<translation id="5056587122125565772">છબી બનાવો</translation>
 <translation id="5058794129231928255">Google Docમાં બનાવવામાં આવતો દસ્તાવેજ બનાવી શક્યા નથી</translation>
 <translation id="5062496344832867502">RAM</translation>
 <translation id="5068762093486106012">મ્યૂટ કરેલું હોય ત્યારે જો તમે વાત કરો તો તમને સૂચિત કરવામાં આવશે. ઑડિયો તમારા ડિવાઇસમાં જ રહે છે.</translation>
@@ -1275,6 +1279,7 @@
 <translation id="5222676887888702881">સાઇન આઉટ</translation>
 <translation id="5228195526683428788">સ્ક્રીનને વિભાજિત કરતું વિભાજક</translation>
 <translation id="5229343007215035173">પ્રાઇવસી સ્ક્રીન ચાલુ/બંધ કરો</translation>
+<translation id="5229860525743792999">સૂચવેલા ગ્રૂપમાંથી <ph name="ITEM_LABEL" /> કાઢી નાખો</translation>
 <translation id="5230516054153933099">વિંડો</translation>
 <translation id="5234764350956374838">કાઢી નાખો</translation>
 <translation id="523505283826916779">ઍક્સેસિબિલિટી સેટિંગ</translation>
@@ -1619,6 +1624,7 @@
 <translation id="6319058840130157106">સૌથી નીચેના જમણા ખૂણા, લૉન્ચર, ઍડ્રેસ બાર, બુકમાર્ક બાર, ખુલ્લી હોય તે વેબસાઇટ અને ડાઉનલોડ વચ્ચે સ્વિચ કરવા માટે, પાછળની તરફ ખસેડો</translation>
 <translation id="6319503618073410818">બ્રાઉઝરમાં વિગતો જુઓ</translation>
 <translation id="6324916366299863871">શૉર્ટકટમાંમાં ફેરફાર કરો</translation>
+<translation id="6325525973963619867">નિષ્ફળ થયું</translation>
 <translation id="6330012934079202188">બધી ડેસ્ક પરથી વિન્ડો બતાવી રહ્યાં છીએ, વર્તમાન ડેસ્ક પરની વિન્ડો બતાવવા માટે ઉપરની ઍરો કી દબાવો</translation>
 <translation id="6337159624125741244">પૂર્ણ-સ્ક્રીન મૅગ્નિફાયર ચાલુ છે</translation>
 <translation id="6338485349199627913">મેનેજ કરાયેલું સત્ર <ph name="DISPLAY_NAME" />ને <ph name="MANAGER" /> દ્વારા મેનેજ કરવામાં આવે છે</translation>
@@ -1683,6 +1689,7 @@
 <translation id="6542891623636520977">ઇમોજી, GIFs અને વધુ</translation>
 <translation id="6543942526104794893">શું તમે ખરેખર ચહેરાના હાવભાવનો વિકલ્પ બંધ કરવા માગો છો?</translation>
 <translation id="6545382064335350438">તમારો પિન હજી પણ ચકાસી શકાયો નથી. ફરી પ્રયાસ કરો.</translation>
+<translation id="6546062506073634094">કન્ટેન્ટ દ્વારા છબી વડે શોધ તેમજ છબીના પ્રીવ્યૂ</translation>
 <translation id="6555373427270923730">ઍડ્રેસ બારમાં વેબ ઍડ્રેસ ટાઇપ કરો, પછી <ph name="MODIFIER" />+<ph name="KEY" /> દબાવો</translation>
 <translation id="655633303491376835"><ph name="APP_NAME" />
 નવી ઇન્સ્ટૉલ કરી છે</translation>
@@ -1756,6 +1763,7 @@
 <translation id="6757237461819837179">કોઈ મીડિયા ચલાવી રહ્યાં નથી</translation>
 <translation id="6760438044935091345">ગેમ ડૅશબોર્ડ</translation>
 <translation id="6768043681523654438">સ્ટોરેજ</translation>
+<translation id="6769195697113506406">છબી શામેલ કરી</translation>
 <translation id="6777216307882431711">કનેક્ટ કરેલા બધા USB-C ડિવાઇસને પાવર સપ્લાય આપી રહ્યાં છીએ</translation>
 <translation id="6781002679438061620">ડેસ્ક 9</translation>
 <translation id="6782182743534150858">ડેસ્ક 13</translation>
@@ -1878,6 +1886,7 @@
 <translation id="7189412385142492784">શુક્રનો ગ્રહ પૃથ્વીથી કેટલી દૂરીએ?</translation>
 <translation id="7198435252016571249">કૅમેરાને નીચેના જમણા ખૂણામાં સ્નેપ કર્યો. સિસ્ટમની સપાટીને ઓવરલેપ કરે છે.</translation>
 <translation id="7219573373513695352">કોઈ ડિવાઇસ કનેક્ટ કરેલું નથી</translation>
+<translation id="7228968829656641943">મારી સ્ક્રીન પર શોધવા માટે વિસ્તાર પસંદ કરો. કીબોર્ડ નૅવિગેશન માટે tab પછી space દબાવો.</translation>
 <translation id="7229029500464092426"><ph name="AVAILABLE_MEMORY" /> મેમરી | કુલ <ph name="TOTAL_MEMORY" /></translation>
 <translation id="7239814253344511868">માઉસના બન્ને બટન</translation>
 <translation id="7244725679040769470"><ph name="PERCENTAGE" />% બૅટરી બાકી છે. તમારા ડિવાઇસને પાવર સૉર્સ સાથે કનેક્ટ કરો.</translation>
@@ -1910,6 +1919,7 @@
 <translation id="735745346212279324">VPN ડિસ્કનેક્ટ કર્યું છે</translation>
 <translation id="7360036564632145207">પેરિફેરલ સેટિંગ માટે તમારી ડેટા ઍક્સેસની સુરક્ષામાં ફેરફાર કરવાથી કાર્યપ્રદર્શન ઑપ્ટિમાઇઝ થઈ શકે છે</translation>
 <translation id="736045644501761622">વૉલપેપર અને સ્ટાઇલ સેટ કરો</translation>
+<translation id="7368041336688136012">તમે AIની વાંચવામાં મારી સહાય કરો, લખવામાં મારી સહાય કરો અને છબી બનાવો સુવિધાઓનો ઉપયોગ કરી શકો એ માટે તમારી ઉંમર ઓછામાં ઓછી 18 વર્ષની હોવી આવશ્યક છે.</translation>
 <translation id="7371404428569700291">વિન્ડો રેકોર્ડ કરો</translation>
 <translation id="7372069265635026568">કુલ <ph name="TOTAL_MEMORY" />માંથી <ph name="AVAILABLE_MEMORY" />મેમરી ઉપલબ્ધ છે</translation>
 <translation id="737315737514430195">આ માઇક્રોફોનની પરવાનગી ધરાવતી બધી ઍપ અને વેબસાઇટ માટે, માઇક્રોફોનના ઍક્સેસની મંજૂરી આપે છે</translation>
@@ -1981,6 +1991,7 @@
 <translation id="7571361473021531288">બૅટરી <ph name="BATTERY_PERCENTAGE" />% | <ph name="TIME" /> બાકી છે</translation>
 <translation id="7573585051776738856">સક્રિય વિન્ડોને જમણે ડૉક કરી.</translation>
 <translation id="7579778809502851308">સ્ક્રીન કૅપ્ચર</translation>
+<translation id="7588317312481506627">ક્લિપબોર્ડ પર કૉપિ કરી.</translation>
 <translation id="7593891976182323525">Search અથવા Shift</translation>
 <translation id="7598054670902114203">CPUના વપરાશનો સ્નૅપશૉટ, <ph name="CPU_USEAGE" />%. તાપમાન <ph name="TEMPERATURE" /> ડિગ્રી સેલ્સિયસ, હાલની સ્પીડ: <ph name="CPU_AVERAGE_CURRENT_FREQUENCY_GHZ" />GHz</translation>
 <translation id="7599378375976398913">પસંદગીના પરિણામો શામેલ કરી રહ્યાં છીએ</translation>
@@ -2175,6 +2186,7 @@
 <translation id="8155628902202578800"><ph name="USER_EMAIL_ADDRESS" /> માટે માહિતી સંવાદ ખોલો</translation>
 <translation id="8167567890448493835"><ph name="LOCALE_NAME" />નો ઉપયોગ કરી રહ્યા છે</translation>
 <translation id="8168435359814927499">કન્ટેન્ટ</translation>
+<translation id="81817143961839203">છબી ઉમેરવામાં નિષ્ફળ રહ્યાં</translation>
 <translation id="8185090165691050712">લૉક મોડનું કદ બદલવા માટે મેનૂ ચાલુ/બંધ કરો</translation>
 <translation id="8192727139462702395">જ્યારે તમે બ્લૂટૂથ બંધ કરો, ત્યારે આ બાહ્ય ડિવાઇસ તમારા <ph name="DEVICE_TYPE" />થી ડિસ્કનેક્ટ થઈ જશે:</translation>
 <translation id="8198456017687137612">ટૅબ કાસ્ટ કરી રહ્યાં છીએ</translation>
@@ -2253,6 +2265,7 @@
 <translation id="8473301994082929012"><ph name="ORGANIZATION_NAME" />માં <ph name="FEATURE_STATE" /> <ph name="FEATURE_NAME" />છે.</translation>
 <translation id="8477270416194247200">રદ કરવા માટે Alt+Search અથવા Shift દબાવો.</translation>
 <translation id="8480418399907765580">ટૂલબાર બતાવો</translation>
+<translation id="8487660088084188539">જ્યારે તમે આ સુવિધાઓને ચાલુ કરો છો, ત્યારે ઇનપુટ કરેલી ટેક્સ્ટ, દસ્તાવેજનું કન્ટેન્ટ અને વેબપેજના URLને Googleના સર્વર પર મોકલવામાં આવી શકે છે. આ માહિતીનો ઉપયોગ લેખન સંબંધિત સૂચનો જનરેટ કરવા, સારાંશ જનરેટ કરવા, પ્રશ્નોના જવાબ આપવા અને પ્રોડક્ટને બહેતર બનાવવા માટે કરવામાં આવે છે, જે <ph name="LINK_TO_SERVICE_TERMS" />ને આધીન છે. વ્યક્તિગત, સંવેદનશીલ કે ગોપનીય હોય તેવી કોઈપણ માહિતી શામેલ કરશો નહીં.</translation>
 <translation id="8487699605742506766">હૉટસ્પૉટ</translation>
 <translation id="8491237443345908933">નવા ટૅબમાં લિંક ખોલો</translation>
 <translation id="8492573885090281069"><ph name="DISPLAY_NAME" />, <ph name="SPECIFIED_RESOLUTION" />ને સપોર્ટ આપતું નથી. રિઝોલ્યુશનને <ph name="FALLBACK_RESOLUTION" /> પર બદલવામાં આવ્યું હતું. ફેરફારો રાખવા માટે કન્ફર્મ પર ક્લિક કરો. અગાઉના સેટિંગ <ph name="TIMEOUT_SECONDS" />માં રિસ્ટોર કરવામાં આવશે.</translation>
@@ -2322,6 +2335,7 @@
 <translation id="8725066075913043281">ફરી પ્રયાસ કરો</translation>
 <translation id="8725214031272624704">ઉપલબ્ધ ઇનપુટ પદ્ધતિઓની સૂચિ બતાવો</translation>
 <translation id="8730621377337864115">થઈ ગયું</translation>
+<translation id="8731188831050207755"><ph name="FILE_NAME" /> ડાઉનલોડ કરવામાં અસફળ.</translation>
 <translation id="8731487213223706745"><ph name="END_TIME" /> વાગ્યે સમાપ્ત થશે <ph name="DAYS_ELAPSED" /></translation>
 <translation id="8734991477317290293">તે તમારા કીસ્ટ્રોકની ચોરી કરવાનો પ્રયાસ કરતું હોઈ શકે છે</translation>
 <translation id="8735678380411481005">કીબોર્ડની બૅકલાઇટનો રંગ</translation>

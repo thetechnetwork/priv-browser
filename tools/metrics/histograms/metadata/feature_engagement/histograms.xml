@@ -60,6 +60,12 @@ chromium-metrics-reviews@google.com.
   <variant name="IPH_AutoDarkUserEducationMessageOptIn"
       summary="message educating users about enabling auto dark web contents
                feature globally"/>
+  <variant name="IPH_AutofillAiOptIn"
+      summary="snooze educating users about the possibility of turning on the
+               AutofillAi feature"/>
+  <variant name="IPH_AutofillBnplAffirmOrZipSuggestion"
+      summary="message shown when users see the Autofill BNPL chip to educate
+               users that they can now pay over time using Affirm or Zip."/>
   <variant name="IPH_AutofillCardInfoRetrievalSuggestion"
       summary="message shown in the Autofill dropdown to educate users that a
                card info retrieval card appears because their account with
@@ -74,9 +80,6 @@ chromium-metrics-reviews@google.com.
   <variant name="IPH_AutofillExternalAccountProfileSuggestion"
       summary="message shown along with the externally created (e.g. in
                Google Pay) profile suggestion option in the Autofill dropdown"/>
-  <variant name="IPH_AutofillPredictionImprovements"
-      summary="snooze educating users about the possibility of turning on the
-               prediction improvements feature from the settings page"/>
   <variant name="IPH_AutofillVirtualCardCVCSuggestion"
       summary="message shown to users that have saved a virtual card on an
                online merchant website to educate users on how to fill in
@@ -282,7 +285,7 @@ chromium-metrics-reviews@google.com.
       summary="(obsolete) showing the Page Info Revamp new badge IPH on the
                overflow menu carousel"/>
   <variant name="IPH_iOSParcelTrackingFeature"
-      summary="showing the Parcel Tracking IPH on the Magic Stack"/>
+      summary="(obsolete) showing the Parcel Tracking IPH on the Magic Stack"/>
   <variant name="IPH_iOSPasswordPromoDesktop"
       summary="showing the iOS password promo on desktop"/>
   <variant name="IPH_iOSPaymentPromoDesktop"
@@ -334,6 +337,8 @@ chromium-metrics-reviews@google.com.
   <variant name="IPH_iOSSavedTabGroupClosed"
       summary="showing the IPH when closing a saved tab group for the first
                time"/>
+  <variant name="IPH_iOSSettingsInOverflowMenuBubbleFeature"
+      summary="settings in the overflow menu"/>
   <variant name="IPH_iOSSharedTabGroupForeground"
       summary="showing the IPH when the user is returning to an opened shared
                tab group"/>

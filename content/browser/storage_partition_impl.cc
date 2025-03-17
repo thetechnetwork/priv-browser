@@ -111,6 +111,7 @@
 #include "content/public/browser/browser_thread.h"
 #include "content/public/browser/browsing_data_filter_builder.h"
 #include "content/public/browser/content_browser_client.h"
+#include "content/public/browser/cookie_access_details.h"
 #include "content/public/browser/dom_storage_context.h"
 #include "content/public/browser/login_delegate.h"
 #include "content/public/browser/network_service_instance.h"
@@ -158,6 +159,7 @@
 #include "storage/browser/quota/quota_manager_impl.h"
 #include "storage/browser/quota/quota_settings.h"
 #include "third_party/blink/public/common/features.h"
+#include "third_party/blink/public/common/navigation/preloading_headers.h"
 #include "third_party/blink/public/common/permissions/permission_utils.h"
 #include "third_party/blink/public/common/storage_key/storage_key.h"
 #include "third_party/blink/public/mojom/devtools/inspector_issue.mojom-shared.h"
@@ -1018,7 +1020,9 @@ class StoragePartitionImpl::ServiceWorkerCookieAccessObserver
       for (GlobalRenderFrameHostId frame_id : GetRoutingIdsForOrigin(
                storage_partition_, url::Origin::Create(details->url))) {
         if (RenderFrameHostImpl* rfh = RenderFrameHostImpl::FromID(frame_id)) {
-          rfh->OnCookiesAccessed(mojo::Clone(details_vector));
+          rfh->NotifyCookiesAccessed(
+              mojo::Clone(details_vector),
+              CookieAccessDetails::Source::kNonNavigation);
         }
       }
     }
@@ -1491,7 +1495,7 @@ void StoragePartitionImpl::Initialize(
         this, path, special_storage_policy_);
   }
 
-  if (base::FeatureList::IsEnabled(blink::features::kInterestGroupStorage)) {
+  if (base::FeatureList::IsEnabled(network::features::kInterestGroupStorage)) {
     // Auction worklets on non-Android use dedicated processes; on Android due
     // to high cost of process launch they try to reuse renderers.
     interest_group_manager_ = std::make_unique<InterestGroupManagerImpl>(
@@ -1510,7 +1514,7 @@ void StoragePartitionImpl::Initialize(
 
   // The Topics API is not available in Incognito mode.
   if (!is_in_memory() &&
-      base::FeatureList::IsEnabled(blink::features::kBrowsingTopics)) {
+      base::FeatureList::IsEnabled(network::features::kBrowsingTopics)) {
     browsing_topics_site_data_manager_ =
         std::make_unique<BrowsingTopicsSiteDataManagerImpl>(path);
   }
@@ -1557,7 +1561,7 @@ void StoragePartitionImpl::Initialize(
   }
 #endif  // BUILDFLAG(ENABLE_LIBRARY_CDMS)
 
-  if (base::FeatureList::IsEnabled(blink::features::kSharedStorageAPI)) {
+  if (base::FeatureList::IsEnabled(network::features::kSharedStorageAPI)) {
     base::FilePath shared_storage_path =
         is_in_memory() ? base::FilePath()
                        : path.Append(storage::kSharedStoragePath);
@@ -2669,9 +2673,8 @@ void StoragePartitionImpl::QuotaManagedDataDeletionHelper::ClearDataOnIOThread(
       &QuotaManagedDataDeletionHelper::DecrementTaskCountOnIO,
       base::Unretained(this));
 
-  // Ask the QuotaManager for all buckets with temporary quota modified
-  // within the user-specified timeframe, and deal with the resulting set in
-  // ClearBucketsOnIOThread().
+  // Ask the QuotaManager for all buckets modified within the user-specified
+  // timeframe, and deal with the resulting set in ClearBucketsOnIOThread().
   if (quota_storage_remove_mask_ & QUOTA_MANAGED_STORAGE_MASK_TEMPORARY) {
     IncrementTaskCountOnIO();
     quota_manager->GetBucketsModifiedBetween(
@@ -2681,18 +2684,6 @@ void StoragePartitionImpl::QuotaManagedDataDeletionHelper::ClearDataOnIOThread(
                        special_storage_policy, storage_key_matcher,
                        perform_storage_cleanup, decrement_callback,
                        blink::mojom::StorageType::kTemporary));
-  }
-
-  // Do the same for syncable quota.
-  if (quota_storage_remove_mask_ & QUOTA_MANAGED_STORAGE_MASK_SYNCABLE) {
-    IncrementTaskCountOnIO();
-    quota_manager->GetBucketsModifiedBetween(
-        blink::mojom::StorageType::kSyncable, begin, end,
-        base::BindOnce(&QuotaManagedDataDeletionHelper::ClearBucketsOnIOThread,
-                       base::Unretained(this), base::RetainedRef(quota_manager),
-                       special_storage_policy, std::move(storage_key_matcher),
-                       perform_storage_cleanup, decrement_callback,
-                       blink::mojom::StorageType::kSyncable));
   }
 
   DecrementTaskCountOnIO();
@@ -3039,7 +3030,7 @@ void StoragePartitionImpl::DataDeletionHelper::ClearDataOnUIThread(
             CreateTaskCompletionClosure(TracingDataType::kPrivateAggregation)));
   }
 
-  if (base::FeatureList::IsEnabled(blink::features::kSharedStorageAPI) &&
+  if (base::FeatureList::IsEnabled(network::features::kSharedStorageAPI) &&
       shared_storage_manager &&
       (remove_mask_ & REMOVE_DATA_MASK_SHARED_STORAGE)) {
     auto shared_storage_purge_callback = base::BindOnce(
@@ -3475,8 +3466,7 @@ void StoragePartitionImpl::InitNetworkContext() {
   // This mechanisms should be used only for legacy internal headers. You can
   // find a recommended alternative approach on URLRequest::cors_exempt_headers
   // at services/network/public/mojom/url_loader.mojom.
-  context_params->cors_exempt_header_list.push_back(
-      kCorsExemptPurposeHeaderName);
+  context_params->cors_exempt_header_list.push_back(blink::kPurposeHeaderName);
   context_params->cors_exempt_header_list.push_back(
       GetCorsExemptRequestedWithHeaderName());
   variations::UpdateCorsExemptHeaderForVariations(context_params.get());

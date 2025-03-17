@@ -736,6 +736,15 @@ targets.mixin(
     ],
 )
 
+# TODO(fxbug.dev/370067428): Remove once Netstack2 no longer exists.
+targets.mixin(
+    name = "fuchsia-netstack2-x64",
+    generate_pyl_entry = False,
+    args = [
+        "--product=terminal_with_netstack2.x64",
+    ],
+)
+
 # TODO(b/300509814): Large device spec should be the default choice.
 # Choose virtual_device_large spec for more ram. This mixin works on emulators
 # only.
@@ -1083,7 +1092,7 @@ targets.mixin(
 # On dual-GPU devices this forces high performance GPU to be used by WebGL
 # while everything else uses the low performance GPU. ANGLE/Metal only.
 targets.mixin(
-    name = "gpu_force_high_performance_gpu_for_webgl",
+    name = "gpu_force_high_performance_gpu_for_webgl_metal",
     args = [
         "--extra-browser-args=--enable-features=EGLDualGPURendering,ForceHighPerformanceGPUForWebGL",
     ],
@@ -1227,6 +1236,19 @@ targets.mixin(
             swarming.cache(
                 name = "runtime_ios_18_2",
                 path = "Runtime-ios-18.2",
+            ),
+        ],
+    ),
+)
+
+targets.mixin(
+    name = "ios_runtime_cache_18_4",
+    generate_pyl_entry = False,
+    swarming = targets.swarming(
+        named_caches = [
+            swarming.cache(
+                name = "runtime_ios_18_4",
+                path = "Runtime-ios-18.4",
             ),
         ],
     ),
@@ -2289,7 +2311,7 @@ targets.mixin(
     swarming = targets.swarming(
         dimensions = {
             "display_attached": "1",
-            "gpu": "1002:7480",
+            "gpu": "1002:7480-32.0.12033.1030",
             "os": "Windows-11-26100",
             "pool": "chromium.tests.gpu",
         },
@@ -2504,12 +2526,12 @@ targets.mixin(
     generate_pyl_entry = False,
     args = [
         "--xcode-build-version",
-        "16c5032a",
+        "16e5121h",
     ],
     swarming = targets.swarming(
         named_caches = [
             swarming.cache(
-                name = "xcode_ios_16c5032a",
+                name = "xcode_ios_16e5121h",
                 path = "Xcode.app",
             ),
         ],

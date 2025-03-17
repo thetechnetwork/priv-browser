@@ -531,9 +531,8 @@ public class EventForwarder {
      */
     public boolean onDragEvent(DragEvent event, View containerView) {
         ClipDescription clipDescription = event.getClipDescription();
-        // Do not forward chrome/tab events to native eventForwarder.
-        if (clipDescription != null
-                && clipDescription.hasMimeType(MimeTypeUtils.CHROME_MIMETYPE_TAB)) {
+        // Do not forward browser content events to native eventForwarder.
+        if (MimeTypeUtils.clipDescriptionHasBrowserContent(clipDescription)) {
             return false;
         }
         if (mNativeEventForwarder == 0) {
@@ -546,9 +545,7 @@ public class EventForwarder {
         }
 
         if (event.getAction() == DragEvent.ACTION_DRAG_STARTED) {
-            return mIsDragDropEnabled
-                    && ((mimeTypes != null && mimeTypes.length > 0)
-                            || UiAndroidFeatureMap.isEnabled(UiAndroidFeatureList.DRAG_DROP_EMPTY));
+            return mIsDragDropEnabled;
         }
 
         String content = "";

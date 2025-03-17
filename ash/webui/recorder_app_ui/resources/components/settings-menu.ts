@@ -201,9 +201,7 @@ export class SettingsMenu extends ReactiveLitElement {
       s.summaryEnabled = SummaryEnableState.ENABLED;
     });
     this.platformHandler.perfLogger.start({kind: 'summaryModelDownload'});
-    this.platformHandler.summaryModelLoader.download();
-    // The settings download both the model for summary and title suggestion.
-    this.platformHandler.titleSuggestionModelLoader.download();
+    this.platformHandler.downloadGenAiModel();
     this.summaryDownloadRequested.value = true;
   }
 
@@ -216,7 +214,7 @@ export class SettingsMenu extends ReactiveLitElement {
   }
 
   private renderSummaryModelDownloadStatus() {
-    const state = this.platformHandler.summaryModelLoader.state.value.kind;
+    const state = this.platformHandler.getGenAiModelState().kind;
     switch (state) {
       case 'unavailable':
         return assertNotReached(
@@ -225,8 +223,15 @@ export class SettingsMenu extends ReactiveLitElement {
       case 'notInstalled':
         return nothing;
       case 'error':
-        // TODO: b/395788668 - Render error state.
-        return nothing;
+        return html`
+          <spoken-message
+            slot="status"
+            role="status"
+            aria-live="polite"
+          >
+            ${i18n.summaryDownloadErrorStatusMessage}
+          </spoken-message>
+        `;
       case 'installed':
         if (!this.summaryDownloadRequested.value) {
           return nothing;
@@ -252,7 +257,16 @@ export class SettingsMenu extends ReactiveLitElement {
   }
 
   private renderSummaryModelDescriptionAndAction() {
-    const state = this.platformHandler.summaryModelLoader.state.value;
+    const state = this.platformHandler.getGenAiModelState();
+    const downloadButton = html`
+      <cra-button
+        slot="action"
+        button-style="secondary"
+        .label=${i18n.settingsOptionsSummaryDownloadButton}
+        @click=${this.onDownloadSummaryClick}
+        aria-label=${i18n.settingsOptionsSummaryDownloadButtonAriaLabel}
+      ></cra-button>
+    `;
     if (state.kind === 'notInstalled') {
       // Shows the "download" button when the summary model is not installed,
       // even if it's already enabled by user. This shouldn't happen in normal
@@ -269,13 +283,18 @@ export class SettingsMenu extends ReactiveLitElement {
             ${i18n.settingsOptionsSummaryLearnMoreLink}
           </a>
         </span>
-        <cra-button
-          slot="action"
-          button-style="secondary"
-          .label=${i18n.settingsOptionsSummaryDownloadButton}
-          @click=${this.onDownloadSummaryClick}
-          aria-label=${i18n.settingsOptionsSummaryDownloadButtonAriaLabel}
-        ></cra-button>
+        ${downloadButton}
+      `;
+    }
+
+    if (state.kind === 'error') {
+      // Shows the "download" button when summary model fails to download so
+      // that users can try download again later.
+      return html`
+        <span slot="description" class="error">
+          ${i18n.settingsOptionsSummaryErrorDescription}
+        </span>
+        ${downloadButton}
       `;
     }
 
@@ -297,9 +316,6 @@ export class SettingsMenu extends ReactiveLitElement {
         return assertNotReached(
           'Summary model unavailable but the setting is rendered.',
         );
-      case 'error':
-        // TODO: b/395788668 - Render error state.
-        return nothing;
       case 'installing': {
         const progressDescription =
           i18n.settingsOptionsSummaryDownloadingProgressDescription(
@@ -326,8 +342,7 @@ export class SettingsMenu extends ReactiveLitElement {
   }
 
   private renderSummaryModelSettings() {
-    if (this.platformHandler.summaryModelLoader.state.value.kind ===
-        'unavailable') {
+    if (this.platformHandler.getGenAiModelState().kind === 'unavailable') {
       return nothing;
     }
     return html`

@@ -129,6 +129,9 @@ void DumpAccessibilityTreeTest::SetUpCommandLine(
   // Enable command/commandfor attributes
   command_line->AppendSwitchASCII(switches::kEnableBlinkFeatures,
                                   "HTMLCommandAttributes");
+  // Enable headingoffset/headingreset attributes
+  command_line->AppendSwitchASCII(switches::kEnableBlinkFeatures,
+                                  "HeadingOffset");
 }
 
 std::vector<std::string> DumpAccessibilityTreeTest::Dump(ui::AXMode mode) {
@@ -2223,7 +2226,7 @@ IN_PROC_BROWSER_TEST_P(CustomizableSelectEnabledDumpAccessibilityTreeTest,
 }
 
 IN_PROC_BROWSER_TEST_P(CustomizableSelectEnabledDumpAccessibilityTreeTest,
-    AccessibilityCustomSelectLabelElement) {
+                       AccessibilityCustomSelectLabelElement) {
   RunHtmlTest(FILE_PATH_LITERAL("custom-select-label-element.html"));
 }
 
@@ -2241,6 +2244,11 @@ IN_PROC_BROWSER_TEST_P(CustomizableSelectEnabledDumpAccessibilityTreeTest,
 IN_PROC_BROWSER_TEST_P(CustomizableSelectEnabledDumpAccessibilityTreeTest,
                        AccessibilityCustomSelectImgAlt) {
   RunHtmlTest(FILE_PATH_LITERAL("custom-select-img-alt.html"));
+}
+
+IN_PROC_BROWSER_TEST_P(CustomizableSelectEnabledDumpAccessibilityTreeTest,
+                       AccessibilitySlowlyBuildSelect) {
+  RunHtmlTest(FILE_PATH_LITERAL("select-slowly-build.html"));
 }
 
 IN_PROC_BROWSER_TEST_P(DumpAccessibilityTreeTest, AccessibilityDd) {
@@ -2552,6 +2560,15 @@ IN_PROC_BROWSER_TEST_P(DumpAccessibilityTreeTest,
 
 IN_PROC_BROWSER_TEST_P(DumpAccessibilityTreeTest, AccessibilityHeading) {
   RunHtmlTest(FILE_PATH_LITERAL("heading.html"));
+}
+
+IN_PROC_BROWSER_TEST_P(DumpAccessibilityTreeTest, HeadingWithHeadingoffset) {
+  RunHtmlTest(FILE_PATH_LITERAL("heading-with-headingoffset.html"));
+}
+
+IN_PROC_BROWSER_TEST_P(DumpAccessibilityTreeTest,
+                       HeadingWithHeadingoffsetDialog) {
+  RunHtmlTest(FILE_PATH_LITERAL("heading-with-headingoffset-dialog.html"));
 }
 
 IN_PROC_BROWSER_TEST_P(DumpAccessibilityTreeTest,

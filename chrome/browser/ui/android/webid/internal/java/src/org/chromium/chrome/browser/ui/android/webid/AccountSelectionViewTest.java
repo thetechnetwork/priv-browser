@@ -6,8 +6,8 @@ package org.chromium.chrome.browser.ui.android.webid;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 
@@ -24,6 +24,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.robolectric.ParameterizedRobolectricTestRunner;
 import org.robolectric.ParameterizedRobolectricTestRunner.Parameters;
 import org.robolectric.shadows.ShadowLooper;
@@ -33,6 +34,7 @@ import org.chromium.base.test.util.CriteriaHelper;
 import org.chromium.base.test.util.ScalableTimeout;
 import org.chromium.blink.mojom.RpMode;
 import org.chromium.chrome.browser.ui.android.webid.AccountSelectionProperties.AccountProperties;
+import org.chromium.chrome.browser.ui.android.webid.AccountSelectionProperties.ButtonData;
 import org.chromium.chrome.browser.ui.android.webid.AccountSelectionProperties.ContinueButtonProperties;
 import org.chromium.chrome.browser.ui.android.webid.AccountSelectionProperties.DataSharingConsentProperties;
 import org.chromium.chrome.browser.ui.android.webid.AccountSelectionProperties.ErrorProperties;
@@ -217,11 +219,13 @@ public class AccountSelectionViewTest extends AccountSelectionJUnitTestBase {
         assertEquals(View.GONE, getAccountSecondaryDescriptionAt(2).getVisibility());
         assertEquals("Incorrect name", mNicolasAccount.getName(), getAccountNameAt(3).getText());
         assertEquals("Incorrect email", mNicolasAccount.getEmail(), getAccountEmailAt(3).getText());
+        // Even though mNicolasAccount has secondary description, it should not be shown when UI is
+        // not in multi IDP mode.
         assertEquals(
                 "Should not have secondary description",
-                mNicolasAccount.getSecondaryDescription(),
+                "",
                 getAccountSecondaryDescriptionAt(3).getText());
-        assertEquals(View.VISIBLE, getAccountSecondaryDescriptionAt(3).getVisibility());
+        assertEquals(View.GONE, getAccountSecondaryDescriptionAt(3).getVisibility());
     }
 
     @Test
@@ -235,7 +239,11 @@ public class AccountSelectionViewTest extends AccountSelectionJUnitTestBase {
 
         getAccounts().getChildAt(0).performClick();
 
-        waitForEvent(mAccountCallback).onResult(eq(mAnaAccount));
+        ArgumentCaptor<ButtonData> captor = ArgumentCaptor.forClass(ButtonData.class);
+        waitForEvent(mAccountCallback).onResult(captor.capture());
+        ButtonData capturedButtonData = captor.getValue();
+        assertEquals(mAnaAccount, capturedButtonData.mAccount);
+        assertNull(capturedButtonData.mIdpMetadata);
     }
 
     @Test
@@ -262,7 +270,11 @@ public class AccountSelectionViewTest extends AccountSelectionJUnitTestBase {
         assertTrue(continueButton.isShown());
         continueButton.performClick();
 
-        waitForEvent(mAccountCallback).onResult(eq(mAnaAccount));
+        ArgumentCaptor<ButtonData> captor = ArgumentCaptor.forClass(ButtonData.class);
+        waitForEvent(mAccountCallback).onResult(captor.capture());
+        ButtonData capturedButtonData = captor.getValue();
+        assertEquals(mAnaAccount, capturedButtonData.mAccount);
+        assertEquals(mIdpMetadata, capturedButtonData.mIdpMetadata);
     }
 
     @Test
@@ -341,7 +353,11 @@ public class AccountSelectionViewTest extends AccountSelectionJUnitTestBase {
         assertEquals("Continue", continueButton.getText());
         continueButton.performClick();
 
-        waitForEvent(mAccountCallback).onResult(eq(null));
+        ArgumentCaptor<ButtonData> captor = ArgumentCaptor.forClass(ButtonData.class);
+        waitForEvent(mAccountCallback).onResult(captor.capture());
+        ButtonData capturedButtonData = captor.getValue();
+        assertNull(capturedButtonData.mAccount);
+        assertEquals(mIdpMetadata, capturedButtonData.mIdpMetadata);
     }
 
     @Test

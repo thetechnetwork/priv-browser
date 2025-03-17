@@ -81,6 +81,7 @@
 <translation id="131461803491198646">የቤት አውታረ መረብ፣ የሌላን እየተጠቀመ አይደለም</translation>
 <translation id="1327977588028644528">አግባቢ ፍኖት</translation>
 <translation id="1328223165223065150">የልጣፍ ቀለም</translation>
+<translation id="1329478709358066995">የጽሑፍ ግልባጭ፦</translation>
 <translation id="1330426557709298164">JPG</translation>
 <translation id="1337912285145772892">ከመቃኛ አካባቢ ጋር አመጣጥን</translation>
 <translation id="1343442362630695901">የጨው ሀይቅ</translation>
@@ -126,7 +127,17 @@
 <translation id="1515129336378114413">የአሳሽ መነሻ</translation>
 <translation id="1526389707933164996">የማያ ገፅ አሳራፊ እነማ</translation>
 <translation id="152892567002884378">ድምፅ ጨምር</translation>
+<translation id="1531038290222364269">ትሮችን አሳይ</translation>
 <translation id="1539864135338521185">ላፒስ ላዙሊ</translation>
+<translation id="1548555207631326346">የእርስዎን የሰው ሠራሽ አስተውሎት ምስሎች ግላዊ ለማድረግ አንድ ገፅታ ይምረጡ እና ከዚያ የተሰመረባቸውን ቃላት ይምረጡ።<ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          ተጨማሪ ልዩ እና የተለያዩ የሰው ሰራሽ አስተውሎት ምስሎች አማራጮችን ለማግኘት «አነሳሳኝ» የሚለውን ይምረጡ።
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          በAI ሲፈጥሩ ለ<ph name="BEGIN_LINK_GOOGLE_PRIVACY_POLICY" />Google ግላዊነት መመሪያ<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" /> ተገዢ ሆኖ ምስሎችን ለማመንጨት እና ምርቱን ለማሻሻል ጥያቄው ወደ የGoogle AI አገልጋዮች ይላካል።
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          AI አመንጪ በሙከራ ደረጃ ላይ ያለ፣ ከጊዜው በቀደመ ግንባታ ላይ ያለ እና በአሁኑ ጊዜ ውሱን ተደራሽነት ያለው ነው።</translation>
 <translation id="1555130319947370107">ሰማያዊ</translation>
 <translation id="155865706765934889">ተችፓድ</translation>
 <translation id="1561927818299383735">የጀርባ ብርሃን ቀለም</translation>
@@ -252,7 +263,6 @@
 <translation id="2011174342667534258">የኤስዲኬ ስሪት፦</translation>
 <translation id="2016697457005847575">የመላ ፍለጋ እርምጃዎችን ይሞክሩ</translation>
 <translation id="202500043506723828">EID</translation>
-<translation id="2041627599411887437">የእርስዎን የሰው ሠራሽ አስተውሎት ምስሎች ግላዊ ለማድረግ አንድ ገፅታ ይምረጡ እና ከዚያ የተሰመረባቸውን ቃላት ይምረጡ።</translation>
 <translation id="2045814230297767491">መቁረጫዎች</translation>
 <translation id="2047316797244836561">እባክዎ ከአውታረ መረብ ጋር ይገናኙ እና የማያ ገፅ ማቆያን ለማየት ገጹን እንደገና ይጫኑ።</translation>
 <translation id="2056550196601855911">IPv4/IPv6</translation>
@@ -405,6 +415,7 @@
 <translation id="2787237339470862294">ይህ ቋንቋ አሁን ላይ አይደገፍም</translation>
 <translation id="2787435249130282949">የቁልፍ ሰሌዳን ፈካ የሚያደርግ</translation>
 <translation id="2805756323405976993">መተግበሪያዎች</translation>
+<translation id="2822702442014805146">የማጠቃለያ እና ስም ፈጠራ ሞዴል ማውረድ በሂደት ላይ</translation>
 <translation id="28232023175184696">ከበይነመረቡ ጋር መገናኘት አልተቻለም። እንደገና ለመሞከር ጠቅ ያድርጉ።</translation>
 <translation id="2855718259207180827">ሱፍ</translation>
 <translation id="2859243502336719778">ወሳኝ ዝማኔ</translation>
@@ -502,6 +513,7 @@
 <translation id="3373141842870501561">የመሬት ፍሰት ልጣፍ</translation>
 <translation id="33736539805963175">የ<ph name="LETTERS_COLOR" /> ዳራ ከ<ph name="LETTERS_LETTER" /> ፊደል ጋር</translation>
 <translation id="3383623117265110236">ለሚመለከተው የተወሰነ</translation>
+<translation id="3395147534045164351">የsnap አካባቢን አሳይ</translation>
 <translation id="3404249063913988450">የማያ ገፅ ማቆያን አንቃ</translation>
 <translation id="3413935475507503304">በዝማኔው ለመቀጠል ቀጣይ የሚለውን ጠቅ ያድርጉ።</translation>
 <translation id="3428551088151258685">ከቤት ውጭ</translation>
@@ -651,6 +663,7 @@
 <translation id="4113067922640381334">እርስዎ አሁን ለአዲስ <ph name="BEGIN_LINK_WALLPAPER_SUBPAGE" />ልጣፎች<ph name="END_LINK_WALLPAPER_SUBPAGE" /> መዳረሻ አለዎት</translation>
 <translation id="4117637339509843559">የጨለማ ሁነታ</translation>
 <translation id="4126551873361000548">10 ሰከንዶች ወደኋላ</translation>
+<translation id="4128271910628504223">እንደ «ጭጋጋማ ጫካ ሳል» ያለ ጥያቄ ያስገቡ</translation>
 <translation id="4130035430755296270">ለተጨማሪ የአቀማመጥ አማራጮች ማንዣበብዎን ይቀጥሉ</translation>
 <translation id="4130750466177569591">እስማማለሁ</translation>
 <translation id="4131410914670010031">ጥቁር እና ነጭ</translation>
@@ -824,6 +837,7 @@
 <translation id="4891842000192098784">ጭንቀት</translation>
 <translation id="4897058166682006107">መሣሪያ <ph name="BATTERY_PERCENTAGE" />% የግራ ጆሮ ማዳመጫ ባትሪ አለው።</translation>
 <translation id="4905998861748258752">የማያ ገፅ አሳራፊ አማራጮችን ለመምረጥ ባህሪውን ያብሩት</translation>
+<translation id="4910853326379896417">የማጠቃለያ እና ስም ፈጠራ ሞዴል ማውረድ ተጠናቅቋል</translation>
 <translation id="4910858703033903787">የኤፒኤን ዓይነቶች</translation>
 <translation id="4917385247580444890">ጠንካራ</translation>
 <translation id="4917889632206600977">ቆሟል - ወረቀት አልቋል</translation>
@@ -858,8 +872,10 @@
 <translation id="5050042263972837708">የቡድን ስም</translation>
 <translation id="5051044138948155788">ይህ ብቸኛው ገፅ ነው። ይህ ወደ መቃኘት መጀመሪያው ማያ ገፅ ይወስደዎታል።</translation>
 <translation id="5053233795640754917">ባለበት አቁም</translation>
+<translation id="5056587122125565772">ምስል ፍጠር</translation>
 <translation id="5078711626843651677">የድምጽ ማውጫ መለያ እስኪጠናቀቅ ድረስ የድምፅ ሞዴሎች በጊዜያዊነት በመሣሪያ ላይ ይከማቻሉ። ይህን በማንኛውም ጊዜ በቅንብሮች ውስጥ ማጥፋት ይችላሉ።</translation>
 <translation id="5078983345702708852">የወደፊት</translation>
+<translation id="5085224064082122501">ለማጠቃለያ እና ስም ፈጠራ ሞዴል ማውረድ አልተቻለም። እንደገና ይሞክሩ ወይም የእርስዎን Chromebook እንደገና ያስጀምሩ።</translation>
 <translation id="5087864757604726239">ወደ ኋላ</translation>
 <translation id="5088172560898466307">የአገልጋይ አስተናጋጅ ስም</translation>
 <translation id="5089810972385038852">ግዛት</translation>
@@ -1129,14 +1145,12 @@
 <translation id="6325525973963619867">አልተሳካም</translation>
 <translation id="6327262166342360252">ይህ ልጣፍ የተፈጠረው የሚከተለውን ጽሑፍ በመጠቀም በAI ነው፦ «<ph name="PROMPT" />»።</translation>
 <translation id="6331191339300272798">ራስሰር ጠቆር ያለ ገጽታ</translation>
-<translation id="6335228876613776082">ሞዴል ማውረድ ተጠናቋል</translation>
 <translation id="6340526405444716530">ግላዊነት ማላበስ</translation>
 <translation id="6348252528297699679">አካባቢን በቅንብሮች &gt; ግላዊነት እና ደህንነት &gt; የግላዊነት ቁጥጥሮች &gt; የአካባቢ መዳረሻ ውስጥ ማጥፋት ይችላሉ። <ph name="LINK_BEGIN" />የበለጠ ለመረዳት<ph name="LINK_END" /></translation>
 <translation id="6348738456043757611">የተጠቃሚ ስም እና የይለፍ ቃል</translation>
 <translation id="6352210854422428614">የተለየ ፕላኔት</translation>
 <translation id="6359706544163531585">ነጣ ያለ ገጽታን አሰናክል</translation>
 <translation id="6359919876285606596">ይህ እርምጃ ቋሚ ነው እና ሊቀለበስ አይችልም</translation>
-<translation id="6368342879959028556">«በሰው ሠራሽ አስተውሎት ፍጠር» የሚለውን ሲመርጡ ብጁ ጥያቄ ይጻፉ። ወይም የእርስዎን ሰው ሠራሽ አስተውሎት ልጣፍ ግላዊ ለማድረግ ገፅታ ለመምረጥ እና ከዚያ የተሰመረባቸውን ቃላት ለመምረጥ «ሰው ሠራሽ አስተውሎት ልጣፎች» የሚለውን መምረጥ ይችላሉ።</translation>
 <translation id="636850387210749493">የድርጅት ምዝገባ</translation>
 <translation id="6369221585240879141">ለዚህ የጽሑፍ ግልባጭ ቋንቋ የቀረጻ ስሞችን መፍጠር አልተቻልም</translation>
 <translation id="6373461326814131011">ኩሬ</translation>
@@ -1209,16 +1223,6 @@
 <translation id="6657240842932274095">የሥርዓት አገልግሎቶች አካባቢዎን እንዲጠቀሙ ይፈቀድ?</translation>
 <translation id="6657585470893396449">የይለፍ ቃል</translation>
 <translation id="66621959568103627">ኮራል ሮዝ</translation>
-<translation id="6667885109186363316"><ph name="SEA_PEN_INTRO_FIRST_PARAGRAPH" />
-          <ph name="LINE_BREAK" />
-          <ph name="LINE_BREAK" />
-          ተጨማሪ ልዩ እና የተለያዩ የሰው ሰራሽ አስተውሎት ምስሎች አማራጮችን ለማግኘት «አነሳሳኝ» የሚለውን ይምረጡ።
-          <ph name="LINE_BREAK" />
-          <ph name="LINE_BREAK" />
-          በሰው ሠራሽ አስተውሎት ሲፈጥሩ <ph name="BEGIN_LINK_GOOGLE_PRIVACY_POLICY" />ለGoogle ግላዊነት መመሪያ<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" /> ተገዢ በሆነ መልኩ ምስሎችን እንዲያመነጩ እና ምርቱን እንዲያሻሽሉ ጥያቄው ወደ የGoogle ሰው ሠራሽ አስተውሎት አገልጋዮች ይላካል።
-          <ph name="LINE_BREAK" />
-          <ph name="LINE_BREAK" />
-          ሰው ሠራሽ አስተውሎት አመንጪ የሙከራ፣ በግንባታ ጅማሬ ላይ ያለ እና በአሁኑ ጊዜ ውሱን ተገኚነት ያለው ነው።</translation>
 <translation id="6673898378497337661">የቁልፍ ሰሌዳ ብሩህነት መጨመሪያ</translation>
 <translation id="6692996468359469499">ከእርስዎ ምርጫ ጋር የተገናኘ መረጃ ያግኙ</translation>
 <translation id="6694534975463174713">ቁልፍ</translation>
@@ -1274,6 +1278,7 @@
 <translation id="6930597342185648547">ስለ ዳራ</translation>
 <translation id="6939667434404433010">የቅጂ ስምን ይፈልጉ</translation>
 <translation id="6939766318048400022">ካፌ</translation>
+<translation id="6942253772720771875">ግብረመልስዎን ያጋሩ ወይም ችግርዎን ይግለጹ</translation>
 <translation id="6943893908656559156">የርቀት ማንነት (ከተፈለገ)</translation>
 <translation id="6953137545147683679">ወርቃማ</translation>
 <translation id="6957231940976260713">የአገልግሎት ስም</translation>
@@ -1295,6 +1300,7 @@
 <translation id="7040230719604914234">ከዋኝ</translation>
 <translation id="7040729769968826896">የተናጋሪ መለየትን ይፍቀዱ</translation>
 <translation id="7041549558901442110">መሣሪያ አልተገናኘም።</translation>
+<translation id="704183341263526038">ጁፒተር</translation>
 <translation id="7046522406494308071">ሁሉም አቋራጮች ወደ ነባሪዎች በድጋሚ ይቀናበሩ?</translation>
 <translation id="7049916119678019302">ቅንብሮች ውስጥ ወደ ጽሑፍ ግልባጭን ያውርዱ</translation>
 <translation id="7058278511608979688">ጨርስ እና አስቀምጥ</translation>
@@ -1427,6 +1433,7 @@
 <translation id="7569444139234840525"><ph name="QUERY_TEXT" /> · /<ph name="PHONETICS" />/</translation>
 <translation id="7570674786725311828">የዩኤስቢ መነካት የሚችል ማያ</translation>
 <translation id="757747079855995705">ድንጋይ</translation>
+<translation id="7584853321964440104">ማውረድ አልተቻለም። እንደገና ይሞክሩ ወይም የእርስዎን Chromebook እንደገና ያስጀምሩ።</translation>
 <translation id="7590883480672980941">የግቤት ቅንብሮች</translation>
 <translation id="7595982850646262331"><ph name="TIME_VALUE" /> ቀርቷል</translation>
 <translation id="7600430297804876776">የ<ph name="MANAGER" /> አስተዳዳሪው <ph name="DEVICE_TYPE" /> መቼ ጥቅም ላይ መዋል እንደሚችል አቀናብረዋል።</translation>
@@ -1557,6 +1564,16 @@
 <translation id="8179976553408161302">አስገባ</translation>
 <translation id="8183975772394450380">የባህር ዳርቻ</translation>
 <translation id="819278132617411009">የበለጠ ውጤታማ ለመሆን Google ሰው ሠራሽ አስተውሎት ይጠቀሙ</translation>
+<translation id="82003371436638355">«የራስዎን ይፍጠሩ» የሚለውን ሲመርጡ ብጁ ጥያቄ ይጻፉ። ወይም የእርስዎን የሰው ሠራሽ አስተውሎት ልጣፍ ግላዊ ለማድረግ አንድ ገፅታ መምረጥ ይችላሉ እና ከዚያ የተሰመረባቸውን ቃላት ይምረጡ።
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          ተጨማሪ ልዩ እና የተለያዩ የሰው ሰራሽ አስተውሎት ምስሎች አማራጮችን ለማግኘት «አነሳሳኝ» የሚለውን ይምረጡ።
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          የራስዎን ልጣፍ ሲፈጥሩ <ph name="BEGIN_LINK_GOOGLE_PRIVACY_POLICY" />ለGoogle የአገልግሎት ውል እና የግላዊነት መመሪያ <ph name="END_LINK_GOOGLE_PRIVACY_POLICY" /> ተገዢ በሆነ መልኩ ምስሎችን እንዲያመነጩ እና ምርቱን እንዲያሻሽሉ ጥያቄው ወደ የGoogle ሰው ሠራሽ አስተውሎት አገልጋዮች ይላካል። የግል፣ ልዩ ጥንቃቄ የሚያስፈልገው ወይም ምስጢራዊ የሆነ ማንኛውም ነገር አያካትቱ።
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          ስለ ሰዎች ጨምሮ ሰው ሠራሽ አስተውሎት አመንጪ ስሕተቶችን ሊሠራ ይችላል፣ ስለዚህ በድጋሚ ያረጋግጡት። <ph name="BEGIN_LINK_CREATE_YOUR_OWN_WALLPAPER" />የበለጠ ለመረዳት<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" /></translation>
 <translation id="8200772114523450471">ከቆመበት ቀጥል</translation>
 <translation id="8206859287963243715">ሴሉላር</translation>
 <translation id="8208861521865154048">ጥቅማጥቅሞች</translation>
@@ -1578,6 +1595,7 @@
 <translation id="8312330582793120272">ሚዲያ ማጫወቻ</translation>
 <translation id="8318753676953949627">ምንም ምስሎች የሉም</translation>
 <translation id="8320910311642849813">ደን</translation>
+<translation id="8322464149031882595">ወደፊት ለመሄድ ጠቅ ያድርጉ</translation>
 <translation id="8329018942023753850">የሒሳብ ማስያ መተግበሪያ</translation>
 <translation id="8336739000755212683">የመሣሪያ መለያ ምስልን ለውጥ</translation>
 <translation id="8339024191194156249">ስለ በራስ-ሰር አስጀምር የበለጠ ይረዱ</translation>
@@ -1598,6 +1616,7 @@
 <translation id="8395584934117017006">ይህ <ph name="DEVICE_TYPE" /> በድርጅት የሚተዳደር ነው</translation>
 <translation id="8398927464629426868">መሣሪያው በአሁኑ ጊዜ ኃይል እየሞላ ወይም እያስወገደ ያለበት ፍጥነት</translation>
 <translation id="8403988360557588704">የ<ph name="ART_FEATURE" /> የቀለም ሥዕል በ<ph name="ART_MOVEMENT" /> ቅጥ</translation>
+<translation id="8409219750150841791">የመነጨ ማጠቃለያ፦</translation>
 <translation id="8410244574650205435">በራስ-ሰር ተገኝቷል</translation>
 <translation id="8420955526972171689">ለሃርድዌር ችግሮች ሙከራዎችን እና መላ ፍለጋን ያሂዱ</translation>
 <translation id="8422748173858722634">IMEI</translation>
@@ -1642,6 +1661,7 @@
 <translation id="8626489604350149811">ለ<ph name="APN_NAME" /> ተጨማሪ እርምጃዎች</translation>
 <translation id="86356131183441916">ፈዛዛ ወይን ጠጅ</translation>
 <translation id="8647595191512746911">የኦዲዮ ጽሑፍ ግልባጭ</translation>
+<translation id="8648578954147795914">የመነጩ ስሞች፦</translation>
 <translation id="8650852232143958317">የእርስዎን Gmail እና Google Drive ፋይሎች ከእርስዎ ጋር ይውሰዱ</translation>
 <translation id="8651481478098336970">ድምፅ ዝጋ</translation>
 <translation id="8655295600908251630">ሰርጥ</translation>
@@ -1670,7 +1690,6 @@
 <translation id="8764414543112028321">WireGuard</translation>
 <translation id="87646919272181953">የGoogle ፎቶዎች አልበም</translation>
 <translation id="8775713578693478175">ዘመናዊ ኤፒኤን</translation>
-<translation id="877735394245039557">ሞዴል ማውረድ በሂደት ላይ</translation>
 <translation id="877985182522063539">A4</translation>
 <translation id="879568662008399081">ይህ አውታረ መረብ ተያዥ መግቢያ ሊኖረው ይችላል</translation>
 <translation id="8797082062139985406">Google ሰው ሠራሽ አስተውሎት በመጠቀም ስም ይፍጠሩ</translation>
@@ -1723,6 +1742,7 @@
 <translation id="8961025972867871808">ፔንግዊኖች</translation>
 <translation id="8968751544471797276">ኃይል መሙላት መጠን</translation>
 <translation id="8970109610781093811">እንደገና ያሂዱ</translation>
+<translation id="8972061581514441296">መልሰው ለመሄድ ጠቅ ያድርጉ</translation>
 <translation id="8983038754672563810">ኤችኤስፒኤ</translation>
 <translation id="8987565828374052507">{NUMBER_OF_PAGES,plural, =0{ቃኝ}=1{ገፅ {NUMBER_OF_PAGES} ቃኝ}one{ገፅ {NUMBER_OF_PAGES} ቃኝ}other{ገፅ {NUMBER_OF_PAGES} ቃኝ}}</translation>
 <translation id="89945434909472341">መንደር</translation>
@@ -1784,6 +1804,7 @@
 <translation id="9218016617214286986">የታወቁ ኤፒኤኖችን አሳይ</translation>
 <translation id="932327136139879170">መነሻ</translation>
 <translation id="939519157834106403">SSID</translation>
+<translation id="940663759301549538">ማይክሮፎንዎ እንደተገናኘ ያረጋግጡ ወይም የእርስዎን Chromebook እንደገና ማስጀመር ይሞክሩ</translation>
 <translation id="945522503751344254">ግብረመልስ ላክ</translation>
 <translation id="950520315903467048">የ<ph name="DIRECTION" /> ቁልፉ ይጎድላል። <ph name="ASSIGN_INSTRUCTION" /></translation>
 <translation id="951780398843003443">ጽሁፍ ግልባጩ እያንዳንዱ ተናጋር ምን እና መቼ እንደተናገረ እንዲያንጸባርቅ በቅጂው ላይ ድምፆችን ያነጻጽሩ</translation>

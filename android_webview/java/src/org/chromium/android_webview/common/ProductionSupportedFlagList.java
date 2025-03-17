@@ -191,6 +191,9 @@ public final class ProductionSupportedFlagList {
                 VizFeatures.DRAW_IMMEDIATELY_WHEN_INTERACTIVE,
                 "Enable optimization for immediate activation and draw when interactive."),
         Flag.baseFeature(
+                VizFeatures.AVOID_DUPLICATE_DELAY_BEGIN_FRAME,
+                "For epsilonic judder avoid sending duplicate (delay source) begin frames."),
+        Flag.baseFeature(
                 VizFeatures.ACK_ON_SURFACE_ACTIVATION_WHEN_INTERACTIVE,
                 "Enable immediately sending acks to clients when a viz surface activates and when"
                         + " that surface is a dependency of an interactive frame (i.e., when there"
@@ -205,6 +208,8 @@ public final class ProductionSupportedFlagList {
                 NetFeatures.USE_NEW_ALPS_CODEPOINT_HTTP2,
                 "Enables using the new ALPS codepoint to negotiate application settings for"
                         + " HTTP2."),
+        Flag.baseFeature(
+                BlinkFeatures.LAYOUT_NG_SHAPE_CACHE, "Cache shape results for short text blocks."),
         Flag.baseFeature(
                 BlinkFeatures.SIMPLIFY_LOADING_TRANSPARENT_PLACEHOLDER_IMAGE,
                 "Enables simplifying loading known transparent placeholder images."),
@@ -237,9 +242,6 @@ public final class ProductionSupportedFlagList {
                 AndroidAutofillFeatures.ANDROID_AUTOFILL_BOTTOM_SHEET_WORKAROUND_NAME,
                 "Enable the workaround for autofill bottom sheet platform bug."),
         Flag.baseFeature(
-                AndroidAutofillFeatures.ANDROID_AUTOFILL_PREFILL_REQUEST_FOR_CHANGE_PASSWORD_NAME,
-                "Enables sending prefill requests for Change Password forms."),
-        Flag.baseFeature(
                 AutofillFeatures.AUTOFILL_ACCEPT_DOM_MUTATION_AFTER_AUTOFILL_SUBMISSION,
                 "Accepts DOM_MUTATION_AFTER_AUTOFILL submissions detected on password forms."),
         Flag.baseFeature(
@@ -255,6 +257,8 @@ public final class ProductionSupportedFlagList {
                 AutofillFeatures.AUTOFILL_ENABLE_SUPPORT_FOR_PARSING_WITH_SHARED_LABELS,
                 "Splits Autofill labels among consecutive fields for better heuristic"
                         + " predictions."),
+        Flag.baseFeature(
+                AutofillFeatures.AUTOFILL_EXTRACT_INPUT_DATE, "Extracts <input type=date> fields."),
         Flag.baseFeature(
                 AutofillFeatures.AUTOFILL_FIX_FORM_TRACKING,
                 "Improves form submission tracking and duplicate submission handling"),
@@ -273,6 +277,9 @@ public final class ProductionSupportedFlagList {
         Flag.baseFeature(
                 AutofillFeatures.AUTOFILL_INFER_LABEL_FROM_DEFAULT_SELECT_TEXT,
                 "Considers the text of a <select> element's first <option> as a potential label"),
+        Flag.baseFeature(
+                AutofillFeatures.AUTOFILL_IMPROVE_CITY_FIELD_CLASSIFICATION,
+                "Reduces city field false positive classifications"),
         Flag.baseFeature(
                 AutofillFeatures.AUTOFILL_DETECT_REMOVED_FORM_CONTROLS,
                 "Enables Autofill to detect if form controls are removed from the DOM"),
@@ -337,6 +344,9 @@ public final class ProductionSupportedFlagList {
         Flag.baseFeature(
                 AutofillFeatures.AUTOFILL_SUPPORT_PHONETIC_NAME_FOR_JP,
                 "When enabled, Autofill will support phonetic name for Japan."),
+        Flag.baseFeature(
+                AutofillFeatures.AUTOFILL_THROTTLE_ASK_FOR_VALUES_TO_FILL,
+                "When enabled, Autofill throttles duplicate AskForValuesToFill() events."),
         Flag.baseFeature(
                 AutofillFeatures.AUTOFILL_UKM_EXPERIMENTAL_FIELDS,
                 "Enables UKM collection for experimental fields"),
@@ -787,6 +797,9 @@ public final class ProductionSupportedFlagList {
                 MediaFeatures.BUILT_IN_HLS_PLAYER,
                 "Switches the HLS demuxer implementation from MediaPlayer to an internal one"),
         Flag.baseFeature(
+                MediaFeatures.BUILT_IN_HLS_MP4,
+                "Enabled the playback of HLS renditions which use the mp4 container"),
+        Flag.baseFeature(
                 MediaFeatures.LIBVPX_USE_CHROME_THREADS,
                 "Attaches libvpx threads to the chromium thread system."),
         Flag.baseFeature(
@@ -819,10 +832,6 @@ public final class ProductionSupportedFlagList {
                 AwFeatures.WEBVIEW_USE_INITIAL_NETWORK_STATE_AT_STARTUP,
                 "Use initial network state at startup"),
         Flag.baseFeature("StandardCompliantNonSpecialSchemeURLParsing"),
-        Flag.baseFeature(
-                BlinkFeatures.CURSOR_ANCHOR_INFO_MOJO_PIPE,
-                "If enabled, CursorAnchorInfo is sent from Blink to the browser using a single"
-                        + " IPC."),
         Flag.baseFeature(
                 NetworkServiceFeatures.AVOID_RESOURCE_REQUEST_COPIES,
                 "Avoids copying ResourceRequest when possible."),
@@ -964,7 +973,6 @@ public final class ProductionSupportedFlagList {
         Flag.baseFeature(
                 AwFeatures.WEBVIEW_DIGITAL_ASSET_LINKS_LOAD_INCLUDES,
                 "Enable loading include statements when checking digital asset links."),
-        Flag.baseFeature("PrefetchNewWaitLoop"),
         Flag.baseFeature("DirectCompositorThreadIpc"),
         Flag.baseFeature(
                 AwFeatures.WEBVIEW_WEBAUTHN,
@@ -1035,20 +1043,22 @@ public final class ProductionSupportedFlagList {
                 BlinkFeatures.STANDARDIZED_TIMER_CLAMPING,
                 "Clamp nested timers according to the spec."),
         Flag.baseFeature(
-                BlinkFeatures.WEB_SQL_WEBVIEW_ACCESS,
-                "If false, prevents access to WebSQL on webview."),
-        Flag.baseFeature(
                 MediaFeatures.MEDIA_CODEC_BLOCK_MODEL,
                 "Controls use of MediaCodec's LinearBlock mode."),
-        Flag.baseFeature(
-                AwFeatures.WEBVIEW_PARTITIONED_COOKIES_EXCLUDED,
-                "When enabled, WebView records if a site with partitioned cookies has any cookies"
-                    + " excluded due to a different cookie partition key than the current site's."),
         Flag.baseFeature(BlinkFeatures.FETCH_LATER_API, "Enables FetchLater API."),
         Flag.baseFeature(
                 ContentFeatures.WEB_PAYMENTS,
                 "Enable the JavaScript PaymentRequest API for launching payment apps through"
                         + " Android intents."),
+        Flag.baseFeature(
+                GpuFeatures.WEB_GPU_USE_VULKAN_MEMORY_MODEL,
+                "Use the Vulkan Memory Model from WebGPU when available"),
+        Flag.baseFeature("RunBeforeUnloadClosureOnStackInvestigation"),
+        Flag.baseFeature(NetworkServiceFeatures.SHARED_STORAGE_API, "Enable Shared Storage API."),
+        Flag.baseFeature(BlinkFeatures.FENCED_FRAMES, "Enable Fenced Frames HTML Element."),
+        Flag.baseFeature(
+                BlinkFeatures.FENCED_FRAMES_API_CHANGES,
+                "Enable Fenced Frames HTML Element extra APIs."),
         // Add new commandline switches and features above. The final entry should have a
         // trailing comma for cleaner diffs.
     };

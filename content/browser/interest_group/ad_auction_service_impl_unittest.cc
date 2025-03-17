@@ -31,6 +31,7 @@
 #include "base/notreached.h"
 #include "base/run_loop.h"
 #include "base/strings/string_number_conversions.h"
+#include "base/strings/to_string.h"
 #include "base/synchronization/lock.h"
 #include "base/task/sequenced_task_runner.h"
 #include "base/test/bind.h"
@@ -207,7 +208,7 @@ function reportResult(auctionConfig, browserSignals) {
   };
 }
                             )",
-                            send_report ? "true" : "false", kOriginStringA,
+                            base::ToString(send_report), kOriginStringA,
                             kOriginStringA);
 }
 
@@ -849,7 +850,7 @@ class AdAuctionServiceImplTest : public RenderViewHostTestHarness {
             base::test::TaskEnvironment::TimeSource::MOCK_TIME) {
     feature_list_.InitWithFeatures(
         /*enabled_features=*/
-        {blink::features::kInterestGroupStorage,
+        {network::features::kInterestGroupStorage,
          blink::features::kAdInterestGroupAPI, blink::features::kFledge,
          blink::features::kFledgeRealTimeReporting,
          blink::features::kFledgeAuctionDealSupport},
@@ -9600,7 +9601,7 @@ class AdAuctionServiceImplSharedStorageEnabledTest
     : public AdAuctionServiceImplTest {
  public:
   AdAuctionServiceImplSharedStorageEnabledTest() {
-    feature_list_.InitAndEnableFeature(blink::features::kSharedStorageAPI);
+    feature_list_.InitAndEnableFeature(network::features::kSharedStorageAPI);
   }
 
   std::u16string SharedStorageGet(const url::Origin& context_origin,
@@ -9830,7 +9831,7 @@ class AdAuctionServiceImplSharedStorageDisabledTest
     : public AdAuctionServiceImplTest {
  public:
   AdAuctionServiceImplSharedStorageDisabledTest() {
-    feature_list_.InitAndDisableFeature(blink::features::kSharedStorageAPI);
+    feature_list_.InitAndDisableFeature(network::features::kSharedStorageAPI);
   }
 
  protected:
@@ -11540,6 +11541,57 @@ TEST_F(AdAuctionServiceImplTest, SerializesAuctionBlobDebugReportingInLockout) {
                                test_origin, testing::ElementsAre("cars"))));
 }
 
+TEST_F(AdAuctionServiceImplTest, SerializesAuctionBlobDebugReportSampling) {
+  base::test::ScopedFeatureList feature_list;
+  feature_list.InitAndEnableFeature(
+      blink::features::kFledgeEnableSampleDebugReportOnCookieSetting);
+
+  url::Origin test_origin = url::Origin::Create(GURL(kOriginStringA));
+  manager_->JoinInterestGroup(
+      blink::TestInterestGroupBuilder(test_origin, "cars")
+          .SetAds({{{GURL("https://c.test/ad.html"), /*metadata=*/"do not send",
+                     /*size_group=*/std::nullopt,
+                     /*buyer_reporting_id=*/std::nullopt,
+                     /*buyer_and_seller_reporting_id=*/std::nullopt,
+                     /*selectable_buyer_and_seller_reporting_ids=*/std::nullopt,
+                     "1234"}}})
+          .Build(),
+      GURL("https://a.test/example.html"));
+  task_environment()->FastForwardBy(base::Seconds(1));
+  manager_->RecordDebugReportLockout(
+      base::Time::Now(), blink::features::kFledgeDebugReportLockout.Get());
+  task_environment()->FastForwardBy(base::Seconds(1));
+
+  std::vector<uint8_t> msg;
+  base::flat_map<url::Origin, std::vector<std::string>> group_names;
+  base::RunLoop run_loop;
+  manager_->GetInterestGroupAdAuctionData(
+      /*top_level_origin=*/test_origin,
+      /*generation_id=*/
+      base::Uuid::ParseCaseInsensitive("00000000-0000-0000-0000-000000000000"),
+      /*timestamp=*/base::Time::FromMillisecondsSinceUnixEpoch(0),
+      /*config=*/blink::mojom::AuctionDataConfig::New(),
+      /*callback=*/base::BindLambdaForTesting([&](BiddingAndAuctionData data) {
+        msg = std::move(data.request);
+        group_names = std::move(data.group_names);
+        run_loop.Quit();
+      }));
+  run_loop.Run();
+  std::string expected =
+      "AgAAARinZ3ZlcnNpb24AaXB1Ymxpc2hlcmZhLnRlc3RsZ2VuZXJhdGlvbklkeCQwMDAwMDAw"
+      "MC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMDAwMDBuaW50ZXJlc3RHcm91cHOhbmh0dHBzOi8v"
+      "YS50ZXN0WGEfiwgAAAAAAAAAa1ycnJhS3JhiaGRskpKXmJuakpxYVJyXVJRfXpxaFJyZnpeY"
+      "U7wkIykzxTm/"
+      "NK+"
+      "EIaOgKLUsPDOvuCEzKz8zDyzImFmUmpyal1zpW8wAALB77c5QAAAAcnJlcXVlc3RUaW1lc3R"
+      "hbXBNcwB0ZW5hYmxlRGVidWdSZXBvcnRpbmf1eBtlbmFibGVTYW1wbGVkRGVidWdSZXBvcnR"
+      "pbmf0AAAAAAAAAAAAAAAAAAA";
+  EXPECT_THAT(base::Base64Encode(msg), testing::StartsWith(expected));
+  EXPECT_EQ(5u * 1024u - kEncryptionOverhead, msg.size());
+  EXPECT_THAT(group_names, testing::ElementsAre(testing::Pair(
+                               test_origin, testing::ElementsAre("cars"))));
+}
+
 TEST_F(AdAuctionServiceImplTest, SerializesAuctionBlobWithDebugToken) {
   base::CommandLine::ForCurrentProcess()->AppendSwitchASCII(
       switches::kProtectedAudiencesConsentedDebugToken, "myToken");
@@ -12441,6 +12493,125 @@ TEST_F(AdAuctionServiceImplBAndATest, EncryptsPayloadWithDebugReportLockout) {
               testing::EndsWith(R"(, "enableDebugReporting": false})"));
 }
 
+TEST_F(AdAuctionServiceImplBAndATest,
+       EncryptsPayloadWithDebugReportSamplingFlag) {
+  base::test::ScopedFeatureList feature_list;
+  feature_list.InitAndEnableFeature(
+      blink::features::kFledgeEnableSampleDebugReportOnCookieSetting);
+
+  ProvideKeys();
+  NavigateAndCommit(kUrlA);
+  url::Origin test_origin = url::Origin::Create(GURL(kOriginStringA));
+  manager_->JoinInterestGroup(
+      blink::TestInterestGroupBuilder(test_origin, "cars")
+          .SetAds(
+              {{{GURL("https://c.test/ad1.html"), /*metadata=*/std::nullopt}}})
+          .Build(),
+      GURL("https://a.test/example.html"));
+  task_environment()->FastForwardBy(base::Seconds(1));
+  manager_->RecordDebugReportLockout(
+      base::Time::Now(), blink::features::kFledgeDebugReportLockout.Get());
+  task_environment()->FastForwardBy(base::Seconds(1));
+
+  std::optional<AdAuctionDataAndId> result =
+      GetAdAuctionDataAndFlushForFrame(test_origin);
+
+  ASSERT_TRUE(result.has_value());
+  ASSERT_FALSE(result->request.empty());
+
+  auto key_config = quiche::ObliviousHttpHeaderKeyConfig::Create(
+                        0x12, EVP_HPKE_DHKEM_X25519_HKDF_SHA256,
+                        EVP_HPKE_HKDF_SHA256, EVP_HPKE_AES_256_GCM)
+                        .value();
+  auto ohttp_gateway =
+      quiche::ObliviousHttpGateway::Create(
+          std::string(reinterpret_cast<const char*>(&kTestBaPrivateKey[0]),
+                      sizeof(kTestBaPrivateKey)),
+          key_config)
+          .value();
+  EXPECT_EQ(0x00, result->request[0]);
+  auto request = ohttp_gateway.DecryptObliviousHttpRequest(
+      result->request.substr(1), kBiddingAndAuctionEncryptionRequestMediaType);
+  ASSERT_TRUE(request.ok()) << request.status();
+  auto plaintext_data = request->GetPlaintextData();
+
+  EXPECT_EQ(0x02, plaintext_data[0]);
+  size_t request_size = 0;
+  for (size_t idx = 0; idx < sizeof(uint32_t); idx++) {
+    request_size =
+        (request_size << 8) | static_cast<uint8_t>(plaintext_data[idx + 1]);
+  }
+
+  std::string got_str = cbor::DiagnosticWriter::Write(
+      cbor::Reader::Read(
+          base::as_byte_span(plaintext_data.substr(5, request_size)))
+          .value());
+  EXPECT_THAT(got_str,
+              testing::EndsWith(R"(, "enableSampledDebugReporting": false})"));
+}
+
+// Similar to EncryptsPayloadWithDebugReportSamplingFlag, but
+// enableSampledDebugReporting is true, set by the
+// kFledgeDoSampleDebugReportForTesting feature flag.
+TEST_F(AdAuctionServiceImplBAndATest,
+       EncryptsPayloadWithDebugReportSamplingFlagSetToTrue) {
+  base::test::ScopedFeatureList feature_list;
+  feature_list.InitWithFeatures(
+      {blink::features::kFledgeEnableSampleDebugReportOnCookieSetting,
+       features::kFledgeDoSampleDebugReportForTesting},
+      {});
+
+  ProvideKeys();
+  NavigateAndCommit(kUrlA);
+  url::Origin test_origin = url::Origin::Create(GURL(kOriginStringA));
+  manager_->JoinInterestGroup(
+      blink::TestInterestGroupBuilder(test_origin, "cars")
+          .SetAds(
+              {{{GURL("https://c.test/ad1.html"), /*metadata=*/std::nullopt}}})
+          .Build(),
+      GURL("https://a.test/example.html"));
+  task_environment()->FastForwardBy(base::Seconds(1));
+  manager_->RecordDebugReportLockout(
+      base::Time::Now(), blink::features::kFledgeDebugReportLockout.Get());
+  task_environment()->FastForwardBy(base::Seconds(1));
+
+  std::optional<AdAuctionDataAndId> result =
+      GetAdAuctionDataAndFlushForFrame(test_origin);
+
+  ASSERT_TRUE(result.has_value());
+  ASSERT_FALSE(result->request.empty());
+
+  auto key_config = quiche::ObliviousHttpHeaderKeyConfig::Create(
+                        0x12, EVP_HPKE_DHKEM_X25519_HKDF_SHA256,
+                        EVP_HPKE_HKDF_SHA256, EVP_HPKE_AES_256_GCM)
+                        .value();
+  auto ohttp_gateway =
+      quiche::ObliviousHttpGateway::Create(
+          std::string(reinterpret_cast<const char*>(&kTestBaPrivateKey[0]),
+                      sizeof(kTestBaPrivateKey)),
+          key_config)
+          .value();
+  EXPECT_EQ(0x00, result->request[0]);
+  auto request = ohttp_gateway.DecryptObliviousHttpRequest(
+      result->request.substr(1), kBiddingAndAuctionEncryptionRequestMediaType);
+  ASSERT_TRUE(request.ok()) << request.status();
+  auto plaintext_data = request->GetPlaintextData();
+
+  EXPECT_EQ(0x02, plaintext_data[0]);
+  size_t request_size = 0;
+  for (size_t idx = 0; idx < sizeof(uint32_t); idx++) {
+    request_size =
+        (request_size << 8) | static_cast<uint8_t>(plaintext_data[idx + 1]);
+  }
+
+  std::string got_str = cbor::DiagnosticWriter::Write(
+      cbor::Reader::Read(
+          base::as_byte_span(plaintext_data.substr(5, request_size)))
+          .value());
+  EXPECT_THAT(got_str,
+              testing::EndsWith(R"(, "enableSampledDebugReporting": true})"));
+}
+
 TEST_F(AdAuctionServiceImplBAndATest, EncryptsPayloadWithKAnon) {
   base::test::ScopedFeatureList feature_list;
   feature_list.InitWithFeatures(
@@ -12760,7 +12931,7 @@ TEST_F(AdAuctionServiceImplBAndATest, RunBAndAAuction) {
   hist.ExpectTotalCount("Ads.InterestGroup.ServerAuction.EndToEndTime", 1);
   hist.ExpectTotalCount("Ads.InterestGroup.ServerAuction.EndToEndTimeNoWinner",
                         0);
-  hist.ExpectUniqueSample("Ads.InterestGroup.ServerAuction.Result",
+  hist.ExpectUniqueSample("Ads.InterestGroup.ServerAuction.Result2",
                           AuctionResult::kSuccess, 1);
   hist.ExpectUniqueSample(
       "Ads.InterestGroup.ServerAuction.NonKAnonWinnerIsKAnon", true, 1);
@@ -12777,7 +12948,7 @@ TEST_F(AdAuctionServiceImplBAndATest, RunBAndAAuction) {
   // There should be no on-device metrics
   hist.ExpectTotalCount("Ads.InterestGroup.Auction.EndToEndTime", 0);
   hist.ExpectTotalCount("Ads.InterestGroup.Auction.EndToEndTimeNoWinner", 0);
-  hist.ExpectTotalCount("Ads.InterestGroup.Auction.Result", 0);
+  hist.ExpectTotalCount("Ads.InterestGroup.Auction.Result2", 0);
   hist.ExpectTotalCount("Ads.InterestGroup.Auction.NonKAnonWinnerIsKAnon", 0);
   hist.ExpectTotalCount("Ads.InterestGroup.Auction.AuctionWithWinnerTime", 0);
   hist.ExpectTotalCount("Ads.InterestGroup.Auction.ReportDelay", 0);
@@ -12939,7 +13110,7 @@ TEST_F(AdAuctionServiceImplBAndATest, RunBAndAAuctionNoBids) {
   hist.ExpectTotalCount("Ads.InterestGroup.ServerAuction.EndToEndTime", 0);
   hist.ExpectTotalCount("Ads.InterestGroup.ServerAuction.EndToEndTimeNoWinner",
                         1);
-  hist.ExpectUniqueSample("Ads.InterestGroup.ServerAuction.Result",
+  hist.ExpectUniqueSample("Ads.InterestGroup.ServerAuction.Result2",
                           AuctionResult::kNoBids, 1);
   hist.ExpectTotalCount("Ads.InterestGroup.ServerAuction.NonKAnonWinnerIsKAnon",
                         0);
@@ -12949,7 +13120,7 @@ TEST_F(AdAuctionServiceImplBAndATest, RunBAndAAuctionNoBids) {
   // There should be no on-device metrics
   hist.ExpectTotalCount("Ads.InterestGroup.Auction.EndToEndTime", 0);
   hist.ExpectTotalCount("Ads.InterestGroup.Auction.EndToEndTimeNoWinner", 0);
-  hist.ExpectTotalCount("Ads.InterestGroup.Auction.Result", 0);
+  hist.ExpectTotalCount("Ads.InterestGroup.Auction.Result2", 0);
   hist.ExpectTotalCount("Ads.InterestGroup.Auction.NonKAnonWinnerIsKAnon", 0);
   hist.ExpectTotalCount("Ads.InterestGroup.Auction.AuctionWithWinnerTime", 0);
 }
@@ -13029,7 +13200,7 @@ TEST_F(AdAuctionServiceImplBAndATest, RunBAndAAuctionServerError) {
   hist.ExpectTotalCount("Ads.InterestGroup.ServerAuction.EndToEndTime", 0);
   hist.ExpectTotalCount("Ads.InterestGroup.ServerAuction.EndToEndTimeNoWinner",
                         1);
-  hist.ExpectUniqueSample("Ads.InterestGroup.ServerAuction.Result",
+  hist.ExpectUniqueSample("Ads.InterestGroup.ServerAuction.Result2",
                           AuctionResult::kNoBids, 1);
   hist.ExpectTotalCount("Ads.InterestGroup.ServerAuction.NonKAnonWinnerIsKAnon",
                         0);
@@ -13039,7 +13210,7 @@ TEST_F(AdAuctionServiceImplBAndATest, RunBAndAAuctionServerError) {
   // There should be no on-device metrics
   hist.ExpectTotalCount("Ads.InterestGroup.Auction.EndToEndTime", 0);
   hist.ExpectTotalCount("Ads.InterestGroup.Auction.EndToEndTimeNoWinner", 0);
-  hist.ExpectTotalCount("Ads.InterestGroup.Auction.Result", 0);
+  hist.ExpectTotalCount("Ads.InterestGroup.Auction.Result2", 0);
   hist.ExpectTotalCount("Ads.InterestGroup.Auction.NonKAnonWinnerIsKAnon", 0);
   hist.ExpectTotalCount("Ads.InterestGroup.Auction.AuctionWithWinnerTime", 0);
 }
@@ -13120,7 +13291,7 @@ TEST_F(AdAuctionServiceImplBAndATest, HandlesBadResponseForBAndAAuction) {
   hist.ExpectTotalCount("Ads.InterestGroup.ServerAuction.EndToEndTime", 0);
   hist.ExpectTotalCount("Ads.InterestGroup.ServerAuction.EndToEndTimeNoWinner",
                         0);
-  hist.ExpectUniqueSample("Ads.InterestGroup.ServerAuction.Result",
+  hist.ExpectUniqueSample("Ads.InterestGroup.ServerAuction.Result2",
                           AuctionResult::kInvalidServerResponse, 1);
   hist.ExpectTotalCount("Ads.InterestGroup.ServerAuction.NonKAnonWinnerIsKAnon",
                         0);
@@ -13206,7 +13377,7 @@ TEST_F(AdAuctionServiceImplBAndATest,
   hist.ExpectTotalCount("Ads.InterestGroup.ServerAuction.EndToEndTime", 0);
   hist.ExpectTotalCount("Ads.InterestGroup.ServerAuction.EndToEndTimeNoWinner",
                         0);
-  hist.ExpectUniqueSample("Ads.InterestGroup.ServerAuction.Result",
+  hist.ExpectUniqueSample("Ads.InterestGroup.ServerAuction.Result2",
                           AuctionResult::kInvalidServerResponse, 1);
   hist.ExpectTotalCount("Ads.InterestGroup.ServerAuction.NonKAnonWinnerIsKAnon",
                         0);

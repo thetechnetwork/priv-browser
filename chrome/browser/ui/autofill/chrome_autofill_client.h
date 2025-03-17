@@ -36,7 +36,6 @@
 #include "components/autofill/core/browser/ui/payments/card_unmask_prompt_options.h"
 #include "components/optimization_guide/proto/features/common_quality_data.pb.h"
 #include "components/signin/public/identity_manager/account_info.h"
-#include "components/user_annotations/user_annotations_types.h"
 #include "content/public/browser/visibility.h"
 #include "content/public/browser/web_contents_observer.h"
 
@@ -121,6 +120,8 @@ class ChromeAutofillClient : public ContentAutofillClient,
   AutofillComposeDelegate* GetComposeDelegate() final;
   AutofillPlusAddressDelegate* GetPlusAddressDelegate() final;
   AutofillAiDelegate* GetAutofillAiDelegate() final;
+  AutofillAiModelCache* GetAutofillAiModelCache() final;
+  AutofillAiModelExecutor* GetAutofillAiModelExecutor() final;
   void OfferPlusAddressCreation(const url::Origin& main_frame_origin,
                                 bool is_manual_fallback,
                                 PlusAddressCallback callback) final;
@@ -134,6 +135,7 @@ class ChromeAutofillClient : public ContentAutofillClient,
   syncer::SyncService* GetSyncService() final;
   signin::IdentityManager* GetIdentityManager() final;
   const signin::IdentityManager* GetIdentityManager() const final;
+  const GoogleGroupsManager* GetGoogleGroupsManager() const final;
   FormDataImporter* GetFormDataImporter() final;
   payments::ChromePaymentsAutofillClient* GetPaymentsAutofillClient() final;
   StrikeDatabase* GetStrikeDatabase() final;

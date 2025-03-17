@@ -35,7 +35,6 @@
 #include "base/numerics/safe_conversions.h"
 #include "base/strings/string_util.h"
 #include "build/build_config.h"
-#include "build/chromeos_buildflags.h"
 #include "third_party/blink/public/common/features.h"
 #include "third_party/blink/public/common/input/web_keyboard_event.h"
 #include "third_party/blink/public/common/input/web_menu_source_type.h"
@@ -120,6 +119,7 @@
 #include "third_party/blink/renderer/modules/accessibility/ax_debug_utils.h"
 #endif
 #include "third_party/blink/renderer/bindings/core/v8/v8_highlight_type.h"
+#include "third_party/blink/renderer/core/page/page_popup_client.h"
 #include "third_party/blink/renderer/modules/accessibility/ax_image_map_link.h"
 #include "third_party/blink/renderer/modules/accessibility/ax_inline_text_box.h"
 #include "third_party/blink/renderer/modules/accessibility/ax_object_cache_impl.h"
@@ -211,40 +211,6 @@ String GetIgnoredReasonsDebugString(AXObject::IgnoredReasons& reasons) {
 }
 
 #endif
-
-String GetNodeString(Node* node) {
-  if (node->IsTextNode()) {
-    String string_builder = "\"";
-    string_builder = string_builder + node->nodeValue();
-    string_builder = string_builder + "\"";
-    return string_builder;
-  }
-
-  Element* element = DynamicTo<Element>(node);
-  if (!element) {
-    return To<Document>(node)->IsLoadCompleted() ? "#document"
-                                                 : "#document (loading)";
-  }
-
-  String string_builder = "<";
-
-  string_builder = string_builder + element->tagName().LowerASCII();
-  // Cannot safely get @class from SVG elements.
-  if (!element->IsSVGElement() &&
-      element->FastHasAttribute(html_names::kClassAttr)) {
-    string_builder = string_builder + "." +
-                     element->FastGetAttribute(html_names::kClassAttr);
-  }
-  if (element->FastHasAttribute(html_names::kIdAttr)) {
-    string_builder =
-        string_builder + "#" + element->FastGetAttribute(html_names::kIdAttr);
-  }
-  if (element->FastHasAttribute(html_names::kSlotAttr)) {
-    string_builder = string_builder + " slot=" +
-                     element->FastGetAttribute(html_names::kSlotAttr);
-  }
-  return string_builder + ">";
-}
 
 #if DCHECK_IS_ON()
 bool IsValidRole(ax::mojom::blink::Role role) {
@@ -983,26 +949,6 @@ Node* AXObject::GetParentNodeForComputeParent(AXObjectCacheImpl& cache,
 
   Node* parent = nullptr;
 
-  // Select elements have a complex architecture with two different slot
-  // elements which `node` may be slotted into. `node` might also not be slotted
-  // into anything at all (which is why we are doing this before using
-  // LayoutTreeBuilderTraversal). Despite this, we always want to expose a
-  // consistent structure for the select element with a MenuList and
-  // MenuListPopup with all the children exposed in the MenuListPopup. For
-  // consistency, we will use the select's PopoverForAppearanceBase element as
-  // the MenuListPopup and make it the parent of all the nodes inside the
-  // select.
-  if (RuntimeEnabledFeatures::CustomizableSelectEnabled()) {
-    if (auto* select = DynamicTo<HTMLSelectElement>(node->parentNode())) {
-      if (select->UsesMenuList()) {
-        if (node == select->SlottedButton()) {
-          return select;
-        }
-        parent = select->PopoverForAppearanceBase();
-      }
-    }
-  }
-
   // Use LayoutTreeBuilderTraversal::Parent(), which handles pseudo content.
   // This can return nullptr for a node that is never visited by
   // LayoutTreeBuilderTraversal's child traversal. For example, while an element
@@ -1117,17 +1063,9 @@ bool AXObject::CanHaveChildren(Element& element) {
   // For consistency with the past, options with a single text child are leaves.
   // However, options can now sometimes have interesting children, for
   // a <select> menulist that uses appearance:base-select.
-  // This code looks at IsAppearanceBaseButton instead of IsAppearanceBasePicker
-  // in order to have the same result whether the picker is open or closed.
-  // Ideally we would check to see if the picker is opted in to base appearance,
-  // but without a style update that would change based on whether the picker is
-  // open or not. When the button is opted in then the user will likely be able
-  // to see the child node structure of the option element in the button, so we
-  // can use that as a signal to allow options to have children.
   if (auto* option = DynamicTo<HTMLOptionElement>(element)) {
     return option->OwnerSelectElement() &&
-           option->OwnerSelectElement()->IsAppearanceBaseButton(
-               HTMLSelectElement::StyleUpdateBehavior::kDontUpdateStyle) &&
+           option->OwnerSelectElement()->IsAppearanceBasePicker() &&
            !option->HasOneTextChild();
   }
 
@@ -1362,37 +1300,43 @@ void SerializeAriaNotificationAttributes(const AriaNotifications& notifications,
   }
 
   std::vector<std::string> announcements;
+  std::vector<int32_t> priority_properties;
   std::vector<std::string> notification_ids;
   std::vector<int32_t> interrupt_properties;
-  std::vector<int32_t> priority_properties;
 
   announcements.reserve(size);
+  priority_properties.reserve(size);
   notification_ids.reserve(size);
   interrupt_properties.reserve(size);
-  priority_properties.reserve(size);
 
   for (const auto& notification : notifications) {
     announcements.emplace_back(TruncateString(notification.Announcement()));
-    notification_ids.emplace_back(
-        TruncateString(notification.NotificationId()));
-    interrupt_properties.emplace_back(
-        static_cast<int32_t>(notification.Interrupt()));
     priority_properties.emplace_back(
         static_cast<int32_t>(notification.Priority()));
+    if (RuntimeEnabledFeatures::AriaNotifyV2Enabled()) {
+      notification_ids.emplace_back(
+          TruncateString(notification.NotificationId()));
+      interrupt_properties.emplace_back(
+          static_cast<int32_t>(notification.Interrupt()));
+    } else {
+      notification_ids.emplace_back();
+      interrupt_properties.emplace_back(static_cast<int32_t>(
+          ax::mojom::blink::AriaNotificationInterrupt::kNone));
+    }
   }
 
   node_data->AddStringListAttribute(
       ax::mojom::blink::StringListAttribute::kAriaNotificationAnnouncements,
       announcements);
+  node_data->AddIntListAttribute(
+      ax::mojom::blink::IntListAttribute::kAriaNotificationPriorityProperties,
+      priority_properties);
   node_data->AddStringListAttribute(
       ax::mojom::blink::StringListAttribute::kAriaNotificationIds,
       notification_ids);
   node_data->AddIntListAttribute(
       ax::mojom::blink::IntListAttribute::kAriaNotificationInterruptProperties,
       interrupt_properties);
-  node_data->AddIntListAttribute(
-      ax::mojom::blink::IntListAttribute::kAriaNotificationPriorityProperties,
-      priority_properties);
 }
 
 }  // namespace
@@ -1450,16 +1394,17 @@ void AXObject::Serialize(ui::AXNodeData* node_data,
     SerializeBoundingBoxAttributes(*node_data);
   }
 
-  if (accessibility_mode.has_mode(ui::AXMode::kScreenReader)) {
+  if (accessibility_mode.has_mode(ui::AXMode::kExtendedProperties)) {
     // TODO(accessibility) We serialize these even on ignored nodes, in order
     // for the browser side to compute inherited colors for descendants, but we
     // do not ensure that elements that change foreground/background color are
     // included in the tree. Could this lead to errors?
     // See All/DumpAccess*.AccessibilityCSSBackgroundColorTransparent/blink.
+
     SerializeColorAttributes(node_data);  // Blends using all nodes' values.
   }
 
-  if (accessibility_mode.has_mode(ui::AXMode::kScreenReader) ||
+  if (accessibility_mode.has_mode(ui::AXMode::kExtendedProperties) ||
       accessibility_mode.has_mode(ui::AXMode::kPDFPrinting)) {
     SerializeLangAttribute(node_data);  // Propagates using all nodes' values.
   }
@@ -1484,7 +1429,7 @@ void AXObject::Serialize(ui::AXNodeData* node_data,
 
   SerializeUnignoredAttributes(node_data, accessibility_mode, is_snapshot);
 
-  if (!accessibility_mode.has_mode(ui::AXMode::kScreenReader)) {
+  if (!accessibility_mode.has_mode(ui::AXMode::kExtendedProperties)) {
     // Return early. None of the following attributes are needed outside of
     // screen reader mode.
     return;
@@ -1997,8 +1942,9 @@ void AXObject::SerializeNameAndDescriptionAttributes(
   TruncateAndAddStringAttribute(
       node_data, ax::mojom::blink::StringAttribute::kTooltip, title);
 
-  if (!accessibility_mode.has_mode(ui::AXMode::kScreenReader))
+  if (!accessibility_mode.has_mode(ui::AXMode::kExtendedProperties)) {
     return;
+  }
 
   String placeholder = Placeholder(name_from);
   TruncateAndAddStringAttribute(
@@ -2432,11 +2378,12 @@ void AXObject::SerializeUnignoredAttributes(ui::AXNodeData* node_data,
                                             bool is_snapshot) const {
   SerializeNameAndDescriptionAttributes(accessibility_mode, node_data);
 
-  if (accessibility_mode.has_mode(ui::AXMode::kScreenReader)) {
+  if (accessibility_mode.has_mode(ui::AXMode::kExtendedProperties)) {
     SerializeMarkerAttributes(node_data);
 #if BUILDFLAG(IS_ANDROID)
-    // On Android, style attributes are only serialized for snapshots.
-    if (is_snapshot) {
+    // On Android, style attributes are only serialized for snapshots, or, when
+    // the experimental feature flag for text formatting data is enabled.
+    if (is_snapshot || ::features::IsAccessibilityTextFormattingEnabled()) {
       SerializeStyleAttributes(node_data);
     }
 #else
@@ -2518,7 +2465,7 @@ void AXObject::SerializeUnignoredAttributes(ui::AXNodeData* node_data,
   else if (Orientation() == blink::kAccessibilityOrientationHorizontal)
     node_data->AddState(ax::mojom::blink::State::kHorizontal);
 
-  if (accessibility_mode.has_mode(ui::AXMode::kScreenReader) ||
+  if (accessibility_mode.has_mode(ui::AXMode::kExtendedProperties) ||
       accessibility_mode.has_mode(ui::AXMode::kPDFPrinting)) {
     // Heading level.
     if (ui::IsHeading(role) && HeadingLevel()) {
@@ -3222,9 +3169,7 @@ ax::mojom::blink::Role AXObject::ComputeFinalRoleForSerialization() const {
       RuntimeEnabledFeatures::CustomizableSelectEnabled()) {
     if (auto* parent = ParentObject()) {
       if (auto* select = DynamicTo<HTMLSelectElement>(parent->GetNode())) {
-        if (select->IsAppearanceBaseButton(
-                HTMLSelectElement::StyleUpdateBehavior::kDontUpdateStyle) &&
-            select->IsInDialogMode()) {
+        if (select->IsAppearanceBasePicker() && select->IsInDialogMode()) {
           return ax::mojom::blink::Role::kDialog;
         }
       }
@@ -4293,7 +4238,7 @@ bool AXObject::IsExcludedByFormControlsFilter() const {
   const ui::AXMode& mode = cache.GetAXMode();
 
   bool filter_to_form_controls =
-      mode.HasExperimentalFlags(ui::AXMode::kExperimentalFormControls);
+      mode.HasFilterFlags(ui::AXMode::kFormsAndLabelsOnly);
 
   if (!filter_to_form_controls) {
     return false;
@@ -7306,12 +7251,26 @@ void AXObject::GetRelativeBounds(AXObject** out_container,
       out_bounds_in_container.set_size(gfx::SizeF(view->Size()));
 
       // If it's a popup, account for the popup window's offset.
-      if (view->GetPage()->GetChromeClient().IsPopup()) {
+      auto& chrome_client = view->GetPage()->GetChromeClient();
+      if (chrome_client.IsPopup()) {
         gfx::Rect frame_rect = view->FrameToScreen(view->FrameRect());
         LocalFrameView* root_view =
             AXObjectCache().GetDocument().GetFrame()->View();
         gfx::Rect root_frame_rect =
             root_view->FrameToScreen(root_view->FrameRect());
+        // If a color picker popup is found inside of an iframe, account for the
+        // distance from the current frame to the parent frame.
+        auto* owner_element = chrome_client.GetPopupClientOwnerElement();
+        if (auto* input_element = DynamicTo<HTMLInputElement>(owner_element)) {
+          if (input_element->FormControlType() ==
+              FormControlType::kInputColor) {
+            gfx::Point origin(root_frame_rect.origin());
+            owner_element->GetDocument()
+                .GetFrame()
+                ->AdjustOffsetByAncestorFrames(&origin);
+            root_frame_rect.set_origin(origin);
+          }
+        }
 
         // Screen coordinates are in DIP without device scale factor applied.
         // Accessibility expects device scale factor applied here which is
@@ -7773,12 +7732,19 @@ bool AXObject::OnNativeScrollToMakeVisibleWithSubFocusAction(
     const gfx::Rect& rect,
     blink::mojom::blink::ScrollAlignment horizontal_scroll_alignment,
     blink::mojom::blink::ScrollAlignment vertical_scroll_alignment) const {
-  LayoutObject* layout_object = GetLayoutObjectForNativeScrollAction();
+  const LayoutObject* layout_object = GetLayoutObjectForNativeScrollAction();
   if (!layout_object)
     return false;
 
   PhysicalRect target_rect =
       layout_object->LocalToAbsoluteRect(PhysicalRect(rect));
+  // To scroll an element into view, we don't scroll the element itself
+  // unless it is the document scrolling element.
+  // TODO(crbug.com/401443093): Consider moving this logic further down
+  // affecting focus and scrollIntoView calls as well.
+  if (const LayoutObject* container = layout_object->Container()) {
+    layout_object = container;
+  }
   scroll_into_view_util::ScrollRectToVisible(
       *layout_object, target_rect,
       scroll_into_view_util::CreateScrollIntoViewParams(
@@ -8423,6 +8389,41 @@ void AXObject::PreSerializationConsistencyCheck() const{
       << "IsAriaHidden() doesn't match existence of an aria-hidden ancestor: "
       << this;
 #endif
+}
+
+// static
+String AXObject::GetNodeString(Node* node) {
+  if (node->IsTextNode()) {
+    String string_builder = "\"";
+    string_builder = string_builder + node->nodeValue();
+    string_builder = string_builder + "\"";
+    return string_builder;
+  }
+
+  Element* element = DynamicTo<Element>(node);
+  if (!element) {
+    return To<Document>(node)->IsLoadCompleted() ? "#document"
+                                                 : "#document (loading)";
+  }
+
+  String string_builder = "<";
+
+  string_builder = string_builder + element->tagName().LowerASCII();
+  // Cannot safely get @class from SVG elements.
+  if (!element->IsSVGElement() &&
+      element->FastHasAttribute(html_names::kClassAttr)) {
+    string_builder = string_builder + "." +
+                     element->FastGetAttribute(html_names::kClassAttr);
+  }
+  if (element->FastHasAttribute(html_names::kIdAttr)) {
+    string_builder =
+        string_builder + "#" + element->FastGetAttribute(html_names::kIdAttr);
+  }
+  if (element->FastHasAttribute(html_names::kSlotAttr)) {
+    string_builder = string_builder + " slot=" +
+                     element->FastGetAttribute(html_names::kSlotAttr);
+  }
+  return string_builder + ">";
 }
 
 String AXObject::ToString(bool verbose) const {

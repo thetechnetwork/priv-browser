@@ -311,14 +311,15 @@ using DocumentClassFlags = base::
 // storage, but only store a single element vector which is DCHECKED at the
 // calling site.
 using ExplicitlySetAttrElementsMap =
-    HeapHashMap<QualifiedName, Member<HeapLinkedHashSet<WeakMember<Element>>>>;
+    GCedHeapHashMap<QualifiedName,
+                    Member<GCedHeapLinkedHashSet<WeakMember<Element>>>>;
 
 // A map of IDL attribute name to Element FrozenArray value, for one particular
 // element.
 // This represents 'cached attr-associated elements' in the HTML specification.
 // https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#cached-attr-associated-elements
 using CachedAttrAssociatedElementsMap =
-    HeapHashMap<QualifiedName, Member<FrozenArray<Element>>>;
+    GCedHeapHashMap<QualifiedName, Member<FrozenArray<Element>>>;
 
 // Represents the start and end time of the unload event.
 struct UnloadEventTiming {
@@ -895,9 +896,27 @@ class CORE_EXPORT Document : public ContainerNode,
   void writeln(v8::Isolate*, const Vector<String>& text, ExceptionState&);
 
   // TrustedHTML variants of the above.
-  // TODO(mkwst): Write a spec for this.
   void write(v8::Isolate*, TrustedHTML*, ExceptionState&);
   void writeln(v8::Isolate*, TrustedHTML*, ExceptionState&);
+  void write(v8::Isolate*,
+             TrustedHTML*,
+             HeapVector<Member<V8UnionStringOrTrustedHTML>>,
+             ExceptionState&);
+  void writeln(v8::Isolate*,
+               TrustedHTML*,
+               HeapVector<Member<V8UnionStringOrTrustedHTML>>,
+               ExceptionState&);
+
+  // Corresponds to https://html.spec.whatwg.org/#document-write-steps
+  //
+  // This implements steps 1-5 of the algorithm, and calls
+  // write(const String&, LocalDOMWindow*, ExceptionState&) for the remainder.
+  void Write(v8::Isolate*,
+             TrustedHTML*,
+             HeapVector<Member<V8UnionStringOrTrustedHTML>>,
+             bool line_feed,
+             const char* sink,
+             ExceptionState&);
 
   bool WellFormed() const { return well_formed_; }
 
@@ -1987,13 +2006,25 @@ class CORE_EXPORT Document : public ContainerNode,
     return render_blocking_resource_manager_.Get();
   }
 
-  void SetHasRenderBlockingExpectLinkElements(bool flag) {
-    has_render_blocking_expect_link_elements_ = flag;
-  }
+  void SetHasRenderBlockingExpectLinkElements(bool flag);
 
   bool HasRenderBlockingExpectLinkElements() const {
     return has_render_blocking_expect_link_elements_;
   }
+
+  void SetHasFullFrameRateBlockingExpectLinkElements(bool flag);
+
+  bool HasFullFrameRateBlockingExpectLinkElements() const {
+    return has_frame_rate_blocking_expect_link_elements_;
+  }
+
+  // Whether the document has any pending elements that need to be tracked for
+  // full render blocking or full frame rate blocking.
+  bool HasPendingExpectLinkElements() const {
+    return has_pending_expect_link_elements_;
+  }
+
+  void UpdateRenderFrameRate();
 
   // Called when a previously render-blocking resource is no longer render-
   // blocking, due to it has finished loading or has given up render-blocking.
@@ -2609,6 +2640,10 @@ class CORE_EXPORT Document : public ContainerNode,
   bool contains_plugins_ = false;
 
   bool has_render_blocking_expect_link_elements_ = false;
+
+  bool has_frame_rate_blocking_expect_link_elements_ = false;
+
+  bool has_pending_expect_link_elements_ = false;
 
   // Set to true whenever shadow root is attached to document. Does not
   // get reset if all roots are removed.

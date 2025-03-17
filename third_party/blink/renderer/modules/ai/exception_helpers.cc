@@ -53,6 +53,8 @@ const char kExceptionMessageInitialPromptTooLarge[] =
     "context.";
 const char kExceptionMessageUnableToCloneSession[] =
     "The session cannot be cloned.";
+const char kExceptionMessageUnableToCalculateUsage[] =
+    "The usage cannot be calculated.";
 const char kExceptionMessageSystemPromptIsDefinedMultipleTimes[] =
     "The system prompt should not be defined in both systemPrompt and "
     "initialPrompts.";
@@ -164,7 +166,7 @@ DOMException* ConvertModelStreamingResponseErrorToDOMException(
       return DOMException::Create(
           kExceptionMessageSessionDestroyed,
           DOMException::GetErrorName(DOMExceptionCode::kInvalidStateError));
-    case ModelStreamingResponseStatus::kErrorPromptRequestTooLarge:
+    case ModelStreamingResponseStatus::kErrorInputTooLarge:
       return DOMException::Create(
           kExceptionRequestTooLarge,
           DOMException::GetErrorName(DOMExceptionCode::kQuotaExceededError));

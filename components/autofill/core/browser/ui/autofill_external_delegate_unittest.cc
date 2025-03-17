@@ -31,7 +31,7 @@
 #include "components/autofill/core/browser/data_manager/test_personal_data_manager.h"
 #include "components/autofill/core/browser/data_model/addresses/autofill_profile.h"
 #include "components/autofill/core/browser/field_types.h"
-#include "components/autofill/core/browser/filling/entities/field_filling_entity_util.h"
+#include "components/autofill/core/browser/filling/autofill_ai/field_filling_entity_util.h"
 #include "components/autofill/core/browser/filling/field_filling_util.h"
 #include "components/autofill/core/browser/foundations/autofill_client.h"
 #include "components/autofill/core/browser/foundations/browser_autofill_manager.h"
@@ -322,7 +322,8 @@ class AutofillExternalDelegateTest : public testing::Test {
  protected:
   void SetUp() override {
     client().set_entity_data_manager(std::make_unique<EntityDataManager>(
-        webdata_helper_.autofill_webdata_service()));
+        webdata_helper_.autofill_webdata_service(), /*history_service=*/nullptr,
+        /*strike_database=*/nullptr));
     autofill_driver_ =
         std::make_unique<NiceMock<MockAutofillDriver>>(&client());
     auto mock_browser_autofill_manager =
@@ -802,6 +803,32 @@ TEST_F(AutofillExternalDelegateTest, SuggestionsShownWithCreditCardEntry) {
   external_delegate().OnSuggestionsShown(suggestions);
 }
 
+// Tests that the Autofill delegate fills a form with a VCN when a suggestion
+// containing a BNPL entry is accepted, and the user completes the flow.
+TEST_F(AutofillExternalDelegateTest, AcceptedBnplEntry_FormIsFilled) {
+  IssueOnQuery();
+  CreditCard card = test::GetVirtualCard();
+  card.set_issuer_id(payments::BnplManager::GetSupportedBnplIssuerIds()[0]);
+
+  const uint64_t expected_amount = 50'000'000;
+  EXPECT_CALL(
+      client().GetPaymentsAutofillClient()->CreateOrGetMockBnplManager(),
+      InitBnplFlow(expected_amount, _))
+      .WillOnce(RunOnceCallback<1>(card));
+  EXPECT_CALL(manager(),
+              FillOrPreviewCreditCardForm(
+                  mojom::ActionPersistence::kFill, HasQueriedFormId(),
+                  IsQueriedFieldId(), card, AutofillTriggerSource::kPopup));
+
+  Suggestion::PaymentsPayload payments_payload;
+  payments_payload.extracted_amount_in_micros = expected_amount;
+  external_delegate().DidAcceptSuggestion(
+      test::CreateAutofillSuggestion(SuggestionType::kBnplEntry,
+                                     /*main_text_value=*/u"BNPL suggestion",
+                                     payments_payload),
+      {});
+}
+
 // Test that the Autofill popup is able to display warnings explaining why
 // Autofill is disabled for a website.
 // Regression test for http://crbug.com/247880
@@ -1249,19 +1276,23 @@ TEST_F(AutofillExternalDelegateTest, FillAutofillAiFillsFullForm) {
                  Property("value", &FormFieldData::value, Eq(value)));
   };
 
+  EXPECT_CALL(driver(),
+              ApplyFormAction(_, mojom::ActionPersistence::kPreview,
+                              ElementsAre(field_with_value(
+                                  field_to_fill,
+                                  GetObfuscatedValue(passport_number->GetInfo(
+                                      PASSPORT_NUMBER, /*app_locale=*/"",
+                                      /*format_string=*/std::nullopt)))),
+                              _, _))
+      .WillOnce(Return(std::vector<FieldGlobalId>{}));
   EXPECT_CALL(
       driver(),
-      ApplyFormAction(
-          _, mojom::ActionPersistence::kPreview,
-          ElementsAre(field_with_value(
-              field_to_fill, GetObfuscatedValue(passport_number->value()))),
-          _, _))
-      .WillOnce(Return(std::vector<FieldGlobalId>{}));
-  EXPECT_CALL(driver(),
-              ApplyFormAction(_, mojom::ActionPersistence::kFill,
-                              ElementsAre(field_with_value(
-                                  field_to_fill, passport_number->value())),
-                              _, _))
+      ApplyFormAction(_, mojom::ActionPersistence::kFill,
+                      ElementsAre(field_with_value(
+                          field_to_fill, passport_number->GetInfo(
+                                             PASSPORT_NUMBER, /*app_locale=*/"",
+                                             /*format_string=*/std::nullopt))),
+                      _, _))
       .WillOnce(Return(std::vector<FieldGlobalId>{}));
 
   Suggestion fill_suggestion =

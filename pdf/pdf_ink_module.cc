@@ -14,6 +14,7 @@
 #include <string>
 #include <string_view>
 #include <utility>
+#include <variant>
 #include <vector>
 
 #include "base/check.h"
@@ -51,6 +52,7 @@
 #include "third_party/skia/include/core/SkBitmap.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkColor.h"
+#include "ui/base/cursor/cursor.h"
 #include "ui/gfx/geometry/point_f.h"
 #include "ui/gfx/geometry/rect.h"
 #include "ui/gfx/geometry/rect_f.h"
@@ -172,7 +174,6 @@ void PdfInkModule::Draw(SkCanvas& canvas) {
 
   const gfx::Vector2dF origin_offset = client_->GetViewportOriginOffset();
   const PageOrientation rotation = client_->GetOrientation();
-  const float zoom = client_->GetZoom();
 
   auto in_progress_stroke = CreateInProgressStrokeSegmentsFromInputs();
   CHECK(!in_progress_stroke.empty());
@@ -180,8 +181,10 @@ void PdfInkModule::Draw(SkCanvas& canvas) {
   DrawingStrokeState& state = drawing_stroke_state();
 
   const gfx::Rect content_rect = client_->GetPageContentsRect(state.page_index);
-  const ink::AffineTransform transform =
-      GetInkRenderTransform(origin_offset, rotation, content_rect, zoom);
+  const gfx::SizeF page_size_in_points =
+      client_->GetPageSizeInPoints(state.page_index);
+  const ink::AffineTransform transform = GetInkRenderTransform(
+      origin_offset, rotation, content_rect, page_size_in_points);
 
   SkAutoCanvasRestore save_restore(&canvas, /*doSave=*/true);
   canvas.clipRect(GetDrawPageClipRect(content_rect, origin_offset));
@@ -1150,11 +1153,11 @@ void PdfInkModule::ApplyUndoRedoCommandsHelper(
   std::set<InkModeledShapeId> shape_ids;
   for (PdfInkUndoRedoModel::IdType id : ids) {
     bool inserted;
-    if (absl::holds_alternative<InkStrokeId>(id)) {
-      inserted = stroke_ids.insert(absl::get<InkStrokeId>(id)).second;
+    if (std::holds_alternative<InkStrokeId>(id)) {
+      inserted = stroke_ids.insert(std::get<InkStrokeId>(id)).second;
     } else {
-      CHECK(absl::holds_alternative<InkModeledShapeId>(id));
-      inserted = shape_ids.insert(absl::get<InkModeledShapeId>(id)).second;
+      CHECK(std::holds_alternative<InkModeledShapeId>(id));
+      inserted = shape_ids.insert(std::get<InkModeledShapeId>(id)).second;
     }
     CHECK(inserted);
   }
@@ -1347,9 +1350,12 @@ void PdfInkModule::MaybeSetCursor() {
     brush_size = kEraserSize;
   }
 
-  client_->UpdateInkCursorImage(GenerateToolCursor(
+  SkBitmap bitmap = GenerateToolCursor(
       color,
-      CursorDiameterFromBrushSizeAndZoom(brush_size, client_->GetZoom())));
+      CursorDiameterFromBrushSizeAndZoom(brush_size, client_->GetZoom()));
+  gfx::Point hotspot(bitmap.width() / 2, bitmap.height() / 2);
+  client_->UpdateInkCursor(
+      ui::Cursor::NewCustom(std::move(bitmap), std::move(hotspot)));
 }
 
 PdfInkModule::DrawingStrokeState::DrawingStrokeState() = default;

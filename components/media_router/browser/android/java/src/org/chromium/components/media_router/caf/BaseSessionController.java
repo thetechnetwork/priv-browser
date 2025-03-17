@@ -28,6 +28,7 @@ import java.util.List;
  * Has persistent lifecycle and always attaches itself to the current {@link CastSession}.
  */
 @NullMarked
+@SuppressWarnings("NullAway") // https://crbug.com/401584051
 public abstract class BaseSessionController {
     private static final String TAG = "BaseSessionCtrl";
 
@@ -108,6 +109,7 @@ public abstract class BaseSessionController {
         List<String> capabilities = new ArrayList<>();
         if (mCastSession == null || !mCastSession.isConnected()) return capabilities;
         CastDevice device = mCastSession.getCastDevice();
+        assumeNonNull(device);
         if (device.hasCapability(CastDevice.CAPABILITY_AUDIO_IN)) {
             capabilities.add("audio_in");
         }
@@ -130,6 +132,7 @@ public abstract class BaseSessionController {
 
     private void updateRemoteMediaClient(String message) {
         if (!isConnected()) return;
+        assumeNonNull(mCastSession.getRemoteMediaClient());
 
         mCastSession
                 .getRemoteMediaClient()

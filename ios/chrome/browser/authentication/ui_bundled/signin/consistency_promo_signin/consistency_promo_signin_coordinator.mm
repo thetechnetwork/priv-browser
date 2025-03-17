@@ -102,22 +102,20 @@
                      accessPoint:accessPoint];
 }
 
-#pragma mark - SigninCoordinator
+#pragma mark - InterruptibleChromeCoordinator
 
-- (void)interruptWithAction:(SigninCoordinatorInterrupt)action
-                 completion:(ProceduralBlock)completion {
+- (void)interruptAnimated:(BOOL)animated {
   [self stopAlertCoordinator];
-  __weak __typeof(self) weakSelf = self;
-  ProceduralBlock consistencyCompletion = ^() {
-    [weakSelf finalizeInterruptWithAction:action completion:completion];
-  };
-  if (self.addAccountCoordinator) {
-    [self.addAccountCoordinator interruptWithAction:action
-                                         completion:consistencyCompletion];
-  } else {
-    consistencyCompletion();
-  }
+  [self.addAccountCoordinator interruptAnimated:animated];
+  DCHECK(!self.addAccountCoordinator);
+  [self.navigationController.presentingViewController
+      dismissViewControllerAnimated:animated
+                         completion:nil];
+  [self runCompletionWithSigninResult:SigninCoordinatorResultInterrupted
+                   completionIdentity:nil];
 }
+
+#pragma mark - SigninCoordinator
 
 - (void)start {
   [super start];
@@ -170,6 +168,40 @@
   [self stopDefaultAccountCoordinator];
 }
 
+- (void)runCompletionWithSigninResult:(SigninCoordinatorResult)signinResult
+                   completionIdentity:(id<SystemIdentity>)completionIdentity {
+  switch (signinResult) {
+    case SigninCoordinatorResultCanceledByUser:
+      base::RecordAction(
+          base::UserMetricsAction("Signin_BottomSheet_ClosedByCancel"));
+      break;
+    case SigninCoordinatorResultSuccess:
+      base::RecordAction(
+          base::UserMetricsAction("Signin_BottomSheet_ClosedBySignIn"));
+      break;
+    case SigninCoordinatorResultDisabled:
+    case SigninCoordinatorResultInterrupted:
+      base::RecordAction(
+          base::UserMetricsAction("Signin_BottomSheet_ClosedByInterrupt"));
+      break;
+    case SigninCoordinatorUINotAvailable:
+      // ConsistencyPromoSigninCoordinator presents its child coordinators
+      // directly and does not use `ShowSigninCommand`.
+      NOTREACHED();
+  }
+  DCHECK(!self.alertCoordinator);
+  self.navigationController.delegate = nil;
+  self.navigationController.transitioningDelegate = nil;
+  self.navigationController = nil;
+  [self stopDefaultAccountCoordinator];
+  [self stopAccountChooserCoordinator];
+  self.consistencyPromoSigninMediator.delegate = nil;
+  [self.consistencyPromoSigninMediator disconnectWithResult:signinResult];
+  self.consistencyPromoSigninMediator = nil;
+  [super runCompletionWithSigninResult:signinResult
+                    completionIdentity:completionIdentity];
+}
+
 #pragma mark - Properties
 
 - (id<SystemIdentity>)selectedIdentity {
@@ -202,53 +234,6 @@
   self.addAccountCoordinator = nil;
 }
 
-// Finishes the interrupt process. This method needs to be called once all
-// other dialogs on top of ConsistencyPromoSigninCoordinator are properly
-// dismissed.
-- (void)finalizeInterruptWithAction:(SigninCoordinatorInterrupt)action
-                         completion:(ProceduralBlock)interruptCompletion {
-  DCHECK(!self.alertCoordinator);
-  DCHECK(!self.addAccountCoordinator);
-  __weak ConsistencyPromoSigninCoordinator* weakSelf = self;
-  const SigninCoordinatorResult signinResult =
-      SigninCoordinatorResultInterrupted;
-  ProceduralBlock finishCompletionBlock = ^() {
-    [weakSelf runCompletionWithSigninResult:signinResult
-                         completionIdentity:nil];
-    if (interruptCompletion) {
-      interruptCompletion();
-    }
-  };
-  switch (action) {
-    case SigninCoordinatorInterrupt::UIShutdownNoDismiss:
-      CHECK(!IsInterruptibleCoordinatorAlwaysDismissedEnabled(),
-            base::NotFatalUntil::M136);
-      // The coordinator is done, no event should happen from the mediator.
-      [self coordinatorDoneWithResult:signinResult];
-      finishCompletionBlock();
-      break;
-    case SigninCoordinatorInterrupt::DismissWithoutAnimation:
-    case SigninCoordinatorInterrupt::DismissWithAnimation: {
-      BOOL animated =
-          action == SigninCoordinatorInterrupt::DismissWithAnimation;
-      if (IsInterruptibleCoordinatorStoppedSynchronouslyEnabled()) {
-        [self.navigationController.presentingViewController
-            dismissViewControllerAnimated:animated
-                               completion:nil];
-        // The coordinator is done, no event should happen from the mediator.
-        [self coordinatorDoneWithResult:signinResult];
-        finishCompletionBlock();
-      } else {
-          [self.navigationController.presentingViewController
-              dismissViewControllerAnimated:animated
-                                 completion:finishCompletionBlock];
-          // The coordinator is done, no event should happen from the mediator.
-          [self coordinatorDoneWithResult:signinResult];
-      }
-    }
-  }
-}
-
 // Does cleanup (metrics and remove coordinator) once the add-account flow is
 // finished. If `hasAccounts == NO` and `signinResult` is successful , the
 // function immediately signs in to Chrome with the identity acquired from the
@@ -278,6 +263,8 @@
   self.defaultAccountCoordinator.selectedIdentity = completionIdentity;
 
   if (hasAccounts) {
+    [self.navigationController popViewControllerAnimated:YES];
+    [self stopAccountChooserCoordinator];
     return;
   }
   [self startSignIn];
@@ -313,38 +300,6 @@
   [self.addAccountCoordinator start];
 }
 
-// Stops all the coordinators and mediator.
-- (void)coordinatorDoneWithResult:(SigninCoordinatorResult)signinResult {
-  switch (signinResult) {
-    case SigninCoordinatorResultCanceledByUser:
-      base::RecordAction(
-          base::UserMetricsAction("Signin_BottomSheet_ClosedByCancel"));
-      break;
-    case SigninCoordinatorResultSuccess:
-      base::RecordAction(
-          base::UserMetricsAction("Signin_BottomSheet_ClosedBySignIn"));
-      break;
-    case SigninCoordinatorResultDisabled:
-    case SigninCoordinatorResultInterrupted:
-      base::RecordAction(
-          base::UserMetricsAction("Signin_BottomSheet_ClosedByInterrupt"));
-      break;
-    case SigninCoordinatorUINotAvailable:
-      // ConsistencyPromoSigninCoordinator presents its child coordinators
-      // directly and does not use `ShowSigninCommand`.
-      NOTREACHED();
-  }
-  DCHECK(!self.alertCoordinator);
-  self.navigationController.delegate = nil;
-  self.navigationController.transitioningDelegate = nil;
-  self.navigationController = nil;
-  [self stopDefaultAccountCoordinator];
-  [self stopAccountChooserCoordinator];
-  self.consistencyPromoSigninMediator.delegate = nil;
-  [self.consistencyPromoSigninMediator disconnectWithResult:signinResult];
-  self.consistencyPromoSigninMediator = nil;
-}
-
 // Starts the sign-in flow.
 - (void)startSignIn {
   AuthenticationFlow* authenticationFlow =
@@ -352,7 +307,9 @@
                                          identity:self.selectedIdentity
                                       accessPoint:self.accessPoint
                                 postSignInActions:PostSignInActionSet()
-                         presentingViewController:self.navigationController];
+                         presentingViewController:self.navigationController
+                                       anchorView:nil
+                                       anchorRect:CGRectNull];
   authenticationFlow.precedingHistorySync = YES;
   [self.consistencyPromoSigninMediator
       signinWithAuthenticationFlow:authenticationFlow];
@@ -388,16 +345,13 @@
                                 skipCounter);
   }
   __weak __typeof(self) weakSelf = self;
-  const SigninCoordinatorResult signinResult =
-      SigninCoordinatorResultCanceledByUser;
   [self.navigationController.presentingViewController
       dismissViewControllerAnimated:YES
                          completion:^() {
-                           [weakSelf runCompletionWithSigninResult:signinResult
+                           [weakSelf runCompletionWithSigninResult:
+                                         SigninCoordinatorResultCanceledByUser
                                                 completionIdentity:nil];
                          }];
-  // The coordinator is done, no event should happen from the mediator.
-  [self coordinatorDoneWithResult:signinResult];
 }
 
 - (void)consistencyDefaultAccountCoordinatorOpenIdentityChooser:
@@ -505,18 +459,14 @@
   DCHECK([identity isEqual:self.selectedIdentity]);
   id<SystemIdentity> completionIdentity = identity;
   __weak __typeof(self) weakSelf = self;
-  const SigninCoordinatorResult signinResult = SigninCoordinatorResultSuccess;
   [self.navigationController.presentingViewController
       dismissViewControllerAnimated:YES
                          completion:^() {
-                           [weakSelf.defaultAccountCoordinator
-                                   stopSigninSpinner];
-                           [weakSelf runCompletionWithSigninResult:signinResult
+                           [weakSelf runCompletionWithSigninResult:
+                                         SigninCoordinatorResultSuccess
                                                 completionIdentity:
                                                     completionIdentity];
                          }];
-  // The coordinator is done, no event should happen from the mediator.
-  [self coordinatorDoneWithResult:SigninCoordinatorResultSuccess];
 }
 
 - (void)consistencyPromoSigninMediatorSignInCancelled:

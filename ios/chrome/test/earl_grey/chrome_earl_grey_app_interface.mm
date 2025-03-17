@@ -6,6 +6,8 @@
 
 #import <WebKit/WebKit.h>
 
+#import <string>
+
 #import "base/apple/foundation_util.h"
 #import "base/barrier_closure.h"
 #import "base/command_line.h"
@@ -13,7 +15,7 @@
 #import "base/files/file.h"
 #import "base/files/file_util.h"
 #import "base/ios/ios_util.h"
-#import "base/json/json_string_value_serializer.h"
+#import "base/json/json_writer.h"
 #import "base/strings/sys_string_conversions.h"
 #import "base/test/ios/wait_util.h"
 #import "base/test/scoped_feature_list.h"
@@ -24,6 +26,7 @@
 #import "components/browsing_data/core/pref_names.h"
 #import "components/content_settings/core/browser/host_content_settings_map.h"
 #import "components/metrics/demographics/demographic_metrics_provider.h"
+#import "components/metrics/dwa/dwa_recorder.h"
 #import "components/password_manager/core/common/password_manager_features.h"
 #import "components/prefs/pref_service.h"
 #import "components/safe_browsing/core/common/features.h"
@@ -116,10 +119,8 @@ NSString* SerializedPref(const PrefService::Preference* pref) {
   const base::Value* value = pref ? pref->GetValue() : &none_value;
   DCHECK(value);
 
-  std::string serialized_value;
-  JSONStringValueSerializer serializer(&serialized_value);
-  serializer.Serialize(*value);
-  return base::SysUTF8ToNSString(serialized_value);
+  return base::SysUTF8ToNSString(
+      base::WriteJson(*value).value_or(std::string()));
 }
 // Returns a JSON-encoded string representing the given `value`. If `value` is
 // nullptr, returns a string representing a base::Value of type NONE.
@@ -128,10 +129,8 @@ NSString* SerializedValue(const base::Value* value) {
   const base::Value* result = value ? value : &none_value;
   DCHECK(result);
 
-  std::string serialized_value;
-  JSONStringValueSerializer serializer(&serialized_value);
-  serializer.Serialize(*result);
-  return base::SysUTF8ToNSString(serialized_value);
+  return base::SysUTF8ToNSString(
+      base::WriteJson(*result).value_or(std::string()));
 }
 
 }  // namespace
@@ -1173,6 +1172,10 @@ NSString* SerializedValue(const base::Value* value) {
 
 + (BOOL)isUKMEnabled {
   return base::FeatureList::IsEnabled(ukm::kUkmFeature);
+}
+
++ (BOOL)isDWAEnabled {
+  return base::FeatureList::IsEnabled(metrics::dwa::kDwaFeature);
 }
 
 + (BOOL)isTestFeatureEnabled {

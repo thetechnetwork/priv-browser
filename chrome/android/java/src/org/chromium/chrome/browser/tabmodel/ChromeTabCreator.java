@@ -41,6 +41,7 @@ import org.chromium.chrome.browser.tab.TabState;
 import org.chromium.components.embedder_support.util.UrlConstants;
 import org.chromium.components.url_formatter.UrlFormatter;
 import org.chromium.content_public.browser.LoadUrlParams;
+import org.chromium.content_public.browser.Visibility;
 import org.chromium.content_public.browser.WebContents;
 import org.chromium.ui.base.PageTransition;
 import org.chromium.ui.base.WindowAndroid;
@@ -112,6 +113,8 @@ public class ChromeTabCreator extends TabCreator {
                 return "NewIncognitoTab";
             case TabLaunchType.FROM_STARTUP:
                 return "Startup";
+            case TabLaunchType.FROM_START_SURFACE:
+                return "StartSurface";
             case TabLaunchType.FROM_TAB_GROUP_UI:
                 return "TabGroupUI";
             case TabLaunchType.FROM_LONGPRESS_BACKGROUND_IN_GROUP:
@@ -140,6 +143,8 @@ public class ChromeTabCreator extends TabCreator {
                 return "CollaborationBackgroundInGroup";
             case TabLaunchType.FROM_BOOKMARK_BAR_BACKGROUND:
                 return "BookmarkBarBackground";
+            case TabLaunchType.FROM_REPARENTING_BACKGROUND:
+                return "ReparentingBackground";
             default:
                 assert false : "Unexpected serialization of tabLaunchType: " + tabLaunchType;
                 return "TypeUnknown";
@@ -295,10 +300,17 @@ public class ChromeTabCreator extends TabCreator {
             Tab tab;
             @TabCreationState int creationState = TabCreationState.LIVE_IN_FOREGROUND;
             if (asyncParams != null && asyncParams.getTabToReparent() != null) {
-                type = TabLaunchType.FROM_REPARENTING;
-
                 TabReparentingParams params = (TabReparentingParams) asyncParams;
                 tab = params.getTabToReparent();
+
+                @Nullable
+                TabGroupMetadata tabGroupMetadata = IntentHandler.getTabGroupMetadata(intent);
+                if (tabGroupMetadata != null && tabGroupMetadata.selectedTabId != tab.getId()) {
+                    type = TabLaunchType.FROM_REPARENTING_BACKGROUND;
+                } else {
+                    type = TabLaunchType.FROM_REPARENTING;
+                }
+
                 ReparentingTask.from(tab)
                         .finish(
                                 ReparentingDelegateFactory.createReparentingTaskDelegate(
@@ -375,6 +387,9 @@ public class ChromeTabCreator extends TabCreator {
                                         createDefaultTabDelegateFactory()),
                                 null);
                 RedirectHandlerTabHelper.updateIntentInTab(tab, intent);
+                // Makes WebContents visible before loading the URL to record metrics for SpareTab
+                // (Ref: https://crbug.com/40266649).
+                tab.getWebContents().updateWebContentsVisibility(Visibility.VISIBLE);
                 tab.loadUrl(loadUrlParams);
                 TraceEvent.end("ChromeTabCreator.loadUrlWithSpareTab");
             } else {

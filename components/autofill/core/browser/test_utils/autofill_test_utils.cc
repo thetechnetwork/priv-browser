@@ -454,6 +454,7 @@ CreditCard GetVirtualCard() {
   credit_card.set_record_type(CreditCard::RecordType::kVirtualCard);
   credit_card.set_virtual_card_enrollment_state(
       CreditCard::VirtualCardEnrollmentState::kEnrolled);
+  credit_card.set_cvc(u"123");
   test_api(credit_card).set_network_for_card(kMasterCard);
   return credit_card;
 }
@@ -871,25 +872,37 @@ EntityInstance GetPassportEntityInstance(PassportEntityOptions options) {
   std::vector<AttributeInstance> attributes;
   if (options.number) {
     attributes.emplace_back(AttributeType(kPassportNumber));
-    attributes.back().SetInfo(PASSPORT_NUMBER, options.number);
+    attributes.back().SetInfo(PASSPORT_NUMBER, options.number,
+                              /*app_locale=*/"", /*format_string=*/u"",
+                              VerificationStatus::kNoStatus);
   }
   if (options.name) {
     attributes.emplace_back(AttributeType(kPassportName));
-    attributes.back().SetInfo(PASSPORT_NAME_TAG, options.name);
+    attributes.back().SetInfo(PASSPORT_NAME_TAG, options.name,
+                              /*app_locale=*/"", /*format_string=*/u"",
+                              VerificationStatus::kNoStatus);
     attributes.back().FinalizeInfo();
   }
   if (options.country) {
     attributes.emplace_back(AttributeType(kPassportCountry));
-    attributes.back().SetInfo(PASSPORT_ISSUING_COUNTRY_TAG, options.country);
+    attributes.back().SetInfo(PASSPORT_ISSUING_COUNTRY, options.country,
+                              /*app_locale=*/"en-US",
+                              /*format_string=*/u"",
+                              VerificationStatus::kNoStatus);
   }
   if (options.expiry_date) {
-    attributes.emplace_back(AttributeType(kPassportExpiryDate));
-    attributes.back().SetInfo(PASSPORT_EXPIRATION_DATE_TAG,
-                              options.expiry_date);
+    attributes.emplace_back(AttributeType(kPassportExpirationDate));
+    attributes.back().SetInfo(PASSPORT_EXPIRATION_DATE, options.expiry_date,
+                              /*app_locale=*/"",
+                              /*format_string=*/u"YYYY-MM-DD",
+                              VerificationStatus::kNoStatus);
   }
   if (options.issue_date) {
     attributes.emplace_back(AttributeType(kPassportIssueDate));
-    attributes.back().SetInfo(PASSPORT_ISSUE_DATE_TAG, options.issue_date);
+    attributes.back().SetInfo(PASSPORT_ISSUE_DATE, options.issue_date,
+                              /*app_locale=*/"",
+                              /*format_string=*/u"YYYY-MM-DD",
+                              VerificationStatus::kNoStatus);
   }
   return EntityInstance(
       EntityType(EntityTypeName::kPassport), std::move(attributes),
@@ -897,25 +910,99 @@ EntityInstance GetPassportEntityInstance(PassportEntityOptions options) {
       base::Time::FromTimeT(options.date_modified.ToTimeT()));
 }
 
-EntityInstance GetLoyaltyCardEntityInstance(LoyaltyCardEntityOptions options) {
+EntityInstance GetDriversLicenseEntityInstance(DriversLicenseOptions options) {
   using enum AttributeTypeName;
   std::vector<AttributeInstance> attributes;
-  if (options.program) {
-    attributes.emplace_back(AttributeType(kLoyaltyCardProgram));
-    attributes.back().SetInfo(LOYALTY_MEMBERSHIP_PROGRAM, options.program);
+  if (options.name) {
+    attributes.emplace_back(AttributeType(kDriversLicenseName));
+    attributes.back().SetInfo(DRIVERS_LICENSE_NAME_TAG, options.name,
+                              /*app_locale=*/"", /*format_string=*/u"",
+                              VerificationStatus::kNoStatus);
+    attributes.back().FinalizeInfo();
   }
-  if (options.provider) {
-    attributes.emplace_back(AttributeType(kLoyaltyCardProvider));
-    attributes.back().SetInfo(LOYALTY_MEMBERSHIP_PROVIDER, options.provider);
+  if (options.region) {
+    attributes.emplace_back(AttributeType(kDriversLicenseState));
+    attributes.back().SetInfo(DRIVERS_LICENSE_REGION, options.region,
+                              /*app_locale=*/"en-US",
+                              /*format_string=*/u"",
+                              VerificationStatus::kNoStatus);
   }
-  if (options.member_id) {
-    attributes.emplace_back(AttributeType(kLoyaltyCardMemberId));
-    attributes.back().SetInfo(LOYALTY_MEMBERSHIP_ID, options.member_id);
+  if (options.number) {
+    attributes.emplace_back(AttributeType(kDriversLicenseNumber));
+    attributes.back().SetInfo(DRIVERS_LICENSE_NUMBER, options.number,
+                              /*app_locale=*/"", /*format_string=*/u"",
+                              VerificationStatus::kNoStatus);
+  }
+  if (options.expiration_date) {
+    attributes.emplace_back(AttributeType(kDriversLicenseExpirationDate));
+    attributes.back().SetInfo(
+        DRIVERS_LICENSE_EXPIRATION_DATE, options.expiration_date,
+        /*app_locale=*/"", /*format_string=*/u"YYYY-MM-DD",
+        VerificationStatus::kNoStatus);
+  }
+  if (options.issue_date) {
+    attributes.emplace_back(AttributeType(kDriversLicenseIssueDate));
+    attributes.back().SetInfo(DRIVERS_LICENSE_ISSUE_DATE, options.issue_date,
+                              /*app_locale=*/"",
+                              /*format_string=*/u"YYYY-MM-DD",
+                              VerificationStatus::kNoStatus);
   }
   return EntityInstance(
-      EntityType(EntityTypeName::kLoyaltyCard), std::move(attributes),
+      EntityType(EntityTypeName::kDriversLicense), std::move(attributes),
       base::Uuid::ParseLowercase(options.guid), std::string(options.nickname),
       base::Time::FromTimeT(options.date_modified.ToTimeT()));
+}
+
+EntityInstance GetVehicleEntityInstance(VehicleOptions options) {
+  using enum AttributeTypeName;
+  std::vector<AttributeInstance> attributes;
+  if (options.name) {
+    attributes.emplace_back(AttributeType(kVehicleOwner));
+    attributes.back().SetInfo(VEHICLE_OWNER_TAG, options.name,
+                              /*app_locale=*/"", /*format_string=*/u"",
+                              VerificationStatus::kNoStatus);
+    attributes.back().FinalizeInfo();
+  }
+  if (options.plate) {
+    attributes.emplace_back(AttributeType(kVehiclePlateNumber));
+    attributes.back().SetInfo(VEHICLE_LICENSE_PLATE, options.plate,
+                              /*app_locale=*/"en-US", /*format_string=*/u"",
+                              VerificationStatus::kNoStatus);
+  }
+  if (options.number) {
+    attributes.emplace_back(AttributeType(kVehicleVin));
+    attributes.back().SetInfo(VEHICLE_VIN, options.number,
+                              /*app_locale=*/"", /*format_string=*/u"",
+                              VerificationStatus::kNoStatus);
+  }
+  if (options.make) {
+    attributes.emplace_back(AttributeType(kVehicleMake));
+    attributes.back().SetInfo(VEHICLE_MAKE, options.make,
+                              /*app_locale=*/"", /*format_string=*/u"",
+                              VerificationStatus::kNoStatus);
+  }
+  if (options.model) {
+    attributes.emplace_back(AttributeType(kVehicleModel));
+    attributes.back().SetInfo(VEHICLE_MODEL, options.model,
+                              /*app_locale=*/"", /*format_string=*/u"",
+                              VerificationStatus::kNoStatus);
+  }
+  if (options.year) {
+    attributes.emplace_back(AttributeType(kVehicleYear));
+    attributes.back().SetInfo(VEHICLE_YEAR, options.model,
+                              /*app_locale=*/"", /*format_string=*/u"",
+                              VerificationStatus::kNoStatus);
+  }
+  if (options.state) {
+    attributes.emplace_back(AttributeType(kVehiclePlateState));
+    attributes.back().SetInfo(VEHICLE_PLATE_STATE, options.state,
+                              /*app_locale=*/"", /*format_string=*/u"",
+                              VerificationStatus::kNoStatus);
+  }
+  return EntityInstance(
+      EntityType(EntityTypeName::kVehicle), std::move(attributes),
+      base::Uuid::ParseLowercase(options.guid), std::string(options.nickname),
+      base::Time::FromTimeT(kJune2017.ToTimeT()));
 }
 
 void InitializePossibleTypes(std::vector<FieldTypeSet>& possible_field_types,

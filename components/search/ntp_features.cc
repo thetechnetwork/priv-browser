@@ -5,6 +5,7 @@
 #include "components/search/ntp_features.h"
 
 #include <string>
+#include <vector>
 
 #include "base/feature_list.h"
 #include "base/metrics/field_trial_params.h"
@@ -106,6 +107,11 @@ BASE_FEATURE(kNtpDummyModules,
 BASE_FEATURE(kNtpDriveModule,
              "NtpDriveModule",
              base::FEATURE_ENABLED_BY_DEFAULT);
+
+// If enabled, the NTP Drive module does not require sync.
+BASE_FEATURE(kNtpDriveModuleNoSyncRequirement,
+             "NtpDriveModuleNoSyncRequirement",
+             base::FEATURE_DISABLED_BY_DEFAULT);
 
 // If enabled, segmentation data will be collected to decide whether or not to
 // show the Drive module.
@@ -425,10 +431,10 @@ const base::FeatureParam<NtpSharepointModuleDataType>::Option
          "fake-non-insights"}};
 
 const base::FeatureParam<NtpSharepointModuleDataType>
-    kNtpSharepointModuleDataParam{
-        &ntp_features::kNtpSharepointModule, "NtpSharepointModuleDataParam",
-        NtpSharepointModuleDataType::kTrendingInsights,
-        &kNtpSharepointModuleDataTypeOptions};
+    kNtpSharepointModuleDataParam{&ntp_features::kNtpSharepointModule,
+                                  "NtpSharepointModuleDataParam",
+                                  NtpSharepointModuleDataType::kNonInsights,
+                                  &kNtpSharepointModuleDataTypeOptions};
 
 const base::FeatureParam<int> kNtpMicrosoftFilesModuleMaxFilesParam(
     &ntp_features::kNtpSharepointModule,

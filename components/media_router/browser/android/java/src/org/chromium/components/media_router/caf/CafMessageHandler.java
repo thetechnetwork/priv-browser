@@ -44,6 +44,7 @@ import java.util.Queue;
  * talks to the pages via the media router.
  */
 @NullMarked
+@SuppressWarnings("NullAway") // https://crbug.com/401584051
 public class CafMessageHandler {
     private static final String TAG = "CafMR";
 
@@ -684,7 +685,7 @@ public class CafMessageHandler {
             JSONObject jsonReceiver = new JSONObject();
             jsonReceiver.put(
                     "label",
-                    mSessionController.getSession().getCastDevice().getDeviceId());
+                    assumeNonNull(mSessionController.getSession().getCastDevice()).getDeviceId());
             jsonReceiver.put(
                     "friendlyName",
                     mSessionController.getSession().getCastDevice().getFriendlyName());

@@ -34,8 +34,8 @@
 #include "components/commerce/core/test_utils.h"
 #include "components/feature_engagement/public/feature_constants.h"
 #include "components/feature_engagement/test/mock_tracker.h"
+#include "components/signin/public/base/signin_switches.h"
 #include "components/signin/public/identity_manager/identity_test_utils.h"
-#include "components/sync/base/features.h"
 #include "components/sync/test/test_sync_service.h"
 #include "components/ukm/test_ukm_recorder.h"
 #include "services/metrics/public/cpp/ukm_builders.h"
@@ -135,7 +135,7 @@ class BookmarkBubbleViewTestBase : public BrowserWithTestWindowTest {
     // Create a fake anchor view for the bubble.
     BookmarkBubbleView::ShowBubble(
         anchor_widget_->GetContentsView(),
-        browser()->tab_strip_model()->GetActiveWebContents(), nullptr, nullptr,
+        browser()->tab_strip_model()->GetActiveWebContents(), nullptr,
         browser(), GURL(kTestBookmarkURL), already_bookmarked);
   }
 
@@ -435,7 +435,7 @@ class BookmarkBubbleViewWithAccountBookmarksTest
  public:
   BookmarkBubbleViewWithAccountBookmarksTest() {
     test_features_.InitAndEnableFeature(
-        syncer::kSyncEnableBookmarksInTransportMode);
+        switches::kSyncEnableBookmarksInTransportMode);
   }
 };
 

@@ -20,11 +20,15 @@ import '../icons.html.js';
 import '../settings_columned_section.css.js';
 import '../settings_shared.css.js';
 import '../simple_confirmation_dialog.js';
+import './autofill_ai_add_or_edit_dialog.js';
 
 import {PrefsMixin} from '/shared/settings/prefs/prefs_mixin.js';
 import {HelpBubbleMixin} from 'chrome://resources/cr_components/help_bubble/help_bubble_mixin.js';
+import {AnchorAlignment} from 'chrome://resources/cr_elements/cr_action_menu/cr_action_menu.js';
 import type {CrActionMenuElement} from 'chrome://resources/cr_elements/cr_action_menu/cr_action_menu.js';
 import type {CrLazyRenderElement} from 'chrome://resources/cr_elements/cr_lazy_render/cr_lazy_render.js';
+import {I18nMixin} from 'chrome://resources/cr_elements/i18n_mixin.js';
+import {assert} from 'chrome://resources/js/assert.js';
 import {OpenWindowProxyImpl} from 'chrome://resources/js/open_window_proxy.js';
 import {PolymerElement} from 'chrome://resources/polymer/v3_0/polymer/polymer_bundled.min.js';
 import type {DomRepeatEvent} from 'chrome://resources/polymer/v3_0/polymer/polymer_bundled.min.js';
@@ -35,10 +39,12 @@ import {Router} from '../router.js';
 import type {SettingsSimpleConfirmationDialogElement} from '../simple_confirmation_dialog.js';
 
 import {getTemplate} from './autofill_ai_section.html.js';
-import type {EntityDataManagerProxy} from './entity_data_manager_proxy.js';
+import type {EntityDataManagerProxy, EntityInstancesChangedListener} from './entity_data_manager_proxy.js';
 import {EntityDataManagerProxyImpl} from './entity_data_manager_proxy.js';
 
+type EntityInstance = chrome.autofillPrivate.EntityInstance;
 type EntityInstanceWithLabels = chrome.autofillPrivate.EntityInstanceWithLabels;
+type EntityType = chrome.autofillPrivate.EntityType;
 
 // browser_element_identifiers constants
 const AUTOFILL_AI_HEADER_ELEMENT_ID =
@@ -47,12 +53,13 @@ const AUTOFILL_AI_HEADER_ELEMENT_ID =
 export interface SettingsAutofillAiSectionElement {
   $: {
     actionMenu: CrLazyRenderElement<CrActionMenuElement>,
+    addMenu: CrLazyRenderElement<CrActionMenuElement>,
     entriesHeaderTitle: HTMLElement,
   };
 }
 
 const SettingsAutofillAiSectionElementBase =
-    HelpBubbleMixin(PrefsMixin(PolymerElement));
+    I18nMixin(HelpBubbleMixin(PrefsMixin(PolymerElement)));
 
 export class SettingsAutofillAiSectionElement extends
     SettingsAutofillAiSectionElementBase {
@@ -80,36 +87,78 @@ export class SettingsAutofillAiSectionElement extends
         value: false,
       },
 
-      /** The same dialog can be used for both adding and editing entities. */
-      showAddOrEditEntityDialog_: {
+      /**
+         The corresponding `EntityInstance` model for any entity instance
+         related action menus or dialogs.
+       */
+      activeEntityInstance_: {
+        type: Object,
+        value: null,
+      },
+
+      /**
+         Complete list of entity types that exist. When the user wants to add a
+         new entity instance, this list is displayed.
+       */
+      completeEntityTypesList_: {
+        type: Array,
+        value: () => [],
+      },
+
+      /**
+         The same dialog can be used for both adding and editing entity
+         instances.
+       */
+      showAddOrEditEntityInstanceDialog_: {
         type: Boolean,
         value: false,
       },
 
-      showRemoveEntityDialog_: {
+      addOrEditEntityInstanceDialogTitle_: {
+        type: String,
+        value: '',
+      },
+
+      showRemoveEntityInstanceDialog_: {
         type: Boolean,
         value: false,
       },
 
       entityInstances_: {
-        Array,
+        type: Array,
         value: () => [],
       },
     };
   }
 
   ineligibleUser: boolean;
-  private showAddOrEditEntityDialog_: boolean;
-  private showRemoveEntityDialog_: boolean;
+  private activeEntityInstance_: EntityInstance|null;
+  private completeEntityTypesList_: EntityType[];
+  private showAddOrEditEntityInstanceDialog_: boolean;
+  private addOrEditEntityInstanceDialogTitle_: string;
+  private showRemoveEntityInstanceDialog_: boolean;
   private entityInstances_: EntityInstanceWithLabels[];
 
-  // The correspondent model for any entity related action menus or dialogs.
-  private activeEntity_: EntityInstanceWithLabels|null;
+  // The correspondent `EntityInstanceWithLabels` model for any entity instance
+  // related action menus or dialogs.
+  private activeEntityInstanceWithLabels_: EntityInstanceWithLabels|null;
+  private entityInstancesChangedListener_: EntityInstancesChangedListener|null =
+      null;
   private entityDataManager_: EntityDataManagerProxy =
       EntityDataManagerProxyImpl.getInstance();
 
   override connectedCallback() {
     super.connectedCallback();
+
+    this.entityInstancesChangedListener_ =
+        (entityInstances => this.entityInstances_ = entityInstances);
+    this.entityDataManager_.addEntityInstancesChangedListener(
+        this.entityInstancesChangedListener_);
+
+    this.entityDataManager_.getAllEntityTypes().then(
+        (entityTypes: EntityType[]) => {
+          this.completeEntityTypesList_ = entityTypes;
+        });
 
     this.entityDataManager_.loadEntityInstances().then(
         (entityInstances: EntityInstanceWithLabels[]) => {
@@ -130,62 +179,115 @@ export class SettingsAutofillAiSectionElement extends
         AUTOFILL_AI_HEADER_ELEMENT_ID, this.$.entriesHeaderTitle);
   }
 
+  override disconnectedCallback() {
+    super.disconnectedCallback();
+
+    assert(this.entityInstancesChangedListener_);
+    this.entityDataManager_.removeEntityInstancesChangedListener(
+        this.entityInstancesChangedListener_);
+    this.entityInstancesChangedListener_ = null;
+  }
+
   private onToggleSubLabelLinkClick_(): void {
     OpenWindowProxyImpl.getInstance().openUrl(
         loadTimeData.getString('autofillAiLearnMoreURL'));
+  }
+
+  private computeDisableAddButton_(
+      ineligibleUser: boolean, optInPrefValue: boolean): boolean {
+    return ineligibleUser || !optInPrefValue;
+  }
+
+  /**
+   * @returns the accessibility title for the "More Actions button"
+   *     corresponding to the entity instance which is described by `label` and
+   *     `sublabel`.
+   */
+  private getMoreButtonTitle_(label: string, subLabel: string) {
+    return this.i18n('autofillAiMoreActionsForEntityInstance', label, subLabel);
   }
 
   /**
    * Open the action menu.
    */
   private onMoreButtonClick_(e: DomRepeatEvent<EntityInstanceWithLabels>) {
-    this.activeEntity_ = e.model.item;
+    this.activeEntityInstanceWithLabels_ = e.model.item;
     const moreButton = e.target as HTMLElement;
     this.$.actionMenu.get().showAt(moreButton);
   }
 
   /**
-   * Handles tapping on the "Add" entity button.
+   * Handles tapping on the "Add" entity instance button.
    */
-  private onAddEntityClick_(e: Event) {
+  private onAddButtonClick_(e: Event) {
+    const addButton = e.target as HTMLElement;
+    this.$.addMenu.get().showAt(addButton, {
+      anchorAlignmentX: AnchorAlignment.BEFORE_END,
+      anchorAlignmentY: AnchorAlignment.AFTER_END,
+      noOffset: true,
+    });
+  }
+
+  private onAddEntityInstanceFromDropdownClick_(e: DomRepeatEvent<EntityType>) {
     e.preventDefault();
-    this.showAddOrEditEntityDialog_ = true;
+    // Create a new entity instance with no attribute instances and guid. A guid
+    // will be assigned after saving, on the C++ side.
+    this.activeEntityInstance_ = {
+      type: e.model.item,
+      attributeInstances: [],
+      guid: '',
+      nickname: '',
+    };
+    this.addOrEditEntityInstanceDialogTitle_ =
+        this.activeEntityInstance_.type.addEntityTypeString;
+    this.showAddOrEditEntityInstanceDialog_ = true;
+    this.$.addMenu.get().close();
   }
 
   /**
-   * Handles tapping on the "Edit" entity button in the action menu.
+   * Handles tapping on the "Edit" entity instance button in the action menu.
    */
-  private onMenuEditEntityClick_(e: Event) {
+  private async onMenuEditEntityInstanceClick_(e: Event) {
     e.preventDefault();
-    // Clone item so dialog won't update model on cancel.
-    this.activeEntity_ = structuredClone(this.activeEntity_);
-    this.showAddOrEditEntityDialog_ = true;
+    this.activeEntityInstance_ =
+        await this.entityDataManager_.getEntityInstanceByGuid(
+            this.activeEntityInstanceWithLabels_!.guid);
+    this.addOrEditEntityInstanceDialogTitle_ =
+        this.activeEntityInstance_.type.editEntityTypeString;
+    this.showAddOrEditEntityInstanceDialog_ = true;
     this.$.actionMenu.get().close();
   }
 
   /**
-   * Handles tapping on the "Delete" entity button in the action menu.
+   * Handles tapping on the "Delete" entity instance button in the action menu.
    */
-  private onMenuRemoveEntityClick_(e: Event) {
+  private onMenuRemoveEntityInstanceClick_(e: Event) {
     e.preventDefault();
-    this.showRemoveEntityDialog_ = true;
+    this.showRemoveEntityInstanceDialog_ = true;
     this.$.actionMenu.get().close();
   }
 
-  private onRemoveEntityDialogClose_() {
+  private onAutofillAiAddOrEditDone_(e: CustomEvent<EntityInstance>) {
+    e.stopPropagation();
+    this.entityDataManager_.addOrUpdateEntityInstance(e.detail);
+  }
+
+  private onAddOrEditEntityInstanceDialogClose_(e: Event) {
+    e.stopPropagation();
+    this.showAddOrEditEntityInstanceDialog_ = false;
+  }
+
+  private onRemoveEntityInstanceDialogClose_() {
     const wasDeletionConfirmed =
         this.shadowRoot!
             .querySelector<SettingsSimpleConfirmationDialogElement>(
-                '#removeEntityDialog')!.wasConfirmed();
+                '#removeEntityInstanceDialog')!.wasConfirmed();
     if (wasDeletionConfirmed) {
-      this.entityDataManager_.removeEntityInstance(this.activeEntity_!.guid);
-      // Speculatively update local list to avoid potential stale data issues.
-      const deletedEntityIndex = this.entityInstances_.findIndex(
-          entityInstance => entityInstance.guid === this.activeEntity_!.guid);
-      this.splice('entityInstances_', deletedEntityIndex, 1);
+      this.entityDataManager_.removeEntityInstance(
+          this.activeEntityInstanceWithLabels_!.guid);
     }
 
-    this.showRemoveEntityDialog_ = false;
+    this.showRemoveEntityInstanceDialog_ = false;
   }
 }
 

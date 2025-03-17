@@ -42,10 +42,12 @@
 #include "third_party/blink/renderer/core/css/css_property_names.h"
 #include "third_party/blink/renderer/core/css/properties/computed_style_utils.h"
 #include "third_party/blink/renderer/core/css/properties/css_property.h"
+#include "third_party/blink/renderer/core/css/properties/css_unresolved_property.h"
 #include "third_party/blink/renderer/core/css/properties/longhand.h"
 #include "third_party/blink/renderer/core/css/properties/longhands.h"
 #include "third_party/blink/renderer/core/css/resolver/style_resolver.h"
 #include "third_party/blink/renderer/core/dom/document.h"
+#include "third_party/blink/renderer/core/dom/pseudo_element.h"
 #include "third_party/blink/renderer/core/frame/local_dom_window.h"
 #include "third_party/blink/renderer/core/frame/settings.h"
 #include "third_party/blink/renderer/core/html/forms/html_legend_element.h"
@@ -67,6 +69,7 @@
 #include "third_party/blink/renderer/core/style/content_data.h"
 #include "third_party/blink/renderer/core/style/coord_box_offset_path_operation.h"
 #include "third_party/blink/renderer/core/style/cursor_data.h"
+#include "third_party/blink/renderer/core/style/gap_data.h"
 #include "third_party/blink/renderer/core/style/reference_offset_path_operation.h"
 #include "third_party/blink/renderer/core/style/shadow_list.h"
 #include "third_party/blink/renderer/core/style/shape_offset_path_operation.h"
@@ -1065,18 +1068,23 @@ bool ComputedStyle::DiffNeedsNormalPaintInvalidation(
     return true;
   }
 
-  if (field_diff & kBackgroundCurrentColor) {
-    // If the background-image or background-color depends on currentColor
-    // (e.g., background-image: linear-gradient(currentColor, #fff) or
-    // background-color: color-mix(in srgb, currentcolor ...)), and the color
-    // has changed, we need to recompute it even though VisuallyEqual()
-    // thinks the old and new background styles are identical.
-    if ((BackgroundInternal().AnyLayerUsesCurrentColor() ||
-         BackgroundColor().IsUnresolvedColorFunction() ||
-         InternalVisitedBackgroundColor().IsUnresolvedColorFunction()) &&
-        (GetCurrentColor() != other.GetCurrentColor() ||
+  if (field_diff & kCurrentcolor) {
+    // If a property has a value that contains a <color> that depends on
+    // 'currentcolor', for example:
+    //
+    //   background-image: linear-gradient(currentColor, #fff)
+    //   background-color: color-mix(in srgb, currentcolor ...)
+    //
+    // If the (current)color has changed, we need to recompute it even though
+    // the old and new property values are identical.
+    //
+    // NOTE: This is also handled to some degree by
+    // LayoutObject::AdjustStyleDifference. We should probably re-distribute
+    // the responsibilities between these two locations.
+    if ((GetCurrentColor() != other.GetCurrentColor() ||
          GetInternalVisitedCurrentColor() !=
-             other.GetInternalVisitedCurrentColor())) {
+             other.GetInternalVisitedCurrentColor()) &&
+        HasPropertyDependingOnCurrentColor()) {
       return true;
     }
   }
@@ -1262,8 +1270,10 @@ static bool HasPropertyThatCreatesStackingContext(
       case CSSPropertyID::kScale:
       case CSSPropertyID::kOffsetPath:
       case CSSPropertyID::kOffsetPosition:
-      case CSSPropertyID::kMask:
-      case CSSPropertyID::kWebkitMaskBoxImage:
+      case CSSPropertyID::kMask:  // Matches longhand.
+      case CSSPropertyID::kMaskImage:
+      case CSSPropertyID::kWebkitMaskBoxImage:  // Matches longhand
+      case CSSPropertyID::kWebkitMaskBoxImageSource:
       case CSSPropertyID::kClipPath:
       case CSSPropertyID::kWebkitBoxReflect:
       case CSSPropertyID::kFilter:
@@ -2022,6 +2032,23 @@ const AtomicString& ComputedStyle::TextEmphasisMarkString() const {
 
 LineLogicalSide ComputedStyle::GetTextEmphasisLineLogicalSide() const {
   TextEmphasisPosition position = GetTextEmphasisPosition();
+  if (RuntimeEnabledFeatures::TextEmphasisPositionAutoEnabled() &&
+      position == TextEmphasisPosition::kAuto) {
+    if (IsHorizontalWritingMode()) {
+      return LineLogicalSide::kOver;
+    }
+    switch (GetWritingMode()) {
+      case WritingMode::kVerticalRl:
+      case WritingMode::kVerticalLr:
+      case WritingMode::kSidewaysRl:
+        return LineLogicalSide::kOver;
+      case WritingMode::kSidewaysLr:
+        return LineLogicalSide::kUnder;
+      default:
+        NOTREACHED();
+    }
+  }
+
   if (IsHorizontalWritingMode()) {
     return IsOver(position) ? LineLogicalSide::kOver : LineLogicalSide::kUnder;
   }
@@ -2200,6 +2227,18 @@ const StyleInheritedVariables* ComputedStyle::InheritedVariables() const {
 
 const StyleNonInheritedVariables* ComputedStyle::NonInheritedVariables() const {
   return NonInheritedVariablesInternal().Get();
+}
+
+bool ComputedStyle::HasPropertyDependingOnCurrentColor() const {
+  for (CSSPropertyID property_id : kCSSIncludesCurrentColorProperties) {
+    auto& property = CSSProperty::Get(property_id);
+    DCHECK(property.IsLonghand());
+    if (static_cast<const Longhand&>(property).IsAffectedByCurrentColor(
+            *this)) {
+      return true;
+    }
+  }
+  return false;
 }
 
 namespace {
@@ -2646,7 +2685,7 @@ bool ComputedStyle::ShadowListHasCurrentColor(const ShadowList* shadow_list) {
   return shadow_list &&
          std::ranges::any_of(shadow_list->Shadows(),
                              [](const ShadowData& shadow) {
-                               return shadow.GetColor().IsCurrentColor();
+                               return shadow.GetColor().DependsOnCurrentColor();
                              });
 }
 

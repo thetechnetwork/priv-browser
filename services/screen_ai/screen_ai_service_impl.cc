@@ -4,6 +4,7 @@
 
 #include "services/screen_ai/screen_ai_service_impl.h"
 
+#include <algorithm>
 #include <memory>
 #include <optional>
 #include <utility>
@@ -19,6 +20,7 @@
 #include "base/metrics/histogram_functions.h"
 #include "base/process/process.h"
 #include "base/strings/stringprintf.h"
+#include "base/system/sys_info.h"
 #include "base/task/single_thread_task_runner.h"
 #include "base/task/thread_pool.h"
 #include "components/crash/core/common/crash_key.h"
@@ -43,6 +45,10 @@
 namespace screen_ai {
 
 namespace {
+
+// Maximum image resolution that OCR service processes. Images larger than this
+// threshold are downsampled before processing.
+const uint32_t kLargestOcrResolution = 2048 * 2048;
 
 // How often it would be checked that the service is idle and can be shutdown.
 constexpr base::TimeDelta kIdleCheckingDelay = base::Minutes(5);
@@ -114,6 +120,19 @@ void SetCPUInstructionSetCrashKey() {
 #endif
 }
 #endif
+
+// Return a maximum 11 character string with the signature of available and
+// total memory, both in MB and capped to 99999.
+std::string GetMemoryStatusForCrashKey() {
+  int total_memory = base::SysInfo::AmountOfPhysicalMemoryMB();
+  int available_memory = static_cast<int>(
+      base::SysInfo::AmountOfAvailablePhysicalMemory() / (1024 * 1024));
+
+  // Cap the number of digits for crash report.
+  total_memory = std::min(total_memory, 99999);
+  available_memory = std::min(available_memory, 99999);
+  return base::StringPrintf("%i,%i", available_memory, total_memory);
+}
 
 }  // namespace
 
@@ -280,6 +299,9 @@ void ScreenAIService::InitializeOCR(
     base::flat_map<base::FilePath, base::File> model_files,
     mojo::PendingReceiver<mojom::OCRService> ocr_service_receiver,
     InitializeOCRCallback callback) {
+  static crash_reporter::CrashKeyString<12> memory_ocr_init(
+      "screen_ai_mem_ocr_init");
+  memory_ocr_init.Set(GetMemoryStatusForCrashKey());
   if (!library_) {
     LoadLibrary(library_path);
   }
@@ -309,6 +331,13 @@ void ScreenAIService::InitializeOCR(
   ocr_last_used_ = base::TimeTicks::Now();
 }
 
+void ScreenAIService::BindShutdownHandler(
+    mojo::PendingRemote<mojom::ScreenAIServiceShutdownHandler>
+        shutdown_handler) {
+  DCHECK(!screen_ai_shutdown_handler_.is_bound());
+  screen_ai_shutdown_handler_.Bind(std::move(shutdown_handler));
+}
+
 void ScreenAIService::BindAnnotator(
     mojo::PendingReceiver<mojom::ScreenAIAnnotator> annotator) {
   screen_ai_annotators_.Add(this, std::move(annotator));
@@ -323,12 +352,16 @@ void ScreenAIService::BindMainContentExtractor(
 
 std::optional<chrome_screen_ai::VisualAnnotation>
 ScreenAIService::PerformOcrAndRecordMetrics(const SkBitmap& image) {
+  static crash_reporter::CrashKeyString<12> memory_perform_ocr(
+      "screen_ai_mem_ocr_perform");
+  memory_perform_ocr.Set(GetMemoryStatusForCrashKey());
+
   CHECK(base::Contains(ocr_client_types_,
                        screen_ai_annotators_.current_receiver()));
-  mojom::OcrClientType client_type =
-      ocr_client_types_.find(screen_ai_annotators_.current_receiver())->second;
+  OcrClientTypeForMetrics client_type = GetClientType(
+      ocr_client_types_.find(screen_ai_annotators_.current_receiver())->second);
   base::UmaHistogramEnumeration("Accessibility.ScreenAI.OCR.ClientType",
-                                GetClientType(client_type));
+                                client_type);
 
   ocr_last_used_ = base::TimeTicks::Now();
   auto result = library_->PerformOcr(image);
@@ -339,9 +372,13 @@ ScreenAIService::PerformOcrAndRecordMetrics(const SkBitmap& image) {
 
   if (!result) {
     base::UmaHistogramEnumeration(
-        "Accessibility.ScreenAI.OCR.Failed.ClientType",
-        GetClientType(client_type));
+        "Accessibility.ScreenAI.OCR.Failed.ClientType", client_type);
   }
+  if (image_size >= kLargestOcrResolution) {
+    base::UmaHistogramEnumeration(
+        "Accessibility.ScreenAI.OCR.Oversize.ClientType", client_type);
+  }
+
   base::UmaHistogramBoolean("Accessibility.ScreenAI.OCR.Successful",
                             result.has_value());
   base::UmaHistogramCounts100("Accessibility.ScreenAI.OCR.LinesCount",
@@ -363,14 +400,16 @@ ScreenAIService::PerformOcrAndRecordMetrics(const SkBitmap& image) {
   }
 
   // MediaApp provides OCR for ChromeOS PDF viewer.
-  if (client_type == mojom::OcrClientType::kPdfViewer ||
-      client_type == mojom::OcrClientType::kMediaApp) {
+  if (client_type == OcrClientTypeForMetrics::kPdfViewer ||
+      client_type == OcrClientTypeForMetrics::kMediaApp) {
     base::UmaHistogramCounts100("Accessibility.ScreenAI.OCR.LinesCount.PDF",
                                 lines_count);
     base::UmaHistogramTimes("Accessibility.ScreenAI.OCR.Time.PDF",
                             elapsed_time);
-    base::UmaHistogramCounts10M("Accessibility.ScreenAI.OCR.ImageSize.PDF",
-                                image.width() * image.height());
+    base::UmaHistogramCounts10M(
+        lines_count ? "Accessibility.ScreenAI.OCR.ImageSize.PDF.WithText"
+                    : "Accessibility.ScreenAI.OCR.ImageSize.PDF.NoText",
+        image_size);
 
     if (result.has_value()) {
       std::optional<uint64_t> most_detected_language =
@@ -445,6 +484,20 @@ void ScreenAIService::ExtractMainNode(const ui::AXTreeUpdate& snapshot,
   }
 }
 
+void ScreenAIService::IdentifyMainNode(const ui::AXTreeUpdate& snapshot,
+                                       IdentifyMainNodeCallback callback) {
+  ui::AXTree tree;
+  std::optional<std::vector<int32_t>> content_node_ids;
+  bool success = ExtractMainContentInternal(snapshot, tree, content_node_ids);
+
+  if (success) {
+    ui::AXNodeID main_node_id = ComputeMainNode(&tree, *content_node_ids);
+    std::move(callback).Run(tree.GetAXTreeID(), main_node_id);
+  } else {
+    std::move(callback).Run(ui::AXTreeIDUnknown(), ui::kInvalidAXNodeID);
+  }
+}
+
 bool ScreenAIService::ExtractMainContentInternal(
     const ui::AXTreeUpdate& snapshot,
     ui::AXTree& tree,
@@ -511,6 +564,7 @@ void ScreenAIService::ShutDownIfNoClients() {
       main_content_extraction_last_used_ < kIdlenessThreshold;
 
   if (ocr_not_needed && main_content_extractioncan_not_needed) {
+    screen_ai_shutdown_handler_->ShuttingDownOnIdle();
     VLOG(2) << "Shutting down since no client or idle.";
     base::Process::TerminateCurrentProcessImmediately(0);
   }

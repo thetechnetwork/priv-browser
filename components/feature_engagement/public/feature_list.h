@@ -52,6 +52,9 @@ DEFINE_VARIATION_PARAM(kIPHAccountSettingsHistorySync,
 DEFINE_VARIATION_PARAM(kIPHAndroidTabDeclutter, "IPH_AndroidTabDeclutter");
 DEFINE_VARIATION_PARAM(kIPHAdaptiveButtonInTopToolbarCustomizationNewTabFeature,
                        "IPH_AdaptiveButtonInTopToolbarCustomization_NewTab");
+DEFINE_VARIATION_PARAM(
+    kIPHAdaptiveButtonInTopToolbarCustomizationOpenInBrowserFeature,
+    "IPH_AdaptiveButtonInTopToolbarCustomization_OpenInBrowser");
 DEFINE_VARIATION_PARAM(kIPHAdaptiveButtonInTopToolbarCustomizationShareFeature,
                        "IPH_AdaptiveButtonInTopToolbarCustomization_Share");
 DEFINE_VARIATION_PARAM(
@@ -255,8 +258,6 @@ DEFINE_VARIATION_PARAM(kIPHiOSPromoNonModalShareDefaultBrowserFeature,
                        "IPH_iOSPromoNonModalShareDefaultBrowser");
 DEFINE_VARIATION_PARAM(kIPHiOSPromoPasswordManagerWidgetFeature,
                        "IPH_iOSPromoPasswordManagerWidget");
-DEFINE_VARIATION_PARAM(kIPHiOSParcelTrackingFeature,
-                       "IPH_iOSParcelTrackingFeature");
 DEFINE_VARIATION_PARAM(kIPHiOSPullToRefreshFeature,
                        "IPH_iOSPullToRefreshFeature");
 DEFINE_VARIATION_PARAM(kIPHiOSReplaceSyncPromosWithSignInPromos,
@@ -301,6 +302,8 @@ DEFINE_VARIATION_PARAM(
     "IPH_iOSReminderNotificationsOverflowMenuNewBadgeFeature");
 DEFINE_VARIATION_PARAM(kIPHiOSDownloadAutoDeletionFeature,
                        "IPH_iOSDownloadAutoDeletion");
+DEFINE_VARIATION_PARAM(kIPHiOSSettingsInOverflowMenuBubbleFeature,
+                       "IPH_iOSSettingsInOverflowMenuBubbleFeature");
 #endif  // BUILDFLAG(IS_IOS)
 
 #if BUILDFLAG(IS_WIN) || BUILDFLAG(IS_APPLE) || BUILDFLAG(IS_LINUX) || \
@@ -418,17 +421,17 @@ DEFINE_VARIATION_PARAM(kIPHTabGroupsSharedTabFeedbackFeature,
 
 #if BUILDFLAG(IS_WIN) || BUILDFLAG(IS_APPLE) || BUILDFLAG(IS_LINUX) || \
     BUILDFLAG(IS_CHROMEOS) || BUILDFLAG(IS_ANDROID) || BUILDFLAG(IS_FUCHSIA)
+DEFINE_VARIATION_PARAM(kIPHAutofillAiOptInFeature, "IPH_AutofillAiOptIn");
+DEFINE_VARIATION_PARAM(kIPHAutofillBnplAffirmOrZipSuggestionFeature,
+                       "IPH_AutofillBnplAffirmOrZipSuggestion");
 DEFINE_VARIATION_PARAM(kIPHAutofillCreditCardBenefitFeature,
                        "IPH_AutofillCreditCardBenefit");
-
 DEFINE_VARIATION_PARAM(kIPHAutofillCardInfoRetrievalSuggestionFeature,
                        "IPH_AutofillCardInfoRetrievalSuggestion");
 DEFINE_VARIATION_PARAM(kIPHAutofillDisabledVirtualCardSuggestionFeature,
                        "IPH_AutofillDisabledVirtualCardSuggestion");
 DEFINE_VARIATION_PARAM(kIPHAutofillExternalAccountProfileSuggestionFeature,
                        "IPH_AutofillExternalAccountProfileSuggestion");
-DEFINE_VARIATION_PARAM(kIPHAutofillPredictionImprovementsFeature,
-                       "IPH_AutofillPredictionImprovements");
 DEFINE_VARIATION_PARAM(kIPHAutofillVirtualCardCVCSuggestionFeature,
                        "IPH_AutofillVirtualCardCVCSuggestion");
 DEFINE_VARIATION_PARAM(kIPHAutofillVirtualCardSuggestionFeature,
@@ -658,7 +661,6 @@ inline constexpr flags_ui::FeatureEntry::FeatureVariation
         VARIATION_ENTRY(kIPHiOSPromoNonModalAppSwitcherDefaultBrowserFeature),
         VARIATION_ENTRY(kIPHiOSPromoNonModalShareDefaultBrowserFeature),
         VARIATION_ENTRY(kIPHiOSPromoPasswordManagerWidgetFeature),
-        VARIATION_ENTRY(kIPHiOSParcelTrackingFeature),
         VARIATION_ENTRY(kIPHiOSPullToRefreshFeature),
         VARIATION_ENTRY(kIPHiOSReplaceSyncPromosWithSignInPromos),
         VARIATION_ENTRY(kIPHiOSTabGridSwipeRightForIncognito),
@@ -747,11 +749,11 @@ inline constexpr flags_ui::FeatureEntry::FeatureVariation
 
 #if BUILDFLAG(IS_WIN) || BUILDFLAG(IS_APPLE) || BUILDFLAG(IS_LINUX) || \
     BUILDFLAG(IS_CHROMEOS) || BUILDFLAG(IS_ANDROID) || BUILDFLAG(IS_FUCHSIA)
+        VARIATION_ENTRY(kIPHAutofillAiOptInFeature),
         VARIATION_ENTRY(kIPHAutofillCreditCardBenefitFeature),
         VARIATION_ENTRY(kIPHAutofillCardInfoRetrievalSuggestionFeature),
         VARIATION_ENTRY(kIPHAutofillDisabledVirtualCardSuggestionFeature),
         VARIATION_ENTRY(kIPHAutofillExternalAccountProfileSuggestionFeature),
-        VARIATION_ENTRY(kIPHAutofillPredictionImprovementsFeature),
         VARIATION_ENTRY(kIPHAutofillVirtualCardCVCSuggestionFeature),
         VARIATION_ENTRY(kIPHAutofillVirtualCardSuggestionFeature),
         VARIATION_ENTRY(kIPHPlusAddressCreateSuggestionFeature),

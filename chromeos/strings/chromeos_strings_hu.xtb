@@ -81,6 +81,7 @@
 <translation id="131461803491198646">Otthoni hálózat, nincs roaming</translation>
 <translation id="1327977588028644528">Átjáró</translation>
 <translation id="1328223165223065150">Háttérkép színe</translation>
+<translation id="1329478709358066995">Átirat:</translation>
 <translation id="1330426557709298164">JPG</translation>
 <translation id="1337912285145772892">Igazítás a beolvasási területhez</translation>
 <translation id="1343442362630695901">sóstó</translation>
@@ -126,7 +127,17 @@
 <translation id="1515129336378114413">böngésző kezdőlapja</translation>
 <translation id="1526389707933164996">Animált képernyőkímélő</translation>
 <translation id="152892567002884378">Hangerő növelése</translation>
+<translation id="1531038290222364269">Lapok megjelenítése</translation>
 <translation id="1539864135338521185">lazúrkő</translation>
+<translation id="1548555207631326346">Válasszon egy témát, majd válassza ki az aláhúzott szavakat az AI-képek személyre szabásához.<ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          Az „Inspiráció” gombot választva egyedibb és változatosabb AI-képlehetőségeket kaphat.
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          Amikor AI-jal hoz létre tartalmat, a rendszer elküldi az utasítást a Google AI szervereinek a képek generálásához és a termék továbbfejlesztéséhez <ph name="BEGIN_LINK_GOOGLE_PRIVACY_POLICY" />A Google adatvédelmi irányelveinek<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" /> megfelelően.
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          A generatív AI egy kísérleti szolgáltatás, korai fejlesztési fázisban van, és jelenleg korlátozottan áll rendelkezésre.</translation>
 <translation id="1555130319947370107">Kék</translation>
 <translation id="155865706765934889">Érintőpad</translation>
 <translation id="1561927818299383735">háttérvilágítás színe</translation>
@@ -252,7 +263,6 @@
 <translation id="2011174342667534258">SDK-verzió:</translation>
 <translation id="2016697457005847575">Problémamegoldási lépések kipróbálása</translation>
 <translation id="202500043506723828">EID</translation>
-<translation id="2041627599411887437">Válasszon egy témát, majd válassza ki az aláhúzott szavakat az AI-képek személyre szabásához.</translation>
 <translation id="2045814230297767491">evőeszközök</translation>
 <translation id="2047316797244836561">A képernyővédő megtekintéséhez csatlakozzon egy hálózathoz, majd töltse be újra az oldalt.</translation>
 <translation id="2056550196601855911">IPv4/IPv6</translation>
@@ -405,6 +415,7 @@
 <translation id="2787237339470862294">Ez a nyelv jelenleg nem támogatott</translation>
 <translation id="2787435249130282949">billentyűzet világosabb</translation>
 <translation id="2805756323405976993">Alkalmazások</translation>
+<translation id="2822702442014805146">Az összefoglaló és névlétrehozó modell letöltése folyamatban van</translation>
 <translation id="28232023175184696">Nem lehet csatlakozni az internethez. Kattintson az újrapróbálkozáshoz.</translation>
 <translation id="2855718259207180827">gyapjú</translation>
 <translation id="2859243502336719778">Kritikus frissítés</translation>
@@ -502,6 +513,7 @@
 <translation id="3373141842870501561">A Föld mozgása háttérkép</translation>
 <translation id="33736539805963175"><ph name="LETTERS_COLOR" /> háttér a következő betűvel: <ph name="LETTERS_LETTER" /></translation>
 <translation id="3383623117265110236">Exkluzív</translation>
+<translation id="3395147534045164351">Igazítási hely kapcsolója</translation>
 <translation id="3404249063913988450">Képernyővédő engedélyezése</translation>
 <translation id="3413935475507503304">A frissítéssel való folytatáshoz kattintson a Tovább lehetőségre.</translation>
 <translation id="3428551088151258685">a szabadban</translation>
@@ -651,6 +663,7 @@
 <translation id="4113067922640381334">Mostantól új <ph name="BEGIN_LINK_WALLPAPER_SUBPAGE" />háttérképekhez<ph name="END_LINK_WALLPAPER_SUBPAGE" /> férhet hozzá</translation>
 <translation id="4117637339509843559">Sötét mód</translation>
 <translation id="4126551873361000548">Vissza 10 másodpercet</translation>
+<translation id="4128271910628504223">Írja be a kívánt utasítást, például hogy „rajzolj egy ködös erdőt”</translation>
 <translation id="4130035430755296270">További elrendezési lehetőségekért mozgassa tovább az egérmutatót</translation>
 <translation id="4130750466177569591">Elfogadom</translation>
 <translation id="4131410914670010031">Fekete-fehér</translation>
@@ -824,6 +837,7 @@
 <translation id="4891842000192098784">Stressz</translation>
 <translation id="4897058166682006107">Bal fülhallgató akkumulátorszintje: <ph name="BATTERY_PERCENTAGE" />%.</translation>
 <translation id="4905998861748258752">Kapcsolja be a funkciót a képernyőkímélő-beállítások kiválasztásához</translation>
+<translation id="4910853326379896417">Sikerült az összefoglaló és névlétrehozó modell letöltése</translation>
 <translation id="4910858703033903787">APN-típusok</translation>
 <translation id="4917385247580444890">Erős</translation>
 <translation id="4917889632206600977">Leállt – Kifogyott a papír</translation>
@@ -858,8 +872,10 @@
 <translation id="5050042263972837708">Csoport neve</translation>
 <translation id="5051044138948155788">Ez az egy oldal van csak. A művelet végrehajtása esetén a beolvasás indítóképernyőjére jut.</translation>
 <translation id="5053233795640754917">Szüneteltetés</translation>
+<translation id="5056587122125565772">Kép létrehozása</translation>
 <translation id="5078711626843651677">A hangminták ideiglenesen az eszközön maradnak, amíg be nem fejeződik a beszélők megcímkézése. Ezt bármikor kikapcsolhatja a Beállításokban.</translation>
 <translation id="5078983345702708852">futurista</translation>
+<translation id="5085224064082122501">Nem sikerült letölteni az összefoglaló és névlétrehozó modellt. Próbálja újra, vagy indítsa újra a Chromebookot.</translation>
 <translation id="5087864757604726239">vissza</translation>
 <translation id="5088172560898466307">Szerver gépneve</translation>
 <translation id="5089810972385038852">Állam</translation>
@@ -1129,14 +1145,12 @@
 <translation id="6325525973963619867">Nem sikerült</translation>
 <translation id="6327262166342360252">Ezt a háttérképet AI hozta létre a következő szöveg alapján: „<ph name="PROMPT" />”.</translation>
 <translation id="6331191339300272798">Automatikus sötét téma</translation>
-<translation id="6335228876613776082">A modell letöltése befejeződött</translation>
 <translation id="6340526405444716530">Személyre szabás</translation>
 <translation id="6348252528297699679">A helyadatokat a Beállítások &gt; Adatvédelem és biztonság &gt; Adatvédelmi beállítások &gt; Helyhozzáférés menüpontban kapcsolhatja ki. <ph name="LINK_BEGIN" />További információ<ph name="LINK_END" />.</translation>
 <translation id="6348738456043757611">Felhasználónév és jelszó</translation>
 <translation id="6352210854422428614">másik bolygó</translation>
 <translation id="6359706544163531585">Világos téma kikapcsolása</translation>
 <translation id="6359919876285606596">Ez a művelet végleges, és nem vonható vissza.</translation>
-<translation id="6368342879959028556">Írhat egyéni utasítást a „Létrehozás AI használatával” lehetőséget választva. Másik lehetőségként kiválaszthatja az „AI-háttérképek” lehetőséget, majd választhat egy témát, és az aláhúzott szavak kiválasztásával személyre szabhatja az AI-háttérképet.</translation>
 <translation id="636850387210749493">Vállalat rögzítése</translation>
 <translation id="6369221585240879141">Nem lehet felvételnevet létrehozni ehhez az átiratnyelvhez</translation>
 <translation id="6373461326814131011">tavacska</translation>
@@ -1209,16 +1223,6 @@
 <translation id="6657240842932274095">Engedélyezi a rendszerszolgáltatásoknak a helyadatok használatát?</translation>
 <translation id="6657585470893396449">Jelszó</translation>
 <translation id="66621959568103627">korallrózsaszín</translation>
-<translation id="6667885109186363316"><ph name="SEA_PEN_INTRO_FIRST_PARAGRAPH" />
-          <ph name="LINE_BREAK" />
-          <ph name="LINE_BREAK" />
-          Az „Inspiráció” gombot választva egyedibb és változatosabb AI-képlehetőségeket kaphat.
-          <ph name="LINE_BREAK" />
-          <ph name="LINE_BREAK" />
-          Amikor AI-jal hoz létre tartalmat, a rendszer elküldi az utasítást a Google AI szervereinek a képek generálásához és a termék továbbfejlesztéséhez a <ph name="BEGIN_LINK_GOOGLE_PRIVACY_POLICY" />Google adatvédelmi irányelveinek<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" /> megfelelően.
-          <ph name="LINE_BREAK" />
-          <ph name="LINE_BREAK" />
-          A generatív AI egy kísérleti szolgáltatás, korai fejlesztési fázisban van, és jelenleg korlátozottan áll rendelkezésre.</translation>
 <translation id="6673898378497337661">billentyűzet fényerejének növelése</translation>
 <translation id="6692996468359469499">Információk kérése a kiválasztott elemmel kapcsolatban</translation>
 <translation id="6694534975463174713">zárolás</translation>
@@ -1274,6 +1278,7 @@
 <translation id="6930597342185648547">A háttérről</translation>
 <translation id="6939667434404433010">Keresés felvétel neve szerint</translation>
 <translation id="6939766318048400022">Kávézó</translation>
+<translation id="6942253772720771875">Írja le visszajelzését vagy problémáját</translation>
 <translation id="6943893908656559156">Távoli azonosító (nem kötelező)</translation>
 <translation id="6953137545147683679">aranyszínű</translation>
 <translation id="6957231940976260713">Szolgáltatás neve</translation>
@@ -1295,6 +1300,7 @@
 <translation id="7040230719604914234">Szolgáltató</translation>
 <translation id="7040729769968826896">Beszélő azonosításának engedélyezése</translation>
 <translation id="7041549558901442110">Az eszköz nincs csatlakoztatva.</translation>
+<translation id="704183341263526038">Jupiter</translation>
 <translation id="7046522406494308071">Visszaállítja az összes billentyűparancsot az alapértelmezett értékekre?</translation>
 <translation id="7049916119678019302">Töltse le az átírási modellt a Beállításokban.</translation>
 <translation id="7058278511608979688">Befejezés és mentés</translation>
@@ -1427,6 +1433,7 @@ Ha szeretné használni az átiratokat, töltse le az átírási modellt (legfel
 <translation id="7569444139234840525"><ph name="QUERY_TEXT" /> · /<ph name="PHONETICS" />/</translation>
 <translation id="7570674786725311828">USB-érintőképernyő</translation>
 <translation id="757747079855995705">kő</translation>
+<translation id="7584853321964440104">Nem lehet letölteni. Próbálja újra, vagy indítsa újra a Chromebookot.</translation>
 <translation id="7590883480672980941">Beviteli beállítások</translation>
 <translation id="7595982850646262331"><ph name="TIME_VALUE" /> van hátra</translation>
 <translation id="7600430297804876776">A(z) <ph name="MANAGER" /> adminisztrátora meghatározta, hogy mikor használható ez a <ph name="DEVICE_TYPE" />.</translation>
@@ -1557,6 +1564,16 @@ Ha szeretné használni az átiratokat, töltse le az átírási modellt (legfel
 <translation id="8179976553408161302">Enter</translation>
 <translation id="8183975772394450380">tengerpart</translation>
 <translation id="819278132617411009">A Google AI használatával hatékonyabb lehet</translation>
+<translation id="82003371436638355">Írhat egyéni utasítást a „Saját létrehozása” lehetőséget választva. Másik lehetőségként kiválaszthatja a „Téma kiválasztása” elemet, majd kijelölhet egy témát, és az aláhúzott szavak kiválasztásával személyre szabhatja az AI-háttérképet.
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          Az „Inspiráció” gombot választva egyedibb és változatosabb AI-képlehetőségeket kaphat.
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          Amikor saját háttérképet hoz létre, a rendszer elküldi az utasítást a Google szervereinek a képek generálásához és a termék továbbfejlesztéséhez a <ph name="BEGIN_LINK_GOOGLE_PRIVACY_POLICY" />Google Általános Szerződési Feltételeinek és adatvédelmi irányelveinek<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" /> megfelelően. Ne adjon meg személyes, kényes vagy bizalmas adatokat.
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          A generatív AI hibázhat (többek között személyekkel kapcsolatban is), ezért ellenőrizze a válaszait. <ph name="BEGIN_LINK_CREATE_YOUR_OWN_WALLPAPER" />További információ<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" /></translation>
 <translation id="8200772114523450471">Folytatás</translation>
 <translation id="8206859287963243715">Mobil</translation>
 <translation id="8208861521865154048">Előnyök</translation>
@@ -1578,6 +1595,7 @@ Ha szeretné használni az átiratokat, töltse le az átírási modellt (legfel
 <translation id="8312330582793120272">médiafájl lejátszása</translation>
 <translation id="8318753676953949627">Nincsenek képek</translation>
 <translation id="8320910311642849813">erdő</translation>
+<translation id="8322464149031882595">Kattintson a továbblépéshez</translation>
 <translation id="8329018942023753850">számológép alkalmazás</translation>
 <translation id="8336739000755212683">Eszközfiókhoz tartozó kép módosítása</translation>
 <translation id="8339024191194156249">További információ az automatikus indításról</translation>
@@ -1598,6 +1616,7 @@ Ha szeretné használni az átiratokat, töltse le az átírási modellt (legfel
 <translation id="8395584934117017006">Ezt a(z) <ph name="DEVICE_TYPE" /> eszközt a vállalat felügyeli</translation>
 <translation id="8398927464629426868">Az eszköz jelenlegi töltésének vagy merülésének sebessége</translation>
 <translation id="8403988360557588704">Festmény a következőről: <ph name="ART_FEATURE" /> <ph name="ART_MOVEMENT" /> stílusban</translation>
+<translation id="8409219750150841791">Generált összegzés:</translation>
 <translation id="8410244574650205435">Automatikusan észlelve</translation>
 <translation id="8420955526972171689">Tesztek futtatása és problémamegoldás hardveres problémák esetén</translation>
 <translation id="8422748173858722634">IMEI</translation>
@@ -1642,6 +1661,7 @@ Ha szeretné használni az átiratokat, töltse le az átírási modellt (legfel
 <translation id="8626489604350149811">További műveletek a következőhöz: <ph name="APN_NAME" /></translation>
 <translation id="86356131183441916">Világoslila</translation>
 <translation id="8647595191512746911">Hangátirat</translation>
+<translation id="8648578954147795914">Generált nevek:</translation>
 <translation id="8650852232143958317">Vigye magával a Gmailt és a Google Drive-fájljait</translation>
 <translation id="8651481478098336970">némítás</translation>
 <translation id="8655295600908251630">Csatorna</translation>
@@ -1670,7 +1690,6 @@ Ha szeretné használni az átiratokat, töltse le az átírási modellt (legfel
 <translation id="8764414543112028321">WireGuard</translation>
 <translation id="87646919272181953">Google Fotók-album</translation>
 <translation id="8775713578693478175">Modem APN</translation>
-<translation id="877735394245039557">A modell letöltése folyamatban van</translation>
 <translation id="877985182522063539">A4</translation>
 <translation id="879568662008399081">Előfordulhat, hogy a hálózat hitelesítési portállal rendelkezik</translation>
 <translation id="8797082062139985406">Név létrehozása a Google AI használatával</translation>
@@ -1723,6 +1742,7 @@ Ha szeretné használni az átiratokat, töltse le az átírási modellt (legfel
 <translation id="8961025972867871808">pingvinek</translation>
 <translation id="8968751544471797276">Töltési sebesség</translation>
 <translation id="8970109610781093811">Futtatás újra</translation>
+<translation id="8972061581514441296">Kattintson a visszalépéshez</translation>
 <translation id="8983038754672563810">HSPA</translation>
 <translation id="8987565828374052507">{NUMBER_OF_PAGES,plural, =0{Keresés}=1{Keresés {NUMBER_OF_PAGES} oldalon}other{Keresés {NUMBER_OF_PAGES} oldalon}}</translation>
 <translation id="89945434909472341">falu</translation>
@@ -1784,6 +1804,7 @@ Ha szeretné használni az átiratokat, töltse le az átírási modellt (legfel
 <translation id="9218016617214286986">Ismert APN-ek megjelenítése</translation>
 <translation id="932327136139879170">Főoldal</translation>
 <translation id="939519157834106403">SSID</translation>
+<translation id="940663759301549538">Győződjön meg arról, hogy a mikrofon csatlakoztatva van, vagy próbálja meg újraindítani a Chromebookot</translation>
 <translation id="945522503751344254">Visszajelzés küldése</translation>
 <translation id="950520315903467048">Nincs hozzárendelve billentyű a következőhöz: <ph name="DIRECTION" />. <ph name="ASSIGN_INSTRUCTION" />.</translation>
 <translation id="951780398843003443">Hasonlítsa össze a felvételben elhangzó beszédhangokat, hogy az átiratban látható legyen, az egyes beszélők mit és mikor mondtak</translation>

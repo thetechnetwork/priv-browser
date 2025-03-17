@@ -8,6 +8,7 @@
 <translation id="1010200102790553230">Wczytaj stronę później</translation>
 <translation id="1010225406377140704">Skontaktuj się z nadawcą, aby poprosić o nowy link</translation>
 <translation id="1011206368273183593">Przygotowuję pliki</translation>
+<translation id="1012264210825687872">Po sprawdzeniu zamówienia musisz zalogować się na konto <ph name="BNPL_ISSUER_NAME" /> lub je utworzyć. To konto zostanie automatycznie połączone z Google Pay.</translation>
 <translation id="1014509239502131234">Cofam wynik</translation>
 <translation id="1015730422737071372">Podaj dodatkowe informacje</translation>
 <translation id="1019413721762100891">wyłączono</translation>
@@ -137,6 +138,7 @@ Jeśli się nie zgodzisz, zostaną one zablokowane ze względu na Twoje ustawien
 <translation id="1230244617745022071"><ph name="SOURCE" /> (wykryty automatycznie)</translation>
 <translation id="1232569758102978740">Bez tytułu</translation>
 <translation id="1236081509407217141">Zezwalać na VR?</translation>
+<translation id="1236689197410206751">AfterPay</translation>
 <translation id="1240347957665416060">Nazwa urządzenia</translation>
 <translation id="124116460088058876">Więcej języków</translation>
 <translation id="1243027604378859286">Autor:</translation>
@@ -251,6 +253,7 @@ Jeśli się nie zgodzisz, zostaną one zablokowane ze względu na Twoje ustawien
 <translation id="1419305130220238697">Przycisk Zarządzaj pobranymi plikami w Chrome; aktywuj, aby zarządzać pobranymi plikami w Chrome</translation>
 <translation id="1420345875188552368">Do tej płatności może zostać użyta zapisana forma płatności automatycznej. Aby wyłączyć e-portfele w Chrome, otwórz <ph name="BEGIN_LINK1" />ustawienia płatności<ph name="END_LINK1" /></translation>
 <translation id="1420920093772172268"><ph name="TURN_ON_BLUETOOTH_LINK" />, by umożliwić sparowanie</translation>
+<translation id="1421484961346698724">Usunięte konto</translation>
 <translation id="14222610277930434">Często odwiedzasz</translation>
 <translation id="1422930527989633628">Może prosić o zgodę na wykrywanie urządzeń Bluetooth w pobliżu</translation>
 <translation id="1426410128494586442">Tak</translation>
@@ -626,6 +629,7 @@ Jeśli się nie zgodzisz, zostaną one zablokowane ze względu na Twoje ustawien
 <translation id="2082238445998314030">Wynik <ph name="RESULT_NUMBER" /> z <ph name="TOTAL_RESULTS" /></translation>
 <translation id="2083256696566019397">Zezwalaj przy każdej wizycie</translation>
 <translation id="2085876078937250610">Zapisz…</translation>
+<translation id="2090451897496479509">Aby uzyskać więcej informacji, skontaktuj się z usługodawcą</translation>
 <translation id="2091887806945687916">Dźwięk</translation>
 <translation id="2093982008204312032">Google Chrome próbuje wyłączyć używanie Windows Hello do wypełniania haseł.</translation>
 <translation id="2094505752054353250">Niewłaściwa domena</translation>
@@ -660,6 +664,7 @@ Jeśli się nie zgodzisz, zostaną one zablokowane ze względu na Twoje ustawien
 <translation id="2145193671493396738">Wiadomości gospodarcze</translation>
 <translation id="214556005048008348">Anuluj płatność</translation>
 <translation id="2147117373852943630">Instrumenty muzyczne</translation>
+<translation id="2147254250314124496"><ph name="EMBEDDED_URL" /> chce używać zapisanych informacji o Tobie</translation>
 <translation id="2148613324460538318">Dodaj kartę</translation>
 <translation id="2148716181193084225">Dzisiaj</translation>
 <translation id="2149968176347646218">Połączenie nie jest bezpieczne</translation>
@@ -691,6 +696,7 @@ Jeśli się nie zgodzisz, zostaną one zablokowane ze względu na Twoje ustawien
 <translation id="2187317261103489799">Wykrywaj (domyślnie)</translation>
 <translation id="2188375229972301266">Wiele otworów na dole</translation>
 <translation id="2194856509914051091">Istotne kwestie</translation>
+<translation id="2198071643181968308"><ph name="BNPL_ISSUER_NAME" /> – więcej informacji</translation>
 <translation id="2200678913752027654">Przycisk Nie lubię. Naciśnij Enter, aby otworzyć formularz, w którym możesz szczegółowo wyjaśnić, dlaczego ta sugestia Ci się nie podoba</translation>
 <translation id="2202627062836089804">z tyłu karty</translation>
 <translation id="2204482073374652408">Ukończono aktualizację</translation>
@@ -837,6 +843,7 @@ Jeśli się nie zgodzisz, zostaną one zablokowane ze względu na Twoje ustawien
 <translation id="2451607499823206582">Śledzenie</translation>
 <translation id="2452098632681057184">Ekologia i środowisko</translation>
 <translation id="2452837234288608067">Nie udało się pomóc. Spróbuj ponownie.</translation>
+<translation id="2453045048779611513">Twoja organizacja nie pozwala na synchronizację niektórych typów danych</translation>
 <translation id="2456755709261364512">Poziom naładowania baterii musi przekraczać <ph name="REQUIRED_BATTERY_PRECENT" />%</translation>
 <translation id="2461385121573678775">Chrome Enterprise Core to centralne narzędzie do konfigurowania zasad przeglądarki w chmurze</translation>
 <translation id="2461822463642141190">Aktualnie</translation>
@@ -1086,6 +1093,7 @@ Jeśli się nie zgodzisz, zostaną one zablokowane ze względu na Twoje ustawien
 <translation id="2942492342931589800">Zwykły</translation>
 <translation id="2942515540157583425">Praca w IT i działach technicznych</translation>
 <translation id="2943895734390379394">Czas przesłania:</translation>
+<translation id="2947281105969315778">Aby udostępniać grupy kart lub do nich dołączać, musisz mieć możliwość logowania się w Chrome</translation>
 <translation id="2948083400971632585">Możesz wyłączyć dowolne serwery proxy skonfigurowane dla połączenia na stronie ustawień.</translation>
 <translation id="2949183777371959169">Zignorowano, ponieważ komputer nie jest zarejestrowany w zarządzaniu przeglądarką Chrome w chmurze.</translation>
 <translation id="2951588413176968965">Mój zestaw tac odbiorczych</translation>
@@ -1304,6 +1312,7 @@ Uruchamianie aplikacji może potrwać dłużej niż zwykle.</translation>
 <translation id="33073482541490531">Użyte właśnie hasło znaleźliśmy jako ujawnione w wyniku naruszenia bezpieczeństwa danych. Menedżer haseł zaleca, aby jak najszybciej je zmienić.</translation>
 <translation id="3307649904964670439">Przycisk Dostosuj Chrome; aktywuj, aby dostosować wygląd przeglądarki</translation>
 <translation id="3308006649705061278">Jednostka organizacyjna (OU)</translation>
+<translation id="3317077846337994567">Płatność ratalna jest obecnie niedostępna. Spróbuj ponownie później.</translation>
 <translation id="3318016344440038475">Komedie telewizyjne</translation>
 <translation id="3324687287337751929">4 x 6 cali</translation>
 <translation id="3324983252691184275">Karmazynowy</translation>
@@ -1432,6 +1441,7 @@ Uruchamianie aplikacji może potrwać dłużej niż zwykle.</translation>
 <translation id="3536227077203206203">Przyznano jednorazowo</translation>
 <translation id="3537165859691846083">Letter Plus</translation>
 <translation id="353816159217417898">Ekran (z podziałem na strony)</translation>
+<translation id="3541016556608204104">Więcej informacji o oprogramowaniu sprzęgającym Chrome Enterprise</translation>
 <translation id="3542628208405253498">Obraz na karcie</translation>
 <translation id="3542768452570884558">Otwórz link w nowym oknie</translation>
 <translation id="3543935938072367282">Płać szybciej dzięki autouzupełnianiu</translation>
@@ -1796,6 +1806,7 @@ Uruchamianie aplikacji może potrwać dłużej niż zwykle.</translation>
 <translation id="415440494507469262">Dodaj kartę do tabeli porównawczej</translation>
 <translation id="4159784952369912983">Purpurowy</translation>
 <translation id="4165422751765527461">Otwiera artykuł w Centrum pomocy w nowej karcie</translation>
+<translation id="4165584779486830267">Teraz możesz płacić w ratach za pomocą Affirm lub Zip.</translation>
 <translation id="4165986682804962316">Ustawienia witryn</translation>
 <translation id="4169535189173047238">Nie zezwalaj</translation>
 <translation id="4171400957073367226">Nieprawidłowy podpis weryfikujący</translation>
@@ -1946,6 +1957,7 @@ Uruchamianie aplikacji może potrwać dłużej niż zwykle.</translation>
 <translation id="4378154925671717803">Telefon</translation>
 <translation id="4384395682990721132">A4x3</translation>
 <translation id="4387692837058041921">Przesyłanie pliku do Microsoft OneDrive zostało wstrzymane</translation>
+<translation id="4389931020843542579">Wczytuję grupę kart</translation>
 <translation id="4390472908992056574">Krawędź</translation>
 <translation id="4395550503472021297">Ta zasada kontroluje działanie domyślne tych zasad: <ph name="POLICIES" /></translation>
 <translation id="4397978002248035985">Otwiera wyskakujące okienko umożliwiające weryfikację w witrynie banku</translation>
@@ -2315,6 +2327,7 @@ Uruchamianie aplikacji może potrwać dłużej niż zwykle.</translation>
 <translation id="5097501891273180634">A2</translation>
 <translation id="5106405387002409393">Chrome potrzebuje dostępu do uprawnienia <ph name="PERMISSION" /> na Twoim urządzeniu</translation>
 <translation id="510644072453496781">Karton (koniec)</translation>
+<translation id="5106648964679263509">Karta wirtualna dla: <ph name="BNPL_ISSUER_NAME" /> została wypełniona</translation>
 <translation id="5108881358339761672">Strona nie jest bezpieczna</translation>
 <translation id="5109892411553231226">Zarządzaj formami płatności</translation>
 <translation id="5112422516732747637">A5</translation>
@@ -2510,6 +2523,7 @@ Uruchamianie aplikacji może potrwać dłużej niż zwykle.</translation>
             <ph name="LIST_ITEM" />informacji podanych w formularzach.
           <ph name="END_LIST" /></translation>
 <translation id="5443468954631487277">Kolejność odwrotna, strona do drukowania skierowana w górę</translation>
+<translation id="5445340838622821110">Gdy płacisz w ratach, wypełniany jest jednorazowy numer karty wirtualnej. Ten numer służy tylko do tego zakupu. <ph name="IDS_AUTOFILL_BNPL_FILLED_CARD_INFORMATION_BUBBLE_LEARN_MORE_LINK_LABEL" /></translation>
 <translation id="5447235695608032700">Zezwól witrynie <ph name="SITE" /> na korzystanie z zapisanych informacji o Tobie</translation>
 <translation id="5452270690849572955">Nie można znaleźć tej strony na <ph name="HOST_NAME" /></translation>
 <translation id="5452923259299906094">Płać przez e-portfel i Pix</translation>
@@ -2757,6 +2771,7 @@ Uruchamianie aplikacji może potrwać dłużej niż zwykle.</translation>
 <translation id="5910140988253729859">Cofnij autouzupełnianie</translation>
 <translation id="5911020115933784199">Kalendarze imprez</translation>
 <translation id="5911110632211230665">Otwieranie zostało zablokowane</translation>
+<translation id="5914465277418006379"><ph name="MEMBER_FIRST_NAME" /> dodał(a) tę kartę</translation>
 <translation id="5915189366813702112">Elastyczne zarządzanie pracą</translation>
 <translation id="59174027418879706">Włączony</translation>
 <translation id="5918373444239520146">Gadżety i przenośna elektronika</translation>
@@ -2792,7 +2807,7 @@ Uruchamianie aplikacji może potrwać dłużej niż zwykle.</translation>
 <translation id="5967592137238574583">Edytuj dane kontaktowe</translation>
 <translation id="5967867314010545767">Usuń z historii</translation>
 <translation id="5968022600320704045">Brak wyników wyszukiwania</translation>
-<translation id="5969199813874624822">Zapisz i obserwuj cenę</translation>
+<translation id="5969199813874624822">Zapisz i śledź cenę</translation>
 <translation id="5973514677932942122"><ph name="EXPIRATION_DATE" /> | <ph name="SECURITY_CODE" /></translation>
 <translation id="5974052231147553524">Rolka 6</translation>
 <translation id="5974745851230707809">Opcje płatności w ratach</translation>
@@ -2837,6 +2852,7 @@ Uruchamianie aplikacji może potrwać dłużej niż zwykle.</translation>
 <translation id="604124094241169006">Automatyczne</translation>
 <translation id="6041777658117377052">Temperatura w komorze</translation>
 <translation id="6042308850641462728">Więcej</translation>
+<translation id="6043357981274314628">Gotowe.</translation>
 <translation id="6044573915096792553">Rozmiar 12</translation>
 <translation id="6045164183059402045">Szablon impozycji</translation>
 <translation id="6047927260846328439">Te treści mogą próbować podstępem nakłonić Cię do zainstalowania oprogramowania lub ujawnienia danych osobowych. <ph name="BEGIN_LINK" />Wyświetl mimo to<ph name="END_LINK" /></translation>
@@ -2860,7 +2876,6 @@ Uruchamianie aplikacji może potrwać dłużej niż zwykle.</translation>
 <translation id="6062937464449575061">Wyłącz śledzenie ceny</translation>
 <translation id="6063415549109819824">Finansowanie zakupu domu lub mieszkania</translation>
 <translation id="6070432475334343308">Co najmniej 1 plik nie został przesłany do folderu <ph name="FOLDER_NAME" /> w usłudze <ph name="CLOUD_PROVIDER" /></translation>
-<translation id="6080696365213338172">Masz dostęp do treści dzięki certyfikatowi dostarczonemu przez administratora. Administrator może odczytać dane, jakie udostępnisz w <ph name="DOMAIN" />.</translation>
 <translation id="6085149458302186532">Etykiety (kolorowe)</translation>
 <translation id="6087312102907839798">Podobne wyszukiwania</translation>
 <translation id="6089505343295765444">Karty usunięte z historii w Chrome nadal będą widoczne w tabelach porównawczych</translation>
@@ -3002,11 +3017,11 @@ Uruchamianie aplikacji może potrwać dłużej niż zwykle.</translation>
 <translation id="6322182122604171028">Nie udało się użyć Windows Hello</translation>
 <translation id="6326947323444967009">Ustaw Chrome jako domyślną przeglądarkę systemową w ustawieniach iOS</translation>
 <translation id="6328639280570009161">Wyłącz przewidywanie działań sieciowych</translation>
-<translation id="6328784461820205019">„Połączenie nie jest prywatne” lub „&lt;span class="error-code"&gt;NET::ERR_CERT_AUTHORITY_INVALID&lt;/span&gt;” lub „&lt;span class="error-code"&gt;ERR_CERT_COMMON_NAME_INVALID&lt;/span&gt;” lub „&lt;span class="error-code"&gt;NET::ERR_CERT_WEAK_SIGNATURE_ALGORITHM&lt;/span&gt;” lub „&lt;span class="error-code"&gt;ERR_CERT_SYMANTEC_LEGACY&lt;/span&gt;” lub „Błąd certyfikatu SSL”</translation>
 <translation id="6335029926534404762">Obuwie sportowe</translation>
 <translation id="6337133576188860026">Zwolni się mniej niż <ph name="SIZE" />. Podczas następnej wizyty niektóre strony mogą ładować się wolniej.</translation>
 <translation id="6337534724793800597">Filtruj zasady według nazwy</translation>
 <translation id="633770708279464947">Wartość <ph name="SECURE_DNS_SALT" /> jest nieprawidłowa i nie zostanie użyta.</translation>
+<translation id="6338645927051849741">Hasło • Menedżer haseł Google</translation>
 <translation id="6340739886198108203">Zgodnie z zasadą administratora nie zaleca się robienia zrzutów ekranu, gdy są widoczne treści poufne:</translation>
 <translation id="6341434961864773665">{0,plural, =1{Zgodnie z zasadą administratora nie zaleca się przenoszenia tego pliku, jeśli miejscem docelowym jest <ph name="DESTINATION_NAME" />}few{Zgodnie z zasadą administratora nie zaleca się przenoszenia tych plików, jeśli miejscem docelowym jest <ph name="DESTINATION_NAME" />}many{Zgodnie z zasadą administratora nie zaleca się przenoszenia tych plików, jeśli miejscem docelowym jest <ph name="DESTINATION_NAME" />}other{Zgodnie z zasadą administratora nie zaleca się przenoszenia tych plików, jeśli miejscem docelowym jest <ph name="DESTINATION_NAME" />}}</translation>
 <translation id="6342069812937806050">Przed momentem</translation>
@@ -3016,6 +3031,7 @@ Uruchamianie aplikacji może potrwać dłużej niż zwykle.</translation>
 <translation id="6351658970066645919">Usuń dane przeglądania</translation>
 <translation id="6353505687280762741">{COUNT,plural, =0{Brak}=1{1 hasło (do <ph name="DOMAIN_LIST" />, zsynchronizowano)}=2{2 hasła (do <ph name="DOMAIN_LIST" />, zsynchronizowano)}few{# hasła (do <ph name="DOMAIN_LIST" />, zsynchronizowano)}many{# haseł (do <ph name="DOMAIN_LIST" />, zsynchronizowano)}other{# hasła (do <ph name="DOMAIN_LIST" />, zsynchronizowano)}}</translation>
 <translation id="6355392890578844978">Ta przeglądarka nie jest zarządzana przez firmę ani inną organizację. Aktywność na tym urządzeniu może być zarządzana poza Chromium. <ph name="BEGIN_LINK" />Więcej informacji<ph name="END_LINK" /></translation>
+<translation id="6357546827188504216">Grupy kart „<ph name="GROUP_TITLE_1" />” i „<ph name="GROUP_TITLE_2" />” nie są już dostępne</translation>
 <translation id="6358088212770985041">edytować formy płatności</translation>
 <translation id="6358450015545214790">Co to oznacza?</translation>
 <translation id="6360213755783740931">Więcej informacji o ochronie przed złośliwym oprogramowaniem</translation>
@@ -3110,7 +3126,7 @@ Uruchamianie aplikacji może potrwać dłużej niż zwykle.</translation>
 <translation id="6490119919181773296">Niemowlęta i małe dzieci</translation>
 <translation id="6493924760403974580">Ta aplikacja obsługuje tylko ten rozmiar.</translation>
 <translation id="6494750904506170417">pop-upy i przekierowania</translation>
-<translation id="6495664197699704593">To hasło zostało zapisane tylko na tym urządzeniu. Aby móc go używać na innych urządzeniach, <ph name="GOOGLE_PASSWORD_MANAGER" />.</translation>
+<translation id="6495664197699704593">To hasło zostało zapisane tylko na tym urządzeniu. Aby używać go na innych urządzeniach, <ph name="GOOGLE_PASSWORD_MANAGER" />.</translation>
 <translation id="6499038740797743453">Zresetować hasło?</translation>
 <translation id="6502510275417601303">Panel alertu o nowych ustawieniach płatności jest zamknięty</translation>
 <translation id="6502991525169604759">Bez Twoich zmian</translation>
@@ -3329,6 +3345,7 @@ Uruchamianie aplikacji może potrwać dłużej niż zwykle.</translation>
 <translation id="6917795328362592458">Użyte właśnie hasło znaleźliśmy jako ujawnione w wyniku naruszenia bezpieczeństwa danych. Menedżer haseł zaleca sprawdzenie zapisanych haseł – pozwoli to zabezpieczyć Twoje konta.</translation>
 <translation id="6917873303492266709">Aby udostępniać grupy kart, dołączać do nich i używać ich do współpracy, otwórz ustawienia i włącz opcję Zezwalaj na logowanie się w Chrome</translation>
 <translation id="6921197121276419421">Instalowanie aplikacji internetowych jest dozwolone</translation>
+<translation id="69238565902785824">Dzięki połączeniu konta możesz płacić szybciej przez <ph name="BNPL_ISSUER_NAME" />, ale możesz je odłączyć na stronie <ph name="IDS_AUTOFILL_BNPL_TOS_LINK_TEXT_WALLET_LINK_TEXT" /></translation>
 <translation id="6924013822850225188">Zdecyduj, czy chcesz widzieć korzyści z karty w momencie płatności (obowiązują warunki banku)</translation>
 <translation id="6925267999184670015">B+ (Ameryka Północna)</translation>
 <translation id="6926216138694948720">Zdobienie ciała</translation>
@@ -3394,6 +3411,7 @@ Uruchamianie aplikacji może potrwać dłużej niż zwykle.</translation>
 <translation id="701757816833614688">Edukacja w zakresie sztuk wizualnych i wzornictwa</translation>
 <translation id="702275896380648118">Witryna określa Twoje zainteresowania, a potem sugeruje reklamy innym witrynom. Witryna wykorzystuje też gromadzone przez Chrome informacje o interesujących Cię tematach, aby wyświetlać trafniejsze reklamy.</translation>
 <translation id="7023162328967545559">Ostrzeżenie administratora</translation>
+<translation id="7023765275461720661">Połączyć konto i zapłacić za pomocą <ph name="BNPL_ISSUER_NAME" />?</translation>
 <translation id="7029809446516969842">Hasła</translation>
 <translation id="7030164307377592766">zmienić ustawienia wypełniania form płatności</translation>
 <translation id="7031646650991750659">Zainstalowane przez Ciebie aplikacje z Google Play</translation>
@@ -3616,6 +3634,7 @@ Dodatkowe informacje:
 <translation id="741204030948306876">Tak</translation>
 <translation id="7416351320495623771">Zarządzaj hasłami…</translation>
 <translation id="7416898721136759658">Dotacje, stypendia i wsparcie finansowe</translation>
+<translation id="741772962178517671">Affirm</translation>
 <translation id="7418620734632363981">Programowanie</translation>
 <translation id="7419091773564635591">Komputery i elektronika</translation>
 <translation id="7419106976560586862">Ścieżka profilu</translation>
@@ -3662,6 +3681,7 @@ Dodatkowe informacje:
 <translation id="7485085230273446323">Biznes i przemysł</translation>
 <translation id="7485870689360869515">Nie znaleziono danych.</translation>
 <translation id="7486880426035242089">w usłudze OneDrive</translation>
+<translation id="7489255442002627311"><ph name="BNPL_ISSUER_NAME" /> sprawdzi, czy spełniasz wymagania (nie wpłynie to na Twój scoring kredytowy). Jeśli prośba zostanie zatwierdzona, <ph name="BNPL_ISSUER_NAME" /> udostępni Ci dostępne plany spłaty, z których możesz wybrać jeden, aby sfinalizować zakup.</translation>
 <translation id="7489392576326061356">Szampony i odżywki</translation>
 <translation id="7495528107193238112">Ta zawartość jest zablokowana. Aby rozwiązać problem, skontaktuj się z właścicielem witryny.</translation>
 <translation id="749865518782565832">Hydraulika</translation>
@@ -3718,6 +3738,7 @@ Dodatkowe informacje:
 <translation id="7569983096843329377">Czarny</translation>
 <translation id="7574998639136359461">Sprzęt do sportów zimowych</translation>
 <translation id="7575207903026901870">Usuń przycisk sugestii. Naciśnij Enter, by usunąć tę sugestię</translation>
+<translation id="7575800019233204241">„Połączenie nie jest prywatne” lub „&lt;span class="error-code"&gt;NET::ERR_CERT_AUTHORITY_INVALID&lt;/span&gt;” lub „&lt;span class="error-code"&gt;ERR_CERT_COMMON_NAME_INVALID&lt;/span&gt;” lub „&lt;span class="error-code"&gt;NET::ERR_CERT_WEAK_SIGNATURE_ALGORITHM&lt;/span&gt;” lub „Błąd certyfikatu SSL”</translation>
 <translation id="7575887283389198269">Telefony komórkowe</translation>
 <translation id="7578104083680115302">Używaj swoich kart zapisanych w Google, by łatwiej dokonywać płatności na stronach i w aplikacjach na różnych urządzeniach.</translation>
 <translation id="7579442726219254162">Nieznana zmienna „<ph name="VARIABLE" />” w zarządzanej konfiguracji „<ph name="APPLICATION_ID" />”.</translation>
@@ -3904,6 +3925,7 @@ Dodatkowe informacje:
 <translation id="791107458486222637">Wynik ponownego wykonania</translation>
 <translation id="791551905239004656">Rysowanie i kolorowanie</translation>
 <translation id="7916162853251942238">Podstawa fleksograficzna</translation>
+<translation id="791698251820376781">Twoja organizacja nie zezwala na logowanie się</translation>
 <translation id="7926503317156566022">Branża lotnicza</translation>
 <translation id="793209273132572360">Zaktualizować adres?</translation>
 <translation id="7932579305932748336">Powłoka</translation>
@@ -3990,7 +4012,7 @@ Dodatkowe informacje:
 <translation id="8057711352706143257">Oprogramowanie „<ph name="SOFTWARE_NAME" />” nie jest prawidłowo skonfigurowane. Odinstalowanie oprogramowania „<ph name="SOFTWARE_NAME" />” zwykle rozwiązuje problem. <ph name="FURTHER_EXPLANATION" /></translation>
 <translation id="8058603697124206642">Niewymagana</translation>
 <translation id="8061691770921837575">Makijaż i kosmetyki</translation>
-<translation id="8063875539456488183">Zapisz i obserwuj cenę</translation>
+<translation id="8063875539456488183">Zapisz i śledź cenę</translation>
 <translation id="8066225060526005217">Zarządzanie przez ustawienia plików cookie</translation>
 <translation id="8067872629359326442">Przed chwilą wpisano hasło na stronie wprowadzającej w błąd. Chromium może pomóc. Aby zmienić hasło i powiadomić Google, że Twoje konto może być zagrożone, kliknij Chroń konto.</translation>
 <translation id="8070439594494267500">Ikona aplikacji</translation>
@@ -4227,7 +4249,6 @@ Dodatkowe informacje:
 <translation id="8473626140772740486">300 x 450 mm</translation>
 <translation id="8473863474539038330">Adresy i ustawienia</translation>
 <translation id="8474910779563686872">Pokaż informacje dla deweloperów</translation>
-<translation id="8476959635632921417">Aby zapisać ten adres i korzystać z niego na wszystkich swoich urządzeniach, potwierdź swoją tożsamość</translation>
 <translation id="8479754468255770962">Zszywka w lewym dolnym rogu</translation>
 <translation id="8483229036294884935">Ten adres zostanie usunięty z Twojego konta Google (<ph name="ACCOUNT" />)</translation>
 <translation id="8488350697529856933">Dotyczy</translation>
@@ -4610,11 +4631,13 @@ Dodatkowe informacje:
 <translation id="9183425211371246419">Serwer <ph name="HOST_NAME" /> używa nieobsługiwanego protokołu.</translation>
 <translation id="918454845714257218">Sprawdź kod <ph name="SIDE_OF_CARD" /> i spróbuj ponownie</translation>
 <translation id="9186203289258525843">Przycisk Ustaw Chrome jako przeglądarkę domyślną; aktywuj, aby ustawić Chrome jako domyślną przeglądarkę w systemie</translation>
+<translation id="9189468832660648522"><ph name="MEMBER_FIRST_NAME" /> zmienił(a) tę kartę</translation>
 <translation id="9189789270972826888">Jeśli dane karty nie zostały uzupełnione, kliknij je poniżej, aby je skopiować i wkleić. <ph name="IDS_AUTOFILL_FILLED_CARD_INFORMATION_BUBBLE_LEARN_MORE_LINK_LABEL" /></translation>
 <translation id="9190557999028587593">Tematy starsze niż 4 tygodnie są automatycznie usuwane</translation>
 <translation id="9191834167571392248">Otwór w lewym dolnym rogu</translation>
 <translation id="9192361865877479444">Metal (matowy)</translation>
 <translation id="9192947025498305328">Kosmetyki naturalne</translation>
+<translation id="9195969368671142407">Gdy Twoja organizacja ogranicza zapisywanie danych na koncie Google, nie możesz udostępniać grup kart ani do nich dołączać</translation>
 <translation id="9199905725844810519">Drukowanie jest zablokowane</translation>
 <translation id="9201904868909900493">Otwieram ankietę…</translation>
 <translation id="9204089334327209740">Po zakończeniu przesyłania możesz zmodyfikować pliki w usłudze <ph name="CLOUD_PROVIDER" />. Dane z pamięci lokalnej, w tym wszystkie pliki w koszu, zostaną automatycznie usunięte.</translation>

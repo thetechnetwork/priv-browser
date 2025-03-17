@@ -70,6 +70,11 @@ BASE_FEATURE(kCertVerificationNetworkTime,
              base::FEATURE_DISABLED_BY_DEFAULT);
 #endif  // !BUILDFLAG(IS_CHROMEOS)
 
+// Killswitch that guards clearing all user data in the ProfileImpl destructor.
+BASE_FEATURE(kClearUserDataUponProfileDestruction,
+             "ClearUserDataUponProfileDestruction",
+             base::FEATURE_ENABLED_BY_DEFAULT);
+
 // Uses the browser theme's color mode for web contents.
 // The theme can have three modes: light, dark, and device.
 // When the mode is light or dark, the browser theme's color mode will be
@@ -246,12 +251,6 @@ BASE_FEATURE(kUseFreedesktopSecretKeyProviderForEncryption,
              "UseFreedesktopSecretKeyProviderForEncryption",
              base::FEATURE_DISABLED_BY_DEFAULT);
 #endif  // BUILDFLAG(IS_LINUX)
-
-// This flag controls whether to trigger prerendering when the default search
-// engine suggests to prerender a search result.
-BASE_FEATURE(kSupportSearchSuggestionForPrerender2,
-             "SupportSearchSuggestionForPrerender2",
-             base::FEATURE_ENABLED_BY_DEFAULT);
 
 // Enables migration of the network context data from `unsandboxed_data_path` to
 // `data_path`. See the explanation in network_context.mojom.

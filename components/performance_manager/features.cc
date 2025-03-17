@@ -54,17 +54,9 @@ const base::FeatureParam<base::TimeDelta>
         &kPerformanceControlsBatteryPerformanceSurvey, "battery_lookback",
         base::Days(8)};
 
-BASE_FEATURE(kPerformanceInterventionUI,
-             "PerformanceInterventionUI",
-             base::FEATURE_ENABLED_BY_DEFAULT);
-
 BASE_FEATURE(kPerformanceInterventionDemoMode,
              "PerformanceInterventionDemoMode",
              base::FEATURE_DISABLED_BY_DEFAULT);
-
-bool ShouldUsePerformanceInterventionBackend() {
-  return base::FeatureList::IsEnabled(kPerformanceInterventionUI);
-}
 
 #if BUILDFLAG(IS_CHROMEOS)
 BASE_FEATURE(kUnthrottledTabProcessReporting,
@@ -80,6 +72,13 @@ BASE_FEATURE(kPMProcessPriorityPolicy,
 
 const base::FeatureParam<bool> kInheritParentPriority{
     &kPMProcessPriorityPolicy, "inherit_parent_priority", true};
+
+const base::FeatureParam<bool> kRenderedOutOfViewIsNotVisible{
+    &kPMProcessPriorityPolicy, "rendered_out_of_view_is_not_visible", false};
+
+const base::FeatureParam<bool> kNonSpareRendererHighInitialPriority{
+    &kPMProcessPriorityPolicy, "non_spare_renderer_high_initial_priority",
+    false};
 
 BASE_FEATURE(kPMLoadingPageVoter,
              "PMLoadingPageVoter",

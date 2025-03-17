@@ -58,8 +58,6 @@ struct OptimizationGuideModelStreamingExecutionResult {
       base::expected<const StreamingResponse,
                      OptimizationGuideModelExecutionError> response,
       bool provided_by_on_device,
-      // TODO(372535824): remove this parameter.
-      std::unique_ptr<ModelQualityLogEntry> log_entry = nullptr,
       std::unique_ptr<proto::ModelExecutionInfo> execution_info = nullptr);
 
   ~OptimizationGuideModelStreamingExecutionResult();
@@ -70,8 +68,6 @@ struct OptimizationGuideModelStreamingExecutionResult {
       response;
   // True if the response was computed on-device.
   bool provided_by_on_device = false;
-  // The log entry will be null until `StreamingResponse.is_complete` is true.
-  std::unique_ptr<ModelQualityLogEntry> log_entry;
   // The execution info will be null until `StreamingResponse.is_complete` is
   // true.
   std::unique_ptr<proto::ModelExecutionInfo> execution_info;
@@ -97,7 +93,7 @@ using OptimizationGuideModelExecutionResultStreamingCallback =
 
 // The callback for receiving the token size of the given input.
 using OptimizationGuideModelSizeInTokenCallback =
-    base::OnceCallback<void(uint32_t)>;
+    base::OnceCallback<void(std::optional<uint32_t>)>;
 
 // Params used to control sampling output tokens for the on-device model.
 struct SamplingParams {
@@ -300,6 +296,12 @@ class OptimizationGuideModelExecutor {
     // Returns the feature_metadata from the
     // OnDeviceModelExecutionFeatureConfig.
     virtual const proto::Any& GetOnDeviceFeatureMetadata() const = 0;
+
+    // Clones the session and associated context. Note that if the parent
+    // session is deleted and cancels context processing after clone, the
+    // context will also be cancelled for the clone.
+    // TODO: crbug.com/396211270 - Make clone independent of parent.
+    virtual std::unique_ptr<Session> Clone() = 0;
   };
 
   // Starts a session which allows streaming input and output from the model.

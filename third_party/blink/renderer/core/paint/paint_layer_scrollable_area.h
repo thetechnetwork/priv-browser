@@ -656,6 +656,8 @@ class CORE_EXPORT PaintLayerScrollableArea final
   // @container (snapped:...) query for the given axis.
   Element* GetSnappedQueryTargetAlongAxis(cc::SnapAxis) const;
 
+  bool HasRunningAnimation();
+
  private:
   bool NeedsHypotheticalScrollbarThickness(ScrollbarOrientation) const;
   int ComputeHypotheticalScrollbarThickness(
@@ -743,7 +745,7 @@ class CORE_EXPORT PaintLayerScrollableArea final
   void SetShouldCheckForPaintInvalidation();
 
   bool UsedColorSchemeScrollbarsChanged(const ComputedStyle* old_style) const;
-  bool IsGlobalRootNonOverlayScroller() const;
+  bool IsGlobalRootNonOverlayScroller() const override;
 
   // Helper function to map element ids to Node* pointers. Used by both event
   // dispatching and container queries.
@@ -760,7 +762,6 @@ class CORE_EXPORT PaintLayerScrollableArea final
   void CreateAndSetSnappedQueryScrollSnapshotIfNeeded(
       cc::TargetSnapAreaElementIds);
 
-  ScrollOffset GetScrollOffsetForScrollMarkerUpdate();
   void UpdateScrollMarkers() override;
   ScrollMarkerGroupPseudoElement* GetScrollMarkerGroup() const override;
 

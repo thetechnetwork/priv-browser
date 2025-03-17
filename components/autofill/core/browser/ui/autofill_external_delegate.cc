@@ -481,7 +481,7 @@ bool AutofillExternalDelegate::HasActiveScreenReader() const {
   // Note: This always returns false if ChromeVox is in use because the
   // process-wide AXMode is not updated in that case.
   return ui::AXPlatform::GetInstance().GetMode().has_mode(
-      ui::AXMode::kScreenReader);
+      ui::AXMode::kExtendedProperties);
 #endif
 }
 
@@ -1377,8 +1377,27 @@ void AutofillExternalDelegate::DidAcceptPaymentsSuggestion(
                          GetWeakPtr()));
       break;
     case SuggestionType::kBnplEntry:
-      // TODO(crbug.com/365774376): Wire up BNPL suggestion to
-      // SelectBnplIssuerDialog.
+      CHECK(suggestion.GetPayload<Suggestion::PaymentsPayload>()
+                .extracted_amount_in_micros.has_value());
+      manager_->client()
+          .GetPaymentsAutofillClient()
+          ->GetPaymentsBnplManager()
+          ->InitBnplFlow(
+              /*final_checkout_amount=*/suggestion
+                  .GetPayload<Suggestion::PaymentsPayload>()
+                  .extracted_amount_in_micros.value(),
+              base::BindOnce(
+                  [](base::WeakPtr<AutofillExternalDelegate> delegate,
+                     const CreditCard& card) {
+                    if (delegate) {
+                      delegate->manager_->FillOrPreviewCreditCardForm(
+                          mojom::ActionPersistence::kFill,
+                          delegate->query_form_,
+                          delegate->query_field_.global_id(), card,
+                          AutofillTriggerSource::kPopup);
+                    }
+                  },
+                  GetWeakPtr()));
       break;
     default:
       NOTREACHED();  // Should be handled elsewhere

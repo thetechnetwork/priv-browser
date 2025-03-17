@@ -106,6 +106,7 @@ const char kMilestoneNonRedirectResponseLoaderCallback[] =
     "NonRedirectResponseLoaderCallback";
 const char kMilestoneCommitSent[] = "CommitSent";
 const char kMilestoneCommitReceived[] = "CommitReceived";
+const char kMilestoneCommitReplySent[] = "CommitReplySent";
 const char kMilestoneDidCommit[] = "DidCommit";
 const char kMilestoneParseStart[] = "ParseStart";
 const char kFirstContentfulPaint[] = "FirstContentfulPaint";
@@ -210,6 +211,8 @@ std::string AbandonedPageLoadMetricsObserver::NavigationMilestoneToString(
       return internal::kMilestoneCommitSent;
     case NavigationMilestone::kCommitReceived:
       return internal::kMilestoneCommitReceived;
+    case NavigationMilestone::kCommitReplySent:
+      return internal::kMilestoneCommitReplySent;
     case NavigationMilestone::kDidCommit:
       return internal::kMilestoneDidCommit;
     case NavigationMilestone::kParseStart:
@@ -538,6 +541,7 @@ void AbandonedPageLoadMetricsObserver::LogUKMHistograms(
       case NavigationMilestone::kNonRedirectResponseLoaderCallback:
       case NavigationMilestone::kCommitSent:
       case NavigationMilestone::kCommitReceived:
+      case NavigationMilestone::kCommitReplySent:
       case NavigationMilestone::kDidCommit:
       case NavigationMilestone::kSecondRedirectResponseStart:
       case NavigationMilestone::kSecondRedirectedRequestStart:
@@ -556,8 +560,10 @@ void AbandonedPageLoadMetricsObserver::LogLoadingMilestone(
   if (loading_milestones_.contains(milestone)) {
     return;
   }
-  CHECK_GE(milestone, NavigationMilestone::kFirstEssentialLoadingEvent);
-  CHECK_LE(milestone, NavigationMilestone::kLastEssentialLoadingEvent);
+  // Check if we are within the loading milestone for Gws so that we can cover
+  // all the possible loading milestones.
+  CHECK_GE(milestone, NavigationMilestone::kFirstGwsEssentialLoadingEvent);
+  CHECK_LE(milestone, NavigationMilestone::kLastGwsEssentialLoadingEvent);
   LogMilestoneHistogram(milestone, time);
   loading_milestones_[milestone] = time;
 }
@@ -692,6 +698,10 @@ AbandonedPageLoadMetricsObserver::OnCommit(
   LogMilestoneHistogram(NavigationMilestone::kCommitReceived,
                         navigation_handle->GetNavigationHandleTiming()
                             .navigation_commit_received_time,
+                        navigation_start_time_);
+  LogMilestoneHistogram(NavigationMilestone::kCommitReplySent,
+                        navigation_handle->GetNavigationHandleTiming()
+                            .navigation_commit_reply_sent_time,
                         navigation_start_time_);
   LogMilestoneHistogram(
       NavigationMilestone::kDidCommit,

@@ -226,7 +226,7 @@ class RecentActivityBubbleDialogViewBrowserTest : public DialogBrowserTest {
     bubble_coordinator_ = std::make_unique<RecentActivityBubbleCoordinator>();
     EXPECT_EQ(nullptr, bubble_coordinator_->GetBubble());
     bubble_coordinator_->ShowForCurrentTab(
-        anchor_view, browser()->tab_strip_model()->GetWebContentsAt(0),
+        anchor_view, browser()->tab_strip_model()->GetWebContentsAt(0), {},
         activity_log, browser()->profile());
   }
 
@@ -353,8 +353,7 @@ class RecentActivityBubbleDialogViewActionBrowserTest
  public:
   void SetUp() override {
     scoped_feature_list_.InitWithFeatures(
-        {tab_groups::kTabGroupsSaveV2,
-         tab_groups::kTabGroupSyncServiceDesktopMigration,
+        {tab_groups::kTabGroupSyncServiceDesktopMigration,
          data_sharing::features::kDataSharingFeature,
          collaboration::features::kCollaborationMessaging},
         {});

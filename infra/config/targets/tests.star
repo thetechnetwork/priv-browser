@@ -25,6 +25,22 @@ targets.tests.isolated_script_test(
     args = [
         "--skipped",
         "always",
+        "--test-type",
+        "testharness",
+        "reftest",
+        "crashtest",
+        "print-reftest",
+    ],
+    binary = "chrome_public_wpt",
+)
+
+targets.tests.isolated_script_test(
+    name = "android_webdriver_wpt_tests",
+    args = [
+        "--skipped",
+        "always",
+        "--test-type",
+        "wdspec",
     ],
     binary = "chrome_public_wpt",
 )
@@ -2812,7 +2828,7 @@ targets.tests.gpu_telemetry_test(
         "gpu_force_command_decoder_passthrough",
         "gpu_force_angle_metal",
         "gpu_force_skia_graphite",
-        "gpu_force_high_performance_gpu_for_webgl",
+        "gpu_force_high_performance_gpu_for_webgl_metal",
         "gpu_enable_metal_debug_layers",
         "gpu_integration_test_webgl2_args",
         "gpu_integration_test_common_args",
@@ -2933,7 +2949,7 @@ targets.tests.gpu_telemetry_test(
         "gpu_force_command_decoder_passthrough",
         "gpu_force_angle_metal",
         "gpu_force_skia_ganesh",
-        "gpu_force_high_performance_gpu_for_webgl",
+        "gpu_force_high_performance_gpu_for_webgl_metal",
         "gpu_enable_metal_debug_layers",
         "gpu_integration_test_webgl1_args",
         "gpu_integration_test_common_args",
@@ -2948,7 +2964,7 @@ targets.tests.gpu_telemetry_test(
         "gpu_force_command_decoder_passthrough",
         "gpu_force_angle_metal",
         "gpu_force_skia_graphite",
-        "gpu_force_high_performance_gpu_for_webgl",
+        "gpu_force_high_performance_gpu_for_webgl_metal",
         "gpu_enable_metal_debug_layers",
         "gpu_integration_test_webgl1_args",
         "gpu_integration_test_common_args",

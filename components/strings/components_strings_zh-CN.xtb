@@ -8,6 +8,7 @@
 <translation id="1010200102790553230">保存网页以供日后加载</translation>
 <translation id="1010225406377140704">请联系发送者获取新的链接</translation>
 <translation id="1011206368273183593">正在准备文件</translation>
+<translation id="1012264210825687872">查看订单后，您必须登录或创建<ph name="BNPL_ISSUER_NAME" />账号。此账号将自动与 Google Pay 关联。</translation>
 <translation id="1014509239502131234">正在撤消结果</translation>
 <translation id="1015730422737071372">提供其他详细信息</translation>
 <translation id="1019413721762100891">已关闭</translation>
@@ -137,6 +138,7 @@
 <translation id="1230244617745022071"><ph name="SOURCE" />（自动检测）</translation>
 <translation id="1232569758102978740">无标题</translation>
 <translation id="1236081509407217141">允许 VR？</translation>
+<translation id="1236689197410206751">AfterPay</translation>
 <translation id="1240347957665416060">您的设备名称</translation>
 <translation id="124116460088058876">更多语言</translation>
 <translation id="1243027604378859286">作者：</translation>
@@ -251,6 +253,7 @@
 <translation id="1419305130220238697">“管理 Chrome 中的下载内容”按钮，激活它即可管理您已在 Chrome 中下载的文件</translation>
 <translation id="1420345875188552368">系统可能会使用您已保存的自动支付方式进行此笔付款。如需在 Chrome 中关闭电子钱包，请前往<ph name="BEGIN_LINK1" />支付设置<ph name="END_LINK1" /></translation>
 <translation id="1420920093772172268"><ph name="TURN_ON_BLUETOOTH_LINK" />以允许配对</translation>
+<translation id="1421484961346698724">已删除的账号</translation>
 <translation id="14222610277930434">您经常访问</translation>
 <translation id="1422930527989633628">可以询问能否发现附近的蓝牙设备</translation>
 <translation id="1426410128494586442">是</translation>
@@ -626,6 +629,7 @@
 <translation id="2082238445998314030">第 <ph name="RESULT_NUMBER" /> 条结果，共 <ph name="TOTAL_RESULTS" /> 条</translation>
 <translation id="2083256696566019397">每次访问时都允许</translation>
 <translation id="2085876078937250610">保存…</translation>
+<translation id="2090451897496479509">如需了解详情，请联系提供商</translation>
 <translation id="2091887806945687916">声音</translation>
 <translation id="2093982008204312032">Google Chrome 正在尝试关闭 Windows Hello，以使其不再作为填充密码时的验证机制。</translation>
 <translation id="2094505752054353250">网域不匹配</translation>
@@ -660,6 +664,7 @@
 <translation id="2145193671493396738">经济新闻</translation>
 <translation id="214556005048008348">取消付款</translation>
 <translation id="2147117373852943630">乐器</translation>
+<translation id="2147254250314124496"><ph name="EMBEDDED_URL" /> 想使用其保存的与您相关的信息</translation>
 <translation id="2148613324460538318">添加支付卡</translation>
 <translation id="2148716181193084225">今天</translation>
 <translation id="2149968176347646218">连接不安全</translation>
@@ -691,6 +696,7 @@
 <translation id="2187317261103489799">检测（默认）</translation>
 <translation id="2188375229972301266">多孔（底部）</translation>
 <translation id="2194856509914051091">注意事项</translation>
+<translation id="2198071643181968308">详细了解<ph name="BNPL_ISSUER_NAME" /></translation>
 <translation id="2200678913752027654">“不喜欢”按钮，按 Enter 键可打开一个反馈表单，您可以在表单中详细说明不喜欢此建议的原因</translation>
 <translation id="2202627062836089804">卡背面</translation>
 <translation id="2204482073374652408">更新已完成！</translation>
@@ -837,6 +843,7 @@
 <translation id="2451607499823206582">正在跟踪</translation>
 <translation id="2452098632681057184">生态与环境</translation>
 <translation id="2452837234288608067">无法提供这方面的帮助。请重试。</translation>
+<translation id="2453045048779611513">您所在的组织限制了您可保存的内容</translation>
 <translation id="2456755709261364512">电池电量必须在 <ph name="REQUIRED_BATTERY_PRECENT" />% 以上</translation>
 <translation id="2461385121573678775">Chrome 企业核心版提供了一站式工具，让您可以从云端配置浏览器政策</translation>
 <translation id="2461822463642141190">当前</translation>
@@ -1086,6 +1093,7 @@
 <translation id="2942492342931589800">随意</translation>
 <translation id="2942515540157583425">IT 类和技术类职位</translation>
 <translation id="2943895734390379394">上传时间：</translation>
+<translation id="2947281105969315778">如需分享或加入标签页分组，您必须能够登录 Chrome</translation>
 <translation id="2948083400971632585">您可以在设置页面中停用任何针对某个连接配置的代理。</translation>
 <translation id="2949183777371959169">被忽略了，因为相应设备未注册“Chrome 浏览器云管理”服务。</translation>
 <translation id="2951588413176968965">我的信箱</translation>
@@ -1302,6 +1310,7 @@
 <translation id="33073482541490531">系统检测到，您刚才使用的密码遭遇了数据泄露。密码管理工具建议您立即更改此密码。</translation>
 <translation id="3307649904964670439">“自定义 Chrome”按钮，激活它即可自定义您的浏览器外观</translation>
 <translation id="3308006649705061278">组织单位 (OU)</translation>
+<translation id="3317077846337994567">目前无法使用分期付款功能，请稍后重试。</translation>
 <translation id="3318016344440038475">电视喜剧</translation>
 <translation id="3324687287337751929">4 x 6 英寸</translation>
 <translation id="3324983252691184275">深红色</translation>
@@ -1429,6 +1438,7 @@
 <translation id="3536227077203206203">这次可以使用</translation>
 <translation id="3537165859691846083">Letter Plus</translation>
 <translation id="353816159217417898">屏幕（分页）</translation>
+<translation id="3541016556608204104">详细了解 Chrome 企业版接口</translation>
 <translation id="3542628208405253498">虚拟卡图片</translation>
 <translation id="3542768452570884558">在新窗口中打开链接</translation>
 <translation id="3543935938072367282">利用自动填充功能更快结账</translation>
@@ -1792,6 +1802,7 @@
 <translation id="415440494507469262">向比较表格添加标签页</translation>
 <translation id="4159784952369912983">紫色</translation>
 <translation id="4165422751765527461">在新标签页中打开帮助中心文章</translation>
+<translation id="4165584779486830267">现在，您可以使用 Affirm 或 Zip 分期付款。</translation>
 <translation id="4165986682804962316">网站设置</translation>
 <translation id="4169535189173047238">不允许</translation>
 <translation id="4171400957073367226">验证签名无效</translation>
@@ -1843,7 +1854,7 @@
 <translation id="422722221769396062">餐馆外卖服务</translation>
 <translation id="4230204356098880324">可以询问能否使用和移动您的摄像头</translation>
 <translation id="4231448684371260244">8 x 13 英寸</translation>
-<translation id="4233220688695460165">Chrome 会在 30 天内自动删除可建议广告的主题和网站。您也可屏蔽不喜欢的特定主题和网站。</translation>
+<translation id="4233220688695460165">Chrome 会在 30 天内自动删除可提供广告建议的主题和网站。您也可屏蔽不喜欢的特定主题和网站。</translation>
 <translation id="4235360514405112390">有效</translation>
 <translation id="4239799716689808527">标签</translation>
 <translation id="4241830393007970744">您尝试访问的网站上的攻击者可能会诱使您安装软件或泄露某些信息，例如您的密码、手机号码或信用卡号码。</translation>
@@ -1942,6 +1953,7 @@
 <translation id="4378154925671717803">电话</translation>
 <translation id="4384395682990721132">A4x3</translation>
 <translation id="4387692837058041921">已暂停向 Microsoft OneDrive 上传文件</translation>
+<translation id="4389931020843542579">正在加载标签页分组</translation>
 <translation id="4390472908992056574">帽檐式</translation>
 <translation id="4395550503472021297">此政策正在控制以下政策的默认行为：<ph name="POLICIES" /></translation>
 <translation id="4397978002248035985">打开在银行网站上进行验证的弹出式窗口</translation>
@@ -2311,6 +2323,7 @@
 <translation id="5097501891273180634">A2</translation>
 <translation id="5106405387002409393">Chrome 需要访问设备的<ph name="PERMISSION" /></translation>
 <translation id="510644072453496781">纸板（封边）</translation>
+<translation id="5106648964679263509">已填写<ph name="BNPL_ISSUER_NAME" />的虚拟卡信息</translation>
 <translation id="5108881358339761672">网站不安全</translation>
 <translation id="5109892411553231226">管理付款方式</translation>
 <translation id="5112422516732747637">A5</translation>
@@ -2506,6 +2519,7 @@
             <ph name="LIST_ITEM" />在表单中填写的信息
           <ph name="END_LIST" /></translation>
 <translation id="5443468954631487277">逆转顺序，正面朝上</translation>
+<translation id="5445340838622821110">分期付款时，系统会填写一次性虚拟卡号。此号码仅用于本次购买交易。<ph name="IDS_AUTOFILL_BNPL_FILLED_CARD_INFORMATION_BUBBLE_LEARN_MORE_LINK_LABEL" /></translation>
 <translation id="5447235695608032700">允许 <ph name="SITE" /> 使用其保存的与您相关的信息</translation>
 <translation id="5452270690849572955">找不到 <ph name="HOST_NAME" /> 的网页</translation>
 <translation id="5452923259299906094">使用电子钱包和 Pix 付款</translation>
@@ -2753,6 +2767,7 @@
 <translation id="5910140988253729859">撤消自动填充</translation>
 <translation id="5911020115933784199">活动与演出</translation>
 <translation id="5911110632211230665">禁止打开</translation>
+<translation id="5914465277418006379"><ph name="MEMBER_FIRST_NAME" />添加了此标签页</translation>
 <translation id="5915189366813702112">弹性工作安排</translation>
 <translation id="59174027418879706">已启用</translation>
 <translation id="5918373444239520146">小工具和便携式电子产品</translation>
@@ -2833,6 +2848,7 @@
 <translation id="604124094241169006">自动</translation>
 <translation id="6041777658117377052">室内温度</translation>
 <translation id="6042308850641462728">展开</translation>
+<translation id="6043357981274314628">已完成！</translation>
 <translation id="6044573915096792553">大小：12</translation>
 <translation id="6045164183059402045">拼版模板</translation>
 <translation id="6047927260846328439">此内容可能会试图诱骗您安装软件或透露个人信息。<ph name="BEGIN_LINK" />仍然显示<ph name="END_LINK" /></translation>
@@ -2856,7 +2872,6 @@
 <translation id="6062937464449575061">取消跟踪价格</translation>
 <translation id="6063415549109819824">住宅融资</translation>
 <translation id="6070432475334343308">有一个或多个文件未上传到“<ph name="CLOUD_PROVIDER" />”上的“<ph name="FOLDER_NAME" />”</translation>
-<translation id="6080696365213338172">您已使用管理员提供的证书访问了内容，因此管理员可以拦截您提供给 <ph name="DOMAIN" /> 的数据。</translation>
 <translation id="6085149458302186532">标签（彩色）</translation>
 <translation id="6087312102907839798">相关搜索</translation>
 <translation id="6089505343295765444">您从 Chrome 历史记录中删除的标签页仍会显示在比较表格中</translation>
@@ -2997,11 +3012,11 @@
 <translation id="6322182122604171028">无法使用 Windows Hello</translation>
 <translation id="6326947323444967009">在 iOS 设置中将 Chrome 设置为系统的默认浏览器</translation>
 <translation id="6328639280570009161">请尝试停用网络联想查询功能</translation>
-<translation id="6328784461820205019">“您的连接不是私密连接”、“&lt;span class="error-code"&gt;NET::ERR_CERT_AUTHORITY_INVALID&lt;/span&gt;”、“&lt;span class="error-code"&gt;ERR_CERT_COMMON_NAME_INVALID&lt;/span&gt;”、“&lt;span class="error-code"&gt;NET::ERR_CERT_WEAK_SIGNATURE_ALGORITHM&lt;/span&gt;”、“&lt;span class="error-code"&gt;ERR_CERT_SYMANTEC_LEGACY&lt;/span&gt;”或“SSL 证书错误”</translation>
 <translation id="6335029926534404762">运动鞋</translation>
 <translation id="6337133576188860026">释放不到 <ph name="SIZE" /> 空间。当您下次访问时，某些网站的加载速度可能会更慢。</translation>
 <translation id="6337534724793800597">按名称过滤政策</translation>
 <translation id="633770708279464947"><ph name="SECURE_DNS_SALT" /> 值无效，因此不会被使用。</translation>
+<translation id="6338645927051849741">密码 • Google 密码管理工具</translation>
 <translation id="6340739886198108203">管理员政策不建议在屏幕显示机密内容时截屏/录屏：</translation>
 <translation id="6341434961864773665">{0,plural, =1{管理员政策不建议将这个文件上传到<ph name="DESTINATION_NAME" />}other{管理员政策不建议将这些文件上传到<ph name="DESTINATION_NAME" />}}</translation>
 <translation id="6342069812937806050">刚刚</translation>
@@ -3011,6 +3026,7 @@
 <translation id="6351658970066645919">删除浏览数据</translation>
 <translation id="6353505687280762741">{COUNT,plural, =0{无}=1{1 个密码（用于 <ph name="DOMAIN_LIST" />，已同步）}=2{2 个密码（用于 <ph name="DOMAIN_LIST" />，已同步）}other{# 个密码（用于 <ph name="DOMAIN_LIST" />，已同步）}}</translation>
 <translation id="6355392890578844978">此浏览器并未由某个公司或其他组织管理。此设备上的活动可能在接受 Chromium 外部的管理。<ph name="BEGIN_LINK" />了解详情<ph name="END_LINK" /></translation>
+<translation id="6357546827188504216">“<ph name="GROUP_TITLE_1" />”和“<ph name="GROUP_TITLE_2" />”标签页分组已不可用</translation>
 <translation id="6358088212770985041">修改付款方式</translation>
 <translation id="6358450015545214790">这分别意味着什么？</translation>
 <translation id="6360213755783740931">详细了解恶意软件防护</translation>
@@ -3324,6 +3340,7 @@
 <translation id="6917795328362592458">系统检测到，您刚才使用的密码遭遇了数据泄露。为确保您的账号安全，密码管理工具建议您检查已保存的所有密码。</translation>
 <translation id="6917873303492266709">如需分享、加入标签页分组并在其中协作，请打开“设置”并开启“允许登录 Chrome”</translation>
 <translation id="6921197121276419421">允许安装 Web 应用</translation>
+<translation id="69238565902785824">让账号保持关联状态有助于您更快地通过<ph name="BNPL_ISSUER_NAME" />付款，不过您可以前往 <ph name="IDS_AUTOFILL_BNPL_TOS_LINK_TEXT_WALLET_LINK_TEXT" /> 解除关联</translation>
 <translation id="6924013822850225188">选择是否在结账时显示凭卡可享福利（需遵守银行条款）</translation>
 <translation id="6925267999184670015">北美洲 B+</translation>
 <translation id="6926216138694948720">人体艺术</translation>
@@ -3389,6 +3406,7 @@
 <translation id="701757816833614688">视觉艺术与设计教育</translation>
 <translation id="702275896380648118">此网站会先判断您的喜好，然后向其他网站建议相关广告。此网站还会从 Chrome 中了解您的广告主题，从而向您展示与您更相关的广告。</translation>
 <translation id="7023162328967545559">管理员警告</translation>
+<translation id="7023765275461720661">要关联账号并使用<ph name="BNPL_ISSUER_NAME" />付款吗？</translation>
 <translation id="7029809446516969842">密码</translation>
 <translation id="7030164307377592766">修改用于填充付款方式的设置</translation>
 <translation id="7031646650991750659">您已安装的 Google Play 应用</translation>
@@ -3611,6 +3629,7 @@
 <translation id="741204030948306876">立即开启</translation>
 <translation id="7416351320495623771">管理密码…</translation>
 <translation id="7416898721136759658">助学金、奖学金与经济资助</translation>
+<translation id="741772962178517671">Affirm</translation>
 <translation id="7418620734632363981">编程</translation>
 <translation id="7419091773564635591">计算机与电子产品</translation>
 <translation id="7419106976560586862">个人资料路径</translation>
@@ -3657,6 +3676,7 @@
 <translation id="7485085230273446323">工商业</translation>
 <translation id="7485870689360869515">找不到数据。</translation>
 <translation id="7486880426035242089">OneDrive</translation>
+<translation id="7489255442002627311"><ph name="BNPL_ISSUER_NAME" />将检查您是否符合资格要求（这不会影响您的信用评分）。如果获得批准，<ph name="BNPL_ISSUER_NAME" />将提供付款方案供您选择，以便您完成购买交易。</translation>
 <translation id="7489392576326061356">洗发水和护发素</translation>
 <translation id="7495528107193238112">该内容被屏蔽了。请联系网站所有者以解决此问题。</translation>
 <translation id="749865518782565832">管道维修</translation>
@@ -3713,6 +3733,7 @@
 <translation id="7569983096843329377">黑色</translation>
 <translation id="7574998639136359461">冬季运动装备</translation>
 <translation id="7575207903026901870">“移除建议”按钮，按 Enter 键即可移除这项建议</translation>
+<translation id="7575800019233204241">“您的连接不是私密连接”、“&lt;span class="error-code"&gt;NET::ERR_CERT_AUTHORITY_INVALID&lt;/span&gt;”、“&lt;span class="error-code"&gt;ERR_CERT_COMMON_NAME_INVALID&lt;/span&gt;”、“&lt;span class="error-code"&gt;NET::ERR_CERT_WEAK_SIGNATURE_ALGORITHM&lt;/span&gt;”或“SSL 证书错误”</translation>
 <translation id="7575887283389198269">手机</translation>
 <translation id="7578104083680115302">通过各种设备在网站和应用中购物时，您都可以使用 Google 为您保存的银行卡信息快速付款。</translation>
 <translation id="7579442726219254162">“<ph name="APPLICATION_ID" />”的受管配置中包含未知变量“<ph name="VARIABLE" />”。</translation>
@@ -3899,6 +3920,7 @@
 <translation id="791107458486222637">正在重新生成结果</translation>
 <translation id="791551905239004656">绘画与着色</translation>
 <translation id="7916162853251942238">柔印底基</translation>
+<translation id="791698251820376781">您所在的组织不允许您登录</translation>
 <translation id="7926503317156566022">航空业</translation>
 <translation id="793209273132572360">更新地址？</translation>
 <translation id="7932579305932748336">涂层</translation>
@@ -4222,7 +4244,6 @@
 <translation id="8473626140772740486">300 x 450 毫米</translation>
 <translation id="8473863474539038330">地址和其他信息</translation>
 <translation id="8474910779563686872">显示开发者详细信息</translation>
-<translation id="8476959635632921417">若要在您的所有设备上保存并使用此地址，请验证您的身份</translation>
 <translation id="8479754468255770962">钉装（左下角）</translation>
 <translation id="8483229036294884935">系统将从您的 Google 账号 (<ph name="ACCOUNT" />) 中删除此地址</translation>
 <translation id="8488350697529856933">适用对象</translation>
@@ -4606,11 +4627,13 @@
 <translation id="9183425211371246419"><ph name="HOST_NAME" /> 使用了不受支持的协议。</translation>
 <translation id="918454845714257218">请查看<ph name="SIDE_OF_CARD" />的安全码，然后重试</translation>
 <translation id="9186203289258525843">“将 Chrome 设为默认浏览器”按钮，激活它即可将 Chrome 设为系统的默认浏览器</translation>
+<translation id="9189468832660648522"><ph name="MEMBER_FIRST_NAME" />更改了此标签页</translation>
 <translation id="9189789270972826888">如果卡片未填写，请点击下方的卡片详细信息进行复制粘贴。<ph name="IDS_AUTOFILL_FILLED_CARD_INFORMATION_BUBBLE_LEARN_MORE_LINK_LABEL" /></translation>
 <translation id="9190557999028587593">系统会自动删除保留时长超过 4 周的主题</translation>
 <translation id="9191834167571392248">打孔（左下角）</translation>
 <translation id="9192361865877479444">金属（哑光）</translation>
 <translation id="9192947025498305328">洁净美容</translation>
+<translation id="9195969368671142407">如果您所在的组织限制您将内容保存到 Google 账号，您将无法分享或加入标签页分组</translation>
 <translation id="9199905725844810519">打印功能已被禁用</translation>
 <translation id="9201904868909900493">正在打开调查问卷…</translation>
 <translation id="9204089334327209740">上传完成后，您可以在<ph name="CLOUD_PROVIDER" />中修改文件。本地存储空间（包括回收站中的所有文件）将被自动移除。</translation>

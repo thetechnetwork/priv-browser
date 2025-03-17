@@ -9,6 +9,7 @@
 
 #include "base/check_op.h"
 #include "base/command_line.h"
+#include "base/compiler_specific.h"
 #include "base/dcheck_is_on.h"
 #include "base/debug/crash_logging.h"
 #include "base/debug/dump_without_crashing.h"
@@ -79,6 +80,32 @@ void SetCrashKeyThreadSafe(crash_reporter::CrashKeyString<KeySize>& crash_key,
 void SetDawnErrorCrashKey(std::string_view message) {
   static crash_reporter::CrashKeyString<1024> error_key("dawn-error");
   SetCrashKeyThreadSafe(error_key, message);
+}
+
+// Different versions of DumpWithoutCrashing for different reasons.
+// Deliberately prevent inlining so that the crash report's call stack can
+// distinguish between them.
+NOINLINE NOOPT void DumpWithoutCrashingOnDXGIError(wgpu::ErrorType error_type,
+                                                   std::string_view message) {
+  LOG(ERROR) << "DXGI Error: " << message;
+  base::debug::DumpWithoutCrashing();
+}
+
+NOINLINE NOOPT void DumpWithoutCrashingOnGenericError(
+    wgpu::ErrorType error_type,
+    std::string_view message) {
+  LOG(ERROR) << message;
+  base::debug::DumpWithoutCrashing();
+}
+
+void DumpWithoutCrashingOnError(wgpu::ErrorType error_type,
+                                std::string_view message) {
+  SetDawnErrorCrashKey(message);
+  if (message.find("DXGI_ERROR") != std::string_view::npos) {
+    DumpWithoutCrashingOnDXGIError(error_type, message);
+  } else {
+    DumpWithoutCrashingOnGenericError(error_type, message);
+  }
 }
 
 std::vector<const char*> GetDisabledToggles(
@@ -657,7 +684,6 @@ bool DawnSharedContext::Initialize(
   descriptor.requiredFeatureCount = std::size(features);
 
   // Use best limits for the device.
-#ifdef WGPU_BREAKING_CHANGE_FLATTEN_LIMITS
   wgpu::Limits supportedLimits = {};
   if (adapter_.GetLimits(&supportedLimits) != wgpu::Status::Success) {
     LogInitFailure("Failed to call adapter.GetLimits().",
@@ -666,19 +692,6 @@ bool DawnSharedContext::Initialize(
     return false;
   }
   descriptor.requiredLimits = &supportedLimits;
-#else
-  wgpu::SupportedLimits supportedLimits = {};
-  if (adapter_.GetLimits(&supportedLimits) != wgpu::Status::Success) {
-    LogInitFailure("Failed to call adapter.GetLimits().",
-                   /*generate_crash_report=*/true, backend_type,
-                   force_fallback_adapter);
-    return false;
-  }
-
-  wgpu::RequiredLimits deviceCreationLimits = {};
-  deviceCreationLimits.limits = supportedLimits.limits;
-  descriptor.requiredLimits = &deviceCreationLimits;
-#endif  // WGPU_BREAKING_CHANGE_FLATTEN_LIMITS
 
   // ANGLE always tries creating D3D11 device with debug layer when dcheck is
   // on, so tries creating dawn device with backend validation as well.
@@ -756,9 +769,6 @@ std::optional<error::ContextLostReason> DawnSharedContext::GetResetStatus()
 
 void DawnSharedContext::OnError(wgpu::ErrorType error_type,
                                 wgpu::StringView message) {
-  LOG(ERROR) << message;
-  SetDawnErrorCrashKey(message);
-
 #if BUILDFLAG(IS_WIN)
   if (auto d3d11_device = GetD3D11Device()) {
     static crash_reporter::CrashKeyString<64> reason_message_key(
@@ -776,7 +786,8 @@ void DawnSharedContext::OnError(wgpu::ErrorType error_type,
   }
 #endif
 
-  base::debug::DumpWithoutCrashing();
+  DumpWithoutCrashingOnError(error_type,
+                             static_cast<std::string_view>(message));
 
 #if !DCHECK_IS_ON()
   // Do not provoke context loss on validation failures for non-DCHECK builds.
@@ -845,10 +856,32 @@ bool DawnSharedContext::OnMemoryDump(
   if (args.level_of_detail ==
       base::trace_event::MemoryDumpLevelOfDetail::kBackground) {
     using base::trace_event::MemoryAllocatorDump;
+
+    const dawn::native::MemoryUsageInfo mem_usage =
+        dawn::native::ComputeEstimatedMemoryUsageInfo(device_.Get());
+
     pmd->GetOrCreateAllocatorDump(kDawnMemoryDumpPrefix)
         ->AddScalar(MemoryAllocatorDump::kNameSize,
+                    MemoryAllocatorDump::kUnitsBytes, mem_usage.totalUsage);
+    pmd->GetOrCreateAllocatorDump(
+           base::JoinString({kDawnMemoryDumpPrefix, "textures"}, "/"))
+        ->AddScalar(MemoryAllocatorDump::kNameSize,
+                    MemoryAllocatorDump::kUnitsBytes, mem_usage.texturesUsage);
+    pmd
+        ->GetOrCreateAllocatorDump(base::JoinString(
+            {kDawnMemoryDumpPrefix, "textures/depth_stencil"}, "/"))
+        ->AddScalar(MemoryAllocatorDump::kNameSize,
                     MemoryAllocatorDump::kUnitsBytes,
-                    dawn::native::ComputeEstimatedMemoryUsage(device_.Get()));
+                    mem_usage.depthStencilTexturesUsage);
+    pmd->GetOrCreateAllocatorDump(
+           base::JoinString({kDawnMemoryDumpPrefix, "textures/msaa"}, "/"))
+        ->AddScalar(MemoryAllocatorDump::kNameSize,
+                    MemoryAllocatorDump::kUnitsBytes,
+                    mem_usage.msaaTexturesUsage);
+    pmd->GetOrCreateAllocatorDump(
+           base::JoinString({kDawnMemoryDumpPrefix, "buffers"}, "/"))
+        ->AddScalar(MemoryAllocatorDump::kNameSize,
+                    MemoryAllocatorDump::kUnitsBytes, mem_usage.buffersUsage);
   } else {
     DawnMemoryDump dump(pmd);
     dawn::native::DumpMemoryStatistics(device_.Get(), &dump);

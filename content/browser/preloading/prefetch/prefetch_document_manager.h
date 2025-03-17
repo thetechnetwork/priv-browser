@@ -12,11 +12,11 @@
 #include "base/functional/callback.h"
 #include "base/memory/weak_ptr.h"
 #include "content/browser/preloading/prefetch/prefetch_type.h"
-#include "content/browser/preloading/preload_pipeline_info.h"
 #include "content/common/content_export.h"
 #include "content/common/features.h"
 #include "content/public/browser/document_user_data.h"
 #include "content/public/browser/prefetch_metrics.h"
+#include "content/public/browser/preload_pipeline_info.h"
 #include "content/public/browser/preloading.h"
 #include "content/public/browser/web_contents_observer.h"
 #include "net/http/http_no_vary_search_data.h"
@@ -26,6 +26,7 @@
 namespace content {
 
 class PrefetchContainer;
+class PrefetchHandle;
 class PrefetchService;
 class PreloadingPredictor;
 
@@ -142,7 +143,7 @@ class CONTENT_EXPORT PrefetchDocumentManager
   //
   // We allow normal prefetch and prefetch ahead of prerender with the same key
   // here, to handle and merge them in `PrefetchService`.
-  std::map<std::pair<GURL, PreloadingType>, base::WeakPtr<PrefetchContainer>>
+  std::map<std::pair<GURL, PreloadingType>, std::unique_ptr<PrefetchHandle>>
       all_prefetches_;
 
   // Stores whether or not canary checks have been started for this page.

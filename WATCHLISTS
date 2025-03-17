@@ -146,13 +146,6 @@
     'android_webview_webexposed': {
       'filepath': 'android_webview/test/data/web_tests/(virtual/stable/)?webexposed/global-interface-listing-expected.txt',
     },
-    'app_service': {
-      'filepath': 'chrome/browser/apps/app_service/'\
-                  '|chrome/browser/ash/app_list/app_service/'\
-                  '|chrome/browser/ui/ash/shelf/app_service/'\
-                  '|chrome/browser/ui/views/apps/app_dialog/' \
-                  '|components/services/app_service/',
-    },
     'app_service_protos': {
       'filepath': 'components/services/app_service/public/protos/',
     },
@@ -899,9 +892,7 @@
     },
     'client_hints': {
       'filepath': 'client_hints|user_agent_utils|'\
-                  'chrome/browser/android/content/content_utils.cc'\
-                  'content/common/user_agent.cc|'\
-                  'content/public/common/user_agent.h'
+                  'chrome/browser/android/content/content_utils.cc'
     },
     'clipboard': {
       'filepath': 'content/browser/renderer/clipboard|' \
@@ -1697,6 +1688,9 @@
     'nfc': {
       'filepath': 'services/device/nfc/|'\
                   'third_party/blink/renderer/modules/nfc/'
+    },
+    'notification_content_detection': {
+      'filepath': 'components/safe_browsing/content/browser/notification_content_detection/'
     },
     'notifications': {
       'filepath': 'chrome/browser/extensions/api/notifications/|'\
@@ -2501,7 +2495,8 @@
     'android_accessibility': ['mschillaci+watcha11y@google.com',
                               'zhangwenyu+watcha11y@google.com',
                               'cambickel+watcha11y@google.com',
-                              'michaelcheco+watcha11y@google.com'],
+                              'michaelcheco+watcha11y@google.com',
+                              'jhawkins+watcha11y@google.com'],
     'android_browser_controls': ['peilinwang+watch@google.com'],
     'android_crash_reporting': ['asvitkine+watch@chromium.org',
                                 'wnwen+watch@chromium.org'],
@@ -2526,7 +2521,6 @@
     'android_webview_network_service': [],
     'android_webview_webexposed': ['ashleynewson+watch-webexposed@chromium.org',
                                    'peter+watch-webexposed@chromium.org'],
-    'app_service': ['tsergeant+watch@chromium.org'],
     'app_service_protos': ['cros-reporting-team+watch@google.com',
                            'vshenvi+watch@google.com'],
     'app_shortcuts': ['loyso+watch@chromium.org',
@@ -2631,8 +2625,7 @@
                   'blink-reviews-css@chromium.org'],
     'blink_css_flexbox': ['cbiesinger@chromium.org'],
     'blink_css_fragmentation_tests': ['mstensho@chromium.org'],
-    'blink_css_grid_layout': ['jfernandez@igalia.com',
-                              'obrufau@igalia.com'],
+    'blink_css_grid_layout': ['jfernandez@igalia.com'],
     'blink_custom_elements': ['dominicc+watchlist@chromium.org'],
     'blink_device_orientation': ['kubo@igalia.com'],
     'blink_devtools': ['devtools-reviews+blink@chromium.org'],
@@ -3115,6 +3108,7 @@
     'network_service': ['network-service-reviews@chromium.org'],
     'nfc': ['mattreynolds+watch@chromium.org',
             'rijubrata.bhaumik@intel.com'],
+    'notification_content_detection': ['skrakowi@chromium.org'],
     'notifications': ['peter@chromium.org'],
     'nqe': ['tbansal+watch-nqe@chromium.org'],
     'ntp_snippets': ['ntp-dev+reviews@chromium.org'],

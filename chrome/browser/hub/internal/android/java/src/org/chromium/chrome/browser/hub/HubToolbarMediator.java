@@ -15,7 +15,6 @@ import static org.chromium.chrome.browser.hub.HubToolbarProperties.PANE_SWITCHER
 import static org.chromium.chrome.browser.hub.HubToolbarProperties.SEARCH_BOX_VISIBLE;
 import static org.chromium.chrome.browser.hub.HubToolbarProperties.SEARCH_LISTENER;
 import static org.chromium.chrome.browser.hub.HubToolbarProperties.SEARCH_LOUPE_VISIBLE;
-import static org.chromium.chrome.browser.hub.HubToolbarProperties.SHOW_ACTION_BUTTON_TEXT;
 import static org.chromium.chrome.browser.hub.HubToolbarProperties.TOOLBAR_OVERVIEW_COLOR_SETTER;
 
 import android.content.ComponentCallbacks;
@@ -34,7 +33,6 @@ import org.chromium.base.metrics.RecordHistogram;
 import org.chromium.base.supplier.ObservableSupplier;
 import org.chromium.base.supplier.ObservableSupplierImpl;
 import org.chromium.base.supplier.TransitiveObservableSupplier;
-import org.chromium.chrome.browser.flags.ChromeFeatureList;
 import org.chromium.chrome.browser.hub.HubToolbarProperties.PaneButtonLookup;
 import org.chromium.chrome.browser.ui.searchactivityutils.SearchActivityClient;
 import org.chromium.chrome.browser.ui.searchactivityutils.SearchActivityExtras.ResolutionType;
@@ -95,8 +93,6 @@ public class HubToolbarMediator {
                     mPropertyModel.set(APPLY_DELAY_FOR_SEARCH_BOX_ANIMATION, false);
                     mPropertyModel.set(SEARCH_BOX_VISIBLE, !showLoupe);
                     mPropertyModel.set(SEARCH_LOUPE_VISIBLE, showLoupe);
-
-                    updateShowActionButtonText();
                 }
 
                 @Override
@@ -253,25 +249,6 @@ public class HubToolbarMediator {
         }
         mPropertyModel.set(PANE_SWITCHER_INDEX, selectedIndex);
         mPropertyModel.set(PANE_SWITCHER_BUTTON_DATA, buttonDataList);
-        updateShowActionButtonText();
-    }
-
-    private void updateShowActionButtonText() {
-        @Nullable List<FullButtonData> buttonData = mPropertyModel.get(PANE_SWITCHER_BUTTON_DATA);
-        if (buttonData == null) return;
-
-        int screenWidthDp = mContext.getResources().getConfiguration().screenWidthDp;
-        boolean showText = shouldShowActionButtonText(buttonData.size(), screenWidthDp);
-
-        mPropertyModel.set(SHOW_ACTION_BUTTON_TEXT, showText);
-    }
-
-    private static boolean shouldShowActionButtonText(int buttonCount, int screenWidthDp) {
-        if (ChromeFeatureList.sTabSwitcherFullNewTabButton.isEnabled()) {
-            return buttonCount <= (isScreenWidthTablet(screenWidthDp) ? 3 : 2);
-        } else {
-            return buttonCount <= 1;
-        }
     }
 
     private void onFocusedPaneChange(@Nullable Pane focusedPane) {

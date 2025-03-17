@@ -5,6 +5,7 @@
 #include "components/optimization_guide/content/browser/page_content_proto_util.h"
 
 #include "base/test/bind.h"
+#include "components/optimization_guide/content/browser/page_content_proto_provider.h"
 #include "testing/gtest/include/gtest/gtest.h"
 #include "third_party/blink/public/mojom/content_extraction/ai_page_content.mojom.h"
 #include "third_party/blink/renderer/platform/graphics/color.h"
@@ -58,7 +59,7 @@ content::GlobalRenderFrameHostToken CreateFrameToken() {
 }
 
 bool ConvertAIPageContentToProto(blink::mojom::AIPageContentPtr& root_content,
-                                 proto::AnnotatedPageContent& proto) {
+                                 AIPageContentResult& page_content) {
   auto main_frame_token = CreateFrameToken();
   AIPageContentMap page_content_map;
   page_content_map[main_frame_token] = std::move(root_content);
@@ -69,7 +70,7 @@ bool ConvertAIPageContentToProto(blink::mojom::AIPageContentPtr& root_content,
       });
 
   return ConvertAIPageContentToProto(main_frame_token, page_content_map,
-                                     get_render_frame_info, &proto);
+                                     get_render_frame_info, page_content);
 }
 
 void CheckTextNodeProto(const proto::ContentNode& node_proto,
@@ -101,9 +102,9 @@ TEST(PageContentProtoUtilTest, IframeNodeWithNoData) {
         NOTREACHED();
       });
 
-  proto::AnnotatedPageContent proto;
+  AIPageContentResult page_content;
   EXPECT_FALSE(ConvertAIPageContentToProto(main_frame_token, page_content_map,
-                                           get_render_frame_info, &proto));
+                                           get_render_frame_info, page_content));
 }
 
 TEST(PageContentProtoUtilTest, IframeDestroyed) {
@@ -129,9 +130,9 @@ TEST(PageContentProtoUtilTest, IframeDestroyed) {
         return std::nullopt;
       });
 
-  proto::AnnotatedPageContent proto;
+  AIPageContentResult page_content;
   EXPECT_FALSE(ConvertAIPageContentToProto(main_frame_token, page_content_map,
-                                           get_render_frame_info, &proto));
+                                           get_render_frame_info, page_content));
   ASSERT_TRUE(query_token.has_value());
   EXPECT_EQ(iframe_token.frame_token, *query_token);
 }
@@ -142,12 +143,12 @@ TEST(PageContentProtoUtilTest, Basic) {
       CreateTextNode("text", blink::mojom::AIPageContentTextSize::kXS,
                      /*has_emphasis=*/false, blink::Color(0, 0, 0).Rgb()));
 
-  proto::AnnotatedPageContent proto;
-  EXPECT_TRUE(ConvertAIPageContentToProto(root_content, proto));
+  AIPageContentResult page_content;
+  EXPECT_TRUE(ConvertAIPageContentToProto(root_content, page_content));
 
-  EXPECT_EQ(proto.version(),
+  EXPECT_EQ(page_content.proto.version(),
             optimization_guide::proto::ANNOTATED_PAGE_CONTENT_VERSION_1_0);
-  ASSERT_EQ(proto.root_node().children_nodes_size(), 1);
+  ASSERT_EQ(page_content.proto.root_node().children_nodes_size(), 1);
 }
 
 TEST(PageContentProtoUtilTest, ConvertTextInfo) {
@@ -178,26 +179,26 @@ TEST(PageContentProtoUtilTest, ConvertTextInfo) {
   root_content->root_node->children_nodes.emplace_back(
       std::move(xl_white_text_node));
 
-  proto::AnnotatedPageContent proto;
-  EXPECT_TRUE(ConvertAIPageContentToProto(root_content, proto));
+  AIPageContentResult page_content;
+  EXPECT_TRUE(ConvertAIPageContentToProto(root_content, page_content));
 
-  EXPECT_EQ(proto.version(),
+  EXPECT_EQ(page_content.proto.version(),
             optimization_guide::proto::ANNOTATED_PAGE_CONTENT_VERSION_1_0);
-  ASSERT_EQ(proto.root_node().children_nodes_size(), 5);
+  ASSERT_EQ(page_content.proto.root_node().children_nodes_size(), 5);
 
-  CheckTextNodeProto(proto.root_node().children_nodes(0), "XS text",
+  CheckTextNodeProto(page_content.proto.root_node().children_nodes(0), "XS text",
                      optimization_guide::proto::TEXT_SIZE_XS,
                      /*has_emphasis=*/false, blink::Color(0, 0, 0).Rgb());
-  CheckTextNodeProto(proto.root_node().children_nodes(1), "S text",
+  CheckTextNodeProto(page_content.proto.root_node().children_nodes(1), "S text",
                      optimization_guide::proto::TEXT_SIZE_S,
                      /*has_emphasis=*/true, blink::Color(255, 0, 0).Rgb());
-  CheckTextNodeProto(proto.root_node().children_nodes(2), "M text",
+  CheckTextNodeProto(page_content.proto.root_node().children_nodes(2), "M text",
                      optimization_guide::proto::TEXT_SIZE_M_DEFAULT,
                      /*has_emphasis=*/false, blink::Color(0, 255, 0).Rgb());
-  CheckTextNodeProto(proto.root_node().children_nodes(3), "L text",
+  CheckTextNodeProto(page_content.proto.root_node().children_nodes(3), "L text",
                      optimization_guide::proto::TEXT_SIZE_L,
                      /*has_emphasis=*/true, blink::Color(0, 0, 255).Rgb());
-  CheckTextNodeProto(proto.root_node().children_nodes(4), "XL text",
+  CheckTextNodeProto(page_content.proto.root_node().children_nodes(4), "XL text",
                      optimization_guide::proto::TEXT_SIZE_XL,
                      /*has_emphasis=*/false, blink::Color(255, 255, 255).Rgb());
 }
@@ -210,8 +211,8 @@ TEST(PageContentProtoUtilTest, AttributeTypeDoesNotMatchData_Text) {
       blink::mojom::AIPageContentImageInfo::New();
   root_content->root_node->children_nodes.emplace_back(std::move(text_node));
 
-  proto::AnnotatedPageContent proto;
-  EXPECT_FALSE(ConvertAIPageContentToProto(root_content, proto));
+  AIPageContentResult page_content;
+  EXPECT_FALSE(ConvertAIPageContentToProto(root_content, page_content));
 }
 
 TEST(PageContentProtoUtilTest, ConvertImageInfo) {
@@ -225,18 +226,18 @@ TEST(PageContentProtoUtilTest, ConvertImageInfo) {
       url::Origin::Create(GURL("https://example.com/image.png"));
   root_content->root_node->children_nodes.emplace_back(std::move(image_node));
 
-  proto::AnnotatedPageContent proto;
-  EXPECT_TRUE(ConvertAIPageContentToProto(root_content, proto));
+  AIPageContentResult page_content;
+  EXPECT_TRUE(ConvertAIPageContentToProto(root_content, page_content));
 
-  EXPECT_EQ(proto.version(),
+  EXPECT_EQ(page_content.proto.version(),
             optimization_guide::proto::ANNOTATED_PAGE_CONTENT_VERSION_1_0);
-  ASSERT_EQ(proto.root_node().children_nodes_size(), 1);
+  ASSERT_EQ(page_content.proto.root_node().children_nodes_size(), 1);
 
   EXPECT_EQ(
-      proto.root_node().children_nodes(0).content_attributes().attribute_type(),
+      page_content.proto.root_node().children_nodes(0).content_attributes().attribute_type(),
       optimization_guide::proto::CONTENT_ATTRIBUTE_IMAGE);
   const auto& image_data =
-      proto.root_node().children_nodes(0).content_attributes().image_data();
+      page_content.proto.root_node().children_nodes(0).content_attributes().image_data();
   EXPECT_EQ(image_data.image_caption(), "image caption");
   EXPECT_EQ(image_data.source_url(), GURL("https://example.com"));
 }
@@ -249,8 +250,8 @@ TEST(PageContentProtoUtilTest, AttributeTypeDoesNotMatchData_Image) {
       blink::mojom::AIPageContentTextInfo::New();
   root_content->root_node->children_nodes.emplace_back(std::move(image_node));
 
-  proto::AnnotatedPageContent proto;
-  EXPECT_FALSE(ConvertAIPageContentToProto(root_content, proto));
+  AIPageContentResult page_content;
+  EXPECT_FALSE(ConvertAIPageContentToProto(root_content, page_content));
 }
 
 TEST(PageContentProtoUtilTest, ConvertAnchorData) {
@@ -275,17 +276,17 @@ TEST(PageContentProtoUtilTest, ConvertAnchorData) {
       blink::mojom::AIPageContentAnchorRel::kRelationTermsOfService);
   root_content->root_node->children_nodes.emplace_back(std::move(anchor_node));
 
-  proto::AnnotatedPageContent proto;
-  EXPECT_TRUE(ConvertAIPageContentToProto(root_content, proto));
+  AIPageContentResult page_content;
+  EXPECT_TRUE(ConvertAIPageContentToProto(root_content, page_content));
 
-  EXPECT_EQ(proto.version(),
+  EXPECT_EQ(page_content.proto.version(),
             optimization_guide::proto::ANNOTATED_PAGE_CONTENT_VERSION_1_0);
-  ASSERT_EQ(proto.root_node().children_nodes_size(), 1);
+  ASSERT_EQ(page_content.proto.root_node().children_nodes_size(), 1);
   EXPECT_EQ(
-      proto.root_node().children_nodes(0).content_attributes().attribute_type(),
+      page_content.proto.root_node().children_nodes(0).content_attributes().attribute_type(),
       optimization_guide::proto::CONTENT_ATTRIBUTE_ANCHOR);
   const auto& anchor_data =
-      proto.root_node().children_nodes(0).content_attributes().anchor_data();
+      page_content.proto.root_node().children_nodes(0).content_attributes().anchor_data();
   EXPECT_EQ(anchor_data.url(), GURL("https://example.com/anchor"));
   EXPECT_EQ(anchor_data.rel_size(), 6);
   EXPECT_EQ(anchor_data.rel(0), optimization_guide::proto::ANCHOR_REL_UNKNOWN);
@@ -308,8 +309,8 @@ TEST(PageContentProtoUtilTest, AttributeTypeDoesNotMatchData_Anchor) {
       blink::mojom::AIPageContentTableData::New();
   root_content->root_node->children_nodes.emplace_back(std::move(anchor_node));
 
-  proto::AnnotatedPageContent proto;
-  EXPECT_FALSE(ConvertAIPageContentToProto(root_content, proto));
+  AIPageContentResult page_content;
+  EXPECT_FALSE(ConvertAIPageContentToProto(root_content, page_content));
 }
 
 TEST(PageContentProtoUtilTest, ConvertTableData) {
@@ -321,17 +322,17 @@ TEST(PageContentProtoUtilTest, ConvertTableData) {
   table_node->content_attributes->table_data->table_name = "table name";
   root_content->root_node->children_nodes.emplace_back(std::move(table_node));
 
-  proto::AnnotatedPageContent proto;
-  EXPECT_TRUE(ConvertAIPageContentToProto(root_content, proto));
+  AIPageContentResult page_content;
+  EXPECT_TRUE(ConvertAIPageContentToProto(root_content, page_content));
 
-  EXPECT_EQ(proto.version(),
+  EXPECT_EQ(page_content.proto.version(),
             optimization_guide::proto::ANNOTATED_PAGE_CONTENT_VERSION_1_0);
-  ASSERT_EQ(proto.root_node().children_nodes_size(), 1);
+  ASSERT_EQ(page_content.proto.root_node().children_nodes_size(), 1);
   EXPECT_EQ(
-      proto.root_node().children_nodes(0).content_attributes().attribute_type(),
+      page_content.proto.root_node().children_nodes(0).content_attributes().attribute_type(),
       optimization_guide::proto::CONTENT_ATTRIBUTE_TABLE);
   const auto& table_data =
-      proto.root_node().children_nodes(0).content_attributes().table_data();
+      page_content.proto.root_node().children_nodes(0).content_attributes().table_data();
   EXPECT_EQ(table_data.table_name(), "table name");
 }
 
@@ -343,8 +344,8 @@ TEST(PageContentProtoUtilTest, AttributeTypeDoesNotMatchData_Table) {
       blink::mojom::AIPageContentAnchorData::New();
   root_content->root_node->children_nodes.emplace_back(std::move(table_node));
 
-  proto::AnnotatedPageContent proto;
-  EXPECT_FALSE(ConvertAIPageContentToProto(root_content, proto));
+  AIPageContentResult page_content;
+  EXPECT_FALSE(ConvertAIPageContentToProto(root_content, page_content));
 }
 
 TEST(PageContentProtoUtilTest, ConvertTableRowData) {
@@ -374,18 +375,18 @@ TEST(PageContentProtoUtilTest, ConvertTableRowData) {
   root_content->root_node->children_nodes.emplace_back(
       std::move(footer_row_node));
 
-  proto::AnnotatedPageContent proto;
-  EXPECT_TRUE(ConvertAIPageContentToProto(root_content, proto));
+  AIPageContentResult page_content;
+  EXPECT_TRUE(ConvertAIPageContentToProto(root_content, page_content));
 
-  EXPECT_EQ(proto.version(),
+  EXPECT_EQ(page_content.proto.version(),
             optimization_guide::proto::ANNOTATED_PAGE_CONTENT_VERSION_1_0);
-  ASSERT_EQ(proto.root_node().children_nodes_size(), 3);
+  ASSERT_EQ(page_content.proto.root_node().children_nodes_size(), 3);
   const auto& header_row_attributes =
-      proto.root_node().children_nodes(0).content_attributes();
+      page_content.proto.root_node().children_nodes(0).content_attributes();
   const auto& body_row_attributes =
-      proto.root_node().children_nodes(1).content_attributes();
+      page_content.proto.root_node().children_nodes(1).content_attributes();
   const auto& footer_row_attributes =
-      proto.root_node().children_nodes(2).content_attributes();
+      page_content.proto.root_node().children_nodes(2).content_attributes();
   EXPECT_EQ(header_row_attributes.attribute_type(),
             optimization_guide::proto::CONTENT_ATTRIBUTE_TABLE_ROW);
   EXPECT_EQ(body_row_attributes.attribute_type(),
@@ -409,11 +410,77 @@ TEST(PageContentProtoUtilTest, AttributeTypeDoesNotMatchData_TableRow) {
   root_content->root_node->children_nodes.emplace_back(
       std::move(table_row_node));
 
-  proto::AnnotatedPageContent proto;
-  EXPECT_FALSE(ConvertAIPageContentToProto(root_content, proto));
+  AIPageContentResult page_content;
+  EXPECT_FALSE(ConvertAIPageContentToProto(root_content, page_content));
 }
 
-// TODO(crbug.com/385159723): Add tests for ConvertIFrameData.
+TEST(PageContentProtoUtilTest, ConvertIframeData) {
+  auto main_frame_token = CreateFrameToken();
+  auto root_content = CreatePageContent();
+  root_content->root_node->children_nodes.emplace_back(
+      CreateContentNode(blink::mojom::AIPageContentAttributeType::kIframe));
+
+  auto iframe_token = CreateFrameToken();
+  auto iframe_data = blink::mojom::AIPageContentIframeData::New();
+  iframe_data->frame_token = iframe_token.frame_token;
+  iframe_data->likely_ad_frame = true;
+  iframe_data->local_frame_data = blink::mojom::AIPageContentFrameData::New();
+  iframe_data->local_frame_data->frame_interaction_info =
+      blink::mojom::AIPageContentFrameInteractionInfo::New();
+  iframe_data->local_frame_data->frame_interaction_info->selection =
+      blink::mojom::AIPageContentSelection::New();
+  iframe_data->local_frame_data->frame_interaction_info->selection
+      ->selected_text = "selected text";
+  iframe_data->local_frame_data->frame_interaction_info->selection
+      ->start_node_id = 1;
+  iframe_data->local_frame_data->frame_interaction_info->selection
+      ->end_node_id = 2;
+  iframe_data->local_frame_data->frame_interaction_info->selection
+      ->start_offset = 3;
+  iframe_data->local_frame_data->frame_interaction_info->selection->end_offset =
+      4;
+  root_content->root_node->children_nodes.back()
+      ->content_attributes->iframe_data = std::move(iframe_data);
+
+  AIPageContentMap page_content_map;
+  page_content_map[main_frame_token] = std::move(root_content);
+
+  std::optional<blink::FrameToken> query_token;
+  auto get_render_frame_info = base::BindLambdaForTesting(
+      [&](int child_process_id,
+          blink::FrameToken token) -> std::optional<RenderFrameInfo> {
+        query_token = token;
+        RenderFrameInfo render_frame_info;
+        render_frame_info.global_frame_token = iframe_token;
+        render_frame_info.source_origin =
+            url::Origin::Create(GURL("https://example.com"));
+        return render_frame_info;
+      });
+
+  AIPageContentResult page_content;
+  EXPECT_TRUE(ConvertAIPageContentToProto(main_frame_token, page_content_map,
+                                          get_render_frame_info, page_content));
+  ASSERT_TRUE(query_token.has_value());
+  EXPECT_EQ(iframe_token.frame_token, *query_token);
+
+  EXPECT_EQ(page_content.proto.version(),
+            optimization_guide::proto::ANNOTATED_PAGE_CONTENT_VERSION_1_0);
+  ASSERT_EQ(page_content.proto.root_node().children_nodes_size(), 1);
+  EXPECT_EQ(
+      page_content.proto.root_node().children_nodes(0).content_attributes().attribute_type(),
+      optimization_guide::proto::CONTENT_ATTRIBUTE_IFRAME);
+  const auto& proto_iframe_data =
+      page_content.proto.root_node().children_nodes(0).content_attributes().iframe_data();
+  EXPECT_TRUE(proto_iframe_data.likely_ad_frame());
+  const auto& frame_interaction_info =
+      proto_iframe_data.frame_data().frame_interaction_info();
+  const auto& selection = frame_interaction_info.selection();
+  EXPECT_EQ(selection.selected_text(), "selected text");
+  EXPECT_EQ(selection.start_node_id(), 1);
+  EXPECT_EQ(selection.end_node_id(), 2);
+  EXPECT_EQ(selection.start_offset(), 3);
+  EXPECT_EQ(selection.end_offset(), 4);
+}
 
 TEST(PageContentProtoUtilTest, AttributeTypeDoesNotMatchData_Form) {
   auto root_content = CreatePageContent();
@@ -423,8 +490,8 @@ TEST(PageContentProtoUtilTest, AttributeTypeDoesNotMatchData_Form) {
       blink::mojom::AIPageContentTableRowData::New();
   root_content->root_node->children_nodes.emplace_back(std::move(form_node));
 
-  proto::AnnotatedPageContent proto;
-  EXPECT_FALSE(ConvertAIPageContentToProto(root_content, proto));
+  AIPageContentResult page_content;
+  EXPECT_FALSE(ConvertAIPageContentToProto(root_content, page_content));
 }
 
 TEST(PageContentProtoUtilTest, ConvertGeometry) {
@@ -440,17 +507,17 @@ TEST(PageContentProtoUtilTest, ConvertGeometry) {
   text_node->content_attributes->geometry->is_fixed_or_sticky_position = true;
   root_content->root_node->children_nodes.emplace_back(std::move(text_node));
 
-  proto::AnnotatedPageContent proto;
-  EXPECT_TRUE(ConvertAIPageContentToProto(root_content, proto));
+  AIPageContentResult page_content;
+  EXPECT_TRUE(ConvertAIPageContentToProto(root_content, page_content));
 
-  EXPECT_EQ(proto.version(),
+  EXPECT_EQ(page_content.proto.version(),
             optimization_guide::proto::ANNOTATED_PAGE_CONTENT_VERSION_1_0);
-  ASSERT_EQ(proto.root_node().children_nodes_size(), 1);
+  ASSERT_EQ(page_content.proto.root_node().children_nodes_size(), 1);
   EXPECT_EQ(
-      proto.root_node().children_nodes(0).content_attributes().attribute_type(),
+      page_content.proto.root_node().children_nodes(0).content_attributes().attribute_type(),
       optimization_guide::proto::CONTENT_ATTRIBUTE_TEXT);
   const auto& geometry =
-      proto.root_node().children_nodes(0).content_attributes().geometry();
+      page_content.proto.root_node().children_nodes(0).content_attributes().geometry();
   EXPECT_EQ(geometry.outer_bounding_box().x(), 10);
   EXPECT_EQ(geometry.outer_bounding_box().y(), 20);
   EXPECT_EQ(geometry.outer_bounding_box().width(), 30);
@@ -462,34 +529,37 @@ TEST(PageContentProtoUtilTest, ConvertGeometry) {
   EXPECT_TRUE(geometry.is_fixed_or_sticky_position());
 }
 
-TEST(PageContentProtoUtilTest, ConvertInteractionInfo) {
+TEST(PageContentProtoUtilTest, ConvertNodeInteractionInfo) {
   auto root_content = CreatePageContent();
   auto text_node =
       CreateContentNode(blink::mojom::AIPageContentAttributeType::kText);
-  text_node->content_attributes->interaction_info =
-      blink::mojom::AIPageContentInteractionInfo::New();
-  text_node->content_attributes->interaction_info->scrolls_overflow_x = true;
-  text_node->content_attributes->interaction_info->scrolls_overflow_y = true;
-  text_node->content_attributes->interaction_info->is_selectable = true;
-  text_node->content_attributes->interaction_info->is_editable = true;
-  text_node->content_attributes->interaction_info->can_resize_horizontal = true;
-  text_node->content_attributes->interaction_info->can_resize_vertical = true;
-  text_node->content_attributes->interaction_info->is_focusable = true;
-  text_node->content_attributes->interaction_info->is_focused = true;
-  text_node->content_attributes->interaction_info->is_draggable = true;
-  text_node->content_attributes->interaction_info->is_clickable = true;
+  text_node->content_attributes->node_interaction_info =
+      blink::mojom::AIPageContentNodeInteractionInfo::New();
+  text_node->content_attributes->node_interaction_info->scrolls_overflow_x =
+      true;
+  text_node->content_attributes->node_interaction_info->scrolls_overflow_y =
+      true;
+  text_node->content_attributes->node_interaction_info->is_selectable = true;
+  text_node->content_attributes->node_interaction_info->is_editable = true;
+  text_node->content_attributes->node_interaction_info->can_resize_horizontal =
+      true;
+  text_node->content_attributes->node_interaction_info->can_resize_vertical =
+      true;
+  text_node->content_attributes->node_interaction_info->is_focusable = true;
+  text_node->content_attributes->node_interaction_info->is_draggable = true;
+  text_node->content_attributes->node_interaction_info->is_clickable = true;
   root_content->root_node->children_nodes.emplace_back(std::move(text_node));
 
-  proto::AnnotatedPageContent proto;
-  EXPECT_TRUE(ConvertAIPageContentToProto(root_content, proto));
+  AIPageContentResult page_content;
+  EXPECT_TRUE(ConvertAIPageContentToProto(root_content, page_content));
 
-  EXPECT_EQ(proto.version(),
+  EXPECT_EQ(page_content.proto.version(),
             optimization_guide::proto::ANNOTATED_PAGE_CONTENT_VERSION_1_0);
-  ASSERT_EQ(proto.root_node().children_nodes_size(), 1);
+  ASSERT_EQ(page_content.proto.root_node().children_nodes_size(), 1);
   EXPECT_EQ(
-      proto.root_node().children_nodes(0).content_attributes().attribute_type(),
+      page_content.proto.root_node().children_nodes(0).content_attributes().attribute_type(),
       optimization_guide::proto::CONTENT_ATTRIBUTE_TEXT);
-  const auto& interaction_info = proto.root_node()
+  const auto& interaction_info = page_content.proto.root_node()
                                      .children_nodes(0)
                                      .content_attributes()
                                      .interaction_info();
@@ -500,9 +570,62 @@ TEST(PageContentProtoUtilTest, ConvertInteractionInfo) {
   EXPECT_TRUE(interaction_info.can_resize_horizontal());
   EXPECT_TRUE(interaction_info.can_resize_vertical());
   EXPECT_TRUE(interaction_info.is_focusable());
-  EXPECT_TRUE(interaction_info.is_focused());
   EXPECT_TRUE(interaction_info.is_draggable());
   EXPECT_TRUE(interaction_info.is_clickable());
+}
+
+TEST(PageContentProtoUtilTest, ConvertPageInteractionInfo) {
+  auto root_content = CreatePageContent();
+  root_content->page_interaction_info =
+      blink::mojom::AIPageContentPageInteractionInfo::New();
+  root_content->page_interaction_info->focused_node_id = 1;
+  root_content->page_interaction_info->accessibility_focused_node_id = 2;
+  root_content->page_interaction_info->mouse_position = gfx::Point(10, 20);
+
+  AIPageContentResult page_content;
+  EXPECT_TRUE(ConvertAIPageContentToProto(root_content, page_content));
+
+  EXPECT_EQ(page_content.proto.version(),
+            optimization_guide::proto::ANNOTATED_PAGE_CONTENT_VERSION_1_0);
+  const auto& page_interaction_info = page_content.proto.page_interaction_info();
+  EXPECT_EQ(page_interaction_info.focused_node_id(), 1);
+  EXPECT_EQ(page_interaction_info.accessibility_focused_node_id(), 2);
+  EXPECT_EQ(page_interaction_info.mouse_position().x(), 10);
+  EXPECT_EQ(page_interaction_info.mouse_position().y(), 20);
+}
+
+TEST(PageContentProtoUtilTest, ConvertMainFrameInteractionInfo) {
+  auto root_content = CreatePageContent();
+
+  auto frame_data = blink::mojom::AIPageContentFrameData::New();
+  // blink::mojom::AIPageContentFrameData frame_data;
+
+  frame_data->frame_interaction_info =
+      blink::mojom::AIPageContentFrameInteractionInfo::New();
+  frame_data->frame_interaction_info->selection =
+      blink::mojom::AIPageContentSelection::New();
+  frame_data->frame_interaction_info->selection->selected_text =
+      "selected text";
+  frame_data->frame_interaction_info->selection->start_node_id = 1u;
+  frame_data->frame_interaction_info->selection->end_node_id = 2u;
+  frame_data->frame_interaction_info->selection->start_offset = 3u;
+  frame_data->frame_interaction_info->selection->end_offset = 4u;
+
+  root_content->frame_data = std::move(frame_data);
+
+  AIPageContentResult page_content;
+  EXPECT_TRUE(ConvertAIPageContentToProto(root_content, page_content));
+
+  EXPECT_EQ(page_content.proto.version(),
+            optimization_guide::proto::ANNOTATED_PAGE_CONTENT_VERSION_1_0);
+  const auto& main_frame_data = page_content.proto.main_frame_data();
+  const auto& frame_interaction_info = main_frame_data.frame_interaction_info();
+  const auto& selection = frame_interaction_info.selection();
+  EXPECT_EQ(selection.selected_text(), "selected text");
+  EXPECT_EQ(selection.start_node_id(), 1);
+  EXPECT_EQ(selection.end_node_id(), 2);
+  EXPECT_EQ(selection.start_offset(), 3);
+  EXPECT_EQ(selection.end_offset(), 4);
 }
 
 TEST(PageContentProtoUtilTest, ConvertAnnotatedRoles) {
@@ -528,14 +651,14 @@ TEST(PageContentProtoUtilTest, ConvertAnnotatedRoles) {
   root_content->root_node->children_nodes.emplace_back(
       std::move(container_node));
 
-  proto::AnnotatedPageContent proto;
-  EXPECT_TRUE(ConvertAIPageContentToProto(root_content, proto));
+  AIPageContentResult page_content;
+  EXPECT_TRUE(ConvertAIPageContentToProto(root_content, page_content));
 
-  EXPECT_EQ(proto.version(),
+  EXPECT_EQ(page_content.proto.version(),
             optimization_guide::proto::ANNOTATED_PAGE_CONTENT_VERSION_1_0);
-  ASSERT_EQ(proto.root_node().children_nodes_size(), 1);
+  ASSERT_EQ(page_content.proto.root_node().children_nodes_size(), 1);
   const auto& container_node_attributes_proto =
-      proto.root_node().children_nodes(0).content_attributes();
+      page_content.proto.root_node().children_nodes(0).content_attributes();
   EXPECT_EQ(container_node_attributes_proto.attribute_type(),
             optimization_guide::proto::CONTENT_ATTRIBUTE_CONTAINER);
   EXPECT_EQ(container_node_attributes_proto.annotated_roles_size(), 8);
@@ -566,14 +689,14 @@ TEST(PageContentProtoUtilTest, ConvertFormData) {
   form_node->content_attributes->form_data->form_name = "form name";
   root_content->root_node->children_nodes.emplace_back(std::move(form_node));
 
-  proto::AnnotatedPageContent proto;
-  EXPECT_TRUE(ConvertAIPageContentToProto(root_content, proto));
+  AIPageContentResult page_content;
+  EXPECT_TRUE(ConvertAIPageContentToProto(root_content, page_content));
 
-  EXPECT_EQ(proto.version(),
+  EXPECT_EQ(page_content.proto.version(),
             optimization_guide::proto::ANNOTATED_PAGE_CONTENT_VERSION_1_0);
-  ASSERT_EQ(proto.root_node().children_nodes_size(), 1);
+  ASSERT_EQ(page_content.proto.root_node().children_nodes_size(), 1);
   const auto& form_data_proto =
-      proto.root_node().children_nodes(0).content_attributes().form_data();
+      page_content.proto.root_node().children_nodes(0).content_attributes().form_data();
   EXPECT_EQ(form_data_proto.form_name(), "form name");
 }
 
@@ -604,13 +727,13 @@ TEST(PageContentProtoUtilTest, ConvertFormControlData) {
   root_content->root_node->children_nodes.emplace_back(
       std::move(form_control_node));
 
-  proto::AnnotatedPageContent proto;
-  EXPECT_TRUE(ConvertAIPageContentToProto(root_content, proto));
+  AIPageContentResult page_content;
+  EXPECT_TRUE(ConvertAIPageContentToProto(root_content, page_content));
 
-  EXPECT_EQ(proto.version(),
+  EXPECT_EQ(page_content.proto.version(),
             optimization_guide::proto::ANNOTATED_PAGE_CONTENT_VERSION_1_0);
-  ASSERT_EQ(proto.root_node().children_nodes_size(), 1);
-  const auto& form_control_data_proto = proto.root_node()
+  ASSERT_EQ(page_content.proto.root_node().children_nodes_size(), 1);
+  const auto& form_control_data_proto = page_content.proto.root_node()
                                             .children_nodes(0)
                                             .content_attributes()
                                             .form_control_data();
@@ -635,14 +758,14 @@ TEST(PageContentProtoUtilTest, ConvertNodeId) {
   root_content->root_node->children_nodes[0]
       ->content_attributes->content_node_id = 2;
 
-  proto::AnnotatedPageContent proto;
-  EXPECT_TRUE(ConvertAIPageContentToProto(root_content, proto));
+  AIPageContentResult page_content;
+  EXPECT_TRUE(ConvertAIPageContentToProto(root_content, page_content));
 
-  EXPECT_EQ(proto.version(),
+  EXPECT_EQ(page_content.proto.version(),
             optimization_guide::proto::ANNOTATED_PAGE_CONTENT_VERSION_1_0);
-  ASSERT_EQ(proto.root_node().children_nodes_size(), 1);
-  EXPECT_EQ(proto.root_node().content_attributes().content_node_id(), 1);
-  EXPECT_EQ(proto.root_node()
+  ASSERT_EQ(page_content.proto.root_node().children_nodes_size(), 1);
+  EXPECT_EQ(page_content.proto.root_node().content_attributes().content_node_id(), 1);
+  EXPECT_EQ(page_content.proto.root_node()
                 .children_nodes(0)
                 .content_attributes()
                 .content_node_id(),

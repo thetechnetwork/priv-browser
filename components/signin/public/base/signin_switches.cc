@@ -28,6 +28,12 @@ BASE_FEATURE(kHistoryOptInEntryPoints,
              "HistoryOptInEntryPoints",
              base::FEATURE_DISABLED_BY_DEFAULT);
 
+// Makes the History Page history opt-in promo use a different CTA String.
+// No-op unless "HistoryOptInEntryPoints" is enabled.
+BASE_FEATURE(kHistoryOptInPromoCtaStringVariation,
+             "HistoryOptInPromoCtaStringVariation",
+             base::FEATURE_DISABLED_BY_DEFAULT);
+
 // Add history opt-in IPH in settings on Android.
 BASE_FEATURE(kHistoryOptInIph,
              "HistoryOptInIph",
@@ -127,40 +133,29 @@ BASE_FEATURE(kForceStartupSigninPromo,
              base::FEATURE_DISABLED_BY_DEFAULT);
 #endif
 
-BASE_FEATURE(kExplicitBrowserSigninUIOnDesktop,
-             "ExplicitBrowserSigninUIOnDesktop",
-#if BUILDFLAG(IS_WIN) || BUILDFLAG(IS_MAC) || BUILDFLAG(IS_LINUX)
-             base::FEATURE_ENABLED_BY_DEFAULT
-#else
-             base::FEATURE_DISABLED_BY_DEFAULT
-#endif
-);
-
-const base::FeatureParam<bool> kInterceptBubblesDismissibleByAvatarButton{
-    &kExplicitBrowserSigninUIOnDesktop,
-    /*name=*/"bubble_dismissible_by_avatar_button",
-    /*default_value=*/true};
-
-bool IsExplicitBrowserSigninUIOnDesktopEnabled() {
-  return base::FeatureList::IsEnabled(kExplicitBrowserSigninUIOnDesktop);
-}
+BASE_FEATURE(kInterceptBubblesDismissibleByAvatarButton,
+             "InterceptBubblesDismissibleByAvatarButton",
+             base::FEATURE_ENABLED_BY_DEFAULT);
 
 BASE_FEATURE(kImprovedSigninUIOnDesktop,
              "ImprovedSigninUIOnDesktop",
-             base::FEATURE_DISABLED_BY_DEFAULT);
+             base::FEATURE_ENABLED_BY_DEFAULT);
 
 bool IsImprovedSigninUIOnDesktopEnabled() {
-  return IsExplicitBrowserSigninUIOnDesktopEnabled() &&
-         base::FeatureList::IsEnabled(kImprovedSigninUIOnDesktop);
+  return base::FeatureList::IsEnabled(kImprovedSigninUIOnDesktop);
 }
 
 BASE_FEATURE(kImprovedSettingsUIOnDesktop,
              "ImprovedSettingsUIOnDesktop",
-             base::FEATURE_DISABLED_BY_DEFAULT);
+#if BUILDFLAG(IS_CHROMEOS)
+             base::FEATURE_DISABLED_BY_DEFAULT
+#else
+             base::FEATURE_ENABLED_BY_DEFAULT
+#endif
+);
 
 bool IsImprovedSettingsUIOnDesktopEnabled() {
-  return IsExplicitBrowserSigninUIOnDesktopEnabled() &&
-         base::FeatureList::IsEnabled(kImprovedSettingsUIOnDesktop);
+  return base::FeatureList::IsEnabled(kImprovedSettingsUIOnDesktop);
 }
 
 BASE_FEATURE(kEnableSnackbarInSettings,
@@ -214,6 +209,15 @@ bool IsExtensionsExplicitBrowserSigninEnabled() {
   return base::FeatureList::IsEnabled(kEnableExtensionsExplicitBrowserSignin);
 }
 
+BASE_FEATURE(kSyncEnableBookmarksInTransportMode,
+             "SyncEnableBookmarksInTransportMode",
+#if BUILDFLAG(IS_IOS) || BUILDFLAG(IS_ANDROID)
+             base::FEATURE_ENABLED_BY_DEFAULT
+#else
+             base::FEATURE_DISABLED_BY_DEFAULT
+#endif  // BUILDFLAG(IS_IOS)
+);
+
 BASE_FEATURE(kDeferWebSigninTrackerCreation,
              "DeferWebSigninTrackerCreation",
              base::FEATURE_ENABLED_BY_DEFAULT);
@@ -241,7 +245,7 @@ BASE_FEATURE(kProfilesReordering,
 
 BASE_FEATURE(kOutlineSilhouetteIcon,
              "OutlineSilhouetteIcon",
-             base::FEATURE_DISABLED_BY_DEFAULT);
+             base::FEATURE_ENABLED_BY_DEFAULT);
 
 #if BUILDFLAG(IS_ANDROID)
 BASE_FEATURE(kIgnoreMirrorHeadersInBackgoundTabs,

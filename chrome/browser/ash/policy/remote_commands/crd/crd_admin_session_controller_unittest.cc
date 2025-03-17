@@ -66,6 +66,7 @@ using ::testing::Eq;
 
 constexpr char kTestUserName[] = "test-username";
 const SessionId kValidSessionId{678};
+const base::TimeDelta kAutoAcceptTimeout = base::Seconds(30);
 
 // Returns a valid response that can be sent to a `StartSupportSessionCallback`.
 StartSupportSessionResponsePtr AnyResponse() {
@@ -516,6 +517,42 @@ TEST_F(CrdAdminSessionControllerTest, ShouldPassUserNameToRemotingService) {
   EXPECT_EQ(actual_parameters->user_name, "<the-user-name>");
 }
 
+TEST_F(CrdAdminSessionControllerTest,
+       ShouldPassAutoAcceptTimeoutToRemotingService) {
+  InitWithNoReconnectableSession(session_controller());
+  SessionParameters parameters;
+  parameters.connection_auto_accept_timeout = kAutoAcceptTimeout;
+
+  remoting::ChromeOsEnterpriseParams actual_parameters;
+  EXPECT_CALL(remoting_service(), StartSession)
+      .WillOnce(SaveParamAndInvokeCallback(&actual_parameters));
+
+  delegate().StartCrdHostAndGetCode(parameters, success_callback(),
+                                    error_callback(),
+                                    session_finished_callback());
+
+  EXPECT_EQ(actual_parameters.connection_auto_accept_timeout,
+            kAutoAcceptTimeout);
+}
+
+TEST_F(CrdAdminSessionControllerTest,
+       ShouldNotPassAutoAcceptTimeoutIfUnsetToRemotingService) {
+  InitWithNoReconnectableSession(session_controller());
+  SessionParameters parameters;
+  parameters.connection_auto_accept_timeout = std::nullopt;
+
+  remoting::ChromeOsEnterpriseParams actual_parameters;
+  EXPECT_CALL(remoting_service(), StartSession)
+      .WillOnce(SaveParamAndInvokeCallback(&actual_parameters));
+
+  delegate().StartCrdHostAndGetCode(parameters, success_callback(),
+                                    error_callback(),
+                                    session_finished_callback());
+
+  EXPECT_EQ(actual_parameters.connection_auto_accept_timeout,
+            base::TimeDelta());
+}
+
 TEST_P(CrdAdminSessionControllerTestWithBoolParams,
        ShouldPassShowConfirmationDialogToRemotingService) {
   InitWithNoReconnectableSession(session_controller());
@@ -532,6 +569,7 @@ TEST_P(CrdAdminSessionControllerTestWithBoolParams,
 
   EXPECT_NE(actual_parameters.suppress_notifications, GetParam());
   EXPECT_NE(actual_parameters.suppress_user_dialogs, GetParam());
+  EXPECT_EQ(actual_parameters.connection_dialog_required, GetParam());
 }
 
 TEST_P(CrdAdminSessionControllerTestWithBoolParams,

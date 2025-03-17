@@ -129,7 +129,7 @@ class ChromePrivateNetworkDeviceDelegate;
 class ChromeSerialDelegate;
 class ChromeBluetoothDelegate;
 class ChromeUsbDelegate;
-class ChromeWebAuthenticationDelegate;
+class ChromeWebAuthenticationDelegateBase;
 class HttpAuthCoordinator;
 class MainThreadStackSamplingProfiler;
 class WindowsSystemTracingClient;
@@ -451,6 +451,9 @@ class ChromeContentBrowserClient : public content::ContentBrowserClient {
       content::BrowserContext* context) override;
   std::string GetWebUIHostnameForCodeCacheMetrics(
       const GURL& webui_url) const override;
+  bool IsWebUIBundledCodeCachingEnabled(
+      const GURL& webui_lock_url) const override;
+  base::flat_map<GURL, int> GetWebUIResourceUrlToCodeCacheMap() const override;
   void AllowCertificateError(
       content::WebContents* web_contents,
       int cert_error,
@@ -749,6 +752,7 @@ class ChromeContentBrowserClient : public content::ContentBrowserClient {
   bool IsSecurityLevelAcceptableForWebAuthn(
       content::RenderFrameHost* rfh,
       const url::Origin& caller_origin) override;
+  content::WebAuthenticationDelegate* GetWebAuthenticationDelegate() override;
 #if !BUILDFLAG(IS_ANDROID)
   void CreateDeviceInfoService(
       content::RenderFrameHost* render_frame_host,
@@ -759,7 +763,6 @@ class ChromeContentBrowserClient : public content::ContentBrowserClient {
       override;
   content::HidDelegate* GetHidDelegate() override;
   content::DirectSocketsDelegate* GetDirectSocketsDelegate() override;
-  content::WebAuthenticationDelegate* GetWebAuthenticationDelegate() override;
   std::unique_ptr<content::AuthenticatorRequestClientDelegate>
   GetWebAuthenticationRequestDelegate(
       content::RenderFrameHost* render_frame_host) override;
@@ -1167,6 +1170,8 @@ class ChromeContentBrowserClient : public content::ContentBrowserClient {
   void AddExtraPartForTesting(
       std::unique_ptr<ChromeContentBrowserClientParts> part);
 
+  bool ShouldEnableSubframeZoom() override;
+
  protected:
   static bool HandleWebUI(GURL* url, content::BrowserContext* browser_context);
   static bool HandleWebUIReverse(GURL* url,
@@ -1315,10 +1320,11 @@ class ChromeContentBrowserClient : public content::ContentBrowserClient {
 
   StartupData startup_data_;
 
+  std::unique_ptr<ChromeWebAuthenticationDelegateBase>
+      web_authentication_delegate_;
 #if !BUILDFLAG(IS_ANDROID)
   std::unique_ptr<ChromeHidDelegate> hid_delegate_;
   std::unique_ptr<ChromeDirectSocketsDelegate> direct_sockets_delegate_;
-  std::unique_ptr<ChromeWebAuthenticationDelegate> web_authentication_delegate_;
 #endif
   std::unique_ptr<ChromeBluetoothDelegate> bluetooth_delegate_;
   std::unique_ptr<ChromeUsbDelegate> usb_delegate_;

@@ -118,6 +118,8 @@ FEATURE_CONSTANTS_DECLARE_FEATURE(kIPHAndroidTabDeclutter);
 FEATURE_CONSTANTS_DECLARE_FEATURE(
     kIPHAdaptiveButtonInTopToolbarCustomizationNewTabFeature);
 FEATURE_CONSTANTS_DECLARE_FEATURE(
+    kIPHAdaptiveButtonInTopToolbarCustomizationOpenInBrowserFeature);
+FEATURE_CONSTANTS_DECLARE_FEATURE(
     kIPHAdaptiveButtonInTopToolbarCustomizationShareFeature);
 FEATURE_CONSTANTS_DECLARE_FEATURE(
     kIPHAdaptiveButtonInTopToolbarCustomizationVoiceSearchFeature);
@@ -255,7 +257,6 @@ FEATURE_CONSTANTS_DECLARE_FEATURE(
 FEATURE_CONSTANTS_DECLARE_FEATURE(
     kIPHiOSPromoNonModalShareDefaultBrowserFeature);
 FEATURE_CONSTANTS_DECLARE_FEATURE(kIPHiOSPromoPasswordManagerWidgetFeature);
-FEATURE_CONSTANTS_DECLARE_FEATURE(kIPHiOSParcelTrackingFeature);
 FEATURE_CONSTANTS_DECLARE_FEATURE(kIPHiOSPullToRefreshFeature);
 FEATURE_CONSTANTS_DECLARE_FEATURE(kIPHiOSReplaceSyncPromosWithSignInPromos);
 FEATURE_CONSTANTS_DECLARE_FEATURE(kIPHiOSTabGridSwipeRightForIncognito);
@@ -284,6 +285,7 @@ FEATURE_CONSTANTS_DECLARE_FEATURE(
     kIPHiOSReminderNotificationsOverflowMenuBubbleFeature);
 FEATURE_CONSTANTS_DECLARE_FEATURE(
     kIPHiOSReminderNotificationsOverflowMenuNewBadgeFeature);
+FEATURE_CONSTANTS_DECLARE_FEATURE(kIPHiOSSettingsInOverflowMenuBubbleFeature);
 
 // A feature flag to enable and parametrize the sliding window of time for a
 // user's eligibility to be shown a default browser promo. This is not an FET
@@ -306,6 +308,7 @@ FEATURE_CONSTANTS_DECLARE_FEATURE(kDefaultBrowserTriggerCriteriaExperiment);
 
 #if BUILDFLAG(IS_WIN) || BUILDFLAG(IS_APPLE) || BUILDFLAG(IS_LINUX) || \
     BUILDFLAG(IS_CHROMEOS) || BUILDFLAG(IS_ANDROID) || BUILDFLAG(IS_FUCHSIA)
+FEATURE_CONSTANTS_DECLARE_FEATURE(kIPHAutofillBnplAffirmOrZipSuggestionFeature);
 FEATURE_CONSTANTS_DECLARE_FEATURE(
     kIPHAutofillCardInfoRetrievalSuggestionFeature);
 FEATURE_CONSTANTS_DECLARE_FEATURE(kIPHAutofillCreditCardBenefitFeature);
@@ -313,7 +316,7 @@ FEATURE_CONSTANTS_DECLARE_FEATURE(
     kIPHAutofillDisabledVirtualCardSuggestionFeature);
 FEATURE_CONSTANTS_DECLARE_FEATURE(
     kIPHAutofillExternalAccountProfileSuggestionFeature);
-FEATURE_CONSTANTS_DECLARE_FEATURE(kIPHAutofillPredictionImprovementsFeature);
+FEATURE_CONSTANTS_DECLARE_FEATURE(kIPHAutofillAiOptInFeature);
 FEATURE_CONSTANTS_DECLARE_FEATURE(kIPHAutofillVirtualCardCVCSuggestionFeature);
 FEATURE_CONSTANTS_DECLARE_FEATURE(kIPHAutofillVirtualCardSuggestionFeature);
 FEATURE_CONSTANTS_DECLARE_FEATURE(kIPHCookieControlsFeature);

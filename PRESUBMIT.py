@@ -299,6 +299,24 @@ _BANNED_JAVA_FUNCTIONS : Sequence[BanRule] = (
          ' for more details and suggested replacements.', ),
         False,
     ),
+    BanRule(
+        pattern=(r'IS_DESKTOP_ANDROID'),
+        explanation=(
+            'Features which depend on IS_DESKTOP_ANDROID should only exist in '
+            'chrome/ layer and similar layers. Lower layers such as content/ '
+            'should not have features which are only designed for '
+            'desktop-android builds. See https://crbug.com/401628399.', ),
+        treat_as_error=False,
+        excluded_paths=[
+          _THIRD_PARTY_EXCEPT_BLINK, # Don't warn in third_party folders.
+          r'^build/', # This is permitted in build/ folder.
+          r'^chrome/', # This is permitted in chrome/ folder.
+          r'^components/', # This is permitted only for components/ that are not shared by WebView.
+          r'^extensions/', # This is permitted in chrome/ folder.
+          r'^infra/', # This is permitted in infra/ folder.
+          r'^tools/', # This is permitted in tools/ folder.
+        ],
+    ),
 )
 
 _BANNED_JAVASCRIPT_FUNCTIONS : Sequence [BanRule] = (
@@ -617,6 +635,7 @@ _BANNED_CPP_FUNCTIONS: Sequence[BanRule] = (
         (
             r'^base/third_party/symbolize/.*',
             r'^third_party/abseil-cpp/.*',
+            r'^third_party/grpc/source/.*',
         ),
     ),
     BanRule(
@@ -1904,16 +1923,18 @@ _BANNED_CPP_FUNCTIONS: Sequence[BanRule] = (
         explanation=(
             'Do not use `features::kIsolatedWebApps` directly to guard Isolated ',
             'Web App code. ',
-            'Use `content::IsolatedWebAppsPolicy::AreIsolatedWebAppsEnabled()` in ',
-            'the browser process or check the `kEnableIsolatedWebAppsInRenderer` ',
-            'command line flag in the renderer process.',
+            'Use `content::AreIsolatedWebAppsEnabled()` in the browser process '
+            'or check the `kEnableIsolatedWebAppsInRenderer` command line flag '
+            'in the renderer process.',
         ),
         treat_as_error=True,
-        excluded_paths=_TEST_CODE_EXCLUDED_PATHS +
-        ('^chrome/browser/about_flags.cc',
-         '^chrome/browser/web_applications/isolated_web_apps/chrome_content_browser_client_isolated_web_apps_part.cc',
-         '^chrome/browser/ui/startup/bad_flags_prompt.cc',
-         '^content/shell/browser/shell_content_browser_client.cc')),
+        excluded_paths=_TEST_CODE_EXCLUDED_PATHS + (
+            '^chrome/browser/about_flags.cc',
+            '^chrome/browser/component_updater/iwa_key_distribution_component_installer.cc',
+            '^chrome/browser/web_applications/isolated_web_apps/chrome_content_browser_client_isolated_web_apps_part.cc',
+            '^chrome/browser/ui/startup/bad_flags_prompt.cc',
+            '^content/shell/browser/shell_content_browser_client.cc',
+        )),
     BanRule(
         pattern=r'features::kIsolatedWebAppDevMode',
         explanation=(
@@ -2064,6 +2085,17 @@ _BANNED_CPP_FUNCTIONS: Sequence[BanRule] = (
         treat_as_error=False,
     ),
     BanRule(
+        pattern='CreateBrowserWithTestWindowForParams',
+        explanation=
+         ('Do not use CreateBrowserWithTestWindowForParams. See '
+          'docs/chrome_browser_design_principles.md for details. If you want '
+          'to write a test that has a Browser, create a browser_test and use '
+          'Browser::Browser. If you want to write a unit_test, your code must '
+          'not reference Browser*.',
+         ),
+        treat_as_error=False,
+    ),
+    BanRule(
         pattern='RunUntilIdle',
         explanation=
         ('Do not RunUntilIdle. If possible, explicitly quit the run loop using '
@@ -2132,12 +2164,10 @@ _BANNED_CPP_FUNCTIONS: Sequence[BanRule] = (
         treat_as_error=False,
     ),
     BanRule(
-        pattern=(r'/IS_CHROMEOS_ASH|'
-                 r'IS_CHROMEOS_LACROS'),
+        pattern='IS_CHROMEOS_ASH',
         explanation=
-        ('Lacros is deprecated. Please do not use IS_CHROMEOS_ASH and '
-         'IS_CHROMEOS_LACROS anymore. Instead, remove the code section under '
-         'IS_CHROMEOS_LACROS and use IS_CHROMEOS for ChromeOS-only code.',
+        ('IS_CHROMEOS_ASH is deprecated. Please use the equivalent IS_CHROMEOS '
+         'instead (Lacros is gone).',
         ),
         treat_as_error=False,
     ),
@@ -2152,6 +2182,32 @@ _BANNED_CPP_FUNCTIONS: Sequence[BanRule] = (
         excluded_paths=[
           _THIRD_PARTY_EXCEPT_BLINK, # Don't warn in third_party folders.
           r'^(?!.*\.h$).*$', # Exclude all files except those that end in .h
+        ],
+    ),
+    BanRule(
+        pattern=('AddChildViewRaw'),
+        explanation=(
+            'Do not use AddChildViewRaw. It is prone to memory leaks and '
+            'use-after-free bugs. Instead, use AddChildView(std::unique_ptr). '
+            'See https://crbug.com/40485510 for more details.', ),
+        treat_as_error=False,
+    ),
+    BanRule(
+        pattern=(r'IS_DESKTOP_ANDROID'),
+        explanation=(
+            'Features which depend on IS_DESKTOP_ANDROID should only exist in '
+            'chrome/ layer and similar layers. Lower layers such as content/ '
+            'should not have features which are only designed for '
+            'desktop-android builds. See https://crbug.com/401628399.', ),
+        treat_as_error=False,
+        excluded_paths=[
+          _THIRD_PARTY_EXCEPT_BLINK, # Don't warn in third_party folders.
+          r'^build/', # This is permitted in build/ folder.
+          r'^chrome/', # This is permitted in chrome/ folder.
+          r'^components/', # This is permitted only for components/ that are not shared by WebView.
+          r'^extensions/', # This is permitted in chrome/ folder.
+          r'^infra/', # This is permitted in infra/ folder.
+          r'^tools/', # This is permitted in tools/ folder.
         ],
     ),
 )
@@ -2361,6 +2417,7 @@ _GENERIC_PYDEPS_FILES = [
     'third_party/blink/tools/merge_web_test_results.pydeps',
     'tools/binary_size/sizes.pydeps',
     'tools/binary_size/supersize.pydeps',
+    'tools/cygprofile/generate_orderfile.pydeps',
     'tools/perf/process_perf_results.pydeps',
     'tools/pgo/generate_profile.pydeps',
 ]

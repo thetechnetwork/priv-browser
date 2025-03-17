@@ -21,11 +21,13 @@
 #include "base/functional/callback.h"
 #include "base/functional/callback_helpers.h"
 #include "base/memory/ptr_util.h"
+#include "base/memory/scoped_refptr.h"
 #include "base/memory/shared_memory_mapping.h"
 #include "base/memory/unsafe_shared_memory_region.h"
 #include "base/numerics/safe_conversions.h"
 #include "base/strings/strcat.h"
 #include "base/strings/stringprintf.h"
+#include "base/strings/to_string.h"
 #include "base/task/bind_post_task.h"
 #include "base/task/sequenced_task_runner.h"
 #include "base/task/single_thread_task_runner.h"
@@ -890,19 +892,19 @@ VaapiVideoEncodeAccelerator::CreateEncodeJob(
   scoped_refptr<CodecPicture> picture;
   switch (output_codec_) {
     case VideoCodec::kH264:
-      picture = new VaapiH264Picture(
+      picture = base::MakeRefCounted<VaapiH264Picture>(
           reconstructed_surface->ReleaseAsVASurfaceHandle());
       break;
     case VideoCodec::kVP8:
-      picture = new VaapiVP8Picture(
+      picture = base::MakeRefCounted<VaapiVP8Picture>(
           reconstructed_surface->ReleaseAsVASurfaceHandle());
       break;
     case VideoCodec::kVP9:
-      picture = new VaapiVP9Picture(
+      picture = base::MakeRefCounted<VaapiVP9Picture>(
           reconstructed_surface->ReleaseAsVASurfaceHandle());
       break;
     case VideoCodec::kAV1:
-      picture = new VaapiAV1Picture(
+      picture = base::MakeRefCounted<VaapiAV1Picture>(
           /*display_va_surface=*/nullptr,
           reconstructed_surface->ReleaseAsVASurfaceHandle());
       break;
@@ -1245,7 +1247,7 @@ bool VaapiVideoEncodeAccelerator::OnMemoryDump(
 
   MemoryAllocatorDump* dump = pmd->CreateAllocatorDump(dump_name);
   dump->AddString("encoder native input mode", "",
-                  native_input_mode_ ? "true" : "false");
+                  base::ToString(native_input_mode_));
 
   constexpr double kNumBytesPerPixelYUV420 = 12.0 / 8;
 

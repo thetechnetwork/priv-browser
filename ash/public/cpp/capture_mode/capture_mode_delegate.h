@@ -15,6 +15,7 @@
 #include "base/unguessable_token.h"
 #include "chromeos/crosapi/mojom/video_conference.mojom-shared.h"
 #include "chromeos/crosapi/mojom/video_conference.mojom.h"
+#include "components/search_engines/template_url.h"
 #include "mojo/public/cpp/bindings/pending_receiver.h"
 #include "mojo/public/cpp/bindings/remote.h"
 
@@ -31,6 +32,10 @@ class Rect;
 namespace media::mojom {
 class AudioStreamFactory;
 }  // namespace media::mojom
+
+namespace network {
+class SharedURLLoaderFactory;
+}  // namespace network
 
 namespace recording::mojom {
 class RecordingService;
@@ -251,6 +256,23 @@ class ASH_PUBLIC_EXPORT CaptureModeDelegate {
   // involved with an empty string.
   virtual void DetectTextInImage(const SkBitmap& image,
                                  OnTextDetectionComplete callback) = 0;
+
+  // Gets the OAuth2 access token for the active user's primary account, used
+  // for making a Lens Web API POST request.
+  virtual void GetPrimaryAccountAccessToken(
+      base::RepeatingCallback<void(const std::string& access_token)>
+          callback) = 0;
+
+  // Gets the POST request URL for a Lens Web API image search, and encodes the
+  // `image` data into `post_content` to be used as the body of the request.
+  // Other URL parameters may need to be appended to the returned GURL.
+  virtual GURL GetBaseSearchURLAndPostContent(
+      const gfx::Image& image,
+      gfx::Size image_original_size,
+      TemplateURLRef::PostContent* post_content) = 0;
+
+  virtual scoped_refptr<network::SharedURLLoaderFactory>
+  GetSharedURLLoaderFactory() const = 0;
 
   // Sends the captured `region` and `image` to the backend. Invokes `callback`
   // when the response is fetched.

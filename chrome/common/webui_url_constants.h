@@ -322,6 +322,10 @@ inline constexpr char kChromeUICustomizeChromeSidePanelHost[] =
     "customize-chrome-side-panel.top-chrome";
 inline constexpr char kChromeUICustomizeChromeSidePanelURL[] =
     "chrome://customize-chrome-side-panel.top-chrome";
+inline constexpr char kChromeUIHistorySidePanelHost[] =
+    "history-side-panel.top-chrome";
+inline constexpr char kChromeUIHistorySidePanelURL[] =
+    "chrome://history-side-panel.top-chrome/";
 inline constexpr char kChromeUIHistoryClustersSidePanelHost[] =
     "history-clusters-side-panel.top-chrome";
 inline constexpr char kChromeUIHistoryClustersSidePanelURL[] =
@@ -601,6 +605,7 @@ inline constexpr char kExperimentalAISettingsSubPage[] = "ai";
 inline constexpr char kFileSystemSettingsSubpage[] =
     "content/filesystem/siteDetails";
 inline constexpr char kFileSystemSubpage[] = "content/filesystem";
+inline constexpr char kGlicSettingsSubpage[] = "ai/gemini";
 inline constexpr char kHandlerSettingsSubPage[] = "handlers";
 inline constexpr char kHistorySearchSubpage[] = "historySearch";
 inline constexpr char kImportDataSubPage[] = "importData";
@@ -642,6 +647,7 @@ inline constexpr char kCleanupSubPage[] = "cleanup";
 
 #if !BUILDFLAG(IS_ANDROID) && BUILDFLAG(GOOGLE_CHROME_BRANDING)
 inline constexpr char kChromeUICastFeedbackHost[] = "cast-feedback";
+inline constexpr char kChromeUICastFeedbackURL[] = "chrome://cast-feedback";
 #endif
 
 #if BUILDFLAG(CHROME_ROOT_STORE_CERT_MANAGEMENT_UI)

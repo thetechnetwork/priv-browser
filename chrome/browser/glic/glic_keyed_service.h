@@ -12,9 +12,8 @@
 #include "base/containers/flat_set.h"
 #include "base/memory/raw_ptr.h"
 #include "chrome/browser/glic/glic.mojom.h"
-#include "chrome/browser/glic/glic_enums.h"
-#include "chrome/browser/glic/glic_focused_tab_manager.h"
-#include "chrome/browser/glic/glic_page_handler.h"
+#include "chrome/browser/glic/host/context/glic_focused_tab_manager.h"
+#include "chrome/browser/glic/host/glic_page_handler.h"
 #include "components/keyed_service/core/keyed_service.h"
 
 class BrowserWindowInterface;
@@ -50,6 +49,9 @@ class GlicKeyedService : public KeyedService {
   GlicKeyedService& operator=(const GlicKeyedService&) = delete;
   ~GlicKeyedService() override;
 
+  // Convenience method, may return nullptr.
+  static GlicKeyedService* Get(content::BrowserContext* context);
+
   // KeyedService
   void Shutdown() override;
 
@@ -58,9 +60,9 @@ class GlicKeyedService : public KeyedService {
   // to that view's Browser.
   void ToggleUI(BrowserWindowInterface* bwi,
                 bool prevent_close,
-                InvocationSource source);
+                mojom::InvocationSource source);
 
-  GlicEnabling* enabling() { return enabling_.get(); }
+  GlicEnabling& enabling() { return *enabling_.get(); }
   GlicMetrics* metrics() { return metrics_.get(); }
   GlicWindowController& window_controller() { return *window_controller_; }
 
@@ -74,6 +76,8 @@ class GlicKeyedService : public KeyedService {
   void PageHandlerRemoved(GlicPageHandler* page_handler);
 
   bool IsWindowShowing() const;
+  // Virtual for testing.
+  virtual bool IsWindowDetached() const;
 
   // Private API for the glic WebUI.
 
@@ -90,7 +94,6 @@ class GlicKeyedService : public KeyedService {
   void ResizePanel(const gfx::Size& size,
                    base::TimeDelta duration,
                    base::OnceClosure callback);
-  void ShowProfilePicker();
   void SetPanelDraggableAreas(const std::vector<gfx::Rect>& draggable_areas);
   void SetContextAccessIndicator(bool show);
   void NotifyWindowIntentToShow();
@@ -138,6 +141,11 @@ class GlicKeyedService : public KeyedService {
       const mojom::GetTabContextOptions& options,
       glic::mojom::WebClientHandler::GetContextFromFocusedTabCallback callback);
 
+  void ActInFocusedTab(
+      const std::vector<uint8_t>& action_proto,
+      const mojom::GetTabContextOptions& options,
+      mojom::WebClientHandler::ActInFocusedTabCallback callback);
+
   void CaptureScreenshot(
       glic::mojom::WebClientHandler::CaptureScreenshotCallback callback);
 
@@ -153,17 +161,17 @@ class GlicKeyedService : public KeyedService {
   virtual void TryPreload();
   void Reload();
 
-  GlicProfileManager* GetProfileManagerForTesting() { return profile_manager_; }
-
   Profile* profile() const { return profile_; }
 
   base::WeakPtr<GlicKeyedService> GetWeakPtr();
 
+  const base::flat_set<raw_ptr<GlicPageHandler>>& GetPageHandlersForTesting()
+      const {
+    return page_handlers_;
+  }
+
  private:
   GlicPageHandler* GetPageHandler(const content::WebContents* webui_contents);
-
-  // Callback from ProfilePicker::Show().
-  void DidSelectProfile(Profile* profile);
 
   // List of callbacks to be notified when the client requests a change to the
   // context access indicator status.

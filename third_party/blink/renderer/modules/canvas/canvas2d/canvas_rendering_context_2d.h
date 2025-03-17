@@ -54,7 +54,6 @@
 #include "third_party/blink/renderer/platform/graphics/color.h"
 #include "third_party/blink/renderer/platform/graphics/image_orientation.h"
 #include "third_party/blink/renderer/platform/graphics/paint/paint_filter.h"
-#include "third_party/blink/renderer/platform/graphics/skia/skia_utils.h"
 #include "third_party/blink/renderer/platform/graphics/static_bitmap_image.h"
 #include "third_party/blink/renderer/platform/heap/forward.h"  // IWYU pragma: keep (blink::Visitor)
 #include "third_party/blink/renderer/platform/wtf/hash_map.h"
@@ -85,7 +84,6 @@ class ComputedStyle;
 class Element;
 class ExceptionState;
 class ExecutionContext;
-class FontSelector;
 class ImageData;
 class ImageDataSettings;
 class MemoryManagedPaintRecorder;
@@ -251,7 +249,7 @@ class MODULES_EXPORT CanvasRenderingContext2D final
 
  protected:
   HTMLCanvasElement* HostAsHTMLCanvasElement() const final;
-  FontSelector* GetFontSelector() const final;
+  UniqueFontSelector* GetFontSelector() const final;
 
   PredefinedColorSpace GetDefaultImageDataColorSpace() const final {
     return color_params_.ColorSpace();

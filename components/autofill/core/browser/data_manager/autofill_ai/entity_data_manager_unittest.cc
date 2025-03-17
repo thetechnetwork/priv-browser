@@ -7,6 +7,7 @@
 #include <memory>
 #include <vector>
 
+#include "base/scoped_observation.h"
 #include "base/test/scoped_feature_list.h"
 #include "base/test/task_environment.h"
 #include "base/test/test_future.h"
@@ -32,6 +33,17 @@ using ::testing::Optional;
 using ::testing::UnorderedElementsAre;
 using ::testing::UnorderedElementsAreArray;
 
+class MockEntityDataManagerObserver : public EntityDataManager::Observer {
+ public:
+  MockEntityDataManagerObserver() = default;
+  MockEntityDataManagerObserver(const MockEntityDataManagerObserver&) = delete;
+  MockEntityDataManagerObserver& operator=(
+      const MockEntityDataManagerObserver&) = delete;
+  ~MockEntityDataManagerObserver() override = default;
+
+  MOCK_METHOD(void, OnEntityInstancesChanged, (), (override));
+};
+
 // Test fixture for the asynchronous database operations in EntityDataManager.
 class EntityDataManagerTest : public testing::Test {
  public:
@@ -50,20 +62,22 @@ class EntityDataManagerTest : public testing::Test {
 // Tests that the constructor of EntityDataManager queries the database.
 TEST_F(EntityDataManagerTest, InitialPopulation) {
   EntityInstance pp = test::GetPassportEntityInstance();
-  EntityInstance lc = test::GetLoyaltyCardEntityInstance();
+  EntityInstance dl = test::GetDriversLicenseEntityInstance();
 
   helper().autofill_webdata_service()->AddOrUpdateEntityInstance(
       pp, base::DoNothing());
   helper().autofill_webdata_service()->AddOrUpdateEntityInstance(
-      lc, base::DoNothing());
+      dl, base::DoNothing());
   helper().WaitUntilIdle();
 
-  EntityDataManager entity_data_manager(helper().autofill_webdata_service());
+  EntityDataManager entity_data_manager(helper().autofill_webdata_service(),
+                                        /*history_service=*/nullptr,
+                                        /*strike_database=*/nullptr);
   EXPECT_THAT(entity_data_manager.GetEntityInstances(), IsEmpty());
 
   helper().WaitUntilIdle();
   EXPECT_THAT(entity_data_manager.GetEntityInstances(),
-              UnorderedElementsAre(pp, lc));
+              UnorderedElementsAre(pp, dl));
 }
 
 // Test fixture that starts with an empty database.
@@ -77,22 +91,36 @@ class EntityDataManagerTest_InitiallyEmpty : public EntityDataManagerTest {
   }
 
  private:
-  EntityDataManager entity_data_manager_{helper().autofill_webdata_service()};
+  EntityDataManager entity_data_manager_{helper().autofill_webdata_service(),
+                                         /*history_service=*/nullptr,
+                                         /*strike_database=*/nullptr};
 };
 
 // Tests that AddOrUpdateEntityInstance() asynchronously adds entities.
 TEST_F(EntityDataManagerTest_InitiallyEmpty, AddEntityInstance) {
+  MockEntityDataManagerObserver observer;
+  base::ScopedObservation<EntityDataManager, MockEntityDataManagerObserver>
+      observation{&observer};
+  observation.Observe(&entity_data_manager());
+
   EntityInstance pp = test::GetPassportEntityInstance();
-  EntityInstance lc = test::GetLoyaltyCardEntityInstance();
+  EntityInstance dl = test::GetDriversLicenseEntityInstance();
+  EXPECT_CALL(observer, OnEntityInstancesChanged).Times(2);
   entity_data_manager().AddOrUpdateEntityInstance(pp);
-  entity_data_manager().AddOrUpdateEntityInstance(lc);
-  EXPECT_THAT(GetEntityInstances(), UnorderedElementsAre(pp, lc));
+  entity_data_manager().AddOrUpdateEntityInstance(dl);
+  EXPECT_THAT(GetEntityInstances(), UnorderedElementsAre(pp, dl));
 }
 
 // Tests that AddOrUpdateEntityInstance() asynchronously updates entities.
 TEST_F(EntityDataManagerTest_InitiallyEmpty, UpdateEntityInstance) {
+  MockEntityDataManagerObserver observer;
+  base::ScopedObservation<EntityDataManager, MockEntityDataManagerObserver>
+      observation{&observer};
+  observation.Observe(&entity_data_manager());
+
   EntityInstance pp = test::GetPassportEntityInstance(
       {.date_modified = test::kJune2017 - base::Days(3)});
+  EXPECT_CALL(observer, OnEntityInstancesChanged).Times(2);
   entity_data_manager().AddOrUpdateEntityInstance(pp);
   ASSERT_THAT(GetEntityInstances(), UnorderedElementsAre(pp));
 
@@ -104,44 +132,56 @@ TEST_F(EntityDataManagerTest_InitiallyEmpty, UpdateEntityInstance) {
 
 // Tests that RemoveEntityInstance() asynchronously removes entities.
 TEST_F(EntityDataManagerTest_InitiallyEmpty, RemoveEntityInstance) {
+  MockEntityDataManagerObserver observer;
+  base::ScopedObservation<EntityDataManager, MockEntityDataManagerObserver>
+      observation{&observer};
+  observation.Observe(&entity_data_manager());
+
   EntityInstance pp = test::GetPassportEntityInstance();
-  EntityInstance lc = test::GetLoyaltyCardEntityInstance();
+  EntityInstance dl = test::GetDriversLicenseEntityInstance();
+  EXPECT_CALL(observer, OnEntityInstancesChanged).Times(3);
   entity_data_manager().AddOrUpdateEntityInstance(pp);
-  entity_data_manager().AddOrUpdateEntityInstance(lc);
-  ASSERT_THAT(GetEntityInstances(), UnorderedElementsAre(pp, lc));
+  entity_data_manager().AddOrUpdateEntityInstance(dl);
+  ASSERT_THAT(GetEntityInstances(), UnorderedElementsAre(pp, dl));
 
   entity_data_manager().RemoveEntityInstance(pp.guid());
-  EXPECT_THAT(GetEntityInstances(), UnorderedElementsAre(lc));
+  EXPECT_THAT(GetEntityInstances(), UnorderedElementsAre(dl));
 }
 
 // Tests that removing a non-existing entity is a no-op.
 TEST_F(EntityDataManagerTest_InitiallyEmpty, RemoveEntityInstance_NonExisting) {
   EntityInstance pp = test::GetPassportEntityInstance();
-  EntityInstance lc = test::GetLoyaltyCardEntityInstance();
+  EntityInstance dl = test::GetDriversLicenseEntityInstance();
   entity_data_manager().AddOrUpdateEntityInstance(pp);
-  entity_data_manager().AddOrUpdateEntityInstance(lc);
-  ASSERT_THAT(GetEntityInstances(), UnorderedElementsAre(pp, lc));
+  entity_data_manager().AddOrUpdateEntityInstance(dl);
+  ASSERT_THAT(GetEntityInstances(), UnorderedElementsAre(pp, dl));
 
   entity_data_manager().RemoveEntityInstance(pp.guid());
-  EXPECT_THAT(GetEntityInstances(), UnorderedElementsAre(lc));
+  EXPECT_THAT(GetEntityInstances(), UnorderedElementsAre(dl));
   entity_data_manager().RemoveEntityInstance(pp.guid());  // No-op.
-  EXPECT_THAT(GetEntityInstances(), UnorderedElementsAre(lc));
+  EXPECT_THAT(GetEntityInstances(), UnorderedElementsAre(dl));
 }
 
 // Tests that removing entities in a date range updates the cache.
 TEST_F(EntityDataManagerTest_InitiallyEmpty,
        RemoveEntityInstancesModifiedBetween) {
+  MockEntityDataManagerObserver observer;
+  base::ScopedObservation<EntityDataManager, MockEntityDataManagerObserver>
+      observation{&observer};
+  observation.Observe(&entity_data_manager());
+
   EntityInstance pp = test::GetPassportEntityInstance(
       {.date_modified = test::kJune2017 - base::Days(1)});
-  EntityInstance lc = test::GetLoyaltyCardEntityInstance(
+  EntityInstance dl = test::GetDriversLicenseEntityInstance(
       {.date_modified = test::kJune2017 + base::Days(1)});
   entity_data_manager().AddOrUpdateEntityInstance(pp);
-  entity_data_manager().AddOrUpdateEntityInstance(lc);
-  ASSERT_THAT(GetEntityInstances(), UnorderedElementsAre(pp, lc));
+  entity_data_manager().AddOrUpdateEntityInstance(dl);
+  ASSERT_THAT(GetEntityInstances(), UnorderedElementsAre(pp, dl));
 
+  EXPECT_CALL(observer, OnEntityInstancesChanged).Times(1);
   entity_data_manager().RemoveEntityInstancesModifiedBetween(
       test::kJune2017 - base::Days(1), test::kJune2017);
-  EXPECT_THAT(GetEntityInstances(), UnorderedElementsAre(lc));
+  EXPECT_THAT(GetEntityInstances(), UnorderedElementsAre(dl));
 
   entity_data_manager().RemoveEntityInstancesModifiedBetween(
       test::kJune2017, test::kJune2017 + base::Days(2) + base::Seconds(1));
@@ -151,10 +191,10 @@ TEST_F(EntityDataManagerTest_InitiallyEmpty,
 // Tests that entities can be retrieved by GUID.
 TEST_F(EntityDataManagerTest_InitiallyEmpty, GetEntityInstance) {
   EntityInstance pp = test::GetPassportEntityInstance();
-  EntityInstance lc = test::GetLoyaltyCardEntityInstance();
+  EntityInstance dl = test::GetDriversLicenseEntityInstance();
   entity_data_manager().AddOrUpdateEntityInstance(pp);
-  entity_data_manager().AddOrUpdateEntityInstance(lc);
-  ASSERT_THAT(GetEntityInstances(), UnorderedElementsAre(pp, lc));
+  entity_data_manager().AddOrUpdateEntityInstance(dl);
+  ASSERT_THAT(GetEntityInstances(), UnorderedElementsAre(pp, dl));
 
   EXPECT_THAT(entity_data_manager().GetEntityInstance(pp.guid()), Optional(pp));
   EXPECT_EQ(

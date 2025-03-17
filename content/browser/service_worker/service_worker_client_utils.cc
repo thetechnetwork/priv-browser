@@ -210,6 +210,21 @@ void AddWindowClient(
   }
   DCHECK(!info->client_uuid.empty());
 
+  auto* rfh =
+      RenderFrameHostImpl::FromID(service_worker_client.GetRenderFrameHostId());
+  // Workaround to avoid referring the last committed origin before the render
+  // frame host initialize it. It is known to be updated when the last committed
+  // url is updated in DidNavigate(), we assume the invalid last committed URL
+  // means that the invalid last committed origin.
+  //
+  // See: crbug.com/396502398#comment19
+  if (rfh->GetLastCommittedURL().is_empty()) {
+    // TODO(crbug.com/396502398): Add a test for this.
+    // The test is not trivial because the case only happens in the timing
+    // between CommitNavigation() and DidNavigate(), though.
+    return;
+  }
+
   // TODO(crbug.com/385901567): Investigate/clarify the intention of this
   // check.
   // We can get info for a frame that was navigating and ended up with a
@@ -222,13 +237,7 @@ void AddWindowClient(
   // relationship between the origin of the service worker script and frames.
   const url::Origin controller_origin =
       url::Origin::Create(controller->script_url());
-  auto* rfh =
-      RenderFrameHostImpl::FromID(service_worker_client.GetRenderFrameHostId());
-  if (!controller_origin.IsSameOriginWith(rfh->GetLastCommittedOrigin())
-      // TODO(crbug.com/396502398): find the reason why `Clients.matchAll()`
-      // is called by the Chrome extension ServiceWorker, and remove the
-      // following condition.
-      && controller_origin.scheme() != "chrome-extension") {
+  if (!controller_origin.IsSameOriginWith(rfh->GetLastCommittedOrigin())) {
     SCOPED_CRASH_KEY_STRING256("AddWindowClient", "ctrler_origin",
                                controller_origin.GetURL().spec());
     SCOPED_CRASH_KEY_STRING256("AddWindowClient", "rfh_origin",
@@ -273,6 +282,14 @@ void AddNonWindowClient(
       blink::mojom::ServiceWorkerClientLifecycleState::kActive,
       base::TimeTicks(), service_worker_client.create_time());
   out_clients->push_back(std::move(client_info));
+
+  if (service_worker_client.GetClientType() ==
+      blink::mojom::ServiceWorkerClientType::kSharedWorker) {
+    // This is recorded per the SharedWorker client.
+    base::UmaHistogramBoolean(
+        "ServiceWorker.AddNonWindowClient.SharedWorkerScript.IsBlob",
+        url.SchemeIsBlob());
+  }
 }
 
 struct ServiceWorkerClientInfoSort {
@@ -629,6 +646,12 @@ void GetClient(ServiceWorkerClient* service_worker_client,
         base::TimeTicks(), service_worker_client->create_time());
     base::SingleThreadTaskRunner::GetCurrentDefault()->PostTask(
         FROM_HERE, base::BindOnce(std::move(callback), std::move(client_info)));
+    if (service_worker_client->GetClientType() ==
+        blink::mojom::ServiceWorkerClientType::kSharedWorker) {
+      base::UmaHistogramBoolean(
+          "ServiceWorker.GetClient.SharedWorkerScript.IsBlob",
+          url.SchemeIsBlob());
+    }
   }
 }
 

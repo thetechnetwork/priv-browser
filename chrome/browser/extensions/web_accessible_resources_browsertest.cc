@@ -29,6 +29,7 @@
 #include "testing/gmock/include/gmock/gmock.h"
 
 #if !BUILDFLAG(IS_ANDROID)
+#include "chrome/browser/extensions/extension_browsertest.h"
 #include "chrome/browser/ui/browser.h"
 #include "chrome/test/base/ui_test_utils.h"
 #endif
@@ -84,10 +85,7 @@ static constexpr char kFetchResourceScriptTemplate[] = R"(
 // Exercise web accessible resources with experimental extension features.
 class WebAccessibleResourcesBrowserTest : public ExtensionPlatformBrowserTest {
  public:
-  explicit WebAccessibleResourcesBrowserTest(bool enable_feature = true) {
-    feature_list_.InitWithFeatureState(
-        extensions_features::kExtensionDynamicURLRedirection, enable_feature);
-  }
+  WebAccessibleResourcesBrowserTest() = default;
 
   void SetUpOnMainThread() override {
     ExtensionPlatformBrowserTest::SetUpOnMainThread();
@@ -471,27 +469,13 @@ IN_PROC_BROWSER_TEST_F(WebAccessibleResourcesBrowserTest,
 
 #endif  // !BUILDFLAG(IS_ANDROID)
 
-// A test suite that will run both with and without the dynamic URL feature
-// enabled.
-class ParameterizedWebAccessibleResourcesBrowserTest
-    : public WebAccessibleResourcesBrowserTest,
-      public testing::WithParamInterface<bool> {
- public:
-  ParameterizedWebAccessibleResourcesBrowserTest()
-      : WebAccessibleResourcesBrowserTest(GetParam()) {}
-};
-
-INSTANTIATE_TEST_SUITE_P(All,
-                         ParameterizedWebAccessibleResourcesBrowserTest,
-                         testing::Bool());
-
 #if !BUILDFLAG(IS_ANDROID)
 // DNR, WAR, and use_dynamic_url with the extension feature. DNR does not
 // currently succeed when redirecting to a resource using use_dynamic_url with
 // query parameters.
 // TODO(crbug.com/383366125): Port to desktop Android once chrome.runtime is
 // fully ported. Right now the ExtensionTestMessageListener times out.
-IN_PROC_BROWSER_TEST_P(ParameterizedWebAccessibleResourcesBrowserTest,
+IN_PROC_BROWSER_TEST_F(WebAccessibleResourcesBrowserTest,
                        DeclarativeNetRequest) {
   ExtensionTestMessageListener listener("ready");
   auto file_path = test_data_dir_.AppendASCII("web_accessible_resources/dnr");
@@ -542,49 +526,11 @@ IN_PROC_BROWSER_TEST_P(ParameterizedWebAccessibleResourcesBrowserTest,
 }
 #endif  // !BUILDFLAG(IS_ANDROID)
 
-// Exercise web accessible resources without experimental extension features.
-class WebAccessibleResourcesNonGuidBrowserTest
-    : public WebAccessibleResourcesBrowserTest {
- public:
-  WebAccessibleResourcesNonGuidBrowserTest()
-      : WebAccessibleResourcesBrowserTest(false) {}
-};
-
-// If `use_dynamic_url` is set to true in manifest.json, then the associated web
-// accessible resource(s) can only be loaded using the dynamic url if using the
-// extension feature. If not using the extension feature, dynamic URLs can be
-// loaded using static urls.
-IN_PROC_BROWSER_TEST_F(WebAccessibleResourcesNonGuidBrowserTest,
-                       UseDynamicUrlInFetch) {
-  // Load extension.
-  TestExtensionDir extension_dir;
-  extension_dir.WriteManifest(kManifestStub);
-  extension_dir.WriteFile(FILE_PATH_LITERAL("dynamic.html"), "dynamic.html");
-  extension_dir.WriteFile(FILE_PATH_LITERAL("static.html"), "static.html");
-  const Extension* extension = LoadExtension(extension_dir.UnpackedPath());
-
-  // Navigate to a test page and get the web contents.
-  base::FilePath test_page;
-  GURL gurl = embedded_test_server()->GetURL("example.com", "/simple.html");
-  auto* web_contents = GetActiveWebContents();
-  ASSERT_TRUE(content::NavigateToURL(web_contents, gurl));
-
-  std::string script =
-      base::StringPrintf(kFetchResourceScriptTemplate,
-                         extension->guid().c_str(), extension->id().c_str(), R"(
-      ["Load a static resource with a dynamic url", 'static.html', true, false],
-      ["Load a static resource with a static url", 'static.html', false, true],
-      ["Load dynamic resource with a dynamic url", 'dynamic.html', true, false],
-      ["Load dynamic resource with a static url", 'dynamic.html', false, true],
-      )");
-  ASSERT_TRUE(content::EvalJs(web_contents, script).ExtractBool());
-}
-
 // Verify setting script.src from a content script that relies on web request to
 // redirect to a web accessible resource. It's important to set `script.src`
 // using a script so that `CanRequestResource` has `upstream_url` set to
 // something other than a chrome extension.
-IN_PROC_BROWSER_TEST_P(ParameterizedWebAccessibleResourcesBrowserTest,
+IN_PROC_BROWSER_TEST_F(WebAccessibleResourcesBrowserTest,
                        WebRequestRedirectFromScript) {
   ExtensionTestMessageListener listener("ready");
   auto file_path = test_data_dir_.AppendASCII(
@@ -605,7 +551,7 @@ IN_PROC_BROWSER_TEST_P(ParameterizedWebAccessibleResourcesBrowserTest,
 
 // Tests an extension using webRequest to redirect a resource included in a
 // page's static html.
-IN_PROC_BROWSER_TEST_P(ParameterizedWebAccessibleResourcesBrowserTest,
+IN_PROC_BROWSER_TEST_F(WebAccessibleResourcesBrowserTest,
                        WebRequestRedirectFromPage) {
   ExtensionTestMessageListener listener("ready");
   auto file_path = test_data_dir_.AppendASCII(
@@ -626,8 +572,7 @@ IN_PROC_BROWSER_TEST_P(ParameterizedWebAccessibleResourcesBrowserTest,
 }
 
 // Succeed when DNR redirects a script to a WAR where use_dynamic_url is true.
-IN_PROC_BROWSER_TEST_P(ParameterizedWebAccessibleResourcesBrowserTest,
-                       DNRRedirect) {
+IN_PROC_BROWSER_TEST_F(WebAccessibleResourcesBrowserTest, DNRRedirect) {
   auto file_path =
       test_data_dir_.AppendASCII("web_accessible_resources/dnr/redirect");
   const Extension* extension = LoadExtension(file_path);
@@ -897,6 +842,164 @@ IN_PROC_BROWSER_TEST_P(WebAccessibleResourcesBrowserProcessRedirectTest,
   bool is_war_for_redirect_enabled = GetParam();
   TestBrowserRedirect(MV3, is_war_for_redirect_enabled);
   TestBrowserRedirect(MV2, is_war_for_redirect_enabled);
+}
+
+// Test dynamic origins in web accessible resources.
+// TODO(crbug.com/352267920): Move to web_accessible_resources_browsertest.cc?
+class DynamicOriginBrowserTest : public ExtensionBrowserTest {
+ public:
+  DynamicOriginBrowserTest() = default;
+
+  void SetUpOnMainThread() override {
+    ExtensionBrowserTest::SetUpOnMainThread();
+    InstallExtension();
+  }
+
+ protected:
+  const Extension* GetExtension() { return extension_; }
+
+  content::WebContents* GetActiveWebContents() const {
+    return browser()->tab_strip_model()->GetActiveWebContents();
+  }
+
+  content::RenderFrameHost* GetPrimaryMainFrame() const {
+    return GetActiveWebContents()->GetPrimaryMainFrame();
+  }
+
+ private:
+  void InstallExtension() {
+    dir_.WriteManifest(R"({
+      "name": "Extension",
+      "version": "1.0",
+      "manifest_version": 3,
+      "web_accessible_resources": [{
+        "resources": ["web_accessible_resource.html", "ok.html"],
+        "matches": ["<all_urls>"]
+      }]
+    })");
+    std::vector<std::string> files(
+        {"extension_resource.html", "web_accessible_resource.html", "ok.html"});
+    for (const auto& filename : files) {
+      dir_.WriteFile(base::FilePath::FromASCII(filename).value(), filename);
+    }
+    extension_ = LoadExtension(dir_.UnpackedPath());
+    DCHECK(extension_);
+  }
+
+  raw_ptr<const Extension, DanglingUntriaged> extension_ = nullptr;
+  TestExtensionDir dir_;
+  base::test::ScopedFeatureList feature_list_;
+  ScopedCurrentChannel current_channel_{version_info::Channel::CANARY};
+};
+
+// Test a dynamic url as a web accessible resource.
+IN_PROC_BROWSER_TEST_F(DynamicOriginBrowserTest, DynamicUrl) {
+  auto* extension = GetExtension();
+
+  // Resource and extension origin should match.
+  {
+    ASSERT_TRUE(ui_test_utils::NavigateToURL(
+        browser(), extension->GetResourceURL("ok.html")));
+    ASSERT_EQ(extension->origin(),
+              GetPrimaryMainFrame()->GetLastCommittedOrigin());
+  }
+
+  // Dynamic resource should resolve to static url.
+  {
+    GURL static_url = extension->url().Resolve("ok.html");
+    GURL dynamic_url = extension->dynamic_url().Resolve("ok.html");
+    ASSERT_NE(static_url, dynamic_url);
+    ASSERT_TRUE(ui_test_utils::NavigateToURL(browser(), dynamic_url));
+    EXPECT_EQ(static_url, GetPrimaryMainFrame()->GetLastCommittedURL());
+    EXPECT_EQ(extension->origin(),
+              GetPrimaryMainFrame()->GetLastCommittedOrigin());
+  }
+}
+
+// Error accessing resource from random guid.
+IN_PROC_BROWSER_TEST_F(DynamicOriginBrowserTest,
+                       InvalidDynamicResourceFailsToLoad) {
+  auto* extension = GetExtension();
+
+  auto run = [&](const GURL& gurl, int status) {
+    content::WebContents* web_contents = GetActiveWebContents();
+    content::TestNavigationObserver nav_observer(web_contents);
+    web_contents->GetController().LoadURL(
+        gurl, content::Referrer(), ui::PageTransition::PAGE_TRANSITION_TYPED,
+        std::string());
+    nav_observer.Wait();
+    EXPECT_EQ(status == net::OK, nav_observer.last_navigation_succeeded());
+    EXPECT_EQ(status, nav_observer.last_net_error_code());
+  };
+
+  auto random_guid = base::Uuid::GenerateRandomV4().AsLowercaseString();
+  GURL random_url =
+      Extension::GetBaseURLFromExtensionId(random_guid).Resolve("ok.html");
+  GURL dynamic_url = extension->dynamic_url().Resolve("ok.html");
+  run(random_url, net::ERR_BLOCKED_BY_CLIENT);
+  run(dynamic_url, net::OK);
+}
+
+// Web Accessible Resources.
+IN_PROC_BROWSER_TEST_F(DynamicOriginBrowserTest, FetchGuidFromFrame) {
+  auto* extension = GetExtension();
+
+  // Fetch url from frame to verify with expectations.
+  auto test_frame_with_fetch = [&](const GURL& frame_url,
+                                   const GURL& expected_frame_url,
+                                   const GURL& fetch_url,
+                                   const char* expected_fetch_url_contents) {
+    SCOPED_TRACE(testing::Message() << "test_frame_with_fetch"
+                                    << ": frame_url = " << frame_url
+                                    << "; fetch_url = " << fetch_url);
+    // Fetch and test resource.
+    ASSERT_TRUE(ui_test_utils::NavigateToURL(browser(), frame_url));
+    content::WebContents* web_contents = GetActiveWebContents();
+    EXPECT_EQ(expected_frame_url,
+              web_contents->GetPrimaryMainFrame()->GetLastCommittedURL());
+
+    constexpr char kFetchScriptTemplate[] =
+        R"(
+        fetch($1).then(result => {
+          return result.text();
+        }).catch(err => {
+          return String(err);
+        });)";
+    EXPECT_EQ(
+        expected_fetch_url_contents,
+        content::EvalJs(web_contents, content::JsReplace(kFetchScriptTemplate,
+                                                         fetch_url.spec())));
+  };
+
+  const struct {
+    const char* title;
+    GURL frame_url;
+    GURL expected_frame_url;
+    GURL fetch_url;
+    const char* expected_fetch_url_contents;
+  } test_cases[] = {
+      {
+          "Fetch web accessible resource from extension resource.",
+          extension->url().Resolve("extension_resource.html"),
+          extension->url().Resolve("extension_resource.html"),
+          extension->url().Resolve("web_accessible_resource.html"),
+          "web_accessible_resource.html",
+      },
+      {
+          "Fetch dynamic web accessible resource from extension resource.",
+          extension->url().Resolve("extension_resource.html"),
+          extension->url().Resolve("extension_resource.html"),
+          extension->dynamic_url().Resolve("web_accessible_resource.html"),
+          "web_accessible_resource.html",
+      },
+  };
+
+  for (const auto& test_case : test_cases) {
+    SCOPED_TRACE(testing::Message() << test_case.title);
+    test_frame_with_fetch(test_case.frame_url, test_case.expected_frame_url,
+                          test_case.fetch_url,
+                          test_case.expected_fetch_url_contents);
+  }
 }
 
 #endif  // !BUILDFLAG(IS_ANDROID)

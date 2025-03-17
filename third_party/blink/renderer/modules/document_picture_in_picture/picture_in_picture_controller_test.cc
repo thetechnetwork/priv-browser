@@ -138,6 +138,9 @@ class MockPictureInPictureSession
                const viz::SurfaceId&,
                const gfx::Size&,
                bool));
+  MOCK_METHOD(void,
+              UpdateMediaPosition,
+              (media_session::mojom::blink::MediaPositionPtr));
 
  private:
   mojo::Receiver<mojom::blink::PictureInPictureSession> receiver_;
@@ -680,7 +683,7 @@ TEST_F(PictureInPictureControllerTestWithWidget,
 
   EXPECT_NE(nullptr, PictureInPictureControllerImpl::From(GetDocument())
                          .PictureInPictureElement());
-  EXPECT_EQ(DisplayType::kPictureInPicture, Video()->GetDisplayType());
+  EXPECT_EQ(DisplayType::kVideoPictureInPicture, Video()->GetDisplayType());
 }
 
 TEST_F(PictureInPictureControllerTestWithWidget,

@@ -37,7 +37,7 @@
 #include "third_party/blink/renderer/core/typed_arrays/array_buffer_view_helpers.h"
 #include "third_party/blink/renderer/core/typed_arrays/dom_typed_array.h"
 #include "third_party/blink/renderer/platform/bindings/script_wrappable.h"
-#include "third_party/blink/renderer/platform/graphics/graphics_types.h"
+#include "third_party/blink/renderer/platform/graphics/predefined_color_space.h"
 #include "third_party/blink/renderer/platform/heap/garbage_collected.h"
 #include "third_party/blink/renderer/platform/wtf/text/wtf_string.h"
 #include "third_party/skia/include/core/SkPixmap.h"
@@ -47,7 +47,7 @@ namespace blink {
 
 class ExceptionState;
 class ImageBitmapOptions;
-class V8ImageDataStorageFormat;
+class V8ImageDataPixelFormat;
 class V8PredefinedColorSpace;
 
 class CORE_EXPORT ImageData final : public ScriptWrappable,
@@ -182,7 +182,7 @@ class CORE_EXPORT ImageData final : public ScriptWrappable,
   int width() const { return size_.width(); }
   int height() const { return size_.height(); }
   V8PredefinedColorSpace colorSpace() const;
-  V8ImageDataStorageFormat storageFormat() const;
+  V8ImageDataPixelFormat pixelFormat() const;
 
   // TODO(https://crbug.com/1198606): Remove this.
   ImageDataSettings* getSettings() const;

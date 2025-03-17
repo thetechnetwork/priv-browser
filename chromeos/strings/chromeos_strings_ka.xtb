@@ -81,6 +81,7 @@
 <translation id="131461803491198646">სახლის ქსელი, როუმინგის გარეშე</translation>
 <translation id="1327977588028644528">შლიუზი</translation>
 <translation id="1328223165223065150">ფონის ფერი</translation>
+<translation id="1329478709358066995">ტრანსკრიპტი:</translation>
 <translation id="1330426557709298164">JPG</translation>
 <translation id="1337912285145772892">სკანირებად არეზე მორგება</translation>
 <translation id="1343442362630695901">მარილიანი ტბა</translation>
@@ -126,7 +127,17 @@
 <translation id="1515129336378114413">ბრაუზერის მთავარი გვერდი</translation>
 <translation id="1526389707933164996">ეკრანმზოგის ანიმაცია</translation>
 <translation id="152892567002884378">ხმის აწევა</translation>
+<translation id="1531038290222364269">ჩანართების ჩვენება</translation>
 <translation id="1539864135338521185">ლაზურიტი</translation>
+<translation id="1548555207631326346">გენერაციული სურათების პერსონალიზებისთვის აირჩიეთ თემა, შემდეგ კი — ხაზგასმული სიტყვები.<ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          ხელოვნური ინტელექტით შექმნილი სურათების უფრო უნიკალური და განსხვავებული ვარიანტების მისაღებად აირჩიეთ „შთაგონების მიღება“.
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          ხელოვნური ინტელექტის დახმარებით რაიმეს შექმნისას შესაბამისი მოთხოვნა ეგზავნება Google-ის ხელოვნური ინტელექტის სერვერებს, რომლებიც შემდეგ ქმნის სურათებს და აუმჯობესებს პროდუქტს <ph name="BEGIN_LINK_GOOGLE_PRIVACY_POLICY" />Google-ის კონფიდენციალურობის დებულების<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" /> შესაბამისად.
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          გენერაციული ხელოვნური ინტელექტი ექსპერიმენტული ფუნქციაა, რომელიც შემუშავების ადრეულ სტადიებზეა, ამიტომ მისი ხელმისაწვდომობა შეზღუდულია.</translation>
 <translation id="1555130319947370107">ლურჯი</translation>
 <translation id="155865706765934889">Touchpad</translation>
 <translation id="1561927818299383735">ფონური განათების ფერი</translation>
@@ -252,7 +263,6 @@
 <translation id="2011174342667534258">SDK ვერსია:</translation>
 <translation id="2016697457005847575">გამოცადეთ დეფექტების აღმოფხვრის საფეხურები</translation>
 <translation id="202500043506723828">EID</translation>
-<translation id="2041627599411887437">გენერაციული სურათების პერსონალიზებისთვის აირჩიეთ თემა, შემდეგ კი — ხაზგასმული სიტყვები.</translation>
 <translation id="2045814230297767491">დანა-ჩანგალი</translation>
 <translation id="2047316797244836561">ეკრანმზოგის სანახავად დაუკავშირდით ქსელს და გადატვირთეთ გვერდი.</translation>
 <translation id="2056550196601855911">IPv4/IPv6</translation>
@@ -405,6 +415,7 @@
 <translation id="2787237339470862294">ეს ენა ამჟამად არ არის მხარდაჭერილი</translation>
 <translation id="2787435249130282949">კლავიატურის უფრო განათება</translation>
 <translation id="2805756323405976993">პროგრამები</translation>
+<translation id="2822702442014805146">მიმდინარეობს შეჯამების და სახელის შექმნის მოდელის ჩამოტვირთვა</translation>
 <translation id="28232023175184696">ინტერნეტთან დაკავშირება ვერ მოხერხდა. დააწკაპუნეთ ხელახლა საცდელად.</translation>
 <translation id="2855718259207180827">შალი</translation>
 <translation id="2859243502336719778">კრიტიკულად მნიშვნელოვანი განახლება</translation>
@@ -502,6 +513,7 @@
 <translation id="3373141842870501561">მიწის ნაკადის ფონი</translation>
 <translation id="33736539805963175"><ph name="LETTERS_COLOR" /> ფონი, რომელზეც გამოსახულია ასო <ph name="LETTERS_LETTER" /></translation>
 <translation id="3383623117265110236">ექსკლუზიური</translation>
+<translation id="3395147534045164351">მდებარეობის ჩართვა</translation>
 <translation id="3404249063913988450">ეკრანმზოგის ჩართვა</translation>
 <translation id="3413935475507503304">განახლების გასაგრძელებლად დაწკაპუნებით აირჩიეთ „შემდეგი“.</translation>
 <translation id="3428551088151258685">გარე</translation>
@@ -651,6 +663,7 @@
 <translation id="4113067922640381334">ამიერიდან წვდომა გაქვთ ახალ <ph name="BEGIN_LINK_WALLPAPER_SUBPAGE" />ფონებზე<ph name="END_LINK_WALLPAPER_SUBPAGE" /></translation>
 <translation id="4117637339509843559">მუქი რეჟიმი</translation>
 <translation id="4126551873361000548">10 წამით უკან გადახვევა</translation>
+<translation id="4128271910628504223">შეიყვანეთ მოთხოვნა, მაგალითად, „დახატე ნისლიანი ტყე“</translation>
 <translation id="4130035430755296270">განლაგებების მეტი ვარიანტებისთვის გააგრძელეთ გადატარება</translation>
 <translation id="4130750466177569591">ვეთანხმები</translation>
 <translation id="4131410914670010031">შავი და თეთრი</translation>
@@ -824,6 +837,7 @@
 <translation id="4891842000192098784">სტრესი</translation>
 <translation id="4897058166682006107">მოწყობილობის მარცხენა ყურსაცვამის ბატარეის დონეა <ph name="BATTERY_PERCENTAGE" />%.</translation>
 <translation id="4905998861748258752">ეკრანმზოგის ვარიანტების ასარჩევად ჩართეთ ეს ფუნქცია</translation>
+<translation id="4910853326379896417">შეჯამების და სახელის შექმნის მოდელის ჩამოტვირთვა დასრულდა</translation>
 <translation id="4910858703033903787">APN-ის ტიპები</translation>
 <translation id="4917385247580444890">ძლიერი</translation>
 <translation id="4917889632206600977">გაჩერდა — ქაღალდი გათავდა</translation>
@@ -858,8 +872,10 @@
 <translation id="5050042263972837708">ჯგუფის სახელი</translation>
 <translation id="5051044138948155788">ეს ერთადერთი გვერდია. ეს ქმედება სკანირების საწყის ეკრანზე გადაგიყვანთ.</translation>
 <translation id="5053233795640754917">პაუზა</translation>
+<translation id="5056587122125565772">სურათის შექმნა</translation>
 <translation id="5078711626843651677">ხმის მოდელები დროებით ინახება მოწყობილობაში, სანამ მოსაუბრის ლეიბლების მიმაგრება დასრულდება. ამის გამორთვა ნებისმიერ დროს შეგიძლიათ პარამეტრებიდან.</translation>
 <translation id="5078983345702708852">ფუტურისტული</translation>
+<translation id="5085224064082122501">შეჯამების და სახელის შექმნის მოდელის ჩამოტვირთვა შეუძლებელია. ხელახლა ცადეთ ან გადატვირთეთ Chromebook.</translation>
 <translation id="5087864757604726239">უკან</translation>
 <translation id="5088172560898466307">სერვერის სახელი</translation>
 <translation id="5089810972385038852">შტატი</translation>
@@ -913,6 +929,7 @@
 <translation id="5286263799730375393">უკანა განათების ფერი</translation>
 <translation id="5292579816060236070">მზის ამოსვლის ფონი</translation>
 <translation id="5294769550414936029">ვერსია <ph name="MILESTONE_VERSION" /></translation>
+<translation id="5300172019534884676">კამერის წვდომის გადართვა</translation>
 <translation id="5300814202279832142">ფანჯრის გადატანა სამუშაო მაგიდაზე</translation>
 <translation id="5302048478445481009">ენა</translation>
 <translation id="5303837385540978511">ფონი ექსკლუზიურად <ph name="PRODUCT_NAME" />-ისთვის</translation>
@@ -1028,6 +1045,7 @@
 <translation id="5896602941605730551">დაკვრა</translation>
 <translation id="5901630391730855834">ყვითელი</translation>
 <translation id="5903200662178656908">მოწყობილობა კლავიატურისა და მაუსის კომბინაციაა.</translation>
+<translation id="5903822368221507416">ჩანართების დამალვა</translation>
 <translation id="5904994456462260490">ახალი APN-ის დამატება</translation>
 <translation id="590746845088109442">კატები</translation>
 <translation id="5907649332524363701">კლავიშების ფერი</translation>
@@ -1129,14 +1147,12 @@
 <translation id="6325525973963619867">ვერ შესრულდა</translation>
 <translation id="6327262166342360252">ეს ფონი შეიქმნა ხელოვნური ინტელექტით, შემდეგი ტექსტის გამოყენებით: „<ph name="PROMPT" />“.</translation>
 <translation id="6331191339300272798">ავტომატური მუქი თემა</translation>
-<translation id="6335228876613776082">მოდელის ჩამოტვირთვა დასრულდა</translation>
 <translation id="6340526405444716530">პერსონალიზება</translation>
 <translation id="6348252528297699679">მდებარეობის გამორთვა შეგიძლიათ აქ: პარამეტრები &gt; კონფიდენციალურობა და უსაფრთხოება &gt; კონფიდენციალურობის მართვის პარამეტრები &gt; მდებარეობაზე წვდომა. <ph name="LINK_BEGIN" />შეიტყვეთ მეტი<ph name="LINK_END" /></translation>
 <translation id="6348738456043757611">მომხმარებლის სახელი და პაროლი</translation>
 <translation id="6352210854422428614">სხვა პლანეტა</translation>
 <translation id="6359706544163531585">ღია თემის გათიშვა</translation>
 <translation id="6359919876285606596">ეს ქმედება სამუდამოა და მისი დაბრუნება შეუძლებელია</translation>
-<translation id="6368342879959028556">„ხელოვნური ინტელექტის დახმარების შექმნის“ არჩევის შემთხვევაში დაწერეთ ინდივიდუალური მოთხოვნა. ან მონიშნეთ „AI ფონი“, რომ თქვენი AI ფონის პერსონალიზებისთვის აირჩიოთ ფონი და შემდეგ — ხაზგასმული სიტყვები.</translation>
 <translation id="636850387210749493">ორგანიზაციის რეგისტრაცია</translation>
 <translation id="6369221585240879141">ამ ენის ტრანსკრიპტისთვის ჩანაწერების სახელების შექმნა ვერ მოხერხდა</translation>
 <translation id="6373461326814131011">ტბორი</translation>
@@ -1209,16 +1225,6 @@
 <translation id="6657240842932274095">დაიშვას სისტემის სერვისებისთვის თქვენი მდებარეობის გამოყენება?</translation>
 <translation id="6657585470893396449">პაროლი</translation>
 <translation id="66621959568103627">მარჯნისფერი ვარდისფერი</translation>
-<translation id="6667885109186363316"><ph name="SEA_PEN_INTRO_FIRST_PARAGRAPH" />
-          <ph name="LINE_BREAK" />
-          <ph name="LINE_BREAK" />
-          ხელოვნური ინტელექტით შექმნილი სურათების უფრო უნიკალური და განსხვავებული ვარიანტების მისაღებად აირჩიეთ „შთაგონების მიღება“.
-          <ph name="LINE_BREAK" />
-          <ph name="LINE_BREAK" />
-          ხელოვნური ინტელექტის დახმარებით რაიმეს შექმნისას შესაბამისი მოთხოვნა ეგზავნება Google-ის ხელოვნური ინტელექტის სერვერებს, რომლებიც შემდეგ ქმნის სურათებს და აუმჯობესებს პროდუქტს <ph name="BEGIN_LINK_GOOGLE_PRIVACY_POLICY" />Google-ის კონფიდენციალურობის დებულების<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" /> შესაბამისად.
-          <ph name="LINE_BREAK" />
-          <ph name="LINE_BREAK" />
-          გენერაციული ხელოვნური ინტელექტი ექსპერიმენტული ფუნქციაა, რომელიც შემუშავების ადრეულ სტადიებზეა, ამიტომ მისი ხელმისაწვდომობა შეზღუდულია.</translation>
 <translation id="6673898378497337661">კლავიატურის სიკაშკაშის მომატება</translation>
 <translation id="6692996468359469499">მიიღეთ თქვენს არჩევანთან დაკავშირებული ინფორმაცია</translation>
 <translation id="6694534975463174713">საკეტი</translation>
@@ -1274,6 +1280,7 @@
 <translation id="6930597342185648547">ფოტოს შესახებ</translation>
 <translation id="6939667434404433010">ჩანაწერის სახელის ძიება</translation>
 <translation id="6939766318048400022">კაფე</translation>
+<translation id="6942253772720771875">გამოგვეხმაურეთ ან აღწერეთ პრობლემა</translation>
 <translation id="6943893908656559156">დისტანციური იდენტობა (არასავალდებულო)</translation>
 <translation id="6953137545147683679">ოქროსფერი</translation>
 <translation id="6957231940976260713">სერვისის სახელი</translation>
@@ -1295,6 +1302,7 @@
 <translation id="7040230719604914234">ოპერატორი</translation>
 <translation id="7040729769968826896">მოსაუბრის იდენტიფიცირების დაშვება</translation>
 <translation id="7041549558901442110">მოწყობილობა დაკავშირებული არ არის.</translation>
+<translation id="704183341263526038">იუპიტერი</translation>
 <translation id="7046522406494308071">გსურთ, ნაგულისხმევზე დააბრუნოთ ყველა მალსახმობი?</translation>
 <translation id="7049916119678019302">ჩამოტვირთეთ ტრანსკრიფციის მოდელი პარამეტრებიდან</translation>
 <translation id="7058278511608979688">დასრულება და შენახვა</translation>
@@ -1389,6 +1397,7 @@
 <translation id="7388345524791662148">მეტი ვარიანტი <ph name="RECORDING_NAME" />-ისთვის</translation>
 <translation id="7388959671917308825">ჩაშენებული სენსორული პანელი</translation>
 <translation id="7397270852490618635">ღია თემის გამორთვა</translation>
+<translation id="7400166052988585408">თქვენი მასწავლებელი თქვენს ეკრანს ჩაკეტავს <ph name="NUM_SECONDS" /> წამში</translation>
 <translation id="7401543881546089382">წაშალეთ მალსახმობი</translation>
 <translation id="7405493795721832710"><ph name="DEVICE_NAME" /> მზადაა განახლებისთვის</translation>
 <translation id="741244894080940828">გარდაქმნა</translation>
@@ -1427,6 +1436,7 @@
 <translation id="7569444139234840525"><ph name="QUERY_TEXT" /> · /<ph name="PHONETICS" />/</translation>
 <translation id="7570674786725311828">USB სენსორული ეკრანი</translation>
 <translation id="757747079855995705">ქვა</translation>
+<translation id="7584853321964440104">ჩამოტვირთვა ვერ ხერხდება. ხელახლა ცადეთ ან გადატვირთეთ Chromebook.</translation>
 <translation id="7590883480672980941">შეყვანის პარამეტრები</translation>
 <translation id="7595982850646262331">დარჩენილია <ph name="TIME_VALUE" /></translation>
 <translation id="7600430297804876776"><ph name="MANAGER" />-ის ადმინისტრატორმა დააყენა, როდის შეიძლება ამ <ph name="DEVICE_TYPE" />-ის გამოყენება</translation>
@@ -1434,7 +1444,7 @@
 <translation id="7618216277886673749">აირჩიეთ <ph name="LANGUAGE_NAME" /></translation>
 <translation id="7618774594543487847">ნეიტრალური</translation>
 <translation id="7620771111601174153">შეიტყვეთ მეტი დახმარების ცენტრში</translation>
-<translation id="7623327321610992184">OnTask Pod</translation>
+<translation id="7623327321610992184">OnTask ვიჯეტი</translation>
 <translation id="763165478673169849">ბოლო გადაყენების დრო</translation>
 <translation id="7633068090678117093">ფონური სურათი</translation>
 <translation id="763873111564339966">ინდიგო</translation>
@@ -1557,6 +1567,16 @@
 <translation id="8179976553408161302">Enter</translation>
 <translation id="8183975772394450380">პლაჟი</translation>
 <translation id="819278132617411009">გამოიყენეთ Google-ის ხელოვნური ინტელექტი პროდუქტიულობის გაზრდაში</translation>
+<translation id="82003371436638355">როცა აირჩევთ ვარიანტს „საკუთარი მოთხოვნის შექმნა“, დაწერეთ მორგებული მოთხოვნა. ან აირჩიეთ „თემის არჩევა“ და შემდეგ მონიშნეთ ხაზგასმული სიტყვები, რომ მოახდინოთ თქვენი AI ფონის პერსონალიზება.
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          ხელოვნური ინტელექტით შექმნილი სურათების უფრო უნიკალური და განსხვავებული ვარიანტების მისაღებად აირჩიეთ „შთაგონების მიღება“.
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          თქვენი ფონის შექმნისას შესაბამისი მოთხოვნა ეგზავნება Google-ის სერვერებს, რომლებიც შემდეგ ქმნის სურათებს და აუმჯობესებს პროდუქტს <ph name="BEGIN_LINK_GOOGLE_PRIVACY_POLICY" />Google-ის კონფიდენციალურობის დებულების<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" /> შესაბამისად. ნუ მიუთითებთ პერსონალურ, სენსიტიურ და კონფიდენციალურ ინფორმაციას.
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          გენერაციული ხელოვნური ინტელექტი შეიძლება შეცდეს, მათ შორის, ხალხის შესახებ, ამიტომ გადაამოწმეთ მისი ინფორმაცია <ph name="BEGIN_LINK_CREATE_YOUR_OWN_WALLPAPER" />შეიტყვეთ მეტი<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" /></translation>
 <translation id="8200772114523450471">გაგრძელება</translation>
 <translation id="8206859287963243715">ფიჭური</translation>
 <translation id="8208861521865154048">ბონუსები</translation>
@@ -1578,6 +1598,7 @@
 <translation id="8312330582793120272">მედიის დაკვრა</translation>
 <translation id="8318753676953949627">სურათები არ არის</translation>
 <translation id="8320910311642849813">ტყე</translation>
+<translation id="8322464149031882595">დააწკაპუნეთ გასაგრძელებლად</translation>
 <translation id="8329018942023753850">კალკულატორის აპი</translation>
 <translation id="8336739000755212683">მოწყობილობის ანგარიშის სურათის შეცვლა</translation>
 <translation id="8339024191194156249">შეიტყვეთ მეტი ავტომატური გაშვების შესახებ</translation>
@@ -1598,6 +1619,7 @@
 <translation id="8395584934117017006">ეს <ph name="DEVICE_TYPE" /> მართულია ორგანიზაციის მიერ</translation>
 <translation id="8398927464629426868">სიხშირე, რომლითაც მოწყობილობა ამჟამად იტენება ან იცლება</translation>
 <translation id="8403988360557588704">ნახატი, რომელზეც გამოსახულია <ph name="ART_FEATURE" />, სტილი: <ph name="ART_MOVEMENT" /></translation>
+<translation id="8409219750150841791">გენერირებული შეჯამება:</translation>
 <translation id="8410244574650205435">ავტომატურად აღმოჩენილი</translation>
 <translation id="8420955526972171689">შეასრულეთ ტესტები და დეფექტების აღმოფხვრა აპარატურის პრობლემების შემთხვევაში</translation>
 <translation id="8422748173858722634">IMEI</translation>
@@ -1642,6 +1664,7 @@
 <translation id="8626489604350149811">სხვა ქმედებები <ph name="APN_NAME" />-ისთვის</translation>
 <translation id="86356131183441916">ღია მეწამული</translation>
 <translation id="8647595191512746911">აუდიოტრანსკრიფცია</translation>
+<translation id="8648578954147795914">გენერირებული სახელები:</translation>
 <translation id="8650852232143958317">ყველგან თან იქონიეთ Gmail-ისა და Google Drive-ის ფაილები</translation>
 <translation id="8651481478098336970">ხმის დადუმება</translation>
 <translation id="8655295600908251630">არხი</translation>
@@ -1670,7 +1693,6 @@
 <translation id="8764414543112028321">WireGuard</translation>
 <translation id="87646919272181953">Google Photos ალბომი</translation>
 <translation id="8775713578693478175">მოდემის APN</translation>
-<translation id="877735394245039557">მიმდინარეობს მოდელის ჩამოტვირთვა</translation>
 <translation id="877985182522063539">A4</translation>
 <translation id="879568662008399081">ამ ქსელს, შესაძლოა, ავტორიზაციის პორტალი ჰქონდეს</translation>
 <translation id="8797082062139985406">სახელის შექმნა Google-ის ხელოვნური ინტელექტის მეშვეობით</translation>
@@ -1723,6 +1745,7 @@
 <translation id="8961025972867871808">პინგვინები</translation>
 <translation id="8968751544471797276">დატენის სიჩქარე</translation>
 <translation id="8970109610781093811">ხელახლა გაშვება</translation>
+<translation id="8972061581514441296">დააწკაპუნეთ უკან დასაბრუნებლად</translation>
 <translation id="8983038754672563810">HSPA</translation>
 <translation id="8987565828374052507">{NUMBER_OF_PAGES,plural, =0{სკანირება}=1{გვერდის {NUMBER_OF_PAGES} სკანირება}other{გვერდის {NUMBER_OF_PAGES} სკანირება}}</translation>
 <translation id="89945434909472341">სოფელი</translation>
@@ -1784,6 +1807,7 @@
 <translation id="9218016617214286986">ნაცნობი APN-ების ჩვენება</translation>
 <translation id="932327136139879170">საწყისი გვერდი</translation>
 <translation id="939519157834106403">SSID</translation>
+<translation id="940663759301549538">დარწმუნდით, რომ თქვენი მიკროფონი დაკავშირებულია და ცადეთ Chromebook-ის გადატვირთვა</translation>
 <translation id="945522503751344254">შეფასების გაგზავნა</translation>
 <translation id="950520315903467048">მოქმედებისთვის „<ph name="DIRECTION" />“ აკლია კლავიში. <ph name="ASSIGN_INSTRUCTION" /></translation>
 <translation id="951780398843003443">აფასებს ჩანაწერის ხმებს ისე, რომ ტრანსკრიპტი აჩვენებს, რა და როდის თქვა თითოეულმა მოსაუბრემ</translation>

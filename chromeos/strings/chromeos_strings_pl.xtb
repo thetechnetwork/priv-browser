@@ -81,6 +81,7 @@
 <translation id="131461803491198646">Sieć macierzysta, nie w roamingu</translation>
 <translation id="1327977588028644528">Brama</translation>
 <translation id="1328223165223065150">Kolor tapety</translation>
+<translation id="1329478709358066995">Transkrypcja:</translation>
 <translation id="1330426557709298164">JPG</translation>
 <translation id="1337912285145772892">Dopasuj do obszaru skanowania</translation>
 <translation id="1343442362630695901">słone jezioro</translation>
@@ -126,7 +127,16 @@
 <translation id="1515129336378114413">strona główna przeglądarki</translation>
 <translation id="1526389707933164996">Animacja wygaszacza ekranu</translation>
 <translation id="152892567002884378">Zwiększ głośność</translation>
+<translation id="1531038290222364269">Pokaż karty</translation>
 <translation id="1539864135338521185">lapis-lazuli</translation>
+<translation id="1548555207631326346">Wybierz motyw, a następnie podkreślone słowa, aby spersonalizować obrazy wygenerowane przez AI.<ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />Wybierz „Zainspiruj mnie”, aby uzyskać dostęp do bardziej unikalnych i zróżnicowanych opcji obrazów wygenerowanych przez AI.
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          Gdy tworzysz treści za pomocą AI, prompt jest wysyłany na serwery AI od Google w celu wygenerowania obrazów oraz użycia go do ulepszania usługi, zgodnie z <ph name="BEGIN_LINK_GOOGLE_PRIVACY_POLICY" />Polityką prywatności Google<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" />.
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          Generatywna AI to funkcja eksperymentalna, która znajduje się we wczesnej fazie rozwoju i obecnie jest dostępna z ograniczeniami.</translation>
 <translation id="1555130319947370107">Niebieski</translation>
 <translation id="155865706765934889">Touchpad</translation>
 <translation id="1561927818299383735">kolor podświetlenia</translation>
@@ -252,7 +262,6 @@
 <translation id="2011174342667534258">Wersja SDK:</translation>
 <translation id="2016697457005847575">Wykonaj czynności z instrukcji rozwiązywania problemów</translation>
 <translation id="202500043506723828">EID</translation>
-<translation id="2041627599411887437">Wybierz motyw, a następnie podkreślone słowa, aby spersonalizować obrazy wygenerowane przez AI.</translation>
 <translation id="2045814230297767491">sztućce</translation>
 <translation id="2047316797244836561">Aby wyświetlić wygaszacz ekranu, połącz się z siecią i odśwież stronę.</translation>
 <translation id="2056550196601855911">IPv4/IPv6</translation>
@@ -405,6 +414,7 @@
 <translation id="2787237339470862294">Ten język nie jest obecnie obsługiwany</translation>
 <translation id="2787435249130282949">klawiatura jaśniejsza</translation>
 <translation id="2805756323405976993">Aplikacje</translation>
+<translation id="2822702442014805146">Pobieram model do tworzenia podsumowań i nazw</translation>
 <translation id="28232023175184696">Nie udało się połączyć z internetem. Kliknij, by spróbować jeszcze raz.</translation>
 <translation id="2855718259207180827">wełny</translation>
 <translation id="2859243502336719778">Krytyczna aktualizacja</translation>
@@ -502,6 +512,7 @@
 <translation id="3373141842870501561">Tapeta Ziemia</translation>
 <translation id="33736539805963175">Tło w kolorze <ph name="LETTERS_COLOR" /> z literą <ph name="LETTERS_LETTER" /></translation>
 <translation id="3383623117265110236">Na wyłączność</translation>
+<translation id="3395147534045164351">Przełącz lokalizację przyciągania</translation>
 <translation id="3404249063913988450">Włącz wygaszacz ekranu</translation>
 <translation id="3413935475507503304">Aby rozpocząć aktualizację, kliknij Dalej.</translation>
 <translation id="3428551088151258685">na zewnątrz</translation>
@@ -651,6 +662,7 @@
 <translation id="4113067922640381334">Teraz masz dostęp do nowych <ph name="BEGIN_LINK_WALLPAPER_SUBPAGE" />tapet<ph name="END_LINK_WALLPAPER_SUBPAGE" /></translation>
 <translation id="4117637339509843559">Tryb ciemny</translation>
 <translation id="4126551873361000548">Przewiń do tyłu o 10 s</translation>
+<translation id="4128271910628504223">Wpisz prompt, np. „narysuj las we mgle”</translation>
 <translation id="4130035430755296270">Najedź kursorem, aby zobaczyć więcej opcji układu</translation>
 <translation id="4130750466177569591">Zgadzam się</translation>
 <translation id="4131410914670010031">Czarno-biały</translation>
@@ -824,6 +836,7 @@
 <translation id="4891842000192098784">Obciążenie</translation>
 <translation id="4897058166682006107">Poziom naładowania baterii lewej słuchawki urządzenia: <ph name="BATTERY_PERCENTAGE" />%.</translation>
 <translation id="4905998861748258752">Włącz tę funkcję, aby wybrać opcje wygaszacza ekranu</translation>
+<translation id="4910853326379896417">Pobieranie modelu do tworzenia podsumowań i nazw zostało zakończone</translation>
 <translation id="4910858703033903787">Typy APN</translation>
 <translation id="4917385247580444890">Silny</translation>
 <translation id="4917889632206600977">Zatrzymano – brak papieru</translation>
@@ -858,8 +871,10 @@
 <translation id="5050042263972837708">Nazwa grupy</translation>
 <translation id="5051044138948155788">To jedyna strona. Pojawi się ekran rozpoczęcia skanowania.</translation>
 <translation id="5053233795640754917">Wstrzymaj</translation>
+<translation id="5056587122125565772">Utwórz obraz</translation>
 <translation id="5078711626843651677">Modele głosu są tymczasowo przechowywane na urządzeniu do czasu zakończenia etykietowania rozmówców. W każdej chwili możesz wyłączyć tę funkcję w Ustawieniach.</translation>
 <translation id="5078983345702708852">futurystyczne</translation>
+<translation id="5085224064082122501">Nie udało się pobrać modelu do tworzenia podsumowań i nazw. Spróbuj jeszcze raz lub uruchom ponownie Chromebooka.</translation>
 <translation id="5087864757604726239">wstecz</translation>
 <translation id="5088172560898466307">Nazwa hosta serwera</translation>
 <translation id="5089810972385038852">Stan</translation>
@@ -1129,14 +1144,12 @@
 <translation id="6325525973963619867">Niepowodzenie</translation>
 <translation id="6327262166342360252">Ta tapeta została utworzona za pomocą AI przy użyciu tego tekstu: „<ph name="PROMPT" />”.</translation>
 <translation id="6331191339300272798">Automatyczny ciemny motyw</translation>
-<translation id="6335228876613776082">Model został pobrany</translation>
 <translation id="6340526405444716530">Personalizacja</translation>
 <translation id="6348252528297699679">Możesz wyłączyć lokalizację, klikając Ustawienia &gt; Prywatność i bezpieczeństwo &gt; Ustawienia prywatności &gt; Dostęp do lokalizacji. <ph name="LINK_BEGIN" />Więcej informacji<ph name="LINK_END" /></translation>
 <translation id="6348738456043757611">Nazwa użytkownika i hasło</translation>
 <translation id="6352210854422428614">inna planeta</translation>
 <translation id="6359706544163531585">Wyłącz jasny motyw</translation>
 <translation id="6359919876285606596">To działanie jest trwałe i nie można go cofnąć</translation>
-<translation id="6368342879959028556">Gdy wybierzesz „Utwórz przy pomocy AI”, wpisz niestandardowy prompt. Możesz też kliknąć „Tapety AI”, a potem wybrać motyw i podkreślone słowa, aby spersonalizować tapetę AI.</translation>
 <translation id="636850387210749493">Rejestracja w firmie</translation>
 <translation id="6369221585240879141">Nie można utworzyć nazw nagrań dla tego języka transkrypcji</translation>
 <translation id="6373461326814131011">staw</translation>
@@ -1209,16 +1222,6 @@
 <translation id="6657240842932274095">Zezwolić usługom systemowym na korzystanie z Twojej lokalizacji?</translation>
 <translation id="6657585470893396449">Hasło</translation>
 <translation id="66621959568103627">koralowy</translation>
-<translation id="6667885109186363316"><ph name="SEA_PEN_INTRO_FIRST_PARAGRAPH" />
-          <ph name="LINE_BREAK" />
-          <ph name="LINE_BREAK" />
-          Wybierz „Zainspiruj mnie”, aby uzyskać dostęp do bardziej unikalnych i zróżnicowanych opcji obrazów wygenerowanych przez AI.
-          <ph name="LINE_BREAK" />
-          <ph name="LINE_BREAK" />
-          Gdy tworzysz treści za pomocą AI, prompt jest wysyłany na serwery AI od Google w celu wygenerowania obrazów oraz użycia go do ulepszania usługi, zgodnie z <ph name="BEGIN_LINK_GOOGLE_PRIVACY_POLICY" />Polityką prywatności Google<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" />.
-          <ph name="LINE_BREAK" />
-          <ph name="LINE_BREAK" />
-          Generatywna AI to funkcja eksperymentalna, która znajduje się we wczesnej fazie rozwoju i obecnie jest dostępna z ograniczeniami.</translation>
 <translation id="6673898378497337661">zwiększ jasność klawiatury</translation>
 <translation id="6692996468359469499">Uzyskiwanie informacji związanych z zaznaczoną treścią</translation>
 <translation id="6694534975463174713">zablokuj</translation>
@@ -1274,6 +1277,7 @@
 <translation id="6930597342185648547">Informacje o tle</translation>
 <translation id="6939667434404433010">Wyszukaj nazwę nagrania</translation>
 <translation id="6939766318048400022">Kawiarnia</translation>
+<translation id="6942253772720771875">Podziel się opinią lub opisz problem</translation>
 <translation id="6943893908656559156">Tożsamość zdalna (opcjonalnie)</translation>
 <translation id="6953137545147683679">złoty</translation>
 <translation id="6957231940976260713">Nazwa usługi</translation>
@@ -1295,6 +1299,7 @@
 <translation id="7040230719604914234">Operator</translation>
 <translation id="7040729769968826896">Zezwalaj na identyfikację mówiącej osoby</translation>
 <translation id="7041549558901442110">Urządzenie nie ma połączenia.</translation>
+<translation id="704183341263526038">Jowisz</translation>
 <translation id="7046522406494308071">Zresetować wszystkie skróty do wartości domyślnych?</translation>
 <translation id="7049916119678019302">Pobierz model transkrypcji w Ustawieniach</translation>
 <translation id="7058278511608979688">Zakończ i zapisz</translation>
@@ -1425,6 +1430,7 @@ Aby korzystać z tej funkcji, pobierz model transkrypcji (do 100 MB).</transla
 <translation id="7569444139234840525"><ph name="QUERY_TEXT" /> · /<ph name="PHONETICS" />/</translation>
 <translation id="7570674786725311828">Ekran dotykowy USB</translation>
 <translation id="757747079855995705">kamienia</translation>
+<translation id="7584853321964440104">Nie udało się pobrać. Spróbuj jeszcze raz lub uruchom ponownie Chromebooka.</translation>
 <translation id="7590883480672980941">Ustawienia wprowadzania</translation>
 <translation id="7595982850646262331">Pozostało: <ph name="TIME_VALUE" /></translation>
 <translation id="7600430297804876776">Administrator witryny <ph name="MANAGER" /> określił, kiedy można używać tego urządzenia <ph name="DEVICE_TYPE" />.</translation>
@@ -1555,6 +1561,15 @@ Aby korzystać z tej funkcji, pobierz model transkrypcji (do 100 MB).</transla
 <translation id="8179976553408161302">Enter</translation>
 <translation id="8183975772394450380">plażę</translation>
 <translation id="819278132617411009">Wykorzystaj sztuczną inteligencję Google, aby zwiększyć swoją produktywność</translation>
+<translation id="82003371436638355">Gdy wybierzesz „Utwórz własny”, wpisz niestandardowy prompt. Możesz też kliknąć „Wybierz motyw”, a potem zaznaczyć podkreślone słowa, aby spersonalizować tapetę AI.
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />Wybierz „Zainspiruj mnie”, aby uzyskać dostęp do bardziej unikalnych i zróżnicowanych opcji obrazów wygenerowanych przez AI.
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          Gdy tworzysz własną tapetę, prompt jest wysyłany na serwery Google w celu wygenerowania obrazów oraz użycia go do ulepszania usługi, zgodnie z <ph name="BEGIN_LINK_GOOGLE_PRIVACY_POLICY" />Warunkami korzystania z usług i Polityką prywatności Google<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" />. Nie podawaj żadnych danych osobowych, poufnych ani wrażliwych.
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          Generatywna AI może popełniać błędy, także dotyczące osób, dlatego sprawdzaj uzyskane odpowiedzi. <ph name="BEGIN_LINK_CREATE_YOUR_OWN_WALLPAPER" />Więcej informacji<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" /></translation>
 <translation id="8200772114523450471">Wznów</translation>
 <translation id="8206859287963243715">Komórka</translation>
 <translation id="8208861521865154048">Korzyści</translation>
@@ -1576,6 +1591,7 @@ Aby korzystać z tej funkcji, pobierz model transkrypcji (do 100 MB).</transla
 <translation id="8312330582793120272">odtwórz multimedia</translation>
 <translation id="8318753676953949627">Brak obrazów</translation>
 <translation id="8320910311642849813">las</translation>
+<translation id="8322464149031882595">Kliknij, aby przejść dalej</translation>
 <translation id="8329018942023753850">aplikacja Kalkulator</translation>
 <translation id="8336739000755212683">Zmień obraz konta na urządzeniu</translation>
 <translation id="8339024191194156249">Więcej informacji o automatycznym uruchamianiu</translation>
@@ -1596,6 +1612,7 @@ Aby korzystać z tej funkcji, pobierz model transkrypcji (do 100 MB).</transla
 <translation id="8395584934117017006">Tym urządzeniem (<ph name="DEVICE_TYPE" />) zarządza firma</translation>
 <translation id="8398927464629426868">Obecne tempo, w jakim urządzenie się ładuje lub rozładowuje</translation>
 <translation id="8403988360557588704">Obraz przedstawiający <ph name="ART_FEATURE" /> w stylu <ph name="ART_MOVEMENT" /></translation>
+<translation id="8409219750150841791">Wygenerowane podsumowanie:</translation>
 <translation id="8410244574650205435">Wykryty automatycznie</translation>
 <translation id="8420955526972171689">Uruchamianie testów i rozwiązywanie problemów ze sprzętem</translation>
 <translation id="8422748173858722634">IMEI</translation>
@@ -1640,6 +1657,7 @@ Aby korzystać z tej funkcji, pobierz model transkrypcji (do 100 MB).</transla
 <translation id="8626489604350149811">Więcej działań dotyczących: <ph name="APN_NAME" /></translation>
 <translation id="86356131183441916">Jasnofioletowy</translation>
 <translation id="8647595191512746911">Transkrypcja</translation>
+<translation id="8648578954147795914">Wygenerowane nazwy:</translation>
 <translation id="8650852232143958317">Zabierz ze sobą pliki z Gmaila i Dysku Google</translation>
 <translation id="8651481478098336970">wycisz</translation>
 <translation id="8655295600908251630">Kanał</translation>
@@ -1668,7 +1686,6 @@ Aby korzystać z tej funkcji, pobierz model transkrypcji (do 100 MB).</transla
 <translation id="8764414543112028321">WireGuard</translation>
 <translation id="87646919272181953">Album Zdjęcia Google</translation>
 <translation id="8775713578693478175">APN modemu</translation>
-<translation id="877735394245039557">Pobieram model</translation>
 <translation id="877985182522063539">A4</translation>
 <translation id="879568662008399081">W sieci może znajdować się portal przechwytujący</translation>
 <translation id="8797082062139985406">Utwórz nazwę za pomocą AI od Google</translation>
@@ -1721,6 +1738,7 @@ Aby korzystać z tej funkcji, pobierz model transkrypcji (do 100 MB).</transla
 <translation id="8961025972867871808">pingwiny</translation>
 <translation id="8968751544471797276">Szybkość ładowania</translation>
 <translation id="8970109610781093811">Uruchom ponownie</translation>
+<translation id="8972061581514441296">Kliknij, aby wrócić</translation>
 <translation id="8983038754672563810">HSPA</translation>
 <translation id="8987565828374052507">{NUMBER_OF_PAGES,plural, =0{Skanuj}=1{Skanuj {NUMBER_OF_PAGES} stronę}few{Skanuj {NUMBER_OF_PAGES} strony}many{Skanuj {NUMBER_OF_PAGES} stron}other{Skanuj {NUMBER_OF_PAGES} strony}}</translation>
 <translation id="89945434909472341">wieś</translation>
@@ -1782,6 +1800,7 @@ Aby korzystać z tej funkcji, pobierz model transkrypcji (do 100 MB).</transla
 <translation id="9218016617214286986">Pokaż znane punkty APN</translation>
 <translation id="932327136139879170">Strona główna</translation>
 <translation id="939519157834106403">SSID</translation>
+<translation id="940663759301549538">Sprawdź, czy mikrofon jest podłączony, lub uruchom ponownie Chromebooka</translation>
 <translation id="945522503751344254">Prześlij opinię</translation>
 <translation id="950520315903467048">Brak klawisza dla kierunku <ph name="DIRECTION" />. <ph name="ASSIGN_INSTRUCTION" /></translation>
 <translation id="951780398843003443">porównywać głosy w całym nagraniu i zaznaczać w transkrypcji, co mówi która osoba.</translation>

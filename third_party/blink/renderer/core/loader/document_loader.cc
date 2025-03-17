@@ -46,7 +46,7 @@
 #include "base/time/default_tick_clock.h"
 #include "base/types/optional_util.h"
 #include "base/uuid.h"
-#include "build/chromeos_buildflags.h"
+#include "build/build_config.h"
 #include "net/storage_access_api/status.h"
 #include "services/metrics/public/cpp/ukm_builders.h"
 #include "services/network/public/cpp/client_hints.h"
@@ -61,7 +61,6 @@
 #include "third_party/blink/public/common/loader/loading_behavior_flag.h"
 #include "third_party/blink/public/common/metrics/accept_language_and_content_language_usage.h"
 #include "third_party/blink/public/common/page/browsing_context_group_info.h"
-#include "third_party/blink/public/common/permissions_policy/permissions_policy.h"
 #include "third_party/blink/public/common/scheme_registry.h"
 #include "third_party/blink/public/mojom/commit_result/commit_result.mojom-blink.h"
 #include "third_party/blink/public/mojom/fetch/fetch_api_request.mojom-blink.h"
@@ -1069,10 +1068,9 @@ void DocumentLoader::UpdateForSameDocumentNavigation(
   }
 
   last_navigation_had_trusted_initiator_ =
-      initiator_origin ? initiator_origin->IsSameOriginWith(
-                             frame_->DomWindow()->GetSecurityOrigin()) &&
-                             Url().ProtocolIsInHTTPFamily()
-                       : true;
+      !initiator_origin || (initiator_origin->IsSameOriginWith(
+                                frame_->DomWindow()->GetSecurityOrigin()) &&
+                            Url().ProtocolIsInHTTPFamily());
 
   last_navigation_had_transient_user_activation_ =
       has_transient_user_activation;
@@ -3007,18 +3005,15 @@ void DocumentLoader::CommitNavigation() {
           ? ScopedOldDocumentInfoForCommitCapturer::CurrentInfo()
           : nullptr;
   bool had_sticky_activation_before_navigation =
-      old_document_info_for_commit
-          ? old_document_info_for_commit
-                ->had_sticky_activation_before_navigation
-          : false;
+      old_document_info_for_commit &&
+      old_document_info_for_commit->had_sticky_activation_before_navigation;
   if (had_sticky_activation_before_navigation != had_sticky_activation_) {
     frame_->SetHadStickyUserActivationBeforeNavigation(had_sticky_activation_);
     frame_->GetLocalFrameHostRemote()
         .HadStickyUserActivationBeforeNavigationChanged(had_sticky_activation_);
   }
-  bool was_focused_frame = old_document_info_for_commit
-                               ? old_document_info_for_commit->was_focused_frame
-                               : false;
+  bool was_focused_frame = old_document_info_for_commit &&
+                           old_document_info_for_commit->was_focused_frame;
   if (was_focused_frame) {
     frame_->GetPage()->GetFocusController().SetFocusedFrame(frame_);
   }

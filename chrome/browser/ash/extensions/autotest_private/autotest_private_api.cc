@@ -1627,8 +1627,7 @@ ExtensionFunction::ResponseAction
 AutotestPrivateGetExtensionsInfoFunction::Run() {
   DVLOG(1) << "AutotestPrivateGetExtensionsInfoFunction";
 
-  ExtensionService* service =
-      ExtensionSystem::Get(browser_context())->extension_service();
+  ExtensionRegistrar* registrar = ExtensionRegistrar::Get(browser_context());
   ExtensionRegistry* registry = ExtensionRegistry::Get(browser_context());
   const ExtensionSet& extensions = registry->enabled_extensions();
   const ExtensionSet& disabled_extensions = registry->disabled_extensions();
@@ -1666,7 +1665,7 @@ AutotestPrivateGetExtensionsInfoFunction::Run() {
             .Set("isInternal", location == ManifestLocation::kInternal)
             .Set("isUserInstalled", location == ManifestLocation::kInternal ||
                                         Manifest::IsUnpackedLocation(location))
-            .Set("isEnabled", service->IsExtensionEnabled(id))
+            .Set("isEnabled", registrar->IsExtensionEnabled(id))
             .Set("allowedInIncognito",
                  util::IsIncognitoEnabled(id, browser_context()))
             .Set("hasPageAction",
@@ -6882,7 +6881,7 @@ AutotestPrivateIsFeatureEnabledFunction::Run() {
   static const base::Feature* const kAllowList[] = {
       // clang-format off
       &ash::features::kFeatureManagementVideoConference,
-      &ash::features::kSavedDeskUiRevamp,
+      &ash::features::kForestFeature,
       &kDisabledFeatureForTest,
       &kEnabledFeatureForTest,
       // clang-format on

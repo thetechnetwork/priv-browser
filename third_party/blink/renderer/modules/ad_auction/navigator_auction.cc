@@ -2704,8 +2704,7 @@ mojom::blink::AuctionAdConfigPtr IdlAuctionConfigToMojo(
         base::Milliseconds(config.sellerTimeout());
   }
 
-  if (base::FeatureList::IsEnabled(blink::features::kFledgeReportingTimeout) &&
-      config.hasReportingTimeout()) {
+  if (config.hasReportingTimeout()) {
     mojo_config->auction_ad_config_non_shared_params->reporting_timeout =
         base::Milliseconds(config.reportingTimeout());
   }
@@ -3088,6 +3087,24 @@ scoped_refptr<const SecurityOrigin> ParseAndValidateOrigin(
     return nullptr;
   }
   return origin;
+}
+
+bool AuctionConfigHasLocalAuctions(AuctionAdConfig* config) {
+  // First, check that the top-level auction is server hosted.
+  if (!config->hasServerResponse()) {
+    return true;
+  }
+
+  // Next, verify that all component auctions are also server hosted.
+  if (config->hasComponentAuctions()) {
+    for (AuctionAdConfig* component_auction_config :
+         config->componentAuctions()) {
+      if (!component_auction_config->hasServerResponse()) {
+        return true;
+      }
+    }
+  }
+  return false;
 }
 
 }  // namespace
@@ -3855,6 +3872,12 @@ NavigatorAuction::runAdAuction(ScriptState* script_state,
                                AuctionAdConfig* mutable_config,
                                ExceptionState& exception_state,
                                base::TimeTicks start_time) {
+  if (base::FeatureList::IsEnabled(
+          blink::features::kFledgeDisableLocalAdsAuctions) &&
+      AuctionConfigHasLocalAuctions(mutable_config)) {
+    return ScriptPromise<IDLNullable<V8UnionFencedFrameConfigOrUSVString>>();
+  }
+
   ExecutionContext* context = ExecutionContext::From(script_state);
 
   if (!HandleOldDictNamesRun(mutable_config, exception_state)) {

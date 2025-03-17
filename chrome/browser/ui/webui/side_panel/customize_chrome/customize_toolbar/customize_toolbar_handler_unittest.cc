@@ -9,18 +9,17 @@
 #include "base/test/gmock_move_support.h"
 #include "base/test/mock_callback.h"
 #include "chrome/browser/search_engines/template_url_service_factory.h"
+#include "chrome/browser/ui/actions/chrome_action_id.h"
 #include "chrome/browser/ui/actions/chrome_actions.h"
 #include "chrome/browser/ui/browser_actions.h"
 #include "chrome/browser/ui/tabs/tab_enums.h"
 #include "chrome/browser/ui/toolbar/pinned_toolbar/pinned_toolbar_actions_model_factory.h"
-#include "chrome/browser/ui/ui_features.h"
 #include "chrome/browser/ui/webui/side_panel/customize_chrome/customize_toolbar/customize_toolbar.mojom.h"
 #include "chrome/common/pref_names.h"
 #include "chrome/grit/generated_resources.h"
 #include "chrome/test/base/browser_with_test_window_test.h"
 #include "chrome/test/base/search_test_utils.h"
 #include "components/keyed_service/core/keyed_service.h"
-#include "components/lens/lens_features.h"
 #include "mojo/public/cpp/bindings/pending_receiver.h"
 #include "testing/gmock/include/gmock/gmock.h"
 #include "testing/gtest/include/gtest/gtest.h"
@@ -100,7 +99,6 @@ class CustomizeToolbarHandlerTest : public BrowserWithTestWindowTest {
   }
 
   void SetUp() override {
-    SetupFeatureList();
     InitializeActionIdStringMapping();
     BrowserWithTestWindowTest::SetUp();
 
@@ -140,11 +138,6 @@ class CustomizeToolbarHandlerTest : public BrowserWithTestWindowTest {
     BrowserWithTestWindowTest::TearDown();
   }
 
-  virtual void SetupFeatureList() {
-    feature_list_.InitWithFeatures(
-        {features::kToolbarPinning, lens::features::kLensOverlay}, {});
-  }
-
   CustomizeToolbarHandler& handler() { return *handler_; }
   MockPinnedToolbarActionsModel& mock_pinned_toolbar_actions_model() {
     return *mock_pinned_toolbar_actions_model_;
@@ -154,7 +147,6 @@ class CustomizeToolbarHandlerTest : public BrowserWithTestWindowTest {
   }
 
  protected:
-  base::test::ScopedFeatureList feature_list_;
   testing::NiceMock<MockPage> mock_page_;
 
   raw_ptr<MockPinnedToolbarActionsModel> mock_pinned_toolbar_actions_model_;

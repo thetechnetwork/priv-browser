@@ -31,7 +31,6 @@
 #include "third_party/blink/renderer/platform/graphics/gpu/shared_gpu_context.h"
 #include "third_party/blink/renderer/platform/graphics/gpu/webgpu_mailbox_texture.h"
 #include "third_party/blink/renderer/platform/graphics/gpu/webgpu_texture_alpha_clearer.h"
-#include "third_party/blink/renderer/platform/graphics/graphics_types.h"
 #include "third_party/blink/renderer/platform/graphics/skia/skia_utils.h"
 #include "third_party/blink/renderer/platform/graphics/unaccelerated_static_bitmap_image.h"
 #include "third_party/blink/renderer/platform/scheduler/public/thread_scheduler.h"
@@ -288,6 +287,9 @@ ImageBitmap* GPUCanvasContext::TransferToImageBitmap(
       black_bitmap.eraseARGB(0, 0, 0, 0);
     }
 
+    // Mark the bitmap as immutable to avoid an unnecessary copy in the
+    // following RasterFromBitmap() call.
+    black_bitmap.setImmutable();
     return MakeGarbageCollected<ImageBitmap>(
         UnacceleratedStaticBitmapImage::Create(
             SkImages::RasterFromBitmap(black_bitmap)));
@@ -312,7 +314,7 @@ ImageBitmap* GPUCanvasContext::TransferToImageBitmap(
   }
   DCHECK(release_callback);
 
-  auto sk_color_type = viz::ToClosestSkColorType(client_si->format());
+  auto format = client_si->format();
 
   return MakeGarbageCollected<ImageBitmap>(
       AcceleratedStaticBitmapImage::CreateFromCanvasSharedImage(
@@ -320,7 +322,7 @@ ImageBitmap* GPUCanvasContext::TransferToImageBitmap(
           /* shared_image_texture_id = */ 0,
           gfx::Size(texture_descriptor_.size.width,
                     texture_descriptor_.size.height),
-          sk_color_type, kPremul_SkAlphaType, nullptr,
+          format, kPremul_SkAlphaType, gfx::ColorSpace::CreateSRGB(),
           GetContextProviderWeakPtr(), base::PlatformThread::CurrentRef(),
           ThreadScheduler::Current()->CleanupTaskRunner(),
           std::move(release_callback)));
@@ -381,6 +383,7 @@ void GPUCanvasContext::configure(const GPUCanvasConfiguration* descriptor,
   texture_descriptor_ = {
       // Set the values from the configuration descriptor
       .usage = AsDawnFlags<wgpu::TextureUsage>(descriptor->usage()),
+      .dimension = wgpu::TextureDimension::e2D,
       .size = {static_cast<uint32_t>(host_size.width()),
                static_cast<uint32_t>(host_size.height())},
       .format = AsDawnEnum(descriptor->format()),

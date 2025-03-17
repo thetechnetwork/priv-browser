@@ -8,21 +8,27 @@
 #include <optional>
 
 #include "chrome/common/extensions/api/autofill_private.h"
+#include "components/autofill/core/browser/data_model/autofill_ai/entity_type.h"
 
 namespace autofill {
 class EntityInstance;
-class EntityType;
 }  // namespace autofill
 
 namespace extensions::autofill_ai_util {
 
-// Returns the i18n string representation of "Add <entity>". For example, for a
-// passport for "en-US", this function should return "Add passport".
-std::string GetAddEntityStringForI18n(autofill::EntityType entity_type);
+// Returns the i18n string representation of "Add <entity type>". For example,
+// for a passport for "en-US", this function should return "Add passport".
+std::string GetAddEntityTypeStringForI18n(autofill::EntityType entity_type);
 
-// Returns the i18n string representation of "Edit <entity>". For example, for a
-// passport for "en-US", this function should return "Edit passport".
-std::string GetEditEntityStringForI18n(autofill::EntityType entity_type);
+// Returns the i18n string representation of "Edit <entity type>". For example,
+// for a passport for "en-US", this function should return "Edit passport".
+std::string GetEditEntityTypeStringForI18n(autofill::EntityType entity_type);
+
+// Converts an `autofill::AttributeType::DataType` enum entry to an
+// `api::autofill_private::AttributeTypeDataType` enum entry.
+api::autofill_private::AttributeTypeDataType
+AttributeTypeDataTypeToPrivateApiAttributeTypeDataType(
+    autofill::AttributeType::DataType data_type);
 
 // Converts an `api::autofill_private::EntityInstance` object to an
 // `autofill::EntityInstance` object. Returns `std::nullopt` if one of the
@@ -32,15 +38,19 @@ PrivateApiEntityInstanceToEntityInstance(
     const api::autofill_private::EntityInstance& private_api_entity_instance);
 
 // Converts an `autofill::EntityInstance` object to an
-// `api::autofill_private::EntityInstance` object.
+// `api::autofill_private::EntityInstance` object, according to a given
+// `app_locale`.
 api::autofill_private::EntityInstance EntityInstanceToPrivateApiEntityInstance(
-    const autofill::EntityInstance& entity_instance);
+    const autofill::EntityInstance& entity_instance,
+    const std::string& app_locale);
 
-// Converts an `autofill::EntityInstance` object to an
-// `api::autofill_private::EntityInstanceWithLabels` object.
-api::autofill_private::EntityInstanceWithLabels
-EntityInstanceToPrivateApiEntityInstanceWithLabels(
-    const autofill::EntityInstance& entity_instance);
+// Converts `autofill::EntityInstance`s to
+// `api::autofill_private::EntityInstanceWithLabels`s according to a given
+// `app_locale`.
+std::vector<api::autofill_private::EntityInstanceWithLabels>
+EntityInstancesToPrivateApiEntityInstancesWithLabels(
+    base::span<const autofill::EntityInstance> entity_instances,
+    const std::string& app_locale);
 
 }  // namespace extensions::autofill_ai_util
 

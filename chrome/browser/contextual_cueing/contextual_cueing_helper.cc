@@ -118,7 +118,8 @@ void ContextualCueingHelper::DidFinishNavigation(
 
 void ContextualCueingHelper::PrimaryMainDocumentElementAvailable() {
   auto* glic_nudge_controller = GetGlicNudgeController();
-  if (!glic_nudge_controller) {
+  if (!glic_nudge_controller ||
+      !web_contents()->GetLastCommittedURL().SchemeIsHTTPOrHTTPS()) {
     return;
   }
   // Determine if server data indicates a nudge should be shown.
@@ -204,18 +205,18 @@ bool ContextualCueingHelper::IsBrowserBlockingNudges(
 void ContextualCueingHelper::OnCueingDecision(
     std::unique_ptr<ScopedNudgeDecisionRecorder> decision_recorder,
     base::TimeTicks document_available_time,
-    std::string cue_label) {
+    base::expected<std::string, NudgeDecision> decision_result) {
   CHECK_EQ(NudgeDecision::kUnknown, decision_recorder->nudge_decision());
   if (ContextualCueingPageData::GetForPage(web_contents()->GetPrimaryPage())) {
     ContextualCueingPageData::DeleteForPage(web_contents()->GetPrimaryPage());
   }
 
-  if (cue_label.empty()) {
-    decision_recorder->set_nudge_decision(
-        NudgeDecision::kClientConditionsUnmet);
+  if (!decision_result.has_value()) {
+    decision_recorder->set_nudge_decision(decision_result.error());
     return;
   }
 
+  std::string cue_label = decision_result.value();
   if (IsBrowserBlockingNudges(decision_recorder.get())) {
     return;
   }
@@ -246,14 +247,14 @@ void ContextualCueingHelper::MaybeCreateForWebContents(
 #if BUILDFLAG(ENABLE_GLIC)
   Profile* profile =
       Profile::FromBrowserContext(web_contents->GetBrowserContext());
-  if (!glic::GlicEnabling::IsProfileEligible(profile)) {
+  if (!glic::GlicEnabling::IsEnabledForProfile(profile)) {
     return;
   }
 
   auto* optimization_guide_keyed_service =
       OptimizationGuideKeyedServiceFactory::GetForProfile(profile);
   if (!optimization_guide_keyed_service ||
-      !optimization_guide_keyed_service->GetModelExecutionFeaturesController()
+      !optimization_guide_keyed_service
            ->ShouldModelExecutionBeAllowedForUser()) {
     return;
   }

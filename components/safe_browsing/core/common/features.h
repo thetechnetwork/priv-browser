@@ -114,10 +114,6 @@ BASE_DECLARE_FEATURE(kDlpRegionalizedEndpoints);
 // replace the downloads url.
 BASE_DECLARE_FEATURE(kDownloadsPageReferrerUrl);
 
-// The kill switch for download tailored warnings. The main control is on the
-// server-side.
-BASE_DECLARE_FEATURE(kDownloadTailoredWarnings);
-
 // Enables HaTS surveys for users encountering desktop download warnings on the
 // download bubble or the downloads page.
 BASE_DECLARE_FEATURE(kDownloadWarningSurvey);
@@ -205,9 +201,6 @@ BASE_DECLARE_FEATURE(kHashPrefixRealTimeLookups);
 // to the Safe Browsing server.
 extern const base::FeatureParam<std::string> kHashPrefixRealTimeLookupsRelayUrl;
 
-// Enable faster OHTTP key rotation for hash-prefix real-time lookups.
-BASE_DECLARE_FEATURE(kHashPrefixRealTimeLookupsFasterOhttpKeyRotation);
-
 // Send sample hash-prefix real-time lookups for real-time lookups to catch
 // "false positives" where real-time lookup says safe but hash-prefix lookup
 // says unsafe.
@@ -265,13 +258,6 @@ extern const base::FeatureParam<std::string> kRedWarningSurveyReportTypeFilter;
 
 // Specifies the HaTS survey's identifier.
 extern const base::FeatureParam<std::string> kRedWarningSurveyTriggerId;
-
-#if BUILDFLAG(IS_IOS)
-// Controls whether asynchronous real-time check is enabled. When enabled, the
-// navigation can be committed before real-time Safe Browsing check is
-// completed.
-BASE_DECLARE_FEATURE(kSafeBrowsingAsyncRealTimeCheck);
-#endif
 
 // Enables client side phishing daily reports limit to be configured via Finch
 // for ESB and SBER users

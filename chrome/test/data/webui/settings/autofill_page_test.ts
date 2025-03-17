@@ -18,7 +18,7 @@ import {TestPluralStringProxy} from 'chrome://webui-test/test_plural_string_prox
 import {TestOpenWindowProxy} from 'chrome://webui-test/test_open_window_proxy.js';
 import {Router, routes} from 'chrome://settings/settings.js';
 
-import {AutofillManagerExpectations, createAddressEntry, createCreditCardEntry, createIbanEntry, PaymentsManagerExpectations, STUB_USER_ACCOUNT_INFO, TestAutofillManager, TestPaymentsManager} from './autofill_fake_data.js';
+import {AutofillManagerExpectations, createAddressEntry, createCreditCardEntry, createIbanEntry, createPayOverTimeIssuerEntry, PaymentsManagerExpectations, STUB_USER_ACCOUNT_INFO, TestAutofillManager, TestPaymentsManager} from './autofill_fake_data.js';
 import {TestPasswordManagerProxy} from './test_password_manager_proxy.js';
 import {TestEntityDataManagerProxy} from './test_entity_data_manager_proxy.js';
 
@@ -128,6 +128,7 @@ suite('PasswordsAndForms', function() {
     expected.requestedCreditCards = 1;
     expected.listeningCreditCards = 1;
     expected.requestedIbans = 1;
+    expected.requestedPayOverTimeIssuers = 1;
     return expected;
   }
 
@@ -137,14 +138,18 @@ suite('PasswordsAndForms', function() {
   let prefs: SettingsPrefsElement;
   let element: SettingsAutofillPageElement;
 
-  const testEntityWithLabels:
+  const testEntityInstanceWithLabels:
       chrome.autofillPrivate.EntityInstanceWithLabels = {
     guid: 'e4bbe384-ee63-45a4-8df3-713a58fdc181',
-    entityLabel: 'Toyota',
-    entitySubLabel: 'Car',
+    entityInstanceLabel: 'Toyota',
+    entityInstanceSubLabel: 'Car',
   };
 
   setup(async function() {
+    loadTimeData.overrideValues({
+      shouldShowPayOverTimeSettings: true,
+    });
+
     document.body.innerHTML = window.trustedTypes!.emptyHTML;
 
     // Override the AutofillManagerImpl for testing.
@@ -239,15 +244,16 @@ suite('PasswordsAndForms', function() {
   // The Autofill AI button is visible if the user has data saved, but is not
   // eligible.
   test('AutofillAIVisibleIfUserHasDataSaved', async function() {
-    entityDataManager.setloadEntityInstancesResponse([testEntityWithLabels]);
+    entityDataManager.setLoadEntityInstancesResponse(
+        [testEntityInstanceWithLabels]);
     loadTimeData.overrideValues({
       autofillAiFeatureEnabled: true,
       userEligibleForAutofillAi: false,
     });
-    // Recreate the element with the new `loadTimeData` and entities.
+    // Recreate the element with the new `loadTimeData` and entity instances.
     element.remove();
     element = createAutofillElement(prefs);
-    // Make sure that the entities were loaded.
+    // Make sure that the entity instances were loaded.
     await flushTasks();
     const autofillAiManagerButton =
         element.shadowRoot!.querySelector<CrLinkRowElement>(
@@ -259,12 +265,14 @@ suite('PasswordsAndForms', function() {
     const addressList = [createAddressEntry(), createAddressEntry()];
     const cardList = [createCreditCardEntry(), createCreditCardEntry()];
     const ibanList = [createIbanEntry(), createIbanEntry()];
+    const payOverTimeIssuerList =
+        [createPayOverTimeIssuerEntry(), createPayOverTimeIssuerEntry()];
     const accountInfo = {
       ...STUB_USER_ACCOUNT_INFO,
       isSyncEnabledForAutofillProfiles: true,
     };
     autofillManager.lastCallback.setPersonalDataManagerListener!
-        (addressList, cardList, ibanList, accountInfo);
+        (addressList, cardList, ibanList, payOverTimeIssuerList, accountInfo);
     flush();
 
     assertDeepEquals(
@@ -279,47 +287,33 @@ suite('PasswordsAndForms', function() {
     paymentsManager.assertExpectations(basePaymentsExpectations());
   });
 
-  test('loadCreditCardsAsync', function() {
+  test('loadPaymentMethodsAsync', function() {
     const addressList = [createAddressEntry(), createAddressEntry()];
     const cardList = [createCreditCardEntry(), createCreditCardEntry()];
     const ibanList = [createIbanEntry(), createIbanEntry()];
+    const issuerList =
+        [createPayOverTimeIssuerEntry(), createPayOverTimeIssuerEntry()];
     const accountInfo = {
       ...STUB_USER_ACCOUNT_INFO,
       isSyncEnabledForAutofillProfiles: true,
     };
     paymentsManager.lastCallback.setPersonalDataManagerListener!
-        (addressList, cardList, ibanList, accountInfo);
+        (addressList, cardList, ibanList, issuerList, accountInfo);
     flush();
 
+    const paymentsSection =
+        element.shadowRoot!.querySelector<SettingsPaymentsSectionElement>(
+            '#paymentsSection');
+    assertTrue(!!paymentsSection);
     assertEquals(
-        cardList,
-        element.shadowRoot!
-            .querySelector<SettingsPaymentsSectionElement>(
-                '#paymentsSection')!.creditCards);
-
-    // The callback is coming from the manager, so the element shouldn't
-    // have additional calls to the manager after the base expectations.
-    autofillManager.assertExpectations(baseAutofillExpectations());
-    paymentsManager.assertExpectations(basePaymentsExpectations());
-  });
-
-  test('loadIbansAsync', function() {
-    const addressList = [createAddressEntry(), createAddressEntry()];
-    const cardList = [createCreditCardEntry(), createCreditCardEntry()];
-    const ibanList = [createIbanEntry(), createIbanEntry()];
-    const accountInfo = {
-      ...STUB_USER_ACCOUNT_INFO,
-      isSyncEnabledForAutofillProfiles: true,
-    };
-    paymentsManager.lastCallback.setPersonalDataManagerListener!
-        (addressList, cardList, ibanList, accountInfo);
-    flush();
-
+        cardList, paymentsSection.creditCards,
+        'The cardList should be loaded into the paymentsSection');
     assertEquals(
-        ibanList,
-        element.shadowRoot!
-            .querySelector<SettingsPaymentsSectionElement>(
-                '#paymentsSection')!.ibans);
+        ibanList, paymentsSection.ibans,
+        'The ibanList should be loaded into the paymentsSection');
+    assertEquals(
+        issuerList, paymentsSection.payOverTimeIssuers,
+        'The issuerList should be loaded into the paymentsSection');
 
     // The callback is coming from the manager, so the element shouldn't
     // have additional calls to the manager after the base expectations.

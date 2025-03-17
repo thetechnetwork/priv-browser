@@ -37,6 +37,9 @@ COMPONENT_EXPORT(SIGNIN_SWITCHES)
 BASE_DECLARE_FEATURE(kHistoryOptInEntryPoints);
 
 COMPONENT_EXPORT(SIGNIN_SWITCHES)
+BASE_DECLARE_FEATURE(kHistoryOptInPromoCtaStringVariation);
+
+COMPONENT_EXPORT(SIGNIN_SWITCHES)
 BASE_DECLARE_FEATURE(kHistoryOptInIph);
 
 COMPONENT_EXPORT(SIGNIN_SWITCHES)
@@ -101,19 +104,9 @@ COMPONENT_EXPORT(SIGNIN_SWITCHES)
 BASE_DECLARE_FEATURE(kForceStartupSigninPromo);
 #endif
 
-// Used for the launch of the UNO model on Desktop Phase 0.
 COMPONENT_EXPORT(SIGNIN_SWITCHES)
-BASE_DECLARE_FEATURE(kExplicitBrowserSigninUIOnDesktop);
-// Param to control whether the bubbles are dismissible by pressing on the
-// avatar button.
-COMPONENT_EXPORT(SIGNIN_SWITCHES)
-extern const base::FeatureParam<bool>
-    kInterceptBubblesDismissibleByAvatarButton;
+BASE_DECLARE_FEATURE(kInterceptBubblesDismissibleByAvatarButton);
 
-COMPONENT_EXPORT(SIGNIN_SWITCHES)
-bool IsExplicitBrowserSigninUIOnDesktopEnabled();
-
-// Requires `kExplicitBrowserSigninUIOnDesktop`.
 COMPONENT_EXPORT(SIGNIN_SWITCHES)
 BASE_DECLARE_FEATURE(kImprovedSigninUIOnDesktop);
 
@@ -164,6 +157,13 @@ BASE_DECLARE_FEATURE(kShowEnterpriseDialogForAllManagedAccountsSignin);
 // (when a user is signed in but has not turned on full sync).
 COMPONENT_EXPORT(SIGNIN_SWITCHES)
 BASE_DECLARE_FEATURE(kEnableExtensionsExplicitBrowserSignin);
+
+// This gates the new single-model approach where account bookmarks are stored
+// in separate permanent folders in BookmarkModel. The flag controls whether
+// BOOKMARKS datatype is enabled in the transport mode.
+// TODO(crbug.com/40943550): Remove this.
+COMPONENT_EXPORT(SIGNIN_SWITCHES)
+BASE_DECLARE_FEATURE(kSyncEnableBookmarksInTransportMode);
 
 // Returns if the current browser supports an explicit sign in (signs the user
 // into transport mode, as defined above) for extension access points (e.g. the

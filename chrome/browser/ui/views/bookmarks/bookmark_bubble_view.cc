@@ -44,6 +44,7 @@
 #include "components/page_image_service/image_service.h"
 #include "components/signin/public/base/signin_buildflags.h"
 #include "components/signin/public/base/signin_metrics.h"
+#include "components/signin/public/base/signin_switches.h"
 #include "components/strings/grit/components_strings.h"
 #include "components/sync/service/local_data_description.h"
 #include "content/public/browser/web_contents.h"
@@ -76,6 +77,7 @@ DEFINE_ELEMENT_IDENTIFIER_VALUE(kBookmarkBubbleOkButtonId);
 DEFINE_ELEMENT_IDENTIFIER_VALUE(kBookmarkFolderFieldId);
 DEFINE_ELEMENT_IDENTIFIER_VALUE(kBookmarkNameFieldId);
 DEFINE_ELEMENT_IDENTIFIER_VALUE(kBookmarkSecondaryButtonId);
+DEFINE_ELEMENT_IDENTIFIER_VALUE(kBookmarkBubbleFrameViewId);
 
 namespace {
 
@@ -200,10 +202,8 @@ bool ShouldShowShoppingCollectionFootnote(Profile* profile,
 class BookmarkBubbleView::BookmarkBubbleDelegate
     : public ui::DialogModelDelegate {
  public:
-  BookmarkBubbleDelegate(std::unique_ptr<BubbleSignInPromoDelegate> delegate,
-                         Browser* browser,
-                         const GURL& url)
-      : delegate_(std::move(delegate)), browser_(browser), url_(url) {}
+  BookmarkBubbleDelegate(Browser* browser, const GURL& url)
+      : browser_(browser), url_(url) {}
 
   // Handles presses on the secondary (usually cancel) button and returns
   // whether the dialog should close as a result of the button press. In this
@@ -317,10 +317,7 @@ class BookmarkBubbleView::BookmarkBubbleDelegate
             ->combobox_model());
   }
 
-  BubbleSignInPromoDelegate* delegate() { return delegate_.get(); }
-
  private:
-  std::unique_ptr<BubbleSignInPromoDelegate> delegate_;
   const raw_ptr<Browser> browser_;
   const GURL url_;
   base::OnceCallback<void()> close_callback_;
@@ -329,20 +326,15 @@ class BookmarkBubbleView::BookmarkBubbleDelegate
 };
 
 // static
-void BookmarkBubbleView::ShowBubble(
-    views::View* anchor_view,
-    content::WebContents* web_contents,
-    views::Button* highlighted_button,
-    std::unique_ptr<BubbleSignInPromoDelegate> delegate,
-    Browser* browser,
-    const GURL& url,
-    bool already_bookmarked) {
+void BookmarkBubbleView::ShowBubble(views::View* anchor_view,
+                                    content::WebContents* web_contents,
+                                    views::Button* highlighted_button,
+                                    Browser* browser,
+                                    const GURL& url,
+                                    bool already_bookmarked) {
   if (bookmark_bubble_) {
     return;
   }
-#if !BUILDFLAG(IS_CHROMEOS)
-  BubbleSignInPromoDelegate* const delegate_ptr = delegate.get();
-#endif  // !BUILDFLAG(IS_CHROMEOS)
   Profile* profile = browser->profile();
   bookmarks::BookmarkModel* bookmark_model =
       BookmarkModelFactory::GetForBrowserContext(profile);
@@ -356,8 +348,8 @@ void BookmarkBubbleView::ShowBubble(
       CreatePriceTrackingEmailCallback(profile, anchor_view, web_contents,
                                        bookmark_node);
 
-  auto bubble_delegate_unique = std::make_unique<BookmarkBubbleDelegate>(
-      std::move(delegate), browser, url);
+  auto bubble_delegate_unique =
+      std::make_unique<BookmarkBubbleDelegate>(browser, url);
   BookmarkBubbleDelegate* bubble_delegate = bubble_delegate_unique.get();
 
   auto dialog_model_builder =
@@ -458,7 +450,10 @@ void BookmarkBubbleView::ShowBubble(
                                            bookmark_node)) {
     bubble->SetFootnoteView(
         std::make_unique<commerce::ShoppingCollectionIphView>());
-  } else if (signin::ShouldShowSyncPromo(*profile)) {
+  } else if (signin::ShouldShowBookmarkSignInPromo(*profile) ||
+             (signin::ShouldShowSyncPromo(*profile) &&
+              !base::FeatureList::IsEnabled(
+                  switches::kSyncEnableBookmarksInTransportMode))) {
 #if !BUILDFLAG(IS_CHROMEOS)
     // TODO(pbos): Consider adding model support for footnotes so that this does
     // not need to be tied to views.
@@ -466,7 +461,7 @@ void BookmarkBubbleView::ShowBubble(
     // widget to account for it.
     bubble->SetFootnoteView(std::make_unique<BubbleSignInPromoView>(
         web_contents, signin_metrics::AccessPoint::kBookmarkBubble,
-        syncer::LocalDataItemModel::DataId(), delegate_ptr,
+        syncer::LocalDataItemModel::DataId(bookmark_node->id()),
         ui::ButtonStyle::kDefault));
 #endif
   }
@@ -476,6 +471,9 @@ void BookmarkBubbleView::ShowBubble(
   views::Widget* const widget =
       views::BubbleDialogDelegate::CreateBubble(std::move(bubble));
   widget->Show();
+
+  bookmark_bubble_->GetBubbleFrameView()->SetProperty(
+      views::kElementIdentifierKey, kBookmarkBubbleFrameViewId);
 }
 
 // static

@@ -22,15 +22,19 @@
 #include "chrome/browser/extensions/extension_sync_util.h"
 #include "chrome/browser/extensions/extension_util.h"
 #include "chrome/browser/extensions/launch_util.h"
+#include "chrome/browser/extensions/pending_extension_manager.h"
 #include "chrome/browser/profiles/profile.h"
 #include "chrome/browser/sync/glue/sync_start_util.h"
 #include "chrome/common/extensions/extension_constants.h"
+#include "chrome/common/extensions/sync_helper.h"
 #include "components/sync/model/sync_change.h"
 #include "extensions/browser/app_sorting.h"
 #include "extensions/browser/blocklist_extension_prefs.h"
 #include "extensions/browser/disable_reason.h"
+#include "extensions/browser/extension_registrar.h"
 #include "extensions/browser/extension_system.h"
 #include "extensions/browser/extension_util.h"
+#include "extensions/browser/launch_util.h"
 #include "extensions/browser/uninstall_reason.h"
 #include "extensions/common/extension.h"
 #include "extensions/common/extension_set.h"
@@ -476,7 +480,8 @@ void ExtensionSyncService::ApplySyncData(
   // Enable/disable the extension.
   bool should_be_enabled = disable_reasons.empty();
   bool reenable_after_update = false;
-  if (should_be_enabled && !extension_service()->IsExtensionEnabled(id)) {
+  auto* extension_registrar = extensions::ExtensionRegistrar::Get(profile_);
+  if (should_be_enabled && !extension_registrar->IsExtensionEnabled(id)) {
     if (extension) {
       // Only grant permissions if the sync data explicitly sets the disable
       // reasons to extensions::disable_reason::DISABLE_NONE (as opposed to the
@@ -510,7 +515,7 @@ void ExtensionSyncService::ApplySyncData(
   } else if (!should_be_enabled) {
     // Note that |disable_reasons| includes any pre-existing reasons that
     // weren't explicitly removed above.
-    if (extension_service()->IsExtensionEnabled(id)) {
+    if (extension_registrar->IsExtensionEnabled(id)) {
       extension_service()->DisableExtensionWithRawReasons(passkey, id,
                                                           disable_reasons);
     } else {
@@ -557,12 +562,9 @@ void ExtensionSyncService::ApplySyncData(
         PendingUpdate(extension_sync_data.version(), reenable_after_update);
     check_for_updates = true;
   } else if (state == NOT_INSTALLED) {
-    if (!extension_service()->pending_extension_manager()->AddFromSync(
-            id,
-            extension_sync_data.update_url(),
-            extension_sync_data.version(),
-            ShouldAllowInstall,
-            extension_sync_data.remote_install())) {
+    if (!extensions::PendingExtensionManager::Get(profile_)->AddFromSync(
+            id, extension_sync_data.update_url(), extension_sync_data.version(),
+            ShouldAllowInstall, extension_sync_data.remote_install())) {
       LOG(WARNING) << "Could not add pending extension for " << id;
       // This means that the extension is already pending installation, with a
       // non-INTERNAL location.  Add to pending_sync_data, even though it will
@@ -607,7 +609,8 @@ void ExtensionSyncService::OnExtensionInstalled(
       // changes to this extension, so we don't want to trigger sync activity
       // from the call to GrantPermissionsAndEnableExtension.
       base::AutoReset<bool> ignore_updates(&ignore_updates_, true);
-      extension_service()->GrantPermissionsAndEnableExtension(extension);
+      extensions::ExtensionRegistrar::Get(profile_)
+          ->GrantPermissionsAndEnableExtension(*extension);
     }
     if (compare_result >= 0)
       pending_updates_.erase(it);
@@ -655,18 +658,6 @@ void ExtensionSyncService::OnExtensionUninstalled(
   }
 
   pending_updates_.erase(extension->id());
-}
-
-void ExtensionSyncService::OnExtensionStateChanged(
-    const std::string& extension_id,
-    bool state) {
-  ExtensionRegistry* registry = ExtensionRegistry::Get(profile_);
-  const Extension* extension = registry->GetInstalledExtension(extension_id);
-  // We can get pref change notifications for extensions that aren't installed
-  // (yet). In that case, we'll pick up the change later via ExtensionRegistry
-  // observation (in OnExtensionInstalled).
-  if (extension)
-    SyncExtensionChangeIfNeeded(*extension);
 }
 
 void ExtensionSyncService::OnExtensionDisableReasonsChanged(
@@ -756,9 +747,12 @@ bool ExtensionSyncService::ShouldReceiveSyncData(
 
 bool ExtensionSyncService::ShouldSync(const Extension& extension) const {
   // Only extensions associated with the signed in user's account should be
-  // synced for transport mode.
+  // synced for transport mode. Note that syncable component extensions are an
+  // exception to this, and may be synced even if they are not account
+  // extensions.
   if (extensions::sync_util::IsSyncingExtensionsInTransportMode(profile_) &&
-      !IsAccountExtension(profile_, extension.id())) {
+      !IsAccountExtension(profile_, extension.id()) &&
+      !extensions::sync_helper::IsSyncableComponentExtension(&extension)) {
     return false;
   }
 

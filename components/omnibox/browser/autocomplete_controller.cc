@@ -69,6 +69,7 @@
 #include "components/omnibox/browser/on_device_head_provider.h"
 #include "components/omnibox/browser/open_tab_provider.h"
 #include "components/omnibox/browser/page_classification_functions.h"
+#include "components/omnibox/browser/recently_closed_tabs_provider.h"
 #include "components/omnibox/browser/search_provider.h"
 #include "components/omnibox/browser/search_scoring_signals_annotator.h"
 #include "components/omnibox/browser/shortcuts_provider.h"
@@ -1074,6 +1075,11 @@ bool AutocompleteController::ShouldRunProvider(
         (keyword_turl->starter_pack_id() > 0 ||
          keyword_turl->policy_origin() ==
              TemplateURLData::PolicyOrigin::kSearchAggregator)) {
+      if (keyword_turl->starter_pack_id() ==
+          TemplateURLStarterPackData::kPage) {
+        return provider->type() == AutocompleteProvider::TYPE_SEARCH ||
+               provider->type() == AutocompleteProvider::TYPE_ZERO_SUGGEST;
+      }
       switch (provider->type()) {
         // Keyword provider creates the suggestion attached to the keyword chip
         // and search provider creates the SEARCH_OTHER_ENGINE suggestion
@@ -1143,6 +1149,7 @@ bool AutocompleteController::ShouldRunProvider(
   // Some providers should only run in starter pack mode or in the CrOS
   // launcher. If we reach here, we're not in starter pack mode.
   bool should_run_search_aggregator_provider =
+      omnibox_feature_configs::SearchAggregatorProvider::Get().enabled &&
       template_url_service_ &&
       template_url_service_->GetEnterpriseSearchAggregatorEngine() &&
       !template_url_service_->IsShortcutRequiredForSearchAggregatorEngine();
@@ -1155,7 +1162,9 @@ bool AutocompleteController::ShouldRunProvider(
     // aggregator provider suggestions, which can be configured to provide
     // Google Drive suggestions.
     case AutocompleteProvider::TYPE_DOCUMENT:
-      return !should_run_search_aggregator_provider;
+      return !omnibox_feature_configs::SearchAggregatorProvider::Get()
+                  .disable_drive ||
+             !should_run_search_aggregator_provider;
 
     case AutocompleteProvider::TYPE_OPEN_TAB:
       return is_cros_launcher_;
@@ -1315,6 +1324,10 @@ void AutocompleteController::InitializeSyncProviders(int provider_types) {
     featured_search_provider_ =
         new FeaturedSearchProvider(provider_client_.get());
     providers_.push_back(featured_search_provider_.get());
+  }
+  if (provider_types & AutocompleteProvider::TYPE_RECENTLY_CLOSED_TABS) {
+    providers_.push_back(
+        new RecentlyClosedTabsProvider(provider_client_.get(), this));
   }
 }
 

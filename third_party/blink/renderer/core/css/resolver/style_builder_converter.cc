@@ -25,11 +25,6 @@
  */
 #include "third_party/blink/renderer/core/css/resolver/style_builder_converter.h"
 
-#ifdef UNSAFE_BUFFERS_BUILD
-// TODO(crbug.com/351564777): Remove this and convert code to safer constructs.
-#pragma allow_unsafe_buffers
-#endif
-
 #include <algorithm>
 #include <memory>
 #include <utility>
@@ -101,7 +96,6 @@
 #include "third_party/blink/renderer/platform/fonts/font_palette.h"
 #include "third_party/blink/renderer/platform/fonts/opentype/open_type_math_support.h"
 #include "third_party/blink/renderer/platform/geometry/layout_unit.h"
-#include "third_party/blink/renderer/platform/graphics/graphics_types.h"
 #include "third_party/blink/renderer/platform/heap/garbage_collected.h"
 #include "third_party/blink/renderer/platform/instrumentation/use_counter.h"
 #include "third_party/blink/renderer/platform/runtime_enabled_features.h"
@@ -182,7 +176,7 @@ Color ResolveQuirkOrLinkOrFocusRingColor(
 
 }  // namespace
 
-scoped_refptr<StyleReflection> StyleBuilderConverter::ConvertBoxReflect(
+StyleReflection* StyleBuilderConverter::ConvertBoxReflect(
     StyleResolverState& state,
     const CSSValue& value) {
   if (auto* identifier_value = DynamicTo<CSSIdentifierValue>(value)) {
@@ -191,7 +185,7 @@ scoped_refptr<StyleReflection> StyleBuilderConverter::ConvertBoxReflect(
   }
 
   const auto& reflect_value = To<cssvalue::CSSReflectValue>(value);
-  scoped_refptr<StyleReflection> reflection = StyleReflection::Create();
+  StyleReflection* reflection = MakeGarbageCollected<StyleReflection>();
   reflection->SetDirection(
       reflect_value.Direction()->ConvertTo<CSSReflectionDirection>());
   if (reflect_value.Offset()) {
@@ -236,9 +230,9 @@ DynamicRangeLimit StyleBuilderConverterBase::ConvertDynamicRangeLimit(
         /*constrained_high_mix=*/constrained_high_mix_sum / fraction_sum);
   } else if (auto* identifier_value = DynamicTo<CSSIdentifierValue>(value)) {
     switch (identifier_value->GetValueID()) {
-      case CSSValueID::kHigh:
+      case CSSValueID::kNoLimit:
         return DynamicRangeLimit(cc::PaintFlags::DynamicRangeLimit::kHigh);
-      case CSSValueID::kConstrainedHigh:
+      case CSSValueID::kConstrained:
         return DynamicRangeLimit(
             cc::PaintFlags::DynamicRangeLimit::kConstrainedHigh);
       case CSSValueID::kStandard:
@@ -260,11 +254,9 @@ StyleSVGResource* StyleBuilderConverter::ConvertElementReference(
   }
 
   const auto& url_value = To<cssvalue::CSSURIValue>(value);
-  SVGResource* resource =
-      state.GetElementStyleResources().GetSVGResourceFromValue(property_id,
-                                                               url_value);
   return MakeGarbageCollected<StyleSVGResource>(
-      resource, url_value.ValueForSerialization());
+      state.GetSVGResource(property_id, url_value),
+      url_value.ValueForSerialization());
 }
 
 LengthBox StyleBuilderConverter::ConvertClip(StyleResolverState& state,
@@ -306,11 +298,9 @@ ClipPathOperation* StyleBuilderConverter::ConvertClipPath(
   }
 
   if (const auto* url_value = DynamicTo<cssvalue::CSSURIValue>(value)) {
-    SVGResource* resource =
-        state.GetElementStyleResources().GetSVGResourceFromValue(
-            CSSPropertyID::kClipPath, *url_value);
     return MakeGarbageCollected<ReferenceClipPathOperation>(
-        url_value->ValueForSerialization(), resource);
+        url_value->ValueForSerialization(),
+        state.GetSVGResource(CSSPropertyID::kClipPath, *url_value));
   }
   auto* identifier_value = DynamicTo<CSSIdentifierValue>(value);
   DCHECK(identifier_value &&
@@ -1430,7 +1420,7 @@ GridPosition StyleBuilderConverter::ConvertGridPosition(
   if (current_identifier_value &&
       current_identifier_value->GetValueID() == CSSValueID::kSpan) {
     is_span_position = true;
-    ++it;
+    UNSAFE_TODO(++it);
     current_value = it != values.end() ? it->Get() : nullptr;
   }
 
@@ -1438,14 +1428,14 @@ GridPosition StyleBuilderConverter::ConvertGridPosition(
   if (current_primitive_value && current_primitive_value->IsNumber()) {
     grid_line_number = current_primitive_value->ComputeInteger(
         state.CssToLengthConversionData());
-    ++it;
+    UNSAFE_TODO(++it);
     current_value = it != values.end() ? it->Get() : nullptr;
   }
 
   auto* current_ident_value = DynamicTo<CSSCustomIdentValue>(current_value);
   if (current_ident_value) {
     grid_line_name = current_ident_value->Value();
-    ++it;
+    UNSAFE_TODO(++it);
   }
 
   DCHECK_EQ(it, values.end());
@@ -1585,10 +1575,10 @@ void StyleBuilderConverter::ConvertGridTrackList(
     computed_grid_track_list.axis_type = GridAxisType::kSubgriddedAxis;
     track_list.SetAxisType(GridAxisType::kSubgriddedAxis);
     is_subgrid = true;
-    ++curr_value;
+    UNSAFE_TODO(++curr_value);
   }
 
-  for (; curr_value != values.end(); ++curr_value) {
+  for (; curr_value != values.end(); UNSAFE_TODO(++curr_value)) {
     if (auto* grid_auto_repeat_value =
             DynamicTo<cssvalue::CSSGridAutoRepeatValue>(curr_value->Get())) {
       Vector<GridTrackSize, 1> repeated_track_sizes;
@@ -2534,24 +2524,6 @@ StyleViewTransitionGroup StyleBuilderConverter::ConvertViewTransitionGroup(
       ConvertCustomIdent(state, value)->GetName());
 }
 
-StyleViewTransitionCaptureMode
-StyleBuilderConverter::ConvertViewTransitionCaptureMode(
-    StyleResolverState& state,
-    const CSSValue& value) {
-  if (auto* ident = DynamicTo<CSSIdentifierValue>(value)) {
-    switch (ident->GetValueID()) {
-      case CSSValueID::kLayered:
-        return StyleViewTransitionCaptureMode::kLayered;
-      case CSSValueID::kFlat:
-        return StyleViewTransitionCaptureMode::kFlat;
-      default:
-        NOTREACHED();
-    }
-  }
-
-  return StyleViewTransitionCaptureMode::kLayered;
-}
-
 StyleViewTransitionName* StyleBuilderConverter::ConvertViewTransitionName(
     StyleResolverState& state,
     const CSSValue& value) {
@@ -2777,22 +2749,14 @@ SVGPaint StyleBuilderConverter::ConvertSVGPaint(StyleResolverState& state,
         case CSSValueID::kContextFill:
           // context-fill cannot be use as a uri fallback
           DCHECK(!paint.resource);
-          if (RuntimeEnabledFeatures::SvgContextPaintEnabled()) {
-            paint.type = SVGPaintType::kContextFill;
-            state.GetDocument().CountUse(WebFeature::kSvgContextFillOrStroke);
-          } else {
-            local_identifier_value = nullptr;
-          }
+          paint.type = SVGPaintType::kContextFill;
+          state.GetDocument().CountUse(WebFeature::kSvgContextFillOrStroke);
           break;
         case CSSValueID::kContextStroke:
           // context-stroke cannot be use as a uri fallback
           DCHECK(!paint.resource);
-          if (RuntimeEnabledFeatures::SvgContextPaintEnabled()) {
-            paint.type = SVGPaintType::kContextStroke;
-            state.GetDocument().CountUse(WebFeature::kSvgContextFillOrStroke);
-          } else {
-            local_identifier_value = nullptr;
-          }
+          paint.type = SVGPaintType::kContextStroke;
+          state.GetDocument().CountUse(WebFeature::kSvgContextFillOrStroke);
           break;
         default:
           // For all other keywords, try to parse as a color.
@@ -2844,6 +2808,10 @@ TextEmphasisPosition StyleBuilderConverter::ConvertTextTextEmphasisPosition(
   const auto& list = To<CSSValueList>(value);
   CSSValueID first = To<CSSIdentifierValue>(list.Item(0)).GetValueID();
   if (list.length() < 2) {
+    if (RuntimeEnabledFeatures::TextEmphasisPositionAutoEnabled() &&
+        first == CSSValueID::kAuto) {
+      return TextEmphasisPosition::kAuto;
+    }
     if (first == CSSValueID::kOver) {
       return TextEmphasisPosition::kOverRight;
     }
@@ -3117,11 +3085,9 @@ OffsetPathOperation* ConvertOffsetPathValueToOperation(
         path_value->GetStylePath(), coord_box);
   }
   const auto& url_value = To<cssvalue::CSSURIValue>(value);
-  SVGResource* resource =
-      state.GetElementStyleResources().GetSVGResourceFromValue(
-          CSSPropertyID::kOffsetPath, url_value);
   return MakeGarbageCollected<ReferenceOffsetPathOperation>(
-      url_value.ValueForSerialization(), resource, coord_box);
+      url_value.ValueForSerialization(),
+      state.GetSVGResource(CSSPropertyID::kOffsetPath, url_value), coord_box);
 }
 
 }  // namespace

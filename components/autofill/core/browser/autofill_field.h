@@ -10,6 +10,7 @@
 #include <map>
 #include <optional>
 #include <string>
+#include <string_view>
 #include <utility>
 #include <vector>
 
@@ -60,6 +61,9 @@ enum class AutofillPredictionSource {
   kRationalization = 4,
   kMaxValue = kRationalization
 };
+
+std::string_view AutofillPredictionSourceToStringView(
+    AutofillPredictionSource source);
 
 class AutofillField : public FormFieldData {
  public:
@@ -286,22 +290,6 @@ class AutofillField : public FormFieldData {
     return initial_value_changed_;
   }
 
-  void set_value_identified_as_potentially_sensitive(
-      bool potentially_sensitive) {
-    value_identified_as_potentially_sensitive_ = potentially_sensitive;
-  }
-
-  bool value_identified_as_potentially_sensitive() const {
-    return value_identified_as_potentially_sensitive_;
-  }
-
-  void set_field_is_eligible_for_autofill_ai(std::optional<bool> eligibility) {
-    field_is_eligible_for_autofill_ai_ = eligibility;
-  }
-  std::optional<bool> field_is_eligible_for_autofill_ai() const {
-    return field_is_eligible_for_autofill_ai_;
-  }
-
   void set_credit_card_number_offset(size_t position) {
     credit_card_number_offset_ = position;
   }
@@ -356,15 +344,15 @@ class AutofillField : public FormFieldData {
   //
   // Only one format string is stored at a time: the one with the
   // highest-ranking `FormatStringSource`.
-  const std::string& format_string() const { return format_string_; }
+  base::optional_ref<const std::u16string> format_string() const;
 
   FormatStringSource format_string_source() const {
     return format_string_source_;
   }
 
-  void set_format_string_unless_overruled(std::string format_string,
+  void set_format_string_unless_overruled(std::u16string format_string,
                                           FormatStringSource source) {
-    if (format_string_source_ >= source) {
+    if (format_string_source_ <= source) {
       format_string_ = std::move(format_string);
       format_string_source_ = source;
     }
@@ -516,7 +504,7 @@ class AutofillField : public FormFieldData {
   // Corresponds to the requirements determined by the Autofill server.
   std::optional<PasswordRequirementsSpec> password_requirements_;
 
-  std::string format_string_;
+  std::u16string format_string_;
   FormatStringSource format_string_source_ = FormatStringSource::kUnset;
 
   // Predictions which where calculated on the client. This is initialized to
@@ -561,17 +549,6 @@ class AutofillField : public FormFieldData {
   // Set for <select> fields only if kAutofillFixInitialValueOfSelect is
   // enabled. Always set for <textarea> and <input>.
   std::optional<bool> initial_value_changed_;
-
-  // Indicates if the value contained in the field was identified to potentially
-  // contain sensitive data that should be handled with extra caution.
-  // Note that the 'false' state does not guarantee that the data is not
-  // sensitive, it just means that is wasn't identified as such yet.
-  bool value_identified_as_potentially_sensitive_ = false;
-
-  // Indicates if the field was determined to be eligible for prediction
-  // improvements. The `nullopt` state implies that the eligibility has not been
-  // determined yet.
-  std::optional<bool> field_is_eligible_for_autofill_ai_;
 
   // Used to hold the position of the first digit to be copied as a substring
   // from credit card number.

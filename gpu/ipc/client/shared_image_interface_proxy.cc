@@ -361,6 +361,7 @@ void SharedImageInterfaceProxy::DestroySharedImage(const SyncToken& sync_token,
                   mailbox)),
           std::move(info.destruction_sync_tokens), /*release_count=*/0);
 
+      host_->DelayedEnsureFlush(last_flush_id_);
       mailbox_infos_.erase(it);
     } else if (!dependencies.empty()) {
       constexpr size_t kMaxSyncTokens = 4;
@@ -419,11 +420,6 @@ void SharedImageInterfaceProxy::WaitSyncToken(const SyncToken& sync_token) {
             mojom::DeferredSharedImageRequest::NewNop(0)),
         std::move(dependencies), /*release_count=*/0);
   }
-}
-
-void SharedImageInterfaceProxy::Flush() {
-  base::AutoLock lock(lock_);
-  host_->EnsureFlush(last_flush_id_);
 }
 
 bool SharedImageInterfaceProxy::GetSHMForPixelData(

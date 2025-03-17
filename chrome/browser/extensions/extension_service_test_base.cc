@@ -18,7 +18,6 @@
 #include "base/task/single_thread_task_runner.h"
 #include "base/test/task_environment.h"
 #include "build/build_config.h"
-#include "build/chromeos_buildflags.h"
 #include "chrome/browser/bookmarks/bookmark_model_factory.h"
 #include "chrome/browser/bookmarks/managed_bookmark_service_factory.h"
 #include "chrome/browser/extensions/component_loader.h"
@@ -250,7 +249,7 @@ ExtensionServiceTestBase::ExtensionServiceTestBase(
       service_(nullptr),
       testing_local_state_(TestingBrowserProcess::GetGlobal()),
       registry_(nullptr),
-#if BUILDFLAG(IS_CHROMEOS_ASH)
+#if BUILDFLAG(IS_CHROMEOS)
       user_manager_(std::make_unique<user_manager::UserManagerImpl>(
           std::make_unique<ash::UserManagerDelegateImpl>(),
           testing_local_state_.Get(),
@@ -298,6 +297,7 @@ void ExtensionServiceTestBase::InitializeExtensionService(
   CreateExtensionService(is_first_run, autoupdate_enabled, extensions_enabled,
                          enable_install_limiter);
   registry_ = ExtensionRegistry::Get(profile());
+  registrar_ = ExtensionRegistrar::Get(profile());
 }
 
 bool ExtensionServiceTestBase::ShouldAllowMV2Extensions() {
@@ -429,6 +429,7 @@ void ExtensionServiceTestBase::SetUp() {
 }
 
 void ExtensionServiceTestBase::TearDown() {
+  Shutdown();
   if (profile_) {
     content::StoragePartitionConfig default_storage_partition_config =
         content::StoragePartitionConfig::CreateDefault(profile());
@@ -442,6 +443,11 @@ void ExtensionServiceTestBase::TearDown() {
 #if BUILDFLAG(IS_CHROMEOS)
   kiosk_chrome_app_manager_.reset();
 #endif
+}
+
+void ExtensionServiceTestBase::Shutdown() {
+  registry_ = nullptr;
+  registrar_ = nullptr;
 }
 
 void ExtensionServiceTestBase::SetUpTestSuite() {

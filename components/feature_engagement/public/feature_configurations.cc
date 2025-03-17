@@ -720,7 +720,7 @@ std::optional<FeatureConfig> GetClientSideFeatureConfig(
     FeatureConfig config;
     config.valid = true;
     config.availability = Comparator(ANY, 0);
-    config.session_rate = Comparator(ANY, 0);
+    config.session_rate = Comparator(EQUAL, 0);
     config.trigger = EventConfig("android_tab_declutter_iph_triggered",
                                  Comparator(EQUAL, 0), 7, 7);
     config.event_configs.insert(
@@ -1725,18 +1725,14 @@ std::optional<FeatureConfig> GetClientSideFeatureConfig(
     BUILDFLAG(IS_CHROMEOS) || BUILDFLAG(IS_ANDROID) || BUILDFLAG(IS_FUCHSIA)
 
   if (kIPHAutofillCreditCardBenefitFeature.name == feature->name) {
-    // Credit card benefit IPH is shown:
-    // * once for an installation, 10-year window is used as the maximum
-    // * when a credit card benefit is displayed for the first time
+    // The credit card benefit IPH appears up to three times over 10 years and
+    // only once per session. Dismissing it stops it from showing again.
     FeatureConfig config;
     config.valid = true;
     config.availability = Comparator(ANY, 0);
-    config.session_rate = Comparator(ANY, 0);
-    config.session_rate_impact.type = SessionRateImpact::Type::NONE;
-    config.trigger =
-        EventConfig("autofill_credit_card_benefit_iph_trigger",
-                    Comparator(EQUAL, 0), feature_engagement::kMaxStoragePeriod,
-                    feature_engagement::kMaxStoragePeriod);
+    config.session_rate = Comparator(LESS_THAN, 1);
+    config.trigger = EventConfig("autofill_credit_card_benefit_iph_trigger",
+                                 Comparator(LESS_THAN, 3), 90, 360);
     config.used =
         EventConfig("autofill_credit_card_benefit_iph_accepted",
                     Comparator(EQUAL, 0), feature_engagement::kMaxStoragePeriod,
@@ -2157,31 +2153,6 @@ std::optional<FeatureConfig> GetClientSideFeatureConfig(
     return config;
   }
 
-  if (kIPHiOSParcelTrackingFeature.name == feature->name) {
-    FeatureConfig config;
-    config.valid = true;
-    config.availability = Comparator(ANY, 0);
-    config.session_rate = Comparator(ANY, 0);
-    // The IPH is shown at most once.
-    config.trigger =
-        EventConfig(feature_engagement::events::kParcelTrackingTriggered,
-                    Comparator(EQUAL, 0), feature_engagement::kMaxStoragePeriod,
-                    feature_engagement::kMaxStoragePeriod);
-    config.used =
-        EventConfig("parcel_tracking_feature_used", Comparator(EQUAL, 0),
-                    feature_engagement::kMaxStoragePeriod,
-                    feature_engagement::kMaxStoragePeriod);
-    // The user has tracked a parcel.
-    config.event_configs.insert(
-        EventConfig(feature_engagement::events::kParcelTracked,
-                    Comparator(GREATER_THAN_OR_EQUAL, 1),
-                    feature_engagement::kMaxStoragePeriod,
-                    feature_engagement::kMaxStoragePeriod));
-    config.blocked_by.type = BlockedBy::Type::NONE;
-    config.blocking.type = Blocking::Type::NONE;
-    return config;
-  }
-
   if (kIPHiOSPullToRefreshFeature.name == feature->name) {
     // The IPH of the pull-to-refresh feature for the current tab.
     return CreateNewUserGestureInProductHelpConfig(
@@ -2414,7 +2385,8 @@ std::optional<FeatureConfig> GetClientSideFeatureConfig(
     FeatureConfig config;
     config.valid = true;
     config.availability = Comparator(ANY, 0);
-    config.session_rate = Comparator(EQUAL, 0);
+    config.session_rate = Comparator(ANY, 0);
+    config.session_rate_impact.type = SessionRateImpact::Type::NONE;
     config.trigger =
         EventConfig("download_auto_deletion_iph_trigger", Comparator(EQUAL, 0),
                     feature_engagement::kMaxStoragePeriod,
@@ -2428,6 +2400,29 @@ std::optional<FeatureConfig> GetClientSideFeatureConfig(
                     feature_engagement::kMaxStoragePeriod);
     config.blocked_by.type = BlockedBy::Type::NONE;
     config.blocking.type = Blocking::Type::NONE;
+    return config;
+  }
+
+  if (kIPHiOSSettingsInOverflowMenuBubbleFeature.name == feature->name) {
+    // A config that allows the Settings-in-overflow-menu IPH to be shown to
+    // users. This will be triggered a maximum of 2 times (once per week).
+    FeatureConfig config;
+    config.valid = true;
+    config.availability = Comparator(ANY, 0);
+    config.session_rate = Comparator(ANY, 0);
+
+    constexpr char kSettingsInOverflowTriggerEvent[] =
+        "settings_in_overflow_trigger";
+
+    // Show at most 2 times total.
+    config.trigger =
+        EventConfig(kSettingsInOverflowTriggerEvent, Comparator(LESS_THAN, 2),
+                    feature_engagement::kMaxStoragePeriod,
+                    feature_engagement::kMaxStoragePeriod);
+    // Show at most once per week.
+    config.event_configs.emplace(kSettingsInOverflowTriggerEvent,
+                                 Comparator(EQUAL, 0), 7, 7);
+
     return config;
   }
 #endif  // BUILDFLAG(IS_IOS)

@@ -521,6 +521,8 @@ def add_testing_options_group(parser: argparse.ArgumentParser,
         action='store_true',
         help=('Skip tests marked TIMEOUT. Use it to speed up running the '
               'entire test suite.'))
+    testing_group.add_argument('--layout-tests-directory',
+                               help='Path to a custom web tests directory')
     if rwt:
         testing_group.add_argument(
             '--build',
@@ -579,8 +581,6 @@ def add_testing_options_group(parser: argparse.ArgumentParser,
              "the bot. 'maybe-flaky' == Ignore any tests that flaked once on "
              "the bot. 'unexpected' == Ignore any tests that had unexpected "
              'results on the bot.'))
-        testing_group.add_argument('--layout-tests-directory',
-                                   help='Path to a custom web tests directory')
         testing_group.add_argument(
             '--max-locked-shards',
             type=int,
@@ -702,10 +702,6 @@ def add_testing_options_group(parser: argparse.ArgumentParser,
                                    action='store_true',
                                    default=None,
                                    help=('Do not run virtual tests.'))
-        testing_group.add_argument('--no-wpt-internal',
-                                   action='store_false',
-                                   dest='run_wpt_internal',
-                                   help='Do not run internal WPTs.')
 
 
 # for run_wpt_tests.py only

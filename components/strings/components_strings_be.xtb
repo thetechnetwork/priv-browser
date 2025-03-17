@@ -8,6 +8,7 @@
 <translation id="1010200102790553230">Загрузіць старонку пазней</translation>
 <translation id="1010225406377140704">Звярніцеся да адпраўшчыка па новую спасылку</translation>
 <translation id="1011206368273183593">Ідзе падрыхтоўка файлаў</translation>
+<translation id="1012264210825687872">Пасля таго як вы прагледзіце заказ, трэба будзе ўвайсці ва ўліковы запіс сэрвісу "<ph name="BNPL_ISSUER_NAME" />" або стварыць новы, калі ў вас яго няма. Гэты ўліковы запіс будзе аўтаматычна звязаны з Google Pay.</translation>
 <translation id="1014509239502131234">Вынік будзе адроблены</translation>
 <translation id="1015730422737071372">Указаць дадатковыя звесткі</translation>
 <translation id="1019413721762100891">выключана</translation>
@@ -137,6 +138,7 @@
 <translation id="1230244617745022071"><ph name="SOURCE" /> (вызначана аўтаматычна)</translation>
 <translation id="1232569758102978740">Без назвы</translation>
 <translation id="1236081509407217141">Дазволіць VR?</translation>
+<translation id="1236689197410206751">AfterPay</translation>
 <translation id="1240347957665416060">Назва вашай прылады</translation>
 <translation id="124116460088058876">Іншыя мовы</translation>
 <translation id="1243027604378859286">Аўтар:</translation>
@@ -251,6 +253,7 @@
 <translation id="1419305130220238697">Кнопка "Кіраваць спампоўкамі ў Chrome". Каб кіраваць файламі, якія вы спампавалі ў браўзеры Chrome, націсніце яе.</translation>
 <translation id="1420345875188552368">Для гэтага плацяжу можа быць выкарыстаны спосаб аўтаматычнай аплаты, які вы захавалі. Каб выключыць электронныя кашалькі ў Chrome, перайдзіце ў <ph name="BEGIN_LINK1" />налады аплаты<ph name="END_LINK1" />.</translation>
 <translation id="1420920093772172268"><ph name="TURN_ON_BLUETOOTH_LINK" />, каб дазволіць спалучэнне</translation>
+<translation id="1421484961346698724">Выдалены ўліковы запіс</translation>
 <translation id="14222610277930434">Вы часта наведваеце гэты вэб-сайт</translation>
 <translation id="1422930527989633628">Сайт можа запытваць дазвол выяўляць прылады з Bluetooth паблізу</translation>
 <translation id="1426410128494586442">Так</translation>
@@ -626,6 +629,7 @@
 <translation id="2082238445998314030">Вынік <ph name="RESULT_NUMBER" /> з <ph name="TOTAL_RESULTS" /></translation>
 <translation id="2083256696566019397">Дазваляць пры кожным наведванні</translation>
 <translation id="2085876078937250610">Захаваць…</translation>
+<translation id="2090451897496479509">Каб даведацца больш, звярніцеся да пастаўшчыка</translation>
 <translation id="2091887806945687916">Гук</translation>
 <translation id="2093982008204312032">Google Chrome спрабуе выключыць Windows Hello для ўводу пароляў.</translation>
 <translation id="2094505752054353250">Несупадзенне дамена</translation>
@@ -660,6 +664,7 @@
 <translation id="2145193671493396738">Навіны эканомікі</translation>
 <translation id="214556005048008348">Скасаваць плацеж</translation>
 <translation id="2147117373852943630">Музычныя інструменты</translation>
+<translation id="2147254250314124496">Сайт <ph name="EMBEDDED_URL" /> хоча выкарыстоўваць захаваную інфармацыю пра вас</translation>
 <translation id="2148613324460538318">Дадаць картку</translation>
 <translation id="2148716181193084225">Сёння</translation>
 <translation id="2149968176347646218">Падключэнне не з’яўляецца бяспечным</translation>
@@ -691,6 +696,7 @@
 <translation id="2187317261103489799">Выяўляць (стандартна)</translation>
 <translation id="2188375229972301266">Некалькі дзірак знізу</translation>
 <translation id="2194856509914051091">Інфармацыя для разгляду</translation>
+<translation id="2198071643181968308">Даведацца больш пра сэрвіс "<ph name="BNPL_ISSUER_NAME" />"</translation>
 <translation id="2200678913752027654">Кнопка "Не падабаецца": націсніце Увод, каб адкрыць форму адпраўкі падрабязнага водгуку пра тое, чаму вам не спадабалася гэта прапанова</translation>
 <translation id="2202627062836089804">адваротным баку карткі</translation>
 <translation id="2204482073374652408">Абнаўленне завершана!</translation>
@@ -838,6 +844,7 @@
 <translation id="2451607499823206582">Адсочванне</translation>
 <translation id="2452098632681057184">Экалогія і навакольнае асяроддзе</translation>
 <translation id="2452837234288608067">Не ўдалося дапамагчы з гэтым запытам. Паўтарыце спробу.</translation>
+<translation id="2453045048779611513">Тыпы даных для захоўвання вызначаюцца вашай арганізацыяй</translation>
 <translation id="2456755709261364512">Зарад акумулятара павінен быць большым за <ph name="REQUIRED_BATTERY_PRECENT" />%</translation>
 <translation id="2461385121573678775">Chrome Enterprise Core – гэта цэнтралізаваны інструмент для наладжвання палітык браўзера з воблака</translation>
 <translation id="2461822463642141190">Цяпер</translation>
@@ -1087,6 +1094,7 @@
 <translation id="2942492342931589800">Нефармальны</translation>
 <translation id="2942515540157583425">Вакансіі ў сферы IT і тэхнікі</translation>
 <translation id="2943895734390379394">Час запампоўкі:</translation>
+<translation id="2947281105969315778">Каб абагульваць групы ўкладак і далучацца да іх, вы павінны ўвайсці ў Chrome</translation>
 <translation id="2948083400971632585">На старонцы налад можна выключыць усе проксі-серверы, зададзеныя для падключэння.</translation>
 <translation id="2949183777371959169">Не прымяняецца, паколькі машына не зарэгістравана ў сістэме кіравання браўзерам Chrome праз воблака.</translation>
 <translation id="2951588413176968965">Мая паштовая скрынка</translation>
@@ -1305,6 +1313,7 @@
 <translation id="33073482541490531">Выкарыстаны вамі пароль трапіў у спіс узламаных даных. Рэкамендуем змяніць яго зараз жа ў Менеджары пароляў.</translation>
 <translation id="3307649904964670439">Кнопка "Наладзіць Chrome". Каб наладзіць выгляд браўзера, націсніце яе.</translation>
 <translation id="3308006649705061278">Арганізацыйная адзінка (АА)</translation>
+<translation id="3317077846337994567">Аплата па частках пакуль што не даступная. Паўтарыце спробу пазней.</translation>
 <translation id="3318016344440038475">Камедыйныя праграмы</translation>
 <translation id="3324687287337751929">4 x 6 цаляў</translation>
 <translation id="3324983252691184275">Цёмна-чырвоны</translation>
@@ -1432,6 +1441,7 @@
 <translation id="3536227077203206203">Гэтым разам доступ дазволены</translation>
 <translation id="3537165859691846083">Letter Plus</translation>
 <translation id="353816159217417898">Экранная форма (з разбіўкай на старонкі)</translation>
+<translation id="3541016556608204104">Падрабязней пра Chrome Enterprise Connectors</translation>
 <translation id="3542628208405253498">Відарыс карткі</translation>
 <translation id="3542768452570884558">Адкрыць спасылку ў новым акне</translation>
 <translation id="3543935938072367282">Аўтазапаўненне дапамагае паскорыць працэс аплаты</translation>
@@ -1796,6 +1806,7 @@
 <translation id="415440494507469262">Дадаць укладку ў табліцу параўнання</translation>
 <translation id="4159784952369912983">Фіялетавы</translation>
 <translation id="4165422751765527461">Адкрыць артыкул Даведачнага цэнтра ў новай укладцы</translation>
+<translation id="4165584779486830267">Цяпер можна ўносіць аплату па частках з дапамогай Affirm ці Zip.</translation>
 <translation id="4165986682804962316">Налады сайтаў</translation>
 <translation id="4169535189173047238">Не дазваляць</translation>
 <translation id="4171400957073367226">Подпіс спраўджання недапушчальны</translation>
@@ -1946,6 +1957,7 @@
 <translation id="4378154925671717803">Тэлефон</translation>
 <translation id="4384395682990721132">A4x3</translation>
 <translation id="4387692837058041921">Запампоўванне файла ў Microsoft OneDrive прыпынена</translation>
+<translation id="4389931020843542579">Загружаецца група ўкладак</translation>
 <translation id="4390472908992056574">Мяжа</translation>
 <translation id="4395550503472021297">Гэта палітыка кіруе стандартнымі дзеяннямі наступных палітык: <ph name="POLICIES" /></translation>
 <translation id="4397978002248035985">Адкрыецца ўсплывальнае акно са старонкай вэб-сайта банка, на якой можна прайсці спраўджанне асобы</translation>
@@ -2315,6 +2327,7 @@
 <translation id="5097501891273180634">A2</translation>
 <translation id="5106405387002409393">Браўзеру Chrome патрабуецца доступ да наступнай функцыі на вашай прыладзе: <ph name="PERMISSION" /></translation>
 <translation id="510644072453496781">Кардон з закрытымі краямі</translation>
+<translation id="5106648964679263509">Створаныя даныя віртуальнай карткі для сэрвісу "<ph name="BNPL_ISSUER_NAME" />"</translation>
 <translation id="5108881358339761672">Сайт не з’яўляецца бяспечным</translation>
 <translation id="5109892411553231226">Наладзіць спосабы аплаты</translation>
 <translation id="5112422516732747637">A5</translation>
@@ -2509,6 +2522,7 @@
 <ph name="LIST_ITEM" />звесткі, уведзеныя ў формах.
 <ph name="END_LIST" /></translation>
 <translation id="5443468954631487277">У адваротным парадку, рабочым бокам уверх</translation>
+<translation id="5445340838622821110">Калі вы робіце куплю ў растэрміноўку, ствараецца аднаразовы нумар віртуальнай карткі. Ён дзейнічае толькі для гэтай куплі. <ph name="IDS_AUTOFILL_BNPL_FILLED_CARD_INFORMATION_BUBBLE_LEARN_MORE_LINK_LABEL" /></translation>
 <translation id="5447235695608032700">Дазволіць сайту "<ph name="SITE" />" выкарыстоўваць інфармацыю, якую ён пра вас захаваў</translation>
 <translation id="5452270690849572955">Гэта старонка хоста <ph name="HOST_NAME" /> не знойдзена</translation>
 <translation id="5452923259299906094">Аплата праз eWallet і Pix</translation>
@@ -2756,6 +2770,7 @@
 <translation id="5910140988253729859">Адрабіць аўтазапаўненне</translation>
 <translation id="5911020115933784199">Календары мерапрыемстваў</translation>
 <translation id="5911110632211230665">Магчымасць адкрываць файлы заблакіравана</translation>
+<translation id="5914465277418006379">Карыстальнік (<ph name="MEMBER_FIRST_NAME" />) дадаў гэту ўкладку</translation>
 <translation id="5915189366813702112">Рухомы графік працы</translation>
 <translation id="59174027418879706">Уключана</translation>
 <translation id="5918373444239520146">Гаджэты і партатыўная электроніка</translation>
@@ -2859,7 +2874,6 @@
 <translation id="6062937464449575061">Перастаць адсочваць цану</translation>
 <translation id="6063415549109819824">Жыллёвае фінансаванне</translation>
 <translation id="6070432475334343308">Адзін ці некалькі файлаў не былі запампаваны ў папку "<ph name="FOLDER_NAME" />" (у воблаку "<ph name="CLOUD_PROVIDER" />")</translation>
-<translation id="6080696365213338172">Вы атрымалі доступ да змесціва, выкарыстоўваючы сертыфікат ад адміністратара. Адміністратар можа перахопліваць даныя, якія вы адпраўляеце на <ph name="DOMAIN" />.</translation>
 <translation id="6085149458302186532">Каляровы этыкетачны матэрыял</translation>
 <translation id="6087312102907839798">Падобныя пошукавыя запыты</translation>
 <translation id="6089505343295765444">Укладкі, якія вы выдаляеце з гісторыі Chrome, застануцца ў табліцах параўнання</translation>
@@ -3001,11 +3015,11 @@
 <translation id="6322182122604171028">Не ўдалося выкарыстаць Windows Hello</translation>
 <translation id="6326947323444967009">Зрабіць Chrome стандартным браўзерам сістэмы ў наладах iOS</translation>
 <translation id="6328639280570009161">Паспрабуйце выключыць прагназаванне сеткі</translation>
-<translation id="6328784461820205019">"Падключэнне не з’яўляецца прыватным", або "&lt;span class="error-code"&gt;NET::ERR_CERT_AUTHORITY_INVALID&lt;/span&gt;", або "&lt;span class="error-code"&gt;ERR_CERT_COMMON_NAME_INVALID&lt;/span&gt;", або "&lt;span class="error-code"&gt;NET::ERR_CERT_WEAK_SIGNATURE_ALGORITHM&lt;/span&gt;", або "&lt;span class="error-code"&gt;ERR_CERT_SYMANTEC_LEGACY&lt;/span&gt;", або "Памылка сертыфіката SSL"</translation>
 <translation id="6335029926534404762">Спартыўны абутак</translation>
 <translation id="6337133576188860026">Вызваліцца да <ph name="SIZE" />. Некаторыя сайты могуць загружацца павальней пры наступным наведванні.</translation>
 <translation id="6337534724793800597">Фільтр палітык па назве</translation>
 <translation id="633770708279464947">Значэнне <ph name="SECURE_DNS_SALT" /> з’яўляецца недапушчальным і не будзе выкарыстоўвацца.</translation>
+<translation id="6338645927051849741">Пароль • Менеджар пароляў Google</translation>
 <translation id="6340739886198108203">Згодна з зададзенай адміністратарам палітыкай, не рэкамендуецца рабіць здымкі або відэазапісы экрана, калі паказваецца канфідэнцыяльнае змесціва:</translation>
 <translation id="6341434961864773665">{0,plural, =1{Палітыка адміністратара не рэкамендуе запампоўваць гэты файл сюды: <ph name="DESTINATION_NAME" />}one{Палітыка адміністратара не рэкамендуе запампоўваць гэтыя файлы сюды: <ph name="DESTINATION_NAME" />}few{Палітыка адміністратара не рэкамендуе запампоўваць гэтыя файлы сюды: <ph name="DESTINATION_NAME" />}many{Палітыка адміністратара не рэкамендуе запампоўваць гэтыя файлы сюды: <ph name="DESTINATION_NAME" />}other{Палітыка адміністратара не рэкамендуе запампоўваць гэтыя файлы сюды: <ph name="DESTINATION_NAME" />}}</translation>
 <translation id="6342069812937806050">Толькі што</translation>
@@ -3015,6 +3029,7 @@
 <translation id="6351658970066645919">Выдаліць даныя пра работу ў браўзеры</translation>
 <translation id="6353505687280762741">{COUNT,plural, =0{Няма}=1{1 пароль (для даменаў <ph name="DOMAIN_LIST" />, сінхранізаваны)}=2{2 паролі (для даменаў <ph name="DOMAIN_LIST" />, сінхранізаваны)}one{# пароль (для даменаў <ph name="DOMAIN_LIST" />, сінхранізаваны)}few{# паролі (для даменаў <ph name="DOMAIN_LIST" />, сінхранізаваны)}many{# пароляў (для даменаў <ph name="DOMAIN_LIST" />, сінхранізаваны)}other{# пароля (для даменаў <ph name="DOMAIN_LIST" />, сінхранізаваны)}}</translation>
 <translation id="6355392890578844978">Гэты браўзер не знаходзіцца пад кіраваннем кампаніі або іншай арганізацыі. Аднак сама прылада можа знаходзіцца пад знешнім кіраваннем. <ph name="BEGIN_LINK" />Даведацца больш<ph name="END_LINK" /></translation>
+<translation id="6357546827188504216">Групы ўкладак "<ph name="GROUP_TITLE_1" />" і "<ph name="GROUP_TITLE_2" />" больш не даступныя</translation>
 <translation id="6358088212770985041">змяніць спосабы аплаты</translation>
 <translation id="6358450015545214790">Што яны азначаюць?</translation>
 <translation id="6360213755783740931">Даведацца больш пра абарону ад шкодных праграм</translation>
@@ -3328,6 +3343,7 @@
 <translation id="6917795328362592458">Выкарыстаны вамі пароль трапіў у спіс узламаных даных. Каб абараніць свае ўліковыя запісы, праверце захаваныя паролі ў Менеджары пароляў.</translation>
 <translation id="6917873303492266709">Каб абагульваць групы ўкладак, далучацца да іх і сумесна працаваць з імі, адкрыйце налады і ўключыце параметр "Дазволіць уваход у Chrome"</translation>
 <translation id="6921197121276419421">Усталяванне вэб-праграм дазволена</translation>
+<translation id="69238565902785824">Звязванне ўліковага запісу паскарае працэс аплаты праз сэрвіс "<ph name="BNPL_ISSUER_NAME" />", але вы можаце выдаліць сувязь для свайго ўліковага запісу, перайшоўшы на сайт <ph name="IDS_AUTOFILL_BNPL_TOS_LINK_TEXT_WALLET_LINK_TEXT" />.</translation>
 <translation id="6924013822850225188">Выберыце, ці будуць бонусы па картцы паказвацца падчас афармлення заказу (дзейнічаюць умовы банка)</translation>
 <translation id="6925267999184670015">North American B+</translation>
 <translation id="6926216138694948720">Бодзі-арт</translation>
@@ -3393,6 +3409,7 @@
 <translation id="701757816833614688">Адукацыя ў сферы выяўленчага мастацтва і дызайну</translation>
 <translation id="702275896380648118">Гэты сайт вызначае, што вам падабаецца, а затым на падставе гэтых звестак прапануе рэкламу іншым сайтам. Акрамя таго, ён выкарыстоўвае тэмы рэкламы з Chrome, каб паказваць вам больш рэлевантныя аб’явы.</translation>
 <translation id="7023162328967545559">Папярэджанне адміністратара</translation>
+<translation id="7023765275461720661">Звязаць уліковы запіс і заплаціць з дапамогай сэрвісу "<ph name="BNPL_ISSUER_NAME" />"?</translation>
 <translation id="7029809446516969842">Паролі</translation>
 <translation id="7030164307377592766">змяніць налады для запаўнення спосабаў аплаты</translation>
 <translation id="7031646650991750659">Якія праграмы Google Play вы ўсталявалі.</translation>
@@ -3615,6 +3632,7 @@
 <translation id="741204030948306876">Так, я згаджаюся</translation>
 <translation id="7416351320495623771">Кіраваць паролямі…</translation>
 <translation id="7416898721136759658">Гранты, стыпендыі і фінансавая падтрымка</translation>
+<translation id="741772962178517671">Affirm</translation>
 <translation id="7418620734632363981">Праграмаванне</translation>
 <translation id="7419091773564635591">Камп’ютары і электроніка</translation>
 <translation id="7419106976560586862">Шлях да профілю</translation>
@@ -3661,6 +3679,7 @@
 <translation id="7485085230273446323">Бізнес і прамысловасць</translation>
 <translation id="7485870689360869515">Даныя не знойдзены.</translation>
 <translation id="7486880426035242089">OneDrive</translation>
+<translation id="7489255442002627311"><ph name="BNPL_ISSUER_NAME" /> праверыць адпаведнасць патрабаванням (гэта не паўплывае на ваш крэдытны рэйтынг). У выпадку станоўчага рашэння <ph name="BNPL_ISSUER_NAME" /> прапануе вам планы выплат на выбар і завершыць вашу куплю.</translation>
 <translation id="7489392576326061356">Шампуні і кандыцыянеры</translation>
 <translation id="7495528107193238112">Гэта змесціва заблакіравана. Каб вырашыць праблему, звярніцеся да ўладальніка сайта.</translation>
 <translation id="749865518782565832">Водаправодныя работы</translation>
@@ -3717,6 +3736,7 @@
 <translation id="7569983096843329377">Чорны</translation>
 <translation id="7574998639136359461">Рыштунак для зімовых відаў спорту</translation>
 <translation id="7575207903026901870">Кнопка "Выдаліць прапанову". Каб выдаліць прапанову, націсніце Enter.</translation>
+<translation id="7575800019233204241">"Падключэнне не з’яўляецца прыватным" або "&lt;span class="error-code"&gt;NET::ERR_CERT_AUTHORITY_INVALID&lt;/span&gt;" або "&lt;span class="error-code"&gt;ERR_CERT_COMMON_NAME_INVALID&lt;/span&gt;" або "&lt;span class="error-code"&gt;NET::ERR_CERT_WEAK_SIGNATURE_ALGORITHM&lt;/span&gt;" або "Памылка сертыфіката SSL"</translation>
 <translation id="7575887283389198269">Мабільныя тэлефоны</translation>
 <translation id="7578104083680115302">Хуткая аплата на сайтах і ў праграмах з розных прылад карткамі, захаванымі ў сэрвісах Google.</translation>
 <translation id="7579442726219254162">Невядомая пераменная "<ph name="VARIABLE" />" у кіруемай канфігурацыі праграмы "<ph name="APPLICATION_ID" />".</translation>
@@ -3903,6 +3923,7 @@
 <translation id="791107458486222637">Вынік будзе атрыманы паўторна</translation>
 <translation id="791551905239004656">Рысаванне і размалёўванне</translation>
 <translation id="7916162853251942238">Аснова для флексаграфічнага друку</translation>
+<translation id="791698251820376781">Палітыка вашай арганізацыі не дазваляе вам выканаць уваход</translation>
 <translation id="7926503317156566022">Авіяцыйная прамысловасць</translation>
 <translation id="793209273132572360">Абнавіць адрас?</translation>
 <translation id="7932579305932748336">Пакрыццё</translation>
@@ -4226,7 +4247,6 @@
 <translation id="8473626140772740486">300 x 450 мм</translation>
 <translation id="8473863474539038330">Адрасы і іншае</translation>
 <translation id="8474910779563686872">Паказаць падрабязныя звесткі пра распрацоўшчыка</translation>
-<translation id="8476959635632921417">Каб захаваць і выкарыстоўваць гэты адрас на ўсіх сваіх прыладах, пацвердзіце сваю асобу</translation>
 <translation id="8479754468255770962">Скаба знізу злева</translation>
 <translation id="8483229036294884935">Гэты адрас будзе выдалены з вашага Уліковага запісу Google (<ph name="ACCOUNT" />)</translation>
 <translation id="8488350697529856933">Аб’ект прымянення</translation>
@@ -4610,11 +4630,13 @@
 <translation id="9183425211371246419"><ph name="HOST_NAME" /> выкарыстоўвае пратакол, які не падтрымліваецца.</translation>
 <translation id="918454845714257218">Праверце код на <ph name="SIDE_OF_CARD" /> і паўтарыце спробу</translation>
 <translation id="9186203289258525843">Кнопка "Зрабіць Chrome стандартным браўзерам". Каб зрабіць Chrome стандартным браўзерам сістэмы, націсніце яе.</translation>
+<translation id="9189468832660648522">Карыстальнік (<ph name="MEMBER_FIRST_NAME" />) змяніў гэту ўкладку</translation>
 <translation id="9189789270972826888">Калі даныя карткі не былі запоўнены, націсніце на рэквізіты, паказаныя ніжэй, каб скапіраваць і ўставіць іх. <ph name="IDS_AUTOFILL_FILLED_CARD_INFORMATION_BUBBLE_LEARN_MORE_LINK_LABEL" /></translation>
 <translation id="9190557999028587593">Тэмы, дададзеныя на падставе наведвання сайтаў больш чым 4 тыдні таму назад, выдаляюцца аўтаматычна</translation>
 <translation id="9191834167571392248">Дзірка знізу злева</translation>
 <translation id="9192361865877479444">Матавы метал</translation>
 <translation id="9192947025498305328">Натуральная касметыка</translation>
+<translation id="9195969368671142407">Калі захоўванне даных ва Уліковым запісе Google абмежавана арганізацыяй, вы не можаце абагульваць групы ўкладак і далучацца да іх</translation>
 <translation id="9199905725844810519">Друкаванне заблакіравана</translation>
 <translation id="9201904868909900493">Адкрываецца апытанне…</translation>
 <translation id="9204089334327209740">Пасля завяршэння запампоўвання Вы зможаце ўносіць змяненні ў файлы ў сэрвісе <ph name="CLOUD_PROVIDER" />. Змесціва лакальнага сховішча, у тым ліку сметніцы, будзе аўтаматычна выдалена.</translation>

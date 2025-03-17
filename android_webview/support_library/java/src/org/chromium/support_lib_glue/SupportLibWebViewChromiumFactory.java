@@ -109,6 +109,9 @@ public class SupportLibWebViewChromiumFactory implements WebViewProviderFactoryB
                 Features.WEB_STORAGE_DELETE_BROWSING_DATA,
                 Features.SPECULATIVE_LOADING_CONFIG,
                 Features.SAVE_STATE + Features.DEV_SUFFIX,
+                Features.WEB_VIEW_NAVIGATION_CLIENT_BASIC_USAGE,
+                Features.ASYNC_SHOULD_INTERCEPT_REQUEST + Features.DEV_SUFFIX,
+                Features.PROVIDER_WEAKLY_REF_WEBVIEW,
                 // Add new features above. New features must include `+ Features.DEV_SUFFIX`
                 // when they're initially added (this can be removed in a future CL). The final
                 // feature should have a trailing comma for cleaner diffs.
@@ -238,6 +241,30 @@ public class SupportLibWebViewChromiumFactory implements WebViewProviderFactoryB
         ApiCall.WEB_STORAGE_DELETE_BROWSING_DATA_FOR_SITE,
         ApiCall.SET_SPECULATIVE_LOADING_CONFIG,
         ApiCall.SAVE_STATE,
+        ApiCall.GET_WEBVIEW_NAVIGATION_CLIENT,
+        ApiCall.SET_WEBVIEW_NAVIGATION_CLIENT,
+        ApiCall.NAVIGATION_GET_URL,
+        ApiCall.NAVIGATION_WAS_INITIATED_BY_PAGE,
+        ApiCall.NAVIGATION_IS_SAME_DOCUMENT,
+        ApiCall.NAVIGATION_IS_RELOAD,
+        ApiCall.NAVIGATION_IS_HISTORY,
+        ApiCall.NAVIGATION_IS_RESTORE,
+        ApiCall.NAVIGATION_IS_BACK,
+        ApiCall.NAVIGATION_IS_FORWARD,
+        ApiCall.NAVIGATION_DID_COMMIT,
+        ApiCall.NAVIGATION_DID_COMMIT_ERROR_PAGE,
+        ApiCall.NAVIGATION_GET_STATUS_CODE,
+        ApiCall.CLEAR_ASYNC_SHOULD_INTERCEPT_REQUEST,
+        ApiCall.SET_ASYNC_SHOULD_INTERCEPT_REQUEST,
+        ApiCall.SERVICE_WORKER_CLEAR_ASYNC_SHOULD_INTERCEPT_REQUEST,
+        ApiCall.SERVICE_WORKER_SET_ASYNC_SHOULD_INTERCEPT_REQUEST,
+        ApiCall.WEB_RESPONSE_CALLBACK_DO_NOT_INTERCEPT,
+        ApiCall.WEB_RESPONSE_CALLBACK_INTERCEPT,
+        ApiCall.NAVIGATION_GET_PAGE,
+        ApiCall.SET_PAYMENT_REQUEST_ENABLED,
+        ApiCall.GET_PAYMENT_REQUEST_ENABLED,
+        ApiCall.SET_HAS_ENROLLED_INSTRUMENT_ENABLED,
+        ApiCall.GET_HAS_ENROLLED_INSTRUMENT_ENABLED,
         // Add new constants above. The final constant should have a trailing comma for cleaner
         // diffs.
         ApiCall.COUNT, // Added to suppress WrongConstant in #recordApiCall
@@ -365,9 +392,33 @@ public class SupportLibWebViewChromiumFactory implements WebViewProviderFactoryB
         int WEB_STORAGE_DELETE_BROWSING_DATA_FOR_SITE = 118;
         int SET_SPECULATIVE_LOADING_CONFIG = 119;
         int SAVE_STATE = 120;
+        int GET_WEBVIEW_NAVIGATION_CLIENT = 121;
+        int SET_WEBVIEW_NAVIGATION_CLIENT = 122;
+        int NAVIGATION_GET_URL = 123;
+        int NAVIGATION_WAS_INITIATED_BY_PAGE = 124;
+        int NAVIGATION_IS_SAME_DOCUMENT = 125;
+        int NAVIGATION_IS_RELOAD = 126;
+        int NAVIGATION_IS_HISTORY = 127;
+        int NAVIGATION_IS_RESTORE = 128;
+        int NAVIGATION_IS_BACK = 129;
+        int NAVIGATION_IS_FORWARD = 130;
+        int NAVIGATION_DID_COMMIT = 131;
+        int NAVIGATION_DID_COMMIT_ERROR_PAGE = 132;
+        int NAVIGATION_GET_STATUS_CODE = 133;
+        int CLEAR_ASYNC_SHOULD_INTERCEPT_REQUEST = 134;
+        int SET_ASYNC_SHOULD_INTERCEPT_REQUEST = 135;
+        int SERVICE_WORKER_CLEAR_ASYNC_SHOULD_INTERCEPT_REQUEST = 136;
+        int SERVICE_WORKER_SET_ASYNC_SHOULD_INTERCEPT_REQUEST = 137;
+        int WEB_RESPONSE_CALLBACK_DO_NOT_INTERCEPT = 138;
+        int WEB_RESPONSE_CALLBACK_INTERCEPT = 139;
+        int NAVIGATION_GET_PAGE = 140;
+        int SET_PAYMENT_REQUEST_ENABLED = 141;
+        int GET_PAYMENT_REQUEST_ENABLED = 142;
+        int SET_HAS_ENROLLED_INSTRUMENT_ENABLED = 143;
+        int GET_HAS_ENROLLED_INSTRUMENT_ENABLED = 144;
 
         // Remember to update AndroidXWebkitApiCall in enums.xml when adding new values here
-        int COUNT = 121;
+        int COUNT = 145;
     }
 
     // LINT.ThenChange(/tools/metrics/histograms/metadata/android/enums.xml:AndroidXWebkitApiCall)

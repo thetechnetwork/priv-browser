@@ -342,7 +342,7 @@ class CORE_EXPORT Element : public ContainerNode, public Animatable {
   // This is only exposed as an implementation detail to AXRelationCache, which
   // computes aria-owns differently for element reflection.
   bool HasExplicitlySetAttrAssociatedElements(const QualifiedName& name) const;
-  HeapLinkedHashSet<WeakMember<Element>>* GetExplicitlySetElementsForAttr(
+  GCedHeapLinkedHashSet<WeakMember<Element>>* GetExplicitlySetElementsForAttr(
       const QualifiedName& name) const;
   Element* GetElementAttribute(const QualifiedName& name) const;
   Element* GetElementAttributeResolvingReferenceTarget(
@@ -509,7 +509,6 @@ class CORE_EXPORT Element : public ContainerNode, public Animatable {
   void scrollBy(const ScrollToOptions*);
   void scrollTo(double x, double y);
   void scrollTo(const ScrollToOptions*);
-  LayoutBox* GetLayoutBoxForScrolling() const override;
 
   // Returns the bounds of this Element, unclipped, in the coordinate space of
   // the local root's widget. That is, in the outermost main frame, this will
@@ -1202,6 +1201,9 @@ class CORE_EXPORT Element : public ContainerNode, public Animatable {
       const AtomicString& view_transition_name = g_null_atom) const;
   LayoutObject* PseudoElementLayoutObject(PseudoId) const;
 
+  // Returns true if this element has ::view-transition-group children.
+  bool HasViewTransitionGroupChildren() const;
+
   bool PseudoElementStylesAffectCounters() const;
 
   bool PseudoElementStylesDependOnFontMetrics() const;
@@ -1378,6 +1380,11 @@ class CORE_EXPORT Element : public ContainerNode, public Animatable {
 
   void setTabIndex(int);
   int tabIndex() const;
+  int ReadingOrderValue() const;
+
+  void setHeadingReset(bool);
+  bool headingReset() const;
+  int GetComputedHeadingOffset(int max_offset);
 
   void setEditContext(EditContext* editContext, ExceptionState&);
   EditContext* editContext() const;

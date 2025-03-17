@@ -228,7 +228,7 @@ void SavedTabGroupButton::SetTextProperties(const SavedTabGroup& group) {
 
 void SavedTabGroupButton::UpdateButtonLayout() {
   SetEnabledTextColors(GetSavedTabGroupForegroundColorId(tab_group_color_id_));
-  SetBackground(views::CreateThemedRoundedRectBackground(
+  SetBackground(views::CreateRoundedRectBackground(
       GetTabGroupBookmarkColorId(tab_group_color_id_), kButtonRadius));
 
   // Adjust the insets so the share icon can fit within the bounds of this
@@ -243,10 +243,9 @@ void SavedTabGroupButton::UpdateButtonLayout() {
   if (!local_group_id_.has_value()) {
     SetBorder(views::CreateEmptyBorder(insets));
   } else {
-    std::unique_ptr<views::Border> border =
-        views::CreateThemedRoundedRectBorder(
-            kBorderThickness, kButtonRadius,
-            GetSavedTabGroupOutlineColorId(tab_group_color_id_));
+    std::unique_ptr<views::Border> border = views::CreateRoundedRectBorder(
+        kBorderThickness, kButtonRadius,
+        GetSavedTabGroupOutlineColorId(tab_group_color_id_));
     SetBorder(views::CreatePaddedBorder(std::move(border), insets));
   }
 

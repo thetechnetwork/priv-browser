@@ -2,8 +2,8 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 """Constants for json results file."""
-from types import MappingProxyType
 
+AVERAGE = 'average'
 BENCHMARK = 'benchmark'
 BENCHMARKS = 'benchmarks'
 BOT = 'bot'
@@ -42,15 +42,11 @@ TEST = 'test'
 TRACE_URLS = 'traceUrls'
 TYPE = 'type'
 UNIT = 'unit'
-V8_GIT_HASH = 'V8 Git Hash'
+V8_GIT_HASH = 'V8'
 VALUE = 'value'
 VALUES = 'values'
 VERSION = 'version'
-WEBRTC_GIT_HASH = 'WebRTC Git Hash'
-UNIT_TO_DIRECTION = MappingProxyType({
-    'ms_smallerIsBetter': 'down',
-    'unitless_biggerIsBetter': 'up',
-})
+WEBRTC_GIT_HASH = 'WebRTC'
 REPOSITORY_PROPERTY_MAP = {
   'chromium': {
     'masters': ['ChromeFYIInternal', 'ChromiumAndroid', 'ChromiumChrome',

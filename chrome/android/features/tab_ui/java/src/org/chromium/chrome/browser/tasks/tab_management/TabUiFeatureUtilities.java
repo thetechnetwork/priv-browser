@@ -9,6 +9,7 @@ import android.os.Build;
 import org.chromium.base.ResettersForTesting;
 import org.chromium.base.SysUtils;
 import org.chromium.chrome.browser.flags.ChromeFeatureList;
+import org.chromium.ui.util.XrUtils;
 
 import java.util.Locale;
 import java.util.Set;
@@ -45,7 +46,7 @@ public class TabUiFeatureUtilities {
      * @return whether tab drag as window is enabled.
      */
     public static boolean isTabDragAsWindowEnabled() {
-        return ChromeFeatureList.sTabDragDropAsWindowAndroid.isEnabled();
+        return XrUtils.isXrDevice();
     }
 
     /** Returns if the tab group pane should be displayed in the hub. */
@@ -56,11 +57,11 @@ public class TabUiFeatureUtilities {
     /** Returns whether drag drop from tab strip to create new instance is enabled. */
     public static boolean isTabDragToCreateInstanceSupported() {
         // TODO(crbug/328511660): Add OS version check once available.
-        return doesOEMSupportDragToCreateInstance() || !isTabDragAsWindowEnabled();
+        return doesOemSupportDragToCreateInstance() || !isTabDragAsWindowEnabled();
     }
 
     /** Returns whether device OEM is allow-listed for tab tearing */
-    public static boolean doesOEMSupportDragToCreateInstance() {
+    public static boolean doesOemSupportDragToCreateInstance() {
         return TAB_TEARING_OEM_ALLOWLIST.contains(Build.MANUFACTURER.toLowerCase(Locale.US));
     }
 }

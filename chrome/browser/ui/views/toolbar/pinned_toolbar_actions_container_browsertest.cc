@@ -10,7 +10,6 @@
 #include "chrome/browser/translate/translate_test_utils.h"
 #include "chrome/browser/ui/browser_window/public/browser_window_features.h"
 #include "chrome/browser/ui/toolbar/pinned_toolbar/pinned_toolbar_actions_model.h"
-#include "chrome/browser/ui/ui_features.h"
 #include "chrome/browser/ui/views/frame/browser_view.h"
 #include "chrome/browser/ui/views/side_panel/side_panel_ui.h"
 #include "chrome/browser/ui/views/toolbar/pinned_action_toolbar_button.h"
@@ -31,11 +30,6 @@
 class PinnedToolbarActionsContainerBrowserTest : public InProcessBrowserTest {
  public:
   PinnedToolbarActionsContainerBrowserTest() = default;
-
-  void SetUp() override {
-    feature_list_.InitAndEnableFeature(features::kToolbarPinning);
-    InProcessBrowserTest::SetUp();
-  }
 
   void SetUpOnMainThread() override {
     PinnedToolbarActionsModel* const actions_model =
@@ -94,7 +88,6 @@ class PinnedToolbarActionsContainerBrowserTest : public InProcessBrowserTest {
   }
 
  protected:
-  base::test::ScopedFeatureList feature_list_;
   // OS integration is needed to be able to launch web applications. This
   // override ensures OS integration doesn't leave any traces.
   std::unique_ptr<web_app::OsIntegrationTestOverrideImpl::BlockingRegistration>
@@ -106,7 +99,7 @@ IN_PROC_BROWSER_TEST_F(PinnedToolbarActionsContainerBrowserTest,
                        CustomizeToolbarCanBeCalledFromNewTabPage) {
   auto pinned_button = std::make_unique<PinnedActionToolbarButton>(
       browser(), actions::kActionCut, container());
-  pinned_button->ExecuteCommand(IDC_SHOW_CUSTOMIZE_CHROME_TOOLBAR, 0);
+  pinned_button->menu_model()->ActivatedAt(2);
   content::WebContents* web_contents =
       browser()->tab_strip_model()->GetActiveWebContents();
 
@@ -123,7 +116,7 @@ IN_PROC_BROWSER_TEST_F(PinnedToolbarActionsContainerBrowserTest,
                        CustomizeToolbarCanBeCalledFromNonNewTabPage) {
   auto pinned_button = std::make_unique<PinnedActionToolbarButton>(
       browser(), actions::kActionCut, container());
-  pinned_button->ExecuteCommand(IDC_SHOW_CUSTOMIZE_CHROME_TOOLBAR, 0);
+  pinned_button->menu_model()->ActivatedAt(2);
   content::WebContents* web_contents =
       browser()->tab_strip_model()->GetActiveWebContents();
   content::WaitForLoadStop(web_contents);
@@ -142,8 +135,7 @@ IN_PROC_BROWSER_TEST_F(PinnedToolbarActionsContainerBrowserTest,
   AddBlankTabAndShow(incognito_browser);
   auto pinned_button = std::make_unique<PinnedActionToolbarButton>(
       incognito_browser, actions::kActionCut, container());
-  EXPECT_FALSE(
-      pinned_button->IsCommandIdEnabled(IDC_SHOW_CUSTOMIZE_CHROME_TOOLBAR));
+  EXPECT_FALSE(pinned_button->menu_model()->IsEnabledAt(2));
 }
 
 IN_PROC_BROWSER_TEST_F(PinnedToolbarActionsContainerBrowserTest,

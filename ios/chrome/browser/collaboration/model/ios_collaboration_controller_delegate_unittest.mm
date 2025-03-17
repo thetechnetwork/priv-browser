@@ -18,6 +18,7 @@
 #import "ios/chrome/browser/collaboration/model/collaboration_service_factory.h"
 #import "ios/chrome/browser/data_sharing/model/data_sharing_service_factory.h"
 #import "ios/chrome/browser/favicon/model/ios_chrome_favicon_loader_factory.h"
+#import "ios/chrome/browser/favicon/model/test_favicon_loader.h"
 #import "ios/chrome/browser/saved_tab_groups/model/tab_group_sync_service_factory.h"
 #import "ios/chrome/browser/share_kit/model/fake_share_kit_flow_view_controller.h"
 #import "ios/chrome/browser/share_kit/model/share_kit_service_factory.h"
@@ -48,6 +49,7 @@
 #import "third_party/ocmock/OCMock/OCMock.h"
 #import "third_party/ocmock/gtest_support.h"
 
+using testing::_;
 using testing::Return;
 
 namespace collaboration {
@@ -75,6 +77,11 @@ std::unique_ptr<KeyedService> BuildTestSyncService(web::BrowserState* context) {
 std::unique_ptr<KeyedService> BuildMockCollaborationService(
     web::BrowserState* context) {
   return std::make_unique<MockCollaborationService>();
+}
+
+std::unique_ptr<KeyedService> BuildTestFaviconLoader(
+    web::BrowserState* context) {
+  return std::make_unique<TestFaviconLoader>();
 }
 
 }  // namespace
@@ -113,7 +120,8 @@ class IOSCollaborationControllerDelegateTest : public PlatformTest {
         base::BindRepeating(&BuildTestShareKitService));
     test_cbs_builder.AddTestingFactory(
         IOSChromeFaviconLoaderFactory::GetInstance(),
-        IOSChromeFaviconLoaderFactory::GetDefaultFactory());
+        base::BindRepeating(&BuildTestFaviconLoader));
+
     profile_ = std::move(test_cbs_builder).Build();
     browser_ = std::make_unique<TestBrowser>(profile_.get());
 

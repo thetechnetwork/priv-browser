@@ -19,6 +19,7 @@
 #include "chrome/browser/bookmarks/bookmark_merged_surface_service.h"
 #include "chrome/browser/bookmarks/bookmark_merged_surface_service_factory.h"
 #include "chrome/browser/bookmarks/bookmark_model_factory.h"
+#include "chrome/browser/bookmarks/bookmark_test_helpers.h"
 #include "chrome/browser/bookmarks/managed_bookmark_service_factory.h"
 #include "chrome/browser/favicon/favicon_utils.h"
 #include "chrome/browser/profiles/profile.h"
@@ -42,7 +43,7 @@
 #include "components/prefs/pref_service.h"
 #include "components/search_engines/template_url_service.h"
 #include "components/search_engines/template_url_service_client.h"
-#include "components/sync/base/features.h"
+#include "components/signin/public/base/signin_switches.h"
 #include "components/sync_preferences/testing_pref_service_syncable.h"
 #include "ui/base/dragdrop/drag_drop_types.h"
 #include "ui/base/dragdrop/mojom/drag_drop_types.mojom.h"
@@ -79,6 +80,9 @@ class BookmarkBarViewBaseTest : public ChromeViewsTestBase {
         BookmarkMergedSurfaceServiceFactory::GetInstance(),
         BookmarkMergedSurfaceServiceFactory::GetDefaultFactory());
     profile_ = profile_builder.Build();
+
+    BookmarkMergedSurfaceServiceFactory::GetForProfile(profile_.get())
+        ->LoadForTesting({});
 
     Browser::CreateParams params(profile(), true);
     params.window = &browser_window_;
@@ -213,7 +217,7 @@ class BookmarkBarViewTest : public BookmarkBarViewBaseTest {
 
  private:
   base::test::ScopedFeatureList features_{
-      syncer::kSyncEnableBookmarksInTransportMode};
+      switches::kSyncEnableBookmarksInTransportMode};
   std::unique_ptr<BookmarkBarView> bookmark_bar_view_;
 };
 

@@ -4,7 +4,6 @@
 """Definitions of builders in the tryserver.chromium.android builder group."""
 
 load("//lib/branches.star", "branches")
-load("//lib/builder_config.star", "builder_config")
 load("//lib/builders.star", "os", "siso")
 load("//lib/try.star", "try_")
 load("//lib/consoles.star", "consoles")
@@ -75,25 +74,6 @@ try_.builder(
     ),
 )
 
-try_.builder(
-    name = "android-desktop-x64-compile-rel",
-    mirrors = [
-        "ci/android-desktop-x64-compile-rel",
-    ],
-    builder_config_settings = builder_config.try_settings(
-        include_all_triggered_testers = True,
-        is_compile_only = True,
-    ),
-    gn_args = gn_args.config(
-        configs = [
-            "ci/android-desktop-x64-compile-rel",
-            "release_try_builder",
-        ],
-    ),
-    builderless = False,
-    tryjob = try_.job(),
-)
-
 try_.orchestrator_builder(
     name = "android-desktop-x64-rel",
     description_html = "Run Chromium tests on Android Desktop emulators.",
@@ -118,9 +98,7 @@ try_.orchestrator_builder(
     # TODO(crbug.com/40241638): Use orchestrator pool once overloaded test pools
     # are addressed
     # use_orchestrator_pool = True,
-    tryjob = try_.job(
-        experiment_percentage = 100,
-    ),
+    tryjob = try_.job(),
 )
 
 try_.compilator_builder(

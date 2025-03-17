@@ -123,15 +123,15 @@ bool g_show_hover_card_on_mouse_hover = true;
 
 // Helper functions ------------------------------------------------------------
 
-// Returns the coordinate for an object of size |item_size| centered in a region
-// of size |size|, biasing towards placing any extra space ahead of the object.
+// Returns the coordinate for an object of size `item_size` centered in a region
+// of size `size`, biasing towards placing any extra space ahead of the object.
 int Center(int size, int item_size) {
   int extra_space = size - item_size;
   // Integer division below truncates, thus effectively "rounding toward zero";
   // to always place extra space ahead of the object, we want to round towards
   // positive infinity, which means we need to bias the division only when the
   // size difference is positive.  (Adding one unconditionally will stack with
-  // the truncation if |extra_space| is negative, resulting in off-by-one
+  // the truncation if `extra_space` is negative, resulting in off-by-one
   // errors.)
   if (extra_space > 0) {
     ++extra_space;
@@ -230,7 +230,7 @@ Tab::Tab(TabSlotController* controller)
   title_->SetAutoColorReadabilityEnabled(false);
   title_->SetText(CoreTabHelper::GetDefaultTitle());
   title_->SetBackgroundColor(SK_ColorTRANSPARENT);
-  // |title_| paints on top of an opaque region (the tab background) of a
+  // `title_` paints on top of an opaque region (the tab background) of a
   // non-opaque layer (the tabstrip's layer), which cannot currently be detected
   // by the subpixel-rendering opacity check.
   // TODO(crbug.com/40725997): Improve the check so that this case doen't
@@ -564,6 +564,7 @@ bool Tab::OnMouseDragged(const ui::MouseEvent& event) {
 }
 
 void Tab::OnMouseReleased(const ui::MouseEvent& event) {
+  base::WeakPtr<Tab> self = weak_ptr_factory_.GetWeakPtr();
   controller_->OnMouseEventInTab(this, event);
 
   // Notify the drag helper that we're done with any potential drag operations.
@@ -602,6 +603,11 @@ void Tab::OnMouseReleased(const ui::MouseEvent& event) {
     // selected.
     controller_->SelectTab(this, event);
   }
+  // If the tab was closed with the animation disabled, the tab may have
+  // already been destroyed.
+  if (!self) {
+    return;
+  }
   shift_pressed_on_mouse_down_ = false;
 }
 
@@ -610,7 +616,6 @@ void Tab::OnMouseCaptureLost() {
 }
 
 void Tab::OnMouseMoved(const ui::MouseEvent& event) {
-  tab_style_views()->SetHoverLocation(event.location());
   controller_->OnMouseEventInTab(this, event);
 
   // Linux enter/leave events are sometimes flaky, so we don't want to "miss"
@@ -649,7 +654,7 @@ void Tab::MaybeUpdateHoverStatus(const ui::MouseEvent& event) {
 #endif
 
   mouse_hovered_ = true;
-  tab_style_views()->ShowHover(TabStyle::ShowHoverStyle::kSubtle);
+  controller_->ShowHover(this, TabStyle::ShowHoverStyle::kSubtle);
   UpdateForegroundColors();
   DeprecatedLayoutImmediately();
   if (g_show_hover_card_on_mouse_hover) {
@@ -663,7 +668,7 @@ void Tab::OnMouseExited(const ui::MouseEvent& event) {
     return;
   }
   mouse_hovered_ = false;
-  tab_style_views()->HideHover(TabStyle::HideHoverStyle::kGradual);
+  controller_->HideHover(this, TabStyle::HideHoverStyle::kGradual);
   UpdateForegroundColors();
   DeprecatedLayoutImmediately();
 }
@@ -726,7 +731,7 @@ void Tab::UpdateAccessibleName() {
   if (!name.empty()) {
     GetViewAccessibility().SetName(name);
   } else {
-    // Under some conditions, |GetAccessibleTabName| returns an empty string.
+    // Under some conditions, `GetAccessibleTabName` returns an empty string.
     GetViewAccessibility().SetName(
         std::string(), ax::mojom::NameFrom::kAttributeExplicitlyEmpty);
   }
@@ -746,7 +751,7 @@ void Tab::SetGroup(std::optional<tab_groups::TabGroupId> group) {
 
 gfx::Size Tab::CalculatePreferredSize(
     const views::SizeBounds& available_size) const {
-  return gfx::Size(tab_style()->GetStandardWidth(),
+  return gfx::Size(GetTabSizeInfo().standard_width,
                    GetLayoutConstant(TAB_HEIGHT));
 }
 
@@ -805,7 +810,8 @@ TabSlotView::ViewType Tab::GetTabSlotViewType() const {
 TabSizeInfo Tab::GetTabSizeInfo() const {
   return {tab_style()->GetPinnedWidth(), tab_style()->GetMinimumActiveWidth(),
           tab_style()->GetMinimumInactiveWidth(),
-          tab_style()->GetStandardWidth()};
+          split() ? tab_style()->GetStandardSplitWidth()
+                  : tab_style()->GetStandardWidth()};
 }
 
 void Tab::SetClosing(bool closing) {
@@ -973,7 +979,7 @@ void Tab::SetData(TabRendererData data) {
   if (!data_.pinned && old.pinned) {
     is_animating_from_pinned_ = true;
     // We must set this to true early, because we don't want to set
-    // |is_animating_from_pinned_| to false if we lay out before the animation
+    // `is_animating_from_pinned_` to false if we lay out before the animation
     // begins.
     set_animating(true);
   }

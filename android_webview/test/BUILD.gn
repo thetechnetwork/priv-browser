@@ -57,7 +57,7 @@ if (android_64bit_target_cpu) {
     data_deps = [ "//build/android:test_runner_py" ]
     data = [
       "//android_webview/tools/cts_config/",
-      "//third_party/chromium-variations",
+      "//components/variations/test_data/cipd",
     ]
   }
 
@@ -67,7 +67,7 @@ if (android_64bit_target_cpu) {
     data_deps = [ "//build/android:test_runner_py" ]
     data = [
       "//android_webview/tools/cts_config/",
-      "//third_party/chromium-variations",
+      "//components/variations/test_data/cipd",
     ]
   }
 
@@ -78,7 +78,7 @@ if (android_64bit_target_cpu) {
       data_deps = [ "//build/android:test_runner_py" ]
       data = [
         "//android_webview/tools/cts_config/",
-        "//third_party/chromium-variations",
+        "//components/variations/test_data/cipd",
       ]
     }
   }
@@ -124,10 +124,7 @@ script_test("system_webview_wpt") {
            "--browser-apk",
            "@WrappedPath(apks/SystemWebViewShell.apk)",
          ]
-  data = [
-    "//third_party/blink/web_tests/platform/webview/",
-    "//third_party/blink/web_tests/MobileTestExpectations",
-  ]
+  data = [ "//third_party/blink/web_tests/platform/webview/" ]
   data_deps = [
     "//android_webview:system_webview_apk",
     "//android_webview/tools/system_webview_shell:system_webview_shell_layout_test_apk",
@@ -154,10 +151,7 @@ script_test("trichrome_webview_wpt") {
            "--additional-apk",
            "@WrappedPath(apks/TrichromeLibrary.apk)",
          ]
-  data = [
-    "//third_party/blink/web_tests/platform/webview/",
-    "//third_party/blink/web_tests/MobileTestExpectations",
-  ]
+  data = [ "//third_party/blink/web_tests/platform/webview/" ]
   data_deps = [
     "//android_webview:trichrome_webview_apk",
     "//android_webview/tools/system_webview_shell:system_webview_shell_layout_test_apk",
@@ -185,10 +179,7 @@ if (android_64bit_target_cpu) {
              "--additional-apk",
              "@WrappedPath(apks/TrichromeLibrary64.apk)",
            ]
-    data = [
-      "//third_party/blink/web_tests/platform/webview/",
-      "//third_party/blink/web_tests/MobileTestExpectations",
-    ]
+    data = [ "//third_party/blink/web_tests/platform/webview/" ]
     data_deps = [
       "//android_webview:trichrome_webview_64_apk",
       "//android_webview/tools/system_webview_shell:system_webview_shell_layout_test_apk",
@@ -563,6 +554,7 @@ base_webview_instrumentation_test_apk("webview_instrumentation_test_apk") {
     "../javatests/src/org/chromium/android_webview/test/devui/util/WebViewCrashInfoCollectorTest.java",
     "../javatests/src/org/chromium/android_webview/test/devui/util/WebViewCrashLogParserTest.java",
     "../javatests/src/org/chromium/android_webview/test/payments/AwPaymentRequestServiceTest.java",
+    "../javatests/src/org/chromium/android_webview/test/payments/AwPaymentRequestSettingsTest.java",
     "../javatests/src/org/chromium/android_webview/test/sensitive_content/AwSensitiveContentTest.java",
     "../javatests/src/org/chromium/android_webview/test/services/AwComponentUpdateServiceTest.java",
     "../javatests/src/org/chromium/android_webview/test/services/AwNetLogServiceTest.java",
@@ -586,7 +578,7 @@ base_webview_instrumentation_test_apk("webview_instrumentation_test_apk") {
     "//third_party/blink/web_tests/resources/global-interface-listing.js",
     "//third_party/blink/web_tests/webexposed/global-interface-listing.html",
     "//third_party/blink/web_tests/webexposed/global-interface-listing-expected.txt",
-    "//third_party/chromium-variations/",
+    "//components/variations/test_data/cipd/",
     "$root_build_dir/third_party/blink/web_tests/resources/js-test.js",
   ]
   data_deps =
@@ -604,6 +596,7 @@ android_library("base_webview_instrumentation_test_java") {
     "//android_webview/javatests/src/org/chromium/android_webview/test/AwActivityTestRule.java",
     "//android_webview/javatests/src/org/chromium/android_webview/test/DisableHardwareAcceleration.java",
     "//android_webview/javatests/src/org/chromium/android_webview/test/TestAwContentsClient.java",
+    "//android_webview/javatests/src/org/chromium/android_webview/test/TestAwNavigationClient.java",
     "//android_webview/javatests/src/org/chromium/android_webview/test/util/AwQuotaManagerBridgeTestUtil.java",
     "//android_webview/javatests/src/org/chromium/android_webview/test/util/AwTestTouchUtils.java",
     "//android_webview/javatests/src/org/chromium/android_webview/test/util/CommonResources.java",

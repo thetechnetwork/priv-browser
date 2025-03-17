@@ -158,6 +158,7 @@ _CONFIG = [
             'base::Time',
             'base::TimeDelta',
             'base::TimeTicks',
+            'base::to_address',
             'base::to_underlying',
             'base::Token',
             'base::ToVector',
@@ -1617,16 +1618,6 @@ _CONFIG = [
     },
     {
         'paths': [
-            'third_party/blink/renderer/modules/mediasource/',
-        ],
-        'allowed': [
-            'base::CommandLine',
-            'media::.+',
-            'switches::kLacrosEnablePlatformEncryptedHevc',
-        ]
-    },
-    {
-        'paths': [
             'third_party/blink/renderer/modules/encryptedmedia/',
             'third_party/blink/renderer/modules/media/',
             'third_party/blink/renderer/modules/video_rvfc/',
@@ -1811,6 +1802,7 @@ _CONFIG = [
             'media::.+',
             'viz::RasterContextProvider',
             'viz::ReleaseCallback',
+            'viz::SkColorTypeToSinglePlaneSharedImageFormat',
         ]
     },
     {
@@ -1986,11 +1978,13 @@ _CONFIG = [
         'paths': [
             'third_party/blink/public/platform/web_theme_engine.h',
             'third_party/blink/renderer/core/css/resolver/style_builder_converter.h',
+            'third_party/blink/renderer/core/animation/css_color_interpolation_type.cc',
+            'third_party/blink/renderer/core/animation/interpolable_shadow.cc',
             'third_party/blink/renderer/core/layout/layout_theme.cc',
             'third_party/blink/renderer/core/layout/layout_theme.h',
             'third_party/blink/renderer/core/scroll/',
-            'third_party/blink/renderer/modules/canvas/canvas2d/base_rendering_context_2d.cc',
-            'third_party/blink/renderer/modules/canvas/canvas2d/base_rendering_context_2d.h',
+            'third_party/blink/renderer/modules/canvas/canvas2d/canvas_2d_recorder_context.cc',
+            'third_party/blink/renderer/modules/canvas/canvas2d/canvas_2d_recorder_context.h',
         ],
         'allowed': ['ui::ColorProvider'],
     },
@@ -2391,14 +2385,6 @@ _CONFIG = [
     },
     {
         'paths': [
-            'third_party/blink/public/common/permissions_policy/permissions_policy.h',
-        ],
-        'allowed': [
-            'url::Origin',
-        ]
-    },
-    {
-        'paths': [
             'third_party/blink/public/common/privacy_budget/identifiable_token.h',
         ],
         'allowed': [
@@ -2463,6 +2449,7 @@ _CONFIG = [
         ],
         'allowed': [
             'base::flat_map',
+            'network::PermissionsPolicy',
         ]
     },
     {
@@ -2475,10 +2462,22 @@ _CONFIG = [
     },
     {
         'paths': [
+            'third_party/blink/common/features.cc',
+        ],
+        'allowed': [
+            'network::features::kBrowsingTopics',
+            'network::features::kInterestGroupStorage',
+            'network::features::kSharedStorageAPI',
+        ]
+    },
+    {
+        'paths': [
             'third_party/blink/common/client_hints/client_hints.cc',
         ],
         'allowed': [
+            'GURL',
             'network::GetClientHintToPolicyFeatureMap',
+            'network::PermissionsPolicy',
         ]
     },
 ]

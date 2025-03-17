@@ -89,7 +89,7 @@ public class TabModelRemoverUnitTest {
     @Mock private TabGroupSyncFeatures.Natives mTabGroupSyncFeaturesJniMock;
     @Mock private Runnable mFinishBlocking;
 
-    @Captor private ArgumentCaptor<Callback<Integer>> mOnResultCaptor;
+    @Captor private ArgumentCaptor<Callback<@ActionConfirmationResult Integer>> mOnResultCaptor;
     @Captor private ArgumentCaptor<Callback<Boolean>> mOnDeleteGroupResultCaptor;
     @Captor private ArgumentCaptor<Callback<MaybeBlockingResult>> mOnMaybeBlockingResultCaptor;
     @Captor private ArgumentCaptor<List<Tab>> mNewTabCreationCaptor;
@@ -128,6 +128,8 @@ public class TabModelRemoverUnitTest {
                 .thenReturn(ROOT_ID_1);
         when(mTabGroupModelFilter.getRootIdFromTabGroupId(TAB_GROUP_2.tabGroupId))
                 .thenReturn(ROOT_ID_2);
+        when(mTabGroupModelFilter.tabGroupExists(TAB_GROUP_1.tabGroupId)).thenReturn(true);
+        when(mTabGroupModelFilter.tabGroupExists(TAB_GROUP_2.tabGroupId)).thenReturn(true);
         when(mTabGroupModelFilter.getTabGroupTitle(anyInt())).thenReturn(TAB_GROUP_TITLE);
 
         doAnswer(

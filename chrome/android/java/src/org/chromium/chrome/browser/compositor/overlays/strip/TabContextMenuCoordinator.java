@@ -6,8 +6,6 @@ package org.chromium.chrome.browser.compositor.overlays.strip;
 
 import static org.chromium.chrome.browser.share.ShareDelegate.ShareOrigin.TAB_STRIP_CONTEXT_MENU;
 
-import android.app.Activity;
-
 import androidx.annotation.DimenRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -17,15 +15,15 @@ import androidx.core.content.res.ResourcesCompat;
 import org.chromium.base.metrics.RecordUserAction;
 import org.chromium.base.supplier.Supplier;
 import org.chromium.chrome.browser.collaboration.CollaborationServiceFactory;
-import org.chromium.chrome.browser.data_sharing.DataSharingTabManager;
 import org.chromium.chrome.browser.profiles.Profile;
 import org.chromium.chrome.browser.share.ShareDelegate;
 import org.chromium.chrome.browser.share.ShareUtils;
 import org.chromium.chrome.browser.tab.Tab;
 import org.chromium.chrome.browser.tab_group_sync.TabGroupSyncServiceFactory;
+import org.chromium.chrome.browser.tabmodel.TabClosureParams;
 import org.chromium.chrome.browser.tabmodel.TabGroupModelFilter;
 import org.chromium.chrome.browser.tabmodel.TabModel;
-import org.chromium.chrome.browser.tasks.tab_management.ActionConfirmationManager;
+import org.chromium.chrome.browser.tasks.tab_management.TabGroupListBottomSheetCoordinator;
 import org.chromium.chrome.browser.tasks.tab_management.TabOverflowMenuCoordinator;
 import org.chromium.chrome.browser.tasks.tab_management.TabShareUtils;
 import org.chromium.chrome.tab_ui.R;
@@ -33,7 +31,6 @@ import org.chromium.components.browser_ui.widget.BrowserUiListMenuUtils;
 import org.chromium.components.collaboration.CollaborationService;
 import org.chromium.components.tab_group_sync.TabGroupSyncService;
 import org.chromium.ui.base.WindowAndroid;
-import org.chromium.ui.modaldialog.ModalDialogManager;
 import org.chromium.ui.modelutil.MVCListAdapter.ModelList;
 import org.chromium.ui.widget.AnchoredPopupWindow.HorizontalOrientation;
 import org.chromium.ui.widget.RectProvider;
@@ -52,23 +49,18 @@ public class TabContextMenuCoordinator extends TabOverflowMenuCoordinator<Intege
     private TabContextMenuCoordinator(
             Supplier<TabModel> tabModelSupplier,
             TabGroupModelFilter tabGroupModelFilter,
-            ShareDelegate shareDelegate,
-            ActionConfirmationManager actionConfirmationManager,
-            ModalDialogManager modalDialogManager,
+            TabGroupListBottomSheetCoordinator tabGroupListBottomSheetCoordinator,
+            Supplier<ShareDelegate> shareDelegateSupplier,
             WindowAndroid windowAndroid,
             TabGroupSyncService tabGroupSyncService,
-            DataSharingTabManager dataSharingTabManager,
             CollaborationService collaborationService) {
         super(
                 R.layout.tab_switcher_action_menu_layout,
                 getMenuItemClickedCallback(
-                        windowAndroid.getActivity().get(),
                         tabModelSupplier,
                         tabGroupModelFilter,
-                        shareDelegate,
-                        actionConfirmationManager,
-                        modalDialogManager,
-                        dataSharingTabManager),
+                        tabGroupListBottomSheetCoordinator,
+                        shareDelegateSupplier),
                 tabModelSupplier,
                 tabGroupSyncService,
                 collaborationService);
@@ -79,22 +71,21 @@ public class TabContextMenuCoordinator extends TabOverflowMenuCoordinator<Intege
     /**
      * Creates the TabContextMenuCoordinator object.
      *
-     * @param tabModel The tab model.
+     * @param tabModelSupplier Supplies the {@link TabModel}.
      * @param tabGroupModelFilter The {@link TabGroupModelFilter} to act on.
-     * @param actionConfirmationManager Used to show a confirmation dialog.
-     * @param windowAndroid The {@link WindowAndroid} current window.
-     * @param dataSharingTabManager The {@link DataSharingTabManager} managing communication between
-     *     UI and DataSharing services.
+     * @param tabGroupListBottomSheetCoordinator The {@link TabGroupListBottomSheetCoordinator} that
+     *     will be used to show a bottom sheet when the user selects the "Add to group" option.
+     * @param shareDelegateSupplier Supplies the {@link ShareDelegate} that will be used to share
+     *     the tab's URL when the user selects the "Share" option.
+     * @param windowAndroid The {@link WindowAndroid} where this context menu will be shown.
      */
     public static TabContextMenuCoordinator createContextMenuCoordinator(
-            TabModel tabModel,
+            Supplier<TabModel> tabModelSupplier,
             TabGroupModelFilter tabGroupModelFilter,
-            ShareDelegate shareDelegate,
-            ActionConfirmationManager actionConfirmationManager,
-            ModalDialogManager modalDialogManager,
-            WindowAndroid windowAndroid,
-            DataSharingTabManager dataSharingTabManager) {
-        Profile profile = tabModel.getProfile();
+            TabGroupListBottomSheetCoordinator tabGroupListBottomSheetCoordinator,
+            Supplier<ShareDelegate> shareDelegateSupplier,
+            WindowAndroid windowAndroid) {
+        Profile profile = tabModelSupplier.get().getProfile();
         @Nullable
         TabGroupSyncService tabGroupSyncService =
                 profile.isOffTheRecord() ? null : TabGroupSyncServiceFactory.getForProfile(profile);
@@ -103,33 +94,29 @@ public class TabContextMenuCoordinator extends TabOverflowMenuCoordinator<Intege
                 CollaborationServiceFactory.getForProfile(profile);
 
         return new TabContextMenuCoordinator(
-                () -> tabModel,
+                tabModelSupplier,
                 tabGroupModelFilter,
-                shareDelegate,
-                actionConfirmationManager,
-                modalDialogManager,
+                tabGroupListBottomSheetCoordinator,
+                shareDelegateSupplier,
                 windowAndroid,
                 tabGroupSyncService,
-                dataSharingTabManager,
                 collaborationService);
     }
 
     @VisibleForTesting
     static OnItemClickedCallback<Integer> getMenuItemClickedCallback(
-            Activity activity,
             Supplier<TabModel> tabModelSupplier,
             TabGroupModelFilter tabGroupModelFilter,
-            ShareDelegate shareDelegate,
-            ActionConfirmationManager actionConfirmationManager,
-            ModalDialogManager modalDialogManager,
-            DataSharingTabManager dataSharingTabManager) {
+            TabGroupListBottomSheetCoordinator tabGroupListBottomSheetCoordinator,
+            Supplier<ShareDelegate> shareDelegateSupplier) {
         return (menuId, tabId, collaborationId) -> {
             if (tabId == Tab.INVALID_TAB_ID) return;
-            Tab tab = tabModelSupplier.get().getTabById(tabId);
+            TabModel tabModel = tabModelSupplier.get();
+            Tab tab = tabModel.getTabById(tabId);
             if (tab == null) return;
 
-            // TODO(crbug.com/397249431): Implement menu actions.
             if (menuId == R.id.add_to_tab_group) {
+                tabGroupListBottomSheetCoordinator.showBottomSheet(List.of(tab));
                 recordUserAction("AddToTabGroup");
             } else if (menuId == R.id.remove_from_tab_group) {
                 tabGroupModelFilter
@@ -137,9 +124,13 @@ public class TabContextMenuCoordinator extends TabOverflowMenuCoordinator<Intege
                         .ungroupTabs(List.of(tab), /* trailing= */ true, /* allowDialog= */ true);
                 recordUserAction("RemoveFromTabGroup");
             } else if (menuId == R.id.share_tab) {
-                shareDelegate.share(tab, /* shareDirectly= */ false, TAB_STRIP_CONTEXT_MENU);
+                shareDelegateSupplier
+                        .get()
+                        .share(tab, /* shareDirectly= */ false, TAB_STRIP_CONTEXT_MENU);
                 recordUserAction("ShareTab");
             } else if (menuId == R.id.close_tab) {
+                tabModel.getTabRemover()
+                        .closeTabs(TabClosureParams.closeTab(tab).build(), /* allowDialog= */ true);
                 recordUserAction("CloseTab");
             }
         };
@@ -169,7 +160,6 @@ public class TabContextMenuCoordinator extends TabOverflowMenuCoordinator<Intege
         var tab = mTabModelSupplier.get().getTabById(id);
         if (tab == null) return;
 
-        // TODO(crbug.com/398042939): Add items to the tab context menu under the correct conditions
         itemList.add(
                 BrowserUiListMenuUtils.buildMenuListItem(
                         R.string.add_tab_to_group, R.id.add_to_tab_group, /* startIconId= */ 0));

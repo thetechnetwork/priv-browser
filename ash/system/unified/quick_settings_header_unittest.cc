@@ -127,7 +127,7 @@ TEST_F(QuickSettingsHeaderTest, ShowChannelViewBeforeLoginOnNonStable) {
 
 TEST_F(QuickSettingsHeaderTest, ShowsChannelViewAfterLogin) {
   test_shell_delegate_->set_channel(version_info::Channel::BETA);
-  SimulateUserLogin("user@gmail.com");
+  SimulateUserLogin({"user@gmail.com"});
 
   CreateQuickSettingsHeader();
 
@@ -140,7 +140,7 @@ TEST_F(QuickSettingsHeaderTest, ShowsChannelViewAfterLogin) {
 
 TEST_F(QuickSettingsHeaderTest, EolNoticeVisible) {
   Shell::Get()->system_tray_model()->SetShowEolNotice(true);
-  SimulateUserLogin("user@gmail.com");
+  SimulateUserLogin({"user@gmail.com"});
 
   CreateQuickSettingsHeader();
   // Header is shown.
@@ -172,7 +172,7 @@ TEST_F(QuickSettingsHeaderTest, EolNoticeNotVisibleBeforeLogin) {
 
 TEST_F(QuickSettingsHeaderTest, ChannelIndicatorNotShownWithEolNotice) {
   test_shell_delegate_->set_channel(version_info::Channel::BETA);
-  SimulateUserLogin("user@gmail.com");
+  SimulateUserLogin({"user@gmail.com"});
 
   Shell::Get()->system_tray_model()->SetShowEolNotice(true);
 
@@ -190,7 +190,7 @@ TEST_F(QuickSettingsHeaderTest, ChannelIndicatorNotShownWithEolNotice) {
 
 TEST_F(QuickSettingsHeaderTest, ExtendedUpdatesNoticeVisible) {
   Shell::Get()->system_tray_model()->SetShowExtendedUpdatesNotice(true);
-  SimulateUserLogin("user@gmail.com");
+  SimulateUserLogin({"user@gmail.com"});
 
   base::HistogramTester histogram_tester;
   CreateQuickSettingsHeader();
@@ -232,7 +232,7 @@ TEST_F(QuickSettingsHeaderTest, ExtendedUpdatesNoticeNotVisibleBeforeLogin) {
 TEST_F(QuickSettingsHeaderTest,
        ChannelIndicatorNotShownWithExtendedUpdatesNotice) {
   test_shell_delegate_->set_channel(version_info::Channel::BETA);
-  SimulateUserLogin("user@gmail.com");
+  SimulateUserLogin({"user@gmail.com"});
 
   Shell::Get()->system_tray_model()->SetShowExtendedUpdatesNotice(true);
 
@@ -254,7 +254,7 @@ TEST_F(QuickSettingsHeaderTest,
 }
 
 TEST_F(QuickSettingsHeaderTest, ExtendedUpdatesNoticeNotShownWithEolNotice) {
-  SimulateUserLogin("user@gmail.com");
+  SimulateUserLogin({"user@gmail.com"});
 
   Shell::Get()->system_tray_model()->SetShowEolNotice(true);
   Shell::Get()->system_tray_model()->SetShowExtendedUpdatesNotice(true);
@@ -310,7 +310,7 @@ TEST_F(QuickSettingsHeaderTest, BothChannelAndEnterpriseVisible) {
   test_shell_delegate_->set_channel(version_info::Channel::BETA);
   GetEnterpriseDomainModel()->SetDeviceEnterpriseInfo(DeviceEnterpriseInfo{
       "example.com", ManagementDeviceMode::kChromeEnterprise});
-  SimulateUserLogin("user@gmail.com");
+  SimulateUserLogin({"user@gmail.com"});
 
   CreateQuickSettingsHeader();
 
@@ -327,7 +327,7 @@ TEST_F(QuickSettingsHeaderTest, BothEolNoticeAndEnterpriseVisible) {
   GetEnterpriseDomainModel()->SetDeviceEnterpriseInfo(DeviceEnterpriseInfo{
       "example.com", ManagementDeviceMode::kChromeEnterprise});
   Shell::Get()->system_tray_model()->SetShowEolNotice(true);
-  SimulateUserLogin("user@gmail.com");
+  SimulateUserLogin({"user@gmail.com"});
 
   CreateQuickSettingsHeader();
 
@@ -355,10 +355,8 @@ TEST_F(QuickSettingsHeaderTest, ChildVisible) {
 
   // Simulate supervised user logging in.
   SessionControllerImpl* session = Shell::Get()->session_controller();
-  TestSessionControllerClient* client = GetSessionControllerClient();
-  client->Reset();
-  client->AddUserSession("child@test.com", user_manager::UserType::kChild);
-  client->SetSessionState(session_manager::SessionState::ACTIVE);
+  ClearLogin();
+  SimulateUserLogin({"child@test.com", user_manager::UserType::kChild});
   UserSession user_session = *session->GetUserSession(0);
   user_session.custodian_email = "parent@test.com";
   session->UpdateUserSession(std::move(user_session));
@@ -384,9 +382,9 @@ TEST_F(QuickSettingsHeaderTest, ShowManagementDisclosure) {
       AuthEventsRecorder::CreateForTesting();
 
   // Setup to lock screen.
+  ClearLogin();
   TestSessionControllerClient* client = GetSessionControllerClient();
-  client->Reset();
-  GetSessionControllerClient()->set_show_lock_screen_views(true);
+  client->set_show_lock_screen_views(true);
   client->LockScreen();
   client->SetSessionState(session_manager::SessionState::LOCKED);
 
@@ -408,9 +406,9 @@ TEST_F(QuickSettingsHeaderTest, DoNotShowManagementDisclosure) {
       AuthEventsRecorder::CreateForTesting();
 
   // Setup to lock screen.
+  ClearLogin();
   TestSessionControllerClient* client = GetSessionControllerClient();
-  client->Reset();
-  GetSessionControllerClient()->set_show_lock_screen_views(true);
+  client->set_show_lock_screen_views(true);
   client->LockScreen();
   client->SetSessionState(session_manager::SessionState::LOCKED);
 

@@ -258,7 +258,10 @@ class CORE_EXPORT WebFrameWidgetImpl
   void GetCompositionCharacterBoundsInWindow(
       Vector<gfx::Rect>* bounds_in_dips) override;
   // Return the last calculated line bounds.
-  Vector<gfx::Rect>& GetVisibleLineBoundsOnScreen() override;
+  Vector<gfx::Rect>& GetVisibleLineBoundsOnScreenForTesting();
+  bool HasImeRenderWidgetHost() const override {
+    return !!ime_render_widget_host_;
+  }
   void UpdateLineBounds() override;
   void UpdateCursorAnchorInfo() override;
   gfx::Range CompositionRange() override;
@@ -552,6 +555,8 @@ class CORE_EXPORT WebFrameWidgetImpl
                              cc::PaintHoldingReason reason);
   // Immediately stop deferring commits.
   void StopDeferringCommits(cc::PaintHoldingCommitTrigger);
+
+  void SetShouldThrottleFrameRate(bool flag);
 
   // Pause all rendering (main and compositor thread) in the compositor.
   [[nodiscard]] std::unique_ptr<cc::ScopedPauseRendering> PauseRendering();
@@ -913,6 +918,13 @@ class CORE_EXPORT WebFrameWidgetImpl
   void WaitForPageScaleAnimationForTesting(
       WaitForPageScaleAnimationForTestingCallback callback) override;
   void MoveCaret(const gfx::Point& point_in_dips) override;
+
+#if BUILDFLAG(IS_IOS)
+  void StartAutoscrollForSelectionToPoint(
+      const gfx::PointF& point_in_dips) override;
+  void StopAutoscroll() override;
+#endif  // BUILDFLAG(IS_IOS)
+
   void SelectAroundCaret(mojom::blink::SelectionGranularity granularity,
                          bool should_show_handle,
                          bool should_show_context_menu,
@@ -1143,11 +1155,9 @@ class CORE_EXPORT WebFrameWidgetImpl
   HeapMojoReceiverSet<viz::mojom::blink::InputTargetClient, WebFrameWidgetImpl>
       input_target_receivers_;
 
-#if BUILDFLAG(IS_ANDROID)
   // WebFrameWidgetImpl is not tied to ExecutionContext
   HeapMojoRemote<mojom::blink::ImeRenderWidgetHost> ime_render_widget_host_{
       nullptr};
-#endif
 
   // Different consumers in the browser process makes different assumptions, so
   // must always send the first IPC regardless of value.
@@ -1271,6 +1281,8 @@ class CORE_EXPORT WebFrameWidgetImpl
 
   double zoom_level_ = 0;
   double css_zoom_factor_ = 1;
+
+  bool throttling_frame_rate_ = false;
 };
 
 }  // namespace blink

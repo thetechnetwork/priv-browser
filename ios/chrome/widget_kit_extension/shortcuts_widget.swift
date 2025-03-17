@@ -51,7 +51,7 @@ struct ConfigureShortcutsWidgetEntryProvider: TimelineProvider {
     in context: TimelineProviderContext,
     completion: @escaping (Entry) -> Void
   ) {
-    let entry = loadMostVisitedSitesEntry(isPreview: context.isPreview, gaia: "")
+    let entry = loadMostVisitedSitesEntry(isPreview: context.isPreview, gaia: nil)
     completion(entry)
   }
 
@@ -60,7 +60,7 @@ struct ConfigureShortcutsWidgetEntryProvider: TimelineProvider {
     in context: TimelineProviderContext,
     completion: @escaping (Timeline<Entry>) -> Void
   ) {
-    let entry = loadMostVisitedSitesEntry(isPreview: context.isPreview, gaia: "")
+    let entry = loadMostVisitedSitesEntry(isPreview: context.isPreview, gaia: nil)
     let entries = [entry]
     let timeline = Timeline(
       entries: entries, policy: entry.expirationDate.map { .after($0) } ?? .never)
@@ -144,8 +144,8 @@ struct ShortcutsWidget: Widget {
     // Provides a timeline entry that represents the current time and state of a widget.
     func snapshot(for configuration: SelectProfileIntent, in context: Context) async -> Entry {
 
-      let avatar: Image? = configuration.avatarForAccount(account: configuration.profile)
-      let gaiaID: String? = configuration.gaiaForAccount(account: configuration.profile)
+      let avatar: Image? = configuration.avatar()
+      let gaiaID: String? = configuration.gaia()
       let entry = loadMostVisitedSitesEntry(
         isPreview: context.isPreview, avatar: avatar, gaia: gaiaID)
       return entry
@@ -155,8 +155,8 @@ struct ShortcutsWidget: Widget {
     func timeline(for configuration: SelectProfileIntent, in context: Context) async -> Timeline<
       Entry
     > {
-      let avatar: Image? = configuration.avatarForAccount(account: configuration.profile)
-      let gaiaID: String? = configuration.gaiaForAccount(account: configuration.profile)
+      let avatar: Image? = configuration.avatar()
+      let gaiaID: String? = configuration.gaia()
       let entry = loadMostVisitedSitesEntry(
         isPreview: context.isPreview, avatar: avatar, gaia: gaiaID)
       let entries = [entry]

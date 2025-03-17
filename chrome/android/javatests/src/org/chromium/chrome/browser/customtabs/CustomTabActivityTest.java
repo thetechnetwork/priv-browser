@@ -117,6 +117,7 @@ import org.chromium.base.test.util.DisableIf;
 import org.chromium.base.test.util.DisabledTest;
 import org.chromium.base.test.util.DoNotBatch;
 import org.chromium.base.test.util.Feature;
+import org.chromium.base.test.util.Features;
 import org.chromium.base.test.util.Features.EnableFeatures;
 import org.chromium.base.test.util.HistogramWatcher;
 import org.chromium.base.test.util.MinAndroidSdkLevel;
@@ -213,6 +214,7 @@ import java.util.function.Consumer;
         reason =
                 "Some tests are Testing CCT start up behavior. "
                         + "Unit test conversion tracked in crbug.com/1217031")
+@Features.DisableFeatures({ChromeFeatureList.EDGE_TO_EDGE_EVERYWHERE})
 public class CustomTabActivityTest {
     private static final int TIMEOUT_PAGE_LOAD_SECONDS = 10;
     private static final String TEST_PACKAGE = "org.chromium.chrome.tests";
@@ -2943,6 +2945,10 @@ public class CustomTabActivityTest {
     @Test
     @MediumTest
     public void omniboxInCct_testNonInteractiveOmniboxWhenIntentNotEligible() {
+        // TODO: Find a better way to test omnibox interactivity because titleBar is going to have
+        // a click listener to show page info.
+        if (ChromeFeatureList.sCctNestedSecurityIcon.isEnabled()) return;
+
         // By default, omnibox in CCT is not permitted and no stubbing is necessary.
         Intent intent = createMinimalCustomTabIntent();
         mCustomTabActivityTestRule.startCustomTabActivityWithIntent(intent);

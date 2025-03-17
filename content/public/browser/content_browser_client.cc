@@ -51,6 +51,7 @@
 #include "content/public/browser/tracing_delegate.h"
 #include "content/public/browser/url_loader_request_interceptor.h"
 #include "content/public/browser/vpn_service_proxy.h"
+#include "content/public/browser/web_authentication_delegate.h"
 #include "content/public/browser/web_contents.h"
 #include "content/public/browser/web_contents_view_delegate.h"
 #include "content/public/common/alternative_error_page_override_info.mojom.h"
@@ -96,7 +97,6 @@
 #include "content/public/browser/tts_environment_android.h"
 #else
 #include "content/public/browser/authenticator_request_client_delegate.h"
-#include "content/public/browser/web_authentication_delegate.h"
 #include "third_party/blink/public/mojom/installedapp/related_application.mojom.h"
 #endif
 
@@ -720,6 +720,16 @@ std::string ContentBrowserClient::GetWebUIHostnameForCodeCacheMetrics(
   return std::string();
 }
 
+bool ContentBrowserClient::IsWebUIBundledCodeCachingEnabled(
+    const GURL& webui_lock_url) const {
+  return false;
+}
+
+base::flat_map<GURL, int>
+ContentBrowserClient::GetWebUIResourceUrlToCodeCacheMap() const {
+  return base::flat_map<GURL, int>();
+}
+
 void ContentBrowserClient::AllowCertificateError(
     WebContents* web_contents,
     int cert_error,
@@ -1278,13 +1288,13 @@ bool ContentBrowserClient::IsSecurityLevelAcceptableForWebAuthn(
   return true;
 }
 
-#if !BUILDFLAG(IS_ANDROID)
 WebAuthenticationDelegate*
 ContentBrowserClient::GetWebAuthenticationDelegate() {
   static base::NoDestructor<WebAuthenticationDelegate> delegate;
   return delegate.get();
 }
 
+#if !BUILDFLAG(IS_ANDROID)
 std::unique_ptr<AuthenticatorRequestClientDelegate>
 ContentBrowserClient::GetWebAuthenticationRequestDelegate(
     RenderFrameHost* render_frame_host) {
@@ -1928,6 +1938,10 @@ std::optional<network::CrossOriginEmbedderPolicy>
 ContentBrowserClient::MaybeOverrideLocalURLCrossOriginEmbedderPolicy(
     content::NavigationHandle* navigation_handle) {
   return std::nullopt;
+}
+
+bool ContentBrowserClient::ShouldEnableSubframeZoom() {
+  return false;
 }
 
 }  // namespace content

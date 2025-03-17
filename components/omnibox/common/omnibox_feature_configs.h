@@ -186,6 +186,29 @@ struct SearchAggregatorProvider : Config<SearchAggregatorProvider> {
   int min_query_length;
   // If true, the response will be parsed in a utility process.
   bool parse_response_in_utility_process;
+  // If true, the newer Discovery Engine OAuth scope will be used in suggestions
+  // requests.
+  bool use_discovery_engine_oauth_scope;
+  // If true, doc provider won't run outside the drive scope. If false, doc
+  // provider will run unscoped. Either way, doc provider won't run when in the
+  // enterprise scope.
+  bool disable_drive;
+
+  // See comments in enterprise_search_aggregator_provider.cc
+  size_t scoring_max_matches_created_per_type;
+  size_t scoring_max_scoped_matches_shown_per_type;
+  size_t scoring_max_unscoped_matches_shown_per_type;
+  size_t scoring_min_char_for_strong_text_match;
+  size_t scoring_min_words_for_full_text_match_boost;
+  int scoring_full_text_match_score;
+  int scoring_score_per_strong_text_match;
+  int scoring_score_per_weak_text_match;
+  int scoring_max_text_score;
+  int scoring_people_score_boost;
+  bool scoring_prefer_contents_over_queries;
+  size_t scoring_scoped_max_low_quality_matches;
+  size_t scoring_unscoped_max_low_quality_matches;
+  int scoring_low_quality_threshold;
 
  private:
   // Utility methods and members for setting up a mock search engine via Finch.
@@ -221,6 +244,19 @@ struct SuggestionAnswerMigration : Config<SuggestionAnswerMigration> {
   DECLARE_FEATURE(kOmniboxSuggestionAnswerMigration);
   SuggestionAnswerMigration();
   bool enabled;
+};
+
+// Enables url suggestions when omnibox is focused on Web/SRP.
+struct OmniboxUrlSuggestionsOnFocus : Config<OmniboxUrlSuggestionsOnFocus> {
+  DECLARE_FEATURE(kOmniboxUrlSuggestionsOnFocus);
+  OmniboxUrlSuggestionsOnFocus();
+  bool enabled;
+  // Max number of zps suggestions to show.
+  size_t max_suggestions;
+  // Max number of search zps suggestions to show.
+  size_t max_search_suggestions;
+  // Max number of url zps suggestions to show.
+  size_t max_url_suggestions;
 };
 
 // Do not add new configs here at the bottom by default. They should be ordered

@@ -10,7 +10,6 @@
 
 #include "ash/public/cpp/app_types_util.h"
 #include "ash/public/cpp/window_properties.h"
-#include "ash/session/session_controller_impl.h"
 #include "ash/shelf/shelf_window_watcher.h"
 #include "ash/shell.h"
 #include "base/memory/raw_ptr.h"
@@ -37,7 +36,18 @@ using DemoModeApp = DemoSessionMetricsRecorder::DemoModeApp;
 
 using ExitSessionFrom = DemoSessionMetricsRecorder::ExitSessionFrom;
 
+using SessionType = DemoSessionMetricsRecorder::SessionType;
+
 DemoSessionMetricsRecorder* g_demo_session_metrics_recorder = nullptr;
+
+// It is reset to this default value every session, and DemoLoginController will
+// set it to the other session type if needed.
+//
+// We keep it as a global variable instead of owning by
+// DemoSessionMetricsRecorder, because DemoSessionMetricsRecorder is not
+// initiated yet when DemoLoginController is setting its value before entering
+// the session.
+SessionType current_session_type = SessionType::kClassicMGS;
 
 // How often to sample.
 constexpr auto kSamplePeriod = base::Seconds(1);
@@ -51,6 +61,8 @@ constexpr char kHelpAppId[] = "nbljnnecbjbmifnoehiemkgefbnpoeak";
 
 constexpr char kDemoModeSignedInShopperDwellTime[] =
     "DemoMode.SignedIn.Shopper.DwellTime";
+constexpr char kDemoModeSignedInMGSFallbackShopperDwellTime[] =
+    "DemoMode.SignedIn.MGSFallback.Shopper.DwellTime";
 
 constexpr char kSetupDemoAccountRequestResult[] =
     "DemoMode.SignedIn.Request.SetupResult";
@@ -451,12 +463,7 @@ void DemoSessionMetricsRecorder::RecordExitSessionAction(
       GetExitSessionActionName(recorded_from, false);
   base::RecordAction(base::UserMetricsAction(action_name.c_str()));
 
-  // Check if the current session is signed-in (a regular user). Signed-in
-  // sessions have a regular user account and a better demo experience, whereas
-  // tranditional demo mode is a managed guest session.
-  std::optional<user_manager::UserType> user_type =
-      Shell::Get()->session_controller()->GetUserType();
-  if (user_type && *user_type == user_manager::UserType::kRegular) {
+  if (current_session_type == SessionType::kSignedInDemoSession) {
     // Record signed-in session related action.
     const std::string signed_in_action_name =
         GetExitSessionActionName(recorded_from, true);
@@ -467,6 +474,29 @@ void DemoSessionMetricsRecorder::RecordExitSessionAction(
 // static
 DemoSessionMetricsRecorder* DemoSessionMetricsRecorder::Get() {
   return g_demo_session_metrics_recorder;
+}
+
+// static
+void DemoSessionMetricsRecorder::ReportDemoAccountSetupResult(
+    DemoAccountRequestResultCode result_code) {
+  base::UmaHistogramEnumeration(kSetupDemoAccountRequestResult, result_code);
+}
+
+// static
+void DemoSessionMetricsRecorder::ReportDemoAccountCleanupResult(
+    DemoAccountRequestResultCode result_code) {
+  base::UmaHistogramEnumeration(kCleanupDemoAccountRequestResult, result_code);
+}
+
+// static
+void DemoSessionMetricsRecorder::SetCurrentSessionType(
+    SessionType session_type) {
+  current_session_type = session_type;
+}
+
+// static
+SessionType DemoSessionMetricsRecorder::GetCurrentSessionTypeForTesting() {
+  return current_session_type;
 }
 
 DemoSessionMetricsRecorder::DemoSessionMetricsRecorder(
@@ -631,34 +661,25 @@ void DemoSessionMetricsRecorder::OnTouchEvent(ui::TouchEvent* event) {
 }
 
 void DemoSessionMetricsRecorder::ReportShopperSessionDwellTime() {
-  std::optional<user_manager::UserType> user_type =
-      Shell::Get()->session_controller()->GetUserType();
-  // Check if the current session is signed-in (a regular user).
-  // TODO: Instead of checking the user type, we should have a flag here set
-  // from DemoLoginController to tell if it's a signed-in session.
-  if (user_type && *user_type == user_manager::UserType::kRegular) {
-    if (!shopper_session_first_user_activity_.is_null()) {
-      DCHECK(!last_user_activity_.is_null());
-      DCHECK_LE(shopper_session_first_user_activity_, last_user_activity_);
-
-      base::TimeDelta dwell_time =
-          last_user_activity_ - shopper_session_first_user_activity_;
-      ReportHistogramLongSecondsTimes100(kDemoModeSignedInShopperDwellTime,
-                                         dwell_time);
-    }
-    shopper_session_first_user_activity_ = base::TimeTicks();
+  if (shopper_session_first_user_activity_.is_null()) {
+    return;
   }
+  if (current_session_type == SessionType::kSignedInDemoSession ||
+      current_session_type == SessionType::kFallbackMGS) {
+    DCHECK(!last_user_activity_.is_null());
+    DCHECK_LE(shopper_session_first_user_activity_, last_user_activity_);
+
+    base::TimeDelta dwell_time =
+        last_user_activity_ - shopper_session_first_user_activity_;
+    ReportHistogramLongSecondsTimes100(
+        current_session_type == SessionType::kSignedInDemoSession
+            ? kDemoModeSignedInShopperDwellTime
+            : kDemoModeSignedInMGSFallbackShopperDwellTime,
+        dwell_time);
+  }
+  shopper_session_first_user_activity_ = base::TimeTicks();
 }
 
-void DemoSessionMetricsRecorder::ReportDemoAccountSetupResult(
-    DemoAccountRequestResultCode result_code) {
-  base::UmaHistogramEnumeration(kSetupDemoAccountRequestResult, result_code);
-}
-
-void DemoSessionMetricsRecorder::ReportDemoAccountCleanupResult(
-    DemoAccountRequestResultCode result_code) {
-  base::UmaHistogramEnumeration(kCleanupDemoAccountRequestResult, result_code);
-}
 void DemoSessionMetricsRecorder::OnAppCreation(
     const std::string& app_id_or_package,
     const bool is_arc_app) {

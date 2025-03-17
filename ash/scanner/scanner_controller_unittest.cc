@@ -426,7 +426,6 @@ TEST(ScannerControllerNoFixtureTest,
 
 TEST_F(ScannerControllerTest,
        CanShowUiFalseWhenEnterprisePolicyDisallowedMetrics) {
-  base::HistogramTester histogram_tester;
   ScannerController* scanner_controller = Shell::Get()->scanner_controller();
   ASSERT_TRUE(scanner_controller);
   EXPECT_CALL(*GetFakeScannerProfileScopedDelegate(*scanner_controller),
@@ -435,6 +434,9 @@ TEST_F(ScannerControllerTest,
   Shell::Get()->session_controller()->GetActivePrefService()->SetInteger(
       prefs::kScannerEnterprisePolicyAllowed,
       static_cast<int>(ScannerEnterprisePolicy::kDisallowed));
+  // This must be after setting the preference, as some preference observers
+  // like `SunfishScannerFeatureWatcher` may automatically call `CanShowUi`.
+  base::HistogramTester histogram_tester;
 
   ASSERT_FALSE(scanner_controller->CanShowUi());
 
@@ -756,14 +758,14 @@ TEST_F(ScannerControllerTest, NoActionsFetchedWhenNoActiveSession) {
 }
 
 TEST_F(ScannerControllerTest, ResetsScannerSessionWhenActiveUserChanges) {
-  SimulateUserLogin("user1@gmail.com");
+  SimulateUserLogin({"user1@gmail.com"});
   ScannerController* scanner_controller = Shell::Get()->scanner_controller();
   ASSERT_TRUE(scanner_controller);
   EXPECT_TRUE(scanner_controller->StartNewSession());
   EXPECT_TRUE(scanner_controller->HasActiveSessionForTesting());
 
   // Switch to a different user.
-  SimulateUserLogin("user2@gmail.com");
+  SimulateUserLogin({"user2@gmail.com"});
 
   EXPECT_FALSE(scanner_controller->HasActiveSessionForTesting());
 }
@@ -919,6 +921,53 @@ TEST_F(ScannerControllerTest, ActionSuccessToastButtonOpensFeedbackDialog) {
         unused_send_feedback_callback] = feedback_info_future.Take();
   EXPECT_EQ(feedback_dialog_info.action_details,
             "copy_to_clipboard.html_text: <b>Hello</b>\n");
+}
+
+TEST_F(ScannerControllerTest, ActionSuccessToastButtonEmitsMetric) {
+  base::HistogramTester histogram_tester;
+  base::test::TestFuture<ScannerSession::FetchActionsResponse> actions_future;
+  ScannerController* scanner_controller = Shell::Get()->scanner_controller();
+  ASSERT_TRUE(scanner_controller);
+  EXPECT_TRUE(scanner_controller->StartNewSession());
+  manta::proto::ScannerOutput output;
+  output.add_objects()
+      ->add_actions()
+      ->mutable_copy_to_clipboard()
+      ->set_html_text("<b>Hello</b>");
+  FakeScannerProfileScopedDelegate& fake_profile_scoped_delegate =
+      *GetFakeScannerProfileScopedDelegate(*scanner_controller);
+  // Mock a successful action.
+  EXPECT_CALL(fake_profile_scoped_delegate, FetchActionsForImage)
+      .WillOnce(RunOnceCallback<1>(
+          std::make_unique<manta::proto::ScannerOutput>(output),
+          manta::MantaStatus()));
+  EXPECT_CALL(fake_profile_scoped_delegate, FetchActionDetailsForImage)
+      .WillOnce(RunOnceCallback<2>(
+          std::make_unique<manta::proto::ScannerOutput>(output),
+          manta::MantaStatus{.status_code = manta::MantaStatusCode::kOk}));
+
+  // Fetch an action and execute it.
+  scanner_controller->FetchActionsForImage(/*jpeg_bytes=*/nullptr,
+                                           actions_future.GetCallback());
+  ScannerSession::FetchActionsResponse actions = actions_future.Take();
+  ASSERT_THAT(actions, ValueIs(SizeIs(1)));
+  scanner_controller->ExecuteAction(actions.value()[0]);
+
+  ASSERT_TRUE(ToastManager::Get()->IsToastShown(kScannerActionSuccessToastId));
+  ToastOverlay* toast_overlay =
+      Shell::Get()->toast_manager()->GetCurrentOverlayForTesting();
+  ASSERT_TRUE(toast_overlay);
+  views::Button* feedback_button = toast_overlay->button_for_testing();
+  ASSERT_TRUE(feedback_button);
+
+  histogram_tester.ExpectBucketCount(
+      "Ash.ScannerFeature.UserState",
+      ScannerFeatureUserState::kFeedbackFormOpened, 0);
+  LeftClickOn(feedback_button);
+
+  histogram_tester.ExpectBucketCount(
+      "Ash.ScannerFeature.UserState",
+      ScannerFeatureUserState::kFeedbackFormOpened, 1);
 }
 
 TEST_F(
@@ -1099,6 +1148,37 @@ TEST_F(ScannerControllerTest, OpenFeedbackDialogCallbackSendsFeedback) {
 }
 
 TEST_F(ScannerControllerTest,
+       OpenFeedbackDialogSendFeedbackCallbackSendsMetric) {
+  base::HistogramTester histogram_tester;
+  ScannerController* scanner_controller = Shell::Get()->scanner_controller();
+  ASSERT_TRUE(scanner_controller);
+  FakeScannerDelegate& fake_scanner_delegate =
+      *GetFakeScannerDelegate(*scanner_controller);
+  base::test::TestFuture<const AccountId&, ScannerFeedbackInfo,
+                         ScannerDelegate::SendFeedbackCallback>
+      feedback_info_future;
+  fake_scanner_delegate.SetOpenFeedbackDialogCallback(
+      feedback_info_future.GetRepeatingCallback());
+  EXPECT_CALL(mock_send_specialized_feature_feedback(), Run);
+  manta::proto::ScannerAction action;
+  action.mutable_copy_to_clipboard()->set_html_text("<b>Hello</b>");
+
+  scanner_controller->OpenFeedbackDialog(
+      Shell::Get()->session_controller()->GetActiveAccountId(),
+      std::move(action),
+      /*screenshot=*/base::MakeRefCounted<base::RefCountedString>("testimage"));
+  auto [unused_account_id, feedback_dialog_info, send_feedback_callback] =
+      feedback_info_future.Take();
+  histogram_tester.ExpectBucketCount("Ash.ScannerFeature.UserState",
+                                     ScannerFeatureUserState::kFeedbackSent, 0);
+  std::move(send_feedback_callback)
+      .Run(std::move(feedback_dialog_info), "feedback");
+
+  histogram_tester.ExpectBucketCount("Ash.ScannerFeature.UserState",
+                                     ScannerFeatureUserState::kFeedbackSent, 1);
+}
+
+TEST_F(ScannerControllerTest,
        OpenFeedbackDialogCallbackSendsFeedbackWithOriginalAccount) {
   ScannerController* scanner_controller = Shell::Get()->scanner_controller();
   ASSERT_TRUE(scanner_controller);
@@ -1128,9 +1208,7 @@ TEST_F(ScannerControllerTest,
             original_account);
   AccountId new_account =
       AccountId::FromUserEmailGaiaId("user@test.com", GaiaId("fakegaia"));
-  GetSessionControllerClient()->AddUserSession(
-      new_account, /*display_email=*/account_id.GetUserEmail());
-  GetSessionControllerClient()->SwitchActiveUser(new_account);
+  SimulateUserLogin(new_account);
   ASSERT_NE(Shell::Get()->session_controller()->GetActiveAccountId(),
             original_account);
   std::move(send_feedback_callback)

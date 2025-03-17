@@ -285,6 +285,7 @@ UseCounterMetricsRecorder::GetAllowedUkmFeatures() {
           WebFeature::kSharedStorageAPI_SharedStorage_DOMReference,
           WebFeature::kSharedStorageAPI_Run_Method,
           WebFeature::kSharedStorageAPI_SelectURL_Method,
+          WebFeature::kSharedStorageAPI_SelectURL_Method_CalledWithOneURL,
           WebFeature::kTopicsAPI_BrowsingTopics_Method,
           WebFeature::kHTMLFencedFrameElement,
           WebFeature::kAuthorizationCrossOrigin,
@@ -421,9 +422,6 @@ UseCounterMetricsRecorder::GetAllowedUkmFeatures() {
           WebFeature::kAdScriptInStackOnMicrophoneRead,
           WebFeature::kAdScriptInStackOnCameraRead,
           WebFeature::kUpgradeInsecureRequestsUpgradedRequestBlockable,
-          WebFeature::kV8LanguageTranslator_Translate_Method,
-          WebFeature::kV8Translation_CanTranslate_Method,
-          WebFeature::kV8Translation_CreateTranslator_Method,
           WebFeature::kV8AISummarizer_Summarize_Method,
           WebFeature::kV8AISummarizer_SummarizeStreaming_Method,
           WebFeature::kV8AISummarizerFactory_Create_Method,
@@ -458,6 +456,10 @@ UseCounterMetricsRecorder::GetAllowedUkmFeatures() {
           WebFeature::kGeolocationWouldSucceedWhenAdScriptInStack,
           WebFeature::kAdScriptInStackOnWatchGeoLocation,
           WebFeature::kCrossPartitionSameOriginBlobURLFetch,
+          WebFeature::kCSPBlockedWorkerCreation,
+          WebFeature::kCrossOriginOwnerInterestGroupSubframeCheckFailed,
+          WebFeature::kV8Navigator_LeaveAdInterestGroup_Method,
+          WebFeature::kV8Navigator_ClearOriginJoinedAdInterestGroups_Method,
       }));
   return *opt_in_features;
 }

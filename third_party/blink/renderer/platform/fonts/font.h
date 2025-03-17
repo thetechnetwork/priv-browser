@@ -37,6 +37,8 @@
 #include "third_party/blink/renderer/platform/text/text_direction.h"
 #include "third_party/blink/renderer/platform/wtf/allocator/allocator.h"
 #include "third_party/blink/renderer/platform/wtf/cross_thread_copier.h"
+#include "third_party/blink/renderer/platform/wtf/text/character_names.h"
+#include "third_party/blink/renderer/platform/wtf/text/wtf_uchar.h"
 
 // To avoid conflicts with the DrawText macro from the Windows SDK...
 #undef DrawText
@@ -182,6 +184,12 @@ class PLATFORM_EXPORT Font : public GarbageCollected<Font> {
   // when, for whatever reason, the last resort font cannot be loaded.
   const SimpleFontData* PrimaryFont() const;
 
+  // Returns the primary font that contains the digit zero glyph.
+  const SimpleFontData* PrimaryFontWithDigitZero() const;
+
+  // Returns the primary font that contains the CJK water glyph.
+  const SimpleFontData* PrimaryFontWithCjkWater() const;
+
   // Returns a list of font features for this `FontDescription`. The returned
   // list is common for all `SimpleFontData` for `this`.
   base::span<const FontFeatureRange> GetFontFeatures() const;
@@ -248,17 +256,31 @@ class PLATFORM_EXPORT Font : public GarbageCollected<Font> {
     return EnsureFontFallbackList()->HasCustomFont();
   }
 
- private:
   // TODO(xiaochengh): The function not only initializes null FontFallbackList,
   // but also syncs invalid FontFallbackList. Rename it for better readability.
   FontFallbackList* EnsureFontFallbackList() const;
 
+ private:
   FontDescription font_description_;
   mutable Member<FontFallbackList> font_fallback_list_;
 };
 
+// Uses space as lookup character.
 inline const SimpleFontData* Font::PrimaryFont() const {
-  return EnsureFontFallbackList()->PrimarySimpleFontData(font_description_);
+  return EnsureFontFallbackList()->PrimarySimpleFontDataWithSpace(
+      font_description_);
+}
+
+// Uses digit zero as lookup character.
+inline const SimpleFontData* Font::PrimaryFontWithDigitZero() const {
+  return EnsureFontFallbackList()->PrimarySimpleFontDataWithDigitZero(
+      font_description_);
+}
+
+// Uses CJK water as lookup character.
+inline const SimpleFontData* Font::PrimaryFontWithCjkWater() const {
+  return EnsureFontFallbackList()->PrimarySimpleFontDataWithCjkWater(
+      font_description_);
 }
 
 inline FontSelector* Font::GetFontSelector() const {

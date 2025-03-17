@@ -6,6 +6,8 @@
 // that callbacks are correctly invoked, expected parameters are correct,
 // and failures are detected.
 
+const AttributeTypeDataType = chrome.autofillPrivate.AttributeTypeDataType;
+
 // Constants for the tests.
 var FIRST_NAME = 'Firstname';
 var LAST_NAME = 'Lastname';
@@ -35,19 +37,26 @@ var INVALID_IBAN_VALUE = 'AD14000800010012345678900';
 var ENTITY_INSTANCE = {
   type: {
     typeName: 2,
-    typeNameAsString: 'Car',
-    addEntityString: 'Add car',
-    editEntityString: 'Edit car',
+    typeNameAsString: 'Vehicle',
+    addEntityTypeString: 'Add vehicle',
+    editEntityTypeString: 'Edit vehicle',
   },
-  attributes: [
-    {type: {typeName: 9, typeNameAsString: 'License plate'}, value: 'ABCDE'},
-    {type: {typeName: 11, typeNameAsString: 'Make'}, value: 'Toyota'},
+  attributeInstances: [
+    {
+      type: {
+        typeName: 14,
+        typeNameAsString: 'License plate',
+        dataType: AttributeTypeDataType.STRING,
+      },
+      value: 'ABCDE',
+    },
   ],
   guid: GUID,
-  nickname: 'Personal car'
+  nickname: 'Personal car',
 };
 
-var UPDATED_ENTITY_INSTANCE = {...ENTITY_INSTANCE, nickname: 'Work car'};
+var UPDATED_ENTITY_INSTANCE = structuredClone(ENTITY_INSTANCE);
+UPDATED_ENTITY_INSTANCE.attributeInstances[0].value = 'XYZ';
 
 var failOnceCalled = function() {
   chrome.test.fail();
@@ -186,8 +195,8 @@ function updateCreditCardForCvc(updatedCvcValue) {
 function entityInstaceToEntityInstanceWithLabels(entityInstance) {
   return ({
     guid: entityInstance.guid,
-    entityLabel: entityInstance.attributes[0].value,
-    entitySubLabel: entityInstance.type.typeNameAsString,
+    entityInstanceLabel: entityInstance.attributeInstances[0].value,
+    entityInstanceSubLabel: entityInstance.type.typeNameAsString,
   });
 };
 
@@ -227,7 +236,7 @@ var availableTests = [
     };
 
     chrome.autofillPrivate.getCountryList(
-        /*forAccountAddressProfile=*/ false, handler);
+        /*forAccountStorage=*/ false, handler);
   },
 
   function getAddressComponents() {
@@ -832,39 +841,6 @@ var availableTests = [
     chrome.test.succeed();
   },
 
-  function deleteAllUserAnnotationsEntries() {
-    chrome.autofillPrivate.deleteAllUserAnnotationsEntries();
-    chrome.test.assertNoLastError();
-    chrome.test.succeed();
-  },
-
-
-  function deleteUserAnnotationsEntry() {
-    chrome.autofillPrivate.deleteUserAnnotationsEntry(123);
-    chrome.test.assertNoLastError();
-    chrome.test.succeed();
-  },
-
-  function getUserAnnotationsEntries() {
-    chrome.autofillPrivate.getUserAnnotationsEntries();
-    chrome.test.assertNoLastError();
-    chrome.test.succeed();
-  },
-
-  function hasUserAnnotationsEntries_NoEntries() {
-    chrome.autofillPrivate.hasUserAnnotationsEntries(function(hasEntries) {
-      chrome.test.assertFalse(hasEntries, 'Expected no entries');
-      chrome.test.succeed();
-    });
-  },
-
-  function hasUserAnnotationsEntries_WithEntries() {
-    chrome.autofillPrivate.hasUserAnnotationsEntries(function(hasEntries) {
-      chrome.test.assertTrue(hasEntries, 'Expected entries to exist');
-      chrome.test.succeed();
-    });
-  },
-
   function isUserEligibleForAutofillImprovements() {
     chrome.autofillPrivate.isUserEligibleForAutofillImprovements(function(
         isEligible) {
@@ -918,19 +894,35 @@ var availableTests = [
   },
 
   async function addEntityInstance() {
-    await chrome.autofillPrivate.addOrUpdateEntityInstance(ENTITY_INSTANCE);
-    chrome.test.succeed();
+    chrome.test.listenOnce(
+        chrome.autofillPrivate.onEntityInstancesChanged,
+        chrome.test.callbackPass(function(entityInstancesWithLabelsList) {
+          chrome.test.assertEq(
+              [entityInstaceToEntityInstanceWithLabels(ENTITY_INSTANCE)],
+              entityInstancesWithLabelsList);
+        }));
+    chrome.autofillPrivate.addOrUpdateEntityInstance(ENTITY_INSTANCE);
   },
 
   async function updateEntityInstance() {
-    await chrome.autofillPrivate.addOrUpdateEntityInstance(
-        UPDATED_ENTITY_INSTANCE);
-    chrome.test.succeed();
+    chrome.test.listenOnce(
+        chrome.autofillPrivate.onEntityInstancesChanged,
+        chrome.test.callbackPass(function(entityInstancesWithLabelsList) {
+          chrome.test.assertEq(
+              [entityInstaceToEntityInstanceWithLabels(
+                  UPDATED_ENTITY_INSTANCE)],
+              entityInstancesWithLabelsList);
+        }));
+    chrome.autofillPrivate.addOrUpdateEntityInstance(UPDATED_ENTITY_INSTANCE);
   },
 
   async function removeEntityInstance() {
-    await chrome.autofillPrivate.removeEntityInstance(GUID);
-    chrome.test.succeed();
+    chrome.test.listenOnce(
+        chrome.autofillPrivate.onEntityInstancesChanged,
+        chrome.test.callbackPass(function(entityInstancesWithLabelsList) {
+          chrome.test.assertEq([], entityInstancesWithLabelsList);
+        }));
+    chrome.autofillPrivate.removeEntityInstance(GUID);
   },
 
   async function loadEmptyEntityInstancesList() {
@@ -971,26 +963,20 @@ var availableTests = [
       {
         typeName: 0,
         typeNameAsString: 'Passport',
-        addEntityString: 'Add passport',
-        editEntityString: 'Edit passport'
+        addEntityTypeString: 'Add passport',
+        editEntityTypeString: 'Edit passport'
       },
       {
         typeName: 1,
-        typeNameAsString: 'Loyalty card',
-        addEntityString: 'Add loyalty card',
-        editEntityString: 'Edit loyalty card'
+        typeNameAsString: 'Driver\'s license',
+        addEntityTypeString: 'Add driver\'s license',
+        editEntityTypeString: 'Edit driver\'s license'
       },
       {
         typeName: 2,
-        typeNameAsString: 'Car',
-        addEntityString: 'Add car',
-        editEntityString: 'Edit car'
-      },
-      {
-        typeName: 3,
-        typeNameAsString: 'Driver\'s license',
-        addEntityString: 'Add driver\'s license',
-        editEntityString: 'Edit driver\'s license'
+        typeNameAsString: 'Vehicle',
+        addEntityTypeString: 'Add vehicle',
+        editEntityTypeString: 'Edit vehicle'
       },
     ];
     for (const index in expectedEntityTypesList) {
@@ -1000,18 +986,45 @@ var availableTests = [
     chrome.test.succeed();
   },
 
-  async function getAllAttributeTypesForEntity() {
+  async function getAllAttributeTypesForEntityTypeName() {
     const attributeTypesList =
-        await chrome.autofillPrivate.getAllAttributeTypesForEntity(
-            /*entityTypeName=*/ 3);
+        await chrome.autofillPrivate.getAllAttributeTypesForEntityTypeName(
+            /*entityTypeName=*/ 1);
     const expectedAttributeTypesList = [
-      {typeName: 13, typeNameAsString: 'Name'},
-      {typeName: 14, typeNameAsString: 'Region'},
-      {typeName: 15, typeNameAsString: 'Number'},
-      {typeName: 16, typeNameAsString: 'Expiration date'},
-      {typeName: 17, typeNameAsString: 'Issue date'},
+      {
+        typeName: 5,
+        typeNameAsString: 'Name',
+        dataType: AttributeTypeDataType.STRING,
+      },
+      {
+        typeName: 6,
+        typeNameAsString: 'State',
+        dataType: AttributeTypeDataType.STRING,
+      },
+      {
+        typeName: 7,
+        typeNameAsString: 'Number',
+        dataType: AttributeTypeDataType.STRING,
+      },
+      {
+        typeName: 8,
+        typeNameAsString: 'Issue date',
+        dataType: AttributeTypeDataType.DATE,
+      },
+      {
+        typeName: 9,
+        typeNameAsString: 'Expiration date',
+        dataType: AttributeTypeDataType.DATE,
+      },
     ];
     chrome.test.assertEq(expectedAttributeTypesList, attributeTypesList);
+    chrome.test.succeed();
+  },
+
+  async function getEmptyPayOverTimeIssuerList() {
+    const payOverTimeIssuerList =
+        await chrome.autofillPrivate.getPayOverTimeIssuerList();
+    chrome.test.assertEq([], payOverTimeIssuerList);
     chrome.test.succeed();
   },
 ];
@@ -1052,13 +1065,6 @@ var TESTS_FOR_CONFIG = {
       ['authenticateUserAndFlipMandatoryAuthToggle'],
   'getLocalCard': ['addNewCreditCard', 'getLocalCard'],
   'bulkDeleteAllCvcs': ['bulkDeleteAllCvcs'],
-  'deleteAllUserAnnotationsEntries': ['deleteAllUserAnnotationsEntries'],
-  'deleteUserAnnotationsEntries': ['deleteUserAnnotationsEntries'],
-  'getUserAnnotationsEntries': ['getUserAnnotationsEntries'],
-  'hasUserAnnotationsEntries_NoEntries':
-      ['hasUserAnnotationsEntries_NoEntries'],
-  'hasUserAnnotationsEntries_WithEntries':
-      ['hasUserAnnotationsEntries_WithEntries'],
   'isUserEligibleForAutofillImprovements':
       ['isUserEligibleForAutofillImprovements'],
   'predictionImprovementsIphFeatureUsed':
@@ -1077,7 +1083,9 @@ var TESTS_FOR_CONFIG = {
   'loadUpdatedEntityInstance': ['loadUpdatedEntityInstance'],
   'getEntityInstanceByGuid': ['getEntityInstanceByGuid'],
   'getAllEntityTypes': ['getAllEntityTypes'],
-  'getAllAttributeTypesForEntity': ['getAllAttributeTypesForEntity'],
+  'getAllAttributeTypesForEntityTypeName':
+      ['getAllAttributeTypesForEntityTypeName'],
+  'getEmptyPayOverTimeIssuerList': ['getEmptyPayOverTimeIssuerList'],
 };
 
 var testConfig = window.location.search.substring(1);

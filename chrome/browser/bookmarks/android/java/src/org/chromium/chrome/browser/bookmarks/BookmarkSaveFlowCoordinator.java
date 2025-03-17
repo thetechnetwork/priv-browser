@@ -10,6 +10,7 @@ import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.StringRes;
 import androidx.annotation.VisibleForTesting;
 
 import org.chromium.base.lifetime.DestroyChecker;
@@ -19,6 +20,7 @@ import org.chromium.base.task.TaskTraits;
 import org.chromium.chrome.browser.bookmarks.BookmarkUiPrefs.BookmarkRowDisplayPref;
 import org.chromium.chrome.browser.commerce.PriceTrackingUtils;
 import org.chromium.chrome.browser.commerce.ShoppingServiceFactory;
+import org.chromium.chrome.browser.price_tracking.PriceDropNotificationManager;
 import org.chromium.chrome.browser.profiles.Profile;
 import org.chromium.chrome.browser.user_education.IphCommandBuilder;
 import org.chromium.chrome.browser.user_education.UserEducationHelper;
@@ -64,6 +66,8 @@ public class BookmarkSaveFlowCoordinator {
      * @param userEducationHelper A means of triggering IPH.
      * @param profile The current chrome profile.
      * @param identityManager The {@link IdentityManager} which supplies the account data.
+     * @param bookmarkManagerOpener Manaages opening bookmarkms.
+     * @param priceDropNotificationManager Manages price drop notifications.
      */
     public BookmarkSaveFlowCoordinator(
             @NonNull Context context,
@@ -71,7 +75,9 @@ public class BookmarkSaveFlowCoordinator {
             @NonNull ShoppingService shoppingService,
             @NonNull UserEducationHelper userEducationHelper,
             @NonNull Profile profile,
-            @NonNull IdentityManager identityManager) {
+            @NonNull IdentityManager identityManager,
+            @NonNull BookmarkManagerOpener bookmarkManagerOpener,
+            @NonNull PriceDropNotificationManager priceDropNotificationManager) {
         mContext = context;
         mBottomSheetController = bottomSheetController;
         mUserEducationHelper = userEducationHelper;
@@ -97,7 +103,7 @@ public class BookmarkSaveFlowCoordinator {
                         mBookmarkModel,
                         ImageFetcherFactory.createImageFetcher(
                                 ImageFetcherConfig.DISK_CACHE_ONLY, mProfile.getProfileKey()),
-                        BookmarkUtils.getRoundedIconGenerator(
+                        BookmarkViewUtils.getRoundedIconGenerator(
                                 mContext, BookmarkRowDisplayPref.VISUAL));
 
         mMediator =
@@ -109,7 +115,9 @@ public class BookmarkSaveFlowCoordinator {
                         shoppingService,
                         bookmarkImageFetcher,
                         mProfile,
-                        identityManager);
+                        identityManager,
+                        bookmarkManagerOpener,
+                        priceDropNotificationManager);
     }
 
     /**
@@ -294,17 +302,17 @@ public class BookmarkSaveFlowCoordinator {
         }
 
         @Override
-        public int getSheetClosedAccessibilityStringId() {
+        public @StringRes int getSheetClosedAccessibilityStringId() {
             return R.string.bookmarks_save_flow_closed_description;
         }
 
         @Override
-        public int getSheetHalfHeightAccessibilityStringId() {
+        public @StringRes int getSheetHalfHeightAccessibilityStringId() {
             return R.string.bookmarks_save_flow_opened_half;
         }
 
         @Override
-        public int getSheetFullHeightAccessibilityStringId() {
+        public @StringRes int getSheetFullHeightAccessibilityStringId() {
             return R.string.bookmarks_save_flow_opened_full;
         }
 

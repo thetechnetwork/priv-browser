@@ -40,6 +40,7 @@
 #include "base/strings/strcat.h"
 #include "base/strings/string_number_conversions.h"
 #include "base/strings/stringprintf.h"
+#include "base/strings/to_string.h"
 #include "base/task/sequenced_task_runner.h"
 #include "base/time/time.h"
 #include "base/token.h"
@@ -90,6 +91,7 @@
 #include "mojo/public/cpp/bindings/receiver_set.h"
 #include "net/third_party/quiche/src/quiche/oblivious_http/buffers/oblivious_http_response.h"
 #include "services/data_decoder/public/cpp/data_decoder.h"
+#include "services/network/public/cpp/shared_url_loader_factory.h"
 #include "services/network/public/mojom/client_security_state.mojom.h"
 #include "services/network/public/mojom/ip_address_space.mojom.h"
 #include "services/network/public/mojom/url_loader_factory.mojom-forward.h"
@@ -2259,8 +2261,7 @@ class InterestGroupAuction::BuyerHelper
           true;
     }
 
-    // TODO(crbug.com/391877228): Set its value based on cookie settings.
-    bool browser_signal_for_debugging_only_sampling = false;
+    bool browser_signal_for_debugging_only_sampling = ShouldSampleDebugReport();
     bid_state->worklet_handle->GetBidderWorklet()->BeginGenerateBid(
         auction_worklet::mojom::BidderWorkletNonSharedParams::New(
             interest_group.name,
@@ -2334,6 +2335,7 @@ class InterestGroupAuction::BuyerHelper
     bid_state.bidding_signals_handle =
         auction_->interest_group_manager_->trusted_signals_cache()
             ->RequestTrustedBiddingSignals(
+                auction_->url_loader_factory_,
                 auction_->auction_worklet_manager_->GetFrameTreeNodeID(),
                 auction_->main_frame_origin_, auction_->ip_address_space_,
                 interest_group.owner, interest_group.name,
@@ -3034,6 +3036,7 @@ class InterestGroupAuction::BuyerHelper
 
 InterestGroupAuction::InterestGroupAuction(
     auction_worklet::mojom::KAnonymityBidMode kanon_mode,
+    scoped_refptr<network::SharedURLLoaderFactory> url_loader_factory,
     const url::Origin& main_frame_origin,
     network::mojom::IPAddressSpace ip_address_space,
     const blink::AuctionConfig* config,
@@ -3051,6 +3054,7 @@ InterestGroupAuction::InterestGroupAuction(
     : devtools_auction_id_(base::Token::CreateRandom().ToString()),
       trace_id_(base::trace_event::GetNextGlobalTraceId()),
       kanon_mode_(kanon_mode),
+      url_loader_factory_(std::move(url_loader_factory)),
       main_frame_origin_(main_frame_origin),
       ip_address_space_(ip_address_space),
       auction_metrics_recorder_(auction_metrics_recorder),
@@ -3100,8 +3104,8 @@ InterestGroupAuction::InterestGroupAuction(
     component_auctions_.emplace(
         child_pos,
         std::make_unique<InterestGroupAuction>(
-            kanon_mode_, main_frame_origin, ip_address_space,
-            &component_auction_config,
+            kanon_mode_, url_loader_factory_, main_frame_origin,
+            ip_address_space, &component_auction_config,
             /*parent=*/this, auction_metrics_recorder_, auction_worklet_manager,
             auction_nonce_manager, interest_group_manager,
             get_data_decoder_callback_, auction_start_time_,
@@ -3122,7 +3126,11 @@ InterestGroupAuction::~InterestGroupAuction() {
   }
 
   if (!final_auction_result_) {
-    final_auction_result_ = AuctionResult::kAborted;
+    if (received_abort_signal_) {
+      final_auction_result_ = AuctionResult::kAbortSignal;
+    } else {
+      final_auction_result_ = AuctionResult::kDocumentDestruction;
+    }
   }
 
   std::string uma_prefix = "Ads.InterestGroup.Auction.";
@@ -3132,7 +3140,13 @@ InterestGroupAuction::~InterestGroupAuction() {
 
   // TODO(mmenke): Record histograms for component auctions.
   if (!parent_) {
-    base::UmaHistogramEnumeration(uma_prefix + "Result",
+    base::UmaHistogramEnumeration(
+        uma_prefix + "Result",
+        *final_auction_result_ == AuctionResult::kAbortSignal ||
+                *final_auction_result_ == AuctionResult::kDocumentDestruction
+            ? AuctionResult::kAborted
+            : *final_auction_result_);
+    base::UmaHistogramEnumeration(uma_prefix + "Result2",
                                   *final_auction_result_);
 
     if (HasNonKAnonWinner()) {
@@ -3143,7 +3157,8 @@ InterestGroupAuction::~InterestGroupAuction() {
     // Only record time of full auctions and aborts.
     base::TimeTicks now = base::TimeTicks::Now();
     switch (*final_auction_result_) {
-      case AuctionResult::kAborted:
+      case AuctionResult::kDocumentDestruction:
+      case AuctionResult::kAbortSignal:
         base::UmaHistogramMediumTimes(uma_prefix + "AbortTime",
                                       now - creation_time_);
         break;
@@ -3509,7 +3524,6 @@ std::unique_ptr<InterestGroupAuctionReporter>
 InterestGroupAuction::CreateReporter(
     BrowserContext* browser_context,
     PrivateAggregationManager* private_aggregation_manager,
-    scoped_refptr<network::SharedURLLoaderFactory> url_loader_factory,
     AdAuctionPageDataCallback ad_auction_page_data_callback,
     std::unique_ptr<blink::AuctionConfig> auction_config,
     const url::Origin& main_frame_origin,
@@ -3705,8 +3719,8 @@ InterestGroupAuction::CreateReporter(
       maybe_log_private_aggregation_web_features_callback_,
       std::move(ad_auction_page_data_callback), std::move(auction_config),
       devtools_auction_id_, main_frame_origin, frame_origin,
-      std::move(client_security_state), std::move(url_loader_factory),
-      kanon_mode_, bid_is_kanon, std::move(winning_bid_info),
+      std::move(client_security_state), url_loader_factory_, kanon_mode_,
+      bid_is_kanon, std::move(winning_bid_info),
       std::move(top_level_seller_winning_bid_info),
       std::move(component_seller_winning_bid_info),
       std::move(interest_groups_that_bid), TakeDebugWinReportUrls(),
@@ -4012,9 +4026,8 @@ GURL InterestGroupAuction::FillPostAuctionSignals(
       &query_string, 0, "${winningBidCurrency}",
       blink::PrintableAdCurrency(signals.winning_bid_currency));
 
-  base::ReplaceSubstringsAfterOffset(
-      &query_string, 0, "${madeWinningBid}",
-      signals.made_winning_bid ? "true" : "false");
+  base::ReplaceSubstringsAfterOffset(&query_string, 0, "${madeWinningBid}",
+                                     base::ToString(signals.made_winning_bid));
   base::ReplaceSubstringsAfterOffset(
       &query_string, 0, "${highestScoringOtherBid}",
       base::NumberToString(signals.highest_scoring_other_bid));
@@ -4023,7 +4036,7 @@ GURL InterestGroupAuction::FillPostAuctionSignals(
       blink::PrintableAdCurrency(signals.highest_scoring_other_bid_currency));
   base::ReplaceSubstringsAfterOffset(
       &query_string, 0, "${madeHighestScoringOtherBid}",
-      signals.made_highest_scoring_other_bid ? "true" : "false");
+      base::ToString(signals.made_highest_scoring_other_bid));
 
   // For component auction sellers only, which get post auction signals from
   // both their own component auctions and top-level auction.
@@ -4038,7 +4051,7 @@ GURL InterestGroupAuction::FillPostAuctionSignals(
         blink::PrintableAdCurrency(top_level_signals->winning_bid_currency));
     base::ReplaceSubstringsAfterOffset(
         &query_string, 0, "${topLevelMadeWinningBid}",
-        top_level_signals->made_winning_bid ? "true" : "false");
+        base::ToString(top_level_signals->made_winning_bid));
   }
 
   if (reject_reason.has_value()) {
@@ -4131,6 +4144,8 @@ bool InterestGroupAuction::HasNonKAnonWinner() const {
     case AuctionResult::kNoBids:
     case AuctionResult::kAllBidsRejected:
       return top_non_kanon_enforced_bid() != nullptr;
+    case AuctionResult::kAbortSignal:
+    case AuctionResult::kDocumentDestruction:
     case AuctionResult::kAborted:
     case AuctionResult::kBadMojoMessage:
     case AuctionResult::kNoInterestGroups:
@@ -5586,6 +5601,7 @@ void InterestGroupAuction::ScoreBid(std::unique_ptr<Bid> bid) {
     cache_handle =
         interest_group_manager_->trusted_signals_cache()
             ->RequestTrustedScoringSignals(
+                url_loader_factory_,
                 auction_worklet_manager_->GetFrameTreeNodeID(),
                 main_frame_origin_, ip_address_space_, config_->seller,
                 *config_->trusted_scoring_signals_url,
@@ -5598,8 +5614,7 @@ void InterestGroupAuction::ScoreBid(std::unique_ptr<Bid> bid) {
         cache_handle->compression_group_token(), partition_id);
   }
 
-  // TODO(crbug.com/391877228): Set its value based on cookie settings.
-  bool browser_signal_for_debugging_only_sampling = false;
+  bool browser_signal_for_debugging_only_sampling = ShouldSampleDebugReport();
   seller_worklet_handle_->GetSellerWorklet()->ScoreAd(
       bid->ad_metadata, bid->bid, bid->bid_currency, config_->non_shared_params,
       std::move(cache_key),

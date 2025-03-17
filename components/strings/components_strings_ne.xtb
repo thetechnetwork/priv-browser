@@ -8,6 +8,7 @@
 <translation id="1010200102790553230">पृष्ठ पछि लोड गर्नुहोस्</translation>
 <translation id="1010225406377140704">नयाँ लिंक माग्न प्रेषकलाई सम्पर्क गर्नुहोस्</translation>
 <translation id="1011206368273183593">फाइलहरू तयार पारिँदै छन्</translation>
+<translation id="1012264210825687872">तपाईंले आफ्नो अर्डरको समीक्षा गरेपछि तपाईंले अनिवार्य रूपमा <ph name="BNPL_ISSUER_NAME" /> खातामा साइन इन गर्नु पर्ने हुन्छ वा यो खाता छैन भने नयाँ खाता बनाउनु पर्ने हुन्छ। यो खाता Google Pay मा स्वतः लिंक गरिने छ।</translation>
 <translation id="1014509239502131234">परिणाम अन्डू गरिँदै छ</translation>
 <translation id="1015730422737071372">थप विवरणहरू उपलब्ध गराउनुहोस्</translation>
 <translation id="1019413721762100891">अफ छ</translation>
@@ -137,6 +138,7 @@
 <translation id="1230244617745022071"><ph name="SOURCE" /> (स्वतः पत्ता लगाइएको छ)</translation>
 <translation id="1232569758102978740">शीर्षक नभएको</translation>
 <translation id="1236081509407217141">VR लाई अनुमति दिने हो?</translation>
+<translation id="1236689197410206751">AfterPay</translation>
 <translation id="1240347957665416060">तपाईंको डिभाइसको नाम</translation>
 <translation id="124116460088058876">थप भाषाहरू</translation>
 <translation id="1243027604378859286">लेखक:</translation>
@@ -251,6 +253,7 @@
 <translation id="1419305130220238697">Chrome मा डाउनलोडहरू व्यवस्थापन गर्ने बटन, आफूले Chrome मा डाउनलोड गरेका फाइलहरू व्यवस्थापन गर्न यो बटन थिच्नुहोस्</translation>
 <translation id="1420345875188552368">तपाईंले सेभ गर्नुभएको स्वतः भुक्तानी गर्ने विधि यो भुक्तानीका हकमा प्रयोग गरिन सक्छ। Chrome मा इवालेट अफ गर्न <ph name="BEGIN_LINK1" />भुक्तानीसम्बन्धी सेटिङ<ph name="END_LINK1" />मा जानुहोस्</translation>
 <translation id="1420920093772172268">कनेक्ट गर्ने प्रक्रियालाई अनुमति दिन <ph name="TURN_ON_BLUETOOTH_LINK" /></translation>
+<translation id="1421484961346698724">मेटाइएको खाता</translation>
 <translation id="14222610277930434">तपाईंले प्रायः खोल्ने ट्याब</translation>
 <translation id="1422930527989633628">वरपर रहेका ब्लुटुथ चल्ने डिभाइसहरू पत्ता लगाउने अनुमति माग्न सक्छ</translation>
 <translation id="1426410128494586442">हो</translation>
@@ -626,6 +629,7 @@
 <translation id="2082238445998314030"><ph name="TOTAL_RESULTS" /> को <ph name="RESULT_NUMBER" /> परिणाम</translation>
 <translation id="2083256696566019397">हरेक पटक अनुमति दिनुहोस्</translation>
 <translation id="2085876078937250610">सेभ गर्नुहोस्…</translation>
+<translation id="2090451897496479509">यस सम्बन्धमा थप जानकारी प्राप्त गर्न सेवा प्रदायकलाई सम्पर्क गर्नुहोस्</translation>
 <translation id="2091887806945687916">आवाज</translation>
 <translation id="2093982008204312032">Google Chrome पासवर्डहरू हाल्नका निम्ति Windows Hello अफ गर्न खोज्दै छ।</translation>
 <translation id="2094505752054353250">डोमेन बेमेल</translation>
@@ -660,6 +664,7 @@
 <translation id="2145193671493396738">आर्थिक समाचार</translation>
 <translation id="214556005048008348">भुक्तानी रद्द गर्नुहोस्</translation>
 <translation id="2147117373852943630">बाजाहरू</translation>
+<translation id="2147254250314124496"><ph name="EMBEDDED_URL" /> ले तपाईंका बारेमा सेभ गरिएको जानकारी प्रयोग गर्ने अनुमति माग्दै छ</translation>
 <translation id="2148613324460538318">कार्ड हाल्नुहोस्</translation>
 <translation id="2148716181193084225">आज</translation>
 <translation id="2149968176347646218">इन्टरनेट सुरक्षित छैन</translation>
@@ -691,6 +696,7 @@
 <translation id="2187317261103489799">पत्ता लगाउनुहोस् (डिफल्ट मान)</translation>
 <translation id="2188375229972301266">फेदमा एकभन्दा बढी प्वाल</translation>
 <translation id="2194856509914051091">विचार गर्नु पर्ने कुराहरू</translation>
+<translation id="2198071643181968308"><ph name="BNPL_ISSUER_NAME" /> का बारेमा थप जान्नुहोस्</translation>
 <translation id="2200678913752027654">थम्ज डाउन बटन, तपाईंलाई यो सुझाव मन नपर्नुको कारणका बारेमा विस्तृत प्रतिक्रिया पेस गर्नका निम्ति फाराम खोल्न इन्टर थिच्नुहोस्</translation>
 <translation id="2202627062836089804">आफ्नो कार्डको पछाडिको भाग</translation>
 <translation id="2204482073374652408">अपडेट गर्ने कार्य सम्पन्न भयो!</translation>
@@ -837,6 +843,7 @@
 <translation id="2451607499823206582">ट्र्याक गरिँदै छ</translation>
 <translation id="2452098632681057184">पर्यावरण विज्ञान तथा वातावरण</translation>
 <translation id="2452837234288608067">यस सम्बन्धमा मद्दत गर्न सकिएन। फेरि प्रयास गर्नुहोस्।</translation>
+<translation id="2453045048779611513">तपाईंको सङ्गठनले तपाईंले सेभ गर्न पाउने कुराहरूको सीमा तोकेको छ</translation>
 <translation id="2456755709261364512">तपाईंको ब्याट्री अनिवार्य रूपमा कम्तीमा पनि <ph name="REQUIRED_BATTERY_PRECENT" />% हुने गरी चार्ज गरिएको हुनु पर्छ</translation>
 <translation id="2461385121573678775">Chrome Enterprise Core ले तपाईंलाई क्लाउडबाट ब्राउजरसम्बन्धी नीतिहरू कन्फिगर गर्ने प्रयोजनका लागि केन्द्रीकृत टुल प्रदान गर्छ</translation>
 <translation id="2461822463642141190">हालको</translation>
@@ -1086,6 +1093,7 @@
 <translation id="2942492342931589800">क्याजुअल</translation>
 <translation id="2942515540157583425">आइटी तथा प्राविधिक जागिरहरू</translation>
 <translation id="2943895734390379394">अपलोड गरिएको समय:</translation>
+<translation id="2947281105969315778">तपाईंलाई Chrome मा साइन इन गर्ने अनुमति दिइएको छ भने मात्र तपाईं ट्याब समूह सेयर गर्न वा तिनमा सामेल हुन सक्नुहुन्छ</translation>
 <translation id="2948083400971632585">तपाइँले सेटिङ पृष्ठहरूबाट जडानको लागि विन्यास गरिएको कुनै पनि प्रोक्सीहरू असक्षम गर्न सक्नुहुन्छ।</translation>
 <translation id="2949183777371959169">यो मेसिन 'Chrome ब्राउजर क्लाउड म्यानेज्मेन्ट'मा दर्ता नभएको हुनाले यो नीति लागू गर्न सकिएन।</translation>
 <translation id="2951588413176968965">मेरो मेलबक्स</translation>
@@ -1301,6 +1309,7 @@
 <translation id="33073482541490531">तपाईंले भर्खरै प्रयोग गर्नुभएको पासवर्ड चोरी भएको डेटाको सङ्ग्रहमा भेटिएको छ। पासवर्ड म्यानेजर अहिले नै यो पासवर्ड बदल्न सिफारिस गर्छ।</translation>
 <translation id="3307649904964670439">Chrome कस्टमाइज गर्ने बटन, आफ्नो ब्राउजरको स्वरूप कस्टमाइज गर्न यो बटन थिच्नुहोस्</translation>
 <translation id="3308006649705061278">सङ्गठनात्मक एकाइ (OU)</translation>
+<translation id="3317077846337994567">किस्तामा भुक्तानी गर्ने सुविधा अहिले उपलब्ध छैन। पछि फेरि प्रयास गर्नुहोस्।</translation>
 <translation id="3318016344440038475">हास्य टिभी कार्यक्रमहरू</translation>
 <translation id="3324687287337751929">४ x ६ इन्च</translation>
 <translation id="3324983252691184275">गाढा रातो</translation>
@@ -1429,6 +1438,7 @@
 <translation id="3536227077203206203">अहिले अनुमति दिइएको छ</translation>
 <translation id="3537165859691846083">Letter Plus</translation>
 <translation id="353816159217417898">स्क्रिन (पेज्ड)</translation>
+<translation id="3541016556608204104">Chrome Enterprise Connectors का बारेमा थप जानकारी</translation>
 <translation id="3542628208405253498">कार्डको फोटो</translation>
 <translation id="3542768452570884558">यो लिंक नयाँ विन्डोमा खोल्नुहोस्</translation>
 <translation id="3543935938072367282">अटोफिलका सहायताले अझ छिटो चेक आउट गर्नुहोस्</translation>
@@ -1589,7 +1599,7 @@
 <translation id="3784372983762739446">ब्लुटुथ उपकरणहरू</translation>
 <translation id="378611282717571199">"<ph name="SEARCH_QUERY" />" सँग सबैभन्दा बढी मिल्दाजुल्दा परिणाम</translation>
 <translation id="3789155188480882154">आकार १६</translation>
-<translation id="3789841737615482174">स्थापना गर्नुहोस्</translation>
+<translation id="3789841737615482174">इन्स्टल गर्नुहोस्</translation>
 <translation id="3791118028061680614">एपहरू अदलबदल नगरिकनै भुक्तानी गर्नुहोस्</translation>
 <translation id="3792100426446126328"><ph name="NAME" /> (<ph name="WIDTH" /> x <ph name="HEIGHT" /> इन्च)</translation>
 <translation id="3792826587784915501">प्रशंसकको जमात भएका तथा इन्डी चलचित्रहरू</translation>
@@ -1794,6 +1804,7 @@
 <translation id="415440494507469262">तुलनात्मक जानकारी भएको तालिकामा ट्याब हाल्नुहोस्</translation>
 <translation id="4159784952369912983">बैजनी</translation>
 <translation id="4165422751765527461">नयाँ ट्याबमा मद्दत केन्द्रको लेख खोल्छ</translation>
+<translation id="4165584779486830267">तपाईं अब Affirm वा Zip प्रयोग गरी किस्तामा भुक्तानी गर्न सक्नुहुन्छ।</translation>
 <translation id="4165986682804962316">साइट सेटिङहरू</translation>
 <translation id="4169535189173047238">अनुमति नदिनुहोस्</translation>
 <translation id="4171400957073367226">खराब रूजू हस्ताक्षर।</translation>
@@ -1944,6 +1955,7 @@
 <translation id="4378154925671717803">फोन</translation>
 <translation id="4384395682990721132">A4x3</translation>
 <translation id="4387692837058041921">Microsoft OneDrive मा फाइल अपलोड गर्ने प्रक्रिया रोकिएको छ</translation>
+<translation id="4389931020843542579">ट्याब समूह लोड गरिँदै छ</translation>
 <translation id="4390472908992056574">बिट</translation>
 <translation id="4395550503472021297">यो नीतिले निम्न नीतिहरूको स्वचालित कारबाही नियन्त्रण गरिरहेको छ: <ph name="POLICIES" /></translation>
 <translation id="4397978002248035985">यसले तपाईंको बैंकको वेबसाइटमा पुष्टि गर्न एउटा पप-अप खोल्छ</translation>
@@ -2313,6 +2325,7 @@
 <translation id="5097501891273180634">A2</translation>
 <translation id="5106405387002409393">Chrome लाई तपाईंको डिभाइसको <ph name="PERMISSION" /> प्रयोग गर्ने अनुमति दिनु पर्ने हुन्छ</translation>
 <translation id="510644072453496781">कार्डबोर्ड (इन्ड)</translation>
+<translation id="5106648964679263509"><ph name="BNPL_ISSUER_NAME" /> को भर्चुअल कार्डको विवरण भरियो</translation>
 <translation id="5108881358339761672">यो साइट सुरक्षित छैन</translation>
 <translation id="5109892411553231226">भुक्तानी विधिहरू व्यवस्थापन गर्नुहोस्</translation>
 <translation id="5112422516732747637">A5</translation>
@@ -2508,6 +2521,7 @@
             <ph name="LIST_ITEM" />फारमहरूमा भरिएको जानकारी
           <ph name="END_LIST" /></translation>
 <translation id="5443468954631487277">विपरीत क्रम तर माथितिर फर्काएर</translation>
+<translation id="5445340838622821110">तपाईंले किस्तामा भुक्तानी गर्नुभयो भने एक पटके भर्चुअल कार्ड नम्बर भरिन्छ। यो नम्बर यस खरिदका लागि मात्र प्रयोग गर्न सकिन्छ। <ph name="IDS_AUTOFILL_BNPL_FILLED_CARD_INFORMATION_BUBBLE_LEARN_MORE_LINK_LABEL" /></translation>
 <translation id="5447235695608032700"><ph name="SITE" /> लाई उक्त साइटले तपाईंका बारेमा सेभ गरेको जानकारी प्रयोग गर्ने अनुमति दिनुहोस्</translation>
 <translation id="5452270690849572955">यो <ph name="HOST_NAME" /> को पृष्ठ फेला पार्न सक्दैन</translation>
 <translation id="5452923259299906094">इवालेट र Pix प्रयोग गरी भुक्तानी गर्नुहोस्</translation>
@@ -2755,6 +2769,7 @@
 <translation id="5910140988253729859">स्वतः भर्ने कार्य अन्डू गर्नुहोस्</translation>
 <translation id="5911020115933784199">कार्यक्रम तथा सूची</translation>
 <translation id="5911110632211230665">फाइल खोल्न पाइँदैन</translation>
+<translation id="5914465277418006379"><ph name="MEMBER_FIRST_NAME" /> ले यो ट्याब हाल्नुभयो</translation>
 <translation id="5915189366813702112">पायक पर्ने समयमा काम गर्ने सुविधा</translation>
 <translation id="59174027418879706">सक्षम गरिएको</translation>
 <translation id="5918373444239520146">ग्याजेट तथा पोर्टेबल इलेक्ट्रोनिक</translation>
@@ -2835,6 +2850,7 @@
 <translation id="604124094241169006">स्वचालित</translation>
 <translation id="6041777658117377052">कक्षको तापक्रम</translation>
 <translation id="6042308850641462728">थप</translation>
+<translation id="6043357981274314628">सम्पन्न भयो!</translation>
 <translation id="6044573915096792553">आकार १२</translation>
 <translation id="6045164183059402045">इम्पोजिसन टेम्प्लेट</translation>
 <translation id="6047927260846328439">यो सामग्रीले तपाईंलाई सफ्टवेयर स्थापना गर्न लगाएर वा व्यक्तिगत जानकारी खुलाउन लगाएर झुक्याउन सक्छ। <ph name="BEGIN_LINK" />जे भए पनि देखाउनुहोस्‌<ph name="END_LINK" /></translation>
@@ -2858,7 +2874,6 @@
 <translation id="6062937464449575061">मूल्य ट्र्याक गर्न छाड्नुहोस्</translation>
 <translation id="6063415549109819824">घर कर्जा</translation>
 <translation id="6070432475334343308">एक वा सोभन्दा बढी फाइलहरू <ph name="CLOUD_PROVIDER" /> को <ph name="FOLDER_NAME" /> मा अपलोड गर्न सकिएन</translation>
-<translation id="6080696365213338172">तपाइँले प्रशासक-प्रदान गरिएको प्रमाणपत्र प्रयोग गर्दै सामग्री पहुँच गर्नुभएको छ। तपाइँले <ph name="DOMAIN" /> लाई उपलब्ध गर्नुभएको लगत तपाइँको प्रशासकद्वारा अन्तर्खण्ड गर्न सकिन्छ।</translation>
 <translation id="6085149458302186532">लेबल (रङ्गीन)</translation>
 <translation id="6087312102907839798">सम्बन्धित खोजहरू</translation>
 <translation id="6089505343295765444">तपाईंले आफ्नो Chrome हिस्ट्रीबाट मेटाउने ट्याबहरू तुलनात्मक जानकारी भएका तपाईंका तालिकाहरूमा देखिइरहने छन्</translation>
@@ -3000,11 +3015,11 @@
 <translation id="6322182122604171028">Windows Hello प्रयोग गर्न सकिएन</translation>
 <translation id="6326947323444967009">iOS का सेटिङमा गई Chrome लाई सिस्टमको डिफल्ट ब्राउजरका रूपमा सेट गर्नुहोस्</translation>
 <translation id="6328639280570009161">सञ्जाल भविष्यवाणि असक्षम गर्नुहोस्</translation>
-<translation id="6328784461820205019">"तपाईंको जडान व्यक्तिगत छैन" वा "&lt;span class="error-code"&gt;NET::ERR_CERT_AUTHORITY_INVALID&lt;/span&gt;" वा "&lt;span class="error-code"&gt;ERR_CERT_COMMON_NAME_INVALID&lt;/span&gt;" वा "&lt;span class="error-code"&gt;NET::ERR_CERT_WEAK_SIGNATURE_ALGORITHM&lt;/span&gt;" वा "&lt;span class="error-code"&gt;ERR_CERT_SYMANTEC_LEGACY&lt;/span&gt;" वा "SSL प्रमाणपत्रसम्बन्धी त्रुटि"</translation>
 <translation id="6335029926534404762">एथलेटिक जुत्ता</translation>
 <translation id="6337133576188860026"><ph name="SIZE" /> भन्दा कम ठाउँ खाली गर्दछ। तपाईं अर्कोपटक आउँदा केही साइटहरू अझ ढिलोगरी लोड हुनसक्छन्।</translation>
 <translation id="6337534724793800597">नामद्वारा नीतिहरू फिल्टर गर्छ</translation>
 <translation id="633770708279464947"><ph name="SECURE_DNS_SALT" /> को मान अवैध छ र सो मान प्रयोग गरिने छैन।</translation>
+<translation id="6338645927051849741">पासवर्ड • Google पासवर्ड म्यानेजर</translation>
 <translation id="6340739886198108203">एड्मिनले तोकेका नीतिअनुसार स्क्रिनमा गोप्य सामग्री देखिएका बेला स्क्रिनसट लिन वा स्क्रिन रेकर्ड गर्न सिफारिस गरिँदैन:</translation>
 <translation id="6341434961864773665">{0,plural, =1{एड्मिनले तोकेको नीतिअनुसार यो फाइल <ph name="DESTINATION_NAME" /> मा अपलोड गर्न सिफारिस गरिँदैन}other{एड्मिनले तोकेको नीतिअनुसार यी फाइलहरू <ph name="DESTINATION_NAME" /> मा अपलोड गर्न सिफारिस गरिँदैन}}</translation>
 <translation id="6342069812937806050">अहिले भर्खर</translation>
@@ -3014,6 +3029,7 @@
 <translation id="6351658970066645919">ब्राउजिङ डेटा मेटाउनुहोस्</translation>
 <translation id="6353505687280762741">{COUNT,plural, =0{कुनै पनि होइन}=1{<ph name="DOMAIN_LIST" /> को १ पासवर्ड (सिंक गरिएको छ)}=2{<ph name="DOMAIN_LIST" /> का २ पासवर्डहरू (सिंक गरिएका छन्)}other{<ph name="DOMAIN_LIST" /> का # पासवर्डहरू (सिंक गरिएका छन्)}}</translation>
 <translation id="6355392890578844978">कुनै कम्पनी वा अन्य सङ्गठनले यो ब्राउजर व्यवस्थापन गर्दैन। यो डिभाइसमा गरिएका क्रियाकलाप Chromium बाहिरबाट व्यवस्थापन गरिन सक्छ। <ph name="BEGIN_LINK" />थप जान्नुहोस्<ph name="END_LINK" /></translation>
+<translation id="6357546827188504216">"<ph name="GROUP_TITLE_1" />" र "<ph name="GROUP_TITLE_2" />" ट्याब समूहहरू अब उपलब्ध छैनन्</translation>
 <translation id="6358088212770985041">भुक्तानी विधिहरू परिवर्तन गर्नुहोस्</translation>
 <translation id="6358450015545214790">यसको अर्थ के हो?</translation>
 <translation id="6360213755783740931">मालवेयरबाट सुरक्षाका बारेमा थप जान्नुहोस्</translation>
@@ -3327,6 +3343,7 @@
 <translation id="6917795328362592458">तपाईंले भर्खरै प्रयोग गर्नुभएको पासवर्ड चोरी भएको डेटाको सङ्ग्रहमा भेटिएको छ। तपाईंका खाताको सुरक्षार्थ पासवर्ड म्यानेजर तपाईंले सेभ गरेका पासवर्डहरू सुरक्षित छन् कि छैनन् जाँच्न सिफारिस गर्छ।</translation>
 <translation id="6917873303492266709">ट्याब समूह सेयर गर्न, तिनमा सामेल हुन र सहकार्य गर्न सेटिङ खोल्नुहोस् र "Chrome मा साइन इन गर्ने अनुमति दिनुहोस्" अन गर्नुहोस्</translation>
 <translation id="6921197121276419421">वेब एप इन्स्टल गर्ने अनुमति दिइएको छ</translation>
+<translation id="69238565902785824">तपाईंले आफ्नो खाता लिंक गरिएकै अवस्थामा राख्नुभयो भने तपाईं <ph name="BNPL_ISSUER_NAME" /> मार्फत अझ छिटो भुक्तानी गर्न सक्नुहुन्छ तर तपाईं <ph name="IDS_AUTOFILL_BNPL_TOS_LINK_TEXT_WALLET_LINK_TEXT" /> मा गएर आफ्नो खाता अनलिंक गर्न सक्नुहुन्छ</translation>
 <translation id="6924013822850225188">चेकआउट गर्ने बेलामा तपाईंलाई तपाईंका कार्डका लाभहरू देखाउने कि नदेखाउने भन्ने कुरा छनौट गर्नुहोस् (बैंकका सर्तहरू लागू हुन्छन्)</translation>
 <translation id="6925267999184670015">North American B+</translation>
 <translation id="6926216138694948720">शरीरमा बनाइने कला</translation>
@@ -3392,6 +3409,7 @@
 <translation id="701757816833614688">भिजुअल आर्ट तथा डिजाइनसम्बन्धी शिक्षा</translation>
 <translation id="702275896380648118">यो साइटले तपाईंलाई मन पर्ने कुराहरू निर्धारण गरेर अन्य साइटहरूलाई विज्ञापनहरू सिफारिस गर्छ। यो साइटले तपाईंलाई थप सान्दर्भिक विज्ञापनहरू देखाउने प्रयोजनका लागि तपाईंले Chrome छनौट गर्नुभएका विज्ञापनका विषयसम्बन्धी जानकारी पनि प्राप्त गर्छ।</translation>
 <translation id="7023162328967545559">एड्मिनले दिएका चेतावनी</translation>
+<translation id="7023765275461720661">खाता लिंक गरी <ph name="BNPL_ISSUER_NAME" /> मार्फत भुक्तानी गर्ने हो?</translation>
 <translation id="7029809446516969842">पासवर्डहरू</translation>
 <translation id="7030164307377592766">भुक्तानी विधिसम्बन्धी जानकारी भर्नका निम्ति सेटिङ मिलाउनुहोस्</translation>
 <translation id="7031646650991750659">तपाईंले स्थापना गर्नुभएका Google Play एपहरू</translation>
@@ -3613,6 +3631,7 @@
 <translation id="741204030948306876">हुन्छ, म सहमत छु</translation>
 <translation id="7416351320495623771">पासवर्डहरूको व्यवस्थापन गर्नुहोस्…</translation>
 <translation id="7416898721136759658">अनुदान, छात्रवृत्ति तथा आर्थिक सहयोग</translation>
+<translation id="741772962178517671">Affirm</translation>
 <translation id="7418620734632363981">प्रोग्रामिङ</translation>
 <translation id="7419091773564635591">कम्प्युटर तथा इलेक्ट्रोनिक्स</translation>
 <translation id="7419106976560586862">प्रोफाइल मार्ग</translation>
@@ -3659,6 +3678,7 @@
 <translation id="7485085230273446323">व्यापार तथा उद्योगधन्दा</translation>
 <translation id="7485870689360869515">कुनैपनि डाटा भेटिएन।</translation>
 <translation id="7486880426035242089">OneDrive</translation>
+<translation id="7489255442002627311"><ph name="BNPL_ISSUER_NAME" /> ले तपाईंको योग्यता जाँच गर्ने छ (यसो गर्दा तपाईंको क्रेडिट स्कोर घटबढ हुँदैन)। स्वीकृत गरिएका खण्डमा <ph name="BNPL_ISSUER_NAME" /> ले तपाईंलाई छनौट गर्न मिल्ने भुक्तानी योजनाहरू उपलब्ध गराउने छ। त्यसपछि तपाईं भुक्तानी योजना छनौट गरेर खरिद प्रक्रिया पूरा गर्न सक्नुहुन्छ।</translation>
 <translation id="7489392576326061356">स्याम्पु तथा कन्डिसनर</translation>
 <translation id="7495528107193238112">यो सामग्रीलाई रोक लगाइएको छ। यो समस्या समाधान गर्न उक्त साइटका मालिकसँग सम्पर्क गर्नुहोस्।</translation>
 <translation id="749865518782565832">प्लम्बिङ</translation>
@@ -3715,6 +3735,7 @@
 <translation id="7569983096843329377">कालो</translation>
 <translation id="7574998639136359461">हिउँदे खेलकुदसम्बन्धी उपकरण</translation>
 <translation id="7575207903026901870">सुझावको बटन हटाउनुहोस्, यो सुझाव हटाउन Enter थिच्नुहोस्</translation>
+<translation id="7575800019233204241">"तपाईंको जडान निजी छैन" वा "&lt;span class="error-code"&gt;NET::ERR_CERT_AUTHORITY_INVALID&lt;/span&gt;" वा "&lt;span class="error-code"&gt;ERR_CERT_COMMON_NAME_INVALID&lt;/span&gt;" वा "&lt;span class="error-code"&gt;NET::ERR_CERT_WEAK_SIGNATURE_ALGORITHM&lt;/span&gt;" वा "SSL प्रमाणपत्रसम्बन्धी त्रुटि"</translation>
 <translation id="7575887283389198269">मोबाइल फोन</translation>
 <translation id="7578104083680115302">तपाईंले Google मार्फत सुरक्षित गर्नुभएका कार्डहरू प्रयोग गर्दै साइट र एपहरूमा द्रुत रूपमा भुक्तानी गर्नुहोस्।</translation>
 <translation id="7579442726219254162">"<ph name="APPLICATION_ID" />" को व्यवस्थित कन्फिगुरेसनमा भएको अज्ञात भेरिएबल "<ph name="VARIABLE" />"।</translation>
@@ -3901,6 +3922,7 @@
 <translation id="791107458486222637">परिणाम रिडू गरिँदै छ</translation>
 <translation id="791551905239004656">चित्र कोर्ने तथा रङ भर्ने काम</translation>
 <translation id="7916162853251942238">फ्लेक्सो बेस</translation>
+<translation id="791698251820376781">तपाईंको सङ्गठनले तपाईंलाई साइन इन गर्ने अनुमति दिएको छैन</translation>
 <translation id="7926503317156566022">उड्डयन उद्योग</translation>
 <translation id="793209273132572360">ठेगाना बदल्ने हो?</translation>
 <translation id="7932579305932748336">कोट</translation>
@@ -4224,7 +4246,6 @@
 <translation id="8473626140772740486">३०० x ४५० मिलिमिटर</translation>
 <translation id="8473863474539038330">ठेगाना र थप कुराहरू</translation>
 <translation id="8474910779563686872">विकासकर्ताका विवरणहरू देखाउनुहोस्</translation>
-<translation id="8476959635632921417">यो ठेगाना सेभ गर्न र यसलाई आफ्ना सबै डिभाइसमा प्रयोग गर्न आफ्नो पहिचान पुष्टि गर्नुहोस्</translation>
 <translation id="8479754468255770962">फेदको बायाँपट्टि स्टिच</translation>
 <translation id="8483229036294884935">तपाईंको Google खाता <ph name="ACCOUNT" /> बाट यो ठेगाना मेटाइने छ</translation>
 <translation id="8488350697529856933">मा लागू हुन्छ</translation>
@@ -4608,11 +4629,13 @@
 <translation id="9183425211371246419"><ph name="HOST_NAME" /> ले असमर्थित प्रोटोकल प्रयोग गर्दछ।</translation>
 <translation id="918454845714257218"><ph name="SIDE_OF_CARD" /> मा भएको कोड जाँच गर्नुहोस् र फेरि प्रयास गर्नुहोस्</translation>
 <translation id="9186203289258525843">Chrome लाई सिस्टमको डिफल्ट ब्राउजर बनाउने बटन, Chrome लाई सिस्टमको डिफल्ट ब्राउजर बनाउन यो बटन थिच्नुहोस्</translation>
+<translation id="9189468832660648522"><ph name="MEMBER_FIRST_NAME" /> ले यो ट्याब परिवर्तन गर्नुभयो</translation>
 <translation id="9189789270972826888">कार्डका विवरणहरू स्वतः भरिएको छैन भने तल दिइएका विवरणहरूमा क्लिक गरी तिनलाई कपी र पेस्ट गर्नुहोस्। <ph name="IDS_AUTOFILL_FILLED_CARD_INFORMATION_BUBBLE_LEARN_MORE_LINK_LABEL" /></translation>
 <translation id="9190557999028587593">४ हप्ताभन्दा पुराना विषयहरू स्वतः मेटाइन्छन्</translation>
 <translation id="9191834167571392248">फेदको बायाँपट्टि प्वाल</translation>
 <translation id="9192361865877479444">मेटल (म्याट)</translation>
 <translation id="9192947025498305328">स्वास्थ्य तथा वातावरणमैत्री सौन्दर्य प्रसाधन</translation>
+<translation id="9195969368671142407">तपाईंको सङ्गठनले तपाईंको Google खातामा सेभ गर्न पाइने कुराहरूको सीमा तोकेका अवस्थामा तपाईं ट्याब समूह सेयर गर्न वा तिनमा सामेल हुन पाउनुहुन्न</translation>
 <translation id="9199905725844810519">प्रिन्ट गर्ने सुविधा ब्लक गरिएको छ</translation>
 <translation id="9201904868909900493">सर्वेक्षण खोलिँदै छ...</translation>
 <translation id="9204089334327209740">अपलोड गर्ने प्रक्रिया पूरा भएपछि तपाईं <ph name="CLOUD_PROVIDER" /> मा गई आफ्ना फाइल परिमार्जन गर्न सक्नुहुन्छ। ट्र्यासमा भएका सबै फाइलसहित डिभाइसको भण्डारण स्वतः मेटाइने छ।</translation>

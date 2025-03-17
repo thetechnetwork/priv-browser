@@ -15,7 +15,6 @@
 #include "base/strings/string_util.h"
 #include "base/time/time.h"
 #include "build/build_config.h"
-#include "build/chromeos_buildflags.h"
 #include "chrome/browser/app_mode/app_mode_utils.h"
 #include "chrome/browser/ash/shimless_rma/chrome_shimless_rma_delegate.h"
 #include "chrome/browser/bluetooth/bluetooth_chooser_context_factory.h"
@@ -47,6 +46,7 @@
 #include "chrome/common/channel_info.h"
 #include "chrome/common/pref_names.h"
 #include "chrome/common/url_constants.h"
+#include "chrome/grit/branded_strings.h"
 #include "components/content_settings/core/browser/content_settings_type_set.h"
 #include "components/content_settings/core/browser/cookie_settings.h"
 #include "components/content_settings/core/common/content_settings.h"
@@ -70,6 +70,7 @@
 #include "extensions/buildflags/buildflags.h"
 #include "net/base/registry_controlled_domains/registry_controlled_domain.h"
 #include "services/metrics/public/cpp/ukm_recorder.h"
+#include "ui/base/l10n/l10n_util.h"
 #include "url/origin.h"
 
 #if BUILDFLAG(IS_ANDROID)
@@ -87,7 +88,7 @@
 #include "components/vector_icons/vector_icons.h"
 #endif
 
-#if BUILDFLAG(IS_CHROMEOS_ASH)
+#if BUILDFLAG(IS_CHROMEOS)
 #include "ash/constants/ash_features.h"
 #include "chrome/browser/ash/app_mode/isolated_web_app/kiosk_iwa_data.h"
 #include "chrome/browser/ash/app_mode/isolated_web_app/kiosk_iwa_manager.h"
@@ -509,7 +510,7 @@ std::optional<bool> ChromePermissionsClient::HasPreviouslyAutoRevokedPermission(
 
 std::optional<url::Origin> ChromePermissionsClient::GetAutoApprovalOrigin(
     content::BrowserContext* browser_context) {
-#if BUILDFLAG(IS_CHROMEOS_ASH)
+#if BUILDFLAG(IS_CHROMEOS)
   // In kiosk mode for web apps and isolated web apps, all permission requests
   // are auto-approved for the origin of the main app.
   std::optional<url::Origin> current_kiosk_origin = GetCurrentKioskOrigin();
@@ -674,6 +675,10 @@ favicon::FaviconService* ChromePermissionsClient::GetFaviconService(
   return FaviconServiceFactory::GetForProfile(
       Profile::FromBrowserContext(browser_context),
       ServiceAccessType::EXPLICIT_ACCESS);
+}
+
+const std::u16string ChromePermissionsClient::GetClientApplicationName() const {
+  return l10n_util::GetStringUTF16(IDS_SHORT_PRODUCT_NAME);
 }
 
 #else

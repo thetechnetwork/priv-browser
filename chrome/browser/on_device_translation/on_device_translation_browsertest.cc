@@ -2,9 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <iterator>
 #include <memory>
 
 #include "base/command_line.h"
+#include "base/containers/fixed_flat_set.h"
 #include "base/files/file_util.h"
 #include "base/logging.h"
 #include "base/memory/weak_ptr.h"
@@ -75,6 +77,52 @@ constexpr std::string_view kOriginTrialToken =
     "NDMiLCAiZmVhdHVyZSI6ICJUcmFuc2xhdGlvbkFQSSIsICJleHBpcnkiOiAyMDQ1NDUxMTAxfQ"
     "==";
 
+constexpr auto kLanguagePackKeys = base::MakeFixedFlatSet<LanguagePackKey>({
+    LanguagePackKey::kEn_Es, LanguagePackKey::kEn_Ja,
+    LanguagePackKey::kAr_En, LanguagePackKey::kBn_En,
+    LanguagePackKey::kDe_En, LanguagePackKey::kEn_Fr,
+    LanguagePackKey::kEn_Hi, LanguagePackKey::kEn_It,
+    LanguagePackKey::kEn_Ko, LanguagePackKey::kEn_Nl,
+    LanguagePackKey::kEn_Pl, LanguagePackKey::kEn_Pt,
+    LanguagePackKey::kEn_Ru, LanguagePackKey::kEn_Th,
+    LanguagePackKey::kEn_Tr, LanguagePackKey::kEn_Vi,
+    LanguagePackKey::kEn_Zh, LanguagePackKey::kEn_ZhHant,
+    LanguagePackKey::kBg_En, LanguagePackKey::kCs_En,
+    LanguagePackKey::kDa_En, LanguagePackKey::kEl_En,
+    LanguagePackKey::kEn_Fi, LanguagePackKey::kEn_Hr,
+    LanguagePackKey::kEn_Hu, LanguagePackKey::kEn_Id,
+    LanguagePackKey::kEn_Iw, LanguagePackKey::kEn_Lt,
+    LanguagePackKey::kEn_No, LanguagePackKey::kEn_Ro,
+    LanguagePackKey::kEn_Sk, LanguagePackKey::kEn_Sl,
+    LanguagePackKey::kEn_Sv, LanguagePackKey::kEn_Uk,
+    LanguagePackKey::kEn_Kn, LanguagePackKey::kEn_Ta,
+    LanguagePackKey::kEn_Te, LanguagePackKey::kEn_Mr,
+});
+static_assert(std::size(kLanguagePackKeys) ==
+              static_cast<size_t>(LanguagePackKey::kMaxValue) + 1);
+
+std::string GetPreferredLanguageString(
+    const base::span<const LanguagePackKey>& language_pack_keys) {
+  // Get unique set of language codes from the keys.
+  std::set<std::string_view> language_codes;
+  for (const auto& language_pack_key : language_pack_keys) {
+    language_codes.insert(GetSourceLanguageCode(language_pack_key));
+    language_codes.insert(GetTargetLanguageCode(language_pack_key));
+  }
+
+  // Create a preferred string
+  std::string selected_languages = "";
+  for (auto language_code : language_codes) {
+    selected_languages += language_code;
+    selected_languages += ",";
+  }
+
+  // Remove the extra comma at the end.
+  selected_languages.pop_back();
+
+  return selected_languages;
+}
+
 // Sets the path of the mock library to the command line.
 void SetMockLibraryPathToCommandLine(base::CommandLine* command_line) {
   command_line->AppendSwitchPath(kTranslateKitBinaryPath, GetMockLibraryPath());
@@ -109,6 +157,7 @@ std::string_view GetCanCreateTranslatorResultString(
     case CanCreateTranslatorResult::kAfterDownloadLanguagePackNotReady:
     case CanCreateTranslatorResult::
         kAfterDownloadLibraryAndLanguagePackNotReady:
+    case CanCreateTranslatorResult::kAfterDownloadTranslatorCreationRequired:
       return "downloadable";
     case CanCreateTranslatorResult::kNoNotSupportedLanguage:
     case CanCreateTranslatorResult::kNoAcceptLanguagesCheckFailed:
@@ -159,6 +208,13 @@ class OnDeviceTranslationBrowserTest : public InProcessBrowserTest {
   void SetSelectedLanguages(const std::string_view value) {
     browser()->profile()->GetPrefs()->SetString(
         language::prefs::kSelectedLanguages, value);
+  }
+
+  // Sets the SelectedLanguages prefs to support all the languages in the
+  // `language_pack_keys`. This will change the AcceptLanguages pref.
+  void SetSelectedLanguages(
+      const base::span<const LanguagePackKey>& language_pack_keys) {
+    SetSelectedLanguages(GetPreferredLanguageString(language_pack_keys));
   }
 
   // Tests the behavior of availability().
@@ -575,26 +631,37 @@ IN_PROC_BROWSER_TEST_F(OnDeviceTranslationBrowserTest,
                        ExceedLanguagePackCount) {
   MockComponentManager mock_component_manager(GetTempDir());
   mock_component_manager.ExpectCallRegisterTranslateKitComponentAndInstall();
-  mock_component_manager.ExpectCallRegisterLanguagePackComponentAndInstall(
-      {LanguagePackKey::kEn_Ja, LanguagePackKey::kEn_Es,
-       LanguagePackKey::kEn_Zh});
-
+  const base::span<const LanguagePackKey> language_packs =
+      base::span(kLanguagePackKeys);
   NavigateToEmptyPage();
 
-  // Create a translator for En => Ja.
-  TestSimpleTranslationWorks(browser(), "en", "ja");
-  // Create a translator for En => Es.
-  TestSimpleTranslationWorks(browser(), "en", "es");
-  // Create a translator for En => Zh.
-  TestSimpleTranslationWorks(browser(), "en", "zh");
+  // Get the amount of packages we can install and assert that we have enough
+  // language packs for this test.
+  size_t installable_package_count =
+      on_device_translation::GetInstallablePackageCount(0);
+  ASSERT_GE(language_packs.size(), installable_package_count + 1);
 
+  // Add all the languages we're going to test to the selected languages so we
+  // don't fail PassAcceptLanguagesCheck.
+  SetSelectedLanguages(language_packs.first(installable_package_count + 1));
+
+  // Test that we can install all the language packs up to the language pack
+  // limitation.
+  mock_component_manager.ExpectCallRegisterLanguagePackComponentAndInstall(
+      language_packs.first(installable_package_count));
+  for (const auto& language_pack_key :
+       language_packs.first(installable_package_count)) {
+    TestSimpleTranslationWorks(browser(), language_pack_key);
+  }
+
+  // The language pack count is equal to the limitation. So no more language
+  // pack can be downloaded.
   auto console_observer = CreateConsoleObserver(
       "The Translator API language pack count exceeded the limitation. See "
       "https://developer.chrome.com/docs/ai/"
       "translator-api?#supported-languages for more details.");
 
-  // Create a translator for En => Hi.
-  TestCreateTranslator(browser(), "en", "hi",
+  TestCreateTranslator(browser(), language_packs.at(installable_package_count),
                        "NotSupportedError: Unable to create translator for the "
                        "given source and target language.");
 
@@ -778,9 +845,61 @@ class OnDeviceTranslationV1BrowserTest : public OnDeviceTranslationBrowserTest {
   }
   ~OnDeviceTranslationV1BrowserTest() override = default;
 
+ protected:
+  content::BrowserContext* GetBrowserContext() {
+    return browser()
+        ->tab_strip_model()
+        ->GetActiveWebContents()
+        ->GetBrowserContext();
+  }
+
+  const url::Origin GetLastCommittedOrigin() {
+    return browser()
+        ->tab_strip_model()
+        ->GetActiveWebContents()
+        ->GetPrimaryMainFrame()
+        ->GetLastCommittedOrigin();
+  }
+
  private:
   base::test::ScopedFeatureList scoped_feature_list_;
 };
+
+// The language model limit is not triggered when the V1 flag is enabled.
+IN_PROC_BROWSER_TEST_F(OnDeviceTranslationV1BrowserTest,
+                       NoLanguageModelLimitation) {
+  MockComponentManager mock_component_manager(GetTempDir());
+  mock_component_manager.ExpectCallRegisterTranslateKitComponentAndInstall();
+  const base::span<const LanguagePackKey> language_packs =
+      base::span(kLanguagePackKeys);
+  NavigateToEmptyPage();
+
+  // Expect that the number of available language packs is less than the
+  // installable language pack size, given there is no limitation in place.
+  size_t installable_package_count =
+      on_device_translation::GetInstallablePackageCount(0);
+  ASSERT_LE(language_packs.size() + 1, installable_package_count);
+
+  // Add all the languages we're going to test to the selected languages so we
+  // don't fail `PassAcceptLanguagesCheck`.
+  SetSelectedLanguages(language_packs);
+
+  // Test that we can install all of the possible language packs for
+  // translation.
+  mock_component_manager.ExpectCallRegisterLanguagePackComponentAndInstall(
+      language_packs);
+  for (const auto& language_pack_key : language_packs) {
+    TestSimpleTranslationWorks(browser(), language_pack_key);
+  }
+
+  // Get the last language pack key.
+  LanguagePackKey last_language_pack = *(language_packs.end() - 1);
+
+  // Confirm that the last language pack install succeeded.
+  TestTranslationAvailable(browser(), GetSourceLanguageCode(last_language_pack),
+                           GetTargetLanguageCode(last_language_pack),
+                           "available");
+}
 
 // Tests that `ai.translator.availability()` for a translation
 // containing a language outside of English + the user's preferred languages.
@@ -805,6 +924,74 @@ IN_PROC_BROWSER_TEST_F(OnDeviceTranslationV1BrowserTest,
   // preferred languages.
   mock_component_manager.InstallMockLanguagePack(LanguagePackKey::kEn_Ja);
   TestTranslationAvailable(browser(), "ja", "fr", "downloadable");
+}
+
+// A delay is triggered for a "downloadable" translation containing a language
+// outside of English + preferred languages.
+IN_PROC_BROWSER_TEST_F(
+    OnDeviceTranslationV1BrowserTest,
+    CreateTranslator_Delay_ForMaskedDownloadableTranslation) {
+  // Setup Translate Kit Component and select Spanish as the preferred language.
+  SetSelectedLanguages("en,es");
+  MockComponentManager mock_component_manager(GetTempDir());
+  mock_component_manager.InstallMockTranslateKitComponent();
+  NavigateToEmptyPage();
+
+  auto manager =
+      MockTranslationManagerImpl(GetBrowserContext(), GetLastCommittedOrigin());
+
+  // Simulate the download of an additional language pack (Japanese) by another
+  // site.
+  mock_component_manager.InstallMockLanguagePack(LanguagePackKey::kEn_Ja);
+
+  // The delay is triggered upon the initial translator creation for Japanese,
+  // given that it is not a preferred language.
+  EXPECT_CALL(manager, GetTranslatorDownloadDelay()).Times(1);
+  TestSimpleTranslationWorks(browser(), "en", "ja");
+}
+
+// No delay is triggered for a "downloadable" translation between English +
+// preferred languages.
+IN_PROC_BROWSER_TEST_F(OnDeviceTranslationV1BrowserTest,
+                       CreateTranslator_NoDelay_DownloadableTranslation) {
+  SetSelectedLanguages("en,es");
+  MockComponentManager mock_component_manager(GetTempDir());
+  mock_component_manager.InstallMockTranslateKitComponent();
+  NavigateToEmptyPage();
+
+  auto manager =
+      MockTranslationManagerImpl(GetBrowserContext(), GetLastCommittedOrigin());
+  mock_component_manager.ExpectCallRegisterLanguagePackComponentAndInstall(
+      {LanguagePackKey::kEn_Es});
+  EXPECT_CALL(manager, GetTranslatorDownloadDelay()).Times(0);
+  TestSimpleTranslationWorks(browser(), "en", "es");
+
+  // No delay is triggered now that the translation is "available".
+  EXPECT_CALL(manager, GetTranslatorDownloadDelay()).Times(0);
+  TestSimpleTranslationWorks(browser(), "en", "es");
+}
+
+// No delay is triggered in attempt to create a translator for an unsupported
+// language.
+IN_PROC_BROWSER_TEST_F(OnDeviceTranslationV1BrowserTest,
+                       CreateTranslator_NoDelay_UnsupportedLanguage) {
+  SetSelectedLanguages("en,xx");
+  MockComponentManager mock_component_manager(GetTempDir());
+  mock_component_manager.InstallMockTranslateKitComponent();
+  NavigateToEmptyPage();
+
+  auto manager =
+      MockTranslationManagerImpl(GetBrowserContext(), GetLastCommittedOrigin());
+
+  EXPECT_CALL(manager, GetTranslatorDownloadDelay()).Times(0);
+  EXPECT_NE(EvalJsCatchingError(R"(
+      const translator = await ai.translator.create({
+        sourceLanguage: 'en',
+        targetLanguage: 'xx',
+      });
+      return await translator.translate('hello');
+    )"),
+            "en to xx: hello");
 }
 
 // Tests the behavior of the crash of calling create() and availability().
@@ -1150,22 +1337,36 @@ IN_PROC_BROWSER_TEST_F(OnDeviceTranslationBrowserTest,
   EXPECT_CALL(mock_component_manager, RegisterTranslateKitComponentImpl())
       .Times(0);
   mock_component_manager.InstallMockTranslateKitComponent();
-  mock_component_manager.InstallMockLanguagePack(LanguagePackKey::kEn_Es);
-  // The language pack count is 1, which is less than the limitation.
-  TestCanTranslateResult(
-      "en", "fr",
-      CanCreateTranslatorResult::kAfterDownloadLanguagePackNotReady);
-  mock_component_manager.InstallMockLanguagePack(LanguagePackKey::kEn_Ja);
-  // The language pack count is 2, which is less than the limitation.
-  TestCanTranslateResult(
-      "en", "fr",
-      CanCreateTranslatorResult::kAfterDownloadLanguagePackNotReady);
-  mock_component_manager.InstallMockLanguagePack(LanguagePackKey::kAr_En);
-  // The language pack count is 3, which is equal to the limitation. So no more
-  // language pack can be downloaded.
-  TestCanTranslateResult(
-      "en", "fr",
-      CanCreateTranslatorResult::kNoExceedsLanguagePackCountLimitation);
+
+  // No language packs are installed yet.
+  size_t installed_package_count = 0;
+
+  // Get the amount of packages we can install.
+  size_t installable_package_count =
+      on_device_translation::GetInstallablePackageCount(
+          installed_package_count);
+  ASSERT_NE(installable_package_count, std::numeric_limits<size_t>::max());
+
+  for (const auto& language_pack_key : kLanguagePackKeys) {
+    mock_component_manager.InstallMockLanguagePack(language_pack_key);
+    installed_package_count++;
+
+    if (installed_package_count < installable_package_count) {
+      // The language pack count is less than the limitation.
+      TestCanTranslateResult(
+          "en", "fr",
+          CanCreateTranslatorResult::kAfterDownloadLanguagePackNotReady);
+    } else {
+      // The language pack count is equal to the limitation. So no more language
+      // pack can be downloaded.
+      TestCanTranslateResult(
+          "en", "fr",
+          CanCreateTranslatorResult::kNoExceedsLanguagePackCountLimitation);
+      break;
+    }
+  }
+
+  ASSERT_EQ(installed_package_count, installable_package_count);
 }
 
 // Test the behavior of availability() when the language pack is not ready, and
@@ -1182,24 +1383,43 @@ IN_PROC_BROWSER_TEST_F(
   EXPECT_CALL(mock_component_manager, RegisterTranslateKitComponentImpl())
       .Times(0);
   mock_component_manager.InstallMockTranslateKitComponent();
-  mock_component_manager.InstallMockLanguagePack(LanguagePackKey::kEn_Es);
-  // The language pack count is 1, which is less than the limitation.
-  TestCanTranslateResult(
-      "hi", "fr",
-      CanCreateTranslatorResult::kAfterDownloadLanguagePackNotReady);
-  mock_component_manager.InstallMockLanguagePack(LanguagePackKey::kEn_Ja);
-  // The language pack count is 2, which is less than the limitation. But if we
-  // download the required language packs, the language pack count will exceed
-  // the limitation. So availability() returns `no`.
-  TestCanTranslateResult(
-      "hi", "fr",
-      CanCreateTranslatorResult::kNoExceedsLanguagePackCountLimitation);
-  mock_component_manager.InstallMockLanguagePack(LanguagePackKey::kAr_En);
-  // The language pack count is 3, which is equal to the limitation. So no more
-  // language pack can be downloaded.
-  TestCanTranslateResult(
-      "hi", "fr",
-      CanCreateTranslatorResult::kNoExceedsLanguagePackCountLimitation);
+
+  // No language packs are installed yet.
+  size_t installed_package_count = 0;
+
+  // Get the amount of packages we can install.
+  size_t installable_package_count =
+      on_device_translation::GetInstallablePackageCount(
+          installed_package_count);
+  ASSERT_NE(installable_package_count, std::numeric_limits<size_t>::max());
+
+  for (const auto& language_pack_key : kLanguagePackKeys) {
+    mock_component_manager.InstallMockLanguagePack(language_pack_key);
+    installed_package_count++;
+
+    if (installed_package_count < installable_package_count - 1) {
+      // The language pack count is less than the limitation.
+      TestCanTranslateResult(
+          "hi", "fr",
+          CanCreateTranslatorResult::kAfterDownloadLanguagePackNotReady);
+    } else if (installed_package_count < installable_package_count) {
+      // The language pack count is less than the limitation. But if
+      // we download the required language packs, the language pack count will
+      // exceed the limitation. So availability() returns `no`.
+      TestCanTranslateResult(
+          "hi", "fr",
+          CanCreateTranslatorResult::kNoExceedsLanguagePackCountLimitation);
+    } else {
+      // The language pack count is 3, which is equal to the limitation. So no
+      // more language pack can be downloaded.
+      TestCanTranslateResult(
+          "hi", "fr",
+          CanCreateTranslatorResult::kNoExceedsLanguagePackCountLimitation);
+      break;
+    }
+  }
+
+  ASSERT_EQ(installed_package_count, installable_package_count);
 }
 
 // Test the behavior of availability() when PassAcceptLanguagesCheck() checks
@@ -1217,216 +1437,210 @@ IN_PROC_BROWSER_TEST_F(OnDeviceTranslationBrowserTest,
       "en", "ko", CanCreateTranslatorResult::kNoAcceptLanguagesCheckFailed);
 }
 
-// Test the behavior of capabilities() when the execution context is not valid.
+// Test the behavior of `availability()` when the execution context is not
+// valid.
 IN_PROC_BROWSER_TEST_F(OnDeviceTranslationBrowserTest,
-                       CapabilitiesInvalidStateError) {
+                       Availability_InvalidStateError) {
   MockComponentManager mock_component_manager(GetTempDir());
   mock_component_manager.InstallMockTranslateKitComponent();
   NavigateToEmptyPage();
-  EXPECT_EQ(EvalJsCatchingError(
-                R"(
-      const iframe = document.createElement('iframe');
-      const loadPromise = new Promise(resolve => {
-        iframe.addEventListener('load', resolve);
-      });
-      iframe.src = location.href;
-      document.body.appendChild(iframe);
-      await loadPromise;
-      const iframeAITranslator = iframe.contentWindow.ai.translator;
-      document.body.removeChild(iframe);
-      await iframeAITranslator.capabilities();
-    )"),
-            "InvalidStateError: Failed to execute 'capabilities' on "
+  EXPECT_EQ(EvalJsCatchingError(R"(
+        const iframe = document.createElement('iframe');
+        const loadPromise = new Promise(resolve => {
+          iframe.addEventListener('load', resolve);
+        });
+        iframe.src = location.href;
+        document.body.appendChild(iframe);
+        await loadPromise;
+        const iframeAITranslator = iframe.contentWindow.ai.translator;
+        document.body.removeChild(iframe);
+        await iframeAITranslator.availability({
+          sourceLanguage: "en",
+          targetLanguage: "es"
+        });
+      )"),
+            "InvalidStateError: Failed to execute 'availability' on "
             "'AITranslatorFactory': The execution context is not valid.");
 }
 
-// Test the behavior of AITranslatorCapabilities.available when the library is
-// not ready.
+// Test the behavior of `availability()` for an unsupported language.
 IN_PROC_BROWSER_TEST_F(OnDeviceTranslationBrowserTest,
-                       CapabilitiesAvailableAfterDownload) {
-  MockComponentManager mock_component_manager(GetTempDir());
-  EXPECT_CALL(mock_component_manager, RegisterTranslateKitComponentImpl())
-      .Times(0);
-  NavigateToEmptyPage();
-  TestTranslatorCapabilitiesAvailable(browser(), "after-download");
-}
-
-// Test the behavior of AITranslatorCapabilities.available when the library is
-// ready.
-IN_PROC_BROWSER_TEST_F(OnDeviceTranslationBrowserTest,
-                       CapabilitiesAvailableReadily) {
-  MockComponentManager mock_component_manager(GetTempDir());
-  mock_component_manager.InstallMockTranslateKitComponent();
-  NavigateToEmptyPage();
-  TestTranslatorCapabilitiesAvailable(browser(), "readily");
-}
-
-// Test the behavior of AITranslatorCapabilities.languagePairAvailable() when
-// the language pack is ready.
-IN_PROC_BROWSER_TEST_F(OnDeviceTranslationBrowserTest,
-                       CapabilitiesLanguagesReadily) {
-  MockComponentManager mock_component_manager(GetTempDir());
-  mock_component_manager.InstallMockTranslateKitComponent();
-  mock_component_manager.InstallMockLanguagePack(LanguagePackKey::kEn_Ja);
-  NavigateToEmptyPage();
-  TestLanguagePairAvailable(browser(), "en", "ja", "readily");
-}
-
-// Test the behavior of AITranslatorCapabilities.languagePairAvailable() when
-// the language pack is not ready.
-IN_PROC_BROWSER_TEST_F(OnDeviceTranslationBrowserTest,
-                       CapabilitiesLanguagesAfterDownloadLanguagePackNotReady) {
-  MockComponentManager mock_component_manager(GetTempDir());
-  mock_component_manager.InstallMockTranslateKitComponent();
-  NavigateToEmptyPage();
-  TestLanguagePairAvailable(browser(), "en", "ja", "after-download");
-}
-
-// Test the behavior of AITranslatorCapabilities.languagePairAvailable() when
-// both the library and the language pack are not ready.
-IN_PROC_BROWSER_TEST_F(
-    OnDeviceTranslationBrowserTest,
-    CapabilitiesLanguagesAfterDownloadLibAndLanguagePackNotReady) {
-  MockComponentManager mock_component_manager(GetTempDir());
-  NavigateToEmptyPage();
-  TestLanguagePairAvailable(browser(), "en", "ja", "after-download");
-}
-
-// Test the behavior of AITranslatorCapabilities.languagePairAvailable() when
-// the language pack is ready, but the library is not ready.
-IN_PROC_BROWSER_TEST_F(OnDeviceTranslationBrowserTest,
-                       CapabilitiesLanguagesAfterDownloadLibraryNotReady) {
-  MockComponentManager mock_component_manager(GetTempDir());
-  mock_component_manager.InstallMockLanguagePack(LanguagePackKey::kEn_Ja);
-  NavigateToEmptyPage();
-  // Note: languagePairAvailable() returns "readily". This is different from
-  // availability() which returns "after-download" in this case. See
-  // CanTranslateAfterDownloadLibraryNotReady.
-  TestLanguagePairAvailable(browser(), "en", "ja", "readily");
-}
-
-// Test the behavior of AITranslatorCapabilities.languagePairAvailable() when
-// when the language is not supported.
-IN_PROC_BROWSER_TEST_F(OnDeviceTranslationBrowserTest,
-                       CapabilitiesLanguagesNoNotSupportedLanguage) {
-  // This test case uses English as the source language and an unsupported
-  // language code as the target language. To avoid the failure of
-  // PassAcceptLanguagesCheck(), we set the SelectedLanguages to be English and
-  // the unsupported language code.
+                       Availability_Unavailable_NotSupportedLanguage) {
+  // Set the unsupported language as a preferred language in order to avoid
+  // `PassAcceptLanguagesCheck()` failure, for testing purposes.
   SetSelectedLanguages("en,xx");
   MockComponentManager mock_component_manager(GetTempDir());
   NavigateToEmptyPage();
-  TestLanguagePairAvailable(browser(), "en", "xx", "no");
+  TestTranslationAvailable(browser(), "en", "xx", "unavailable");
 }
 
-// Test the behavior of AITranslatorCapabilities.languagePairAvailable() when
-// the language pack is not ready, and the language pack count will exceed the
-// limitation.
+// Test the behavior of `availability()` when the `PassAcceptLanguagesCheck()`
+// check fails.
 IN_PROC_BROWSER_TEST_F(OnDeviceTranslationBrowserTest,
-                       CapabilitiesLanguagesNoExceedsLangPackCountLimitation) {
-  // This test case uses English as the source language and French as the target
-  // language. To avoid the failure of PassAcceptLanguagesCheck(), we set the
-  // SelectedLanguages to be English and French.
-  SetSelectedLanguages("en,fr");
-  MockComponentManager mock_component_manager(GetTempDir());
-  NavigateToEmptyPage();
-  mock_component_manager.InstallMockTranslateKitComponent();
-  mock_component_manager.InstallMockLanguagePack(LanguagePackKey::kEn_Es);
-  // The language pack count is 1, which is less than the limitation.
-  TestLanguagePairAvailable(browser(), "en", "fr", "after-download");
-  mock_component_manager.InstallMockLanguagePack(LanguagePackKey::kEn_Ja);
-  // The language pack count is 2, which is less than the limitation.
-  TestLanguagePairAvailable(browser(), "en", "fr", "after-download");
-  mock_component_manager.InstallMockLanguagePack(LanguagePackKey::kAr_En);
-  // The language pack count is 3, which is equal to the limitation. So no more
-  // language pack can be downloaded.
-  TestLanguagePairAvailable(browser(), "en", "fr", "no");
-}
-
-// Test the behavior of AITranslatorCapabilities.languagePairAvailable() when
-// the language pack is not ready, and the language pack count exceed the
-// limitation after downloading two language packs.
-IN_PROC_BROWSER_TEST_F(
-    OnDeviceTranslationBrowserTest,
-    CapabilitiesLanguagesNoExceedsLangPackCountLimitationTwoPackagesRequired) {
-  // This test case use Hindi and French as the source and target languages.
-  // To translate from Hindi to French, two language packs are required one for
-  // hi->en and one for en->fr.
-  SetSelectedLanguages("hi,fr");
-  MockComponentManager mock_component_manager(GetTempDir());
-  NavigateToEmptyPage();
-  mock_component_manager.InstallMockTranslateKitComponent();
-  mock_component_manager.InstallMockLanguagePack(LanguagePackKey::kEn_Es);
-  // The language pack count is 1, which is less than the limitation.
-  TestLanguagePairAvailable(browser(), "hi", "fr", "after-download");
-  mock_component_manager.InstallMockLanguagePack(LanguagePackKey::kEn_Ja);
-  // The language pack count is 2, which is less than the limitation. But if we
-  // download the required language packs, the language pack count will exceed
-  // the limitation. So availability() returns `no`.
-  TestLanguagePairAvailable(browser(), "hi", "fr", "no");
-  mock_component_manager.InstallMockLanguagePack(LanguagePackKey::kAr_En);
-  // The language pack count is 3, which is equal to the limitation. So no more
-  // language pack can be downloaded.
-  TestLanguagePairAvailable(browser(), "hi", "fr", "no");
-}
-
-// Test the behavior of AITranslatorCapabilities.languagePairAvailable() when
-// PassAcceptLanguagesCheck() checks fails.
-IN_PROC_BROWSER_TEST_F(OnDeviceTranslationBrowserTest,
-                       CapabilitiesLanguagesNoAcceptLanguagesCheckFailed) {
+                       Availability_Unavailable_AcceptLanguagesCheckFailed) {
   MockComponentManager mock_component_manager(GetTempDir());
   mock_component_manager.InstallMockTranslateKitComponent();
   mock_component_manager.InstallMockLanguagePack(LanguagePackKey::kEn_Ko);
   NavigateToEmptyPage();
+
   // Korean is not treated as a popular language. So if `ko` is not in the
-  // accept languages, PassAcceptLanguagesCheck() will return false.
-  TestLanguagePairAvailable(browser(), "en", "ko", "no");
+  // accept languages, `PassAcceptLanguagesCheck()` will return false.
+  TestTranslationAvailable(browser(), "en", "ko", "unavailable");
 }
 
-// Test the behavior of AITranslatorCapabilities.languagePairAvailable() when
-// both source and target languages are in the Accept-Language. But one language
-// is popular and the other is not.
-IN_PROC_BROWSER_TEST_F(
-    OnDeviceTranslationBrowserTest,
-    CapabilitiesLanguagesReadilyForSelectedPopularAndNonPopular) {
-  SetSelectedLanguages("ja,fr");
-  MockComponentManager mock_component_manager(GetTempDir());
-  mock_component_manager.InstallMockLanguagePack(LanguagePackKey::kEn_Ja);
-  mock_component_manager.InstallMockLanguagePack(LanguagePackKey::kEn_Fr);
-  NavigateToEmptyPage();
-  TestLanguagePairAvailable(browser(), "ja", "fr", "readily");
-}
-
-// Test the behavior of AITranslatorCapabilities.languagePairAvailable() when
-// the source language and the target language are the same.
+// Test the behavior of `availability()` where the source language and the
+// target language are the same language.
 IN_PROC_BROWSER_TEST_F(OnDeviceTranslationBrowserTest,
-                       CapabilitiesLanguagesNoForSameLanguages) {
+                       Availability_Unavailable_SameSourceAndTargetLanguage) {
   SetSelectedLanguages("en,ja");
   MockComponentManager mock_component_manager(GetTempDir());
   mock_component_manager.InstallMockLanguagePack(LanguagePackKey::kEn_Ja);
   NavigateToEmptyPage();
-  TestLanguagePairAvailable(browser(), "ja", "ja", "no");
-  TestLanguagePairAvailable(browser(), "en", "en", "no");
+  TestTranslationAvailable(browser(), "ja", "ja", "unavailable");
+  TestTranslationAvailable(browser(), "en", "en", "unavailable");
 }
 
-// Test the behavior of `ai.translator.availability()` for translations
-// containing English + a preferred language.
+// Test the behavior of `availability()` when the language pack is not ready,
+// and the language pack count will exceed the imitation.
 IN_PROC_BROWSER_TEST_F(OnDeviceTranslationBrowserTest,
-                       TranslatorAvailabilityPreferredLanguages) {
+                       Availability_No_ExceedsLangPackCountLimitation) {
+  // This test case uses English as the source language and French as the target
+  // language. To avoid the failure of `PassAcceptLanguagesCheck()`, we set the
+  // preferred languages to English and French.
+  SetSelectedLanguages("en,fr");
+  MockComponentManager mock_component_manager(GetTempDir());
+  NavigateToEmptyPage();
+  mock_component_manager.InstallMockTranslateKitComponent();
+
+  // No language packs are installed yet.
+  size_t installed_package_count = 0;
+
+  // Get the amount of packages we can install.
+  size_t installable_package_count =
+      on_device_translation::GetInstallablePackageCount(
+          installed_package_count);
+  ASSERT_NE(installable_package_count, std::numeric_limits<size_t>::max());
+
+  for (const auto& language_pack_key : kLanguagePackKeys) {
+    mock_component_manager.InstallMockLanguagePack(language_pack_key);
+    installed_package_count++;
+
+    if (installed_package_count < installable_package_count) {
+      // The language pack count is less than the limitation.
+      TestTranslationAvailable(browser(), "en", "fr", "downloadable");
+    } else {
+      // The language pack count is equal to the limitation. So no more language
+      // pack can be downloaded.
+      TestTranslationAvailable(browser(), "en", "fr", "unavailable");
+      break;
+    }
+  }
+
+  ASSERT_EQ(installed_package_count, installable_package_count);
+}
+
+// Test the behavior of `availability()` when the language pack is not ready,
+// and the language pack count exceeds the limitation after downloading two
+// more language packs.
+IN_PROC_BROWSER_TEST_F(
+    OnDeviceTranslationBrowserTest,
+    Availability_Unavailable_ExceedsLangPackCountLimitationTwoPackagesRequired) {
+  // This test case uses Hindi and French as the source and target languages.
+  // To translate from Hindi to French, two language packs are required: one for
+  // the hi->en translation and one for the en->fr translation.
+  SetSelectedLanguages("hi,fr");
+  MockComponentManager mock_component_manager(GetTempDir());
+  NavigateToEmptyPage();
+  mock_component_manager.InstallMockTranslateKitComponent();
+
+  // No language packs are installed yet.
+  size_t installed_package_count = 0;
+
+  // Get the amount of packages we can install.
+  size_t installable_package_count =
+      on_device_translation::GetInstallablePackageCount(
+          installed_package_count);
+  ASSERT_NE(installable_package_count, std::numeric_limits<size_t>::max());
+
+  for (const auto& language_pack_key : kLanguagePackKeys) {
+    mock_component_manager.InstallMockLanguagePack(language_pack_key);
+    installed_package_count++;
+
+    if (installed_package_count < installable_package_count - 1) {
+      // The language pack count is less than the limitation.
+      TestTranslationAvailable(browser(), "hi", "fr", "downloadable");
+    } else if (installed_package_count < installable_package_count) {
+      // The language pack count is less than the limitation.
+      // If we download the required language packs, the language pack count
+      // will exceed the limitation. As a result, `availability()` is
+      // 'unavailable'.
+      TestTranslationAvailable(browser(), "hi", "fr", "unavailable");
+    } else {
+      // The language pack count is 3, which is equal to the limitation. As a
+      // result, no more language packs can be downloaded.
+      TestTranslationAvailable(browser(), "hi", "fr", "unavailable");
+      break;
+    }
+  }
+
+  ASSERT_EQ(installed_package_count, installable_package_count);
+}
+
+// Test the behavior of `availability()` when both the library and the language
+// packs are not ready.
+IN_PROC_BROWSER_TEST_F(
+    OnDeviceTranslationBrowserTest,
+    Availability_Downloadable_LibraryAndLanguagePackNotReady) {
+  SetSelectedLanguages("en,ja");
+  MockComponentManager mock_component_manager(GetTempDir());
+  NavigateToEmptyPage();
+  TestTranslationAvailable(browser(), "en", "ja", "downloadable");
+}
+
+// Test the behavior of `availability()` when the library is not ready.
+IN_PROC_BROWSER_TEST_F(OnDeviceTranslationBrowserTest,
+                       Availability_Downloadable_LibraryNotReady) {
+  SetSelectedLanguages("en,es");
+  MockComponentManager mock_component_manager(GetTempDir());
+  EXPECT_CALL(mock_component_manager, RegisterTranslateKitComponentImpl())
+      .Times(0);
+  NavigateToEmptyPage();
+  TestTranslationAvailable(browser(), "en", "es", "downloadable");
+}
+
+// Test the behavior of `availability()` when the library is ready, and
+// language packs are not ready.
+IN_PROC_BROWSER_TEST_F(OnDeviceTranslationBrowserTest,
+                       Availability_Downloadable_LanguagePacksNotReady) {
+  SetSelectedLanguages("en,es");
+  MockComponentManager mock_component_manager(GetTempDir());
+  mock_component_manager.InstallMockTranslateKitComponent();
+  NavigateToEmptyPage();
+  TestTranslationAvailable(browser(), "en", "es", "downloadable");
+}
+
+IN_PROC_BROWSER_TEST_F(OnDeviceTranslationBrowserTest,
+                       Availability_Available_ForSelectedPopularAndNonPopular) {
   SetSelectedLanguages("ja,fr");
   MockComponentManager mock_component_manager(GetTempDir());
+  mock_component_manager.InstallMockTranslateKitComponent();
   mock_component_manager.InstallMockLanguagePack(LanguagePackKey::kEn_Ja);
+  mock_component_manager.InstallMockLanguagePack(LanguagePackKey::kEn_Fr);
   NavigateToEmptyPage();
 
-  // Translation is not available until the Language Kit is downloaded.
-  TestTranslationAvailable(browser(), "ja", "en", "downloadable");
-  mock_component_manager.InstallMockTranslateKitComponent();
-  TestTranslationAvailable(browser(), "ja", "en", "available");
-
-  // Translation availability requires download of all required language packs.
-  TestTranslationAvailable(browser(), "ja", "fr", "downloadable");
-  mock_component_manager.InstallMockLanguagePack(LanguagePackKey::kEn_Fr);
   TestTranslationAvailable(browser(), "ja", "fr", "available");
+}
+
+// Test the behavior of `availability()` when both the library and language
+// packs are ready.
+IN_PROC_BROWSER_TEST_F(OnDeviceTranslationBrowserTest,
+                       Availability_Available_LibraryAndLanguagePackReady) {
+  SetSelectedLanguages("en,ja");
+  MockComponentManager mock_component_manager(GetTempDir());
+  mock_component_manager.InstallMockTranslateKitComponent();
+  mock_component_manager.InstallMockLanguagePack(LanguagePackKey::kEn_Ja);
+  NavigateToEmptyPage();
+  TestTranslationAvailable(browser(), "en", "ja", "available");
 }
 
 // Test that calling both the legacy and new API works.
@@ -1460,9 +1674,8 @@ IN_PROC_BROWSER_TEST_F(OnDeviceTranslationBrowserTest, UseBothLegacyAndNewAPI) {
             "en to ja: hello");
 }
 
-// Test the behavior of availability() and
-// AITranslatorCapabilities.languagePairAvailable() when
-// PassAcceptLanguagesCheck() checks is skipped.
+// Test the behavior of availability() when PassAcceptLanguagesCheck() checks
+// is skipped.
 class OnDeviceTranslationSkipAcceptLanguagesCheckBrowserTest
     : public OnDeviceTranslationBrowserTest {
  public:
@@ -1488,17 +1701,6 @@ IN_PROC_BROWSER_TEST_F(OnDeviceTranslationSkipAcceptLanguagesCheckBrowserTest,
   mock_component_manager.InstallMockTranslateKitComponent();
   mock_component_manager.InstallMockLanguagePack(LanguagePackKey::kEn_Ko);
   TestCanTranslateResult("en", "ko", CanCreateTranslatorResult::kReadily);
-}
-
-// Test the behavior of AITranslatorCapabilities.languagePairAvailable() when
-// PassAcceptLanguagesCheck() checks is skipped.
-IN_PROC_BROWSER_TEST_F(OnDeviceTranslationSkipAcceptLanguagesCheckBrowserTest,
-                       CapabilitiesLanguagescceptLanguagesCheckSkipped) {
-  MockComponentManager mock_component_manager(GetTempDir());
-  mock_component_manager.InstallMockTranslateKitComponent();
-  mock_component_manager.InstallMockLanguagePack(LanguagePackKey::kEn_Ko);
-  NavigateToEmptyPage();
-  TestLanguagePairAvailable(browser(), "en", "ko", "readily");
 }
 
 // Test the behavior of Translator API in a cross origin iframe.

@@ -44,7 +44,7 @@ class CORE_EXPORT InvalidationSetToSelectorMap final
     Member<StyleRule> style_rule_;
     unsigned selector_index_;
   };
-  using IndexedSelectorList = HeapHashSet<Member<IndexedSelector>>;
+  using IndexedSelectorList = GCedHeapHashSet<Member<IndexedSelector>>;
 
   enum class SelectorFeatureType {
     kUnknown,
@@ -129,9 +129,9 @@ class CORE_EXPORT InvalidationSetToSelectorMap final
   // execution.
   using InvalidationSetEntry = std::pair<SelectorFeatureType, AtomicString>;
   using InvalidationSetEntryMap =
-      HeapHashMap<InvalidationSetEntry, Member<IndexedSelectorList>>;
+      GCedHeapHashMap<InvalidationSetEntry, Member<IndexedSelectorList>>;
   using InvalidationSetMap =
-      HeapHashMap<const InvalidationSet*, Member<InvalidationSetEntryMap>>;
+      GCedHeapHashMap<const InvalidationSet*, Member<InvalidationSetEntryMap>>;
 
   // Holds the back-map described above.
   Member<InvalidationSetMap> invalidation_set_map_;

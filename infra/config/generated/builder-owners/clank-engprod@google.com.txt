@@ -22,7 +22,9 @@ ci/android-14-tablet-landscape-arm64-rel
 ci/android-14-x64-fyi-rel
 ci/android-14-x64-rel
 ci/android-15-tablet-landscape-x64-dbg-tests
+ci/android-15-tablet-landscape-x64-rel
 ci/android-15-tablet-x64-dbg-tests
+ci/android-15-tablet-x64-rel
 ci/android-15-x64-fyi-rel
 ci/android-15-x64-rel
 ci/android-16-x64-fyi-rel
@@ -57,7 +59,9 @@ try/android-14-tablet-landscape-arm64-rel
 try/android-14-x64-fyi-rel
 try/android-14-x64-rel
 try/android-15-tablet-landscape-x64-dbg
+try/android-15-tablet-landscape-x64-rel
 try/android-15-tablet-x64-dbg
+try/android-15-tablet-x64-rel
 try/android-15-x64-fyi-rel
 try/android-15-x64-rel
 try/android-16-x64-fyi-rel
@@ -69,7 +73,6 @@ try/android-desktop-arm64-compile-dbg
 try/android-desktop-arm64-compile-rel
 try/android-desktop-x64-clobber-rel
 try/android-desktop-x64-compile-dbg
-try/android-desktop-x64-compile-rel
 try/android-desktop-x64-rel
 try/android-desktop-x64-rel-compilator
 try/android-official

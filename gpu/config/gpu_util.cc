@@ -7,6 +7,7 @@
 #include <string_view>
 
 #include "build/build_config.h"
+#include "ui/gl/gpu_preference.h"
 #include "ui/gl/startup_trace.h"
 
 #if BUILDFLAG(IS_WIN)
@@ -315,7 +316,6 @@ void SetProcessGlWorkaroundsFromGpuFeatures(
       .disable_metal = is_enabled(DISABLE_METAL),
       .disable_es3gl_context = is_enabled(DISABLE_ES3_GL_CONTEXT),
 #if BUILDFLAG(IS_WIN)
-      .disable_direct_composition = is_enabled(DISABLE_DIRECT_COMPOSITION),
       .disable_direct_composition_video_overlays =
           is_enabled(DISABLE_DIRECT_COMPOSITION_VIDEO_OVERLAYS),
       .disable_vp_auto_hdr = is_enabled(DISABLE_VP_AUTO_HDR),
@@ -445,8 +445,6 @@ GpuFeatureInfo ComputeGpuFeatureInfoWithNoGpu() {
       kGpuFeatureStatusDisabled;
   gpu_feature_info.status_values[GPU_FEATURE_TYPE_VULKAN] =
       kGpuFeatureStatusDisabled;
-  gpu_feature_info.status_values[GPU_FEATURE_TYPE_CANVAS_OOP_RASTERIZATION] =
-      kGpuFeatureStatusDisabled;
   gpu_feature_info.status_values[GPU_FEATURE_TYPE_ACCELERATED_WEBGPU] =
       kGpuFeatureStatusSoftware;
   gpu_feature_info.status_values[GPU_FEATURE_TYPE_SKIA_GRAPHITE] =
@@ -480,8 +478,6 @@ GpuFeatureInfo ComputeGpuFeatureInfoForSwiftShader() {
   gpu_feature_info.status_values[GPU_FEATURE_TYPE_ACCELERATED_GL] =
       kGpuFeatureStatusDisabled;
   gpu_feature_info.status_values[GPU_FEATURE_TYPE_VULKAN] =
-      kGpuFeatureStatusDisabled;
-  gpu_feature_info.status_values[GPU_FEATURE_TYPE_CANVAS_OOP_RASTERIZATION] =
       kGpuFeatureStatusDisabled;
   gpu_feature_info.status_values[GPU_FEATURE_TYPE_ACCELERATED_WEBGPU] =
       kGpuFeatureStatusSoftware;
@@ -573,9 +569,6 @@ GpuFeatureInfo ComputeGpuFeatureInfo(const GPUInfo& gpu_info,
       GetWebGPUFeatureStatus(blocklisted_features, use_swift_shader);
   gpu_feature_info.status_values[GPU_FEATURE_TYPE_ACCELERATED_2D_CANVAS] =
       Get2DCanvasFeatureStatus(blocklisted_features, use_swift_shader);
-  // TODO(zmo): Remove GPU_FEATURE_TYPE_CANVAS_OOP_RASTERIZATION.
-  gpu_feature_info.status_values[GPU_FEATURE_TYPE_CANVAS_OOP_RASTERIZATION] =
-      kGpuFeatureStatusEnabled;
   gpu_feature_info.status_values[GPU_FEATURE_TYPE_ACCELERATED_VIDEO_DECODE] =
       GetAcceleratedVideoDecodeFeatureStatus(blocklisted_features,
                                              use_swift_shader);
@@ -1073,4 +1066,35 @@ std::string VulkanVersionToString(uint32_t vulkan_version) {
   }
 }
 #endif  // BUILDFLAG(IS_WIN)
+
+#if BUILDFLAG(IS_WIN) || BUILDFLAG(IS_MAC)
+// GPU picking is only effective with ANGLE/Metal backend on Mac and
+// on Windows with EGL.
+void EnsureNonSoftwareDeviceForTesting(gl::GpuPreference gpu_preference) {
+  // `SetGpuPreferenceEGL` fails when a preference was previously already set.
+  if (GetSystemDeviceIdEGLForTesting(gpu_preference) != 0) {  // IN-TEST
+    return;
+  }
+
+  GPUInfo gpu_info;
+  CHECK(CollectBasicGraphicsInfo(&gpu_info));
+
+  uint64_t non_software_renderer_device_id = 0;
+  if (!gpu_info.active_gpu().IsSoftwareRenderer()) {
+    non_software_renderer_device_id = gpu_info.active_gpu().system_device_id;
+  } else if (auto it =
+                 std::ranges::find_if(gpu_info.secondary_gpus,
+                                      [](const GPUInfo::GPUDevice& device) {
+                                        return !device.IsSoftwareRenderer();
+                                      });
+             it != gpu_info.secondary_gpus.end()) {
+    non_software_renderer_device_id = it->system_device_id;
+  } else {
+    LOG(FATAL) << "No non-software renderer device available.";
+  }
+
+  SetGpuPreferenceEGL(gpu_preference, non_software_renderer_device_id);
+}
+#endif
+
 }  // namespace gpu

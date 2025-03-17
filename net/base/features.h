@@ -160,34 +160,12 @@ NET_EXPORT BASE_DECLARE_FEATURE(kSplitCacheByIncludeCredentials);
 // available.
 NET_EXPORT BASE_DECLARE_FEATURE(kSplitCacheByNetworkIsolationKey);
 
-// The following flags are used as part of an experiment to modify the HTTP
-// cache key scheme to better protect against leaks via navigations.
-// These flags are mutually exclusive, and for each flag the HTTP cache will be
-// cleared when the flag first transitions from being disabled to being enabled.
-//
 // This flag incorporates a boolean into the cache key that is true for
 // renderer-initiated main frame navigations when the request initiator site is
-// cross-site to the URL being navigated to.
+// cross-site to the URL being navigated to. This provides protections against
+// certain cross-site leak attacks involving cross-site navigations.
 NET_EXPORT BASE_DECLARE_FEATURE(
     kSplitCacheByCrossSiteMainFrameNavigationBoolean);
-// This flag incorporates the request initiator site into the cache key for
-// renderer-initiated main frame navigations when the request initiator site is
-// cross-site to the URL being navigated to. If the request initiator site is
-// opaque, then no caching is performed of the navigated-to document.
-NET_EXPORT BASE_DECLARE_FEATURE(kSplitCacheByMainFrameNavigationInitiator);
-// This flag incorporates the request initiator site into the cache key for all
-// renderer-initiated navigations (including subframe navigations) when the
-// request initiator site is cross-site to the URL being navigated to. If the
-// request initiator is opaque, then no caching is performed of the navigated-to
-// document. When this scheme is used, the `is-subframe-document-resource`
-// boolean is not incorporated into the cache key, since incorporating the
-// initiator site for subframe navigations should be sufficient for mitigating
-// the attacks that the `is-subframe-document-resource` mitigates.
-NET_EXPORT BASE_DECLARE_FEATURE(kSplitCacheByNavigationInitiator);
-// This flag doesn't result in changes to the HTTP cache scheme but provides an
-// experiment control group that mitigates the differences inherent in changing
-// cache key schemes.
-NET_EXPORT BASE_DECLARE_FEATURE(kHttpCacheKeyingExperimentControlGroup2024);
 
 // Splits the generated code cache by the request's NetworkIsolationKey if one
 // is available. Note that this feature is also gated behind
@@ -290,10 +268,6 @@ NET_EXPORT BASE_DECLARE_FEATURE(kWaitForFirstPartySetsInit);
 // deferred by RWS initialization.
 NET_EXPORT extern const base::FeatureParam<base::TimeDelta>
     kWaitForFirstPartySetsInitNavigationThrottleTimeout;
-
-// When enabled, a cross-site ancestor chain bit is included in the partition
-// key in partitioned cookies.
-NET_EXPORT BASE_DECLARE_FEATURE(kAncestorChainBitEnabledInPartitionedCookies);
 
 // When enabled, requestStorageAccessFor will require storage access permissions
 // granted by StorageAccessApi or StorageAccessHeaders to send cookies on
@@ -445,7 +419,8 @@ NET_EXPORT extern const base::FeatureParam<std::string>
 NET_EXPORT extern const base::FeatureParam<bool> kIpPrivacyDirectOnly;
 
 // If true, pass OAuth token to Phosphor in GetProxyConfig API for IP
-// Protection.
+// Protection. This is used by E2E tests to ensure a stable geo for tokens
+// and proxy config.
 NET_EXPORT extern const base::FeatureParam<bool>
     kIpPrivacyIncludeOAuthTokenInGetProxyConfig;
 
@@ -504,11 +479,6 @@ NET_EXPORT extern const base::FeatureParam<bool> kIpPrivacyFallbackToDirect;
 // value, 0, is not sent.
 NET_EXPORT extern const base::FeatureParam<int> kIpPrivacyDebugExperimentArm;
 
-// Caches tokens by geo allowing for tokens to be preserved on network/geo
-// changes. The default value of this feature is false which maintains existing
-// behavior by default.
-NET_EXPORT extern const base::FeatureParam<bool> kIpPrivacyCacheTokensByGeo;
-
 // When enabled and an IP protection delegate can be be created in the
 // `NetworkContext`, a `IpProtectionProxyDelegate` will ALWAYS be created even
 // for `NetworkContexts` that do not participate in IP protection. This is
@@ -525,6 +495,11 @@ NET_EXPORT extern const base::FeatureParam<bool> kIpPrivacyAlwaysCreateCore;
 // incognito browsing sessions. When set to true, the main profile Network
 // Context won't proxy traffic using IP Protection.
 NET_EXPORT extern const base::FeatureParam<bool> kIpPrivacyOnlyInIncognito;
+
+// Enables the ability to detect when a user has requests being actively
+// proxied by IP Protection and thus allowing the user to made aware and offer
+// the ability to bypass IP Protection via the User Bypass UX.
+NET_EXPORT extern const base::FeatureParam<bool> kIpPrivacyEnableUserBypass;
 
 // Maximum report body size (KB) to include in serialized reports. Bodies
 // exceeding this are omitted when kExcludeLargeBodyReports is enabled.  Use
@@ -604,6 +579,21 @@ NET_EXPORT BASE_DECLARE_FEATURE(kDeviceBoundSessions);
 // across restarts. This feature is only valid if `kDeviceBoundSessions` is
 // enabled.
 NET_EXPORT BASE_DECLARE_FEATURE(kPersistDeviceBoundSessions);
+// This feature will enable the Device Bound Session Credentials
+// protocol on all pages, ignoring the requirements for Origin Trial
+// headers. This is required because we cannot properly add the origin
+// trial header due to the circumstances outlined in
+// https://crbug.com/40860522. An EmbeddedTestServer cannot reliably be
+// started on one origin due to port randomization, an Origin Trial
+// cannot be generated dynamically, and a URLLoaderInterceptor will mock
+// the exact code we need to test.
+NET_EXPORT BASE_DECLARE_FEATURE_PARAM(
+    bool,
+    kDeviceBoundSessionsForceEnableForTesting);
+// This feature enables the Device Bound Session Credentials refresh quota.
+// This behavior is expected by default; disabling it should only be for
+// testing purposes.
+NET_EXPORT BASE_DECLARE_FEATURE(kDeviceBoundSessionsRefreshQuota);
 
 // When enabled, all proxies in a proxy chain are partitioned by the NAK for the
 // endpoint of the connection. When disabled, proxies carrying tunnels to other
@@ -722,6 +712,12 @@ NET_EXPORT BASE_DECLARE_FEATURE(kUseCertTransparencyAwareApiForOsCertVerify);
 // Enables a special interstitial for self signed cert errors in local network
 // URLs.
 NET_EXPORT BASE_DECLARE_FEATURE(kSelfSignedLocalNetworkInterstitial);
+
+#if BUILDFLAG(CHROME_ROOT_STORE_SUPPORTED)
+// If enabled, server certificates that successfully verify and that identify
+// as QWACs will be verified against the 1-QWAC specification as well.
+NET_EXPORT BASE_DECLARE_FEATURE(kVerifyQWACs);
+#endif
 
 }  // namespace net::features
 

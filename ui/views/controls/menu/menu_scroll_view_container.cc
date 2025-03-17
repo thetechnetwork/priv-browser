@@ -439,14 +439,13 @@ void MenuScrollViewContainer::CreateDefaultBorder() {
   // When a custom background color is used, ensure that the border uses
   // the custom background color for its insets.
   if (border_color_id_.has_value()) {
-    SetBorder(
-        views::CreateThemedSolidSidedBorder(insets, border_color_id_.value()));
+    SetBorder(views::CreateSolidSidedBorder(insets, border_color_id_.value()));
     return;
   }
 
-  SetBackground(CreateThemedRoundedRectBackground(
-      ui::kColorMenuBackground, corner_radius_,
-      views::RoundRectPainter::kBorderWidth));
+  SetBackground(
+      CreateRoundedRectBackground(ui::kColorMenuBackground, corner_radius_,
+                                  views::RoundRectPainter::kBorderWidth));
 
   const auto* const color_provider = GetColorProvider();
   SkColor color = color_provider
@@ -527,7 +526,7 @@ void MenuScrollViewContainer::CreateBubbleBorder() {
         CreateEmptyBorder(std::exchange(additional_insets_, {})));
 
     background_view_->SetBackground(
-        CreateThemedRoundedRectBackground(id, corner_radius_));
+        CreateRoundedRectBackground(id, corner_radius_));
     background_view_->layer()->SetRoundedCornerRadius(GetRoundedCorners());
 
 #if BUILDFLAG(IS_CHROMEOS)

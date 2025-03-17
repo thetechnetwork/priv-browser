@@ -40,7 +40,6 @@
 #include "third_party/blink/renderer/core/html/canvas/canvas_rendering_context_host.h"
 #include "third_party/blink/renderer/platform/bindings/script_wrappable.h"
 #include "third_party/blink/renderer/platform/graphics/canvas_resource_provider.h"
-#include "third_party/blink/renderer/platform/graphics/graphics_types.h"
 #include "third_party/blink/renderer/platform/graphics/graphics_types_3d.h"
 #include "third_party/blink/renderer/platform/heap/member.h"
 #include "third_party/blink/renderer/platform/heap/prefinalizer.h"
@@ -96,6 +95,11 @@ class CORE_EXPORT CanvasRenderingContext
   CanvasRenderingContext(const CanvasRenderingContext&) = delete;
   CanvasRenderingContext& operator=(const CanvasRenderingContext&) = delete;
   ~CanvasRenderingContext() override = default;
+
+  // TODO(crbug.com/40280152): Remove these methods once killswitch-guarded
+  // behavior has shipped.
+  static bool CheckProviderInCanCreateCanvas2dResourceProvider();
+  static bool CheckProviderInCanvas2DRenderingContextIsPaintable();
 
   // Correspond to CanvasRenderingAPI defined in
   // tools/metrics/histograms/enums.xml

@@ -94,7 +94,7 @@ class FakeOnDeviceSession final : public mojom::Session {
   void GenerateImpl(mojom::GenerateOptionsPtr options,
                     mojo::PendingRemote<mojom::StreamingResponder> response);
   void AppendImpl(mojom::AppendOptionsPtr options,
-                  mojo::PendingRemote<mojom::ContextClient> client);
+                  mojo::Remote<mojom::ContextClient> client);
 
   raw_ptr<FakeOnDeviceServiceSettings> settings_;
   std::string adaptation_model_weight_;
@@ -116,7 +116,8 @@ class FakeOnDeviceModel : public mojom::OnDeviceModel {
   ~FakeOnDeviceModel() override;
 
   // mojom::OnDeviceModel:
-  void StartSession(mojo::PendingReceiver<mojom::Session> session) override;
+  void StartSession(mojo::PendingReceiver<mojom::Session> session,
+                    mojom::SessionParamsPtr params) override;
 
   void DetectLanguage(const std::string& text,
                       DetectLanguageCallback callback) override;
@@ -191,6 +192,8 @@ class FakeOnDeviceModelService : public mojom::OnDeviceModelService {
   void LoadModel(mojom::LoadModelParamsPtr params,
                  mojo::PendingReceiver<mojom::OnDeviceModel> model,
                  LoadModelCallback callback) override;
+  void GetCapabilities(ModelAssets assets,
+                       GetCapabilitiesCallback callback) override;
   void LoadTextSafetyModel(
       mojom::TextSafetyModelParamsPtr params,
       mojo::PendingReceiver<mojom::TextSafetyModel> model) override;

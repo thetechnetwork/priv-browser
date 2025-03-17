@@ -457,10 +457,8 @@ LayerTreeHostImpl::LayerTreeHostImpl(
       use_layer_context_for_display_(settings_.UseLayerContextForDisplay()),
       use_layer_context_for_animations_(
           settings_.UseLayerContextForAnimations()),
-      is_synchronous_single_threaded_(
-          !task_runner_provider->HasImplThread() &&
-          !settings_.single_thread_proxy_scheduler &&
-          !use_layer_context_for_display_),
+      is_synchronous_single_threaded_(!task_runner_provider->HasImplThread() &&
+                                      !settings_.single_thread_proxy_scheduler),
       cached_managed_memory_policy_(settings.memory_policy),
       // Must be initialized after is_synchronous_single_threaded_ and
       // task_runner_provider_.
@@ -2600,39 +2598,38 @@ viz::CompositorFrameMetadata LayerTreeHostImpl::MakeCompositorFrameMetadata() {
         gfx::Vector2dF offset2d(0.0f, -std::round(offset));
         metadata.offset_tag_values.emplace_back(content_offset_tag, offset2d);
       }
-
-      if (features::IsBcivBottomControlsEnabled() &&
-          browser_controls_offset_manager_->BottomControlsHeight() > 0) {
-        const viz::OffsetTag& bottom_controls_offset_tag =
-            browser_controls_offset_manager_->BottomControlsOffsetTag();
-        if (bottom_controls_offset_tag) {
-          CHECK(!content_offset_tag.IsEmpty());
-
-          float bottom_controls_visible_height =
-              browser_controls_offset_manager_->BottomControlsHeight() *
-              browser_controls_offset_manager_->BottomControlsShownRatio();
-          float offset =
-              browser_controls_offset_manager_->BottomControlsHeight() -
-              bottom_controls_visible_height;
-          if (bottom_controls_visible_height == 0) {
-            // Similar to the top toolbar hairline, there are visual effects
-            // on the top most bottom controls that are still shown after being
-            // completely scrolled off screen. Shift the bottom controls a bit
-            // more so that these visual effects disappear.
-            offset += browser_controls_offset_manager_
-                          ->BottomControlsAdditionalHeight();
-          }
-
-          // ViewAndroid::OnTopControlsChanged() also rounds the offset before
-          // handing it off to Android.
-          gfx::Vector2dF offset2d(0.0f, std::round(offset));
-          metadata.offset_tag_values.emplace_back(bottom_controls_offset_tag,
-                                                  offset2d);
-        }
-      }
     }
 #endif
   }
+
+#if BUILDFLAG(IS_ANDROID)
+  if (browser_controls_offset_manager_->BottomControlsHeight() > 0 &&
+      features::IsBcivBottomControlsEnabled()) {
+    const viz::OffsetTag& bottom_controls_offset_tag =
+        browser_controls_offset_manager_->BottomControlsOffsetTag();
+    if (bottom_controls_offset_tag) {
+      float bottom_controls_visible_height =
+          browser_controls_offset_manager_->BottomControlsHeight() *
+          browser_controls_offset_manager_->BottomControlsShownRatio();
+      float offset = browser_controls_offset_manager_->BottomControlsHeight() -
+                     bottom_controls_visible_height;
+      if (bottom_controls_visible_height == 0) {
+        // Similar to the top toolbar hairline, there are visual effects
+        // on the top most bottom controls that are still shown after being
+        // completely scrolled off screen. Shift the bottom controls a bit
+        // more so that these visual effects disappear.
+        offset +=
+            browser_controls_offset_manager_->BottomControlsAdditionalHeight();
+      }
+
+      // ViewAndroid::OnTopControlsChanged() also rounds the offset before
+      // handing it off to Android.
+      gfx::Vector2dF offset2d(0.0f, std::round(offset));
+      metadata.offset_tag_values.emplace_back(bottom_controls_offset_tag,
+                                              offset2d);
+    }
+  }
+#endif
 
   if (InnerViewportScrollNode()) {
     // TODO(miletus) : Change the metadata to hold ScrollOffset.
@@ -3255,9 +3252,6 @@ viz::CompositorFrame LayerTreeHostImpl::GenerateCompositorFrame(
   CHECK(!settings_.single_thread_proxy_scheduler ||
         active_tree()->local_surface_id_from_parent().is_valid());
 
-  if (settings_.is_display_tree) {
-    UpdateChildLocalSurfaceId();
-  }
   layer_tree_frame_sink_->SetLocalSurfaceId(
       child_local_surface_id_allocator_.GetCurrentLocalSurfaceId());
 

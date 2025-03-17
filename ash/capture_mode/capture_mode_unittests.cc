@@ -325,10 +325,8 @@ class CaptureModeTestBase : public AshTestBase {
   }
 
   void SwitchToUser2() {
-    auto* session_controller = GetSessionControllerClient();
     constexpr char kUserEmail[] = "user2@capture_mode";
-    session_controller->AddUserSession(kUserEmail);
-    session_controller->SwitchActiveUser(AccountId::FromUserEmail(kUserEmail));
+    SimulateUserLogin({kUserEmail});
   }
 
   void OpenSettingsView() {
@@ -6932,7 +6930,7 @@ TEST_P(CaptureModeSettingsTest, NudgeDoesNotShowForAllUserTypes) {
   for (const auto& test_case : kUserTypeTestCases) {
     SCOPED_TRACE(test_case.trace);
     ClearLogin();
-    SimulateUserLogin("example@gmail.com", test_case.user_type);
+    SimulateUserLogin({"example@gmail.com", test_case.user_type});
 
     auto* controller = StartImageRegionCapture();
     EXPECT_EQ(test_case.can_see_nudge, controller->CanShowSunfishRegionNudge());

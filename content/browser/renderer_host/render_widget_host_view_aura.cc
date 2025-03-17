@@ -2546,12 +2546,6 @@ void RenderWidgetHostViewAura::OnHostMovedInPixels(aura::WindowTreeHost* host) {
   TRACE_EVENT0("ui", "RenderWidgetHostViewAura::OnHostMovedInPixels");
 
   UpdateScreenInfo();
-
-  // Close the child popup window if the browser window moves (e.g. due to
-  // moving the window with the keyboard.)
-  if (popup_child_host_view_) {
-    popup_child_host_view_->Shutdown();
-  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -3029,21 +3023,18 @@ void RenderWidgetHostViewAura::ForwardKeyboardEventWithLatencyInfo(
 
 #if BUILDFLAG(IS_LINUX)
   auto* linux_ui = ui::LinuxUi::instance();
-  std::vector<ui::TextEditCommandAuraLinux> commands;
-  if (!event.skip_if_unhandled && linux_ui && event.os_event &&
-      linux_ui->GetTextEditCommandsForEvent(*event.os_event,
-                                            GetTextInputFlags(), &commands)) {
-    // Transform from ui/ types to content/ types.
-    std::vector<blink::mojom::EditCommandPtr> edit_commands;
-    for (std::vector<ui::TextEditCommandAuraLinux>::const_iterator it =
-             commands.begin(); it != commands.end(); ++it) {
-      edit_commands.push_back(blink::mojom::EditCommand::New(
-          it->GetCommandString(), it->argument()));
+  if (!event.skip_if_unhandled && linux_ui && event.os_event) {
+    const auto command = linux_ui->GetTextEditCommandForEvent(
+        *event.os_event, GetTextInputFlags());
+    if (command != ui::TextEditCommand::INVALID_COMMAND) {
+      // Transform from ui/ types to content/ types.
+      std::vector<blink::mojom::EditCommandPtr> commands;
+      commands.push_back(blink::mojom::EditCommand::New(
+          ui::TextEditCommandToString(command), ""));
+      target_host->ForwardKeyboardEventWithCommands(
+          event, latency, std::move(commands), update_event);
+      return;
     }
-
-    target_host->ForwardKeyboardEventWithCommands(
-        event, latency, std::move(edit_commands), update_event);
-    return;
   }
 #endif
 

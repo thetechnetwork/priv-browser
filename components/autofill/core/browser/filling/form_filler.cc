@@ -25,7 +25,7 @@
 #include "components/autofill/core/browser/field_type_utils.h"
 #include "components/autofill/core/browser/field_types.h"
 #include "components/autofill/core/browser/filling/addresses/field_filling_address_util.h"
-#include "components/autofill/core/browser/filling/entities/field_filling_entity_util.h"
+#include "components/autofill/core/browser/filling/autofill_ai/field_filling_entity_util.h"
 #include "components/autofill/core/browser/filling/field_filling_skip_reason.h"
 #include "components/autofill/core/browser/filling/filling_product.h"
 #include "components/autofill/core/browser/filling/payments/field_filling_payments_util.h"
@@ -388,9 +388,9 @@ FormFiller::GetFieldFillingSkipReasons(
   type_count.reserve(form_structure.field_count());
 
   base::flat_set<FieldGlobalId> blocked_fields;
-  if (EntityDataManager* edm = manager_->client().GetEntityDataManager();
-      edm && filling_product == FillingProduct::kAddress) {
-    blocked_fields = GetFieldsFillableByAutofillAi(form_structure, *edm);
+  if (filling_product == FillingProduct::kAddress) {
+    blocked_fields =
+        GetFieldsFillableByAutofillAi(form_structure, manager_->client());
   }
 
   CHECK_EQ(fields.size(), form_structure.field_count());
@@ -970,8 +970,12 @@ FormFiller::FieldFillingData FormFiller::GetFieldFillingData(
           },
           [&](const EntityInstance* entity)
               -> std::pair<std::u16string, std::optional<FieldType>> {
-            return GetFillValueAndTypeForEntity(
-                CHECK_DEREF(entity), autofill_field, action_persistence);
+            // TODO(crbug.com/397620383): Which type should we return here?
+            return {GetFillValueForEntity(
+                        CHECK_DEREF(entity), autofill_field, action_persistence,
+                        manager_->client().GetAppLocale(),
+                        manager_->client().GetAddressNormalizer()),
+                    std::nullopt};
           }},
       filling_payload);
   return {value_to_fill, filling_type, /*value_is_an_override=*/false};

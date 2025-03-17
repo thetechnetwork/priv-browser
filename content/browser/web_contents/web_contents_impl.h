@@ -392,11 +392,12 @@ class CONTENT_EXPORT WebContentsImpl
   WebContentsDelegate* GetDelegate() final;
   void SetDelegate(WebContentsDelegate* delegate) override;
   NavigationControllerImpl& GetController() override;
+  const NavigationControllerImpl& GetController() const override;
   BrowserContext* GetBrowserContext() override;
   base::WeakPtr<WebContents> GetWeakPtr() override;
   const GURL& GetURL() override;
   const GURL& GetVisibleURL() override;
-  const GURL& GetLastCommittedURL() override;
+  const GURL& GetLastCommittedURL() const override;
   const RenderFrameHostImpl* GetPrimaryMainFrame() const override;
   RenderFrameHostImpl* GetPrimaryMainFrame() override;
   PageImpl& GetPrimaryPage() override;
@@ -996,6 +997,8 @@ class CONTENT_EXPORT WebContentsImpl
       bool use_prefetch_proxy,
       const blink::mojom::Referrer& referrer,
       const std::optional<url::Origin>& referring_origin,
+      std::optional<net::HttpNoVarySearchData> no_vary_search_hint,
+      scoped_refptr<PreloadPipelineInfo> preload_pipeline_info,
       base::WeakPtr<PreloadingAttempt> attempt,
       std::optional<PreloadingHoldbackStatus> holdback_status_override)
       override;
@@ -1009,6 +1012,7 @@ class CONTENT_EXPORT WebContentsImpl
       bool should_warm_up_compositor,
       bool should_prepare_paint_tree,
       PreloadingHoldbackStatus holdback_status_override,
+      scoped_refptr<PreloadPipelineInfo> preload_pipeline_info,
       PreloadingAttempt* preloading_attempt,
       base::RepeatingCallback<bool(const GURL&,
                                    const std::optional<UrlMatchType>&)>,
@@ -1595,6 +1599,17 @@ class CONTENT_EXPORT WebContentsImpl
 
   WebContents* GetOpenedPartitionedPopin() const override;
 
+  // Returns the origin of the popin's opener if this is a partitioned popin.
+  // CHECKS if this is not a partitioned popin, as it should never be called
+  // in that case. This is used in permissions checks.
+  // See https://explainers-by-googlers.github.io/partitioned-popins/
+  GURL GetPartitionedPopinEmbedderOrigin(
+      base::PassKey<StorageAccessGrantPermissionContext>) const override;
+
+  // Same as GetPartitionedPopinEmbedderOrigin but for testing to bypass
+  // PassKey requirements.
+  GURL GetPartitionedPopinEmbedderOriginForTesting() const;
+
  private:
   using FrameTreeIterationCallback = base::FunctionRef<void(FrameTree&)>;
   using RenderViewHostIterationCallback =
@@ -2173,6 +2188,9 @@ class CONTENT_EXPORT WebContentsImpl
   // Sets up RenderInputRouterDelegate mojo connections with InputManager on
   // the VizCompositorThread for input handling with InputVizard.
   void SetupRenderInputRouterDelegateConnection();
+
+  // See GetPartitionedPopinEmbedderOrigin for details.
+  GURL GetPartitionedPopinEmbedderOriginImpl() const;
 
   // Data for core operation ---------------------------------------------------
 

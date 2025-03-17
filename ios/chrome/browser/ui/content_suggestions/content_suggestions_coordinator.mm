@@ -62,8 +62,6 @@
 #import "ios/chrome/browser/ntp/ui_bundled/new_tab_page_header_constants.h"
 #import "ios/chrome/browser/ntp_tiles/model/ios_most_visited_sites_factory.h"
 #import "ios/chrome/browser/optimization_guide/model/optimization_guide_service_factory.h"
-#import "ios/chrome/browser/parcel_tracking/features.h"
-#import "ios/chrome/browser/parcel_tracking/parcel_tracking_prefs.h"
 #import "ios/chrome/browser/passwords/model/password_checkup_utils.h"
 #import "ios/chrome/browser/policy/model/policy_util.h"
 #import "ios/chrome/browser/promos_manager/model/promos_manager_factory.h"
@@ -137,8 +135,6 @@
 #import "ios/chrome/browser/ui/content_suggestions/magic_stack_half_sheet_mediator.h"
 #import "ios/chrome/browser/ui/content_suggestions/magic_stack_half_sheet_table_view_controller.h"
 #import "ios/chrome/browser/ui/content_suggestions/ntp_home_constant.h"
-#import "ios/chrome/browser/ui/content_suggestions/parcel_tracking/magic_stack_parcel_list_half_sheet_table_view_controller.h"
-#import "ios/chrome/browser/ui/content_suggestions/parcel_tracking/parcel_tracking_mediator.h"
 #import "ios/chrome/browser/ui/content_suggestions/price_tracking_promo/price_tracking_promo_action_delegate.h"
 #import "ios/chrome/browser/ui/content_suggestions/price_tracking_promo/price_tracking_promo_mediator.h"
 #import "ios/chrome/browser/ui/content_suggestions/safety_check/safety_check_magic_stack_mediator.h"
@@ -154,6 +150,7 @@
 #import "ios/chrome/browser/ui/content_suggestions/set_up_list/set_up_list_show_more_view_controller.h"
 #import "ios/chrome/browser/ui/content_suggestions/set_up_list/set_up_list_tap_delegate.h"
 #import "ios/chrome/browser/ui/content_suggestions/set_up_list/utils.h"
+#import "ios/chrome/browser/ui/content_suggestions/shop_card/shop_card_action_delegate.h"
 #import "ios/chrome/browser/ui/content_suggestions/shop_card/shop_card_mediator.h"
 #import "ios/chrome/browser/ui/content_suggestions/tab_resumption/tab_resumption_mediator.h"
 #import "ios/chrome/browser/ui/content_suggestions/tips/tips_magic_stack_mediator.h"
@@ -162,8 +159,10 @@
 #import "ios/chrome/browser/ui/content_suggestions/tips/tips_passwords_coordinator.h"
 #import "ios/chrome/browser/ui/content_suggestions/tips/tips_prefs.h"
 #import "ios/chrome/browser/url_loading/model/url_loading_browser_agent.h"
+#import "ios/chrome/browser/url_loading/model/url_loading_params.h"
 #import "ios/chrome/grit/ios_branded_strings.h"
 #import "ios/chrome/grit/ios_strings.h"
+#import "ios/web/public/navigation/navigation_manager.h"
 #import "ios/web/public/web_state.h"
 #import "services/network/public/cpp/shared_url_loader_factory.h"
 #import "third_party/search_engines_data/resources/definitions/prepopulated_engines.h"
@@ -202,14 +201,14 @@ using segmentation_platform::TipIdentifier;
     MagicStackCollectionViewControllerAudience,
     MagicStackHalfSheetTableViewControllerDelegate,
     MagicStackModuleContainerDelegate,
-    MagicStackParcelListHalfSheetTableViewControllerDelegate,
     TipsPasswordsCoordinatorDelegate,
     NotificationsOptInAlertCoordinatorDelegate,
     NotificationsOptInCoordinatorDelegate,
     PriceTrackingPromoActionDelegate,
     SetUpListContentNotificationPromoCoordinatorDelegate,
     SetUpListDefaultBrowserPromoCoordinatorDelegate,
-    SetUpListTapDelegate>
+    SetUpListTapDelegate,
+    ShopCardActionDelegate>
 
 @property(nonatomic, strong)
     ContentSuggestionsViewController* contentSuggestionsViewController;
@@ -221,8 +220,6 @@ using segmentation_platform::TipIdentifier;
 // Metrics recorder for the content suggestions.
 @property(nonatomic, strong)
     ContentSuggestionsMetricsRecorder* contentSuggestionsMetricsRecorder;
-// Parcel Tracking Mediator.
-@property(nonatomic, strong) ParcelTrackingMediator* parcelTrackingMediator;
 @property(nonatomic, strong) SetUpListMediator* setUpListMediator;
 
 @end
@@ -250,14 +247,6 @@ using segmentation_platform::TipIdentifier;
   MagicStackHalfSheetTableViewController*
       _magicStackHalfSheetTableViewController;
   MagicStackHalfSheetMediator* _magicStackHalfSheetMediator;
-
-  // The parcel list half sheet to see all tracked parcels.
-  MagicStackParcelListHalfSheetTableViewController*
-      _parcelListHalfSheetTableViewController;
-
-  // The coordinator used to present a modal alert for the parcel tracking
-  // module.
-  AlertCoordinator* _parcelTrackingAlertCoordinator;
 
   // Displays alert giving the user the option to turn notifications
   // on for the app. This is for the third opt in flow where notifications
@@ -436,24 +425,10 @@ using segmentation_platform::TipIdentifier;
     _shopCardMediator = [[ShopCardMediator alloc]
         initWithShoppingService:commerce::ShoppingServiceFactory::GetForProfile(
                                     profile)];
+    _shopCardMediator.shopCardActionDelegate = self;
     [moduleMediators addObject:_shopCardMediator];
   }
 
-  if (IsIOSParcelTrackingEnabled() &&
-      !IsParcelTrackingDisabled(
-          IsHomeCustomizationEnabled()
-              ? prefs
-              : GetApplicationContext()->GetLocalState())) {
-    _parcelTrackingMediator = [[ParcelTrackingMediator alloc]
-        initWithShoppingService:shoppingService
-         URLLoadingBrowserAgent:UrlLoadingBrowserAgent::FromBrowser(
-                                    self.browser)
-                    prefService:IsHomeCustomizationEnabled()
-                                    ? prefs
-                                    : GetApplicationContext()->GetLocalState()];
-    _parcelTrackingMediator.NTPActionsDelegate = self.NTPActionsDelegate;
-    [moduleMediators addObject:_parcelTrackingMediator];
-  }
   if (IsSafetyCheckMagicStackEnabled()) {
     IOSChromeSafetyCheckManager* safetyCheckManager =
         IOSChromeSafetyCheckManagerFactory::GetForProfile(profile);
@@ -565,8 +540,6 @@ using segmentation_platform::TipIdentifier;
 - (void)stop {
   _segmentationService = nullptr;
   _deviceSwitcherResultDispatcher = nullptr;
-  [self.parcelTrackingMediator disconnect];
-  self.parcelTrackingMediator = nil;
   [_shortcutsMediator disconnect];
   _shortcutsMediator = nil;
   [_safetyCheckMediator disconnect];
@@ -597,8 +570,6 @@ using segmentation_platform::TipIdentifier;
       dismissViewControllerAnimated:NO
                          completion:nil];
   _magicStackHalfSheetTableViewController = nil;
-  [self dismissParcelListHalfSheet];
-  [self dismissParcelTrackingAlertCoordinator];
   [_notificationsOptInAlertCoordinator stop];
   _notificationsOptInAlertCoordinator = nil;
   [self.browser->GetCommandDispatcher()
@@ -617,12 +588,10 @@ using segmentation_platform::TipIdentifier;
   // Refresh in case there are new MVT to show.
   [_mostVisitedTilesMediator refreshMostVisitedTiles];
   [_safetyCheckMediator reset];
-  [_parcelTrackingMediator reset];
   [_priceTrackingPromoMediator reset];
   [_magicStackRankingModel fetchLatestMagicStackRanking];
-  // Fetch after resetting ranking since parcels could be returned
+  // Fetch after resetting ranking since subscriptions could be returned
   // synchronously.
-  [_parcelTrackingMediator fetchTrackedParcels];
   [_priceTrackingPromoMediator fetchLatestSubscription];
 }
 
@@ -866,7 +835,7 @@ using segmentation_platform::TipIdentifier;
       [self showSetUpListSeeMoreMenuExpanded:NO];
       break;
     case ContentSuggestionsModuleType::kParcelTracking:
-      [self showMagicStackParcelList];
+      // TODO(crbug.com/391002352): Remove kParcelTracking entirely.
       break;
     case ContentSuggestionsModuleType::kTabResumption:
       [self showMagicStackRecentTabs];
@@ -904,10 +873,9 @@ using segmentation_platform::TipIdentifier;
     case ContentSuggestionsModuleType::kCompactedSetUpList:
       [_setUpListMediator disableModule];
       break;
-    case ContentSuggestionsModuleType::kParcelTracking: {
-      [self presentParcelTrackingAlertCoordinator];
+    case ContentSuggestionsModuleType::kParcelTracking:
+      // TODO(crbug.com/391002352): Remove kParcelTracking entirely.
       break;
-    }
     case ContentSuggestionsModuleType::kPriceTrackingPromo: {
       base::RecordAction(base::UserMetricsAction(
           "Commerce.PriceTracking.MagicStackPromo.Hidden"));
@@ -1103,37 +1071,6 @@ using segmentation_platform::TipIdentifier;
       dismissViewControllerAnimated:YES
                          completion:nil];
   _magicStackHalfSheetTableViewController = nil;
-}
-
-#pragma mark - MagicStackParcelListHalfSheetTableViewControllerDelegate
-
-- (void)dismissParcelListHalfSheet {
-  [_parcelListHalfSheetTableViewController.presentingViewController
-      dismissViewControllerAnimated:YES
-                         completion:nil];
-  _parcelListHalfSheetTableViewController = nil;
-}
-
-- (void)untrackParcel:(NSString*)parcelID carrier:(ParcelType)carrier {
-  [self.parcelTrackingMediator untrackParcel:parcelID];
-
-  id<SnackbarCommands> snackbarHandler = HandlerForProtocol(
-      self.browser->GetCommandDispatcher(), SnackbarCommands);
-  __weak __typeof(self) weakSelf = self;
-  [snackbarHandler
-      showSnackbarWithMessage:
-          l10n_util::GetNSString(IDS_IOS_PARCEL_TRACKING_UNTRACK_SNACKBAR_TITLE)
-                   buttonText:l10n_util::GetNSString(
-                                  IDS_IOS_SNACKBAR_ACTION_UNDO)
-                messageAction:^{
-                  __strong __typeof(weakSelf) strongSelf = weakSelf;
-                  if (!strongSelf) {
-                    return;
-                  }
-                  [weakSelf.parcelTrackingMediator trackParcel:parcelID
-                                                       carrier:carrier];
-                }
-             completionAction:nil];
 }
 
 #pragma mark - TipsPasswordsCoordinatorDelegate
@@ -1505,6 +1442,24 @@ using segmentation_platform::TipIdentifier;
   _contentNotificationCoordinator = nil;
 }
 
+#pragma mark - ShopCardActionDelegate
+
+- (void)openURL:(GURL)url {
+  NSInteger new_web_state_index =
+      self.browser->GetWebStateList()->GetIndexOfInactiveWebStateWithURL(url);
+  UrlLoadingBrowserAgent* urlLoadingBrowserAgent =
+      UrlLoadingBrowserAgent::FromBrowser(self.browser);
+  if (new_web_state_index == WebStateList::kInvalidIndex) {
+    urlLoadingBrowserAgent->Load(UrlLoadParams::InNewTab(url));
+  } else {
+    web::NavigationManager::WebLoadParams webLoadParams =
+        web::NavigationManager::WebLoadParams(url);
+    UrlLoadParams params = UrlLoadParams::SwitchToTab(webLoadParams);
+    params.web_params.transition_type = ui::PAGE_TRANSITION_AUTO_BOOKMARK;
+    urlLoadingBrowserAgent->Load(params);
+  }
+}
+
 #pragma mark - Helpers
 
 - (bool)hasIdentitiesOnDevice {
@@ -1519,75 +1474,11 @@ using segmentation_platform::TipIdentifier;
   }
 }
 
-- (void)showMagicStackParcelList {
-  _parcelListHalfSheetTableViewController =
-      [[MagicStackParcelListHalfSheetTableViewController alloc]
-          initWithParcels:[self.parcelTrackingMediator allParcelTrackingItems]];
-  _parcelListHalfSheetTableViewController.delegate = self;
-
-  UINavigationController* navViewController = [[UINavigationController alloc]
-      initWithRootViewController:_parcelListHalfSheetTableViewController];
-
-  navViewController.modalPresentationStyle = UIModalPresentationPageSheet;
-  UISheetPresentationController* presentationController =
-      navViewController.sheetPresentationController;
-  presentationController.prefersEdgeAttachedInCompactHeight = YES;
-  presentationController.widthFollowsPreferredContentSizeWhenEdgeAttached = YES;
-  presentationController.detents = @[
-    UISheetPresentationControllerDetent.mediumDetent,
-    UISheetPresentationControllerDetent.largeDetent
-  ];
-  [_magicStackCollectionView presentViewController:navViewController
-                                          animated:YES
-                                        completion:nil];
-}
-
 - (void)showMagicStackRecentTabs {
   CommandDispatcher* dispatcher = self.browser->GetCommandDispatcher();
   id<BrowserCoordinatorCommands> browserCoordinatorCommands =
       HandlerForProtocol(dispatcher, BrowserCoordinatorCommands);
   [browserCoordinatorCommands showRecentTabs];
-}
-
-// Presents the parcel tracking alert modal.
-- (void)presentParcelTrackingAlertCoordinator {
-  _parcelTrackingAlertCoordinator = [[AlertCoordinator alloc]
-      initWithBaseViewController:self.magicStackCollectionView
-                         browser:self.browser
-                           title:
-                               l10n_util::GetNSString(
-                                   IDS_IOS_PARCEL_TRACKING_MODULE_HIDE_ALERT_TITLE)
-                         message:
-                             l10n_util::GetNSStringF(
-                                 IDS_IOS_PARCEL_TRACKING_MODULE_HIDE_ALERT_DESCRIPTION,
-                                 base::SysNSStringToUTF16(l10n_util::GetNSString(
-                                     IDS_IOS_CONTENT_SUGGESTIONS_PARCEL_TRACKING_MODULE_TITLE)))];
-
-  __weak ContentSuggestionsCoordinator* weakSelf = self;
-  [_parcelTrackingAlertCoordinator
-      addItemWithTitle:
-          l10n_util::GetNSStringF(
-              IDS_IOS_PARCEL_TRACKING_CONTEXT_MENU_DESCRIPTION,
-              base::SysNSStringToUTF16(l10n_util::GetNSString(
-                  IDS_IOS_CONTENT_SUGGESTIONS_PARCEL_TRACKING_MODULE_TITLE)))
-                action:^{
-                  __strong __typeof(weakSelf) strongSelf = weakSelf;
-                  if (!strongSelf) {
-                    return;
-                  }
-                  [weakSelf.parcelTrackingMediator disableModule];
-                  [weakSelf dismissParcelTrackingAlertCoordinator];
-                }
-                 style:UIAlertActionStyleDefault];
-  [_parcelTrackingAlertCoordinator
-      addItemWithTitle:l10n_util::GetNSString(
-                           IDS_IOS_PARCEL_TRACKING_MODULE_HIDE_ALERT_CANCEL)
-                action:^{
-                  [weakSelf dismissParcelTrackingAlertCoordinator];
-                }
-                 style:UIAlertActionStyleCancel];
-
-  [_parcelTrackingAlertCoordinator start];
 }
 
 // Display the notification settings.
@@ -1598,12 +1489,6 @@ using segmentation_platform::TipIdentifier;
   id<SettingsCommands> settingsHandler = HandlerForProtocol(
       self.browser->GetCommandDispatcher(), SettingsCommands);
   [settingsHandler showNotificationsSettings];
-}
-
-// Dismisses the parcel tracking alert modal.
-- (void)dismissParcelTrackingAlertCoordinator {
-  [_parcelTrackingAlertCoordinator stop];
-  _parcelTrackingAlertCoordinator = nil;
 }
 
 // Returns the ContentSuggestionsModuleType associated with `clientId`.

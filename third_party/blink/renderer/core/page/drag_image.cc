@@ -46,6 +46,7 @@
 #include "third_party/blink/renderer/platform/graphics/color.h"
 #include "third_party/blink/renderer/platform/graphics/graphics_context.h"
 #include "third_party/blink/renderer/platform/graphics/paint/drawing_recorder.h"
+#include "third_party/blink/renderer/platform/graphics/skia/skia_utils.h"
 #include "third_party/blink/renderer/platform/graphics/static_bitmap_image.h"
 #include "third_party/blink/renderer/platform/text/bidi_paragraph.h"
 #include "third_party/blink/renderer/platform/text/text_run.h"
@@ -190,10 +191,10 @@ std::unique_ptr<DragImage> DragImage::Create(const KURL& url,
                        label_size.height() + kDragLabelBorderY * 2);
 
   if (draw_url_string) {
-    url_string_size.set_width(
-        text_painter
-            ? text_painter->ComputeInlineSize(TextRun(url_string), *url_font)
-            : url_font->Width(TextRun(url_string)));
+    url_string_size.set_width(text_painter
+                                  ? text_painter->ComputeInlineSizeWithoutBidi(
+                                        TextRun(url_string), *url_font)
+                                  : url_font->Width(TextRun(url_string)));
     url_string_size.set_height(url_font_data->GetFontMetrics().Ascent() +
                                url_font_data->GetFontMetrics().Descent());
     image_size.set_height(image_size.height() + url_string_size.height());
@@ -248,8 +249,9 @@ std::unique_ptr<DragImage> DragImage::Create(const KURL& url,
     TextRun text_run(url_string);
     if (RuntimeEnabledFeatures::DragImageNoNodeIdEnabled()) {
       if (text_painter) {
-        text_painter->Draw(text_run, *url_font, resource_provider->Canvas(),
-                           text_pos, text_paint);
+        text_painter->DrawWithoutBidi(text_run, *url_font,
+                                      resource_provider->Canvas(), text_pos,
+                                      text_paint);
       } else {
         url_font->DrawText(&resource_provider->Canvas(), text_run, text_pos,
                            text_paint);

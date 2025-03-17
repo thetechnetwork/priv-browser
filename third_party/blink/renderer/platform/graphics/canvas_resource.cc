@@ -44,6 +44,7 @@
 #include "third_party/skia/include/core/SkImageInfo.h"
 #include "third_party/skia/include/core/SkPixmap.h"
 #include "third_party/skia/include/core/SkSize.h"
+#include "third_party/skia/include/core/SkSurface.h"
 #include "third_party/skia/include/gpu/GpuTypes.h"
 #include "third_party/skia/include/gpu/ganesh/GrBackendSurface.h"
 #include "third_party/skia/include/gpu/ganesh/GrTypes.h"
@@ -87,60 +88,6 @@ void CanvasResource::Release() {
   } else {
     WTF::ThreadSafeRefCounted<CanvasResource>::Release();
   }
-}
-
-void CanvasResource::UploadSoftwareRenderingResults(SkSurface* sk_surface) {
-  auto scoped_mapping = GetClientSharedImage()->Map();
-  if (!scoped_mapping) {
-    LOG(ERROR) << "MapSharedImage failed.";
-    return;
-  }
-
-  sk_surface->readPixels(
-      scoped_mapping->GetSkPixmapForPlane(0, CreateSkImageInfo()), 0, 0);
-
-  // Making the below call is not necessary for the case where the the software
-  // compositor is being used, as all accesses to the SI's backing happen via
-  // shared memory. It's also not currently trivial to add in this case as
-  // setting the sync token here would require it to later be verified before it
-  // is sent to the display compositor.
-  if (GetClientSharedImage()->is_software()) {
-    return;
-  }
-
-  // Unmap the SI, inform the service that the SharedImage's backing memory was
-  // written to on the CPU and update this resource's sync token to ensure
-  // proper sequencing of future accesses to the SI with respect to this call on
-  // the service side.
-  scoped_mapping.reset();
-  SetSyncToken(
-      GetClientSharedImage()->BackingWasExternallyUpdated(gpu::SyncToken()));
-}
-
-scoped_refptr<StaticBitmapImage> CanvasResource::CreateUnacceleratedBitmap() {
-  if (!IsValid()) {
-    return nullptr;
-  }
-
-  // Construct an SkImage that references the shared memory buffer.
-  auto mapping = GetClientSharedImage()->Map();
-  if (!mapping) {
-    LOG(ERROR) << "MapSharedImage Failed.";
-    return nullptr;
-  }
-
-  auto sk_image = SkImages::RasterFromPixmapCopy(
-      mapping->GetSkPixmapForPlane(0, CreateSkImageInfo()));
-
-  // Unmap the underlying buffer.
-  mapping.reset();
-  if (!sk_image) {
-    return nullptr;
-  }
-
-  auto image = UnacceleratedStaticBitmapImage::Create(sk_image);
-  image->SetOriginClean(OriginClean());
-  return image;
 }
 
 gpu::InterfaceBase* CanvasResource::InterfaceBase() const {
@@ -254,6 +201,8 @@ bool CanvasResource::PrepareTransferableResource(
       GetSyncTokenWithOptionalVerification(needs_verified_synctoken));
 
   out_resource->hdr_metadata = GetHDRMetadata();
+  out_resource->is_low_latency_rendering = client_shared_image->usage().Has(
+      gpu::SHARED_IMAGE_USAGE_CONCURRENT_READ_WRITE);
 
   // When the compositor returns an accelerated resource, it provides a sync
   // token to allow subsequent accelerated raster operations to properly
@@ -573,9 +522,30 @@ void CanvasResourceSharedImage::Transfer() {
 scoped_refptr<StaticBitmapImage> CanvasResourceSharedImage::Bitmap() {
   TRACE_EVENT0("blink", "CanvasResourceSharedImage::Bitmap");
 
-  SkImageInfo image_info = CreateSkImageInfo();
   if (!is_accelerated_) {
-    return CreateUnacceleratedBitmap();
+    if (!IsValid()) {
+      return nullptr;
+    }
+
+    // Construct an SkImage that references the shared memory buffer.
+    auto mapping = GetClientSharedImage()->Map();
+    if (!mapping) {
+      LOG(ERROR) << "MapSharedImage Failed.";
+      return nullptr;
+    }
+
+    auto sk_image = SkImages::RasterFromPixmapCopy(
+        mapping->GetSkPixmapForPlane(0, CreateSkImageInfo()));
+
+    // Unmap the underlying buffer.
+    mapping.reset();
+    if (!sk_image) {
+      return nullptr;
+    }
+
+    auto image = UnacceleratedStaticBitmapImage::Create(sk_image);
+    image->SetOriginClean(OriginClean());
+    return image;
   }
 
   // In order to avoid creating multiple representations for this shared image
@@ -615,9 +585,9 @@ scoped_refptr<StaticBitmapImage> CanvasResourceSharedImage::Bitmap() {
   // If its cross thread, then the sync token was already verified.
   image = AcceleratedStaticBitmapImage::CreateFromCanvasSharedImage(
       std::move(client_shared_image), GetSyncToken(), texture_id_for_image,
-      Size(), image_info.colorType(), image_info.alphaType(),
-      image_info.refColorSpace(), context_provider_wrapper_, owning_thread_ref_,
-      owning_thread_task_runner_, std::move(release_callback));
+      Size(), GetFormat(), GetAlphaType(), GetColorSpace(),
+      context_provider_wrapper_, owning_thread_ref_, owning_thread_task_runner_,
+      std::move(release_callback));
 
   DCHECK(image);
   return image;
@@ -647,6 +617,37 @@ void CanvasResourceSharedImage::EndExternalWrite(
   // sync token will be chained after `external_write_sync_token` thanks to the
   // wait above.
   owning_thread_data_.mailbox_needs_new_sync_token = true;
+}
+
+void CanvasResourceSharedImage::UploadSoftwareRenderingResults(
+    SkSurface* sk_surface) {
+  auto scoped_mapping = GetClientSharedImage()->Map();
+  if (!scoped_mapping) {
+    LOG(ERROR) << "MapSharedImage failed.";
+    return;
+  }
+
+  sk_surface->readPixels(
+      scoped_mapping->GetSkPixmapForPlane(0, CreateSkImageInfo()), 0, 0);
+
+  // Making the below call is not necessary for the case where the the software
+  // compositor is being used, as all accesses to the SI's backing happen via
+  // shared memory. It's also not currently trivial to add in this case as
+  // setting the sync token here would require it to later be verified before it
+  // is sent to the display compositor.
+  if (GetClientSharedImage()->is_software()) {
+    return;
+  }
+
+  // Unmap the SI, inform the service that the SharedImage's backing memory was
+  // written to on the CPU and update this resource's sync token to ensure
+  // proper sequencing of future accesses to the SI with respect to this call on
+  // the service side.
+  scoped_mapping.reset();
+
+  DCHECK(!is_cross_thread());
+  owning_thread_data().sync_token =
+      GetClientSharedImage()->BackingWasExternallyUpdated(gpu::SyncToken());
 }
 
 const gpu::SyncToken
@@ -791,12 +792,11 @@ scoped_refptr<StaticBitmapImage> ExternalCanvasResource::Bitmap() {
       },
       base::RetainedRef(this));
 
-  auto image_info = CreateSkImageInfo();
   return AcceleratedStaticBitmapImage::CreateFromCanvasSharedImage(
       client_si_, GetSyncToken(), /*shared_image_texture_id=*/0u, Size(),
-      image_info.colorType(), image_info.alphaType(),
-      image_info.refColorSpace(), context_provider_wrapper_, owning_thread_ref_,
-      owning_thread_task_runner_, std::move(release_callback));
+      GetFormat(), GetAlphaType(), GetColorSpace(), context_provider_wrapper_,
+      owning_thread_ref_, owning_thread_task_runner_,
+      std::move(release_callback));
 }
 
 const gpu::SyncToken
@@ -908,8 +908,6 @@ bool CanvasResourceSwapChain::IsValid() const {
 }
 
 scoped_refptr<StaticBitmapImage> CanvasResourceSwapChain::Bitmap() {
-  SkImageInfo image_info = CreateSkImageInfo();
-
   // It's safe to share the back buffer texture id if we're on the same thread
   // since the |release_callback| ensures this resource will be alive.
   GLuint shared_texture_id = !is_cross_thread() ? back_buffer_texture_id_ : 0u;
@@ -924,9 +922,9 @@ scoped_refptr<StaticBitmapImage> CanvasResourceSwapChain::Bitmap() {
 
   return AcceleratedStaticBitmapImage::CreateFromCanvasSharedImage(
       back_buffer_shared_image_, GetSyncToken(), shared_texture_id, Size(),
-      image_info.colorType(), image_info.alphaType(),
-      image_info.refColorSpace(), context_provider_wrapper_, owning_thread_ref_,
-      owning_thread_task_runner_, std::move(release_callback));
+      GetFormat(), GetAlphaType(), GetColorSpace(), context_provider_wrapper_,
+      owning_thread_ref_, owning_thread_task_runner_,
+      std::move(release_callback));
 }
 
 scoped_refptr<gpu::ClientSharedImage>

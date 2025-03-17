@@ -29,6 +29,7 @@
 #include "content/test/test_web_contents.h"
 #include "net/dns/mock_host_resolver.h"
 #include "testing/gtest/include/gtest/gtest.h"
+#include "third_party/blink/public/common/navigation/preloading_headers.h"
 #include "third_party/blink/public/mojom/speculation_rules/speculation_rules.mojom.h"
 
 namespace content {
@@ -141,7 +142,8 @@ class PrerendererImplBrowserTestBase : public ContentBrowserTest {
     for (auto request : requests_) {
       ret.push_back(RequestPathAndSecPurposeHeader{
           .path = request.GetURL().PathForRequest(),
-          .sec_purpose_header_value = request.headers["Sec-Purpose"],
+          .sec_purpose_header_value =
+              request.headers[blink::kSecPurposeHeaderName],
       });
     }
     return ret;
@@ -210,7 +212,10 @@ class PrerendererImplBrowserTestPrefetchAhead
               {"prefetch_timeout_ms", "1500"},
               {"block_until_head_timeout_moderate_prefetch", "500"},
           }}},
-        {blink::features::kLCPTimingPredictorPrerender2});
+        {blink::features::kLCPTimingPredictorPrerender2,
+         // `kPrefetchServiceWorker` is disabled to make the prefetch fail due
+         // to ServiceWorker-related ineligibility.
+         features::kPrefetchServiceWorker});
   }
 };
 
@@ -241,7 +246,8 @@ IN_PROC_BROWSER_TEST_F(PrerendererImplBrowserTestNoPrefetchAhead,
   std::vector<RequestPathAndSecPurposeHeader> expected{
       {.path = "/empty.html", .sec_purpose_header_value = ""},
       {.path = "/title1.html",
-       .sec_purpose_header_value = "prefetch;prerender"}};
+       .sec_purpose_header_value =
+           blink::kSecPurposePrefetchPrerenderHeaderValue}};
   ASSERT_EQ(expected, GetObservedRequests());
 }
 
@@ -280,7 +286,8 @@ IN_PROC_BROWSER_TEST_F(PrerendererImplBrowserTestNoPrefetchAhead,
   std::vector<RequestPathAndSecPurposeHeader> expected{
       {.path = "/empty.html", .sec_purpose_header_value = ""},
       {.path = "/title1.html",
-       .sec_purpose_header_value = "prefetch;prerender"},
+       .sec_purpose_header_value =
+           blink::kSecPurposePrefetchPrerenderHeaderValue},
       {.path = "/title1.html", .sec_purpose_header_value = ""},
   };
   ASSERT_EQ(expected, GetObservedRequests());
@@ -316,7 +323,8 @@ IN_PROC_BROWSER_TEST_F(PrerendererImplBrowserTestPrefetchAhead,
   std::vector<RequestPathAndSecPurposeHeader> expected{
       {.path = "/empty.html", .sec_purpose_header_value = ""},
       {.path = "/title1.html",
-       .sec_purpose_header_value = "prefetch;prerender"}};
+       .sec_purpose_header_value =
+           blink::kSecPurposePrefetchPrerenderHeaderValue}};
   ASSERT_EQ(expected, GetObservedRequests());
 }
 
@@ -351,7 +359,8 @@ IN_PROC_BROWSER_TEST_F(PrerendererImplBrowserTestPrefetchAhead,
   std::vector<RequestPathAndSecPurposeHeader> expected{
       {.path = "/empty.html", .sec_purpose_header_value = ""},
       {.path = "/title1.html",
-       .sec_purpose_header_value = "prefetch;prerender"},
+       .sec_purpose_header_value =
+           blink::kSecPurposePrefetchPrerenderHeaderValue},
   };
   ASSERT_EQ(expected, GetObservedRequests());
 }
@@ -397,7 +406,8 @@ IN_PROC_BROWSER_TEST_F(PrerendererImplBrowserTestPrefetchAhead,
   std::vector<RequestPathAndSecPurposeHeader> expected{
       {.path = "/empty.html", .sec_purpose_header_value = ""},
       {.path = "/title1.html",
-       .sec_purpose_header_value = "prefetch;prerender"},
+       .sec_purpose_header_value =
+           blink::kSecPurposePrefetchPrerenderHeaderValue},
   };
   ASSERT_EQ(expected, GetObservedRequests());
 }
@@ -473,7 +483,8 @@ IN_PROC_BROWSER_TEST_F(PrerendererImplBrowserTestPrefetchAhead,
   std::vector<RequestPathAndSecPurposeHeader> expected{
       {.path = "/empty.html", .sec_purpose_header_value = ""},
       {.path = "/title1.html",
-       .sec_purpose_header_value = "prefetch;prerender"},
+       .sec_purpose_header_value =
+           blink::kSecPurposePrefetchPrerenderHeaderValue},
   };
   ASSERT_EQ(expected, GetObservedRequests());
 }
@@ -523,7 +534,8 @@ IN_PROC_BROWSER_TEST_F(PrerendererImplBrowserTestPrefetchAhead,
   std::vector<RequestPathAndSecPurposeHeader> expected{
       {.path = "/empty.html", .sec_purpose_header_value = ""},
       {.path = "/title1.html",
-       .sec_purpose_header_value = "prefetch;prerender"},
+       .sec_purpose_header_value =
+           blink::kSecPurposePrefetchPrerenderHeaderValue},
   };
   ASSERT_EQ(expected, GetObservedRequests());
 }
@@ -574,7 +586,8 @@ IN_PROC_BROWSER_TEST_F(PrerendererImplBrowserTestPrefetchAhead,
       {.path = "/prerender/empty.html", .sec_purpose_header_value = ""},
       {.path = "/prerender/sw_fallback.js", .sec_purpose_header_value = ""},
       {.path = "/prerender/empty.html?2",
-       .sec_purpose_header_value = "prefetch;prerender"},
+       .sec_purpose_header_value =
+           blink::kSecPurposePrefetchPrerenderHeaderValue},
   };
   ASSERT_EQ(expected, GetObservedRequests());
 }
@@ -647,7 +660,8 @@ IN_PROC_BROWSER_TEST_F(
       {.path = "/prerender/empty.html", .sec_purpose_header_value = ""},
       {.path = "/prerender/sw_fallback.js", .sec_purpose_header_value = ""},
       {.path = "/prerender/empty.html?2",
-       .sec_purpose_header_value = "prefetch;prerender"},
+       .sec_purpose_header_value =
+           blink::kSecPurposePrefetchPrerenderHeaderValue},
   };
   ASSERT_EQ(expected, GetObservedRequests());
 }
@@ -697,7 +711,8 @@ IN_PROC_BROWSER_TEST_F(PrerendererImplBrowserTestPrefetchAhead,
       {.path = "/empty.html", .sec_purpose_header_value = ""},
       // Prefetch and prerender, timed out and aborted.
       {.path = "/title1.html",
-       .sec_purpose_header_value = "prefetch;prerender"},
+       .sec_purpose_header_value =
+           blink::kSecPurposePrefetchPrerenderHeaderValue},
       // Normal navigation.
       {.path = "/title1.html", .sec_purpose_header_value = ""}};
   ASSERT_EQ(expected, GetObservedRequests());
@@ -754,7 +769,8 @@ IN_PROC_BROWSER_TEST_F(PrerendererImplBrowserTestPrefetchAhead,
 
   std::vector<RequestPathAndSecPurposeHeader> expected{
       {.path = "/empty.html", .sec_purpose_header_value = ""},
-      {.path = "/title1.html", .sec_purpose_header_value = "prefetch"}};
+      {.path = "/title1.html",
+       .sec_purpose_header_value = blink::kSecPurposePrefetchHeaderValue}};
   ASSERT_EQ(expected, GetObservedRequests());
 }
 
@@ -803,7 +819,8 @@ IN_PROC_BROWSER_TEST_F(PrerendererImplBrowserTestPrefetchAhead,
 
   std::vector<RequestPathAndSecPurposeHeader> expected{
       {.path = "/empty.html", .sec_purpose_header_value = ""},
-      {.path = "/title1.html", .sec_purpose_header_value = "prefetch"}};
+      {.path = "/title1.html",
+       .sec_purpose_header_value = blink::kSecPurposePrefetchHeaderValue}};
   ASSERT_EQ(expected, GetObservedRequests());
 }
 
@@ -873,7 +890,8 @@ IN_PROC_BROWSER_TEST_F(PrerendererImplBrowserTestPrefetchAhead,
 
   std::vector<RequestPathAndSecPurposeHeader> expected{
       {.path = "/empty.html", .sec_purpose_header_value = ""},
-      {.path = "/title1.html", .sec_purpose_header_value = "prefetch"},
+      {.path = "/title1.html",
+       .sec_purpose_header_value = blink::kSecPurposePrefetchHeaderValue},
       {.path = "/title1.html", .sec_purpose_header_value = ""}};
   ASSERT_EQ(expected, GetObservedRequests());
 }
@@ -1015,7 +1033,8 @@ IN_PROC_BROWSER_TEST_F(PrerendererImplBrowserTestPrefetchAhead,
   std::vector<RequestPathAndSecPurposeHeader> expected{
       {.path = "/empty.html", .sec_purpose_header_value = ""},
       // Prefetch and prerender, timed out and aborted.
-      {.path = "/title1.html", .sec_purpose_header_value = "prefetch"},
+      {.path = "/title1.html",
+       .sec_purpose_header_value = blink::kSecPurposePrefetchHeaderValue},
       // Normal navigation.
       {.path = "/title1.html", .sec_purpose_header_value = ""}};
   ASSERT_EQ(expected, GetObservedRequests());
@@ -1050,7 +1069,7 @@ IN_PROC_BROWSER_TEST_F(
 
     blink::mojom::SpeculationCandidatePtr candidate =
         CreateSpeculationCandidate(prerender_url);
-    // Use `kModerate` to trigger `PrefetchMatchResolver2::OnTimeout()`.
+    // Use `kModerate` to trigger `PrefetchMatchResolver::OnTimeout()`.
     // Note that `block_until_head_timeout_moderate_prefetch = 500 <
     // response_delay_ = 1000 < prefetch_timeout_ms = 1500`.
     candidate->eagerness = blink::mojom::SpeculationEagerness::kModerate;
@@ -1087,7 +1106,8 @@ IN_PROC_BROWSER_TEST_F(
       {.path = "/empty.html", .sec_purpose_header_value = ""},
       // Prerender is aborted, but prefetch is success and used.
       {.path = "/title1.html",
-       .sec_purpose_header_value = "prefetch;prerender"}};
+       .sec_purpose_header_value =
+           blink::kSecPurposePrefetchPrerenderHeaderValue}};
   ASSERT_EQ(expected, GetObservedRequests());
 }
 
@@ -1152,7 +1172,8 @@ IN_PROC_BROWSER_TEST_F(PrerendererImplBrowserTestPrefetchAhead,
   std::vector<RequestPathAndSecPurposeHeader> expected{
       {.path = "/empty.html", .sec_purpose_header_value = ""},
       {.path = "/title1.html",
-       .sec_purpose_header_value = "prefetch;prerender"}};
+       .sec_purpose_header_value =
+           blink::kSecPurposePrefetchPrerenderHeaderValue}};
   ASSERT_EQ(expected, GetObservedRequests());
 }
 

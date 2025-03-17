@@ -43,7 +43,6 @@ const CountryLocaleMap& GetAllowedCountryToLocaleMap() {
     map[&kCommerceMerchantViewerRegionLaunched] = {{"us", {"en-us"}}};
     map[&kEnableDiscountInfoApiRegionLaunched] = {{"us", {"en-us"}}};
     map[&ntp_features::kNtpChromeCartModule] = {{"us", {"en-us"}}};
-    map[&kParcelTrackingRegionLaunched] = {{"us", {"en-us"}}};
     map[&kPriceAnnotationsRegionLaunched] = {{"us", {"en-us"}}};
     map[&kPriceInsightsRegionLaunched] = {{"us", {"en-us"}}};
     map[&kProductSpecifications] = {{"us", {"en-us"}}};
@@ -212,7 +211,7 @@ BASE_FEATURE(kProductSpecificationsCache,
 // enables a new context menu for comparison tables under Bookmarks and Lists.
 BASE_FEATURE(kCompareManagementInterface,
              "CompareManagementInterface",
-             base::FEATURE_DISABLED_BY_DEFAULT);
+             base::FEATURE_ENABLED_BY_DEFAULT);
 
 // Discount on navigation
 BASE_FEATURE(kEnableDiscountInfoApi,
@@ -360,13 +359,6 @@ BASE_FEATURE(kDiscountConsentV2,
              base::FEATURE_ENABLED_BY_DEFAULT);
 
 BASE_FEATURE(kCodeBasedRBD, "CodeBasedRBD", base::FEATURE_ENABLED_BY_DEFAULT);
-
-BASE_FEATURE(kParcelTracking,
-             "ParcelTracking",
-             base::FEATURE_ENABLED_BY_DEFAULT);
-BASE_FEATURE(kParcelTrackingRegionLaunched,
-             "ParcelTrackingRegionLaunched",
-             base::FEATURE_DISABLED_BY_DEFAULT);
 
 extern const char kShopCardArm1[] = "arm_1";
 extern const char kShopCardArm2[] = "arm_2";

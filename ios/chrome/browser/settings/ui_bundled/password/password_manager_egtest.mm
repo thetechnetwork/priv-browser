@@ -36,6 +36,7 @@
 #import "ios/chrome/browser/settings/ui_bundled/password/reauthentication/reauthentication_constants.h"
 #import "ios/chrome/browser/settings/ui_bundled/password/widget_promo_instructions/widget_promo_instructions_constants.h"
 #import "ios/chrome/browser/settings/ui_bundled/settings_root_table_constants.h"
+#import "ios/chrome/browser/shared/public/features/features.h"
 #import "ios/chrome/browser/signin/model/fake_system_identity.h"
 #import "ios/chrome/common/ui/confirmation_alert/constants.h"
 #import "ios/chrome/common/ui/reauthentication/reauthentication_event.h"
@@ -97,6 +98,8 @@ using testing::NavigationBarBackButton;
 namespace {
 
 constexpr base::TimeDelta kSyncActiveTimeout = base::Seconds(5);
+constexpr base::TimeDelta kReEnableTurnOnPasswordsInOtherAppsButtonTimeout =
+    base::Seconds(3);
 
 id<GREYMatcher> ButtonWithAccessibilityID(NSString* id) {
   return grey_allOf(grey_accessibilityID(id),
@@ -370,6 +373,21 @@ id<GREYMatcher> PasswordDetailsMoveToAccountButton() {
   return grey_accessibilityID(kMovePasswordToAccountButtonID);
 }
 
+// Returns a matcher for the "Turn on AutoFill…" button.
+id<GREYMatcher> TurnOnPasswordsInOtherAppsButton(BOOL enabled = YES) {
+  id<GREYMatcher> accessibility_trait_matcher =
+      enabled
+          ? grey_not(grey_accessibilityTrait(UIAccessibilityTraitNotEnabled))
+          : grey_accessibilityTrait(UIAccessibilityTraitNotEnabled);
+  id<GREYMatcher> interaction_enabled_matcher =
+      enabled ? grey_userInteractionEnabled()
+              : grey_not(grey_userInteractionEnabled());
+  return grey_allOf(ButtonWithAccessibilityLabelId(
+                        IDS_IOS_CREDENTIAL_PROVIDER_SETTINGS_TURN_ON_AUTOFILL),
+                    accessibility_trait_matcher, interaction_enabled_matcher,
+                    nil);
+}
+
 // Saves two example forms in the store.
 void SaveExamplePasswordForms() {
   SavePasswordFormToProfileStore(/*password=*/@"password1",
@@ -614,12 +632,6 @@ void OpenPasswordManagerWidgetPromoInstructions() {
   CheckPasswordManagerWidgetPromoInstructionScreenVisible();
 }
 
-#define REQUIRE_PASSKEYS                                         \
-  if (!syncer::IsWebauthnCredentialSyncEnabled()) {              \
-    EARL_GREY_TEST_DISABLED(                                     \
-        @"This build configuration does not support passkeys."); \
-  }
-
 }  // namespace
 
 // Various tests for the main Password Manager UI.
@@ -712,6 +724,13 @@ void OpenPasswordManagerWidgetPromoInstructions() {
   // prevent flakiness, due to a spinner that appears in some tests and blocks
   // later ones from interacting with the UI.
   config.relaunch_policy = ForceRelaunchByCleanShutdown;
+
+  if ([self isRunningTest:@selector
+            (testTurnOnPasswordsInOtherAppsItemVisibility)] ||
+      [self
+          isRunningTest:@selector(testTapsOnTurnOnPasswordsInOtherAppsItem)]) {
+    config.features_enabled.push_back(kIOSPasskeysM2);
+  }
 
   if ([self isRunningTest:@selector(testClosingPasswordManagerWidgetPromo)] ||
       [self isRunningTest:@selector
@@ -2187,7 +2206,6 @@ void OpenPasswordManagerWidgetPromoInstructions() {
 }
 
 - (void)testEditPasskeyUsername {
-  REQUIRE_PASSKEYS
   SaveExamplePasskeyToStore();
 
   OpenPasswordManager();
@@ -2234,7 +2252,6 @@ void OpenPasswordManagerWidgetPromoInstructions() {
 }
 
 - (void)testEditPasskeyUserDisplayName {
-  REQUIRE_PASSKEYS
   SaveExamplePasskeyToStore();
 
   OpenPasswordManager();
@@ -2281,7 +2298,6 @@ void OpenPasswordManagerWidgetPromoInstructions() {
 }
 
 - (void)testDeletePasskey {
-  REQUIRE_PASSKEYS
   SaveExamplePasskeyToStore();
 
   OpenPasswordManager();
@@ -2947,7 +2963,7 @@ void OpenPasswordManagerWidgetPromoInstructions() {
       grey_sufficientlyVisible(), nil);
   if ([PasswordManagerAppInterface isPasskeysM2FeatureEnabled]) {
     if (@available(iOS 18, *)) {
-      offMatcher = grey_allOf(grey_accessibilityLabel(@"Leading detail text"),
+      offMatcher = grey_allOf(TurnOnPasswordsInOtherAppsButton(),
                               grey_sufficientlyVisible(), nil);
     }
   }
@@ -2972,6 +2988,76 @@ void OpenPasswordManagerWidgetPromoInstructions() {
 
   [PasswordsInOtherAppsAppInterface setAutoFillStatus:YES];
   [ChromeEarlGrey waitForUIElementToAppearWithMatcher:onMatcher];
+}
+
+// Tests that the "Turn on AutoFill…" button is only visible on iOS 18+ when
+// AutoFill is off.
+- (void)testTurnOnPasswordsInOtherAppsItemVisibility {
+  OpenPasswordManager();
+  OpenSettingsSubmenu();
+
+  // Check initial visibility. AutoFill is off by default.
+  id<GREYMatcher> initialVisibilityMatcher = grey_nil();
+  if (@available(iOS 18, *)) {
+    initialVisibilityMatcher = grey_sufficientlyVisible();
+  }
+  [[EarlGrey selectElementWithMatcher:TurnOnPasswordsInOtherAppsButton()]
+      assertWithMatcher:initialVisibilityMatcher];
+
+  // Turn on AutoFill. The button should not be visible afterwards.
+  [PasswordsInOtherAppsAppInterface startFakeManagerWithAutoFillStatus:YES];
+  if (@available(iOS 18, *)) {
+    id<GREYMatcher> turnOnButtonNotVisibleMatcher =
+        grey_allOf(TurnOnPasswordsInOtherAppsButton(), grey_notVisible(), nil);
+    [ChromeEarlGrey waitForMatcher:turnOnButtonNotVisibleMatcher];
+  } else {
+    [[EarlGrey selectElementWithMatcher:TurnOnPasswordsInOtherAppsButton()]
+        assertWithMatcher:grey_nil()];
+  }
+
+  // Turn off AutoFill. The button should only become visible on iOS 18+.
+  [PasswordsInOtherAppsAppInterface setAutoFillStatus:NO];
+  if (@available(iOS 18, *)) {
+    [ChromeEarlGrey
+        waitForUIElementToAppearWithMatcher:TurnOnPasswordsInOtherAppsButton()];
+  } else {
+    [[EarlGrey selectElementWithMatcher:TurnOnPasswordsInOtherAppsButton()]
+        assertWithMatcher:grey_nil()];
+  }
+}
+
+// Tests that the "Turn on AutoFill…" button becomes enabled when tapped, and
+// gets re-enabled after a 10 seconds delay.
+- (void)testTapsOnTurnOnPasswordsInOtherAppsItem {
+  if (@available(iOS 18, *)) {
+    OpenPasswordManager();
+    OpenSettingsSubmenu();
+
+    [[EarlGrey selectElementWithMatcher:TurnOnPasswordsInOtherAppsButton()]
+        performAction:grey_tap()];
+
+    // After being pressed, the button should become disabled.
+    [[EarlGrey selectElementWithMatcher:TurnOnPasswordsInOtherAppsButton(
+                                            /*enabled=*/NO)]
+        assertWithMatcher:grey_sufficientlyVisible()];
+
+    // The button should become enabled again after a delay (10 seconds in
+    // normal time, 2 seconds in the context of EG tests).
+    ConditionBlock condition = ^{
+      NSError* error = nil;
+      [[EarlGrey selectElementWithMatcher:TurnOnPasswordsInOtherAppsButton(
+                                              /*enabled=*/YES)]
+          assertWithMatcher:grey_sufficientlyVisible()
+                      error:&error];
+      return error == nil;
+    };
+    GREYAssert(base::test::ios::WaitUntilConditionOrTimeout(
+                   kReEnableTurnOnPasswordsInOtherAppsButtonTimeout, condition),
+               @"Waiting for the 'Turn on AutoFill' button to become enabled.");
+  } else {
+    EARL_GREY_TEST_SKIPPED(
+        @"The 'Turn on AutoFill…' button is only available on iOS 18+.");
+  }
 }
 
 // Tests that the detail view is dismissed when the last password is deleted,
@@ -3862,6 +3948,28 @@ void OpenPasswordManagerWidgetPromoInstructions() {
   // option anymore.
   [[EarlGrey selectElementWithMatcher:PasswordDetailsMoveToAccountButton()]
       assertWithMatcher:grey_notVisible()];
+}
+
+// Checks that the details view is correctly updated to have a move password to
+// account button when the sync state changes to signed in.
+- (void)testMovePasswordToAccountStoreIfSignedInWhileInDetailsView {
+  // Save form to be moved to account later.
+  SavePasswordFormToProfileStore();
+
+  // Open password details view for the saved password and verify the move to
+  // account option is not visible.
+  OpenPasswordManager();
+  [[self interactionForSinglePasswordEntryWithDomain:@"example.com"]
+      performAction:grey_tap()];
+  [[EarlGrey selectElementWithMatcher:PasswordDetailsMoveToAccountButton()]
+      assertWithMatcher:grey_not(grey_sufficientlyVisible())];
+
+  // Sign in and verify the option is now visible.
+  FakeSystemIdentity* fakeIdentity = [FakeSystemIdentity fakeIdentity1];
+  [SigninEarlGrey signinWithFakeIdentity:fakeIdentity];
+  [ChromeEarlGreyUI waitForAppToIdle];
+  [[EarlGrey selectElementWithMatcher:PasswordDetailsMoveToAccountButton()]
+      assertWithMatcher:grey_sufficientlyVisible()];
 }
 
 - (void)testAddPasswordTappingAnywhereInNoteFieldFocusesTextView {

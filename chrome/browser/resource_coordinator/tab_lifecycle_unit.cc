@@ -12,7 +12,6 @@
 #include "base/functional/bind.h"
 #include "base/logging.h"
 #include "base/memory/raw_ptr.h"
-#include "base/observer_list.h"
 #include "base/process/process_metrics.h"
 #include "build/build_config.h"
 #include "chrome/browser/devtools/devtools_window.h"
@@ -25,7 +24,6 @@
 #include "chrome/browser/resource_coordinator/lifecycle_unit_state.mojom-shared.h"
 #include "chrome/browser/resource_coordinator/lifecycle_unit_state.mojom.h"
 #include "chrome/browser/resource_coordinator/tab_helper.h"
-#include "chrome/browser/resource_coordinator/tab_lifecycle_observer.h"
 #include "chrome/browser/resource_coordinator/tab_lifecycle_unit_source.h"
 #include "chrome/browser/resource_coordinator/tab_load_tracker.h"
 #include "chrome/browser/resource_coordinator/tab_manager_features.h"
@@ -38,6 +36,7 @@
 #include "chrome/browser/web_applications/web_app_tab_helper.h"
 #include "components/device_event_log/device_event_log.h"
 #include "components/performance_manager/public/decorators/page_live_state_decorator.h"
+#include "components/performance_manager/public/mojom/lifecycle.mojom.h"
 #include "components/permissions/permission_manager.h"
 #include "content/public/browser/navigation_controller.h"
 #include "content/public/browser/navigation_entry.h"
@@ -72,19 +71,15 @@ StateChangeReason DiscardReasonToStateChangeReason(
 
 TabLifecycleUnitSource::TabLifecycleUnit::TabLifecycleUnit(
     TabLifecycleUnitSource* source,
-    base::ObserverList<TabLifecycleObserver>::UncheckedAndDanglingUntriaged*
-        observers,
     content::WebContents* web_contents,
     TabStripModel* tab_strip_model)
     : LifecycleUnitBase(source),
       content::WebContentsObserver(web_contents),
-      observers_(observers),
       tab_strip_model_(tab_strip_model),
       wall_time_when_hidden_(web_contents->GetVisibility() ==
                                      content::Visibility::VISIBLE
                                  ? base::TimeTicks::Max()
                                  : NowTicks()) {
-  DCHECK(observers_);
   DCHECK(web_contents);
   DCHECK(tab_strip_model_);
 
@@ -97,7 +92,7 @@ TabLifecycleUnitSource::TabLifecycleUnit::TabLifecycleUnit(
   // Visible tabs are treated as having been immediately focused, while
   // non-visible tabs have their focus set to the last active time (the time at
   // which they stopped being the active tab in a tabstrip).
-  if (GetVisibility() == content::Visibility::VISIBLE) {
+  if (web_contents->GetVisibility() == content::Visibility::VISIBLE) {
     last_focused_time_ticks_ = NowTicks();
     last_focused_time_ = Now();
   } else {
@@ -179,10 +174,6 @@ TabLifecycleUnitSource::TabLifecycleUnit::AsTabLifecycleUnitExternal() {
   return this;
 }
 
-std::u16string TabLifecycleUnitSource::TabLifecycleUnit::GetTitle() const {
-  return web_contents()->GetTitle();
-}
-
 base::TimeTicks
 TabLifecycleUnitSource::TabLifecycleUnit::GetLastFocusedTimeTicks() const {
   return last_focused_time_ticks_;
@@ -196,11 +187,6 @@ base::Time TabLifecycleUnitSource::TabLifecycleUnit::GetLastFocusedTime()
 LifecycleUnit::SortKey TabLifecycleUnitSource::TabLifecycleUnit::GetSortKey()
     const {
   return SortKey(last_focused_time_ticks_);
-}
-
-content::Visibility TabLifecycleUnitSource::TabLifecycleUnit::GetVisibility()
-    const {
-  return web_contents()->GetVisibility();
 }
 
 LifecycleUnitLoadingState
@@ -351,16 +337,13 @@ bool TabLifecycleUnitSource::TabLifecycleUnit::IsAutoDiscardable() const {
 
 void TabLifecycleUnitSource::TabLifecycleUnit::SetAutoDiscardable(
     bool auto_discardable) {
-  if (auto_discardable_ == auto_discardable)
+  if (auto_discardable_ == auto_discardable) {
     return;
+  }
   auto_discardable_ = auto_discardable;
 
   performance_manager::PageLiveStateDecorator::SetIsAutoDiscardable(
       web_contents(), auto_discardable_);
-
-  for (auto& observer : *observers_) {
-    observer.OnTabAutoDiscardableStateChange(web_contents(), auto_discardable_);
-  }
 }
 
 void TabLifecycleUnitSource::TabLifecycleUnit::FinishDiscard(
@@ -586,22 +569,6 @@ void TabLifecycleUnitSource::TabLifecycleUnit::UpdatePreDiscardResourceUsage(
   } else {
     pre_discard_resource_usage->UpdateDiscardInfo(tab_memory_footprint_estimate,
                                                   discard_reason);
-  }
-}
-
-void TabLifecycleUnitSource::TabLifecycleUnit::OnLifecycleUnitStateChanged(
-    LifecycleUnitState last_state,
-    LifecycleUnitStateChangeReason reason) {
-  // Populate `discard_reason` if the last or current state is `DISCARDED`.
-  std::optional<LifecycleUnitDiscardReason> discard_reason;
-  if (last_state == LifecycleUnitState::DISCARDED ||
-      GetState() == LifecycleUnitState::DISCARDED) {
-    discard_reason = discard_reason_;
-  }
-
-  for (auto& observer : *observers_) {
-    observer.OnTabLifecycleStateChange(web_contents(), last_state, GetState(),
-                                       discard_reason);
   }
 }
 

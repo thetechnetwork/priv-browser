@@ -98,8 +98,6 @@ bool AmountExtractionManager::ShouldTriggerAmountExtraction(
     return false;
   }
 
-  // TODO(crbug.com/378531706) check that there is at least one BNPL issuer
-  // present.
   if constexpr (BUILDFLAG(IS_WIN) || BUILDFLAG(IS_MAC) || BUILDFLAG(IS_LINUX) ||
                 BUILDFLAG(IS_CHROMEOS)) {
     return base::FeatureList::IsEnabled(
@@ -139,6 +137,11 @@ bool AmountExtractionManager::GetSearchRequestPendingForTesting() {
   return search_request_pending_;
 }
 
+bool AmountExtractionManager::IsUrlEligibleForAmountExtractionForTesting()
+    const {
+  return IsUrlEligibleForAmountExtraction();
+}
+
 void AmountExtractionManager::OnCheckoutAmountReceived(
     base::TimeTicks search_request_start_timestamp,
     const std::string& extracted_amount) {
@@ -151,6 +154,9 @@ void AmountExtractionManager::OnCheckoutAmountReceived(
           : autofill_metrics::AmountExtractionResult::kSuccessful);
   // Set `search_request_pending_` to false once the search is done.
   search_request_pending_ = false;
+  // Invalidate the WeakPtr instance to ignore the scheduled delay task when the
+  // amount is found.
+  weak_ptr_factory_.InvalidateWeakPtrs();
 
   std::optional<uint64_t> parsed_extracted_amount =
       MaybeParseAmountToMonetaryMicroUnits(extracted_amount);
@@ -163,6 +169,10 @@ void AmountExtractionManager::OnCheckoutAmountReceived(
 }
 
 void AmountExtractionManager::OnTimeoutReached() {
+  // If the amount is found, ignore this callback.
+  if (!search_request_pending_) {
+    return;
+  }
   search_request_pending_ = false;
   weak_ptr_factory_.InvalidateWeakPtrs();
   autofill_metrics::LogAmountExtractionResult(
@@ -175,9 +185,16 @@ bool AmountExtractionManager::IsUrlEligibleForAmountExtraction() const {
           autofill_manager_->client().GetAutofillOptimizationGuide()) {
     const GURL& url =
         autofill_manager_->client().GetLastCommittedPrimaryMainFrameURL();
-    for (std::string_view issuer : BnplManager::GetSupportedBnplIssuerIds()) {
+    payments::PaymentsAutofillClient* payments_autofill_client =
+        autofill_manager_->client().GetPaymentsAutofillClient();
+    if (!payments_autofill_client) {
+      return false;
+    }
+    for (const BnplIssuer& issuer :
+         payments_autofill_client->GetPaymentsDataManager().GetBnplIssuers()) {
       if (autofill_optimization_guide
-              ->IsUrlEligibleForCheckoutAmountSearchForIssuerId(issuer, url)) {
+              ->IsUrlEligibleForCheckoutAmountSearchForIssuerId(
+                  issuer.issuer_id(), url)) {
         return true;
       }
     }

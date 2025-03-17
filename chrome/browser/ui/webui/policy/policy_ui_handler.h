@@ -12,6 +12,7 @@
 #include <string>
 #include <utility>
 
+#include "base/feature_list.h"
 #include "base/memory/weak_ptr.h"
 #include "base/scoped_observation.h"
 #include "base/values.h"
@@ -24,6 +25,16 @@
 #include "extensions/buildflags/buildflags.h"
 
 class PrefChangeRegistrar;
+
+namespace features {
+// If enabled, the banner on the chrome://policy page to be shown only to
+// eligible users passing through the promotion eligibility checker.
+BASE_DECLARE_FEATURE(kPolicyPagePromotionEligibilityCheckedBanner);
+}  // namespace features
+
+namespace enterprise_management {
+class GetUserEligiblePromotionsResponse;
+}  // namespace enterprise_management
 
 // The JavaScript message handler for the chrome://policy page.
 class PolicyUIHandler : public content::WebUIMessageHandler,
@@ -93,6 +104,12 @@ class PolicyUIHandler : public content::WebUIMessageHandler,
 #if !BUILDFLAG(IS_CHROMEOS)
   // Called when report has been uploaded, successfully or not.
   void OnReportUploaded(const std::string& callback_id);
+#endif
+
+#if !BUILDFLAG(IS_ANDROID)
+  void OnPromotionEligibilityFetched(
+      const std::string& callback_id,
+      enterprise_management::GetUserEligiblePromotionsResponse response);
 #endif
 
   // Build a JSON string of all the policies.

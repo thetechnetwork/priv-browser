@@ -177,7 +177,7 @@ HostResolverManager::Job::Job(
     return NetLogJobCreationParams(source_net_log.source());
   });
 
-  if (base::FeatureList::IsEnabled(features::kHappyEyeballsV3)) {
+  if (resolver_->IsHappyEyeballsV3Enabled()) {
     dns_task_results_manager_ = std::make_unique<DnsTaskResultsManager>(
         this, key_.host, key_.query_types, net_log_);
   }
@@ -291,8 +291,6 @@ void HostResolverManager::Job::AddServiceEndpointRequest(
                    request->parameters().is_speculative);
 
   service_endpoint_requests_.Append(request);
-  auto [_, inserted] = added_service_endpoint_requests_.insert(request);
-  CHECK(inserted);
 
   UpdatePriority();
 }
@@ -867,6 +865,10 @@ void HostResolverManager::Job::OnIntermediateTransactionsComplete(
         std::move(single_transaction_results->results));
     // `this` may be deleted. Do not add code below.
   }
+}
+
+bool HostResolverManager::Job::IsHappyEyeballsV3Enabled() const {
+  return resolver_->IsHappyEyeballsV3Enabled();
 }
 
 void HostResolverManager::Job::AddTransactionTimeQueued(

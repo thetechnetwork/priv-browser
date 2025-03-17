@@ -47,6 +47,21 @@ chromium-metrics-reviews@google.com.
   <variant name="Shown" summary="shown"/>
 </variants>
 
+<histogram name="SBClientDownload.Android.DownloadProtectionOutcome"
+    enum="SBClientDownloadAndroidDownloadProtectionOutcome"
+    expires_after="2025-08-27">
+  <owner>chlily@chromium.org</owner>
+  <owner>chrome-counter-abuse-alerts@google.com</owner>
+  <summary>
+    Records the outcome of a download on Android, with respect to Safe Browsing
+    download protection, up until the point of sending a ClientDownloadRequest.
+    This is logged exactly once per download for any download on Android,
+    regardless of Safe Browsing state. This does not record the outcome of the
+    ClientDownloadRequest itself, or the actual verdict if a
+    ClientDownloadResponse was received.
+  </summary>
+</histogram>
+
 <histogram name="SBClientDownload.AndroidAppVerificationPromptResult2"
     enum="SafeBrowsingVerifyAppsEnabledResult" expires_after="2025-05-24">
   <owner>drubery@chromium.org</owner>
@@ -308,19 +323,6 @@ useful for Chirp alerts (go/crca-alerts). -->
     Records how often users in a population consented to local decryption are
     actually prompted for this feature. This is logged once per download by an
     eligible user.
-  </summary>
-</histogram>
-
-<histogram name="SBClientDownload.TailoredWarning.HasVaidEmailForAccountInfo"
-    enum="BooleanValid" expires_after="2025-07-06">
-  <owner>xinghuilu@chromium.org</owner>
-  <owner>chrome-counter-abuse-alerts@google.com</owner>
-  <summary>
-    Records whether Chrome can find a valid email to be added in the tailored
-    warning string. Logged each time Safe Browsing asks Chrome to show the
-    account info in the warining. Ideally invalid email should be rare, because
-    Safe Browsing should take the user's signed-in status into account when
-    generating tailored verdicts.
   </summary>
 </histogram>
 
@@ -621,7 +623,7 @@ useful for Chirp alerts (go/crca-alerts). -->
 
 <histogram
     name="SBClientPhishing.HighConfidenceAllowlistMatchOnServerVerdictPhishy{RequestType}"
-    enum="BooleanMatched" expires_after="2025-06-26">
+    enum="BooleanMatched" expires_after="2025-08-31">
   <owner>andysjlim@chromium.org</owner>
   <owner>chrome-counter-abuse-alerts@google.com</owner>
   <summary>
@@ -642,7 +644,7 @@ useful for Chirp alerts (go/crca-alerts). -->
 </histogram>
 
 <histogram name="SBClientPhishing.ImageEmbeddingModelLoadTime.FlatbufferScorer"
-    units="ms" expires_after="2025-06-29">
+    units="ms" expires_after="2025-08-31">
   <owner>andysjlim@chromium.org</owner>
   <owner>chrome-counter-abuse-alerts@google.com</owner>
   <summary>
@@ -1013,7 +1015,7 @@ useful for Chirp alerts (go/crca-alerts). -->
 </histogram>
 
 <histogram name="SBClientPhishing.VisualFeaturesClearReason"
-    enum="CanExtractVisualFeaturesResult" expires_after="2025-07-06">
+    enum="CanExtractVisualFeaturesResult" expires_after="2025-09-07">
   <owner>andysjlim@chromium.org</owner>
   <owner>chrome-counter-abuse-alerts@google.com</owner>
   <summary>

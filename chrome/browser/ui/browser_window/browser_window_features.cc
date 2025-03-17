@@ -45,6 +45,7 @@
 #include "chrome/browser/ui/views/media_router/cast_browser_controller.h"
 #include "chrome/browser/ui/views/send_tab_to_self/send_tab_to_self_toolbar_bubble_controller.h"
 #include "chrome/browser/ui/views/side_panel/extensions/extension_side_panel_manager.h"
+#include "chrome/browser/ui/views/side_panel/history/history_side_panel_coordinator.h"
 #include "chrome/browser/ui/views/side_panel/side_panel_coordinator.h"
 #include "chrome/browser/ui/views/tabs/glic_button.h"
 #include "chrome/browser/ui/views/toolbar/chrome_labs/chrome_labs_coordinator.h"
@@ -58,9 +59,9 @@
 #include "components/saved_tab_groups/public/features.h"
 
 #if BUILDFLAG(ENABLE_GLIC)
-#include "chrome/browser/glic/glic_button_controller.h"
+#include "chrome/browser/glic/browser_ui/glic_button_controller.h"
+#include "chrome/browser/glic/browser_ui/glic_iph_controller.h"
 #include "chrome/browser/glic/glic_enabling.h"
-#include "chrome/browser/glic/glic_iph_controller.h"
 #include "chrome/browser/glic/glic_keyed_service_factory.h"
 #endif
 namespace {
@@ -117,7 +118,6 @@ void BrowserWindowFeatures::Init(BrowserWindowInterface* browser) {
     }
 
     if (browser->GetProfile()->IsRegularProfile() &&
-        tab_groups::IsTabGroupsSaveV2Enabled() &&
         browser->GetTabStripModel()->SupportsTabGroups() &&
         tab_groups::SavedTabGroupUtils::GetServiceForProfile(
             browser->GetProfile())) {
@@ -235,6 +235,11 @@ void BrowserWindowFeatures::InitPostBrowserViewConstruction(
       std::make_unique<SidePanelCoordinator>(browser_view);
   side_panel_coordinator_->Init(browser_view->browser());
 
+  if (HistorySidePanelCoordinator::IsSupported()) {
+    history_side_panel_coordinator_ =
+        std::make_unique<HistorySidePanelCoordinator>(browser_view->browser());
+  }
+
   extension_side_panel_manager_ =
       std::make_unique<extensions::ExtensionSidePanelManager>(
           browser_view->browser(),
@@ -267,7 +272,6 @@ void BrowserWindowFeatures::InitPostBrowserViewConstruction(
   }
 
   if (download::IsDownloadBubbleEnabled() &&
-      features::IsToolbarPinningEnabled() &&
       base::FeatureList::IsEnabled(features::kPinnableDownloadsButton)) {
     download_toolbar_ui_controller_ =
         std::make_unique<DownloadToolbarUIController>(browser_view);
@@ -303,6 +307,10 @@ void BrowserWindowFeatures::TearDownPreBrowserViewDestruction() {
 
   if (shared_tab_group_feedback_controller_) {
     shared_tab_group_feedback_controller_->TearDown();
+  }
+
+  if (chrome_labs_coordinator_) {
+    chrome_labs_coordinator_->TearDown();
   }
 }
 

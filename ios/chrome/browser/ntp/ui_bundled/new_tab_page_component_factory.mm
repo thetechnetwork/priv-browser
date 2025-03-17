@@ -25,6 +25,7 @@
 #import "ios/chrome/browser/regional_capabilities/model/regional_capabilities_service_factory.h"
 #import "ios/chrome/browser/search_engines/model/template_url_service_factory.h"
 #import "ios/chrome/browser/shared/coordinator/scene/scene_state.h"
+#import "ios/chrome/browser/shared/model/application_context/application_context.h"
 #import "ios/chrome/browser/shared/model/browser/browser.h"
 #import "ios/chrome/browser/shared/model/prefs/pref_names.h"
 #import "ios/chrome/browser/shared/model/profile/profile_ios.h"
@@ -73,12 +74,12 @@ void LogLensButtonNewBadgeShownHistogram(IOSNTPNewBadgeShownResult result) {
 
 - (NewTabPageHeaderViewController*)headerViewControllerForBrowser:
     (Browser*)browser {
-  PrefService* prefService = browser->GetProfile()->GetPrefs();
+  PrefService* localState = GetApplicationContext()->GetLocalState();
   NSInteger lensNewBadgeShowCount =
-      prefService->GetInteger(prefs::kNTPLensEntryPointNewBadgeShownCount);
+      localState->GetInteger(prefs::kNTPLensEntryPointNewBadgeShownCount);
 
   BOOL useNewBadgeForCustomizationMenu = NO;
-  NSInteger customizationNewBadgeImpressionCount = prefService->GetInteger(
+  NSInteger customizationNewBadgeImpressionCount = localState->GetInteger(
       prefs::kNTPHomeCustomizationNewBadgeImpressionCount);
 
   if (customizationNewBadgeImpressionCount <
@@ -86,15 +87,15 @@ void LogLensButtonNewBadgeShownHistogram(IOSNTPNewBadgeShownResult result) {
     useNewBadgeForCustomizationMenu = YES;
     base::RecordAction(
         base::UserMetricsAction(kNTPCustomizationNewBadgeShownAction));
-    prefService->SetInteger(prefs::kNTPHomeCustomizationNewBadgeImpressionCount,
-                            customizationNewBadgeImpressionCount + 1);
+    localState->SetInteger(prefs::kNTPHomeCustomizationNewBadgeImpressionCount,
+                           customizationNewBadgeImpressionCount + 1);
   }
 
   if (lensNewBadgeShowCount < kMaxShowCountNTPLensButtonNewBadge) {
     // Show the "New" badge and colored symbol.
     LogLensButtonNewBadgeShownHistogram(IOSNTPNewBadgeShownResult::kShown);
-    prefService->SetInteger(prefs::kNTPLensEntryPointNewBadgeShownCount,
-                            lensNewBadgeShowCount + 1);
+    localState->SetInteger(prefs::kNTPLensEntryPointNewBadgeShownCount,
+                           lensNewBadgeShowCount + 1);
     return [[NewTabPageHeaderViewController alloc]
         initWithUseNewBadgeForLensButton:YES
          useNewBadgeForCustomizationMenu:useNewBadgeForCustomizationMenu];

@@ -20,7 +20,7 @@
 #include "third_party/blink/renderer/core/dom/element_traversal.h"
 #include "third_party/blink/renderer/core/dom/events/scoped_event_queue.h"
 #include "third_party/blink/renderer/core/exported/web_view_impl.h"
-#include "third_party/blink/renderer/core/frame/local_frame.h"
+#include "third_party/blink/renderer/core/frame/local_dom_window.h"
 #include "third_party/blink/renderer/core/frame/local_frame_view.h"
 #include "third_party/blink/renderer/core/frame/web_frame_widget_impl.h"
 #include "third_party/blink/renderer/core/geometry/dom_rect.h"
@@ -372,6 +372,25 @@ void InternalPopupMenu::WriteDocument(SegmentedBuffer& data) {
                          min_height, std::max(24, min_height)),
           data);
     }
+  }
+
+  if (RuntimeEnabledFeatures::SelectColorsRemoveImportantEnabled()) {
+    // We want to use -internal-inactive-list-box-selection here to match
+    // html.css, but we can't because this isn't a UA stylesheet. This code
+    // figures out what that color would resolve to and uses it.
+    Color disabled_bg_color_light =
+        LayoutTheme::GetTheme().InactiveListBoxSelectionBackgroundColor(
+            mojom::blink::ColorScheme::kLight);
+    Color disabled_bg_color_dark =
+        LayoutTheme::GetTheme().InactiveListBoxSelectionBackgroundColor(
+            mojom::blink::ColorScheme::kDark);
+    String listbox_bg_color = String::Format(
+        "option:checked:disabled {"
+        "background-color: light-dark(%s, %s) !important;"
+        "}",
+        disabled_bg_color_light.SerializeAsCSSColor().Ascii().c_str(),
+        disabled_bg_color_dark.SerializeAsCSSColor().Ascii().c_str());
+    PagePopupClient::AddString(listbox_bg_color, data);
   }
 
   PagePopupClient::AddString(
@@ -763,14 +782,8 @@ void InternalPopupMenu::SetMenuListOptionsBoundsInAXTree(
   // We need to make sure we take into account any iframes. Since OOPIF and
   // srcdoc iframes aren't allowed to access the root viewport, we need to
   // iterate through the frame owner's parent nodes and accumulate the offsets.
-  Frame* frame = owner_element_->GetDocument().GetFrame();
-  while (frame->Owner()) {
-    if (auto* frame_view = frame->View()) {
-      gfx::Point frame_point = frame_view->Location();
-      popup_origin.Offset(-frame_point.x(), -frame_point.y());
-    }
-    frame = frame->Parent();
-  }
+  owner_element_->GetDocument().GetFrame()->AdjustOffsetByAncestorFrames(
+      &popup_origin);
 
   for (auto& option_bounds : options_bounds) {
     option_bounds.Offset(popup_origin.x(), popup_origin.y());

@@ -320,6 +320,9 @@ BASE_FEATURE(kStarterPackExpansion,
 // users to certain starter pack engines.
 BASE_FEATURE(kStarterPackIPH, "StarterPackIPH", DISABLED);
 
+// Enables the @page starter pack scope.
+BASE_FEATURE(kStarterPackPage, "StarterPackPage", DISABLED);
+
 // If enabled, |SearchProvider| will not function in Zero Suggest.
 BASE_FEATURE(kAblateSearchProviderWarmup,
              "AblateSearchProviderWarmup",
@@ -354,7 +357,7 @@ BASE_FEATURE(kOmniboxElegantTextHeight, "OmniboxElegantTextHeight", ENABLED);
 // selected so as to allow for easy replacement by the user. Note that even with
 // this feature flag enabled, only large screen devices with an attached
 // keyboard and precision pointer will exhibit a change in behavior.
-BASE_FEATURE(kRetainOmniboxOnFocus, "RetainOmniboxOnFocus", DISABLED);
+BASE_FEATURE(kRetainOmniboxOnFocus, "RetainOmniboxOnFocus", ENABLED);
 
 // Accelerates time from cold start to focused Omnibox on low-end devices,
 // prioritizing Omnibox focus and background initialization.
@@ -369,9 +372,7 @@ BASE_FEATURE(kSuppressIntermediateACUpdatesOnLowEndDevices,
              DISABLED);
 
 // (Android only) Show the search feature in the hub.
-BASE_FEATURE(kAndroidHubSearch,
-             "AndroidHubSearch",
-             base::FEATURE_DISABLED_BY_DEFAULT);
+BASE_FEATURE(kAndroidHubSearch, "AndroidHubSearch", ENABLED);
 
 // When enabled, delay focusTab to prioritize navigation
 // (https://crbug.com/374852568).

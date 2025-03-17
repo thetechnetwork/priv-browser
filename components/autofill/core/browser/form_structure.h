@@ -231,12 +231,6 @@ class FormStructure {
   // is available for at least one field.
   void SetFieldTypesFromAutocompleteAttribute();
 
-  // Resets each field's section and sets it based on the `parsed_autocomplete`
-  // member when available.
-  // Returns whether at least one field's `parsed_autocomplete` section is
-  // correctly defined by the web developer.
-  bool SetSectionsFromAutocompleteOrReset();
-
   // Returns the values that can be filled into the form structure for the
   // given type. For example, there's no way to fill in a value of "The Moon"
   // into ADDRESS_HOME_STATE if the form only has a
@@ -422,16 +416,6 @@ class FormStructure {
 
   // Sets the rank of each field in the form.
   void DetermineFieldRanks();
-
-  // Considers all `GetNonActiveHeuristicSources()` and computes predictions
-  // for the PatternSources among them. If some of them match the
-  // `active_predictions`, applying the regexes is skipped entirely.
-  // `active_predictions` is nullopt if the active HeuristicSource is not a
-  // PatternSource.
-  // Reuses the `context` used to compute the main predictions for caching.
-  void DetermineNonActiveHeuristicTypes(
-      std::optional<FieldCandidatesMap> active_predictions,
-      ParsingContext& context);
 
   // Classifies each field using the regular expressions. The classifications
   // are returned, but not assigned to the `fields_` yet. Use

@@ -91,11 +91,6 @@ struct Layer {
   // Will be set to true for PictureLayers that are backdrop filter masks.
   bool is_backdrop_filter_mask;
 
-  // Will be set for PictureLayers that are backdrop filter masks.
-  ResourceId? resource_id;
-  gfx.mojom.Size? texture_size;
-  gfx.mojom.SizeF? uv_size;
-
   // Optional stable identifier that may be referenced in property trees and
   // animations. Identifies a client-side object which can be represented by
   // multiple layers over time but only by a single layer at once.
@@ -290,14 +285,6 @@ struct EffectNode {
 
   // The CopyOutputRequests that have been made for this node.
   array<CopyOutputRequest> copy_output_requests;
-
-  // State related to copy output requests.
-  // TODO(crbug.com/396060177): Stop passing this state over the wire once it is
-  // updated on EffectNodes via EffectTree::AddCopyRequest(), as it will then be
-  // properly updated on the Viz side by LayerContextImpl's handling of the
-  // `copy_output_requests` that are passed over the wire for each node.
-  bool subtree_has_copy_request;
-  int32 closest_ancestor_with_copy_request_id;
 };
 
 // Details about a new or updated node within a scroll property tree.

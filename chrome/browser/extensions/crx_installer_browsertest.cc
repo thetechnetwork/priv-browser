@@ -83,7 +83,7 @@
 
 #if BUILDFLAG(IS_CHROMEOS)
 #include "ash/constants/ash_switches.h"
-#include "chrome/browser/ash/test/kiosk_logged_in_browser_test_mixin.h"
+#include "chrome/browser/ash/test/kiosk_app_logged_in_browser_test_mixin.h"
 #include "chrome/browser/extensions/extension_assets_manager_chromeos.h"
 #endif
 
@@ -297,7 +297,7 @@ class ExtensionCrxInstallerTest : public ExtensionBrowserTest {
     base::RunLoop run_loop;
 
     scoped_refptr<CrxInstaller> installer(
-        CrxInstaller::Create(extension_service(), std::move(prompt), approval));
+        CrxInstaller::Create(profile(), std::move(prompt), approval));
     installer->set_allow_silent_install(true);
     installer->set_is_gallery_install(true);
     installer->AddInstallerCallback(
@@ -317,7 +317,7 @@ class ExtensionCrxInstallerTest : public ExtensionBrowserTest {
     base::RunLoop run_loop;
 
     scoped_refptr<CrxInstaller> installer(
-        CrxInstaller::Create(extension_service(), std::move(prompt)));
+        CrxInstaller::Create(profile(), std::move(prompt)));
     installer->set_allow_silent_install(true);
     installer->set_is_gallery_install(true);
     installer->AddInstallerCallback(
@@ -337,7 +337,7 @@ class ExtensionCrxInstallerTest : public ExtensionBrowserTest {
     base::RunLoop run_loop;
 
     scoped_refptr<CrxInstaller> installer(
-        CrxInstaller::Create(extension_service(), std::move(prompt)));
+        CrxInstaller::Create(profile(), std::move(prompt)));
     installer->set_delete_source(true);
     installer->AddInstallerCallback(
         base::BindOnce(&ExtensionCrxInstallerTest::InstallerCallback,
@@ -550,7 +550,7 @@ IN_PROC_BROWSER_TEST_F(ExtensionCrxInstallerTest, AllowOffStore) {
         CreateMockPromptProxyForBrowser(browser());
 
     scoped_refptr<CrxInstaller> crx_installer(
-        CrxInstaller::Create(extension_service(), mock_prompt->CreatePrompt()));
+        CrxInstaller::Create(profile(), mock_prompt->CreatePrompt()));
     crx_installer->set_install_cause(
         extension_misc::INSTALL_CAUSE_USER_DOWNLOAD);
 
@@ -1000,77 +1000,14 @@ IN_PROC_BROWSER_TEST_F(ExtensionCrxInstallerTest, KioskOnlyUninstallableTest) {
   EXPECT_FALSE(InstallExtension(crx_path, 0));
 }
 
-class ExtensionCrxInstallerKioskTest : public ExtensionCrxInstallerTest {
+class ExtensionCrxInstallerKioskTest
+    : public InProcessBrowserTestMixinHostSupport<ExtensionCrxInstallerTest> {
  public:
   ExtensionCrxInstallerKioskTest() { set_chromeos_user_ = false; }
 
-  void SetUp() override {
-    mixin_host_.SetUp();
-    ExtensionCrxInstallerTest::SetUp();
-  }
-
-  void SetUpCommandLine(base::CommandLine* command_line) override {
-    mixin_host_.SetUpCommandLine(command_line);
-    ExtensionCrxInstallerTest::SetUpCommandLine(command_line);
-  }
-
-  void SetUpDefaultCommandLine(base::CommandLine* command_line) override {
-    mixin_host_.SetUpDefaultCommandLine(command_line);
-    ExtensionCrxInstallerTest::SetUpDefaultCommandLine(command_line);
-  }
-
-  bool SetUpUserDataDirectory() override {
-    return mixin_host_.SetUpUserDataDirectory() &&
-           ExtensionCrxInstallerTest::SetUpUserDataDirectory();
-  }
-
-  void SetUpInProcessBrowserTestFixture() override {
-    mixin_host_.SetUpInProcessBrowserTestFixture();
-    ExtensionCrxInstallerTest::SetUpInProcessBrowserTestFixture();
-  }
-
-  void SetUpLocalStatePrefService(PrefService* local_state) override {
-    mixin_host_.SetUpLocalStatePrefService(local_state);
-    ExtensionCrxInstallerTest::SetUpLocalStatePrefService(local_state);
-  }
-
-  void CreatedBrowserMainParts(
-      content::BrowserMainParts* browser_main_parts) override {
-    mixin_host_.CreatedBrowserMainParts(browser_main_parts);
-    ExtensionCrxInstallerTest::CreatedBrowserMainParts(browser_main_parts);
-  }
-
-  void SetUpOnMainThread() override {
-    mixin_host_.SetUpOnMainThread();
-    ExtensionCrxInstallerTest::SetUpOnMainThread();
-  }
-
-  void TearDownOnMainThread() override {
-    mixin_host_.TearDownOnMainThread();
-    ExtensionCrxInstallerTest::TearDownOnMainThread();
-  }
-
-  void PostRunTestOnMainThread() override {
-    mixin_host_.PostRunTestOnMainThread();
-    ExtensionCrxInstallerTest::PostRunTestOnMainThread();
-  }
-
-  void TearDownInProcessBrowserTestFixture() override {
-    mixin_host_.TearDownInProcessBrowserTestFixture();
-    ExtensionCrxInstallerTest::TearDownInProcessBrowserTestFixture();
-  }
-
-  void TearDown() override {
-    mixin_host_.TearDown();
-    ExtensionCrxInstallerTest::TearDown();
-  }
-
- protected:
-  InProcessBrowserTestMixinHost mixin_host_;
-
  private:
-  ash::KioskLoggedInBrowserTestMixin kiosk_mixin_{
-      &mixin_host_, "example@kiosk-apps.device-local.localhost"};
+  ash::KioskAppLoggedInBrowserTestMixin kiosk_mixin_{&mixin_host_,
+                                                     "kiosk-account"};
 };
 
 IN_PROC_BROWSER_TEST_F(ExtensionCrxInstallerKioskTest, InstallTest) {
@@ -1108,7 +1045,7 @@ IN_PROC_BROWSER_TEST_F(ExtensionCrxInstallerTest, InstallToSharedLocation) {
 
 IN_PROC_BROWSER_TEST_F(ExtensionCrxInstallerTest, DoNotSync) {
   scoped_refptr<CrxInstaller> crx_installer(
-      CrxInstaller::CreateSilent(extension_service()));
+      CrxInstaller::CreateSilent(profile()));
   crx_installer->set_do_not_sync(true);
 
   base::test::TestFuture<std::optional<CrxInstallError>> installer_done_future;
@@ -1141,13 +1078,12 @@ IN_PROC_BROWSER_TEST_F(ExtensionCrxInstallerTest, UpdateWithFileAccess) {
   base::FilePath crx_with_file_permission = PackExtension(ext_source);
   ASSERT_FALSE(crx_with_file_permission.empty());
 
-  ExtensionService* service = extension_service();
-
   const extensions::ExtensionId extension_id(
       "bdkapipdccfifhdghmblnenbbncfcpid");
   {
     // Install extension.
-    scoped_refptr<CrxInstaller> installer(CrxInstaller::CreateSilent(service));
+    scoped_refptr<CrxInstaller> installer(
+        CrxInstaller::CreateSilent(profile()));
     base::test::TestFuture<std::optional<CrxInstallError>>
         installer_done_future;
     installer->AddInstallerCallback(
@@ -1172,7 +1108,8 @@ IN_PROC_BROWSER_TEST_F(ExtensionCrxInstallerTest, UpdateWithFileAccess) {
     UninstallExtension(extension_id);
     EXPECT_FALSE(ExtensionPrefs::Get(profile())->AllowFileAccess(extension_id));
 
-    scoped_refptr<CrxInstaller> installer(CrxInstaller::CreateSilent(service));
+    scoped_refptr<CrxInstaller> installer(
+        CrxInstaller::CreateSilent(profile()));
     base::test::TestFuture<std::optional<CrxInstallError>>
         installer_done_future;
     installer->AddInstallerCallback(
@@ -1193,7 +1130,8 @@ IN_PROC_BROWSER_TEST_F(ExtensionCrxInstallerTest, UpdateWithFileAccess) {
     EXPECT_TRUE(ExtensionPrefs::Get(profile())->AllowFileAccess(extension_id));
     base::FilePath crx_update_with_file_permission = PackExtension(ext_source);
 
-    scoped_refptr<CrxInstaller> installer(CrxInstaller::CreateSilent(service));
+    scoped_refptr<CrxInstaller> installer(
+        CrxInstaller::CreateSilent(profile()));
     base::test::TestFuture<std::optional<CrxInstallError>>
         installer_done_future;
     installer->AddInstallerCallback(
@@ -1212,8 +1150,7 @@ IN_PROC_BROWSER_TEST_F(ExtensionCrxInstallerTest, UpdateWithFileAccess) {
 #if !defined(LEAK_SANITIZER)
 // This test intentionally leaks a CrxInstaller object at shutdown.
 IN_PROC_BROWSER_TEST_F(ExtensionCrxInstallerTest, InstallDuringShutdown) {
-  scoped_refptr<CrxInstaller> installer(
-      CrxInstaller::CreateSilent(extension_service()));
+  scoped_refptr<CrxInstaller> installer(CrxInstaller::CreateSilent(profile()));
   installer->set_allow_silent_install(true);
   base::FilePath crx_path = test_data_dir_.AppendASCII("crx_installer/v1.crx");
   installer->InstallCrx(crx_path);
@@ -1251,7 +1188,7 @@ IN_PROC_BROWSER_TEST_P(ExtensionCrxInstallerTestWithWithholdingUI,
       CreateMockPromptProxyForBrowserWithConfirmMode(browser(), mode);
 
   scoped_refptr<CrxInstaller> crx_installer(
-      CrxInstaller::Create(extension_service(), mock_prompt->CreatePrompt()));
+      CrxInstaller::Create(profile(), mock_prompt->CreatePrompt()));
 
   // Install a simple extension with google.com as a permission.
   base::RunLoop run_loop;

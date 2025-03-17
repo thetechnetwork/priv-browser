@@ -44,7 +44,7 @@ void* GetKey() {
 namespace version {
 constexpr char kTableName[] = "entities_version";
 constexpr char kVersion[] = "version";
-constexpr int kCurrentVersion = 6;
+constexpr int kCurrentVersion = 7;
 }  // namespace version
 
 namespace attributes {
@@ -99,32 +99,25 @@ void HandleTestSwitchesIfNeeded(sql::Database* db, EntityTable& table) {
       AttributeInstance number((AttributeType(kPassportNumber)));
       AttributeInstance name((AttributeType(kPassportName)));
       AttributeInstance country((AttributeType(kPassportCountry)));
-      AttributeInstance expiry_date((AttributeType(kPassportExpiryDate)));
+      AttributeInstance expiry_date((AttributeType(kPassportExpirationDate)));
       AttributeInstance issue_date((AttributeType(kPassportIssueDate)));
-      number.SetInfo(PASSPORT_NUMBER, u"123");
-      name.SetInfo(NAME_FULL, u"Pippi Långstrump");
-      country.SetInfo(ADDRESS_HOME_COUNTRY, u"Sweden");
-      expiry_date.SetInfo(PASSPORT_EXPIRATION_DATE_TAG, u"09/2098");
-      issue_date.SetInfo(PASSPORT_ISSUE_DATE_TAG, u"10/1998");
+      number.SetInfo(PASSPORT_NUMBER, u"123", /*app_locale=*/"",
+                     /*format_string=*/u"", VerificationStatus::kNoStatus);
+      name.SetInfo(NAME_FULL, u"Pippi Långstrump", /*app_locale=*/"",
+                   /*format_string=*/u"", VerificationStatus::kNoStatus);
+      country.SetInfo(ADDRESS_HOME_COUNTRY, u"Sweden", /*app_locale=*/"",
+                      /*format_string=*/u"", VerificationStatus::kNoStatus);
+      expiry_date.SetInfo(PASSPORT_EXPIRATION_DATE, u"2098-09-01",
+                          /*app_locale=*/"", /*format_string=*/u"YYYY-MM-DD",
+                          VerificationStatus::kNoStatus);
+      issue_date.SetInfo(PASSPORT_ISSUE_DATE, u"1998-10-11",
+                         /*app_locale=*/"", /*format_string=*/u"YYYY-MM-DD",
+                         VerificationStatus::kNoStatus);
       table.AddOrUpdateEntityInstance(EntityInstance(
           EntityType(EntityTypeName::kPassport),
           {number, name, country, expiry_date, issue_date},
           base::Uuid::ParseLowercase("00000000-0000-4000-8000-000000000000"),
           "Passie", base::Time::Now()));
-    }
-    {
-      // Add a loyalty card instance.
-      AttributeInstance program((AttributeType(kLoyaltyCardProgram)));
-      AttributeInstance provider((AttributeType(kLoyaltyCardProvider)));
-      AttributeInstance member_id((AttributeType(kLoyaltyCardMemberId)));
-      program.SetInfo(LOYALTY_MEMBERSHIP_PROGRAM, u"Asterisk Alliance");
-      provider.SetInfo(LOYALTY_MEMBERSHIP_PROVIDER, u"Propeller Airways");
-      program.SetInfo(LOYALTY_MEMBERSHIP_ID, u"987");
-      table.AddOrUpdateEntityInstance(EntityInstance(
-          EntityType(EntityTypeName::kLoyaltyCard),
-          {program, provider, member_id},
-          base::Uuid::ParseLowercase("11111111-1111-4111-8111-111111111111"),
-          "Loyie", base::Time::Now()));
     }
   }
 }
@@ -234,7 +227,7 @@ bool EntityTable::AddAttribute(const EntityInstance& entity,
     s.BindString(1, attribute.type().name_as_string());
     s.BindInt(2, type);
     if (std::string encrypted_value; encryptor()->EncryptString16(
-            attribute.GetInfo(type), &encrypted_value)) {
+            attribute.GetRawInfo(/*pass_key=*/{}, type), &encrypted_value)) {
       s.BindString(3, encrypted_value);
     } else {
       return false;
@@ -429,8 +422,7 @@ std::optional<EntityInstance> EntityTable::ValidateInstance(
         std::optional<VerificationStatus> verification_status =
             ToSafeVerificationStatus(underlying_verification_status);
         if (field_type != UNKNOWN_TYPE && verification_status) {
-          attribute.SetRawInfoWithVerificationStatus(
-              /*pass_key=*/{}, field_type, value, *verification_status);
+          attribute.SetRawInfo(field_type, value, *verification_status);
         }
       }
     }

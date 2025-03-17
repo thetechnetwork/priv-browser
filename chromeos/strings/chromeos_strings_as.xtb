@@ -81,6 +81,7 @@
 <translation id="131461803491198646">গৃহ নেটৱৰ্ক, ৰ’মিং নহয়</translation>
 <translation id="1327977588028644528">গে’টৱে’</translation>
 <translation id="1328223165223065150">ৱালপেপাৰৰ ৰং</translation>
+<translation id="1329478709358066995">ট্ৰেন্সক্ৰিপ্ট:</translation>
 <translation id="1330426557709298164">JPG</translation>
 <translation id="1337912285145772892">স্কেনৰ ক্ষেত্ৰত খাপ খুৱাওক</translation>
 <translation id="1343442362630695901">লুণীয়া পানীৰ হ্ৰদ</translation>
@@ -126,7 +127,17 @@
 <translation id="1515129336378114413">গৃহ স্ক্ৰীনত ব্ৰাউজ কৰক</translation>
 <translation id="1526389707933164996">স্ক্ৰীন ছেভাৰৰ এনিমেশ্বন</translation>
 <translation id="152892567002884378">ভলিউম বঢ়াওক</translation>
+<translation id="1531038290222364269">টেব দেখুৱাওক</translation>
 <translation id="1539864135338521185">লেপিছ লেজুলি</translation>
+<translation id="1548555207631326346">এটা থীম বাছনি কৰক আৰু তাৰ পাছত আপোনাৰ AI প্ৰতিচ্ছবিসমূহ ব্যক্তিগতকৰণ কৰিবলৈ আণ্ডাৰলাইন কৰা শব্দসমূহ বাছনি কৰক।<ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          অধিক অদ্বিতীয় আৰু বৈচিত্ৰময় AI প্ৰতিচ্ছবিৰ বিকল্পসমূহ লাভ কৰিবলৈ "মোক অনুপ্ৰাণিত কৰক" বাছনি কৰক।
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          যেতিয়া আপুনি AIৰ জৰিয়তে সৃষ্টি কৰে, <ph name="BEGIN_LINK_GOOGLE_PRIVACY_POLICY" />Googleৰ গোপনীয়তাৰ নীতি<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" />ৰ অধীনত প্ৰতিচ্ছবি সৃষ্টি আৰু প্ৰ’ডাক্ট উন্নত কৰিবলৈ প্ৰম্প্‌টটো Google AI ছাৰ্ভাৰসমূহলৈ পঠিওৱা হয়।
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          Generative AI সম্পৰীক্ষামূলক, বিকাশৰ প্ৰাৰম্ভিক স্থিতিত আছে আৰু বৰ্তমান ইয়াৰ উপলব্ধতা সীমিত।</translation>
 <translation id="1555130319947370107">নীলা</translation>
 <translation id="155865706765934889">টাচ্চ্‌পেড</translation>
 <translation id="1561927818299383735">কীব’ৰ্ডৰ নেপথ্যৰ পোহৰৰ ৰং</translation>
@@ -252,7 +263,6 @@
 <translation id="2011174342667534258">SDKৰ সংস্কৰণ:</translation>
 <translation id="2016697457005847575">সমস্যা নিবাৰণৰ পদক্ষেপসমূহ কাৰ্যকৰী কৰি চাওক</translation>
 <translation id="202500043506723828">EID</translation>
-<translation id="2041627599411887437">এটা থীম বাছনি কৰক আৰু তাৰ পাছত আপোনাৰ AI প্ৰতিচ্ছবিসমূহ ব্যক্তিগতকৰণ কৰিবলৈ আণ্ডাৰলাইন কৰা শব্দসমূহ বাছনি কৰক।</translation>
 <translation id="2045814230297767491">চামুচ, কাটা চামুচ ইত্যাদি</translation>
 <translation id="2047316797244836561">অনুগ্ৰহ কৰি এটা নেটৱৰ্কৰ সৈতে সংযোগ কৰক আৰু স্ক্ৰীন ছেভাৰ চাবলৈ পৃষ্ঠাখন পুনৰ ল’ড কৰক।</translation>
 <translation id="2056550196601855911">IPv4/IPv6</translation>
@@ -405,6 +415,7 @@
 <translation id="2787237339470862294">এই মুহূৰ্তত এই ভাষাটো সমৰ্থিত নহয়</translation>
 <translation id="2787435249130282949">কীব’ৰ্ড অধিক উজ্জ্বল কৰি তোলা</translation>
 <translation id="2805756323405976993">এপ্</translation>
+<translation id="2822702442014805146">সাৰাংশ আৰু নাম সৃষ্টিৰ বাবে মডেল ডাউনল’ডৰ প্ৰক্ৰিয়া চলি আছে</translation>
 <translation id="28232023175184696">ইণ্টাৰনেটৰ সৈতে সংযোগ কৰিব নোৱাৰি। পুনৰ চেষ্টা কৰিবলৈ ক্লিক কৰক।</translation>
 <translation id="2855718259207180827">ঊণ</translation>
 <translation id="2859243502336719778">গুৰুত্বপূৰ্ণ আপডে’ট</translation>
@@ -502,6 +513,7 @@
 <translation id="3373141842870501561">পৃথিৱীৰ প্ৰবাহৰ ৱালপেপাৰ</translation>
 <translation id="33736539805963175">আখৰ <ph name="LETTERS_LETTER" />ৰ সৈতে <ph name="LETTERS_COLOR" />ৰ পটভূমি</translation>
 <translation id="3383623117265110236">বিশেষ</translation>
+<translation id="3395147534045164351">স্নেপৰ অৱস্থান ট’গল কৰক</translation>
 <translation id="3404249063913988450">স্ক্ৰীন ছেভাৰ সক্ষম কৰক</translation>
 <translation id="3413935475507503304">আপডে’টটো কাৰ্যকৰী কৰিবলৈ, পৰৱৰ্তীত টিপক।</translation>
 <translation id="3428551088151258685">মুকলি ঠাইত</translation>
@@ -651,6 +663,7 @@
 <translation id="4113067922640381334">আপোনাৰ এতিয়া নতুন <ph name="BEGIN_LINK_WALLPAPER_SUBPAGE" />ৱালপেপাৰ<ph name="END_LINK_WALLPAPER_SUBPAGE" />ৰ এক্সেছ আছে</translation>
 <translation id="4117637339509843559">গাঢ় ম’ড</translation>
 <translation id="4126551873361000548">১০ ছেকেণ্ড পিছলৈ যাওক</translation>
+<translation id="4128271910628504223">"এখন কুঁৱলীময় অৰণ্য অংকন কৰক"ৰ দৰে এটা প্ৰ’ম্পট্‌ দিয়ক</translation>
 <translation id="4130035430755296270">লে’আউটৰ অধিক বিকল্পৰ বাবে মাউছৰ কাৰ্ছৰডাল ঘূৰাই থাকক</translation>
 <translation id="4130750466177569591">মই সন্মত</translation>
 <translation id="4131410914670010031">ক’লা আৰু বগা</translation>
@@ -824,6 +837,7 @@
 <translation id="4891842000192098784">চাপ</translation>
 <translation id="4897058166682006107">ডিভাইচটোৰ বাওঁফালৰ বাডটোত <ph name="BATTERY_PERCENTAGE" />% বেটাৰী আছে।</translation>
 <translation id="4905998861748258752">স্ক্ৰীন ছেভাৰৰ বিকল্পসমূহ বাছনি কৰিবলৈ সুবিধাটো অন কৰক</translation>
+<translation id="4910853326379896417">সাৰাংশ আৰু নাম সৃষ্টিৰ মডেল ডাউনল’ড কৰাটো সম্পূৰ্ণ হৈছে</translation>
 <translation id="4910858703033903787">APNৰ ধৰণ</translation>
 <translation id="4917385247580444890">শক্তিশালী</translation>
 <translation id="4917889632206600977">বন্ধ হৈছে - কাগজ শেষ হৈছে</translation>
@@ -858,8 +872,10 @@
 <translation id="5050042263972837708">গোটৰ নাম</translation>
 <translation id="5051044138948155788">এইখনেই একমাত্ৰ পৃষ্ঠা। এইটোৱে আপোনাক স্কেন আৰম্ভ হোৱা পৃষ্ঠাখনলৈ লৈ যাব।</translation>
 <translation id="5053233795640754917">পজ কৰক</translation>
+<translation id="5056587122125565772">প্ৰতিচ্ছবি সৃষ্টি কৰক</translation>
 <translation id="5078711626843651677">স্পীকাৰত লেবেল যোগ দিয়াটো সম্পূৰ্ণ নোহোৱালৈকে ভইচ মডেলসমূহ অস্থায়ীভাৱে ডিভাইচত ৰখা হয়। আপুনি যিকোনো সময়তে ছেটিঙত এইটো অফ কৰিব পাৰে।</translation>
 <translation id="5078983345702708852">অত্যাধুনিক</translation>
+<translation id="5085224064082122501">সাৰাংশ আৰু নাম সৃষ্টিৰ বাবে মডেল ডাউনল’ড কৰিব নোৱাৰি। পুনৰ চেষ্টা কৰক বা আপোনাৰ Chromebook ৰিষ্টাৰ্ট কৰক।</translation>
 <translation id="5087864757604726239">উভতি যাওক</translation>
 <translation id="5088172560898466307">ছার্ভাৰ হ‘ষ্টনে‘ম</translation>
 <translation id="5089810972385038852">ৰাজ্য</translation>
@@ -1129,14 +1145,12 @@
 <translation id="6325525973963619867">বিফল হৈছে</translation>
 <translation id="6327262166342360252">তলৰ পাঠ ব্যৱহাৰ কৰি AIৰ জৰিয়তে এই ৱালপেপাৰখন সৃষ্টি কৰা হৈছিল: "<ph name="PROMPT" />।"</translation>
 <translation id="6331191339300272798">স্বয়ংক্ৰিয় গাঢ় ৰঙৰ থীম</translation>
-<translation id="6335228876613776082">মডেল ডাউনল’ড কৰা সম্পূৰ্ণ হ’ল</translation>
 <translation id="6340526405444716530">ব্যক্তিগতকৰণ</translation>
 <translation id="6348252528297699679">আপুনি ছেটিং &gt; গোপনীয়তা আৰু সুৰক্ষা &gt; গোপনীয়তাৰ নিয়ন্ত্ৰণ &gt; অৱস্থানৰ এক্সেছত অৱস্থান অফ কৰিব পাৰে। <ph name="LINK_BEGIN" />অধিক জানক<ph name="LINK_END" /></translation>
 <translation id="6348738456043757611">ব্যৱহাৰকাৰীৰ নাম আৰু পাছৱৰ্ড</translation>
 <translation id="6352210854422428614">অন্য গ্ৰহ</translation>
 <translation id="6359706544163531585">পাতল ৰঙৰ থীম অক্ষম কৰক</translation>
 <translation id="6359919876285606596">এই কাৰ্যটো স্থায়ী আৰু ইয়াক আনডু কৰিব নোৱাৰি</translation>
-<translation id="6368342879959028556">আপুনি “AIৰ জৰিয়তে সৃষ্টি কৰক” বাছনি কৰিলে এটা কাষ্টম প্ৰম্পট্‌ লিখক। বা আপুনি এটা থীম বাছনি কৰিবলৈ “AI ৱালপেপাৰ” বাছনি কৰিব পাৰে আৰু তাৰ পাছত আপোনাৰ AI ৱালপেপাৰ ব্যক্তিগতকৰণ কৰিবলৈ আণ্ডাৰলাইন কৰা শব্দবোৰ বাছনি কৰিব পাৰে।</translation>
 <translation id="636850387210749493">এন্টাৰপ্ৰাইজৰ পঞ্জীয়ন</translation>
 <translation id="6369221585240879141">এই ট্ৰেন্সক্ৰিপ্টৰ ভাষাটোৰ বাবে ৰেকৰ্ডিঙৰ নাম সৃষ্টি কৰিব নোৱাৰি</translation>
 <translation id="6373461326814131011">পুখুৰী</translation>
@@ -1209,16 +1223,6 @@
 <translation id="6657240842932274095">ছিষ্টেম সেৱাসমূহক আপোনাৰ অৱস্থান ব্যৱহাৰ কৰাৰ অনুমতি দিবনে?</translation>
 <translation id="6657585470893396449">পাছৱৰ্ড</translation>
 <translation id="66621959568103627">প্ৰৱালৰ দৰে গুলপীয়া</translation>
-<translation id="6667885109186363316"><ph name="SEA_PEN_INTRO_FIRST_PARAGRAPH" />
-          <ph name="LINE_BREAK" />
-          <ph name="LINE_BREAK" />
-          অধিক অদ্বিতীয় আৰু বিচিত্ৰ AI প্ৰতিচ্ছবিৰ বিকল্পসমূহ লাভ কৰিবলৈ "মোক অনুপ্ৰাণিত কৰক" বাছনি কৰক।
-          <ph name="LINE_BREAK" />
-          <ph name="LINE_BREAK" />
-          যেতিয়া আপুনি AIৰ জৰিয়তে সৃষ্টি কৰে, <ph name="BEGIN_LINK_GOOGLE_PRIVACY_POLICY" />Googleৰ গোপনীয়তাৰ নীতি<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" /> অনুসৰি প্ৰতিচ্ছবি সৃষ্টি কৰিবলৈ তথা প্ৰ’ডাক্টটো উন্নত কৰিবলৈ প্ৰম্পট্‌টো Google AI ছাৰ্ভাৰসমূহলৈ পঠিওৱা হয়।
-          <ph name="LINE_BREAK" />
-          <ph name="LINE_BREAK" />
-          Generative AI সম্পৰীক্ষামূলক, যিটো বিকাশৰ প্ৰাৰম্ভিক স্থিতিত আছে আৰু বৰ্তমান ইয়াৰ উপলব্ধতা সীমিত।</translation>
 <translation id="6673898378497337661">কীব’ৰ্ডৰ উজ্জ্বলতা বঢ়াওক</translation>
 <translation id="6692996468359469499">আপুনি বাছনি সম্পর্কীয় তথ্য পাওক</translation>
 <translation id="6694534975463174713">লক কৰক</translation>
@@ -1274,6 +1278,7 @@
 <translation id="6930597342185648547">পৃষ্ঠভূমিৰ বিষয়ে</translation>
 <translation id="6939667434404433010">ৰেকৰ্ডিঙৰ নাম সলনি কৰক</translation>
 <translation id="6939766318048400022">কেফে</translation>
+<translation id="6942253772720771875">আপোনাৰ মতামত পঠিয়াওক বা আপোনাৰ সমস্যাটো বৰ্ণনা কৰক</translation>
 <translation id="6943893908656559156">ৰিম’ট পৰিচয় (ঐচ্ছিক)</translation>
 <translation id="6953137545147683679">সোণালী</translation>
 <translation id="6957231940976260713">সেৱাৰ নাম</translation>
@@ -1295,6 +1300,7 @@
 <translation id="7040230719604914234">অপাৰেটৰ</translation>
 <translation id="7040729769968826896">বক্তাৰ চিনাক্তকৰণৰ অনুমতি দিয়ক</translation>
 <translation id="7041549558901442110">ডিভাইচটো সংযোগ কৰা হোৱা নাই।</translation>
+<translation id="704183341263526038">বৃহস্পতি গ্ৰহ</translation>
 <translation id="7046522406494308071">আটাইবোৰ শ্বৰ্টকাট ডিফ'ল্টলৈ ৰিছেট কৰিবনে?</translation>
 <translation id="7049916119678019302">ছেটিঙত ট্ৰেন্সক্ৰিপশ্বনৰ মডেল ডাউনল’ড কৰক</translation>
 <translation id="7058278511608979688">সমাপ্ত কৰি ছেভ কৰক</translation>
@@ -1389,6 +1395,7 @@
 <translation id="7388345524791662148"><ph name="RECORDING_NAME" />ৰ বাবে অধিক বিকল্প</translation>
 <translation id="7388959671917308825">বিল্ট-ইন টাচ্চপেড</translation>
 <translation id="7397270852490618635">পাতল ৰঙৰ থীম অফ কৰক</translation>
+<translation id="7400166052988585408">আপোনাৰ শিক্ষকে <ph name="NUM_SECONDS" /> ছেকেণ্ডত আপোনাৰ স্ক্ৰীনখন লক কৰিব</translation>
 <translation id="7401543881546089382">শ্বৰ্টকাট মচক</translation>
 <translation id="7405493795721832710"><ph name="DEVICE_NAME" /> আপডে’ট কৰিবৰ বাবে সাজু</translation>
 <translation id="741244894080940828">ৰূপান্তৰণ</translation>
@@ -1427,6 +1434,7 @@
 <translation id="7569444139234840525"><ph name="QUERY_TEXT" /> · /<ph name="PHONETICS" />/</translation>
 <translation id="7570674786725311828">ইউএছবি টাচ্‌স্ক্ৰীন</translation>
 <translation id="757747079855995705">শিল</translation>
+<translation id="7584853321964440104">ডাউনল’ড কৰিব নোৱাৰি। পুনৰ চেষ্টা কৰক বা আপোনাৰ Chromebook ৰিষ্টাৰ্ট কৰক।</translation>
 <translation id="7590883480672980941">ইনপুটৰ ছেটিংসমূহ</translation>
 <translation id="7595982850646262331"><ph name="TIME_VALUE" /> বাকী</translation>
 <translation id="7600430297804876776">এই <ph name="DEVICE_TYPE" />টো কেতিয়া ব্যৱহাৰ কৰিব পাৰিব সেয়া <ph name="MANAGER" /> প্ৰশাসকে ছেট কৰিছে।</translation>
@@ -1557,6 +1565,16 @@
 <translation id="8179976553408161302">Enter</translation>
 <translation id="8183975772394450380">সমুদ্ৰতীৰ</translation>
 <translation id="819278132617411009">অধিক উৎপাদনশীল হ’বলৈ Google AI ব্যৱহাৰ কৰক</translation>
+<translation id="82003371436638355">আপুনি “আপোনাৰ নিজৰ সৃষ্টি কৰক” বাছনি কৰিলে, এটা কাষ্টম প্ৰম্প্‌ট লিখক। বা আপুনি “এটা থীম বাছনি কৰক” বাছনি কৰিব পাৰে আৰু তাৰ পাছত আপোনাৰ AI ৱালপেপাৰ ব্যক্তিগতকৰণ কৰিবলৈ আণ্ডাৰলাইন কৰা শব্দবোৰ বাছনি কৰিব পাৰে।
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          অধিক অদ্বিতীয় আৰু বৈচিত্ৰময় AI প্ৰতিচ্ছবিৰ বিকল্পসমূহ লাভ কৰিবলৈ "মোক অনুপ্ৰাণিত কৰক" বাছনি কৰক।
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          আপুনি নিজৰ ৱালপেপাৰ সৃষ্টি কৰোঁতে, <ph name="BEGIN_LINK_GOOGLE_PRIVACY_POLICY" />Googleৰ সেৱাৰ চৰ্তাৱলী আৰু গোপনীয়তাৰ নীতি<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" /> অনুসৰি প্ৰতিচ্ছবি সৃষ্টি কৰিবলৈ তথা প্ৰ’ডাক্টটো উন্নত কৰিবলৈ প্ৰম্পট্‌টো Google AI ছাৰ্ভাৰসমূহলৈ পঠিওৱা হয়। যিকোনো ধৰণৰ ব্যক্তিগত, সংবেদনশীল বা গোপন তথ্য অন্তৰ্ভুক্ত নকৰিব।
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          Generative AIএ লোকসকলৰ বিষয়ে তথ্যকে ধৰি ভুল কৰিব পাৰে, সেয়ে ইয়াক পুনৰ পৰীক্ষা কৰক। <ph name="BEGIN_LINK_CREATE_YOUR_OWN_WALLPAPER" />অধিক জানক<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" /></translation>
 <translation id="8200772114523450471">পুনৰ আৰম্ভ কৰক</translation>
 <translation id="8206859287963243715">চেলুলাৰ</translation>
 <translation id="8208861521865154048">লাভালাভসমূহ</translation>
@@ -1578,6 +1596,7 @@
 <translation id="8312330582793120272">মিডিয়া প্লে’ কৰক</translation>
 <translation id="8318753676953949627">কোনো প্ৰতিচ্ছবি নাই</translation>
 <translation id="8320910311642849813">অৰণ্য</translation>
+<translation id="8322464149031882595">আগবাঢ়ি যাবলৈ ক্লিক কৰক</translation>
 <translation id="8329018942023753850">কেলকুলেটৰ এপ্</translation>
 <translation id="8336739000755212683">ডিভাইচ একাউণ্টৰ প্ৰতিচ্ছবি সলনি কৰক</translation>
 <translation id="8339024191194156249">স্বয়ংক্ৰিয়ভাৱে লঞ্চ হোৱাৰ বিষয়ে অধিক জানক</translation>
@@ -1598,6 +1617,7 @@
 <translation id="8395584934117017006">এই <ph name="DEVICE_TYPE" />টো এণ্টাৰপ্ৰাইজে পৰিচালনা কৰে</translation>
 <translation id="8398927464629426868">বৰ্তমান ডিভাইচটো চাৰ্জ অথবা ডিছচাৰ্জ হৈ থকাৰ হাৰ</translation>
 <translation id="8403988360557588704"><ph name="ART_MOVEMENT" />ৰ শৈলীৰ <ph name="ART_FEATURE" />ৰ এখন পেইণ্টিং</translation>
+<translation id="8409219750150841791">সৃষ্টি হোৱা সাৰাংশ:</translation>
 <translation id="8410244574650205435">স্বয়ংক্ৰিয়ভাৱে চিনাক্ত কৰা হৈছে</translation>
 <translation id="8420955526972171689">হাৰ্ডৱেৰ সম্পৰ্কীয় সমস্যাৰ বাবে পৰীক্ষা কৰাৰ আৰু সমস্যা নিবাৰণৰ সুবিধা চলাওক</translation>
 <translation id="8422748173858722634">IMEI</translation>
@@ -1642,6 +1662,7 @@
 <translation id="8626489604350149811"><ph name="APN_NAME" />ৰ বাবে আৰু অধিক কাৰ্য</translation>
 <translation id="86356131183441916">পাতল বেঙুনীয়া</translation>
 <translation id="8647595191512746911">অডিঅ’ ট্ৰেন্সক্ৰিপশ্বন</translation>
+<translation id="8648578954147795914">সৃষ্টি হোৱা নাম:</translation>
 <translation id="8650852232143958317">আপোনাৰ Gmail আৰু Google Driveৰ ফাইলসমূহ আপোনাৰ সৈতে ৰাখক</translation>
 <translation id="8651481478098336970">ভলিউম মিউট কৰক</translation>
 <translation id="8655295600908251630">চেনেল</translation>
@@ -1670,7 +1691,6 @@
 <translation id="8764414543112028321">WireGuard</translation>
 <translation id="87646919272181953">Google Photosৰ এলবাম</translation>
 <translation id="8775713578693478175">আধুনিক এপিএন</translation>
-<translation id="877735394245039557">মডেল ডাউনল’ড কৰি থকা হৈছে</translation>
 <translation id="877985182522063539">A4</translation>
 <translation id="879568662008399081">এই নেটৱৰ্কটোৰ এটা কেপ্টিভ প’ৰ্টেল থাকিব পাৰে</translation>
 <translation id="8797082062139985406">Google AI ব্যৱহাৰ কৰি নাম সৃষ্টি কৰক</translation>
@@ -1723,6 +1743,7 @@
 <translation id="8961025972867871808">পেংগুইন</translation>
 <translation id="8968751544471797276">চাৰ্জিঙৰ হাৰ</translation>
 <translation id="8970109610781093811">পুনৰ চলাওক</translation>
+<translation id="8972061581514441296">উভতি যাবলৈ ক্লিক কৰক</translation>
 <translation id="8983038754672563810">HSPA</translation>
 <translation id="8987565828374052507">{NUMBER_OF_PAGES,plural, =0{স্কেন কৰক}=1{পৃষ্ঠা {NUMBER_OF_PAGES} স্কেন কৰক}one{পৃষ্ঠা {NUMBER_OF_PAGES} স্কেন কৰক}other{পৃষ্ঠা {NUMBER_OF_PAGES} স্কেন কৰক}}</translation>
 <translation id="89945434909472341">গাঁও</translation>
@@ -1784,6 +1805,7 @@
 <translation id="9218016617214286986">জ্ঞাত এপিএনসমূহ দেখুৱাওক</translation>
 <translation id="932327136139879170">গৃহ</translation>
 <translation id="939519157834106403">SSID</translation>
+<translation id="940663759301549538">আপোনাৰ মাইকটো সংযুক্ত হৈ থকাটো নিশ্চিত কৰক বা আপোনাৰ Chromebookটো ৰিষ্টাৰ্ট কৰি চাওক</translation>
 <translation id="945522503751344254">মতামত পঠিয়াওক</translation>
 <translation id="950520315903467048"><ph name="DIRECTION" />ৰ বাবে কী নাই। <ph name="ASSIGN_INSTRUCTION" /></translation>
 <translation id="951780398843003443">সমগ্ৰ ৰেকৰ্ডিংটোৰ ভইচসমূহ তুলনা কৰক, যাতে ট্ৰেন্সক্ৰিপ্টটোৱে প্ৰতিগৰাকী স্পীকাৰে কেতিয়া কি কৈছিল সেয়া প্ৰতিফলিত কৰে</translation>

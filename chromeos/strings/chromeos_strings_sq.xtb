@@ -81,6 +81,7 @@
 <translation id="131461803491198646">Rrjeti vendor, jo në roaming</translation>
 <translation id="1327977588028644528">Porta e kalimit</translation>
 <translation id="1328223165223065150">Ngjyra e imazhit të sfondit</translation>
+<translation id="1329478709358066995">Transkripti:</translation>
 <translation id="1330426557709298164">JPG</translation>
 <translation id="1337912285145772892">Përshtat me zonën e skanuar</translation>
 <translation id="1343442362630695901">liqen i kripur</translation>
@@ -126,7 +127,17 @@
 <translation id="1515129336378114413">faqja kryesore e shfletuesit</translation>
 <translation id="1526389707933164996">Animacioni i mbrojtësit të ekranit</translation>
 <translation id="152892567002884378">Rrit volumin</translation>
+<translation id="1531038290222364269">Shfaq skedat</translation>
 <translation id="1539864135338521185">lapis</translation>
+<translation id="1548555207631326346">Zgjidh një temë dhe më pas zgjidh fjalët e nënvizuara për të personalizuar imazhet nga IA-ja.<ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          Zgjidh "Më frymëzo" për të marrë opsione më të larmishme dhe më unike për imazhet nga IA-ja.
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          Kur krijon me IA-në, kërkesa dërgohet te serverët e IA-së së Google për të gjeneruar imazhe dhe për të përmirësuar produktin, sipas <ph name="BEGIN_LINK_GOOGLE_PRIVACY_POLICY" />"Politikës së privatësisë" të Google<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" />.
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          IA-ja gjeneruese është eksperimentale, në fazë të hershme zhvillimi dhe ka aktualisht disponueshmëri të kufizuar.</translation>
 <translation id="1555130319947370107">E kaltër</translation>
 <translation id="155865706765934889">Blloku me prekje</translation>
 <translation id="1561927818299383735">ngjyra e ndriçimit të sfondit</translation>
@@ -252,7 +263,6 @@
 <translation id="2011174342667534258">Versioni i SDK-së:</translation>
 <translation id="2016697457005847575">Provo hapat e zgjidhjes së problemeve</translation>
 <translation id="202500043506723828">EID</translation>
-<translation id="2041627599411887437">Zgjidh një temë dhe më pas zgjidh fjalët e nënvizuara për të personalizuar imazhet nga IA-ja.</translation>
 <translation id="2045814230297767491">artikuj tavoline</translation>
 <translation id="2047316797244836561">Lidhu në një rrjet dhe ringarko faqen për të parë mbrojtësin e ekranit.</translation>
 <translation id="2056550196601855911">IPv4/IPv6</translation>
@@ -405,6 +415,7 @@
 <translation id="2787237339470862294">Kjo gjuhë nuk mbështetet në këtë moment</translation>
 <translation id="2787435249130282949">tastiera më e ndritshme</translation>
 <translation id="2805756323405976993">Aplikacionet</translation>
+<translation id="2822702442014805146">Shkarkimi i modelit për krijimin e përmbledhjeve dhe emrave është në vazhdim</translation>
 <translation id="28232023175184696">S'mund të lidhet me internetin. Kliko për të provuar përsëri.</translation>
 <translation id="2855718259207180827">lesh</translation>
 <translation id="2859243502336719778">Përditësim kritik</translation>
@@ -502,6 +513,7 @@
 <translation id="3373141842870501561">Imazhi i sfondit për rrjedhën e tokës</translation>
 <translation id="33736539805963175">Sfondi (<ph name="LETTERS_COLOR" />) me shkronjën <ph name="LETTERS_LETTER" /></translation>
 <translation id="3383623117265110236">Ekskluzive</translation>
+<translation id="3395147534045164351">Aktivizo/çaktivizo vendndodhjen e zhvendosjes</translation>
 <translation id="3404249063913988450">Aktivizo mbrojtësin e ekranit</translation>
 <translation id="3413935475507503304">Kliko "Para" për të vazhduar me përditësimin.</translation>
 <translation id="3428551088151258685">në ambient të jashtëm</translation>
@@ -651,6 +663,7 @@
 <translation id="4113067922640381334">Tani ke qasje tek <ph name="BEGIN_LINK_WALLPAPER_SUBPAGE" />imazhet e reja të sfondit<ph name="END_LINK_WALLPAPER_SUBPAGE" /></translation>
 <translation id="4117637339509843559">Modaliteti i errët</translation>
 <translation id="4126551873361000548">Prapa me 10 sekonda</translation>
+<translation id="4128271910628504223">Fut një kërkesë, si p.sh. "vizato një pyll të mjegullt"</translation>
 <translation id="4130035430755296270">Vazhdo të mbash kursorin mbi të për opsione të tjera të strukturës</translation>
 <translation id="4130750466177569591">Jam dakord</translation>
 <translation id="4131410914670010031">Bardhezi</translation>
@@ -824,6 +837,7 @@
 <translation id="4891842000192098784">Tensioni</translation>
 <translation id="4897058166682006107">Pajisja ka <ph name="BATTERY_PERCENTAGE" />% bateri në kufjen e majtë.</translation>
 <translation id="4905998861748258752">Aktivizo veçorinë për të zgjedhur opsionet e mbrojtësit të ekranit</translation>
+<translation id="4910853326379896417">Shkarkimi i modelit për krijimin e përmbledhjeve dhe emrave përfundoi</translation>
 <translation id="4910858703033903787">Llojet e APN-ve</translation>
 <translation id="4917385247580444890">I fortë</translation>
 <translation id="4917889632206600977">Ndaloi - Nuk ka letër</translation>
@@ -858,8 +872,10 @@
 <translation id="5050042263972837708">Emri i grupit</translation>
 <translation id="5051044138948155788">Kjo është faqja e vetme. Kjo do të të çojë tek ekrani i fillimit të skanimit.</translation>
 <translation id="5053233795640754917">Vendos në pauzë</translation>
+<translation id="5056587122125565772">Krijo një imazh</translation>
 <translation id="5078711626843651677">Modelet e zërit ruhen përkohësisht në pajisje derisa të përfundojë etiketimi i folësit. Mund ta çaktivizosh këtë në çdo kohë te "Cilësimet".</translation>
 <translation id="5078983345702708852">futuriste</translation>
+<translation id="5085224064082122501">Modeli për krijimin e përmbledhjeve dhe emrave nuk mund të shkarkohet. Provo përsëri ose rinis pajisjen tënde Chromebook.</translation>
 <translation id="5087864757604726239">prapa</translation>
 <translation id="5088172560898466307">Emri i strehuesit të serverit</translation>
 <translation id="5089810972385038852">Shteti</translation>
@@ -1129,14 +1145,12 @@
 <translation id="6325525973963619867">Dështoi</translation>
 <translation id="6327262166342360252">Ky imazh sfondi është krijuar me IA duke përdorur tekstin në vijim: "<ph name="PROMPT" />".</translation>
 <translation id="6331191339300272798">Temë e errët automatike</translation>
-<translation id="6335228876613776082">Shkarkimi i modelit përfundoi</translation>
 <translation id="6340526405444716530">Personalizimi</translation>
 <translation id="6348252528297699679">Mund ta çaktivizosh vendndodhjen te Cilësimet &gt; Privatësia dhe siguria &gt; Kontrollet e privatësisë &gt; Qasja te vendndodhja. <ph name="LINK_BEGIN" />Mëso më shumë<ph name="LINK_END" /></translation>
 <translation id="6348738456043757611">Emri i përdoruesit dhe fjalëkalimi</translation>
 <translation id="6352210854422428614">planet tjetër</translation>
 <translation id="6359706544163531585">Çaktivizo temën e ndriçuar</translation>
 <translation id="6359919876285606596">Ky veprim është i përhershëm dhe nuk mund të zhbëhet</translation>
-<translation id="6368342879959028556">Kur zgjedh "Krijo me IA-në", shkruaj një kërkesë të personalizuar. Ndryshe, mund të zgjedhësh "Imazhet e sfondit nga IA-ja", të zgjedhësh një temë dhe më pas të zgjedhësh fjalët e nënvizuara për të personalizuar imazhin e sfondit nga IA-ja.</translation>
 <translation id="636850387210749493">Regjistrimi i ndërmarrjes</translation>
 <translation id="6369221585240879141">Nuk mund të krijohen emrat e regjistrimeve për këtë gjuhë të transkriptit</translation>
 <translation id="6373461326814131011">pellg</translation>
@@ -1209,16 +1223,6 @@
 <translation id="6657240842932274095">Të lejohen shërbimet e sistemit që të përdorin vendndodhjen tënde?</translation>
 <translation id="6657585470893396449">Fjalëkalimi</translation>
 <translation id="66621959568103627">rozë korali</translation>
-<translation id="6667885109186363316"><ph name="SEA_PEN_INTRO_FIRST_PARAGRAPH" />
-          <ph name="LINE_BREAK" />
-          <ph name="LINE_BREAK" />
-          Zgjidh "Më frymëzo" për të marrë opsione më të larmishme dhe më unike për imazhet nga IA-ja.
-          <ph name="LINE_BREAK" />
-          <ph name="LINE_BREAK" />
-          Kur krijon me IA-në, kërkesa dërgohet te serverët e IA-së së Google për të gjeneruar imazhe dhe për të përmirësuar produktin, sipas <ph name="BEGIN_LINK_GOOGLE_PRIVACY_POLICY" />"Politikës së privatësisë" të Google<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" />.
-          <ph name="LINE_BREAK" />
-          <ph name="LINE_BREAK" />
-          IA-ja gjeneruese është eksperimentale, në fazë të hershme zhvillimi dhe ka aktualisht disponueshmëri të kufizuar.</translation>
 <translation id="6673898378497337661">ngritja e ndriçimit të tastierës</translation>
 <translation id="6692996468359469499">Merr informacion në lidhje me përzgjedhjen tënde</translation>
 <translation id="6694534975463174713">kyç</translation>
@@ -1274,6 +1278,7 @@
 <translation id="6930597342185648547">Rreth sfondit</translation>
 <translation id="6939667434404433010">Kërko për emrin e regjistrimit</translation>
 <translation id="6939766318048400022">Kafene</translation>
+<translation id="6942253772720771875">Ndaj komentet e tua ose përshkruaj problemin tënd</translation>
 <translation id="6943893908656559156">Identiteti në distancë (opsional)</translation>
 <translation id="6953137545147683679">të artë</translation>
 <translation id="6957231940976260713">Emri i shërbimit</translation>
@@ -1295,6 +1300,7 @@
 <translation id="7040230719604914234">Operatori</translation>
 <translation id="7040729769968826896">Lejo identifikimin e altoparlantëve</translation>
 <translation id="7041549558901442110">Pajisja nuk është lidhur.</translation>
+<translation id="704183341263526038">Jupiteri</translation>
 <translation id="7046522406494308071">Të rivendosen të gjitha shkurtoret te parazgjedhjet?</translation>
 <translation id="7049916119678019302">Shkarko modelin e transkriptimit te "Cilësimet"</translation>
 <translation id="7058278511608979688">Mbaro dhe ruaj</translation>
@@ -1427,6 +1433,7 @@ Shkarko modelin e transkriptimit (deri në 100 MB) për të marrë këto transk
 <translation id="7569444139234840525"><ph name="QUERY_TEXT" /> · /<ph name="PHONETICS" />/</translation>
 <translation id="7570674786725311828">Ekrani me prekje me USB</translation>
 <translation id="757747079855995705">gur</translation>
+<translation id="7584853321964440104">Nuk mund të shkarkohet. Provo përsëri ose rinis pajisjen tënde Chromebook.</translation>
 <translation id="7590883480672980941">Cilësimet e hyrjes</translation>
 <translation id="7595982850646262331"><ph name="TIME_VALUE" /> të mbetura</translation>
 <translation id="7600430297804876776">Administratori i <ph name="MANAGER" /> ka caktuar se kur mund të përdoret kjo pajisje <ph name="DEVICE_TYPE" />.</translation>
@@ -1557,6 +1564,16 @@ Shkarko modelin e transkriptimit (deri në 100 MB) për të marrë këto transk
 <translation id="8179976553408161302">Enter</translation>
 <translation id="8183975772394450380">plazh</translation>
 <translation id="819278132617411009">Përdor IA-në e Google për të qenë më produktiv</translation>
+<translation id="82003371436638355">Kur zgjedh "Krijo tënden", shkruaj një kërkesë të personalizuar. Ndryshe, zgjidh "Zgjidh një temë" dhe më pas zgjidh fjalët e nënvizuara për të personalizuar imazhin e sfondit nga IA-ja.
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          Zgjidh "Më frymëzo" për të marrë opsione më të larmishme dhe më unike për imazhet nga IA-ja.
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          Kur krijon imazhin tënd të sfondit, kërkesa dërgohet te serverët e Google për të gjeneruar imazhe dhe për të përmirësuar produktin, sipas <ph name="BEGIN_LINK_GOOGLE_PRIVACY_POLICY" />"Kushteve të privatësisë" dhe "Politikës së privatësisë" të Google<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" />. Mos përfshi asgjë personale, delikate apo konfidenciale.
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          IA-ja gjeneruese mund të bëjë gabime, duke përfshirë edhe për njerëzit, prandaj kontrolloje përsëri. <ph name="BEGIN_LINK_CREATE_YOUR_OWN_WALLPAPER" />Mëso më shumë<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" /></translation>
 <translation id="8200772114523450471">Vazhdo</translation>
 <translation id="8206859287963243715">Rrjeti celular</translation>
 <translation id="8208861521865154048">Avantazhet</translation>
@@ -1578,6 +1595,7 @@ Shkarko modelin e transkriptimit (deri në 100 MB) për të marrë këto transk
 <translation id="8312330582793120272">luaj median</translation>
 <translation id="8318753676953949627">Nuk ka imazhe</translation>
 <translation id="8320910311642849813">pyll</translation>
+<translation id="8322464149031882595">Kliko për të vazhduar përpara</translation>
 <translation id="8329018942023753850">aplikacioni i makinës llogaritëse</translation>
 <translation id="8336739000755212683">Ndrysho imazhin e llogarisë së pajisjes</translation>
 <translation id="8339024191194156249">Mëso më shumë për hapjen automatike</translation>
@@ -1598,6 +1616,7 @@ Shkarko modelin e transkriptimit (deri në 100 MB) për të marrë këto transk
 <translation id="8395584934117017006">Kjo pajisje <ph name="DEVICE_TYPE" /> menaxhohet nga ndërmarrja</translation>
 <translation id="8398927464629426868">Shpejtësia me të cilën pajisja aktualisht po karikohet ose po shkarkohet</translation>
 <translation id="8403988360557588704">Një pikturë me një <ph name="ART_FEATURE" /> në stilin <ph name="ART_MOVEMENT" /></translation>
+<translation id="8409219750150841791">Përmbledhja e gjeneruar:</translation>
 <translation id="8410244574650205435">Zbuluar automatikisht</translation>
 <translation id="8420955526972171689">Ekzekuto teste dhe zgjidhjen e problemeve për problemet e harduerit</translation>
 <translation id="8422748173858722634">IMEI</translation>
@@ -1642,6 +1661,7 @@ Shkarko modelin e transkriptimit (deri në 100 MB) për të marrë këto transk
 <translation id="8626489604350149811">Më shumë veprime për <ph name="APN_NAME" /></translation>
 <translation id="86356131183441916">Vjollcë e çelur</translation>
 <translation id="8647595191512746911">Transkriptimi i audios</translation>
+<translation id="8648578954147795914">Emrat e gjeneruar:</translation>
 <translation id="8650852232143958317">Merr me vete skedarët e Gmail dhe të "Diskut të Google"</translation>
 <translation id="8651481478098336970">vendos volumin në heshtje</translation>
 <translation id="8655295600908251630">Kanali</translation>
@@ -1670,7 +1690,6 @@ Shkarko modelin e transkriptimit (deri në 100 MB) për të marrë këto transk
 <translation id="8764414543112028321">WireGuard</translation>
 <translation id="87646919272181953">Albumi i "Fotografive të Google"</translation>
 <translation id="8775713578693478175">APN-ja e modemit</translation>
-<translation id="877735394245039557">Shkarkimi i modelit në vazhdim</translation>
 <translation id="877985182522063539">A4</translation>
 <translation id="879568662008399081">Ky rrjet mund të ketë një portal izolues</translation>
 <translation id="8797082062139985406">Krijo emrin duke përdorur IA-në e Google</translation>
@@ -1723,6 +1742,7 @@ Shkarko modelin e transkriptimit (deri në 100 MB) për të marrë këto transk
 <translation id="8961025972867871808">pinguinë</translation>
 <translation id="8968751544471797276">Shpejtësia e karikimit</translation>
 <translation id="8970109610781093811">Ekzekuto përsëri</translation>
+<translation id="8972061581514441296">Kliko për t'u rikthyer</translation>
 <translation id="8983038754672563810">HSPA</translation>
 <translation id="8987565828374052507">{NUMBER_OF_PAGES,plural, =0{Skano}=1{Skano faqen {NUMBER_OF_PAGES}}other{Skano faqen {NUMBER_OF_PAGES}}}</translation>
 <translation id="89945434909472341">fshat</translation>
@@ -1784,6 +1804,7 @@ Shkarko modelin e transkriptimit (deri në 100 MB) për të marrë këto transk
 <translation id="9218016617214286986">Shfaq APN-të e njohura</translation>
 <translation id="932327136139879170">Faqja kryesore</translation>
 <translation id="939519157834106403">SSID</translation>
+<translation id="940663759301549538">Sigurohu që mikrofoni yt të jetë i lidhur ose provo të rinisësh Chromebook</translation>
 <translation id="945522503751344254">Dërgo komente</translation>
 <translation id="950520315903467048">Tasti mungon për drejtimin <ph name="DIRECTION" />. <ph name="ASSIGN_INSTRUCTION" /></translation>
 <translation id="951780398843003443">Të krahasojë zërat gjatë të gjithë regjistrimit që transkripti të pasqyrojë atë që ka thënë dhe kur e ka thënë çdo folës</translation>

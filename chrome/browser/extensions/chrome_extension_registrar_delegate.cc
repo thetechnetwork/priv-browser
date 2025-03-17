@@ -75,14 +75,13 @@ bool SkipDeleteExtensionDir(const Extension& extension,
 ChromeExtensionRegistrarDelegate::ChromeExtensionRegistrarDelegate(
     Profile* profile,
     ExtensionService* extension_service,
-    ExtensionPrefs* extension_prefs,
-    ExtensionSystem* system,
-    ExtensionRegistry* registry)
+    ComponentLoader* component_loader)
     : profile_(profile),
+      system_(ExtensionSystem::Get(profile_)),
       extension_service_(extension_service),
-      extension_prefs_(extension_prefs),
-      system_(system),
-      registry_(registry) {}
+      extension_prefs_(ExtensionPrefs::Get(profile_)),
+      registry_(ExtensionRegistry::Get(profile_)),
+      component_loader_(component_loader) {}
 
 ChromeExtensionRegistrarDelegate::~ChromeExtensionRegistrarDelegate() = default;
 
@@ -101,6 +100,7 @@ void ChromeExtensionRegistrarDelegate::Shutdown() {
   registry_ = nullptr;
   extension_registrar_ = nullptr;
   delayed_install_manager_ = nullptr;
+  component_loader_ = nullptr;
 }
 
 void ChromeExtensionRegistrarDelegate::PreAddExtension(
@@ -208,8 +208,9 @@ void ChromeExtensionRegistrarDelegate::PostUninstallExtension(
         is_unpacked_location ? extension->path() : extension->path().DirName();
 
     base::FilePath extensions_install_dir =
-        is_unpacked_location ? extension_service_->unpacked_install_directory()
-                             : extension_service_->install_directory();
+        is_unpacked_location
+            ? extension_registrar_->unpacked_install_directory()
+            : extension_registrar_->install_directory();
 
     // Tell the backend to start deleting the installed extension on the file
     // thread.
@@ -246,9 +247,8 @@ void ChromeExtensionRegistrarDelegate::LoadExtensionForReload(
 
   // If we're reloading a component extension, use the component extension
   // loader's reloader.
-  auto* component_loader = extension_service_->component_loader();
-  if (component_loader->Exists(extension_id)) {
-    component_loader->Reload(extension_id);
+  if (component_loader_->Exists(extension_id)) {
+    component_loader_->Reload(extension_id);
     return;
   }
 
@@ -277,7 +277,10 @@ void ChromeExtensionRegistrarDelegate::LoadExtensionForReload(
 void ChromeExtensionRegistrarDelegate::ShowExtensionDisabledError(
     const Extension* extension,
     bool is_remote_install) {
-  AddExtensionDisabledError(extension_service_, extension, is_remote_install);
+  // TODO(crbug.com/399680111): Android will need a different implementation of
+  // this function (e.g. an extension_disabled_ui_android.cc file) as it cannot
+  // use the views implementation of this bubble.
+  AddExtensionDisabledError(profile_, extension, is_remote_install);
 }
 
 void ChromeExtensionRegistrarDelegate::FinishDelayedInstallationsIfAny() {
@@ -291,7 +294,7 @@ bool ChromeExtensionRegistrarDelegate::CanAddExtension(
   // is set (http://crbug.com/29067).
   std::set<std::string> disable_flag_exempted_extensions =
       extension_service_->disable_flag_exempted_extensions();
-  if (!extension_service_->extensions_enabled() &&
+  if (!extension_registrar_->extensions_enabled() &&
       !Manifest::ShouldAlwaysLoadExtension(extension->location(),
                                            extension->is_theme()) &&
       disable_flag_exempted_extensions.count(extension->id()) == 0) {
@@ -375,9 +378,6 @@ void ChromeExtensionRegistrarDelegate::CheckPermissionsIncrease(
   // still remember that "omnibox" had been granted, so that if the
   // extension once again includes "omnibox" in an upgrade, the extension
   // can upgrade without requiring this user's approval.
-  auto passkey = ExtensionPrefs::DisableReasonRawManipulationPasskey();
-  base::flat_set<int> disable_reasons =
-      extension_prefs_->GetRawDisableReasons(passkey, extension->id());
 
   // Silently grant all active permissions to pre-installed apps and apps
   // installed in kiosk mode.
@@ -385,7 +385,7 @@ void ChromeExtensionRegistrarDelegate::CheckPermissionsIncrease(
       extension->was_installed_by_default() ||
       ExtensionsBrowserClient::Get()->IsRunningInForcedAppMode();
   if (auto_grant_permission) {
-    extension_service_->GrantPermissions(extension);
+    PermissionsUpdater(profile_).GrantActivePermissions(extension);
   }
 
   bool is_privilege_increase = false;
@@ -424,26 +424,17 @@ void ChromeExtensionRegistrarDelegate::CheckPermissionsIncrease(
     // warning messages are suppressed by existing permissions). Grant the new
     // permissions.
     if (!is_privilege_increase) {
-      extension_service_->GrantPermissions(extension);
+      PermissionsUpdater(profile_).GrantActivePermissions(extension);
     }
   }
 
-  bool previously_disabled =
-      extension_prefs_->IsExtensionDisabled(extension->id());
-  // TODO(devlin): Is the |is_extension_loaded| check needed here?
-  if (is_extension_loaded && previously_disabled) {
-    // Legacy disabled extensions do not have a disable reason. Infer that it
-    // was likely disabled by the user.
-    if (disable_reasons.empty()) {
-      disable_reasons.insert(disable_reason::DISABLE_USER_ACTION);
-    }
-  }
+  const DisableReasonSet disable_reasons =
+      extension_prefs_->GetDisableReasons(extension->id());
 
   // If the extension is disabled due to a permissions increase, but does in
   // fact have all permissions, remove that disable reason.
   if (disable_reasons.contains(disable_reason::DISABLE_PERMISSIONS_INCREASE) &&
       !is_privilege_increase) {
-    disable_reasons.erase(disable_reason::DISABLE_PERMISSIONS_INCREASE);
     extension_prefs_->RemoveDisableReason(
         extension->id(), disable_reason::DISABLE_PERMISSIONS_INCREASE);
   }
@@ -454,22 +445,8 @@ void ChromeExtensionRegistrarDelegate::CheckPermissionsIncrease(
   // reason.
   if (is_privilege_increase &&
       !disable_reasons.contains(disable_reason::DISABLE_REMOTE_INSTALL)) {
-    disable_reasons.insert(disable_reason::DISABLE_PERMISSIONS_INCREASE);
-  }
-
-  if (disable_reasons.empty()) {
-    extension_prefs_->SetExtensionEnabled(extension->id());
-  } else {
-    // TODO(crbug.com/372186532): We have an interesting side effect here. The
-    // method below will be called even if the code above doesn't change any
-    // disable reasons. If the extension has disable reasons, but its enabled
-    // state is incorrect, the call below will fix it by setting the correct
-    // enabled state. Disable reasons and enabled state can go out-of-sync if
-    // ExtensionRegistrar::DisableExtension() is called for an extension that is
-    // blocklisted. Until we fix this, we must use raw get/set methods here and
-    // can not convert the above code to a series of additions / removals.
-    extension_prefs_->SetExtensionDisabledWithRawReasons(
-        passkey, extension->id(), disable_reasons);
+    extension_prefs_->AddDisableReason(
+        extension->id(), disable_reason::DISABLE_PERMISSIONS_INCREASE);
   }
 }
 

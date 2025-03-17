@@ -6,7 +6,6 @@
 
 #include <algorithm>
 #include <cstdint>
-#include <iterator>
 #include <memory>
 #include <optional>
 #include <string>
@@ -26,17 +25,14 @@
 #include "base/location.h"
 #include "base/memory/scoped_refptr.h"
 #include "base/memory/weak_ptr.h"
-#include "base/no_destructor.h"
-#include "base/notimplemented.h"
 #include "base/notreached.h"
 #include "base/strings/string_util.h"
 #include "base/strings/utf_string_conversions.h"
 #include "base/task/sequenced_task_runner.h"
-#include "base/task/task_traits.h"
-#include "base/task/thread_pool.h"
 #include "base/time/tick_clock.h"
 #include "base/time/time.h"
 #include "base/timer/timer.h"
+#include "build/build_config.h"
 #include "build/buildflag.h"
 #include "chrome/browser/net/system_network_context_manager.h"
 #include "chrome/browser/profiles/profile.h"
@@ -52,7 +48,6 @@
 #include "chrome/browser/webauthn/gpm_enclave_transaction.h"
 #include "chrome/browser/webauthn/gpm_user_verification_policy.h"
 #include "chrome/browser/webauthn/passkey_model_factory.h"
-#include "chrome/browser/webauthn/proto/enclave_local_state.pb.h"
 #include "chrome/browser/webauthn/webauthn_metrics_util.h"
 #include "chrome/browser/webauthn/webauthn_pref_names.h"
 #include "components/device_event_log/device_event_log.h"
@@ -80,7 +75,7 @@
 #include "google_apis/gaia/gaia_id.h"
 #include "services/network/public/cpp/shared_url_loader_factory.h"
 
-#if BUILDFLAG(IS_CHROMEOS_ASH)
+#if BUILDFLAG(IS_CHROMEOS)
 #include "ash/public/cpp/webauthn_dialog_controller.h"
 #endif
 
@@ -337,6 +332,9 @@ GPMEnclaveController::GPMEnclaveController(
   webauthn::PasskeyModel* passkey_model =
       PasskeyModelFactory::GetInstance()->GetForProfile(profile);
   creds_ = passkey_model->GetPasskeysForRelyingPartyId(rp_id_);
+  if (base::FeatureList::IsEnabled(device::kWebAuthnSignalApiHidePasskeys)) {
+    std::erase_if(creds_, [](const auto& cred) { return cred.hidden(); });
+  }
 
   // The following code may do some asynchronous processing. However the control
   // flow terminates, it must have called SetAccountState with some value.
@@ -411,10 +409,8 @@ void GPMEnclaveController::BuildUVKeyOptions(
     EnclaveManager::UVKeyOptions& uv_options) {
   uv_options.rp_id = rp_id_;
   uv_options.render_frame_host_id = render_frame_host_id_;
-#if BUILDFLAG(IS_MAC)
-  uv_options.lacontext = std::move(model_->lacontext);
-#endif  // BUILDFLAG(IS_MAC)
-#if BUILDFLAG(IS_CHROMEOS_ASH)
+  uv_options.local_auth_token = std::move(model_->local_auth_token);
+#if BUILDFLAG(IS_CHROMEOS)
   if (ash::features::IsWebAuthNAuthDialogMergeEnabled()) {
     uv_options.dialog_controller = ash::ActiveSessionAuthController::Get();
   } else {
@@ -693,7 +689,7 @@ void GPMEnclaveController::RecoverSecurityDomain() {
   model_->DisableUiOrShowLoadingDialog();
   device::enclave::ICloudRecoveryKey::Retrieve(
       base::BindOnce(&GPMEnclaveController::OnICloudKeysRetrievedForRecovery,
-                      weak_ptr_factory_.GetWeakPtr()),
+                     weak_ptr_factory_.GetWeakPtr()),
       kICloudKeychainRecoveryKeyAccessGroup);
 #else
   model_->SetStep(Step::kRecoverSecurityDomain);
@@ -974,14 +970,8 @@ void GPMEnclaveController::OnGPMPasskeySelected(
 
     case AccountState::kRecoverable:
     case AccountState::kIrrecoverable:
-      if (base::FeatureList::IsEnabled(
-              device::kWebAuthnNeverSkipTrustThisComputer) ||
-          model_->priority_phone_name.has_value()) {
-        device::enclave::RecordEvent(device::enclave::Event::kOnboarding);
-        model_->SetStep(Step::kTrustThisComputerAssertion);
-      } else {
-        RecoverSecurityDomain();
-      }
+      device::enclave::RecordEvent(device::enclave::Event::kOnboarding);
+      model_->SetStep(Step::kTrustThisComputerAssertion);
       break;
 
     case AccountState::kLoading:

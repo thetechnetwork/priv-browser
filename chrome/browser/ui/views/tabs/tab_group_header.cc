@@ -324,7 +324,7 @@ TabSlotView::ViewType TabGroupHeader::GetTabSlotViewType() const {
 
 TabSizeInfo TabGroupHeader::GetTabSizeInfo() const {
   TabSizeInfo size_info;
-  // Group headers have a fixed width based on |title_|'s width.
+  // Group headers have a fixed width based on `title_`'s width.
   const int width = GetDesiredWidth();
   size_info.pinned_tab_width = width;
   size_info.min_active_width = width;
@@ -449,7 +449,7 @@ void TabGroupHeader::UpdateAccessibleName() {
       tab_slot_controller_->GetGroupContentString(group().value());
   std::u16string collapsed_state = std::u16string();
 
-// Windows screen reader properly announces the state set above in |node_data|
+// Windows screen reader properly announces the state set above in `node_data`
 // and will read out the state change when the header's collapsed state is
 // toggled. The state is added into the title for other platforms and the title
 // will be reread with the updated state when the header's collapsed state is
@@ -481,8 +481,7 @@ bool SupportsDataSharing() {
 
 bool TabGroupHeader::ShouldShowHeaderIcon() const {
   const bool supports_shared_groups = SupportsDataSharing();
-  if (tab_groups::IsTabGroupsSaveV2Enabled() && !supports_shared_groups) {
-    // In V2, the sync icon was removed.
+  if (!supports_shared_groups) {
     return false;
   }
 
@@ -501,8 +500,8 @@ bool TabGroupHeader::ShouldShowHeaderIcon() const {
     return false;
   }
 
-  if (tab_groups::IsTabGroupsSaveV2Enabled() && supports_shared_groups) {
-    // V2 + DataSharing shows a share icon if the group is shared.
+  if (supports_shared_groups) {
+    // DataSharing shows a share icon if the group is shared.
     return saved_group->is_shared_tab_group();
   }
 
@@ -529,8 +528,7 @@ void TabGroupHeader::UpdateTitleView() {
 void TabGroupHeader::UpdateSyncIconView() {
   sync_icon_->SetVisible(should_show_header_icon_);
   if (should_show_header_icon_) {
-    bool use_share_icon =
-        tab_groups::IsTabGroupsSaveV2Enabled() && SupportsDataSharing();
+    bool use_share_icon = SupportsDataSharing();
     sync_icon_->SetImage(ui::ImageModel::FromVectorIcon(
         use_share_icon ? kPeopleGroupIcon : kTabGroupsSyncIcon,
         color_utils::GetColorWithMaxContrast(color_),
@@ -539,8 +537,7 @@ void TabGroupHeader::UpdateSyncIconView() {
 }
 
 void TabGroupHeader::UpdateAttentionIndicatorView() {
-  const bool supports_attention_indicator =
-      tab_groups::IsTabGroupsSaveV2Enabled() && SupportsDataSharing();
+  const bool supports_attention_indicator = SupportsDataSharing();
   if (!supports_attention_indicator) {
     attention_indicator_->SetVisible(false);
     return;
@@ -552,8 +549,7 @@ void TabGroupHeader::UpdateAttentionIndicatorView() {
     attention_indicator_->SetImage(ui::ImageModel::FromVectorIcon(
         kDefaultTouchFaviconMaskIcon,
         color_utils::GetColorWithMaxContrast(color_),
-        group_style_->GetAttentionIndicatorWidth(
-            should_show_attention_indicator)));
+        group_style_->GetAttentionIndicatorWidth()));
   }
 }
 
@@ -575,16 +571,13 @@ void TabGroupHeader::CreateHeaderWithoutTitle() {
           group_style_->GetInsetsForHeaderChip();
       const int title_chip_vertical_inset = 0;
       gfx::Rect title_chip_bounds = group_style_->GetEmptyTitleChipBounds(this);
-      int attention_indicator_width = group_style_->GetAttentionIndicatorWidth(
-          should_show_attention_indicator);
-      if (attention_indicator_width) {
-        // Only add padding if the attention indicator is showing;
-        attention_indicator_width += kSyncIconPaddingFromLabel;
-      }
+      const int attention_indicator_width =
+          group_style_->GetAttentionIndicatorWidth();
 
       // The total width of the title chip includes the horizontal
       // insets, the sync icon, and the attention indicator + its padding.
       title_chip_bounds.set_width(sync_icon_width + attention_indicator_width +
+                                  kSyncIconPaddingFromLabel +
                                   title_chip_insets.width());
       title_chip_->SetBoundsRect(title_chip_bounds);
 
@@ -623,12 +616,13 @@ void TabGroupHeader::CreateHeaderWithTitle() {
   // attention indicator is enabled.
   const bool should_show_attention_indicator =
       should_show_header_icon_ && GetShowingAttentionIndicator();
-  int attention_indicator_width =
-      group_style_->GetAttentionIndicatorWidth(should_show_attention_indicator);
-  if (attention_indicator_width) {
-    // Only add padding if the attention indicator is showing;
-    attention_indicator_width += kSyncIconPaddingFromLabel;
-  }
+  const int attention_indicator_width =
+      should_show_attention_indicator
+          ? group_style_->GetAttentionIndicatorWidth() +
+                kSyncIconPaddingFromLabel
+          : 0;
+  const int attention_indicator_padding =
+      should_show_attention_indicator ? kSyncIconPaddingFromLabel : 0;
 
   // The max width of the content should be half the standard tab width (not
   // counting overlap).
@@ -642,9 +636,9 @@ void TabGroupHeader::CreateHeaderWithTitle() {
       title_->GetPreferredSize(views::SizeBounds(title_->width(), {})).height();
 
   // Width of title chip should at least be the width of an empty title chip.
-  const int total_content_width = sync_icon_width +
-                                  padding_between_label_sync_icon + text_width +
-                                  attention_indicator_width;
+  const int total_content_width =
+      sync_icon_width + padding_between_label_sync_icon + text_width +
+      attention_indicator_width + attention_indicator_padding;
   const gfx::Insets title_chip_insets = group_style_->GetInsetsForHeaderChip();
   const int title_chip_width =
       std::max(group_style_->GetEmptyTitleChipBounds(this).width(),
@@ -694,8 +688,7 @@ bool TabGroupHeader::GetShowingAttentionIndicator() {
 }
 
 void TabGroupHeader::SetTabGroupNeedsAttention(bool needs_attention) {
-  const bool supports_attention_indicator =
-      tab_groups::IsTabGroupsSaveV2Enabled() && SupportsDataSharing();
+  const bool supports_attention_indicator = SupportsDataSharing();
   if (!supports_attention_indicator) {
     return;
   }

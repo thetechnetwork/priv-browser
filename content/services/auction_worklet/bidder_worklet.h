@@ -32,6 +32,7 @@
 #include "content/services/auction_worklet/public/mojom/auction_shared_storage_host.mojom.h"
 #include "content/services/auction_worklet/public/mojom/auction_worklet_service.mojom-forward.h"
 #include "content/services/auction_worklet/public/mojom/auction_worklet_service.mojom.h"
+#include "content/services/auction_worklet/public/mojom/bidder_worklet.mojom-forward.h"
 #include "content/services/auction_worklet/public/mojom/bidder_worklet.mojom.h"
 #include "content/services/auction_worklet/public/mojom/private_aggregation_request.mojom.h"
 #include "content/services/auction_worklet/public/mojom/real_time_reporting.mojom.h"
@@ -446,6 +447,7 @@ class CONTENT_EXPORT BidderWorklet : public mojom::BidderWorklet,
         base::flat_map<std::string, GURL> ad_beacon_map,
         base::flat_map<std::string, std::string> ad_macro_map,
         PrivateAggregationRequests pa_requests,
+        mojom::PrivateModelTrainingRequestDataPtr pmt_request_data,
         base::TimeDelta reporting_latency,
         bool script_timed_out,
         std::vector<std::string> errors)>;
@@ -699,6 +701,7 @@ class CONTENT_EXPORT BidderWorklet : public mojom::BidderWorklet,
         base::flat_map<std::string, GURL> ad_beacon_map,
         base::flat_map<std::string, std::string> ad_macro_map,
         PrivateAggregationRequests pa_requests,
+        mojom::PrivateModelTrainingRequestDataPtr pmt_request_data,
         base::TimeDelta reporting_latency,
         bool script_timed_out,
         std::vector<std::string> errors);
@@ -810,9 +813,17 @@ class CONTENT_EXPORT BidderWorklet : public mojom::BidderWorklet,
       GenerateBidTaskList::iterator task,
       DirectFromSellerSignalsRequester::Result result);
 
+  // Returns true iff all generateBid()'s inputs are ready. The JS and WASM
+  // may or may not be ready yet.
+  bool GenerateBidTaskHasInputs(const GenerateBidTask& task) const;
+
   // Returns true iff all generateBid()'s prerequisite loading tasks have
   // completed.
   bool IsReadyToGenerateBid(const GenerateBidTask& task) const;
+
+  // If the task is ready other than waiting for the JS script, avoid eager
+  // compilation so that we can get started on generating this bid.
+  void DisableEagerJsCompilationIfOnlyWaitingOnJs(const GenerateBidTask& task);
 
   // Checks if IsReadyToGenerateBid(). If so, calls generateBid(), and invokes
   // the task callback with the resulting bid, if any.
@@ -868,6 +879,7 @@ class CONTENT_EXPORT BidderWorklet : public mojom::BidderWorklet,
       base::flat_map<std::string, GURL> ad_beacon_map,
       base::flat_map<std::string, std::string> ad_macro_map,
       PrivateAggregationRequests pa_requests,
+      mojom::PrivateModelTrainingRequestDataPtr pmt_request_data,
       base::TimeDelta reporting_latency,
       bool script_timed_out,
       std::vector<std::string> errors);

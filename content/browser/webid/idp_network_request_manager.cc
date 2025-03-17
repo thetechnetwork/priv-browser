@@ -9,6 +9,7 @@
 #include "base/json/json_writer.h"
 #include "base/strings/escape.h"
 #include "base/strings/string_util.h"
+#include "base/strings/to_string.h"
 #include "base/task/sequenced_task_runner.h"
 #include "content/browser/renderer_host/render_frame_host_impl.h"
 #include "content/browser/webid/fedcm_metrics.h"
@@ -21,6 +22,7 @@
 #include "mojo/public/cpp/bindings/remote.h"
 #include "net/base/isolation_info.h"
 #include "net/base/registry_controlled_domains/registry_controlled_domain.h"
+#include "net/base/schemeful_site.h"
 #include "net/base/url_util.h"
 #include "net/cookies/site_for_cookies.h"
 #include "net/http/http_request_headers.h"
@@ -280,8 +282,10 @@ IdentityRequestAccountPtr ParseAccount(const base::Value::Dict& account,
     RecordApprovedClientsSize(approved_clients->size());
   }
 
+  // TODO(crbug.com/382086282): Support usernames and phone number for
+  // display_name and display_identifier.
   return base::MakeRefCounted<IdentityRequestAccount>(
-      *id, *email, *name, given_name ? *given_name : "",
+      *id, *email, *name, *email, *name, given_name ? *given_name : "",
       picture ? GURL(*picture) : GURL(), std::move(account_hints),
       std::move(domain_hints), std::move(labels), approved_value,
       /*browser_trusted_login_state=*/LoginState::kSignUp);
@@ -737,7 +741,7 @@ std::pair<GURL, std::optional<ErrorUrlType>> GetErrorUrlAndType(
     return std::make_pair(error_url, ErrorUrlType::kSameOrigin);
   }
 
-  if (!webid::IsSameSite(error_origin, idp_origin)) {
+  if (!net::SchemefulSite::IsSameSite(error_origin, idp_origin)) {
     return std::make_pair(GURL(), ErrorUrlType::kCrossSite);
   }
 
@@ -1146,7 +1150,7 @@ void IdpNetworkRequestManager::SendFailedTokenRequestMetrics(
     MetricsEndpointErrorCode error_code) {
   std::string url_encoded_post_data = base::StringPrintf(
       "outcome=failure&error_code=%d&did_show_ui=%s",
-      static_cast<int>(error_code), did_show_ui ? "true" : "false");
+      static_cast<int>(error_code), base::ToString(did_show_ui));
   std::unique_ptr<network::ResourceRequest> resource_request =
       CreateUncredentialedResourceRequest(metrics_endpoint_url,
                                           /*send_origin=*/false);

@@ -55,8 +55,10 @@ class ResourcePoolTest : public testing::Test {
   };
 
   void SetBackingOnResource(const ResourcePool::InUsePoolResource& resource) {
-    auto backing = std::make_unique<ResourcePool::Backing>();
-    backing->set_shared_image(gpu::ClientSharedImage::CreateForTesting());
+    auto backing = std::make_unique<ResourcePool::Backing>(
+        resource.size(), resource.format(), resource.color_space());
+    backing->SetSharedImageForTesting(
+        gpu::ClientSharedImage::CreateForTesting());
     backing->mailbox_sync_token.Set(
         gpu::GPU_IO, gpu::CommandBufferId::FromUnsafeValue(1), 1);
     resource.set_backing(std::move(backing));
@@ -700,8 +702,9 @@ TEST_F(ResourcePoolTest, MetadataSentToDisplayCompositor) {
       metadata.size, metadata.format, metadata.color_space);
   SetBackingOnResource(resource);
 
-  resource.backing()->set_shared_image(gpu::ClientSharedImage::CreateForTesting(
-      metadata, GL_TEXTURE_RECTANGLE_ARB));
+  resource.backing()->SetSharedImageForTesting(
+      gpu::ClientSharedImage::CreateForTesting(metadata,
+                                               GL_TEXTURE_RECTANGLE_ARB));
 
   // More non-default values.
   resource.backing()->mailbox_sync_token = sync_token;
@@ -753,7 +756,8 @@ TEST_F(ResourcePoolTest, InvalidResource) {
       resource_pool_->AcquireResource(size, format, color_space);
 
   // Keep a zero mailbox
-  auto backing = std::make_unique<ResourcePool::Backing>();
+  auto backing = std::make_unique<ResourcePool::Backing>(
+      resource.size(), resource.format(), resource.color_space());
   backing->wait_on_fence_required = true;
   resource.set_backing(std::move(backing));
 

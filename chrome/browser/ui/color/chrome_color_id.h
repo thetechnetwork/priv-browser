@@ -77,6 +77,10 @@
   E_CPONLY(kColorBatchUploadBackground) \
   E_CPONLY(kColorBatchUploadDataBackground) \
   E_CPONLY(kColorBatchUploadDataSeparator) \
+  /* BNPL Issuer GPay colors */ \
+  E_CPONLY(kColorBnplIssuerLabelForeground) \
+  E_CPONLY(kColorBnplIssuerLabelForegroundDisabled) \
+  E_CPONLY(kColorBnplIssuerLinkedIneligibleBackground) \
   /* Compose colors */ \
   E_CPONLY(kColorComposeDialogBackground) \
   E_CPONLY(kColorComposeDialogDivider) \
@@ -679,7 +683,6 @@
   E_CPONLY(kColorHoverCardTabAlertMediaRecordingIcon) \
   E_CPONLY(kColorHoverCardTabAlertPipPlayingIcon) \
   E_CPONLY(kColorHoverCardTabAlertAudioPlayingIcon) \
-  E_CPONLY(kColorHoverCardTabAlertUserAvatarFallbackIcon) \
   /* Tab colors. */ \
   E_CPONLY(kColorTabBackgroundActiveFrameActive) \
   E_CPONLY(kColorTabBackgroundActiveFrameInactive) \

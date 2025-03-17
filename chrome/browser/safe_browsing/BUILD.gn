@@ -2,7 +2,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-import("//build/config/chromeos/ui_mode.gni")
 import("//components/enterprise/buildflags/buildflags.gni")
 import("//components/safe_browsing/buildflags.gni")
 import("//extensions/buildflags/buildflags.gni")
@@ -49,7 +48,6 @@ static_library("safe_browsing") {
     "//components/resources:components_resources_grit",
     "//components/safe_browsing:buildflags",
     "//components/safe_browsing/content/browser",
-    "//components/safe_browsing/content/browser:client_side_detection_service",
     "//components/safe_browsing/content/browser/notification_content_detection:notification_content_detection",
     "//components/safe_browsing/content/browser/triggers:suspicious_site_trigger",
     "//components/safe_browsing/content/browser/web_ui",
@@ -76,6 +74,9 @@ static_library("safe_browsing") {
     "//services/preferences/public/cpp",
   ]
 
+  # Note: is_android is not equivalent to safe_browsing_mode == 2.
+  # Sources and dependencies added to this block must not depend on anything
+  # requiring safe_browsing_mode != 0.
   if (is_android) {
     deps += [
       "//chrome/browser/password_manager/android:utils",
@@ -84,7 +85,7 @@ static_library("safe_browsing") {
     ]
   }
 
-  if (is_chromeos_ash) {
+  if (is_chromeos) {
     deps += [ "//chrome/browser/ash/file_manager" ]
 
     allow_circular_includes_from += [ "//chrome/browser/ash/file_manager" ]
@@ -142,10 +143,12 @@ static_library("safe_browsing") {
       "download_protection/check_client_download_request_base.h",
       "download_protection/check_file_system_access_write_request.cc",
       "download_protection/check_file_system_access_write_request.h",
+      "download_protection/deep_scanning_metadata.cc",
+      "download_protection/deep_scanning_metadata.h",
+      "download_protection/download_item_metadata.cc",
+      "download_protection/download_item_metadata.h",
       "download_protection/download_protection_delegate.cc",
       "download_protection/download_protection_delegate.h",
-      "download_protection/download_protection_delegate_desktop.cc",
-      "download_protection/download_protection_delegate_desktop.h",
       "download_protection/download_protection_observer.cc",
       "download_protection/download_protection_observer.h",
       "download_protection/download_protection_service.cc",
@@ -158,6 +161,8 @@ static_library("safe_browsing") {
       "download_protection/download_url_sb_client.h",
       "download_protection/file_analyzer.cc",
       "download_protection/file_analyzer.h",
+      "download_protection/file_system_access_metadata.cc",
+      "download_protection/file_system_access_metadata.h",
       "download_protection/ppapi_download_request.cc",
       "download_protection/ppapi_download_request.h",
       "external_app_redirect_checking.cc",
@@ -270,8 +275,6 @@ static_library("safe_browsing") {
       sources += [
         "chrome_safe_browsing_hats_delegate.cc",
         "chrome_safe_browsing_hats_delegate.h",
-        "cloud_content_scanning/binary_fcm_service.cc",
-        "cloud_content_scanning/binary_fcm_service.h",
         "cloud_content_scanning/binary_upload_service.cc",
         "cloud_content_scanning/binary_upload_service.h",
         "cloud_content_scanning/cloud_binary_upload_service.cc",
@@ -298,6 +301,8 @@ static_library("safe_browsing") {
         "download_protection/download_feedback.h",
         "download_protection/download_feedback_service.cc",
         "download_protection/download_feedback_service.h",
+        "download_protection/download_protection_delegate_desktop.cc",
+        "download_protection/download_protection_delegate_desktop.h",
         "download_protection/path_sanitizer.cc",
         "download_protection/path_sanitizer.h",
         "extension_telemetry/cookies_get_all_signal.cc",
@@ -460,22 +465,24 @@ static_library("safe_browsing") {
           "//chrome/common:version_header",
         ]
       }
-      if (is_chromeos_ash) {
+      if (is_chromeos) {
         deps += [
           "//ash/constants:constants",
           "//chromeos/ash/components/browser_context_helper:browser_context_helper",
+          "//chromeos/components/mgs:mgs",
         ]
-      }
-      if (is_chromeos) {
-        deps += [ "//chromeos/components/mgs:mgs" ]
       }
       if (!is_android) {
         deps += [ "//chrome/browser/ui:browser_list" ]
       }
     } else if (safe_browsing_mode == 2) {
       sources += [
+        "android/download_protection_metrics_data.cc",
+        "android/download_protection_metrics_data.h",
         "android/services_delegate_android.cc",
         "android/services_delegate_android.h",
+        "download_protection/download_protection_delegate_android.cc",
+        "download_protection/download_protection_delegate_android.h",
         "tailored_security/consented_message_android.cc",
         "tailored_security/consented_message_android.h",
         "tailored_security/unconsented_message_android.cc",

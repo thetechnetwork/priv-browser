@@ -654,6 +654,8 @@ TEST_P(CompositingTest,
 }
 
 TEST_P(CompositingTest, HitTestOpaqueness) {
+  ScopedNoFontAntialiasingForTest disable_no_font_antialiasing_for_test(false);
+
   InitializeWithHTML(*WebView()->MainFrameImpl()->GetFrame(), R"HTML(
     <div id="transparent1" style="pointer-events: none; will-change: transform;
                                   width: 100px; height: 50px">
@@ -942,24 +944,14 @@ class ScrollingContentsCullRectTest : public CompositingTest {
         ->SetPreferCompositingToLCDTextForTesting(false);
   }
 
-  CompositorElementId GetScrollElementId(const char* id) {
-    return GetLayoutObjectById(id)
-        ->FirstFragment()
-        .PaintProperties()
-        ->Scroll()
-        ->GetCompositorElementId();
-  }
-
-  bool IsScrollerComposited(const char* id) {
-    auto& scroll_tree = GetPropertyTrees()->scroll_tree();
-    return scroll_tree.CanRealizeScrollsOnActiveTree(
-        *scroll_tree.FindNodeFromElementId(GetScrollElementId(id)));
-  }
-
   void CheckCullRect(const char* id, const std::optional<gfx::Rect>& expected) {
     const gfx::Rect* actual =
         GetPropertyTrees()->scroll_tree().ScrollingContentsCullRect(
-            GetScrollElementId(id));
+            GetLayoutObjectById(id)
+                ->FirstFragment()
+                .PaintProperties()
+                ->Scroll()
+                ->GetCompositorElementId());
     if (expected) {
       ASSERT_TRUE(actual);
       EXPECT_EQ(*expected, *actual);
@@ -1011,12 +1003,12 @@ TEST_P(ScrollingContentsCullRectTest, Basics) {
   UpdateAllLifecyclePhases();
   auto sequence_number = GetPropertyTrees()->sequence_number();
 
-  EXPECT_TRUE(IsScrollerComposited("short-composited-scroller"));
-  EXPECT_TRUE(IsScrollerComposited("long-composited-scroller"));
-  EXPECT_FALSE(IsScrollerComposited("narrow-non-composited-scroller"));
-  EXPECT_FALSE(IsScrollerComposited("wide-non-composited-scroller"));
-  EXPECT_TRUE(IsScrollerComposited("composited-under-clip"));
-  EXPECT_FALSE(IsScrollerComposited("non-composited-under-clip"));
+  EXPECT_TRUE(CcLayerByDOMElementId("short-composited-scroller"));
+  EXPECT_TRUE(CcLayerByDOMElementId("long-composited-scroller"));
+  EXPECT_FALSE(CcLayerByDOMElementId("narrow-non-composited-scroller"));
+  EXPECT_FALSE(CcLayerByDOMElementId("wide-non-composited-scroller"));
+  EXPECT_TRUE(CcLayerByDOMElementId("composited-under-clip"));
+  EXPECT_FALSE(CcLayerByDOMElementId("non-composited-under-clip"));
 
   CheckCullRect("short-composited-scroller", std::nullopt);
   CheckCullRect("long-composited-scroller", gfx::Rect(20, 20, 400, 4400));
@@ -1052,12 +1044,12 @@ TEST_P(ScrollingContentsCullRectTest, Basics) {
   // full PaintArtifactCompositor update.
   EXPECT_EQ(sequence_number + 1, GetPropertyTrees()->sequence_number());
 
-  EXPECT_TRUE(IsScrollerComposited("short-composited-scroller"));
-  EXPECT_TRUE(IsScrollerComposited("long-composited-scroller"));
-  EXPECT_FALSE(IsScrollerComposited("narrow-non-composited-scroller"));
-  EXPECT_FALSE(IsScrollerComposited("wide-non-composited-scroller"));
-  EXPECT_TRUE(IsScrollerComposited("composited-under-clip"));
-  EXPECT_FALSE(IsScrollerComposited("non-composited-under-clip"));
+  EXPECT_TRUE(CcLayerByDOMElementId("short-composited-scroller"));
+  EXPECT_TRUE(CcLayerByDOMElementId("long-composited-scroller"));
+  EXPECT_FALSE(CcLayerByDOMElementId("narrow-non-composited-scroller"));
+  EXPECT_FALSE(CcLayerByDOMElementId("wide-non-composited-scroller"));
+  EXPECT_TRUE(CcLayerByDOMElementId("composited-under-clip"));
+  EXPECT_FALSE(CcLayerByDOMElementId("non-composited-under-clip"));
 
   CheckCullRect("short-composited-scroller", std::nullopt);
   CheckCullRect("long-composited-scroller", gfx::Rect(20, 1020, 400, 8400));
@@ -3195,6 +3187,8 @@ TEST_P(CompositingSimTest, ChangingDrawsContentRequiresFullUpdate) {
 }
 
 TEST_P(CompositingSimTest, ContentsOpaqueForTextWithSubpixelSizeSimpleBg) {
+  ScopedNoFontAntialiasingForTest disable_no_font_antialiasing_for_test(false);
+
   InitializeWithHTML(R"HTML(
       <!DOCTYPE html>
       <div id="target" style="will-change: transform; background: white;
@@ -3212,6 +3206,8 @@ TEST_P(CompositingSimTest, ContentsOpaqueForTextWithSubpixelSizeSimpleBg) {
 }
 
 TEST_P(CompositingSimTest, ContentsOpaqueForTextWithSubpixelSizeComplexBg) {
+  ScopedNoFontAntialiasingForTest disable_no_font_antialiasing_for_test(false);
+
   InitializeWithHTML(R"HTML(
       <!DOCTYPE html>
       <div id="target" style="will-change: transform; background: white;
@@ -3228,6 +3224,8 @@ TEST_P(CompositingSimTest, ContentsOpaqueForTextWithSubpixelSizeComplexBg) {
 }
 
 TEST_P(CompositingSimTest, ContentsOpaqueForTextWithPartialBackground) {
+  ScopedNoFontAntialiasingForTest disable_no_font_antialiasing_for_test(false);
+
   InitializeWithHTML(R"HTML(
       <!DOCTYPE html>
       <div id="target" style="will-change: transform; padding: 10px">

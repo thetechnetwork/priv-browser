@@ -79,6 +79,18 @@ chrome_internal_verifier(
 ### Optional builders ###
 
 chrome_internal_verifier(
+    # TODO(https://crbug.com/400712231): Turn on branches for this bot.
+    #branch_selector = branches.selector.ANDROID_BRANCHES,
+    builder = "android-arm32-orderfile",
+)
+
+chrome_internal_verifier(
+    # TODO(https://crbug.com/400712231): Turn on branches for this bot.
+    #branch_selector = branches.selector.ANDROID_BRANCHES,
+    builder = "android-arm64-orderfile",
+)
+
+chrome_internal_verifier(
     branch_selector = branches.selector.ANDROID_BRANCHES,
     builder = "android-arm32-pgo",
 )
@@ -154,6 +166,12 @@ chrome_internal_verifier(
     builder = "chromeos-octopus-compile-chrome",
 )
 
+chrome_internal_verifier(
+    builder = "chromeos-volteer-chrome",
+)
+
+# TODO(http://issues.chromium.org/339354084): Remove this after chromeos-volteer-chrome gets
+# stabilized.
 chrome_internal_verifier(
     builder = "chromeos-volteer-chrome-skylab",
 )

@@ -94,6 +94,7 @@
 #include "third_party/blink/renderer/bindings/core/v8/v8_throw_dom_exception.h"
 #include "third_party/blink/renderer/bindings/core/v8/v8_union_elementcreationoptions_string.h"
 #include "third_party/blink/renderer/bindings/core/v8/v8_union_htmlscriptelement_svgscriptelement.h"
+#include "third_party/blink/renderer/bindings/core/v8/v8_union_string_trustedhtml.h"
 #include "third_party/blink/renderer/bindings/core/v8/v8_visibility_state.h"
 #include "third_party/blink/renderer/bindings/core/v8/window_proxy.h"
 #include "third_party/blink/renderer/core/accessibility/ax_context.h"
@@ -3144,10 +3145,9 @@ void Document::Shutdown() {
 
   // Because the document view transition supplement can get destroyed before
   // the execution context notification, we should clean up the transition
-  // object here.
-  if (auto* transition = ViewTransitionUtils::GetTransition(*this)) {
-    transition->SkipTransition();
-  }
+  // objects here.
+  ViewTransitionUtils::ForEachTransition(
+      *this, [](ViewTransition& transition) { transition.SkipTransition(); });
 
   // This is required, as our LocalFrame might delete itself as soon as it
   // detaches us. However, this violates Node::detachLayoutTree() semantics, as
@@ -4418,7 +4418,8 @@ bool Document::ShouldScheduleLayout() const {
 void Document::write(const String& text,
                      LocalDOMWindow* entered_window,
                      ExceptionState& exception_state) {
-  TRACE_EVENT("blink", "Document::write");
+  TRACE_EVENT1("blink", "Document::write", "size_in_bytes",
+               text.CharactersSizeInBytes());
 
   if (!IsA<HTMLDocument>(this)) {
     exception_state.ThrowDOMException(DOMExceptionCode::kInvalidStateError,
@@ -4541,6 +4542,64 @@ void Document::writeln(v8::Isolate* isolate,
                        TrustedHTML* text,
                        ExceptionState& exception_state) {
   writeln(text->toString(), EnteredDOMWindow(isolate), exception_state);
+}
+
+void Document::write(v8::Isolate* isolate,
+                     TrustedHTML* first_text,
+                     HeapVector<Member<V8UnionStringOrTrustedHTML>> other_texts,
+                     ExceptionState& exception_state) {
+  Write(isolate, first_text, other_texts, /*line_feed*/ false, "write",
+        exception_state);
+}
+
+void Document::writeln(
+    v8::Isolate* isolate,
+    TrustedHTML* first_text,
+    HeapVector<Member<V8UnionStringOrTrustedHTML>> other_texts,
+    ExceptionState& exception_state) {
+  Write(isolate, first_text, other_texts, /*line_feed*/ true, "writeln",
+        exception_state);
+}
+
+void Document::Write(v8::Isolate* isolate,
+                     TrustedHTML* first_text,
+                     HeapVector<Member<V8UnionStringOrTrustedHTML>> other_texts,
+                     bool line_feed,
+                     const char* sink,
+                     ExceptionState& exception_state) {
+  // https://html.spec.whatwg.org/#document.write(), steps 1-3:
+  StringBuilder builder;
+  builder.Append(first_text->toString());
+  bool is_trusted = true;
+  for (const auto& text_or_trusted : other_texts) {
+    if (text_or_trusted->IsString()) {
+      builder.Append(text_or_trusted->GetAsString());
+      is_trusted = false;
+    } else {
+      builder.Append(text_or_trusted->GetAsTrustedHTML()->toString());
+    }
+  }
+  // Step 4: If isTrusted is false, set string to [... Get Trusted Type ...]
+  String string =
+      is_trusted ? builder.ReleaseString()
+                 : TrustedTypesCheckForHTML(builder.ReleaseString(),
+                                            GetExecutionContext(), "Document",
+                                            sink, exception_state);
+  if (exception_state.HadException()) {
+    return;
+  }
+
+  // Step 5: If lineFeed is true, append U+000A LINE FEED to string.
+  // The order of steps 4 + 5 is observable through the default policy, so we
+  // can't just do this in the original StringBuilder.
+  if (line_feed) {
+    StringBuilder line_feed_builder;
+    line_feed_builder.Append(string);
+    line_feed_builder.Append("\n");
+    string = line_feed_builder.ReleaseString();
+  }
+  // For steps 6+, delegate to String-only write:
+  write(string, EnteredDOMWindow(isolate), exception_state);
 }
 
 KURL Document::urlForBinding() const {
@@ -5449,6 +5508,12 @@ bool Document::SetFocusedElement(Element* new_focused_element,
         new_focused_element = nullptr;
       }
     }
+    // EditContext's activation is synced with the associated element being
+    // focused or not. If an element loses focus, its associated EditContext
+    // is deactivated.
+    if (auto* old_edit_context = old_focused_element->editContext()) {
+      old_edit_context->Blur();
+    }
   }
 
   // Blur/focusout handlers could have moved the new element out of this
@@ -5562,13 +5627,8 @@ bool Document::SetFocusedElement(Element* new_focused_element,
     frame->Selection().DidChangeFocus();
 
   // EditContext's activation is synced with the associated element being
-  // focused or not. If an element loses focus, its associated EditContext
-  // is deactivated. If getting focus, the EditContext is activated.
-  if (old_focused_element) {
-    if (auto* old_edit_context = old_focused_element->editContext()) {
-      old_edit_context->Blur();
-    }
-  }
+  // focused or not. If an element receives focus, its associated EditContext
+  // is activated.
   if (new_focused_element) {
     if (auto* edit_context = new_focused_element->editContext()) {
       edit_context->Focus();
@@ -5680,23 +5740,25 @@ void Document::SetSequentialFocusNavigationStartingPoint(Node* node) {
 Element* Document::SequentialFocusNavigationStartingPoint(
     mojom::blink::FocusType type) const {
   if (focused_element_) {
-    // Per https://drafts.csswg.org/css-overflow-5/#scroll-marker-next-focus
-    // we want to start our search from scroll target of ::scroll-marker,
-    // for regular ::scroll-marker, the starting point should be its ultimate
-    // originating element. and TODO(378698659): the first element in ::column's
-    // view for column scroll marker, but it's not clear yet what how to
-    // implement that. sequential_focus_navigation_starting_point_ check is
-    // needed to prevent focus loops as carousel primitives focus order is not
-    // regular DOM one, we can end up on the same ::scroll-marker by moving
-    // focus order, but in that case, we shouldn't go to its scroll target, as
-    // we only go there once
-    // ::scroll-marker is activated.
+    // Per https://drafts.csswg.org/css-overflow-5/#scroll-marker-next-focus we
+    // want to start our search from scroll target of ::scroll-marker, for
+    // regular ::scroll-marker, the starting point should be its originating
+    // element, or the first element in ::column's view for column scroll
+    // marker. The sequential_focus_navigation_starting_point_ check is needed
+    // to prevent focus loops as carousel primitives focus order is not regular
+    // DOM one, we can end up on the same ::scroll-marker by moving focus order,
+    // but in that case, we shouldn't go to its scroll target, as we only go
+    // there once ::scroll-marker is activated.
     if (auto* scroll_marker =
             DynamicTo<ScrollMarkerPseudoElement>(focused_element_.Get());
         scroll_marker && sequential_focus_navigation_starting_point_ &&
         sequential_focus_navigation_starting_point_->startContainer() !=
             focused_element_ &&
         type == mojom::blink::FocusType::kForward) {
+      if (auto* column_pseudo =
+              DynamicTo<ColumnPseudoElement>(scroll_marker->parentElement())) {
+        return column_pseudo;
+      }
       return &scroll_marker->UltimateOriginatingElement();
     }
     return focused_element_.Get();
@@ -7402,6 +7464,14 @@ void Document::OnLargestContentfulPaintUpdated() {
 void Document::OnPrepareToStopParsing() {
   if (render_blocking_resource_manager_) {
     render_blocking_resource_manager_->ClearPendingParsingElements();
+    if (features::kThrottleFrameRateOnInitialization.Get() && GetFrame() &&
+        GetFrame()->IsLocalRoot() && GetFrame()->GetPage() &&
+        GetFrame()->IsAttached()) {
+      // The frame rate will be implicitly throttled during initialization
+      // if the feature is enabled so unthrottle here.
+      GetFrame()->GetPage()->GetChromeClient().SetShouldThrottleFrameRate(
+          false, *GetFrame());
+    }
   }
   MaybeExecuteDelayedAsyncScripts(
       MilestoneForDelayedAsyncScript::kFinishedParsing);
@@ -8106,7 +8176,6 @@ HTMLDialogElement* Document::ActiveModalDialog() const {
 
 HTMLElement* Document::TopmostPopoverOrHint() const {
   if (!PopoverHintStack().empty()) {
-    CHECK(RuntimeEnabledFeatures::HTMLPopoverHintEnabled());
     return PopoverHintStack().back();
   }
   if (!PopoverAutoStack().empty()) {
@@ -8125,12 +8194,10 @@ void Document::SetCustomizableSelectMousedownLocation(
 }
 
 const HTMLDialogElement* Document::DialogPointerdownTarget() const {
-  CHECK(RuntimeEnabledFeatures::HTMLDialogLightDismissEnabled());
   return dialog_pointerdown_target_.Get();
 }
 
 void Document::SetDialogPointerdownTarget(const HTMLDialogElement* dialog) {
-  CHECK(RuntimeEnabledFeatures::HTMLDialogLightDismissEnabled());
   DCHECK(!dialog || dialog->IsOpen());
   dialog_pointerdown_target_ = dialog;
 }
@@ -9462,6 +9529,32 @@ void Document::ScheduleSelectionchangeEvent() {
   }
 }
 
+void Document::SetHasRenderBlockingExpectLinkElements(bool flag) {
+  has_render_blocking_expect_link_elements_ = flag;
+  has_pending_expect_link_elements_ =
+      has_render_blocking_expect_link_elements_ ||
+      has_frame_rate_blocking_expect_link_elements_;
+}
+
+void Document::SetHasFullFrameRateBlockingExpectLinkElements(bool flag) {
+  if (flag == has_frame_rate_blocking_expect_link_elements_) {
+    return;
+  }
+  has_frame_rate_blocking_expect_link_elements_ = flag;
+  has_pending_expect_link_elements_ =
+      has_render_blocking_expect_link_elements_ ||
+      has_frame_rate_blocking_expect_link_elements_;
+  UpdateRenderFrameRate();
+}
+
+void Document::UpdateRenderFrameRate() {
+  if (!GetFrame() || !GetFrame()->GetPage() || !GetFrame()->IsAttached()) {
+    return;
+  }
+  GetFrame()->GetPage()->GetChromeClient().SetShouldThrottleFrameRate(
+      has_frame_rate_blocking_expect_link_elements_, *GetFrame());
+}
+
 // static
 Document* Document::parseHTMLInternal(ExecutionContext* context,
                                       const String& html,
@@ -9548,9 +9641,10 @@ template class CORE_TEMPLATE_EXPORT Supplement<Document>;
 }  // namespace blink
 #ifndef NDEBUG
 static WeakDocumentSet& LiveDocumentSet() {
-  DEFINE_STATIC_LOCAL(blink::Persistent<WeakDocumentSet>, set,
-                      (blink::MakeGarbageCollected<WeakDocumentSet>()));
-  return *set;
+  using WeakDocumentSetHolder = blink::DisallowNewWrapper<WeakDocumentSet>;
+  DEFINE_STATIC_LOCAL(blink::Persistent<WeakDocumentSetHolder>, holder,
+                      (blink::MakeGarbageCollected<WeakDocumentSetHolder>()));
+  return holder->Value();
 }
 
 void ShowLiveDocumentInstances() {

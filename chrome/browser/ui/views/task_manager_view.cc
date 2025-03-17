@@ -42,6 +42,7 @@
 #include "ui/base/mojom/menu_source_type.mojom-forward.h"
 #include "ui/compositor/layer.h"
 #include "ui/compositor/layer_type.h"
+#include "ui/views/accessibility/view_accessibility.h"
 #include "ui/views/background.h"
 #include "ui/views/border.h"
 #include "ui/views/controls/label.h"
@@ -307,6 +308,11 @@ void TaskManagerView::OnKeyDown(ui::KeyboardCode keycode) {
   }
 }
 
+void TaskManagerView::OnWidgetInitialized() {
+  GetOkButton()->GetViewAccessibility().SetDescription(
+      l10n_util::GetStringUTF16(IDS_TASK_MANAGER_KILL_ACCESSIBILITY_NAME));
+}
+
 void TaskManagerView::ShowContextMenuForViewImpl(
     views::View* source,
     const gfx::Point& point,
@@ -540,7 +546,7 @@ std::unique_ptr<views::View> TaskManagerView::CreateSearchBar(
   search_bar_layout->set_cross_axis_alignment(views::LayoutAlignment::kStart);
 
   auto search_bar_container = std::make_unique<views::View>();
-  search_bar_container->SetBackground(views::CreateThemedRoundedRectBackground(
+  search_bar_container->SetBackground(views::CreateRoundedRectBackground(
       kColorTaskManagerSearchBarBackground, search_bar_container_radius));
   search_bar_container->SetLayoutManager(std::move(search_bar_layout));
   const gfx::Size search_bar_size{
@@ -554,19 +560,6 @@ std::unique_ptr<views::View> TaskManagerView::CreateSearchBar(
   search_bar_container->AddChildView(std::move(search_bar));
 
   return search_bar_container;
-}
-
-std::unique_ptr<views::MdTextButton> TaskManagerView::CreateEndProcessButton(
-    const gfx::Insets& margins) {
-  auto button = std::make_unique<views::MdTextButton>();
-  button->SetText(l10n_util::GetStringUTF16(IDS_TASK_MANAGER_KILL));
-  button->SetAccessibleName(
-      l10n_util::GetStringUTF16(IDS_TASK_MANAGER_KILL_ACCESSIBILITY_NAME));
-  button->SetStyle(ui::ButtonStyle::kProminent);
-  button->SetProperty(views::kMarginsKey, margins);
-  button->SetCallback(base::BindRepeating(&TaskManagerView::EndSelectedProcess,
-                                          base::Unretained(this)));
-  return button;
 }
 
 std::unique_ptr<views::ScrollView> TaskManagerView::CreateProcessView(
@@ -623,7 +616,9 @@ void TaskManagerView::Init() {
 
   SetButtons(static_cast<int>(ui::mojom::DialogButton::kOk));
   SetButtonLabel(ui::mojom::DialogButton::kOk,
-                 l10n_util::GetStringUTF16(IDS_TASK_MANAGER_KILL));
+                 l10n_util::GetStringUTF16(table_config_.layout_refresh
+                                               ? IDS_TASK_MANAGER_KILL_V2
+                                               : IDS_TASK_MANAGER_KILL));
 
   if (table_config_.header_style) {
     views::TableHeaderStyle header_style = {
@@ -650,6 +645,7 @@ void TaskManagerView::Init() {
                     kColorTaskManagerTableBackgroundSelectedUnfocused,
             },
         .icons_have_background = true,
+        .inset_focus_ring = true,
     };
     tab_table->SetTableStyle(table_style);
   }

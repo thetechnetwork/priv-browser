@@ -309,9 +309,8 @@ export class SelectionOverlayElement extends SelectionOverlayElementBase {
         this.isClosing = true;
         this.removeDragListeners();
       }),
-      this.browserProxy.callbackRouter.triggerCopyText.addListener(() => {
-        this.handleCopy();
-      }),
+      this.browserProxy.callbackRouter.onCopyCommand.addListener(
+          this.onCopyCommand.bind(this)),
     ];
     ScreenshotBitmapBrowserProxyImpl.getInstance().fetchScreenshot(
         this.screenshotDataReceived.bind(this));
@@ -407,8 +406,6 @@ export class SelectionOverlayElement extends SelectionOverlayElementBase {
     this.eventTracker_.add(
         document, 'hide-selected-region-context-menu', () => {
           this.setShowSelectedRegionContextMenu(false);
-          this.textSelectionStartIndex = -1;
-          this.textSelectionEndIndex = -1;
           this.detectedTextStartIndex = -1;
           this.detectedTextEndIndex = -1;
         });
@@ -999,9 +996,13 @@ export class SelectionOverlayElement extends SelectionOverlayElementBase {
   // region. This differs from handleCopy() since text does not need to be
   // selected to support this copy.
   private handleCopyDetectedText() {
-    this.copyText(
+    if (this.simplifiedSelectionEnabled) {
+      this.setShowSelectedRegionContextMenu(false);
+    }
+
+    this.getTextSelectionLayer().onCopyDetectedText(
         this.detectedTextStartIndex, this.detectedTextEndIndex,
-        this.highlightedText);
+        this.copyText.bind(this));
   }
 
   private copyText(textStartIndex: number, textEndIndex: number, text: string) {
@@ -1196,6 +1197,23 @@ export class SelectionOverlayElement extends SelectionOverlayElementBase {
     this.textSelectionLayer =
         this.shadowRoot!.querySelector('lens-text-layer')!;
     return this.textSelectionLayer;
+  }
+
+  private onCopyCommand() {
+    if (!this.simplifiedSelectionEnabled) {
+      this.handleCopy();
+      return;
+    }
+
+    const shouldCopyAsImage = loadTimeData.getBoolean('shouldCopyAsImage');
+    if (shouldCopyAsImage) {
+      this.handleCopyAsImage();
+      return;
+    }
+
+    this.getTextSelectionLayer().onCopyDetectedText(
+        this.detectedTextStartIndex, this.detectedTextEndIndex,
+        this.copyText.bind(this));
   }
 
   /**

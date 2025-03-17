@@ -10,26 +10,16 @@
 #include "chrome/browser/signin/identity_manager_factory.h"
 #include "chrome/common/chrome_features.h"
 #include "chrome/common/chrome_switches.h"
+#include "chrome/common/pref_names.h"
 #include "components/prefs/pref_service.h"
 #include "components/signin/public/identity_manager/account_info.h"
 #include "components/signin/public/identity_manager/identity_manager.h"
 
 namespace glic {
 
-bool GlicEnabling::IsEnabledByFlags() {
-  // Check that the feature flags are enabled.
-  return base::FeatureList::IsEnabled(features::kGlic) &&
-         base::FeatureList::IsEnabled(features::kTabstripComboButton);
-}
-
-bool GlicEnabling::IsProfileEligible(const Profile* profile) {
-  // Glic is supported only in regular profiles, i.e. disable in incognito,
-  // guest, system profile, etc.
-  return IsEnabledByFlags() && profile && profile->IsRegularProfile();
-}
-
-bool GlicEnabling::IsEnabledForProfile(Profile* profile) {
-  if (!IsProfileEligible(profile)) {
+namespace {
+bool IsNonEnterpriseEnabled(Profile* profile) {
+  if (!GlicEnabling::IsProfileEligible(profile)) {
     return false;
   }
 
@@ -56,8 +46,29 @@ bool GlicEnabling::IsEnabledForProfile(Profile* profile) {
     return false;
   }
 
-  return profile->GetPrefs()->GetInteger(glic::prefs::kGlicSettingsPolicy) ==
+  return true;
+}
+
+bool IsEnterpriseEnabled(Profile* profile) {
+  return profile->GetPrefs()->GetInteger(::prefs::kGeminiSettings) ==
          static_cast<int>(glic::prefs::SettingsPolicyState::kEnabled);
+}
+}  // namespace
+
+bool GlicEnabling::IsEnabledByFlags() {
+  // Check that the feature flags are enabled.
+  return base::FeatureList::IsEnabled(features::kGlic) &&
+         base::FeatureList::IsEnabled(features::kTabstripComboButton);
+}
+
+bool GlicEnabling::IsProfileEligible(const Profile* profile) {
+  // Glic is supported only in regular profiles, i.e. disable in incognito,
+  // guest, system profile, etc.
+  return IsEnabledByFlags() && profile && profile->IsRegularProfile();
+}
+
+bool GlicEnabling::IsEnabledForProfile(Profile* profile) {
+  return IsNonEnterpriseEnabled(profile) && IsEnterpriseEnabled(profile);
 }
 
 bool GlicEnabling::IsEnabledAndConsentForProfile(Profile* profile) {
@@ -72,6 +83,11 @@ bool GlicEnabling::IsReadyForProfile(Profile* profile) {
     return false;
   }
 
+  auto* command_line = base::CommandLine::ForCurrentProcess();
+  if (command_line->HasSwitch(::switches::kGlicAutomation)) {
+    return true;
+  }
+
   signin::IdentityManager* identity_manager =
       IdentityManagerFactory::GetForProfile(profile);
 
@@ -83,10 +99,24 @@ bool GlicEnabling::IsReadyForProfile(Profile* profile) {
              core_account_info.account_id);
 }
 
+bool GlicEnabling::ShouldShowSettingsPage(Profile* profile) {
+  if (!IsEnterpriseEnabled(profile)) {
+    // If the feature is disabled by enterprise policy, the settings page should
+    // be shown (it will be shown in a policy-disabled state) only if all other
+    // non-enterprise conditions are met: the account has all appropriate
+    // permissions and has previously completed the FRE before the policy went
+    // into effect.
+    return IsNonEnterpriseEnabled(profile) &&
+           profile->GetPrefs()->GetBoolean(glic::prefs::kGlicCompletedFre);
+  }
+
+  return IsEnabledAndConsentForProfile(profile);
+}
+
 GlicEnabling::GlicEnabling(Profile* profile) : profile_(profile) {
   pref_registrar_.Init(profile_->GetPrefs());
   pref_registrar_.Add(
-      prefs::kGlicSettingsPolicy,
+      ::prefs::kGeminiSettings,
       base::BindRepeating(&GlicEnabling::OnGlicSettingsPolicyChanged,
                           base::Unretained(this)));
   signin::IdentityManager* identity_manager =
@@ -96,11 +126,11 @@ GlicEnabling::GlicEnabling(Profile* profile) : profile_(profile) {
 }
 GlicEnabling::~GlicEnabling() = default;
 
-bool GlicEnabling::IsEnabled() {
+bool GlicEnabling::IsAllowed() {
   return IsEnabledForProfile(profile_);
 }
 
-base::CallbackListSubscription GlicEnabling::RegisterEnableChanged(
+base::CallbackListSubscription GlicEnabling::RegisterAllowedChanged(
     EnableChangedCallback callback) {
   return enable_changed_callback_list_.Add(std::move(callback));
 }

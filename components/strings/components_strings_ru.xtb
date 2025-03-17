@@ -8,6 +8,7 @@
 <translation id="1010200102790553230">Загрузить страницу позже</translation>
 <translation id="1010225406377140704">Попросите отправителя прислать вам новую ссылку.</translation>
 <translation id="1011206368273183593">Подготовка файлов…</translation>
+<translation id="1012264210825687872">После проверки заказа войдите в аккаунт "<ph name="BNPL_ISSUER_NAME" />" или создайте его. Этот аккаунт будет автоматически связан с Google Pay.</translation>
 <translation id="1014509239502131234">Отмена действия</translation>
 <translation id="1015730422737071372">Сообщить дополнительную информацию</translation>
 <translation id="1019413721762100891">ВЫКЛ</translation>
@@ -137,6 +138,7 @@
 <translation id="1230244617745022071"><ph name="SOURCE" /> (определен автоматически)</translation>
 <translation id="1232569758102978740">Без имени</translation>
 <translation id="1236081509407217141">Разрешить VR?</translation>
+<translation id="1236689197410206751">AfterPay</translation>
 <translation id="1240347957665416060">Название вашего устройства</translation>
 <translation id="124116460088058876">Другие языки</translation>
 <translation id="1243027604378859286">Автор:</translation>
@@ -251,6 +253,7 @@
 <translation id="1419305130220238697">Кнопка "Управлять скачанными файлами в Chrome". Нажмите ее, чтобы управлять файлами, скачанными в Chrome.</translation>
 <translation id="1420345875188552368">Для этого платежа можно использовать сохраненный способ автоматической оплаты. Чтобы отключить электронные кошельки в Chrome, откройте <ph name="BEGIN_LINK1" />платежные настройки<ph name="END_LINK1" />.</translation>
 <translation id="1420920093772172268"><ph name="TURN_ON_BLUETOOTH_LINK" />, чтобы разрешить подключение</translation>
+<translation id="1421484961346698724">Аккаунт удален</translation>
 <translation id="14222610277930434">Часто посещаете</translation>
 <translation id="1422930527989633628">Разрешено отправлять запрос на поиск устройств Bluetooth поблизости</translation>
 <translation id="1426410128494586442">Да</translation>
@@ -626,6 +629,7 @@
 <translation id="2082238445998314030">Результат <ph name="RESULT_NUMBER" />, всего <ph name="TOTAL_RESULTS" /></translation>
 <translation id="2083256696566019397">Разрешать при каждом посещении</translation>
 <translation id="2085876078937250610">Сохранить</translation>
+<translation id="2090451897496479509">За дополнительной информацией обратитесь к провайдеру.</translation>
 <translation id="2091887806945687916">Звук</translation>
 <translation id="2093982008204312032">Google Chrome пытается отключить Windows Hello, чтобы не использовать этот сервис для подстановки паролей.</translation>
 <translation id="2094505752054353250">Несоответствие домена</translation>
@@ -660,6 +664,7 @@
 <translation id="2145193671493396738">Экономические новости</translation>
 <translation id="214556005048008348">Отменить оплату</translation>
 <translation id="2147117373852943630">Музыкальные инструменты</translation>
+<translation id="2147254250314124496">Сайт <ph name="EMBEDDED_URL" /> запрашивает разрешение на использование сохраненной информации о вас</translation>
 <translation id="2148613324460538318">Добавить карту</translation>
 <translation id="2148716181193084225">Сегодня</translation>
 <translation id="2149968176347646218">Подключение не защищено</translation>
@@ -691,6 +696,7 @@
 <translation id="2187317261103489799">Определять (по умолчанию)</translation>
 <translation id="2188375229972301266">Несколько отверстий снизу</translation>
 <translation id="2194856509914051091">Важная информация</translation>
+<translation id="2198071643181968308">Подробнее о сервисе "<ph name="BNPL_ISSUER_NAME" />"…</translation>
 <translation id="2200678913752027654">Кнопка "Не нравится". Нажмите Ввод, чтобы открыть форму и подробно описать, почему вам не нравится эта подсказка.</translation>
 <translation id="2202627062836089804">на задней стороне карты</translation>
 <translation id="2204482073374652408">Обновлено</translation>
@@ -837,6 +843,7 @@
 <translation id="2451607499823206582">Отслеживание</translation>
 <translation id="2452098632681057184">Экология и окружающая среда</translation>
 <translation id="2452837234288608067">Не удалось выполнить этот запрос. Повторите попытку.</translation>
+<translation id="2453045048779611513">Ваша организация разрешила сохранять не все данные</translation>
 <translation id="2456755709261364512">Уровень заряда батареи должен быть выше <ph name="REQUIRED_BATTERY_PRECENT" /> %</translation>
 <translation id="2461385121573678775">Chrome Enterprise Core – это инструмент для централизованной настройки правил браузера в облаке.</translation>
 <translation id="2461822463642141190">Сейчас</translation>
@@ -1086,6 +1093,7 @@
 <translation id="2942492342931589800">Неформальнее</translation>
 <translation id="2942515540157583425">Вакансии в сфере ИТ и техники</translation>
 <translation id="2943895734390379394">Время загрузки:</translation>
+<translation id="2947281105969315778">Чтобы делиться группами вкладок и присоединяться к ним, нужно войти в Chrome.</translation>
 <translation id="2948083400971632585">Прокси-серверы, используемые для соединения, можно отключить на странице настроек.</translation>
 <translation id="2949183777371959169">Не применяется, так как устройство не зарегистрировано в облачном управлении браузером Chrome.</translation>
 <translation id="2951588413176968965">Мой почтовый ящик</translation>
@@ -1303,6 +1311,7 @@
 <translation id="33073482541490531">Пароль, который вы только что использовали, был раскрыт в результате утечки данных. Измените его прямо сейчас в Менеджере паролей.</translation>
 <translation id="3307649904964670439">Кнопка "Настроить Chrome". Нажмите ее, чтобы настроить внешний вид браузера.</translation>
 <translation id="3308006649705061278">Подразделение (OU)</translation>
+<translation id="3317077846337994567">Оплата в рассрочку сейчас недоступна. Повторите попытку позже.</translation>
 <translation id="3318016344440038475">Телекомедии</translation>
 <translation id="3324687287337751929">4 x 6 дюймов</translation>
 <translation id="3324983252691184275">Малиновый</translation>
@@ -1431,6 +1440,7 @@
 <translation id="3536227077203206203">Дано разовое разрешение</translation>
 <translation id="3537165859691846083">Letter Plus</translation>
 <translation id="353816159217417898">Экранная форма (с разбивкой на страницы)</translation>
+<translation id="3541016556608204104">О Chrome Enterprise Connectors</translation>
 <translation id="3542628208405253498">Изображение карты</translation>
 <translation id="3542768452570884558">Открыть ссылку в новом окне</translation>
 <translation id="3543935938072367282">Оплачивайте покупки быстрее с помощью автозаполнения</translation>
@@ -1795,6 +1805,7 @@
 <translation id="415440494507469262">Добавить вкладку в сравнительную таблицу</translation>
 <translation id="4159784952369912983">Фиолетовый</translation>
 <translation id="4165422751765527461">Откроется статья Справочного центра в новой вкладке</translation>
+<translation id="4165584779486830267">Теперь вы можете платить в рассрочку с помощью сервиса Affirm или Zip.</translation>
 <translation id="4165986682804962316">Настройки сайтов</translation>
 <translation id="4169535189173047238">Запретить</translation>
 <translation id="4171400957073367226">Подтверждающая подпись недействительна</translation>
@@ -1945,6 +1956,7 @@
 <translation id="4378154925671717803">Телефон</translation>
 <translation id="4384395682990721132">A4x3</translation>
 <translation id="4387692837058041921">Загрузка файлов в Microsoft OneDrive приостановлена</translation>
+<translation id="4389931020843542579">Загрузка группы вкладок…</translation>
 <translation id="4390472908992056574">Поля</translation>
 <translation id="4395550503472021297">Это правило определяет действие по умолчанию для следующих правил: <ph name="POLICIES" />.</translation>
 <translation id="4397978002248035985">Откроется всплывающее окно со страницей банка, на которой можно подтвердить свою личность</translation>
@@ -2314,6 +2326,7 @@
 <translation id="5097501891273180634">A2</translation>
 <translation id="5106405387002409393">Браузеру Chrome требуется доступ к функции "<ph name="PERMISSION" />" вашего устройства.</translation>
 <translation id="510644072453496781">Картон (торцевой)</translation>
+<translation id="5106648964679263509">Введены данные виртуальной карты сервиса "<ph name="BNPL_ISSUER_NAME" />"</translation>
 <translation id="5108881358339761672">Сайт не защищен</translation>
 <translation id="5109892411553231226">Настроить способы оплаты</translation>
 <translation id="5112422516732747637">A5</translation>
@@ -2509,6 +2522,7 @@
             <ph name="LIST_ITEM" />сведения, указанные в формах.
           <ph name="END_LIST" /></translation>
 <translation id="5443468954631487277">В обратном порядке лицевой стороной вверх</translation>
+<translation id="5445340838622821110">Для оплаты в рассрочку будет создан одноразовый номер виртуальной карты. Он предназначен только для этой покупки. <ph name="IDS_AUTOFILL_BNPL_FILLED_CARD_INFORMATION_BUBBLE_LEARN_MORE_LINK_LABEL" /></translation>
 <translation id="5447235695608032700">Разрешить сайту <ph name="SITE" /> использовать сохраненную информацию о вас</translation>
 <translation id="5452270690849572955">Страница <ph name="HOST_NAME" /> не найдена</translation>
 <translation id="5452923259299906094">Оплата с помощью Pix или электронного кошелька</translation>
@@ -2756,6 +2770,7 @@
 <translation id="5910140988253729859">Отменить автозаполнение</translation>
 <translation id="5911020115933784199">Списки событий</translation>
 <translation id="5911110632211230665">Открывать запрещено</translation>
+<translation id="5914465277418006379">Пользователь <ph name="MEMBER_FIRST_NAME" /> добавил эту вкладку.</translation>
 <translation id="5915189366813702112">Гибкие условия работы</translation>
 <translation id="59174027418879706">Включено</translation>
 <translation id="5918373444239520146">Гаджеты и портативные электронные устройства</translation>
@@ -2836,6 +2851,7 @@
 <translation id="604124094241169006">Автоматически</translation>
 <translation id="6041777658117377052">Температура камеры</translation>
 <translation id="6042308850641462728">Ещё</translation>
+<translation id="6043357981274314628">Готово</translation>
 <translation id="6044573915096792553">Размер: 12</translation>
 <translation id="6045164183059402045">Шаблон спуска полос</translation>
 <translation id="6047927260846328439">Посещение этой страницы может привести к установке вредоносной программы или хищению вашей личной информации. <ph name="BEGIN_LINK" />Все равно продолжить<ph name="END_LINK" /></translation>
@@ -2859,7 +2875,6 @@
 <translation id="6062937464449575061">Перестать отслеживать цену</translation>
 <translation id="6063415549109819824">Ипотечное кредитование</translation>
 <translation id="6070432475334343308">Не удалось загрузить один или несколько файлов в папку "<ph name="FOLDER_NAME" />" сервиса "<ph name="CLOUD_PROVIDER" />".</translation>
-<translation id="6080696365213338172">Вы используете сертификат, предоставленный администратором, поэтому он может заблокировать передачу данных на сайт <ph name="DOMAIN" />.</translation>
 <translation id="6085149458302186532">Этикетки (цветные)</translation>
 <translation id="6087312102907839798">Связанные запросы</translation>
 <translation id="6089505343295765444">Даже если вы удалите вкладки из истории Chrome, они останутся видны в сравнительных таблицах.</translation>
@@ -3001,11 +3016,11 @@
 <translation id="6322182122604171028">Не удалось использовать Windows Hello</translation>
 <translation id="6326947323444967009">Сделать Chrome браузером по умолчанию в настройках iOS</translation>
 <translation id="6328639280570009161">Отключите предсказание сетевых действий</translation>
-<translation id="6328784461820205019">"Подключение не защищено", "&lt;span class="error-code"&gt;NET::ERR_CERT_AUTHORITY_INVALID&lt;/span&gt;", "&lt;span class="error-code"&gt;ERR_CERT_COMMON_NAME_INVALID&lt;/span&gt;", "&lt;span class="error-code"&gt;NET::ERR_CERT_WEAK_SIGNATURE_ALGORITHM&lt;/span&gt;", "&lt;span class="error-code"&gt;ERR_CERT_SYMANTEC_LEGACY&lt;/span&gt;" или "Ошибка сертификата SSL"</translation>
 <translation id="6335029926534404762">Спортивная обувь</translation>
 <translation id="6337133576188860026">Освободится менее <ph name="SIZE" /> пространства. При следующем вашем посещении некоторые сайты могут загружаться медленнее.</translation>
 <translation id="6337534724793800597">Фильтровать по названию</translation>
 <translation id="633770708279464947">Значение строки <ph name="SECURE_DNS_SALT" /> недопустимо и не будет использовано.</translation>
+<translation id="6338645927051849741">Пароль • Google Менеджер паролей</translation>
 <translation id="6340739886198108203">Администратор не рекомендует делать снимки и видеозаписи экрана, когда на нем показаны конфиденциальные данные:</translation>
 <translation id="6341434961864773665">{0,plural, =1{Администратор не рекомендует загружать этот файл на <ph name="DESTINATION_NAME" />.}one{Администратор не рекомендует загружать эти файлы на <ph name="DESTINATION_NAME" />.}few{Администратор не рекомендует загружать эти файлы на <ph name="DESTINATION_NAME" />.}many{Администратор не рекомендует загружать эти файлы на <ph name="DESTINATION_NAME" />.}other{Администратор не рекомендует загружать эти файлы на <ph name="DESTINATION_NAME" />.}}</translation>
 <translation id="6342069812937806050">только что</translation>
@@ -3015,6 +3030,7 @@
 <translation id="6351658970066645919">Удалить данные о работе в браузере</translation>
 <translation id="6353505687280762741">{COUNT,plural, =0{Нет}=1{1 пароль (для <ph name="DOMAIN_LIST" />, синхронизировано)}=2{2 пароля (для <ph name="DOMAIN_LIST" />, синхронизировано)}one{# пароль (для <ph name="DOMAIN_LIST" />, синхронизировано)}few{# пароля (для <ph name="DOMAIN_LIST" />, синхронизировано)}many{# паролей (для <ph name="DOMAIN_LIST" />, синхронизировано)}other{# пароля (для <ph name="DOMAIN_LIST" />, синхронизировано)}}</translation>
 <translation id="6355392890578844978">Компания или организация не управляет этим браузером. Действиями на этом устройстве можно управлять вне браузера Chromium. <ph name="BEGIN_LINK" />Подробнее…<ph name="END_LINK" /></translation>
+<translation id="6357546827188504216">Группы вкладок "<ph name="GROUP_TITLE_1" />" и "<ph name="GROUP_TITLE_2" />" больше не доступны.</translation>
 <translation id="6358088212770985041">изменить способы оплаты</translation>
 <translation id="6358450015545214790">Что это значит?</translation>
 <translation id="6360213755783740931">Подробнее о защите от вредоносного ПО</translation>
@@ -3328,6 +3344,7 @@
 <translation id="6917795328362592458">Пароль, который вы только что использовали, был раскрыт в результате утечки данных. Чтобы защитить свои аккаунты, проверьте сохраненные пароли в Менеджере паролей.</translation>
 <translation id="6917873303492266709">Чтобы делиться группами вкладок, присоединяться к ним и работать вместе с другими пользователями, откройте настройки и включите параметр "Разрешить вход в Chrome".</translation>
 <translation id="6921197121276419421">Установка веб-приложений разрешена</translation>
+<translation id="69238565902785824">Привязанный аккаунт сервиса "<ph name="BNPL_ISSUER_NAME" />" поможет оплачивать покупки быстрее. Если вы захотите отменить связь, перейдите на страницу <ph name="IDS_AUTOFILL_BNPL_TOS_LINK_TEXT_WALLET_LINK_TEXT" />.</translation>
 <translation id="6924013822850225188">Выберите, показывать ли преимущества карты при оформлении покупки (действуют условия банка)</translation>
 <translation id="6925267999184670015">North American B+</translation>
 <translation id="6926216138694948720">Боди-арт</translation>
@@ -3393,6 +3410,7 @@
 <translation id="701757816833614688">Образование в сфере изобразительного искусства и дизайна</translation>
 <translation id="702275896380648118">Этот сайт определяет ваши интересы и затем предлагает другим сайтам рекламу для вас. Кроме того, он использует темы рекламы из Chrome, чтобы показывать вам более подходящие объявления.</translation>
 <translation id="7023162328967545559">Предупреждение от администратора</translation>
+<translation id="7023765275461720661">Связать аккаунты и оплатить через сервис "<ph name="BNPL_ISSUER_NAME" />"?</translation>
 <translation id="7029809446516969842">Пароли</translation>
 <translation id="7030164307377592766">изменить настройки автоматического ввода платежных данных</translation>
 <translation id="7031646650991750659">Приложения, установленные из Google Play.</translation>
@@ -3615,6 +3633,7 @@
 <translation id="741204030948306876">ОК</translation>
 <translation id="7416351320495623771">Управление паролями</translation>
 <translation id="7416898721136759658">Гранты, стипендии и финансовая помощь</translation>
+<translation id="741772962178517671">Affirm</translation>
 <translation id="7418620734632363981">Программирование</translation>
 <translation id="7419091773564635591">Компьютеры и электроника</translation>
 <translation id="7419106976560586862">Путь к профилю</translation>
@@ -3661,6 +3680,7 @@
 <translation id="7485085230273446323">Бизнес и промышленность</translation>
 <translation id="7485870689360869515">Данные не найдены.</translation>
 <translation id="7486880426035242089">OneDrive</translation>
+<translation id="7489255442002627311">"<ph name="BNPL_ISSUER_NAME" />" проверит, соответствуете ли вы требованиям. Результаты не повлияют на ваш кредитный рейтинг. Если они будут положительными, "<ph name="BNPL_ISSUER_NAME" />" предложит вам выбрать тарифный план. После этого вы сможете завершить покупку.</translation>
 <translation id="7489392576326061356">Шампуни и кондиционеры для волос</translation>
 <translation id="7495528107193238112">Этот контент заблокирован. Чтобы устранить неполадку, свяжитесь с владельцем сайта.</translation>
 <translation id="749865518782565832">Сантехнические работы</translation>
@@ -3717,6 +3737,7 @@
 <translation id="7569983096843329377">Черный</translation>
 <translation id="7574998639136359461">Инвентарь для зимних видов спорта</translation>
 <translation id="7575207903026901870">Кнопка удаления подсказки. Нажмите Ввод, чтобы удалить подсказку.</translation>
+<translation id="7575800019233204241">"Подключение не защищено", &lt;span class="error-code"&gt;NET::ERR_CERT_AUTHORITY_INVALID&lt;/span&gt;, &lt;span class="error-code"&gt;ERR_CERT_COMMON_NAME_INVALID&lt;/span&gt;, &lt;span class="error-code"&gt;NET::ERR_CERT_WEAK_SIGNATURE_ALGORITHM&lt;/span&gt; или "Ошибка сертификата SSL"</translation>
 <translation id="7575887283389198269">Мобильные телефоны</translation>
 <translation id="7578104083680115302">Быстро оплачивайте покупки на сайтах и в приложениях с помощью карт, сохраненных в Google Pay. Настройка будет действовать на всех ваших устройствах.</translation>
 <translation id="7579442726219254162">Неизвестная переменная "<ph name="VARIABLE" />" в управляемой конфигурации "<ph name="APPLICATION_ID" />".</translation>
@@ -3903,6 +3924,7 @@
 <translation id="791107458486222637">Повтор действия</translation>
 <translation id="791551905239004656">Рисование и раскраски</translation>
 <translation id="7916162853251942238">Основа для флексопечати</translation>
+<translation id="791698251820376781">Ваша организация запретила вход в Chrome</translation>
 <translation id="7926503317156566022">Авиационная отрасль</translation>
 <translation id="793209273132572360">Обновить адрес?</translation>
 <translation id="7932579305932748336">Покрытие</translation>
@@ -4226,7 +4248,6 @@
 <translation id="8473626140772740486">300 x 450 мм</translation>
 <translation id="8473863474539038330">Адреса и другие данные</translation>
 <translation id="8474910779563686872">Показать сведения о разработчике</translation>
-<translation id="8476959635632921417">Чтобы использовать адрес на всех своих устройствах, сохраните его в аккаунте. Для этого подтвердите личность.</translation>
 <translation id="8479754468255770962">Скоба в левом нижнем углу</translation>
 <translation id="8483229036294884935">Адрес будет удален из вашего аккаунта Google (<ph name="ACCOUNT" />).</translation>
 <translation id="8488350697529856933">Объект применения</translation>
@@ -4610,11 +4631,13 @@
 <translation id="9183425211371246419">На сайте <ph name="HOST_NAME" /> используется неподдерживаемый протокол.</translation>
 <translation id="918454845714257218">Проверьте код <ph name="SIDE_OF_CARD" /> и повторите попытку</translation>
 <translation id="9186203289258525843">Кнопка "Сделать Chrome браузером по умолчанию". Нажмите ее, чтобы сделать Chrome браузером по умолчанию.</translation>
+<translation id="9189468832660648522">Пользователь <ph name="MEMBER_FIRST_NAME" /> изменил эту вкладку.</translation>
 <translation id="9189789270972826888">Если реквизиты карты не были заполнены, нажмите на поля ниже, чтобы скопировать и подставить указанные в них данные. <ph name="IDS_AUTOFILL_FILLED_CARD_INFORMATION_BUBBLE_LEARN_MORE_LINK_LABEL" /></translation>
 <translation id="9190557999028587593">Темы, добавленные более 4 недель назад, автоматически удаляются</translation>
 <translation id="9191834167571392248">Отверстие в левом нижнем углу</translation>
 <translation id="9192361865877479444">Металл (матовый)</translation>
 <translation id="9192947025498305328">Экологически чистая косметика</translation>
+<translation id="9195969368671142407">Это значит, что вы не можете делиться группами вкладок и присоединяться к ним.</translation>
 <translation id="9199905725844810519">Печать заблокирована</translation>
 <translation id="9201904868909900493">Опрос открывается…</translation>
 <translation id="9204089334327209740">Когда загрузка завершится, вы сможете изменять свои файлы в сервисе <ph name="CLOUD_PROVIDER" />. Данные в локальном хранилище, в том числе в корзине, будут автоматически удалены.</translation>

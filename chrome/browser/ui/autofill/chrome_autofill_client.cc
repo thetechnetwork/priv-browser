@@ -24,6 +24,8 @@
 #include "build/build_config.h"
 #include "chrome/browser/autofill/address_normalizer_factory.h"
 #include "chrome/browser/autofill/autocomplete_history_manager_factory.h"
+#include "chrome/browser/autofill/autofill_ai_model_cache_factory.h"
+#include "chrome/browser/autofill/autofill_ai_model_executor_factory.h"
 #include "chrome/browser/autofill/autofill_entity_data_manager_factory.h"
 #include "chrome/browser/autofill/autofill_optimization_guide_factory.h"
 #include "chrome/browser/autofill/personal_data_manager_factory.h"
@@ -33,6 +35,7 @@
 #include "chrome/browser/device_reauth/chrome_device_authenticator_factory.h"
 #include "chrome/browser/history/history_service_factory.h"
 #include "chrome/browser/keyboard_accessory/android/manual_filling_controller.h"
+#include "chrome/browser/metrics/variations/google_groups_manager_factory.h"
 #include "chrome/browser/password_manager/chrome_password_manager_client.h"
 #include "chrome/browser/password_manager/password_manager_settings_service_factory.h"
 #include "chrome/browser/plus_addresses/plus_address_service_factory.h"
@@ -114,6 +117,7 @@
 #include "components/sync/service/sync_service.h"
 #include "components/translate/core/browser/translate_manager.h"
 #include "components/unified_consent/pref_names.h"
+#include "components/variations/service/google_groups_manager.h"
 #include "components/variations/service/variations_service.h"
 #include "content/public/browser/navigation_entry.h"
 #include "content/public/browser/render_frame_host.h"
@@ -154,9 +158,9 @@
 #include "chrome/browser/ui/tabs/public/tab_features.h"  // nogncheck
 #include "chrome/browser/ui/toasts/api/toast_id.h"
 #include "chrome/browser/ui/toasts/toast_controller.h"
+#include "chrome/browser/ui/views/autofill/popup/popup_view_views.h"
 #include "chrome/browser/ui/webui/signin/login_ui_service_factory.h"
 #include "components/autofill/core/browser/integrators/autofill_ai_delegate.h"
-#include "components/autofill_ai/core/browser/autofill_ai_features.h"  // nogncheck
 #include "components/autofill_ai/core/browser/autofill_ai_manager.h"  // nogncheck
 #endif  // BUILDFLAG(IS_ANDROID)
 
@@ -190,7 +194,7 @@ AutoselectFirstSuggestion ShouldAutofillPopupAutoselectFirstSuggestion(
 const base::Feature& GetFeature(AutofillClient::IphFeature iph_feature) {
   switch (iph_feature) {
     case AutofillClient::IphFeature::kAutofillAi:
-      return feature_engagement::kIPHAutofillPredictionImprovementsFeature;
+      return feature_engagement::kIPHAutofillAiOptInFeature;
   }
   NOTREACHED();
 }
@@ -198,7 +202,7 @@ const base::Feature& GetFeature(AutofillClient::IphFeature iph_feature) {
 ui::ElementIdentifier GetElementId(AutofillClient::IphFeature iph_feature) {
   switch (iph_feature) {
     case AutofillClient::IphFeature::kAutofillAi:
-      return kAutofillPredictionImprovementsIphElementId;
+      return autofill::PopupViewViews::kAutofillAiOptInIphElementId;
   }
   NOTREACHED();
 }
@@ -478,6 +482,18 @@ AutofillAiDelegate* ChromeAutofillClient::GetAutofillAiDelegate() {
   return nullptr;
 }
 
+AutofillAiModelCache* ChromeAutofillClient::GetAutofillAiModelCache() {
+  Profile* profile =
+      Profile::FromBrowserContext(web_contents()->GetBrowserContext());
+  return AutofillAiModelCacheFactory::GetForProfile(profile);
+}
+
+AutofillAiModelExecutor* ChromeAutofillClient::GetAutofillAiModelExecutor() {
+  Profile* profile =
+      Profile::FromBrowserContext(web_contents()->GetBrowserContext());
+  return AutofillAiModelExecutorFactory::GetForProfile(profile);
+}
+
 void ChromeAutofillClient::OfferPlusAddressCreation(
     const url::Origin& main_frame_origin,
     bool is_manual_fallback,
@@ -535,6 +551,16 @@ const signin::IdentityManager* ChromeAutofillClient::GetIdentityManager()
   Profile* profile =
       Profile::FromBrowserContext(web_contents()->GetBrowserContext());
   return IdentityManagerFactory::GetForProfile(profile->GetOriginalProfile());
+}
+
+const GoogleGroupsManager* ChromeAutofillClient::GetGoogleGroupsManager()
+    const {
+  // Always return the GoogleGroupsManager of the original profile to allow us
+  // to do per-profile feature checks.
+  Profile* profile =
+      Profile::FromBrowserContext(web_contents()->GetBrowserContext());
+  return GoogleGroupsManagerFactory::GetForBrowserContext(
+      profile->GetOriginalProfile());
 }
 
 FormDataImporter* ChromeAutofillClient::GetFormDataImporter() {

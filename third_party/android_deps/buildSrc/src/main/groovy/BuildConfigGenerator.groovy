@@ -15,6 +15,7 @@ import org.gradle.api.tasks.TaskAction
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.util.concurrent.*
+import java.time.*
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 
@@ -45,6 +46,10 @@ class BuildConfigGenerator extends DefaultTask {
     /* groovylint-disable-next-line LineLength */
     // https://source.chromium.org/chromium/infra/infra/+/master:recipes/recipe_modules/support_3pp/resolved_spec.py?q=symbol:PACKAGE_EPOCH&ss=chromium
     private static final String THREEPP_EPOCH = '2'
+
+    // Used to disable breaking changes while the migration to autorolling
+    // portions of android_deps is complete. See http://crbug.com/40774645
+    private static final boolean AUTOROLL_MIGRATION_IN_PROGRESS = true
 
     // Use this to exclude a dep from being depended upon but keep the target.
     private static final List<String> DISALLOW_DEPS = [
@@ -403,7 +408,9 @@ No modifications.
         String normalisedRepoPath = normalisePath(repositoryPath)
 
         // 1. Parse the dependency data
-        graph.collectDependencies()
+        graph.timeIt("** Collecting all dependencies info") {
+            graph.collectDependencies()
+        }
 
         // 2. Import artifacts into the local repository
         List<String> dependencyDirectories = []
@@ -411,7 +418,7 @@ No modifications.
         List<Future> downloadTasks = []
         List<ChromiumDepGraph.DependencyDescription> mergeLicensesDeps = []
         graph.dependencies.values().each { dependency ->
-            if (excludeDependency(dependency) || computeJavaGroupForwardingTargets(dependency)) {
+            if (excludeDependency(dependency) || dependency.extension == 'group') {
                 return
             }
 
@@ -419,7 +426,7 @@ No modifications.
             // jsonDump() throws StackOverflowError for ResolvedArtifact.
             dependencyForLogging.artifact = null
 
-            logger.debug "Processing ${dependency.name}: \n${jsonDump(dependencyForLogging)}"
+            logger.debug "Processing ${dependency.id}: \n${jsonDump(dependencyForLogging)}"
             String depDir = BuildConfigGenerator.computeDepDir(dependency)
             String absoluteDepDir = "${normalisedRepoPath}/${depDir}"
 
@@ -438,12 +445,10 @@ No modifications.
                 logger.quiet("${dependency.id} exists, skipping.")
                 return
             }
-
             project.copy {
                 from dependency.artifact.file
                 into absoluteDepDir
             }
-
             new File("${absoluteDepDir}/README.chromium").write(makeReadme(dependency))
             // fetch_all.py parses cipd.yaml to get information about each dep, even if cipd.yaml isn't needed (e.g. androidx).
             new File("${absoluteDepDir}/cipd.yaml").write(makeCipdYaml(dependency, cipdBucket, repositoryPath))
@@ -515,12 +520,12 @@ No modifications.
     void appendBuildTarget(ChromiumDepGraph.DependencyDescription dependency,
                            Map<String, ChromiumDepGraph.DependencyDescription> allDependencies,
                            StringBuilder sb) {
-        if (excludeDependency(dependency) || !dependency.generateTarget) {
+        if (excludeDependency(dependency)) {
             return
         }
 
         String targetName = translateTargetName(dependency.id) + '_java'
-        List<String> javaDeps = computeJavaGroupForwardingTargets(dependency) ?: dependency.children
+        List<String> javaDeps = dependency.children
         Set<String> addedDeps = new HashSet<String>();
 
         String depsStr = ''
@@ -587,8 +592,15 @@ No modifications.
                   jar_path = "${DOWNLOAD_ROOT_DIRECTORY}/${libPath}/${dependency.fileName}"
                   output_name = "${dependency.id}"
                 """.stripIndent(/* forceGroovyBehavior */ true))
-            if (dependency.supportsAndroid) {
+            if (dependency.isRobolectric) {
+                sb.append('  is_robolectric = true\n')
+            } else {
+              if (dependency.supportsAndroid) {
                 sb.append('  supports_android = true\n')
+              }
+              if (dependency.requiresAndroid) {
+                  sb.append('  requires_android = true\n')
+              }
             }
         } else if (dependency.extension == 'aar') {
             String targetType = isAndroidX ? 'androidx_android_aar_prebuilt' : 'android_aar_prebuilt'
@@ -652,7 +664,7 @@ No modifications.
     }
 
     boolean excludeDependency(ChromiumDepGraph.DependencyDescription dependency) {
-        if (dependency.exclude || EXISTING_LIBS.get(dependency.id)) {
+        if (dependency.exclude || EXISTING_LIBS.containsKey(dependency.id)) {
             return true
         }
         return isInDifferentRepo(dependency)
@@ -660,26 +672,20 @@ No modifications.
 
     boolean isInDifferentRepo(ChromiumDepGraph.DependencyDescription dependency) {
         boolean isAndroidxRepository = repositoryPath.startsWith('third_party/androidx')
+        boolean isAutorolledRepository = repositoryPath.startsWith('third_party/android_deps/autorolled')
         boolean isAndroidxDependency = dependency.id.startsWith('androidx')
-        if (isAndroidxRepository != isAndroidxDependency) {
-            return true
+        if (isAndroidxRepository || isAndroidxDependency) {
+            // Androidx targets always go to the androidx project regardless of
+            // dep.isAutorolled
+            return isAndroidxRepository != isAndroidxDependency
+        } else {
+            if (AUTOROLL_MIGRATION_IN_PROGRESS) {
+                // During the migration, keep the autorolled targets in the main
+                // BUILD.gn until the migration is complete.
+                return isAutorolledRepository && !dependency.isAutorolled
+            }
+            return dependency.isAutorolled != isAutorolledRepository
         }
-        if (repositoryPath == AUTOROLLED_REPO_PATH) {
-            String targetName = translateTargetName(dependency.id) + '_java'
-            return !isTargetAutorolled(targetName)
-        }
-        return false
-    }
-
-    /** If |dependency| should be a java_group(), returns target to forward to. Returns null otherwise. */
-    List<String> computeJavaGroupForwardingTargets(ChromiumDepGraph.DependencyDescription dependency) {
-        String targetName = translateTargetName(dependency.id) + '_java'
-        if (repositoryPath != AUTOROLLED_REPO_PATH && isTargetAutorolled(targetName)) {
-            return ["//${AUTOROLLED_REPO_PATH}:${targetName}"]
-        } else if (dependency.extension == 'group') {
-            return dependency.children
-        }
-        return []
     }
 
     private static String reducedDepencencyId(String dependencyId) {
@@ -705,20 +711,10 @@ No modifications.
     private static void addSpecialTreatment(StringBuilder sb, String dependencyId, String dependencyExtension) {
         addPreconditionsOverrideTreatment(sb, dependencyId)
 
-        if (dependencyId.startsWith('org_robolectric')) {
-            sb.append('  is_robolectric = true\n')
-        }
         if (dependencyExtension == 'aar' && dependencyId.startsWith('com_android_support')) {
             // The androidx and com_android_support libraries have duplicate resources such as
             // 'primary_text_default_material_dark'.
             sb.append('  resource_overlay = true\n')
-        }
-        if (dependencyExtension == 'jar' && (
-                dependencyId.startsWith('io_grpc_') ||
-                        dependencyId == 'com_google_firebase_firebase_encoders' ||
-                        dependencyId == 'com_google_guava_guava_android')) {
-            sb.append('  # https://crbug.com/1412551\n')
-            sb.append('  requires_android = true\n')
         }
 
         switch (dependencyId) {
@@ -853,14 +849,6 @@ No modifications.
                 sb.append('  # Target needs to exclude *xmlpull* files as already included in Android SDK.\n')
                 sb.append('  jar_excluded_patterns = [ "*xmlpull*" ]\n')
                 break
-            case 'org_jetbrains_kotlinx_kotlinx_coroutines_android':
-            case 'org_jetbrains_kotlinx_kotlinx_coroutines_guava':
-                sb.append('requires_android = true')
-                break
-            case 'org_mockito_mockito_android':
-                sb.append('  # Depends on third_party/byte_buddy:byte_buddy_android_java\n')
-                sb.append('  requires_android = true\n')
-                break
             case 'org_mockito_mockito_core':
                 sb.append('  # Uses java.time which does not exist until API 26.\n')
                 sb.append('  # Modifications are added in third_party/mockito.\n')
@@ -983,7 +971,7 @@ No modifications.
         }
 
         depGraph.dependencies.values().sort(dependencyComparator).each { dependency ->
-            if (excludeDependency(dependency) || computeJavaGroupForwardingTargets(dependency)) {
+            if (excludeDependency(dependency) || dependency.extension == 'group') {
                 return
             }
             if (!dependency.artifact) {
@@ -1012,15 +1000,6 @@ No modifications.
             throw new IllegalStateException('DEPS insertion point not found.')
         }
         depsFile.write(matcher.replaceFirst("${DEPS_TOKEN_START}\n${sb}\n  ${DEPS_TOKEN_END}"))
-    }
-
-    private boolean isTargetAutorolled(String targetName) {
-        for (String autorolledLibPrefix in AUTOROLLED_LIB_PREFIXES) {
-            if (targetName.startsWith(autorolledLibPrefix)) {
-                return true
-            }
-        }
-        return false
     }
 
     private String normalisePath(String pathRelativeToChromiumRoot) {

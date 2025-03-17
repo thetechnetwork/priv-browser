@@ -81,6 +81,7 @@
 <translation id="131461803491198646">Hemnätverk, ingen roaming</translation>
 <translation id="1327977588028644528">Gateway</translation>
 <translation id="1328223165223065150">Bakgrundsfärg</translation>
+<translation id="1329478709358066995">Transkription:</translation>
 <translation id="1330426557709298164">JPG</translation>
 <translation id="1337912285145772892">Anpassa till området som ska skannas</translation>
 <translation id="1343442362630695901">saltsjö</translation>
@@ -126,7 +127,17 @@
 <translation id="1515129336378114413">webbläsarens startsida</translation>
 <translation id="1526389707933164996">Animation för skärmsläckaren</translation>
 <translation id="152892567002884378">Höj volymen</translation>
+<translation id="1531038290222364269">Visa flikar</translation>
 <translation id="1539864135338521185">lapis lazuli</translation>
+<translation id="1548555207631326346">Välj ett tema och välj sedan de understrukna orden för att anpassa AI-bilderna.<ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          Välj Inspirera mig för att få mer unika och varierade AI-bildalternativ.
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          När du skapar med AI skickas uppmaningen till Googles AI-servrar för att generera bilder och förbättra produkten i enlighet med <ph name="BEGIN_LINK_GOOGLE_PRIVACY_POLICY" />Googles integritetspolicy<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" />.
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          Generativ AI är experimentell, under utveckling och har för närvarande begränsad tillgänglighet.</translation>
 <translation id="1555130319947370107">Blå</translation>
 <translation id="155865706765934889">Styrplatta</translation>
 <translation id="1561927818299383735">bakgrundsbelysningsfärg</translation>
@@ -252,7 +263,6 @@
 <translation id="2011174342667534258">SDK-version:</translation>
 <translation id="2016697457005847575">Testa felsökningsstegen</translation>
 <translation id="202500043506723828">EID</translation>
-<translation id="2041627599411887437">Välj ett tema och välj sedan de understrukna orden för att anpassa AI-bilderna.</translation>
 <translation id="2045814230297767491">bestick</translation>
 <translation id="2047316797244836561">Anslut till ett nätverk och läs in sidan igen för att se skärmsläckaren.</translation>
 <translation id="2056550196601855911">IPv4/IPv6</translation>
@@ -405,6 +415,7 @@
 <translation id="2787237339470862294">Det här språket stöds för närvarande inte</translation>
 <translation id="2787435249130282949">ljusare tangentbord</translation>
 <translation id="2805756323405976993">Appar</translation>
+<translation id="2822702442014805146">Nedladdning av modell för sammanfattning och namngivning pågår</translation>
 <translation id="28232023175184696">Det gick inte att ansluta till internet. Klicka om du vill försöka igen.</translation>
 <translation id="2855718259207180827">ull</translation>
 <translation id="2859243502336719778">Viktig uppdatering</translation>
@@ -502,6 +513,7 @@
 <translation id="3373141842870501561">Bakgrund med jorden</translation>
 <translation id="33736539805963175"><ph name="LETTERS_COLOR" /> bakgrund med bokstaven <ph name="LETTERS_LETTER" /></translation>
 <translation id="3383623117265110236">Exklusivt</translation>
+<translation id="3395147534045164351">Aktivera/inaktivera positionsfästning</translation>
 <translation id="3404249063913988450">Aktivera skärmsläckare</translation>
 <translation id="3413935475507503304">Klicka på Nästa om du vill fortsätta med uppdateringen.</translation>
 <translation id="3428551088151258685">utomhus</translation>
@@ -651,6 +663,7 @@
 <translation id="4113067922640381334">Du har nu tillgång till nya <ph name="BEGIN_LINK_WALLPAPER_SUBPAGE" />bakgrunder<ph name="END_LINK_WALLPAPER_SUBPAGE" /></translation>
 <translation id="4117637339509843559">Mörkt läge</translation>
 <translation id="4126551873361000548">Spola bakåt 10 sekunder</translation>
+<translation id="4128271910628504223">Skriv en prompt, till exempel ”rita en dimmig skog”</translation>
 <translation id="4130035430755296270">Håll muspekaren över för fler layoutalternativ</translation>
 <translation id="4130750466177569591">Jag godkänner</translation>
 <translation id="4131410914670010031">Svartvitt</translation>
@@ -824,6 +837,7 @@
 <translation id="4891842000192098784">Stress</translation>
 <translation id="4897058166682006107">Batterinivån för vänster hörsnäcka på enheten är <ph name="BATTERY_PERCENTAGE" /> %.</translation>
 <translation id="4905998861748258752">Aktivera funktionen om du vill välja alternativ för skärmsläckaren</translation>
+<translation id="4910853326379896417">Nedladdning av modell för sammanfattning och namngivning har slutförts</translation>
 <translation id="4910858703033903787">APN-typer</translation>
 <translation id="4917385247580444890">Stark</translation>
 <translation id="4917889632206600977">Har stoppats – slut på papper</translation>
@@ -858,8 +872,10 @@
 <translation id="5050042263972837708">Gruppnamn</translation>
 <translation id="5051044138948155788">Det här är den enda sidan. Du kommer till startskärmen för att skanna.</translation>
 <translation id="5053233795640754917">Pausa</translation>
+<translation id="5056587122125565772">Skapa bild</translation>
 <translation id="5078711626843651677">Röstmodeller lagras tillfälligt på enheten tills alla talaretiketter har satts. Du kan inaktivera detta när som helst i inställningarna.</translation>
 <translation id="5078983345702708852">futuristiskt</translation>
+<translation id="5085224064082122501">Det gick inte att ladda ned modellen för sammanfattning och namngivning. Försök igen eller starta om Chromebook.</translation>
 <translation id="5087864757604726239">tillbaka</translation>
 <translation id="5088172560898466307">Serverns värdnamn</translation>
 <translation id="5089810972385038852">Stat</translation>
@@ -1129,14 +1145,12 @@
 <translation id="6325525973963619867">Misslyckades</translation>
 <translation id="6327262166342360252">Den här bakgrunden skapades med AI utifrån följande text: ”<ph name="PROMPT" />”.</translation>
 <translation id="6331191339300272798">Automatiskt mörkt tema</translation>
-<translation id="6335228876613776082">Modellnedladdning har slutförts</translation>
 <translation id="6340526405444716530">Anpassning</translation>
 <translation id="6348252528297699679">Du kan inaktivera plats i Inställningar &gt; Integritet och säkerhet &gt; Integritetsinställningar &gt; Platsåtkomst. <ph name="LINK_BEGIN" />Läs mer<ph name="LINK_END" /></translation>
 <translation id="6348738456043757611">Användarnamn och lösenord</translation>
 <translation id="6352210854422428614">annan planet</translation>
 <translation id="6359706544163531585">Inaktivera ljust tema</translation>
 <translation id="6359919876285606596">Åtgärden är permanent och går inte att ångra</translation>
-<translation id="6368342879959028556">När du väljer Skapa med AI skriver du en anpassad prompt. Du kan även välja AI-bakgrunder för att välja ett tema och sedan välja de understrukna orden för att anpassa AI-bakgrunden.</translation>
 <translation id="636850387210749493">Företagsregistrering</translation>
 <translation id="6369221585240879141">Det går inte att skapa inspelningsnamn för det här transkriptionsspråket</translation>
 <translation id="6373461326814131011">damm</translation>
@@ -1209,16 +1223,6 @@
 <translation id="6657240842932274095">Vill du tillåta att systemtjänster använder din plats?</translation>
 <translation id="6657585470893396449">Lösenord</translation>
 <translation id="66621959568103627">korallrosa</translation>
-<translation id="6667885109186363316"><ph name="SEA_PEN_INTRO_FIRST_PARAGRAPH" />
-          <ph name="LINE_BREAK" />
-          <ph name="LINE_BREAK" />
-          Välj Inspirera mig för att få mer unika och varierade AI-bildalternativ.
-          <ph name="LINE_BREAK" />
-          <ph name="LINE_BREAK" />
-          När du skapar med AI skickas prompten till Googles AI-servrar för att generera bilder och förbättra produkten i enlighet med <ph name="BEGIN_LINK_GOOGLE_PRIVACY_POLICY" />Googles integritetspolicy<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" />.
-          <ph name="LINE_BREAK" />
-          <ph name="LINE_BREAK" />
-          Generativ AI är experimentell, under utveckling och har för närvarande begränsad tillgänglighet.</translation>
 <translation id="6673898378497337661">öka ljusstyrkan på tangentbordet</translation>
 <translation id="6692996468359469499">Få information utifrån det du markerar</translation>
 <translation id="6694534975463174713">lås</translation>
@@ -1274,6 +1278,7 @@
 <translation id="6930597342185648547">Om bakgrunden</translation>
 <translation id="6939667434404433010">Sök efter inspelningsnamn</translation>
 <translation id="6939766318048400022">Kafé</translation>
+<translation id="6942253772720771875">Ge feedback eller beskriv problemet</translation>
 <translation id="6943893908656559156">Fjärridentitet (valfritt)</translation>
 <translation id="6953137545147683679">guldig</translation>
 <translation id="6957231940976260713">Namn på tjänsten</translation>
@@ -1295,6 +1300,7 @@
 <translation id="7040230719604914234">Operatör</translation>
 <translation id="7040729769968826896">Tillåt högtalaridentifiering</translation>
 <translation id="7041549558901442110">Enheten är inte ansluten.</translation>
+<translation id="704183341263526038">Jupiter</translation>
 <translation id="7046522406494308071">Vill du återställa alla kortkommandon till standardinställningarna?</translation>
 <translation id="7049916119678019302">Ladda ned transkriptionsmodell i inställningarna</translation>
 <translation id="7058278511608979688">Avsluta och spara</translation>
@@ -1427,6 +1433,7 @@ Ladda ned transkriptionsmodellen (upp till 100 MB) för att få transkriptioner
 <translation id="7569444139234840525"><ph name="QUERY_TEXT" /> · /<ph name="PHONETICS" />/</translation>
 <translation id="7570674786725311828">USB-pekskärm</translation>
 <translation id="757747079855995705">sten</translation>
+<translation id="7584853321964440104">Det gick inte att ladda ned. Försök igen eller starta om Chromebook.</translation>
 <translation id="7590883480672980941">Inmatningsinställningar</translation>
 <translation id="7595982850646262331"><ph name="TIME_VALUE" /> återstår</translation>
 <translation id="7600430297804876776">Administratören för <ph name="MANAGER" /> har ställt in när denna <ph name="DEVICE_TYPE" /> får användas.</translation>
@@ -1557,6 +1564,16 @@ Ladda ned transkriptionsmodellen (upp till 100 MB) för att få transkriptioner
 <translation id="8179976553408161302">Enter</translation>
 <translation id="8183975772394450380">en strand</translation>
 <translation id="819278132617411009">Använd Google AI för att bli mer produktiv</translation>
+<translation id="82003371436638355">När du väljer Skapa din egen skriver du en anpassad prompt. Du kan även välja Välj ett tema och sedan välja de understrukna orden för att anpassa AI-bakgrunden.
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          Välj Inspirera mig för att få mer unika och varierade AI-bildalternativ.
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          När du skapar en egen bakgrund skickas prompten till Googles servrar för att generera bilder och förbättra produkten i enlighet med <ph name="BEGIN_LINK_GOOGLE_PRIVACY_POLICY" />Googles användarvillkor och integritetspolicy<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" />. Ange inget som är personligt, känsligt eller konfidentiellt.
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          Generativ AI kan göra misstag, inklusive om personer, så dubbelkolla svaren. <ph name="BEGIN_LINK_CREATE_YOUR_OWN_WALLPAPER" />Läs mer<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" /></translation>
 <translation id="8200772114523450471">Återuppta</translation>
 <translation id="8206859287963243715">Mobil</translation>
 <translation id="8208861521865154048">Förmåner</translation>
@@ -1578,6 +1595,7 @@ Ladda ned transkriptionsmodellen (upp till 100 MB) för att få transkriptioner
 <translation id="8312330582793120272">spela upp media</translation>
 <translation id="8318753676953949627">Inga bilder</translation>
 <translation id="8320910311642849813">en skog</translation>
+<translation id="8322464149031882595">Klicka för att gå vidare</translation>
 <translation id="8329018942023753850">appen kalkylator</translation>
 <translation id="8336739000755212683">Ändra kontobilden på enheten</translation>
 <translation id="8339024191194156249">Läs mer om automatisk start</translation>
@@ -1598,6 +1616,7 @@ Ladda ned transkriptionsmodellen (upp till 100 MB) för att få transkriptioner
 <translation id="8395584934117017006">Denna <ph name="DEVICE_TYPE" /> är företagshanterad</translation>
 <translation id="8398927464629426868">Hur fort enheten laddas eller laddas ur för närvarande</translation>
 <translation id="8403988360557588704">En målning av <ph name="ART_FEATURE" /> i stilen <ph name="ART_MOVEMENT" /></translation>
+<translation id="8409219750150841791">Genererad sammanfattning:</translation>
 <translation id="8410244574650205435">Identifierades automatiskt</translation>
 <translation id="8420955526972171689">Kör tester och felsök vid problem med hårdvara</translation>
 <translation id="8422748173858722634">IMEI</translation>
@@ -1642,6 +1661,7 @@ Ladda ned transkriptionsmodellen (upp till 100 MB) för att få transkriptioner
 <translation id="8626489604350149811">Fler åtgärder för <ph name="APN_NAME" /></translation>
 <translation id="86356131183441916">Ljuslila</translation>
 <translation id="8647595191512746911">Ljudtranskription</translation>
+<translation id="8648578954147795914">Genererade namn:</translation>
 <translation id="8650852232143958317">Ta med dig dina Gmail- och Google Drive-filer</translation>
 <translation id="8651481478098336970">ljud av</translation>
 <translation id="8655295600908251630">Kanal</translation>
@@ -1670,7 +1690,6 @@ Ladda ned transkriptionsmodellen (upp till 100 MB) för att få transkriptioner
 <translation id="8764414543112028321">WireGuard</translation>
 <translation id="87646919272181953">Album i Google Foto</translation>
 <translation id="8775713578693478175">Modem-APN</translation>
-<translation id="877735394245039557">Modellnedladdning pågår</translation>
 <translation id="877985182522063539">A4</translation>
 <translation id="879568662008399081">Nätverket kan ha en infångstportal</translation>
 <translation id="8797082062139985406">Skapa ett namn med Google AI</translation>
@@ -1723,6 +1742,7 @@ Ladda ned transkriptionsmodellen (upp till 100 MB) för att få transkriptioner
 <translation id="8961025972867871808">pingviner</translation>
 <translation id="8968751544471797276">Laddningshastighet</translation>
 <translation id="8970109610781093811">Kör igen</translation>
+<translation id="8972061581514441296">Klicka för att gå tillbaka</translation>
 <translation id="8983038754672563810">HSPA</translation>
 <translation id="8987565828374052507">{NUMBER_OF_PAGES,plural, =0{Genomsök}=1{Genomsök sida {NUMBER_OF_PAGES}}other{Genomsök sida {NUMBER_OF_PAGES}}}</translation>
 <translation id="89945434909472341">en by</translation>
@@ -1784,6 +1804,7 @@ Ladda ned transkriptionsmodellen (upp till 100 MB) för att få transkriptioner
 <translation id="9218016617214286986">Visa kända APN:er</translation>
 <translation id="932327136139879170">Startsida</translation>
 <translation id="939519157834106403">SSID</translation>
+<translation id="940663759301549538">Kontrollera att mikrofonen är ansluten eller försök starta om Chromebook</translation>
 <translation id="945522503751344254">Skicka feedback</translation>
 <translation id="950520315903467048">Tangent saknas för <ph name="DIRECTION" />. <ph name="ASSIGN_INSTRUCTION" /></translation>
 <translation id="951780398843003443">Jämför röster i hela inspelningen så att transkriptionen återspeglar vad varje talare sa och när</translation>

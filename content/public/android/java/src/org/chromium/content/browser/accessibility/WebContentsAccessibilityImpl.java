@@ -45,6 +45,7 @@ import static androidx.core.view.accessibility.AccessibilityNodeInfoCompat.Acces
 import static androidx.core.view.accessibility.AccessibilityNodeInfoCompat.AccessibilityActionCompat.ACTION_SHOW_ON_SCREEN;
 import static androidx.core.view.accessibility.AccessibilityNodeInfoCompat.EXTRA_DATA_TEXT_CHARACTER_LOCATION_ARG_LENGTH;
 import static androidx.core.view.accessibility.AccessibilityNodeInfoCompat.EXTRA_DATA_TEXT_CHARACTER_LOCATION_ARG_START_INDEX;
+import static androidx.core.view.accessibility.AccessibilityNodeInfoCompat.EXTRA_DATA_TEXT_CHARACTER_LOCATION_IN_WINDOW_KEY;
 import static androidx.core.view.accessibility.AccessibilityNodeInfoCompat.EXTRA_DATA_TEXT_CHARACTER_LOCATION_KEY;
 import static androidx.core.view.accessibility.AccessibilityNodeInfoCompat.MOVEMENT_GRANULARITY_CHARACTER;
 import static androidx.core.view.accessibility.AccessibilityNodeInfoCompat.MOVEMENT_GRANULARITY_LINE;
@@ -808,6 +809,7 @@ public class WebContentsAccessibilityImpl extends AccessibilityNodeProviderCompa
                             WebContentsAccessibilityImpl.this,
                             AccessibilityState.isScreenReaderEnabled(),
                             AccessibilityState.isOnlyPasswordManagersEnabled(),
+                            AccessibilityState.isKnownScreenReaderRunning(),
                             /* isAccessibilityEnabled= */ true);
 
             // Update the state of enabling/disabling the image descriptions feature. To enable the
@@ -1969,6 +1971,21 @@ public class WebContentsAccessibilityImpl extends AccessibilityNodeProviderCompa
     }
 
     @CalledByNative
+    private void handleImageAnnotationChanged(int id) {
+        if (isAccessibilityEnabled()) {
+            AccessibilityEvent event =
+                    AccessibilityEvent.obtain(AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
+            if (event == null) {
+                return;
+            }
+
+            event.setContentChangeTypes(AccessibilityEvent.CONTENT_CHANGE_TYPE_TEXT);
+            event.setSource(mView, id);
+            requestSendAccessibilityEvent(event);
+        }
+    }
+
+    @CalledByNative
     private void handleNavigate(int newRootId) {
         mAccessibilityFocusId = View.NO_ID;
         mLastAccessibilityFocusId = View.NO_ID;
@@ -2139,7 +2156,12 @@ public class WebContentsAccessibilityImpl extends AccessibilityNodeProviderCompa
             @Nullable Bundle arguments) {
         switch (extraDataKey) {
             case EXTRA_DATA_TEXT_CHARACTER_LOCATION_KEY:
-                getExtraDataTextCharacterLocations(virtualViewId, info, arguments);
+                getExtraDataTextCharacterLocations(
+                        virtualViewId, info, arguments, /* isScreenCoordinates= */ true);
+                break;
+            case EXTRA_DATA_TEXT_CHARACTER_LOCATION_IN_WINDOW_KEY:
+                getExtraDataTextCharacterLocations(
+                        virtualViewId, info, arguments, /* isScreenCoordinates= */ false);
                 break;
             case EXTRAS_DATA_REQUEST_IMAGE_DATA_KEY:
                 getImageData(virtualViewId, info);
@@ -2148,7 +2170,10 @@ public class WebContentsAccessibilityImpl extends AccessibilityNodeProviderCompa
     }
 
     private void getExtraDataTextCharacterLocations(
-            int virtualViewId, AccessibilityNodeInfoCompat info, @Nullable Bundle arguments) {
+            int virtualViewId,
+            AccessibilityNodeInfoCompat info,
+            @Nullable Bundle arguments,
+            boolean isScreenCoordinates) {
         // Arguments must be provided, but some debug tools may not so guard against this.
         if (arguments == null) return;
 
@@ -2180,11 +2205,20 @@ public class WebContentsAccessibilityImpl extends AccessibilityNodeProviderCompa
                             coords[4 * i + 2],
                             coords[4 * i + 3]);
             AccessibilityNodeInfoBuilder.convertWebRectToAndroidCoordinates(
-                    rect, info.getExtras(), mDelegate.getAccessibilityCoordinates(), mView);
+                    rect,
+                    info.getExtras(),
+                    mDelegate.getAccessibilityCoordinates(),
+                    mView,
+                    isScreenCoordinates);
             boundingRects[i] = new RectF(rect);
         }
 
-        info.getExtras().putParcelableArray(EXTRA_DATA_TEXT_CHARACTER_LOCATION_KEY, boundingRects);
+        info.getExtras()
+                .putParcelableArray(
+                        isScreenCoordinates
+                                ? EXTRA_DATA_TEXT_CHARACTER_LOCATION_KEY
+                                : EXTRA_DATA_TEXT_CHARACTER_LOCATION_IN_WINDOW_KEY,
+                        boundingRects);
     }
 
     private void getImageData(int virtualViewId, AccessibilityNodeInfoCompat info) {
@@ -2230,6 +2264,7 @@ public class WebContentsAccessibilityImpl extends AccessibilityNodeProviderCompa
                 WebContentsAccessibilityImpl caller,
                 boolean screenReaderMode,
                 boolean formControlsMode,
+                boolean isKnownScreenReaderRunning,
                 boolean isAccessibilityEnabled);
 
         void disableRendererAccessibility(long nativeWebContentsAccessibilityAndroid);

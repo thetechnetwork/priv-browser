@@ -81,6 +81,7 @@
 <translation id="131461803491198646">Εγχώριο δίκτυο, χωρίς περιαγωγή </translation>
 <translation id="1327977588028644528">Πύλη</translation>
 <translation id="1328223165223065150">Χρώμα ταπετσαρίας</translation>
+<translation id="1329478709358066995">Μεταγραφή:</translation>
 <translation id="1330426557709298164">JPG</translation>
 <translation id="1337912285145772892">Προσαρμογή στην περιοχή σάρωσης</translation>
 <translation id="1343442362630695901">αλυκή</translation>
@@ -126,7 +127,17 @@
 <translation id="1515129336378114413">αρχική σελίδα προγράμματος περιήγησης</translation>
 <translation id="1526389707933164996">Κινούμενη εικόνα προφύλαξης οθόνης</translation>
 <translation id="152892567002884378">Αύξηση έντασης ήχου</translation>
+<translation id="1531038290222364269">Εμφάνιση καρτελών</translation>
 <translation id="1539864135338521185">λάπις λάζουλι</translation>
+<translation id="1548555207631326346">Επιλέξτε ένα θέμα και έπειτα επιλέξτε τις υπογραμμισμένες λέξεις, για να εξατομικεύσετε τις εικόνες AI.<ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          Επιλέξτε Δώσε μου έμπνευση, για να λάβετε περισσότερες μοναδικές και διαφορετικές επιλογές εικόνων AI.
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          Όταν δημιουργείτε περιεχόμενο με AI, η οδηγία αποστέλλεται στους διακομιστές Google AI για τη δημιουργία εικόνων και τη βελτίωση του προϊόντος, σύμφωνα με την <ph name="BEGIN_LINK_GOOGLE_PRIVACY_POLICY" />Πολιτική απορρήτου της Google<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" />.
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          Το generative AI είναι πειραματικό, βρίσκεται σε πρώιμο στάδιο ανάπτυξης και προς το παρόν έχει περιορισμένη διαθεσιμότητα.</translation>
 <translation id="1555130319947370107">Μπλε</translation>
 <translation id="155865706765934889">Επιφάνεια Αφής</translation>
 <translation id="1561927818299383735">χρώμα φωτισμού στο πίσω μέρος</translation>
@@ -252,7 +263,6 @@
 <translation id="2011174342667534258">Έκδοση SDK:</translation>
 <translation id="2016697457005847575">Δοκιμή βημάτων αντιμετώπισης προβλημάτων</translation>
 <translation id="202500043506723828">EID</translation>
-<translation id="2041627599411887437">Για να εξατομικεύσετε τις εικόνες AI, επιλέξτε ένα θέμα και έπειτα τις υπογραμμισμένες λέξεις.</translation>
 <translation id="2045814230297767491">μαχαιροπίρουνα</translation>
 <translation id="2047316797244836561">Συνδεθείτε σε ένα δίκτυο και επαναλάβετε τη φόρτωση της σελίδας για να δείτε την προφύλαξη οθόνης.</translation>
 <translation id="2056550196601855911">IPv4/IPv6</translation>
@@ -368,7 +378,7 @@
 <translation id="2584559707064218956">Για να ρυθμίσετε το δίκτυο, μεταβείτε στις Ρυθμίσεις.</translation>
 <translation id="2586146417912237930">μπλε και λουλακί</translation>
 <translation id="2589921777872778654">Μενού επεξεργασίας και διαγραφής</translation>
-<translation id="2597774443162333062">Τα αρχεία θα σταλούν στην Google για εντοπισμό και διόρθωση σφαλμάτων</translation>
+<translation id="2597774443162333062">Τα αρχεία θα σταλούν στην Google για αποσφαλμάτωση</translation>
 <translation id="2599691907981599502">{NUMBER_OF_PAGES,plural, =1{Η σάρωση ολοκληρώθηκε. Σαρώθηκε μία σελίδα.}other{Η σάρωση ολοκληρώθηκε. Σαρώθηκαν {NUMBER_OF_PAGES} σελίδες.}}</translation>
 <translation id="261322795497077164">Αναγνώριση ομιλητή</translation>
 <translation id="2617397783536231890">βαμβάκι</translation>
@@ -405,6 +415,7 @@
 <translation id="2787237339470862294">Αυτή η γλώσσα δεν υποστηρίζεται προς το παρόν</translation>
 <translation id="2787435249130282949">πιο φωτεινό πληκτρολόγιο</translation>
 <translation id="2805756323405976993">Εφαρμογές </translation>
+<translation id="2822702442014805146">Λήψη μοντέλου δημιουργίας σύνοψης και ονόματος σε εξέλιξη</translation>
 <translation id="28232023175184696">Δεν είναι δυνατή η σύνδεση στο διαδίκτυο. Κάντε κλικ για να δοκιμάσετε ξανά.</translation>
 <translation id="2855718259207180827">μαλλί</translation>
 <translation id="2859243502336719778">Σημαντική ενημέρωση</translation>
@@ -502,6 +513,7 @@
 <translation id="3373141842870501561">Ταπετσαρία Κίνηση της Γης</translation>
 <translation id="33736539805963175"><ph name="LETTERS_COLOR" /> φόντο με το γράμμα <ph name="LETTERS_LETTER" /></translation>
 <translation id="3383623117265110236">Αποκλειστικό</translation>
+<translation id="3395147534045164351">Εναλλαγή τοποθεσίας στιγμιότυπου</translation>
 <translation id="3404249063913988450">Ενεργοποίηση προφύλαξης οθόνης.</translation>
 <translation id="3413935475507503304">Για να συνεχίσετε με την ενημέρωση, κάντε κλικ στο Επόμενο.</translation>
 <translation id="3428551088151258685">εξωτερικού χώρου</translation>
@@ -651,6 +663,7 @@
 <translation id="4113067922640381334">Έχετε πλέον πρόσβαση σε νέες <ph name="BEGIN_LINK_WALLPAPER_SUBPAGE" />ταπετσαρίες<ph name="END_LINK_WALLPAPER_SUBPAGE" /></translation>
 <translation id="4117637339509843559">Λειτουργία χαμηλού φωτισμού</translation>
 <translation id="4126551873361000548">Πίσω κατά 10 δευτερόλεπτα</translation>
+<translation id="4128271910628504223">Εισαγάγετε μια οδηγία, όπως "ζωγράφισε ένα δάσος με ομίχλη"</translation>
 <translation id="4130035430755296270">Κρατήστε τον δείκτη πάνω από το στοιχείο για περισσότερες επιλογές διάταξης</translation>
 <translation id="4130750466177569591">Συμφωνώ</translation>
 <translation id="4131410914670010031">Ασπρόμαυρο</translation>
@@ -824,6 +837,7 @@
 <translation id="4891842000192098784">Καταπόνηση</translation>
 <translation id="4897058166682006107">Η μπαταρία αριστερού ακουστικού της συσκευής βρίσκεται στο <ph name="BATTERY_PERCENTAGE" />%.</translation>
 <translation id="4905998861748258752">Ενεργοποιήστε τη λειτουργία για να ορίσετε επιλογές για την προφύλαξη οθόνης</translation>
+<translation id="4910853326379896417">Η λήψη μοντέλου δημιουργίας σύνοψης και ονόματος ολοκληρώθηκε</translation>
 <translation id="4910858703033903787">Τύποι APN</translation>
 <translation id="4917385247580444890">Ισχυρό</translation>
 <translation id="4917889632206600977">Διακοπή - Τελείωσε το χαρτί</translation>
@@ -858,8 +872,10 @@
 <translation id="5050042263972837708">Όνομα ομάδας</translation>
 <translation id="5051044138948155788">Αυτή είναι η μοναδική σελίδα. Θα μεταβείτε στην οθόνη έναρξης σάρωσης.</translation>
 <translation id="5053233795640754917">Παύση</translation>
+<translation id="5056587122125565772">Δημιουργία εικόνας</translation>
 <translation id="5078711626843651677">Τα φωνητικά μοντέλα αποθηκεύονται προσωρινά στη συσκευή μέχρι να ολοκληρωθεί η προσθήκη ετικετών ομιλητών. Μπορείτε να απενεργοποιήσετε αυτή τη λειτουργία ανά πάσα στιγμή στις Ρυθμίσεις.</translation>
 <translation id="5078983345702708852">φουτουριστικό</translation>
+<translation id="5085224064082122501">Δεν είναι δυνατή η λήψη μοντέλου δημιουργίας σύνοψης και ονόματος. Δοκιμάστε ξανά ή επανεκκινήστε το Chromebook.</translation>
 <translation id="5087864757604726239">πίσω</translation>
 <translation id="5088172560898466307">Όνομα κεντρικού υπολογιστή διακομιστή</translation>
 <translation id="5089810972385038852">Πολιτεία</translation>
@@ -1129,14 +1145,12 @@
 <translation id="6325525973963619867">Απέτυχε</translation>
 <translation id="6327262166342360252">Αυτή η ταπετσαρία δημιουργήθηκε με AI με τη χρήση του παρακάτω κειμένου: "<ph name="PROMPT" />."</translation>
 <translation id="6331191339300272798">Αυτόματο σκούρο θέμα</translation>
-<translation id="6335228876613776082">Η λήψη του μοντέλου ολοκληρώθηκε</translation>
 <translation id="6340526405444716530">Εξατομίκευση</translation>
 <translation id="6348252528297699679">Μπορείτε να απενεργοποιήσετε την τοποθεσία στην ενότητα Ρυθμίσεις &gt; Απόρρητο και ασφάλεια &gt; Στοιχεία ελέγχου απορρήτου &gt; Πρόσβαση τοποθεσίας. <ph name="LINK_BEGIN" />Μάθετε περισσότερα<ph name="LINK_END" /></translation>
 <translation id="6348738456043757611">Όνομα χρήστη και κωδικός πρόσβασης</translation>
 <translation id="6352210854422428614">διαφορετικός πλανήτης</translation>
 <translation id="6359706544163531585">Απενεργοποίηση φωτεινού θέματος</translation>
 <translation id="6359919876285606596">Αυτή η ενέργεια είναι οριστική και δεν μπορεί να αναιρεθεί</translation>
-<translation id="6368342879959028556">Όταν επιλέξετε Δημιουργία με AI, γράψτε μια προσαρμοσμένη οδηγία. Εναλλακτικά, μπορείτε να επιλέξετε "Ταπετσαρίες AI", για να επιλέξετε ένα θέμα και, έπειτα, τις υπογραμμισμένες λέξεις, για να εξατομικεύσετε την ταπετσαρία AI.</translation>
 <translation id="636850387210749493">Εγγραφή επιχείρησης</translation>
 <translation id="6369221585240879141">Δεν είναι δυνατή η δημιουργία ονομάτων εγγραφών για αυτή τη γλώσσα μεταγραφής</translation>
 <translation id="6373461326814131011">λιμνούλα</translation>
@@ -1209,16 +1223,6 @@
 <translation id="6657240842932274095">Να επιτρέπεται στις υπηρεσίες συστήματος να χρησιμοποιούν την τοποθεσία σας;</translation>
 <translation id="6657585470893396449">Κωδικός πρόσβασης</translation>
 <translation id="66621959568103627">ροζ κοραλί</translation>
-<translation id="6667885109186363316"><ph name="SEA_PEN_INTRO_FIRST_PARAGRAPH" />
-          <ph name="LINE_BREAK" />
-          <ph name="LINE_BREAK" />
-          Επιλέξτε Δώσε μου έμπνευση, για να λάβετε περισσότερες μοναδικές και διαφορετικές επιλογές εικόνων AI.
-          <ph name="LINE_BREAK" />
-          <ph name="LINE_BREAK" />
-          Όταν δημιουργείτε περιεχόμενο με AI, η οδηγία αποστέλλεται στους διακομιστές Google AI για τη δημιουργία εικόνων και τη βελτίωση του προϊόντος, σύμφωνα με την <ph name="BEGIN_LINK_GOOGLE_PRIVACY_POLICY" />Πολιτική απορρήτου της Google<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" />.
-          <ph name="LINE_BREAK" />
-          <ph name="LINE_BREAK" />
-          Το generative AI είναι πειραματικό και βρίσκεται σε πρώιμο στάδιο ανάπτυξης. Προς το παρόν, η διαθεσιμότητά του είναι περιορισμένη.</translation>
 <translation id="6673898378497337661">αύξηση φωτεινότητας πληκτρολογίου</translation>
 <translation id="6692996468359469499">Λάβετε πληροφορίες σχετικά με την επιλογή σας.</translation>
 <translation id="6694534975463174713">κλειδαριά</translation>
@@ -1274,6 +1278,7 @@
 <translation id="6930597342185648547">Πληροφορίες για το φόντο</translation>
 <translation id="6939667434404433010">Αναζήτηση ονόματος εγγραφής</translation>
 <translation id="6939766318048400022">Καφετέρια</translation>
+<translation id="6942253772720771875">Μοιραστείτε τα σχόλιά σας ή περιγράψτε το πρόβλημα</translation>
 <translation id="6943893908656559156">Απομακρυσμένη ταυτότητα (προαιρετικό)</translation>
 <translation id="6953137545147683679">χρυσό</translation>
 <translation id="6957231940976260713">Όνομα υπηρεσίας</translation>
@@ -1295,6 +1300,7 @@
 <translation id="7040230719604914234">Χειριστής</translation>
 <translation id="7040729769968826896">Να επιτρέπεται η αναγνώριση ομιλητή</translation>
 <translation id="7041549558901442110">Η συσκευή δεν είναι συνδεδεμένη.</translation>
+<translation id="704183341263526038">Δίας</translation>
 <translation id="7046522406494308071">Επαναφορά όλων των συντομεύσεων στις προεπιλογές;</translation>
 <translation id="7049916119678019302">Κατεβάστε το μοντέλο μεταγραφής στις Ρυθμίσεις</translation>
 <translation id="7058278511608979688">Λήξη και αποθήκευση</translation>
@@ -1389,6 +1395,7 @@
 <translation id="7388345524791662148">Περισσότερες επιλογές για <ph name="RECORDING_NAME" /></translation>
 <translation id="7388959671917308825">Ενσωματωμένη επιφάνεια αφής</translation>
 <translation id="7397270852490618635">Απενεργοποίηση φωτεινού θέματος</translation>
+<translation id="7400166052988585408">Ο καθηγητής θα κλειδώσει την οθόνη σας σε <ph name="NUM_SECONDS" /> δευτερόλεπτα</translation>
 <translation id="7401543881546089382">Διαγραφή συντόμευσης</translation>
 <translation id="7405493795721832710">Η συσκευή <ph name="DEVICE_NAME" /> είναι έτοιμη για ενημέρωση</translation>
 <translation id="741244894080940828">μετατροπή</translation>
@@ -1427,6 +1434,7 @@
 <translation id="7569444139234840525"><ph name="QUERY_TEXT" /> · /<ph name="PHONETICS" />/</translation>
 <translation id="7570674786725311828">Επιφάνεια αφής USB</translation>
 <translation id="757747079855995705">πέτρα</translation>
+<translation id="7584853321964440104">Δεν είναι δυνατή η λήψη. Δοκιμάστε ξανά ή επανεκκινήστε το Chromebook.</translation>
 <translation id="7590883480672980941">Ρυθμίσεις εισαγωγής</translation>
 <translation id="7595982850646262331">Απομένουν <ph name="TIME_VALUE" /></translation>
 <translation id="7600430297804876776">Ο διαχειριστής <ph name="MANAGER" /> έχει ορίσει πότε μπορεί να χρησιμοποιηθεί η συσκευή <ph name="DEVICE_TYPE" />.</translation>
@@ -1557,6 +1565,16 @@
 <translation id="8179976553408161302">Enter</translation>
 <translation id="8183975772394450380">παραλία</translation>
 <translation id="819278132617411009">Χρησιμοποιήστε το Google AI για να γίνετε πιο παραγωγικοί</translation>
+<translation id="82003371436638355">Όταν επιλέξετε Δημιουργήστε τη δική σας, γράψτε μια προσαρμοσμένη οδηγία. Εναλλακτικά, μπορείτε να επιλέξετε Επιλέξτε ένα θέμα και, έπειτα, τις υπογραμμισμένες λέξεις, για να εξατομικεύσετε την ταπετσαρία AI.
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          Επιλέξτε Δώσε μου έμπνευση, για να λάβετε περισσότερες μοναδικές και διαφορετικές επιλογές εικόνων AI.
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          Όταν δημιουργείτε τη δική σας ταπετσαρία, η οδηγία αποστέλλεται στους διακομιστές της Google για τη δημιουργία εικόνων και τη βελτίωση του προϊόντος, σύμφωνα με τους <ph name="BEGIN_LINK_GOOGLE_PRIVACY_POLICY" />Όρους Παροχής Υπηρεσιών και την Πολιτική απορρήτου της Google<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" />. Μην συμπεριλάβετε προσωπικό, ευαίσθητο ή εμπιστευτικό περιεχόμενο.
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          Το generative AI μπορεί να κάνει λάθη, συμπεριλαμβανομένων των πληροφοριών σχετικά με άτομα, επομένως θα πρέπει να επαληθεύετε τις απαντήσεις του. <ph name="BEGIN_LINK_CREATE_YOUR_OWN_WALLPAPER" />Μάθετε περισσότερα<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" /></translation>
 <translation id="8200772114523450471">Συνέχιση</translation>
 <translation id="8206859287963243715">Κινητό</translation>
 <translation id="8208861521865154048">Προνόμια</translation>
@@ -1578,6 +1596,7 @@
 <translation id="8312330582793120272">αναπαραγωγή μέσων</translation>
 <translation id="8318753676953949627">Δεν υπάρχουν εικόνες</translation>
 <translation id="8320910311642849813">δάσος</translation>
+<translation id="8322464149031882595">Κάντε κλικ για μετάβαση εμπρός</translation>
 <translation id="8329018942023753850">εφαρμογή Αριθμομηχανή</translation>
 <translation id="8336739000755212683">Αλλαγή εικόνας λογαριασμού συσκευής</translation>
 <translation id="8339024191194156249">Μάθετε περισσότερα σχετικά με την αυτόματη εκκίνηση</translation>
@@ -1598,6 +1617,7 @@
 <translation id="8395584934117017006">Η διαχείριση αυτής της συσκευής <ph name="DEVICE_TYPE" /> γίνεται από επιχείρηση.</translation>
 <translation id="8398927464629426868">Ο ρυθμός με τον οποίο φορτίζεται ή εκφορτίζεται η συσκευή αυτήν τη στιγμή.</translation>
 <translation id="8403988360557588704">Πίνακας με <ph name="ART_FEATURE" /> σε στιλ <ph name="ART_MOVEMENT" /></translation>
+<translation id="8409219750150841791">Σύνοψη που δημιουργήθηκε:</translation>
 <translation id="8410244574650205435">Εντοπίστηκε αυτόματα</translation>
 <translation id="8420955526972171689">Εκτέλεση δοκιμών και αντιμετώπιση προβλημάτων για προβλήματα εξοπλισμού</translation>
 <translation id="8422748173858722634">Αριθμός ΙΜΕΙ</translation>
@@ -1642,6 +1662,7 @@
 <translation id="8626489604350149811">Περισσότερες ενέργειες για <ph name="APN_NAME" /></translation>
 <translation id="86356131183441916">Ανοιχτό μοβ</translation>
 <translation id="8647595191512746911">Μεταγραφή ήχου</translation>
+<translation id="8648578954147795914">Ονόματα που δημιουργήθηκαν:</translation>
 <translation id="8650852232143958317">Πάρτε μαζί σας τα αρχεία του Gmail και του Google Drive</translation>
 <translation id="8651481478098336970">σίγαση ήχου</translation>
 <translation id="8655295600908251630">Κανάλι</translation>
@@ -1670,7 +1691,6 @@
 <translation id="8764414543112028321">WireGuard</translation>
 <translation id="87646919272181953">Λεύκωμα Φωτογραφιών Google</translation>
 <translation id="8775713578693478175">APN μόντεμ</translation>
-<translation id="877735394245039557">Λήψη μοντέλου σε εξέλιξη</translation>
 <translation id="877985182522063539">A4</translation>
 <translation id="879568662008399081">Αυτό το δίκτυο μπορεί να έχει πύλη υποδοχής</translation>
 <translation id="8797082062139985406">Δημιουργία ονόματος με χρήση του Google AI</translation>
@@ -1723,6 +1743,7 @@
 <translation id="8961025972867871808">πιγκουίνοι</translation>
 <translation id="8968751544471797276">Ρυθμός φόρτισης</translation>
 <translation id="8970109610781093811">Επανεκτέλεση</translation>
+<translation id="8972061581514441296">Κάντε κλικ για επιστροφή</translation>
 <translation id="8983038754672563810">HSPA</translation>
 <translation id="8987565828374052507">{NUMBER_OF_PAGES,plural, =0{Σάρωση}=1{Σάρωση σελίδας {NUMBER_OF_PAGES}}other{Σάρωση σελίδας {NUMBER_OF_PAGES}}}</translation>
 <translation id="89945434909472341">χωριό</translation>
@@ -1784,6 +1805,7 @@
 <translation id="9218016617214286986">Εμφάνιση γνωστών APN</translation>
 <translation id="932327136139879170">Αρχική σελίδα</translation>
 <translation id="939519157834106403">SSID</translation>
+<translation id="940663759301549538">Βεβαιωθείτε ότι το μικρόφωνό σας είναι συνδεδεμένο ή δοκιμάστε να επανεκκινήσετε το Chromebook</translation>
 <translation id="945522503751344254">Αποστολή σχολίων</translation>
 <translation id="950520315903467048">Λείπει το πλήκτρο για το <ph name="DIRECTION" />. <ph name="ASSIGN_INSTRUCTION" /></translation>
 <translation id="951780398843003443">Να συγκρίνει φωνές σε ολόκληρη την εγγραφή, έτσι ώστε η μεταγραφή να αντικατοπτρίζει τι είπε ο κάθε ομιλητής και πότε</translation>

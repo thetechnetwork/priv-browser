@@ -5,7 +5,7 @@
 #ifndef IOS_CHROME_BROWSER_AUTHENTICATION_UI_BUNDLED_AUTHENTICATION_FLOW_AUTHENTICATION_FLOW_H_
 #define IOS_CHROME_BROWSER_AUTHENTICATION_UI_BUNDLED_AUTHENTICATION_FLOW_AUTHENTICATION_FLOW_H_
 
-#import <Foundation/Foundation.h>
+#import <UIKit/UIKit.h>
 
 #import "components/signin/public/base/signin_metrics.h"
 #import "ios/chrome/browser/authentication/ui_bundled/authentication_flow/authentication_flow_performer_delegate.h"
@@ -30,12 +30,14 @@ class Browser;
 // * `postSignInActions` represents the actions to be taken once `identity` is
 //   signed in.
 // * `presentingViewController` is the top presented view controller.
+// * `anchorView` and `anchorRect` is the position that triggered sign-in.
 - (instancetype)initWithBrowser:(Browser*)browser
                        identity:(id<SystemIdentity>)identity
                     accessPoint:(signin_metrics::AccessPoint)accessPoint
               postSignInActions:(PostSignInActionSet)postSignInActions
        presentingViewController:(UIViewController*)presentingViewController
-    NS_DESIGNATED_INITIALIZER;
+                     anchorView:(UIView*)anchorView
+                     anchorRect:(CGRect)anchorRect NS_DESIGNATED_INITIALIZER;
 
 - (instancetype)init NS_UNAVAILABLE;
 
@@ -53,7 +55,7 @@ class Browser;
 // `startSignInWithCompletion` with the sign-in flag set to no.
 //
 // Does noting if the sign-in flow is already done
-- (void)interruptWithAction:(SigninCoordinatorInterrupt)action;
+- (void)interrupt;
 
 // Identity to sign-in.
 @property(nonatomic, strong, readonly) id<SystemIdentity> identity;

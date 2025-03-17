@@ -22,8 +22,7 @@ OnDeviceOptions::OnDeviceOptions(const OnDeviceOptions& orig)
       adapter(orig.adapter),
       safety_checker(std::make_unique<SafetyChecker>(*orig.safety_checker)),
       token_limits(orig.token_limits),
-      logger(orig.logger),
-      log_uploader(orig.log_uploader) {}
+      logger(orig.logger) {}
 
 bool OnDeviceOptions::ShouldUse() const {
   return model_client->ShouldUse();
@@ -53,8 +52,7 @@ OnDeviceContext::GetOrCreateSession() {
   if (session_) {
     return session_;
   }
-  opts_.model_client->GetModelRemote()->StartSession(
-      session_.BindNewPipeAndPassReceiver());
+  opts_.model_client->StartSession(session_.BindNewPipeAndPassReceiver());
   session_.reset_on_disconnect();
   if (input_ && input_->pieces.size() > 0) {
     AddContext();
@@ -67,10 +65,19 @@ void OnDeviceContext::CloneSession(
     proto::OnDeviceModelServiceRequest* logged_request,
     bool ignore_context) {
   auto& session = GetOrCreateSession();
-  if (input_ && !ignore_context) {
+  if (input_ && !ignore_context && logged_request) {
     logged_request->set_input_context_string(OnDeviceInputToString(*input_));
   }
   session->Clone(std::move(clone));
+}
+
+std::unique_ptr<OnDeviceContext> OnDeviceContext::Clone() {
+  auto context = std::make_unique<OnDeviceContext>(opts_, feature_);
+  context->input_ = input_.Clone();
+  CloneSession(context->session_.BindNewPipeAndPassReceiver(),
+               /*logged_request=*/nullptr, /*ignore_context=*/false);
+  context->session_.reset_on_disconnect();
+  return context;
 }
 
 void OnDeviceContext::AddContext() {

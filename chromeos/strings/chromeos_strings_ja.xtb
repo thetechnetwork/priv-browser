@@ -81,6 +81,7 @@
 <translation id="131461803491198646">ホーム ネットワーク、ローミングなし</translation>
 <translation id="1327977588028644528">ゲートウェイ</translation>
 <translation id="1328223165223065150">壁紙の色</translation>
+<translation id="1329478709358066995">文字起こし:</translation>
 <translation id="1330426557709298164">JPG</translation>
 <translation id="1337912285145772892">スキャン領域に合わせる</translation>
 <translation id="1343442362630695901">塩湖</translation>
@@ -126,7 +127,17 @@
 <translation id="1515129336378114413">ブラウザのホーム</translation>
 <translation id="1526389707933164996">スクリーン セーバーのアニメーション</translation>
 <translation id="152892567002884378">音量を上げる</translation>
+<translation id="1531038290222364269">タブを表示</translation>
 <translation id="1539864135338521185">ラピスラズリ</translation>
+<translation id="1548555207631326346">テーマを選択した後、下線付きの単語を選択して AI 画像をカスタマイズします。<ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          [ひらめきがほしい] を選択すると、より個性的で多様な AI 画像オプションが表示されます。
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          AI を使用した画像作成では、<ph name="BEGIN_LINK_GOOGLE_PRIVACY_POLICY" />Google のプライバシー ポリシー<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" />に沿ってプロンプトが Google AI サーバーに送信され、画像の生成とサービスの改善に使用されます。
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          生成 AI は試験運用版で開発の初期段階のため、現時点では限定的にご利用いただけます。</translation>
 <translation id="1555130319947370107">青</translation>
 <translation id="155865706765934889">タッチパッド</translation>
 <translation id="1561927818299383735">バックライトの色</translation>
@@ -252,7 +263,6 @@
 <translation id="2011174342667534258">SDK のバージョン:</translation>
 <translation id="2016697457005847575">トラブルシューティングの手順を試す</translation>
 <translation id="202500043506723828">EID</translation>
-<translation id="2041627599411887437">テーマを選択した後、下線付きの単語を選択して AI 画像をカスタマイズします。</translation>
 <translation id="2045814230297767491">カトラリー</translation>
 <translation id="2047316797244836561">スクリーンセーバーを表示するには、ネットワークに接続してページを再読み込みしてください。</translation>
 <translation id="2056550196601855911">IPv4 / IPv6</translation>
@@ -405,6 +415,7 @@
 <translation id="2787237339470862294">この言語は現在サポートされていません</translation>
 <translation id="2787435249130282949">キーボードを明るくする</translation>
 <translation id="2805756323405976993">アプリ</translation>
+<translation id="2822702442014805146">要約と名前作成のモデルをダウンロードしています</translation>
 <translation id="28232023175184696">インターネットに接続できません。クリックしてもう一度お試しください。</translation>
 <translation id="2855718259207180827">ウール</translation>
 <translation id="2859243502336719778">重要なアップデート</translation>
@@ -502,6 +513,7 @@
 <translation id="3373141842870501561">「地球の動き」の壁紙</translation>
 <translation id="33736539805963175">「<ph name="LETTERS_LETTER" />」という文字を含む<ph name="LETTERS_COLOR" />背景</translation>
 <translation id="3383623117265110236">限定</translation>
+<translation id="3395147534045164351">スナップの位置を切り替え</translation>
 <translation id="3404249063913988450">スクリーン セーバーを有効にする</translation>
 <translation id="3413935475507503304">更新を進めるには、[次へ] をクリックしてください。</translation>
 <translation id="3428551088151258685">アウトドア</translation>
@@ -651,6 +663,7 @@
 <translation id="4113067922640381334">新しい<ph name="BEGIN_LINK_WALLPAPER_SUBPAGE" />壁紙<ph name="END_LINK_WALLPAPER_SUBPAGE" />をご利用いただけます</translation>
 <translation id="4117637339509843559">ダークモード</translation>
 <translation id="4126551873361000548">10 秒巻き戻し</translation>
+<translation id="4128271910628504223">「霧の森を描く」などのプロンプトを入力</translation>
 <translation id="4130035430755296270">カーソルを合わせると他のレイアウト オプションが表示されます</translation>
 <translation id="4130750466177569591">同意する</translation>
 <translation id="4131410914670010031">白黒</translation>
@@ -824,6 +837,7 @@
 <translation id="4891842000192098784">ストレス</translation>
 <translation id="4897058166682006107">デバイスの左イヤフォンのバッテリー残量は <ph name="BATTERY_PERCENTAGE" />% です。</translation>
 <translation id="4905998861748258752">この機能をオンにするとスクリーン セーバーのオプションを選択できます</translation>
+<translation id="4910853326379896417">要約と名前作成のモデルのダウンロードが完了しました</translation>
 <translation id="4910858703033903787">APN タイプ</translation>
 <translation id="4917385247580444890">強い</translation>
 <translation id="4917889632206600977">停止 - 用紙切れ</translation>
@@ -858,8 +872,10 @@
 <translation id="5050042263972837708">グループ名</translation>
 <translation id="5051044138948155788">これは存在する唯一のページです。削除すると、スキャンのスタート画面に戻ります。</translation>
 <translation id="5053233795640754917">一時停止</translation>
+<translation id="5056587122125565772">画像を作成</translation>
 <translation id="5078711626843651677">スピーカー ラベルがすべて付けられるまで、音声モデルはデバイス上に一時的に保存されます。この機能は [設定] でいつでもオフにできます。</translation>
 <translation id="5078983345702708852">未来的</translation>
+<translation id="5085224064082122501">要約と名前作成のモデルをダウンロードできません。もう一度お試しになるか、Chromebook を再起動してください。</translation>
 <translation id="5087864757604726239">戻る</translation>
 <translation id="5088172560898466307">サーバーのホスト名</translation>
 <translation id="5089810972385038852">都道府県 / 州</translation>
@@ -1129,14 +1145,12 @@
 <translation id="6325525973963619867">失敗しました</translation>
 <translation id="6327262166342360252">この壁紙は「<ph name="PROMPT" />」というテキストを使用して AI で作成されました。</translation>
 <translation id="6331191339300272798">ダークモードを自動的に設定する</translation>
-<translation id="6335228876613776082">モデルのダウンロードが完了しました</translation>
 <translation id="6340526405444716530">カスタマイズ</translation>
 <translation id="6348252528297699679">位置情報は、[設定] &gt; [プライバシーとセキュリティ] &gt; [プライバシー管理] &gt; [位置情報へのアクセス] でオフにできます。<ph name="LINK_BEGIN" />詳細<ph name="LINK_END" /></translation>
 <translation id="6348738456043757611">ユーザー名とパスワード</translation>
 <translation id="6352210854422428614">別の惑星</translation>
 <translation id="6359706544163531585">ライトモードを無効にする</translation>
 <translation id="6359919876285606596">この操作は元に戻せません</translation>
-<translation id="6368342879959028556">[AI を使用して作成] を選択した場合は、カスタム プロンプトを入力します。または、[AI 壁紙] を選択してテーマを選んでから、下線付きの単語を選択して AI 壁紙をカスタマイズすることもできます。</translation>
 <translation id="636850387210749493">企業の登録</translation>
 <translation id="6369221585240879141">この文字起こしの言語では録音名を作成できません</translation>
 <translation id="6373461326814131011">池</translation>
@@ -1209,16 +1223,6 @@
 <translation id="6657240842932274095">システム サービスによる位置情報の使用を許可しますか？</translation>
 <translation id="6657585470893396449">パスワード</translation>
 <translation id="66621959568103627">コーラルピンク</translation>
-<translation id="6667885109186363316"><ph name="SEA_PEN_INTRO_FIRST_PARAGRAPH" />
-          <ph name="LINE_BREAK" />
-          <ph name="LINE_BREAK" />
-          [ひらめきがほしい] を選択すると、より個性的で多様な AI 画像オプションが表示されます。
-          <ph name="LINE_BREAK" />
-          <ph name="LINE_BREAK" />
-          AI を使用した画像作成では、<ph name="BEGIN_LINK_GOOGLE_PRIVACY_POLICY" />Google のプライバシー ポリシー<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" />に沿ってプロンプトが Google AI サーバーに送信され、画像の生成とサービスの改善に使用されます。
-          <ph name="LINE_BREAK" />
-          <ph name="LINE_BREAK" />
-          生成 AI は試験運用版で開発の初期段階のため、現時点では限定的にご利用いただけます。</translation>
 <translation id="6673898378497337661">キーボードの明るさを上げる</translation>
 <translation id="6692996468359469499">選択した項目に関連する情報を取得する</translation>
 <translation id="6694534975463174713">ロック</translation>
@@ -1274,6 +1278,7 @@
 <translation id="6930597342185648547">背景について</translation>
 <translation id="6939667434404433010">録音名を検索</translation>
 <translation id="6939766318048400022">カフェ</translation>
+<translation id="6942253772720771875">フィードバックまたは問題の内容を記入してください</translation>
 <translation id="6943893908656559156">リモート ID（オプション）</translation>
 <translation id="6953137545147683679">金色</translation>
 <translation id="6957231940976260713">サービス名</translation>
@@ -1295,6 +1300,7 @@
 <translation id="7040230719604914234">携帯通信会社</translation>
 <translation id="7040729769968826896">話し手の識別を許可する</translation>
 <translation id="7041549558901442110">デバイスは接続されていません。</translation>
+<translation id="704183341263526038">木星</translation>
 <translation id="7046522406494308071">すべてのショートカットをデフォルトにリセットしますか？</translation>
 <translation id="7049916119678019302">[設定] で音声文字変換モデルをダウンロードしてください</translation>
 <translation id="7058278511608979688">終了して保存</translation>
@@ -1389,6 +1395,7 @@
 <translation id="7388345524791662148"><ph name="RECORDING_NAME" /> に関するその他のオプション</translation>
 <translation id="7388959671917308825">デバイス内蔵タッチパッド</translation>
 <translation id="7397270852490618635">ライトモードをオフにする</translation>
+<translation id="7400166052988585408"><ph name="NUM_SECONDS" /> 秒後に教師があなたの画面をロックします</translation>
 <translation id="7401543881546089382">ショートカットを削除</translation>
 <translation id="7405493795721832710"><ph name="DEVICE_NAME" /> を更新する準備ができました</translation>
 <translation id="741244894080940828">単位変換</translation>
@@ -1427,6 +1434,7 @@
 <translation id="7569444139234840525"><ph name="QUERY_TEXT" /> · /<ph name="PHONETICS" />/</translation>
 <translation id="7570674786725311828">USB タッチスクリーン</translation>
 <translation id="757747079855995705">石</translation>
+<translation id="7584853321964440104">ダウンロードできません。もう一度お試しになるか、Chromebook を再起動してください。</translation>
 <translation id="7590883480672980941">入力設定</translation>
 <translation id="7595982850646262331">あと <ph name="TIME_VALUE" /></translation>
 <translation id="7600430297804876776"><ph name="MANAGER" /> の管理者が、この <ph name="DEVICE_TYPE" /> を使用できる時間を設定しました。</translation>
@@ -1557,6 +1565,16 @@
 <translation id="8179976553408161302">Enter</translation>
 <translation id="8183975772394450380">ビーチ</translation>
 <translation id="819278132617411009">Google AI を使用して生産性を高める</translation>
+<translation id="82003371436638355">[独自に作成] を選択した場合は、カスタム プロンプトを入力します。または、[テーマを選択] を選択した後、下線付きの単語を選択して AI 壁紙をカスタマイズすることもできます。
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          [ひらめきがほしい] を選択すると、より個性的で多様な AI 画像オプションが表示されます。
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          独自の壁紙を作成すると、<ph name="BEGIN_LINK_GOOGLE_PRIVACY_POLICY" />Google の利用規約とプライバシー ポリシー<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" />に沿ってプロンプトが Google サーバーに送信され、画像の生成とサービスの改善に使用されます。個人情報や機密情報は含めないでください。
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          生成 AI は間違った画像（人物に関する画像など）を生成することがあるため、生成された画像は再確認するようにしてください。<ph name="BEGIN_LINK_CREATE_YOUR_OWN_WALLPAPER" />詳細<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" /></translation>
 <translation id="8200772114523450471">再開</translation>
 <translation id="8206859287963243715">携帯電話</translation>
 <translation id="8208861521865154048">特典</translation>
@@ -1578,6 +1596,7 @@
 <translation id="8312330582793120272">メディアを再生する</translation>
 <translation id="8318753676953949627">0 件の画像</translation>
 <translation id="8320910311642849813">森林</translation>
+<translation id="8322464149031882595">クリックして続行</translation>
 <translation id="8329018942023753850">電卓アプリ</translation>
 <translation id="8336739000755212683">デバイスのアカウント画像を変更</translation>
 <translation id="8339024191194156249">自動起動の詳細</translation>
@@ -1598,6 +1617,7 @@
 <translation id="8395584934117017006">この <ph name="DEVICE_TYPE" /> は企業の管理対象デバイスです</translation>
 <translation id="8398927464629426868">現在デバイスが充電または放電している速度</translation>
 <translation id="8403988360557588704"><ph name="ART_MOVEMENT" /> スタイルの <ph name="ART_FEATURE" /> の絵画</translation>
+<translation id="8409219750150841791">自動生成された要約:</translation>
 <translation id="8410244574650205435">自動的に検出</translation>
 <translation id="8420955526972171689">ハードウェアの問題に関するテストとトラブルシューティングを行う</translation>
 <translation id="8422748173858722634">IMEI</translation>
@@ -1642,6 +1662,7 @@
 <translation id="8626489604350149811"><ph name="APN_NAME" /> に対するその他の操作</translation>
 <translation id="86356131183441916">ライトパープル</translation>
 <translation id="8647595191512746911">音声文字起こし</translation>
+<translation id="8648578954147795914">自動生成された名前:</translation>
 <translation id="8650852232143958317">Gmail と Google ドライブのファイルを移動</translation>
 <translation id="8651481478098336970">音量をミュート</translation>
 <translation id="8655295600908251630">チャンネル</translation>
@@ -1670,7 +1691,6 @@
 <translation id="8764414543112028321">WireGuard</translation>
 <translation id="87646919272181953">Google フォトのアルバム</translation>
 <translation id="8775713578693478175">モデムの APN</translation>
-<translation id="877735394245039557">モデルをダウンロードしています</translation>
 <translation id="877985182522063539">A4</translation>
 <translation id="879568662008399081">このネットワークにはキャプティブ ポータルがある可能性があります</translation>
 <translation id="8797082062139985406">Google AI を使って名前を作成</translation>
@@ -1723,6 +1743,7 @@
 <translation id="8961025972867871808">ペンギン</translation>
 <translation id="8968751544471797276">充電率</translation>
 <translation id="8970109610781093811">再実行</translation>
+<translation id="8972061581514441296">クリックして戻る</translation>
 <translation id="8983038754672563810">HSPA</translation>
 <translation id="8987565828374052507">{NUMBER_OF_PAGES,plural, =0{スキャン}=1{{NUMBER_OF_PAGES} ページ目をスキャン}other{ {NUMBER_OF_PAGES} ページ目をスキャン}}</translation>
 <translation id="89945434909472341">村</translation>
@@ -1784,6 +1805,7 @@
 <translation id="9218016617214286986">既知の APN を表示</translation>
 <translation id="932327136139879170">ホーム</translation>
 <translation id="939519157834106403">SSID</translation>
+<translation id="940663759301549538">マイクが接続されていることを確認するか、Chromebook を再起動してみてください</translation>
 <translation id="945522503751344254">フィードバックを送信</translation>
 <translation id="950520315903467048"><ph name="DIRECTION" /> のキーが設定されていません。<ph name="ASSIGN_INSTRUCTION" /></translation>
 <translation id="951780398843003443">録音全体で音声を比較し、それぞれのスピーカーが話したタイミングと内容を文字起こしに反映させる</translation>

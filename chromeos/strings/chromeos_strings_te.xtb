@@ -81,6 +81,7 @@
 <translation id="131461803491198646">హోమ్ నెట్‌వర్క్, రోమింగ్ కాదు</translation>
 <translation id="1327977588028644528">గేట్‌వే</translation>
 <translation id="1328223165223065150">వాల్‌పేపర్ రంగు</translation>
+<translation id="1329478709358066995">టైప్ చేసిన మాటల ఫైల్:</translation>
 <translation id="1330426557709298164">JPG</translation>
 <translation id="1337912285145772892">స్కాన్ ఏరియాకు సెట్ చేయండి</translation>
 <translation id="1343442362630695901">ఉప్పునీటి సరస్సు</translation>
@@ -126,7 +127,17 @@
 <translation id="1515129336378114413">బ్రౌజర్ హోమ్</translation>
 <translation id="1526389707933164996">స్క్రీన్ సేవర్ యానిమేషన్</translation>
 <translation id="152892567002884378">వాల్యూమ్ పెంచండి</translation>
+<translation id="1531038290222364269">ట్యాబ్‌లను చూడండి</translation>
 <translation id="1539864135338521185">లాపస్ లాజులై</translation>
+<translation id="1548555207631326346">మీ AI ఇమేజ్‌లను వ్యక్తిగతీకరించడానికి థీమ్‌ను ఎంచుకుని, అండర్‌లైన్ చేసిన పదాలను ఎంచుకోండి.<ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          మరింత ప్రత్యేకమైన, విభిన్నమైన AI ఇమేజ్‌ల ఆప్షన్‌లను పొందడానికి "నాలో స్ఫూర్తిని నింపండి" అనే ఆప్షన్‌ను ఎంచుకోండి.
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          మీరు AIతో క్రియేట్ చేసినప్పుడు, <ph name="BEGIN_LINK_GOOGLE_PRIVACY_POLICY" />Google గోప్యతా పాలసీ<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" />కి లోబడి ఇమేజ్‌లను జెనరేట్ చేయడానికి, ప్రోడక్ట్‌ను మెరుగుపరచడానికి Googleకు చెందిన AI టెక్నాలజీల సర్వర్‌లకు ప్రాంప్ట్ పంపబడుతుంది.
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          జెనరేటివ్ AI ప్రయోగాత్మకమైనది, ఇంకా ప్రారంభ స్థాయి అభివృద్ధి దశలోనే ఉంది, ప్రస్తుతానికి అది పరిమిత స్థాయిలో అందుబాటులో ఉంది.</translation>
 <translation id="1555130319947370107">నీలం</translation>
 <translation id="155865706765934889">టచ్‌ప్యాడ్</translation>
 <translation id="1561927818299383735">బ్యాక్‌లైట్ రంగు</translation>
@@ -252,7 +263,6 @@
 <translation id="2011174342667534258">SDK వెర్షన్:</translation>
 <translation id="2016697457005847575">పరిష్కార ప్రక్రియకు సంబంధించిన దశలను ట్రై చేయండి</translation>
 <translation id="202500043506723828">EID</translation>
-<translation id="2041627599411887437">మీ AI ఇమేజ్‌లను వ్యక్తిగతీకరించడానికి థీమ్‌ను ఎంచుకుని, అండర్‌లైన్ చేసిన పదాలను ఎంచుకోండి.</translation>
 <translation id="2045814230297767491">కట్లరీ</translation>
 <translation id="2047316797244836561">స్క్రీన్ సేవర్‌ను చూడటానికి, దయచేసి నెట్‌వర్క్‌కు కనెక్ట్ చేసి, పేజీని రీలోడ్ చేయండి.</translation>
 <translation id="2056550196601855911">IPv4/IPv6</translation>
@@ -405,6 +415,7 @@
 <translation id="2787237339470862294">ఈ సమయంలో ఈ భాషకు సపోర్ట్ లేదు</translation>
 <translation id="2787435249130282949">కీబోర్డ్ బ్రైట్‌నెస్ మెరుగ్గా ఉంది</translation>
 <translation id="2805756323405976993">యాప్స్</translation>
+<translation id="2822702442014805146">సారాంశం, పేరు క్రియేషన్ మోడల్‌ను డౌన్‌లోడ్ చేయడం ప్రోగ్రెస్‌లో ఉంది</translation>
 <translation id="28232023175184696">నెట్‌వర్క్‌కు కనెక్ట్ చేయడం సాధ్యపడదు. మళ్లీ ట్రై చేయడానికి క్లిక్ చేయండి.</translation>
 <translation id="2855718259207180827">ఉన్ని</translation>
 <translation id="2859243502336719778">ముఖ్యమైన అప్‌డేట్</translation>
@@ -502,6 +513,7 @@
 <translation id="3373141842870501561">ఎర్త్ ఫ్లో వాల్‌పేపర్</translation>
 <translation id="33736539805963175"><ph name="LETTERS_LETTER" /> అక్షరంతో <ph name="LETTERS_COLOR" /> బ్యాక్‌గ్రౌండ్</translation>
 <translation id="3383623117265110236">ప్రత్యేకం</translation>
+<translation id="3395147534045164351">స్నాప్ లొకేషన్‌ను టోగుల్ చేయండి</translation>
 <translation id="3404249063913988450">స్క్రీన్ సేవర్‌ను ఎనేబుల్ చేయి</translation>
 <translation id="3413935475507503304">అప్‌డేట్ చేయడాన్ని కొనసాగించడానికి, 'తర్వాత'ను క్లిక్ చేయండి.</translation>
 <translation id="3428551088151258685">అవుట్‌డోర్</translation>
@@ -651,6 +663,7 @@
 <translation id="4113067922640381334">మీకు ఇప్పుడు కొత్త <ph name="BEGIN_LINK_WALLPAPER_SUBPAGE" />వాల్‌పేపర్‌ల<ph name="END_LINK_WALLPAPER_SUBPAGE" />కు యాక్సెస్ ఉంది</translation>
 <translation id="4117637339509843559">డార్క్ మోడ్</translation>
 <translation id="4126551873361000548">10 సెకన్లు వెనుకకు దాటవేయండి</translation>
+<translation id="4128271910628504223">"పొగమంచుతో ఉన్న అడవిని డ్రా చేయి" లాంటి ప్రాంప్ట్‌ను ఎంటర్ చేయండి</translation>
 <translation id="4130035430755296270">మరిన్ని లేఅవుట్ ఆప్షన్‌ల కోసం మౌస్ కర్సర్‌ని ఉంచడం కొనసాగించండి</translation>
 <translation id="4130750466177569591">నేను అంగీకరిస్తున్నాను</translation>
 <translation id="4131410914670010031">నలుపు మరియు తెలుపు</translation>
@@ -824,6 +837,7 @@
 <translation id="4891842000192098784">ఒత్తిడి</translation>
 <translation id="4897058166682006107">పరికరంలో ఎడమ వైపు బడ్ బ్యాటరీ స్థాయి <ph name="BATTERY_PERCENTAGE" />% ఉంది.</translation>
 <translation id="4905998861748258752">స్క్రీన్ సేవర్ ఆప్షన్‌లను ఎంచుకోవడానికి ఈ ఫీచర్‌ను ఆన్ చేయండి</translation>
+<translation id="4910853326379896417">సారాంశాన్ని, ఇంకా పేరు క్రియేషన్ మోడల్‌ను డౌన్‌లోడ్ చేయడం పూర్తయింది</translation>
 <translation id="4910858703033903787">APN రకాలు</translation>
 <translation id="4917385247580444890">బలమైన</translation>
 <translation id="4917889632206600977">ఆగిపోయింది - పేపర్లు లేవు</translation>
@@ -858,8 +872,10 @@
 <translation id="5050042263972837708">గ్రూప్‌ పేరు</translation>
 <translation id="5051044138948155788">ఈ పేజీ మాత్రమే ఉంది. ఇది మిమ్మల్ని స్కానింగ్ ప్రారంభ స్క్రీన్‌కు తీసుకువెళ్తుంది.</translation>
 <translation id="5053233795640754917">పాజ్ చేయండి</translation>
+<translation id="5056587122125565772">ఇమేజ్‌ను క్రియేట్ చేయండి</translation>
 <translation id="5078711626843651677">స్పీకర్ లేబులింగ్ పూర్తయ్యే వరకు వాయిస్ మోడల్స్ పరికరంలో తాత్కాలికంగా స్టోర్ చేయబడతాయి. మీరు దీనిని సెట్టింగ్‌లలో ఎప్పుడైనా ఆఫ్ చేయవచ్చు.</translation>
 <translation id="5078983345702708852">ఆధునికంగా ఉంది</translation>
+<translation id="5085224064082122501">సారాంశం, పేరు క్రియేషన్ కోసం మోడల్‌ను డౌన్‌లోడ్ చేయడం సాధ్యం కాలేదు. మళ్లీ ట్రై చేయండి లేదా మీ Chromebookను రీస్టార్ట్ చేయండి.</translation>
 <translation id="5087864757604726239">వెనుకకు</translation>
 <translation id="5088172560898466307">సర్వర్ హోస్ట్ పేరు</translation>
 <translation id="5089810972385038852">రాష్ట్రం</translation>
@@ -913,6 +929,7 @@
 <translation id="5286263799730375393">బ్యాక్‌లైట్ రంగు</translation>
 <translation id="5292579816060236070">'సూర్యోదయం' వాల్‌పేపర్</translation>
 <translation id="5294769550414936029">వెర్షన్ <ph name="MILESTONE_VERSION" /></translation>
+<translation id="5300172019534884676">కెమెరా యాక్సెస్‌ను టోగుల్ చేయండి</translation>
 <translation id="5300814202279832142">విండోను డెస్క్‌కు తరలించు</translation>
 <translation id="5302048478445481009">భాష</translation>
 <translation id="5303837385540978511"><ph name="PRODUCT_NAME" /> ప్రత్యేక వాల్‌పేపర్</translation>
@@ -1129,14 +1146,12 @@
 <translation id="6325525973963619867">విఫలమైంది</translation>
 <translation id="6327262166342360252">ఈ వాల్‌పేపర్ ఈ టెక్స్ట్‌ను ఉపయోగించి AIతో క్రియేట్ చేయబడింది: "<ph name="PROMPT" />."</translation>
 <translation id="6331191339300272798">ఆటోమేటిక్ డార్క్ థీమ్‌</translation>
-<translation id="6335228876613776082">మోడల్‌ను డౌన్‌లోడ్ చేయడం పూర్తయింది</translation>
 <translation id="6340526405444716530">వ్యక్తిగతీకరణ</translation>
 <translation id="6348252528297699679">లొకేషన్‌ను మీరు సెట్టింగ్‌లు &gt; గోప్యత, సెక్యూరిటీ &gt; గోప్యతా కంట్రోల్స్ &gt; లొకేషన్ యాక్సెస్‌లో ఆఫ్ చేయవచ్చు. <ph name="LINK_BEGIN" />మరింత తెలుసుకోండి<ph name="LINK_END" /></translation>
 <translation id="6348738456043757611">యూజర్‌నేమ్, పాస్‌వర్డ్</translation>
 <translation id="6352210854422428614">వేరొక గ్రహం</translation>
 <translation id="6359706544163531585">లేత రంగు రూపాన్ని డిజేబుల్ చేయండి</translation>
 <translation id="6359919876285606596">ఈ చర్య శాశ్వతమైనది, దీన్ని రద్దు చేయడం సాధ్యం కాదు</translation>
-<translation id="6368342879959028556">“AIతో క్రియేట్ చేయండి”ని ఎంచుకున్నప్పుడు, అనుకూల ప్రాంప్ట్‌ను రాయండి. లేదా మీరు థీమ్‌ను ఎంచుకోవడానికి “AI వాల్‌పేపర్‌లు” ఎంచుకోవచ్చు, ఆపై మీ AI వాల్‌పేపర్‌ను వ్యక్తిగతీకరించడానికి అండర్‌లైన్ చేసిన పదాలను ఎంచుకోవచ్చు.</translation>
 <translation id="636850387210749493">ఎంటర్‌ప్రైజ్ నమోదు</translation>
 <translation id="6369221585240879141">ఈ టైప్ చేసిన మాటల ఫైల్‌ భాష కోసం రికార్డింగ్ పేర్లను క్రియేట్ చేయడం సాధ్యపడదు</translation>
 <translation id="6373461326814131011">కొలను</translation>
@@ -1209,16 +1224,6 @@
 <translation id="6657240842932274095">మీ లొకేషన్‌ను ఉపయోగించడానికి సిస్టమ్ సర్వీస్‌లను అనుమతించాలా?</translation>
 <translation id="6657585470893396449">పాస్‌వర్డ్</translation>
 <translation id="66621959568103627">పగడపు గులాబీ</translation>
-<translation id="6667885109186363316"><ph name="SEA_PEN_INTRO_FIRST_PARAGRAPH" />
-          <ph name="LINE_BREAK" />
-          <ph name="LINE_BREAK" />
-          మరింత ప్రత్యేకమైన, విభిన్నమైన AI ఇమేజ్‌ల ఆప్షన్‌లను పొందడానికి "నాలో స్ఫూర్తిని నింపండి" అనే ఆప్షన్‌ను ఎంచుకోండి.
-          <ph name="LINE_BREAK" />
-          <ph name="LINE_BREAK" />
-          మీరు AIతో క్రియేట్ చేసినప్పుడు, <ph name="BEGIN_LINK_GOOGLE_PRIVACY_POLICY" />Google గోప్యతా పాలసీ<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" />కి అనుగుణంగా ఇమేజ్‌లు జెనరేట్ చేయడానికి, ప్రోడక్ట్‌ను మెరుగుపరచడానికి, Googleకు చెందిన AI టెక్నాలజీల సర్వర్‌లకు ప్రాంప్ట్ పంపబడుతుంది.
-          <ph name="LINE_BREAK" />
-          <ph name="LINE_BREAK" />
-          జెనరేటివ్ AI ప్రయోగాత్మకమైనది, ఇంకా ప్రారంభ స్థాయి అభివృద్ధి దశలోనే ఉంది, ప్రస్తుతానికి అది పరిమిత స్థాయిలో అందుబాటులో ఉంది.</translation>
 <translation id="6673898378497337661">కీబోర్డ్ బ్రైట్‌నెస్‌ను పెంచుతుంది</translation>
 <translation id="6692996468359469499">మీ ఎంచుకున్న దానికి సంబంధించిన సమాచారాన్ని పొందండి</translation>
 <translation id="6694534975463174713">లాక్</translation>
@@ -1274,6 +1279,7 @@
 <translation id="6930597342185648547">బ్యాక్‌గ్రౌండ్ గురించి వివరాలు</translation>
 <translation id="6939667434404433010">రికార్డింగ్ పేరును సెర్చ్ చేయండి</translation>
 <translation id="6939766318048400022">కెఫే</translation>
+<translation id="6942253772720771875">మీ ఫీడ్‌బ్యాక్‌ను షేర్ చేయండి లేదా మీ సమస్యను వివరించండి</translation>
 <translation id="6943893908656559156">రిమోట్ గుర్తింపు (ఆప్షనల్)</translation>
 <translation id="6953137545147683679">బంగారం రంగు</translation>
 <translation id="6957231940976260713">సేవ పేరు</translation>
@@ -1295,6 +1301,7 @@
 <translation id="7040230719604914234">ఆపరేటర్</translation>
 <translation id="7040729769968826896">స్పీకర్ గుర్తింపును అనుమతించండి</translation>
 <translation id="7041549558901442110">పరికరం కనెక్ట్ కాలేదు.</translation>
+<translation id="704183341263526038">గురు గ్రహం</translation>
 <translation id="7046522406494308071">షార్ట్‌కట్‌లన్నింటినీ ఆటోమేటిక్ సెట్టింగ్‌లకు రీసెట్ చేయాలా?</translation>
 <translation id="7049916119678019302">సెట్టింగ్‌లలో మాటల టైపింగ్ మోడల్‌ను డౌన్‌లోడ్ చేయండి</translation>
 <translation id="7058278511608979688">ఆపివేసి, సేవ్ చేయండి</translation>
@@ -1389,6 +1396,7 @@
 <translation id="7388345524791662148"><ph name="RECORDING_NAME" /> కోసం మరిన్ని ఆప్షన్‌లు</translation>
 <translation id="7388959671917308825">బిల్ట్-ఇన్ టచ్‌ప్యాడ్</translation>
 <translation id="7397270852490618635">లేత రంగు రూపాన్ని ఆఫ్ చేయండి</translation>
+<translation id="7400166052988585408">మీ స్క్రీన్‌ను మీ టీచర్ <ph name="NUM_SECONDS" /> సెకన్లలో లాక్ చేసేస్తారు</translation>
 <translation id="7401543881546089382">షార్ట్‌కట్‌ను తొలగించండి</translation>
 <translation id="7405493795721832710">ఇప్పుడిక <ph name="DEVICE_NAME" />‌ను అప్‌డేట్ చేయవచ్చు</translation>
 <translation id="741244894080940828">మార్పిడి</translation>
@@ -1427,6 +1435,7 @@
 <translation id="7569444139234840525"><ph name="QUERY_TEXT" /> · /<ph name="PHONETICS" />/</translation>
 <translation id="7570674786725311828">USB టచ్‌స్క్రీన్</translation>
 <translation id="757747079855995705">రాయి</translation>
+<translation id="7584853321964440104">డౌన్‌లోడ్ చేయడం సాధ్యపడలేదు. మళ్లీ ట్రై చేయండి లేదా మీ Chromebookను రీస్టార్ట్ చేయండి.</translation>
 <translation id="7590883480672980941">ఇన్‌పుట్ సెట్టింగ్‌లు</translation>
 <translation id="7595982850646262331"><ph name="TIME_VALUE" /> మిగిలి ఉంది</translation>
 <translation id="7600430297804876776">ఈ <ph name="DEVICE_TYPE" />‌ను ఎప్పుడు ఉపయోగించవచ్చో <ph name="MANAGER" /> అడ్మినిస్ట్రేటర్ సెట్ చేశారు.</translation>
@@ -1557,6 +1566,16 @@
 <translation id="8179976553408161302">Enter</translation>
 <translation id="8183975772394450380">బీచ్</translation>
 <translation id="819278132617411009">ప్రొడక్టివిటీని మరింత పెంచుకోవడానికి Googleకు చెందిన AI టెక్నాలజీలను ఉపయోగించండి</translation>
+<translation id="82003371436638355">మీరు “మీ సొంతంగా క్రియేట్ చేయండి” అనే ఆప్షన్‌ను ఎంచుకున్నప్పుడు, అనుకూల ప్రాంప్ట్‌ను రాయండి. లేదా మీ AI వాల్‌పేపర్‌ను వ్యక్తిగతీకరించడానికి మీరు “థీమ్‌ను ఎంచుకోండి”ని ఎంచుకుని, ఆ తర్వాత అండర్‌లైన్ చేసిన పదాలను ఎంచుకోవచ్చు.
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          మరింత ప్రత్యేకమైన, విభిన్నమైన AI ఇమేజ్‌ల ఆప్షన్‌లను పొందడానికి "నాలో స్ఫూర్తిని నింపండి" అనే ఆప్షన్‌ను ఎంచుకోండి.
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          మీరు మీ సొంత వాల్‌పేపర్‌ను క్రియేట్ చేసినప్పుడు, <ph name="BEGIN_LINK_GOOGLE_PRIVACY_POLICY" />Google సర్వీస్ నియమాలు, గోప్యతా పాలసీ<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" />‌కి అనుగుణంగా ఇమేజ్‌లు జెనరేట్ చేయడానికి, ప్రోడక్ట్‌ను మెరుగుపరచడానికి, Googleకు చెందిన సర్వర్‌లకు ప్రాంప్ట్ పంపబడుతుంది. అందులో వ్యక్తిగతమైన వాటిని, సున్నితమైన, లేదా గోప్యమైన అంశాలను చేర్చకండి.
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          జెనరేటివ్ AI ఇచ్చే సమాధానాలు కరెక్ట్‌గా ఉండకపోవచ్చు, వ్యక్తులకు సంబంధించిన సమాచారం విషయంలో కూడా ఇదే వర్తిస్తుంది, కాబట్టి దాన్ని డబుల్-చెక్ చేయండి. <ph name="BEGIN_LINK_CREATE_YOUR_OWN_WALLPAPER" />మరింత తెలుసుకోండి<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" /></translation>
 <translation id="8200772114523450471">మ‌ళ్లీ ప్రారంభించండి</translation>
 <translation id="8206859287963243715">సెల్యులార్</translation>
 <translation id="8208861521865154048">పెర్క్‌లు</translation>
@@ -1578,6 +1597,7 @@
 <translation id="8312330582793120272">మీడియాను ప్లే చేస్తుంది</translation>
 <translation id="8318753676953949627">ఇమేజ్‌లు లేవు</translation>
 <translation id="8320910311642849813">అడవి</translation>
+<translation id="8322464149031882595">ముందుకు వెళ్లడానికి క్లిక్ చేయండి</translation>
 <translation id="8329018942023753850">క్యాలిక్యులేటర్ యాప్</translation>
 <translation id="8336739000755212683">పరికరం ఖాతా చిత్రాన్ని మార్చండి</translation>
 <translation id="8339024191194156249">ఆటోమేటిక్ లాంచ్ గురించి మరింత తెలుసుకోండి</translation>
@@ -1598,6 +1618,7 @@
 <translation id="8395584934117017006">ఈ <ph name="DEVICE_TYPE" /> ఎంటర్‌ప్రైజ్ ద్వారా మేనేజ్ చేయబడుతుంది</translation>
 <translation id="8398927464629426868">పరికరం ప్రస్తుతం ఛార్జ్ అవుతున్న లేదా డిశ్చార్జ్ అవుతున్న రేట్</translation>
 <translation id="8403988360557588704"><ph name="ART_MOVEMENT" /> స్టయిల్‌లో <ph name="ART_FEATURE" /> పెయింటింగ్</translation>
+<translation id="8409219750150841791">జెనరేట్ అయిన సారాంశం:</translation>
 <translation id="8410244574650205435">ఆటోమేటిక్‌గా గుర్తించబడింది</translation>
 <translation id="8420955526972171689">హార్డ్‌వేర్ సమస్యలకు టెస్ట్‌లను రన్ చేసి, సమస్యలను పరిష్కరించండి</translation>
 <translation id="8422748173858722634">IMEI</translation>
@@ -1642,6 +1663,7 @@
 <translation id="8626489604350149811"><ph name="APN_NAME" /> కోసం మరిన్ని చర్యలు</translation>
 <translation id="86356131183441916">లేత ఊదా రంగు</translation>
 <translation id="8647595191512746911">ఆడియో మాటల టైపింగ్</translation>
+<translation id="8648578954147795914">జెనరేట్ అయిన పేర్లు:</translation>
 <translation id="8650852232143958317">మీ Gmail, Google Drive ఫైల్స్‌ను మీతో పాటు తీసుకెళ్లండి</translation>
 <translation id="8651481478098336970">వాల్యూమ్‌ను మ్యూట్ చేస్తుంది</translation>
 <translation id="8655295600908251630">ఛానల్</translation>
@@ -1670,7 +1692,6 @@
 <translation id="8764414543112028321">WireGuard</translation>
 <translation id="87646919272181953">Google Photos ఆల్బమ్</translation>
 <translation id="8775713578693478175">మోడెమ్ APN</translation>
-<translation id="877735394245039557">మోడల్ డౌన్‌లోడ్ ప్రోగ్రెస్‌లో ఉంది</translation>
 <translation id="877985182522063539">A4</translation>
 <translation id="879568662008399081">ఈ నెట్‌వర్క్‌లో క్యాప్టివ్ పోర్టల్ ఉండవచ్చు</translation>
 <translation id="8797082062139985406">Google AIని ఉపయోగించి పేరును క్రియేట్ చేయండి</translation>
@@ -1723,6 +1744,7 @@
 <translation id="8961025972867871808">పెంగ్విన్‌లు</translation>
 <translation id="8968751544471797276">ఛార్జింగ్ రేట్</translation>
 <translation id="8970109610781093811">మళ్లీ అమలు చేయి</translation>
+<translation id="8972061581514441296">వెనుకకు వెళ్లడానికి క్లిక్ చేయండి</translation>
 <translation id="8983038754672563810">HSPA</translation>
 <translation id="8987565828374052507">{NUMBER_OF_PAGES,plural, =0{స్కాన్ చేయండి}=1{{NUMBER_OF_PAGES} పేజీని స్కాన్ చేయండి}other{{NUMBER_OF_PAGES} పేజీని స్కాన్ చేయండి}}</translation>
 <translation id="89945434909472341">గ్రామం</translation>
@@ -1784,6 +1806,7 @@
 <translation id="9218016617214286986">తరచుగా ఉపయోగించే APNలను చూపండి</translation>
 <translation id="932327136139879170">హోమ్</translation>
 <translation id="939519157834106403">SSID</translation>
+<translation id="940663759301549538">మీ మైక్ కనెక్ట్ అయి ఉందని నిర్ధారించుకోండి లేదా మీ Chromebookను రీస్టార్ట్ చేయడానికి ట్రై చేయండి</translation>
 <translation id="945522503751344254">ఫీడ్‌బ్యాక్ పంపండి</translation>
 <translation id="950520315903467048"><ph name="DIRECTION" /> కోసం కీ ఏదీ నొక్కబడలేదు. <ph name="ASSIGN_INSTRUCTION" /></translation>
 <translation id="951780398843003443">రికార్డింగ్ అంతటా వాయిస్‌లను సరిపోల్చండి, తద్వారా టైప్ చేసిన మాటల ఫైల్ ప్రతి వాయిస్ ఏమి చెప్పింది, ఎప్పుడు చెప్పింది అనే విషయాన్ని ప్రతిబింబిస్తుంది</translation>

@@ -311,7 +311,7 @@ history::mojom::HistoryEntryPtr HistoryEntryToMojom(
     debug_mojom->is_url_in_local_database = IsUrlInLocalDatabase(entry);
     debug_mojom->visit_count = entry.visit_count;
     debug_mojom->typed_count = entry.typed_count;
-    result_mojom->debug_info = std::move(debug_mojom);
+    result_mojom->debug = std::move(debug_mojom);
   }
 
   return result_mojom;
@@ -409,8 +409,9 @@ void BrowsingHistoryHandler::QueryHistoryContinuation(
   }
   query_history_callback_ = std::move(callback);
 
-  DCHECK(query_history_continuation_);
-  std::move(query_history_continuation_).Run();
+  if (!query_history_continuation_.is_null()) {
+    std::move(query_history_continuation_).Run();
+  }
 }
 
 void BrowsingHistoryHandler::RemoveVisits(

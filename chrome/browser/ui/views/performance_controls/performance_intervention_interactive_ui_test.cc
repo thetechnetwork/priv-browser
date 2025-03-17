@@ -8,15 +8,17 @@
 #include "base/functional/bind.h"
 #include "base/run_loop.h"
 #include "base/test/metrics/histogram_tester.h"
-#include "base/test/scoped_feature_list.h"
 #include "build/build_config.h"
 #include "chrome/browser/browser_process.h"
 #include "chrome/browser/feature_engagement/tracker_factory.h"
 #include "chrome/browser/performance_manager/public/user_tuning/performance_detection_manager.h"
 #include "chrome/browser/profiles/profile_manager.h"
 #include "chrome/browser/profiles/profile_test_util.h"
-#include "chrome/browser/resource_coordinator/tab_lifecycle_observer.h"
-#include "chrome/browser/resource_coordinator/tab_lifecycle_unit_external.h"
+#include "chrome/browser/resource_coordinator/lifecycle_unit.h"
+#include "chrome/browser/resource_coordinator/lifecycle_unit_observer.h"
+#include "chrome/browser/resource_coordinator/lifecycle_unit_state.mojom.h"
+#include "chrome/browser/resource_coordinator/tab_lifecycle_unit_source.h"
+#include "chrome/browser/resource_coordinator/utils.h"
 #include "chrome/browser/ui/browser_element_identifiers.h"
 #include "chrome/browser/ui/performance_controls/performance_controls_metrics.h"
 #include "chrome/browser/ui/performance_controls/performance_intervention_button_controller.h"
@@ -34,7 +36,6 @@
 #include "chrome/test/interaction/interactive_browser_test.h"
 #include "chrome/test/user_education/interactive_feature_promo_test.h"
 #include "components/feature_engagement/public/feature_constants.h"
-#include "components/performance_manager/public/features.h"
 #include "components/performance_manager/public/resource_attribution/page_context.h"
 #include "components/performance_manager/public/user_tuning/prefs.h"
 #include "components/prefs/pref_service.h"
@@ -55,26 +56,25 @@
 
 namespace {
 
-class DiscardObserver : public resource_coordinator::TabLifecycleObserver,
+class DiscardObserver : public resource_coordinator::LifecycleUnitObserver,
                         public ui::test::StateObserver<bool> {
  public:
   explicit DiscardObserver(int expected_tab_discarded_count)
       : expected_tab_discarded_count_(expected_tab_discarded_count) {
-    resource_coordinator::TabLifecycleUnitExternal::AddTabLifecycleObserver(
+    resource_coordinator::GetTabLifecycleUnitSource()->AddLifecycleObserver(
         this);
   }
 
   ~DiscardObserver() override {
-    resource_coordinator::TabLifecycleUnitExternal::RemoveTabLifecycleObserver(
+    resource_coordinator::GetTabLifecycleUnitSource()->RemoveLifecycleObserver(
         this);
   }
 
-  void OnTabLifecycleStateChange(
-      content::WebContents* contents,
-      mojom::LifecycleUnitState previous_state,
-      mojom::LifecycleUnitState new_state,
-      std::optional<LifecycleUnitDiscardReason> discard_reason) override {
-    if (new_state == mojom::LifecycleUnitState::DISCARDED) {
+  void OnLifecycleUnitStateChanged(
+      resource_coordinator::LifecycleUnit* lifecycle_unit,
+      ::mojom::LifecycleUnitState last_state,
+      ::mojom::LifecycleUnitStateChangeReason reason) override {
+    if (lifecycle_unit->GetState() == ::mojom::LifecycleUnitState::DISCARDED) {
       expected_tab_discarded_count_--;
     }
 
@@ -108,8 +108,6 @@ class PerformanceInterventionInteractiveTest
 
   void SetUp() override {
     set_open_about_blank_on_browser_launch(true);
-    feature_list_.InitAndEnableFeature(
-        performance_manager::features::kPerformanceInterventionUI);
     InteractiveFeaturePromoTest::SetUp();
   }
 
@@ -203,9 +201,6 @@ class PerformanceInterventionInteractiveTest
                                enabled);
     });
   }
-
- private:
-  base::test::ScopedFeatureList feature_list_;
 };
 
 IN_PROC_BROWSER_TEST_F(PerformanceInterventionInteractiveTest,

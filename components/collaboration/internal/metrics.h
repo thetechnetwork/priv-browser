@@ -5,6 +5,12 @@
 #ifndef COMPONENTS_COLLABORATION_INTERNAL_METRICS_H_
 #define COMPONENTS_COLLABORATION_INTERNAL_METRICS_H_
 
+#include "components/collaboration/public/collaboration_flow_type.h"
+
+namespace data_sharing {
+class Logger;
+}  // namespace data_sharing
+
 namespace collaboration::metrics {
 
 // Types of join events that occur in the collaboration service.
@@ -40,11 +46,16 @@ enum class CollaborationServiceJoinEvent {
   kDataSharingServiceReadyObserved = 25,
   kTabGroupServiceReady = 26,
   kAllServicesReadyForFlow = 27,
-  kMaxValue = kAllServicesReadyForFlow,
+  kTimeoutWaitingForServicesReady = 28,
+  kTimeoutWaitingForSyncAndDataSharingGroup = 29,
+  kDevicePolicyDisableSignin = 30,
+  kManagedAccountSignin = 31,
+  kAccountInfoNotReadyOnSignin = 32,
+  kMaxValue = kAccountInfoNotReadyOnSignin,
 };
 // LINT.ThenChange(//tools/metrics/histograms/metadata/collaboration_service/enums.xml:CollaborationServiceJoinEvent)
 
-// Types of join events that occur in the collaboration service.
+// Types of share or manage events that occur in the collaboration service.
 // These values are persisted to logs. Entries should not be renumbered and
 // number values should never be reused.
 // LINT.IfChange(CollaborationServiceShareOrManageEvent)
@@ -72,12 +83,22 @@ enum class CollaborationServiceShareOrManageEvent {
   kDataSharingServiceReadyObserved = 20,
   kTabGroupServiceReady = 21,
   kAllServicesReadyForFlow = 22,
-  kMaxValue = kAllServicesReadyForFlow,
+  kDevicePolicyDisableSignin = 23,
+  kManagedAccountSignin = 24,
+  kAccountInfoNotReadyOnSignin = 25,
+  kMaxValue = kAccountInfoNotReadyOnSignin,
 };
 // LINT.ThenChange(//tools/metrics/histograms/metadata/collaboration_service/enums.xml:CollaborationServiceShareOrManageEvent)
 
-void RecordJoinEvent(CollaborationServiceJoinEvent event);
-void RecordShareOrManageEvent(CollaborationServiceShareOrManageEvent event);
+void RecordJoinEvent(data_sharing::Logger* logger,
+                     CollaborationServiceJoinEvent event);
+void RecordShareOrManageEvent(data_sharing::Logger* logger,
+                              CollaborationServiceShareOrManageEvent event);
+void RecordJoinOrShareOrManageEvent(
+    data_sharing::Logger* logger,
+    FlowType type,
+    CollaborationServiceJoinEvent join_event,
+    CollaborationServiceShareOrManageEvent share_or_manage_event);
 }  // namespace collaboration::metrics
 
 #endif  // COMPONENTS_COLLABORATION_INTERNAL_METRICS_H_

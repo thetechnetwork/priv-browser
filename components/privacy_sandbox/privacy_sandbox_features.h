@@ -164,10 +164,6 @@ BASE_DECLARE_FEATURE(kAlwaysBlock3pcsIncognito);
 COMPONENT_EXPORT(PRIVACY_SANDBOX_FEATURES)
 BASE_DECLARE_FEATURE(kFingerprintingProtectionUx);
 
-// Enables IP Protection setting behavior.
-COMPONENT_EXPORT(PRIVACY_SANDBOX_FEATURES)
-BASE_DECLARE_FEATURE(kIpProtectionV1);
-
 // Enables showing IP Protection toggle on the settings page.
 COMPONENT_EXPORT(PRIVACY_SANDBOX_FEATURES)
 BASE_DECLARE_FEATURE(kIpProtectionUx);
@@ -241,9 +237,6 @@ extern const base::FeatureParam<bool>
 
 COMPONENT_EXPORT(PRIVACY_SANDBOX_FEATURES)
 BASE_DECLARE_FEATURE(kPrivacySandboxAdTopicsContentParity);
-
-COMPONENT_EXPORT(PRIVACY_SANDBOX_FEATURES)
-BASE_DECLARE_FEATURE(kPrivacySandboxMigratePrefsToNoticeConsentDataModel);
 
 // If true, provides a link to the Privacy Policy on the Topics Consent notice.
 COMPONENT_EXPORT(PRIVACY_SANDBOX_FEATURES)
@@ -330,6 +323,11 @@ BASE_DECLARE_FEATURE(kPrivacySandboxAllowPromptForBlocked3PCookies);
 // equalized styling.
 COMPONENT_EXPORT(PRIVACY_SANDBOX_FEATURES)
 BASE_DECLARE_FEATURE(kPrivacySandboxEqualizedPromptButtons);
+
+// If true, migrates Privacy Sandbox Notice & Consent prefs to V2.
+COMPONENT_EXPORT(PRIVACY_SANDBOX_FEATURES)
+BASE_DECLARE_FEATURE(kPrivacySandboxMigratePrefsToSchemaV2);
+
 }  // namespace privacy_sandbox
 
 #endif  // COMPONENTS_PRIVACY_SANDBOX_PRIVACY_SANDBOX_FEATURES_H_

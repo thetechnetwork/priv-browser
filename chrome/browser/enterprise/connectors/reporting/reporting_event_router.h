@@ -9,6 +9,7 @@
 #include "chrome/browser/enterprise/connectors/reporting/realtime_reporting_client.h"
 #include "components/keyed_service/content/browser_context_keyed_service_factory.h"
 #include "components/keyed_service/core/keyed_service.h"
+#include "components/safe_browsing/core/common/proto/realtimeapi.pb.h"
 #include "content/public/browser/browser_context.h"
 
 namespace base {
@@ -32,6 +33,20 @@ class ReportingEventRouter : public KeyedService {
   ~ReportingEventRouter() override;
 
   bool IsEventEnabled(const std::string& event);
+
+  void OnLoginEvent(const GURL& url,
+                    bool is_federated,
+                    const url::SchemeHostPort& federated_origin,
+                    const std::u16string& username);
+
+  void OnPasswordBreach(
+      const std::string& trigger,
+      const std::vector<std::pair<GURL, std::u16string>>& identities);
+
+  void OnUrlFilteringInterstitial(
+      const GURL& url,
+      const std::string& threat_type,
+      const safe_browsing::RTLookupResponse& response);
 
  private:
   raw_ptr<content::BrowserContext> context_;

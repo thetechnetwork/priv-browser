@@ -182,7 +182,7 @@ run("gclient sync -fD", exit_on_error=False)
 run("gn gen out/linux", "Failed to generate out/linux.")
 
 try:
-    run("gcertstatus --check_remaining=3h --check_loas2=false")
+    run("gcertstatus --check_remaining=3h --nocheck_ssh")
     print("Remote exec available. Enabling.")
     with open("out/linux/args.gn", "w") as f:
         f.write("use_remoteexec = true\n")
@@ -191,10 +191,11 @@ except:
     print("Remote exec not available. Disabling.")
     with open("out/linux/args.gn", "w") as f:
         f.write("use_remoteexec = false\n")
+        f.write("use_reclient = false\n")
         f.write("use_siso = true\n")
 
 # Produce a full rewrite, and store individual patches below ~/scratch/patch_*
-run("./tools/clang/spanify/rewrite-multiple-platforms.sh", exit_on_error=False)
+run("./tools/clang/spanify/rewrite-multiple-platforms.sh")
 
 run("git reset --hard origin/main")  # Restore source code.
 run("gclient sync -fD", exit_on_error=False)  # Restore compiler.
@@ -255,7 +256,8 @@ try:
                                     capture_output=True,
                                     text=True)
         except subprocess.CalledProcessError as e:
-            error_msg = str(e) + " !!! exception(stderr): " + str(e.stderr)
+            error_msg = ("\"" + str(e) + " !!! exception(stderr): " +
+                         str(e.stderr) + "\"")
             with open(scratch_dir + "/evaluation.csv", "a") as f:
                 f.write(f"{index}, fail, {error_msg}\n")
 
@@ -270,11 +272,14 @@ try:
                 error_msg,
                 diff,
             ])
+            run("git restore .", "Failed to restore after failed patch.")
 
-            shutil.copy(scratch_dir + f"/patch_{index}.out",
-                        scratch_dir + f"/patch_{index}.fail")
+            with open(scratch_dir + f"/patch_{index}.fail", "w+") as f:
+                f.write(str(e.stderr))
+                f.write(str(e.stdout))
             continue
 
+        run("git cl format")
 
         # Commit changes
         run("git add -u", "Failed to add changes.")
@@ -282,7 +287,24 @@ try:
         with open("commit_message.txt", "w+") as f:
             f.write(
                 f"""spanification patch {index} applied.\n\nPatch: {index}""")
-        run("git commit -F commit_message.txt")
+        # Sometimes we generate patches that apply_edits will skip (for example
+        # third_party) thus don't treat failure to commit as an error.
+        if not run("git commit -F commit_message.txt", exit_on_error=False):
+            with open(scratch_dir + "/evaluation.csv", "a") as f:
+                f.write(f"{index}, fail, {error_msg}\n")
+
+            # We fail when there is no diff get the replacements instead.
+            diff = open(scratch_dir + f"/patch_{index}.txt").read()
+
+            appendRow(spreadsheet, [
+                today,
+                index,
+                len(patches),
+                "fail",
+                "Failed to commit diff",
+                diff,
+            ])
+            continue
 
         # Serialize changes
         run(f"git diff HEAD~...HEAD > ~/scratch/patch_{index}.diff")

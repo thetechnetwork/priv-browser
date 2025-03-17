@@ -387,7 +387,8 @@ class CONTENT_EXPORT FedCmMetrics {
       std::optional<FedCmUseOtherAccountResult> use_other_account_result,
       std::optional<FedCmVerifyingDialogResult> verifying_dialog_result,
       FedCmThirdPartyCookiesStatus tpc_status,
-      const FedCmRequesterFrameType& requester_frame_type);
+      const FedCmRequesterFrameType& requester_frame_type,
+      std::optional<bool> has_signin_account);
 
   // Records whether user sign-in states between IDP and browser match.
   void RecordSignInStateMatchStatus(const GURL& provider,
@@ -499,6 +500,12 @@ class CONTENT_EXPORT FedCmMetrics {
   // Records whether a FedCM API call gets rejected because other IdPs have
   // already initiated an API call.
   void RecordMultipleRequestsFromDifferentIdPs(bool has_collision);
+
+  // Records whether the RP's URL has a path.
+  void RecordRpUrlHasPath(bool rp_url_has_path);
+
+  // Records the page scroll Y-axis position upon account selection.
+  void RecordAccountSelectionScrollPosition(const gfx::Point& scroll_position);
 
   int session_id() { return session_id_; }
 

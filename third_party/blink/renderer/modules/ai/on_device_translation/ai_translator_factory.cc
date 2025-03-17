@@ -64,6 +64,8 @@ bool RequiresUserActivation(CanCreateTranslatorResult result) {
     case CanCreateTranslatorResult::kAfterDownloadLanguagePackNotReady:
     case CanCreateTranslatorResult::
         kAfterDownloadLibraryAndLanguagePackNotReady:
+    case mojom::blink::CanCreateTranslatorResult::
+        kAfterDownloadTranslatorCreationRequired:
       return true;
     case CanCreateTranslatorResult::kReadily:
     case CanCreateTranslatorResult::kNoNotSupportedLanguage:
@@ -123,8 +125,8 @@ class CreateTranslatorClient
       // TODO (crbug.com/391715395): Pass the real download progress rather than
       // mocking one.
       if (monitor_) {
-        monitor_->OnDownloadProgressUpdate(0, 1);
-        monitor_->OnDownloadProgressUpdate(1, 1);
+        monitor_->OnDownloadProgressUpdate(0, 0x10000);
+        monitor_->OnDownloadProgressUpdate(0x10000, 0x10000);
       }
 
       GetResolver()->Resolve(MakeGarbageCollected<AITranslator>(
@@ -255,29 +257,6 @@ ScriptPromise<AITranslator> AITranslatorFactory::create(
                     WrapPersistent(create_translator_client)));
 
   return resolver->Promise();
-}
-
-ScriptPromise<AITranslatorCapabilities> AITranslatorFactory::capabilities(
-    ScriptState* script_state,
-    ExceptionState& exception_state) {
-  if (!script_state->ContextIsValid()) {
-    exception_state.ThrowDOMException(DOMExceptionCode::kInvalidStateError,
-                                      "The execution context is not valid.");
-    return ScriptPromise<AITranslatorCapabilities>();
-  }
-  ScriptPromiseResolver<AITranslatorCapabilities>* resolver =
-      MakeGarbageCollected<ScriptPromiseResolver<AITranslatorCapabilities>>(
-          script_state);
-  ScriptPromise<AITranslatorCapabilities> promise = resolver->Promise();
-
-  GetTranslationManagerRemote()->GetTranslatorAvailabilityInfo(WTF::BindOnce(
-      [](ScriptPromiseResolver<AITranslatorCapabilities>* resolver,
-         mojom::blink::TranslatorAvailabilityInfoPtr info) {
-        resolver->Resolve(
-            MakeGarbageCollected<AITranslatorCapabilities>(std::move(info)));
-      },
-      WrapPersistent(resolver)));
-  return promise;
 }
 
 HeapMojoRemote<mojom::blink::TranslationManager>&

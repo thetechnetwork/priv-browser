@@ -1161,7 +1161,7 @@ public class CustomTabToolbar extends ToolbarLayout implements View.OnLongClickL
                             optionalButton,
                             mUserEducationHelper,
                             /* transitionRoot= */ CustomTabToolbar.this,
-                            () -> true,
+                            /* isAnimationAllowedPredicate= */ () -> false,
                             mTrackerSupplier);
 
             mOptionalButtonCoordinator.setBackgroundColorFilter(getBackground().getColor());
@@ -1179,7 +1179,7 @@ public class CustomTabToolbar extends ToolbarLayout implements View.OnLongClickL
 
         private void updateOptionalButton(ButtonData buttonData) {
             if (mOptionalButtonCoordinator == null) initializeOptionalButton();
-            mOptionalButtonCoordinator.updateButton(buttonData);
+            mOptionalButtonCoordinator.updateButton(buttonData, isIncognitoBranded());
         }
 
         private void updateOptionalButtonTint() {
@@ -1467,8 +1467,13 @@ public class CustomTabToolbar extends ToolbarLayout implements View.OnLongClickL
                 setTitleUrlBarAccessibilityDelegate(mTitleBar);
                 setTitleUrlBarAccessibilityDelegate(mUrlBar);
             }
-            Tab currentTab = getCurrentTab();
-            mTrackerSupplier.set(TrackerFactory.getTrackerForProfile(currentTab.getProfile()));
+            if (ChromeFeatureList.isEnabled(ChromeFeatureList.CCT_ADAPTIVE_BUTTON)) {
+                Tab currentTab = getCurrentTab();
+                if (currentTab != null) {
+                    mTrackerSupplier.set(
+                            TrackerFactory.getTrackerForProfile(currentTab.getProfile()));
+                }
+            }
         }
 
         private void setTitleUrlBarAccessibilityDelegate(View view) {

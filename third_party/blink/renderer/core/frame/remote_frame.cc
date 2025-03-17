@@ -61,6 +61,7 @@
 #include "third_party/blink/renderer/platform/exported/wrapped_resource_request.h"
 #include "third_party/blink/renderer/platform/heap/collection_support/heap_vector.h"
 #include "third_party/blink/renderer/platform/heap/garbage_collected.h"
+#include "third_party/blink/renderer/platform/heap/member.h"
 #include "third_party/blink/renderer/platform/loader/fetch/fetch_client_settings_object.h"
 #include "third_party/blink/renderer/platform/loader/fetch/resource_fetcher.h"
 #include "third_party/blink/renderer/platform/loader/fetch/resource_fetcher_properties.h"
@@ -77,11 +78,13 @@ namespace {
 
 // Maintain a global (statically-allocated) hash map indexed by the the result
 // of hashing the |frame_token| passed on creation of a RemoteFrame object.
-typedef HeapHashMap<uint64_t, WeakMember<RemoteFrame>> RemoteFramesByTokenMap;
+using RemoteFramesByTokenMap = HeapHashMap<uint64_t, WeakMember<RemoteFrame>>;
 static RemoteFramesByTokenMap& GetRemoteFramesMap() {
-  DEFINE_STATIC_LOCAL(Persistent<RemoteFramesByTokenMap>, map,
-                      (MakeGarbageCollected<RemoteFramesByTokenMap>()));
-  return *map;
+  using RemoteFramesByTokenMapHolder =
+      DisallowNewWrapper<RemoteFramesByTokenMap>;
+  DEFINE_STATIC_LOCAL(Persistent<RemoteFramesByTokenMapHolder>, holder,
+                      (MakeGarbageCollected<RemoteFramesByTokenMapHolder>()));
+  return holder->Value();
 }
 
 }  // namespace
@@ -930,7 +933,7 @@ bool RemoteFrame::DetachChildren() {
 }
 
 void RemoteFrame::ApplyReplicatedPermissionsPolicyHeader() {
-  const PermissionsPolicy* parent_permissions_policy = nullptr;
+  const network::PermissionsPolicy* parent_permissions_policy = nullptr;
   if (Frame* parent_frame = Parent()) {
     parent_permissions_policy =
         parent_frame->GetSecurityContext()->GetPermissionsPolicy();

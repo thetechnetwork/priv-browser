@@ -330,8 +330,8 @@ struct PassportEntityOptions {
   const char16_t* name = u"Pippi Långstrump";
   const char16_t* number = u"123";
   const char16_t* country = u"Sweden";
-  const char16_t* expiry_date = u"12/2019";
-  const char16_t* issue_date = u"01/2010";
+  const char16_t* expiry_date = u"2019-08-30";
+  const char16_t* issue_date = u"2010-09-01";
   std::string_view guid = "00000000-0000-4000-8000-000000000000";
   std::string_view nickname = "Passie";
   base::Time date_modified = kJune2017;
@@ -344,22 +344,33 @@ struct PassportEntityOptions {
 // base::Time in the database is seconds).
 EntityInstance GetPassportEntityInstance(PassportEntityOptions options = {});
 
-struct LoyaltyCardEntityOptions {
-  const char16_t* program = u"Asterisk Airlines";
-  const char16_t* provider = u"Propeller Airways";
-  const char16_t* member_id = u"987";
-  std::string_view guid = "11111111-1111-4111-8111-111111111111";
-  std::string_view nickname = "Loyie";
+struct DriversLicenseOptions {
+  const char16_t* name = u"Knecht Ruprecht";
+  const char16_t* region = u"California";
+  const char16_t* number = u"12312345";
+  const char16_t* expiration_date = u"01/12/2019";
+  const char16_t* issue_date = u"01/01/2010";
+  std::string_view guid = "00000000-0000-4000-8000-100000000000";
+  std::string_view nickname = "License";
   base::Time date_modified = kJune2017;
 };
 
-// Creates a test loyalty card instance with the values from `options`.
-// Attributes whose value in `options` is `nullptr` are left absent.
-// `options.date_modified` is rounded to seconds so that writing and reading the
-// entity from the database obtains the original entity (the resolution of
-// base::Time in the database is seconds).
-EntityInstance GetLoyaltyCardEntityInstance(
-    LoyaltyCardEntityOptions options = {});
+EntityInstance GetDriversLicenseEntityInstance(
+    DriversLicenseOptions options = {});
+
+struct VehicleOptions {
+  const char16_t* name = u"Knecht Ruprecht";
+  const char16_t* plate = u"123456";
+  const char16_t* number = u"12312345";
+  const char16_t* make = u"BMW";
+  const char16_t* model = u"Series 2";
+  const char16_t* year = u"2025";
+  const char16_t* state = u"California";
+  std::string_view guid = "00000000-0000-4000-8000-200000000000";
+  std::string_view nickname = "Vehicle";
+};
+
+EntityInstance GetVehicleEntityInstance(VehicleOptions options = {});
 
 // Adds `possible_types` at the end of `possible_field_types`.
 void InitializePossibleTypes(std::vector<FieldTypeSet>& possible_field_types,

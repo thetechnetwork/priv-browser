@@ -53,6 +53,10 @@ BASE_DECLARE_FEATURE(kApiRuntimeActionData);
 // the permissions API.
 BASE_DECLARE_FEATURE(kApiPermissionsHostAccessRequests);
 
+// Controls whether chrome.Printing API uses margins and scale ticket items when
+// submitting a print job.
+BASE_DECLARE_FEATURE(kApiPrintingMarginsAndScale);
+
 // Controls the availability of executing user scripts programmatically using
 // the userScripts API.
 BASE_DECLARE_FEATURE(kApiUserScriptsExecute);
@@ -63,6 +67,10 @@ BASE_DECLARE_FEATURE(kApiUserScriptsMultipleWorlds);
 
 // Controls the availability of the odfsConfigPrivate API.
 BASE_DECLARE_FEATURE(kApiOdfsConfigPrivate);
+
+// Controls the availability of the
+// `enterprise.reportingPrivate.onDataMaskingRulesTriggered` API.
+BASE_DECLARE_FEATURE(kApiEnterpriseReportingPrivateOnDataMaskingRulesTriggered);
 
 ///////////////////////////////////////////////////////////////////////////////
 // Other Features
@@ -87,9 +95,6 @@ BASE_DECLARE_FEATURE(kEnableWebHidInWebView);
 
 // If enabled, disables unpacked extensions if developer mode is off.
 BASE_DECLARE_FEATURE(kExtensionDisableUnsupportedDeveloper);
-
-// Determine if dynamic extension URLs are handled and redirected.
-BASE_DECLARE_FEATURE(kExtensionDynamicURLRedirection);
 
 // A replacement key for declaring icons, in addition to supporting dark mode.
 BASE_DECLARE_FEATURE(kExtensionIconVariants);
@@ -126,9 +131,6 @@ BASE_DECLARE_FEATURE(kExtensionSourceUrlEnforcement);
 // Controls whether server-side redirects are subject to extensions' web
 // accessible resource restrictions.
 BASE_DECLARE_FEATURE(kExtensionWARForRedirect);
-
-// File Handlers.
-BASE_DECLARE_FEATURE(kExtensionWebFileHandlers);
 
 // If enabled, only manifest v3 extensions is allowed while v2 will be disabled.
 // Note that this feature is now only checked by `ExtensionManagement` which
@@ -189,6 +191,11 @@ BASE_DECLARE_FEATURE(kStructuredCloningForMV3Messaging);
 // https://chromium.googlesource.com/chromium/src/+/master/docs/telemetry_extension/README.md.
 BASE_DECLARE_FEATURE(kTelemetryExtensionPendingApprovalApi);
 
+#if BUILDFLAG(IS_WIN)
+// TODO(https://crbug.com/400119351): Remove this feature flag in M138.
+BASE_DECLARE_FEATURE(kWinRejectDotSpaceSuffixFilePaths);
+#endif
+
 ///////////////////////////////////////////////////////////////////////////////
 // STOP!
 // Please don't just add your new feature down here.
@@ -209,11 +216,6 @@ BASE_DECLARE_FEATURE(kDeclarativeNetRequestSafeRuleLimits);
 // sent to the browser process. This data is used for telemetry purpose
 // only.
 BASE_DECLARE_FEATURE(kIncludeJSCallStackInExtensionApiRequest);
-
-// If enabled, the button for visiting the chrome webstore in both the
-// extensions menu in the app menu and the chrome://extensions sidebar will send
-// the user to the new chrome webstore URL.
-BASE_DECLARE_FEATURE(kNewWebstoreURL);
 
 // If enabled, use the new CWS itemSnippets API to fetch extension info.
 BASE_DECLARE_FEATURE(kUseItemSnippetsAPI);

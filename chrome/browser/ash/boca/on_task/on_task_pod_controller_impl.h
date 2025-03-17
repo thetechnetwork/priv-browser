@@ -8,17 +8,24 @@
 #include <memory>
 
 #include "ash/boca/on_task/on_task_pod_controller.h"
+#include "ash/boca/on_task/on_task_pod_view.h"
+#include "ash/style/icon_button.h"
 #include "base/memory/weak_ptr.h"
+#include "ui/aura/window.h"
+#include "ui/aura/window_observer.h"
+#include "ui/compositor/property_change_reason.h"
 #include "ui/gfx/geometry/rect.h"
 #include "ui/views/widget/widget.h"
 
 class Browser;
+class ImmersiveRevealedLock;
 
 namespace ash {
 
 // OnTask pod controller implementation for the `OnTaskPodView`. This controller
 // implementation also owns the widget that hosts the pod component view.
-class OnTaskPodControllerImpl : public OnTaskPodController {
+class OnTaskPodControllerImpl : public OnTaskPodController,
+                                public aura::WindowObserver {
  public:
   explicit OnTaskPodControllerImpl(Browser* browser);
   OnTaskPodControllerImpl(const OnTaskPodControllerImpl&) = delete;
@@ -26,10 +33,26 @@ class OnTaskPodControllerImpl : public OnTaskPodController {
   ~OnTaskPodControllerImpl() override;
 
   // OnTaskPodController:
+  void MaybeNavigateToPreviousPage() override;
+  void MaybeNavigateToNextPage() override;
   void ReloadCurrentPage() override;
+  void ToggleTabStripVisibility(bool show) override;
+  void SetSnapLocation(OnTaskPodSnapLocation snap_location) override;
+  void OnPageNavigationContextChanged() override;
+  bool CanNavigateToPreviousPage() override;
+  bool CanNavigateToNextPage() override;
+  bool CanToggleTabStripVisibility() override;
+
+  // aura::WindowObserver:
+  void OnWindowBoundsChanged(aura::Window* window,
+                             const gfx::Rect& old_bounds,
+                             const gfx::Rect& new_bounds,
+                             ui::PropertyChangeReason reason) override;
 
   // Component accessors used for testing purposes.
   views::Widget* GetPodWidgetForTesting();
+  ImmersiveRevealedLock* GetTabStripRevealLockForTesting();
+  OnTaskPodSnapLocation GetSnapLocationForTesting() const;
 
  private:
   // Calculates the OnTask pod widget bounds based on the snap location and
@@ -41,6 +64,15 @@ class OnTaskPodControllerImpl : public OnTaskPodController {
 
   // Pod widget that contains the `OnTaskPodView`.
   std::unique_ptr<views::Widget> pod_widget_;
+
+  // Prevents the tab strip from hiding while in immersive fullscreen.
+  std::unique_ptr<ImmersiveRevealedLock> tab_strip_reveal_lock_;
+
+  // Whether the window is pinned or not.
+  bool is_window_pinned_;
+
+  // Snap location for the OnTask pod. Top left by default.
+  OnTaskPodSnapLocation pod_snap_location_ = OnTaskPodSnapLocation::kTopLeft;
 };
 
 }  // namespace ash

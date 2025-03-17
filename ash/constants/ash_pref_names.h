@@ -2624,6 +2624,40 @@ inline constexpr char kClassManagementToolsNavRuleSetting[] =
 inline constexpr char kClassManagementToolsCaptionEnablementSetting[] =
     "ash.class_management_tools.caption_enablement_setting";
 
+// A boolean pref indicating user's eligibility to sending content feature in
+// class management tools.
+inline constexpr char kClassManagementToolsSendingContentEligibilitySetting[] =
+    "ash.class_management_tools.sending_content_setting";
+
+// A boolean pref indicating user's eligibility to caption feature in class
+// management tools.
+inline constexpr char kClassManagementToolsCaptionEligibilitySetting[] =
+    "ash.class_management_tools.caption_eligibility_setting";
+
+// A boolean pref indicating user's eligibility to Classroom integration in
+// class management tools.
+inline constexpr char kClassManagementToolsClassroomEligibilitySetting[] =
+    "ash.class_management_tools.classroom_eligibility_setting";
+
+// A boolean pref indicating user's network restriction setting in class
+// management tools.
+inline constexpr char kClassManagementToolsNetworkRestrictionSetting[] =
+    "ash.class_management_tools.network_restriction_setting";
+
+// A boolean pref indicating user's eligibility to view screen feature in class
+// management tools.
+inline constexpr char kClassManagementToolsViewScreenEligibilitySetting[] =
+    "ash.class_management_tools.view_screen_setting";
+
+// A integer pref indicating how many times user have accessed class management
+// tools OOBE page.
+inline constexpr char kClassManagementToolsOOBEAccessCountSetting[] =
+    "ash.class_management_tools.oobe_access_count_setting";
+
+// A boolean pref indicating whether age requirement met for GenAI access for
+// Coral.
+inline constexpr char kCoralGenAIAgeAllowed[] = "ash.coral.gen_ai_age_allowed";
+
 // A boolean pref that holds whether the user dismissed the extended updates
 // notification.
 inline constexpr char kExtendedUpdatesNotificationDismissed[] =

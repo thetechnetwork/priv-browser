@@ -16,6 +16,7 @@
 #include "components/saved_tab_groups/public/collaboration_finder.h"
 #include "components/saved_tab_groups/public/features.h"
 #include "components/saved_tab_groups/public/tab_group_sync_service.h"
+#include "components/sync/base/collaboration_id.h"
 #include "content/public/test/browser_test.h"
 #include "testing/gmock/include/gmock/gmock.h"
 #include "third_party/abseil-cpp/absl/status/status.h"
@@ -48,7 +49,6 @@ class CollaborationControllerDelegateDesktopInteractiveUITest
   void SetUp() override {
     scoped_feature_list_.InitWithFeatures(
         {data_sharing::features::kDataSharingFeature,
-         tab_groups::kTabGroupsSaveV2,
          tab_groups::kTabGroupSyncServiceDesktopMigration},
         {});
     InProcessBrowserTest::SetUp();
@@ -209,7 +209,7 @@ IN_PROC_BROWSER_TEST_F(CollaborationControllerDelegateDesktopInteractiveUITest,
 
 IN_PROC_BROWSER_TEST_F(CollaborationControllerDelegateDesktopInteractiveUITest,
                        PromoteTabGroup) {
-  std::string fake_collab_id = "fake_collab_id";
+  const syncer::CollaborationId fake_collab_id("fake_collab_id");
   // Make sure fake_collab_id is available for testing.
   tab_groups::TabGroupSyncService* tab_group_service =
       tab_groups::TabGroupSyncServiceFactory::GetForProfile(
@@ -221,7 +221,7 @@ IN_PROC_BROWSER_TEST_F(CollaborationControllerDelegateDesktopInteractiveUITest,
   tab_groups::LocalTabGroupID group_id = InstrumentATabGroup();
   std::optional<tab_groups::SavedTabGroup> group =
       tab_group_service->GetGroup(group_id);
-  group->SetCollaborationId(tab_groups::CollaborationId(fake_collab_id));
+  group->SetCollaborationId(fake_collab_id);
   tab_group_service->RemoveGroup(group->saved_guid());
   tab_group_service->AddGroup(group.value());
 
@@ -234,7 +234,7 @@ IN_PROC_BROWSER_TEST_F(CollaborationControllerDelegateDesktopInteractiveUITest,
       callback,
       Run(collaboration::CollaborationControllerDelegate::Outcome::kSuccess))
       .Times(1);
-  delegate.PromoteTabGroup(data_sharing::GroupId(fake_collab_id),
+  delegate.PromoteTabGroup(data_sharing::GroupId(fake_collab_id.value()),
                            callback.Get());
 }
 

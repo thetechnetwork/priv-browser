@@ -82,6 +82,7 @@
 #include "net/base/schemeful_site.h"
 #include "net/base/url_util.h"
 #include "net/cookies/canonical_cookie.h"
+#include "net/cookies/cookie_access_params.h"
 #include "net/cookies/cookie_base.h"
 #include "net/cookies/cookie_constants.h"
 #include "net/cookies/cookie_monster_change_dispatcher.h"
@@ -124,8 +125,7 @@ using TimeRange = net::CookieDeletionInfo::TimeRange;
 // notification of key load completion triggered by the first request for the
 // same eTLD+1.
 
-static const int kDaysInTenYears = 10 * 365;
-static const int kMinutesInTenYears = kDaysInTenYears * 24 * 60;
+static const int kMinutesIn400Days = 60 * 24 * 400;
 
 namespace {
 
@@ -209,11 +209,12 @@ void LogStoredCookieToUMA(const net::CanonicalCookie& cc,
   type_sample |= cc.IsHttpOnly() ? 1 << COOKIE_TYPE_HTTPONLY : 0;
   type_sample |= cc.SecureAttribute() ? 1 << COOKIE_TYPE_SECURE : 0;
   type_sample |= cc.IsPersistent() ? 1 << COOKIE_TYPE_PERSISTENT : 0;
-  UMA_HISTOGRAM_EXACT_LINEAR("Cookie.Type2", type_sample,
-                             (1 << COOKIE_TYPE_LAST_ENTRY));
+  base::UmaHistogramExactLinear("Cookie.Type2.Subsampled", type_sample,
+                                (1 << COOKIE_TYPE_LAST_ENTRY));
 
   // Cookie.SourceType collects the CookieSourceType of the stored cookie.
-  UMA_HISTOGRAM_ENUMERATION("Cookie.SourceType", cc.SourceType());
+  base::UmaHistogramEnumeration("Cookie.SourceType.Subsampled",
+                                cc.SourceType());
 }
 
 }  // namespace
@@ -442,36 +443,25 @@ CountCookiesAndGenerateListsForPossibleDeletionPartitionedCookies(
   return could_be_deleted;
 }
 
-// Records minutes until the expiration date of a cookie to the appropriate
-// histogram. Only histograms cookies that have an expiration date (i.e. are
-// persistent).
-void HistogramExpirationDuration(const CanonicalCookie& cookie,
+// Records whether the cookie being set is persistent. If so, this also records
+// minutes until the expiration date of a cookie to the appropriate histogram.
+void RecordPersistanceHistograms(const CanonicalCookie& cookie,
                                  base::Time creation_time) {
+  base::UmaHistogramBoolean("Cookie.IsPersistentWhenSet.Subsampled",
+                            cookie.IsPersistent());
   if (!cookie.IsPersistent())
     return;
 
   int expiration_duration_minutes =
       (cookie.ExpiryDate() - creation_time).InMinutes();
   if (cookie.SecureAttribute()) {
-    UMA_HISTOGRAM_CUSTOM_COUNTS("Cookie.ExpirationDurationMinutesSecure",
-                                expiration_duration_minutes, 1,
-                                kMinutesInTenYears, 50);
+    base::UmaHistogramCustomCounts(
+        "Cookie.ExpirationDurationMinutesSecure.Subsampled2",
+        expiration_duration_minutes, 1, kMinutesIn400Days, 100);
   } else {
-    UMA_HISTOGRAM_CUSTOM_COUNTS("Cookie.ExpirationDurationMinutesNonSecure",
-                                expiration_duration_minutes, 1,
-                                kMinutesInTenYears, 50);
-  }
-  // The proposed rfc6265bis sets an upper limit on Expires/Max-Age attribute
-  // values of 400 days. We need to study the impact this change would have:
-  // https://httpwg.org/http-extensions/draft-ietf-httpbis-rfc6265bis.html
-  int expiration_duration_days = (cookie.ExpiryDate() - creation_time).InDays();
-  if (expiration_duration_days > 400) {
-    UMA_HISTOGRAM_CUSTOM_COUNTS("Cookie.ExpirationDuration400DaysGT",
-                                expiration_duration_days, 401, kDaysInTenYears,
-                                100);
-  } else {
-    UMA_HISTOGRAM_CUSTOM_COUNTS("Cookie.ExpirationDuration400DaysLTE",
-                                expiration_duration_days, 1, 400, 50);
+    base::UmaHistogramCustomCounts(
+        "Cookie.ExpirationDurationMinutesNonSecure.Subsampled2",
+        expiration_duration_minutes, 1, kMinutesIn400Days, 100);
   }
 }
 
@@ -772,7 +762,7 @@ void CookieMonster::GetCookieListWithOptions(
   DCHECK_CALLED_ON_VALID_THREAD(thread_checker_);
 
   std::optional<base::ElapsedTimer> timer;
-  if (metrics_subsampler_.ShouldSample(0.001)) {
+  if (metrics_subsampler_.ShouldSample(kHistogramSampleProbability)) {
     timer.emplace();
   }
 
@@ -827,8 +817,8 @@ void CookieMonster::GetCookieListWithOptions(
                          std::move(excluded_cookies));
 
   if (timer) {
-    UMA_HISTOGRAM_CUSTOM_MICROSECONDS_TIMES(
-        "Cookie.GetCookieListWithOptions.Duration", timer->Elapsed(),
+    base::UmaHistogramCustomMicrosecondsTimes(
+        "Cookie.GetCookieListWithOptions.Duration.Subsampled", timer->Elapsed(),
         base::Microseconds(1), base::Milliseconds(128), 100);
   }
 }
@@ -1028,11 +1018,6 @@ void CookieMonster::OnLoaded(
                                 blocked_due_to_global_op, base::Milliseconds(1),
                                 base::Minutes(1), 50);
 
-  base::UmaHistogramBoolean(
-      "Cookie.Partitioned.AncestorChainBitFeatureEnabled",
-      base::FeatureList::IsEnabled(
-          features::kAncestorChainBitEnabledInPartitionedCookies));
-
   // Invoke the task queue of cookie request.
   InvokeQueue();
 }
@@ -1083,17 +1068,15 @@ void CookieMonster::StoreLoadedCookies(
     if (cookie_ptr->IsPartitioned()) {
       auto inserted = InternalInsertPartitionedCookie(
           GetKey(cookie_ptr->Domain()), std::move(cookie),
-          false /* sync_to_store */, access_result,
-          false /* dispatch_change */);
+          /*sync_to_store=*/false, access_result, /*dispatch_change=*/false);
       if (ContainsControlCharacter(cookie_ptr->Name()) ||
           ContainsControlCharacter(cookie_ptr->Value())) {
         partitioned_cookies_with_control_chars.push_back(inserted);
       }
     } else {
-      auto inserted =
-          InternalInsertCookie(GetKey(cookie_ptr->Domain()), std::move(cookie),
-                               false /* sync_to_store */, access_result,
-                               false /* dispatch_change */);
+      auto inserted = InternalInsertCookie(
+          GetKey(cookie_ptr->Domain()), std::move(cookie),
+          /*sync_to_store=*/false, access_result, /*dispatch_change=*/false);
 
       if (ContainsControlCharacter(cookie_ptr->Name()) ||
           ContainsControlCharacter(cookie_ptr->Value())) {
@@ -1410,31 +1393,31 @@ void CookieMonster::FilterCookiesWithOptions(
     // without considering shadowing domain cookies. Recording them on every
     // resource sequest results in unnecessarily large amounts of samples
     // and has a non-zero runtime cost, so only collect 1/1000 times.
-    if (metrics_subsampler_.ShouldSample(0.001) &&
+    if (metrics_subsampler_.ShouldSample(kHistogramSampleProbability) &&
         access_result.status.IsInclude()) {
       int destination_port = url.EffectiveIntPort();
 
       if (IsLocalhost(url)) {
         UMA_HISTOGRAM_ENUMERATION(
-            "Cookie.Port.Read.Localhost",
+            "Cookie.Port.Read.Localhost.Subsampled",
             ReducePortRangeForCookieHistogram(destination_port));
         UMA_HISTOGRAM_ENUMERATION(
-            "Cookie.Port.ReadDiffersFromSet.Localhost",
+            "Cookie.Port.ReadDiffersFromSet.Localhost.Subsampled",
             IsCookieSentToSamePortThatSetIt(url, cookie_ptr->SourcePort(),
                                             cookie_ptr->SourceScheme()));
       } else {
         UMA_HISTOGRAM_ENUMERATION(
-            "Cookie.Port.Read.RemoteHost",
+            "Cookie.Port.Read.RemoteHost.Subsampled",
             ReducePortRangeForCookieHistogram(destination_port));
         UMA_HISTOGRAM_ENUMERATION(
-            "Cookie.Port.ReadDiffersFromSet.RemoteHost",
+            "Cookie.Port.ReadDiffersFromSet.RemoteHost.Subsampled",
             IsCookieSentToSamePortThatSetIt(url, cookie_ptr->SourcePort(),
                                             cookie_ptr->SourceScheme()));
       }
 
       if (cookie_ptr->IsDomainCookie()) {
         UMA_HISTOGRAM_ENUMERATION(
-            "Cookie.Port.ReadDiffersFromSet.DomainSet",
+            "Cookie.Port.ReadDiffersFromSet.DomainSet.Subsampled",
             IsCookieSentToSamePortThatSetIt(url, cookie_ptr->SourcePort(),
                                             cookie_ptr->SourceScheme()));
       }
@@ -1503,6 +1486,9 @@ void CookieMonster::MaybeDeleteEquivalentCookieAndUpdateStatus(
 
   // Check every cookie matching this domain key for equivalence.
   CookieMapItPair range_its = cookie_map->equal_range(key);
+  const auto cookie_being_set_key = cookie_being_set.UniqueKey();
+  const auto cookie_being_set_scope_semantics =
+      GetScopeSemanticsForCookieDomain(cookie_being_set.Domain());
   for (auto cur_it = range_its.first; cur_it != range_its.second; ++cur_it) {
     CanonicalCookie* cur_existing_cookie = cur_it->second.get();
 
@@ -1535,9 +1521,9 @@ void CookieMonster::MaybeDeleteEquivalentCookieAndUpdateStatus(
     }
     // If cookie's domain is in legacy mode, check to make sure we are not
     // setting an aliasing cookie.
-    if (cookie_being_set.IsEquivalent(*cur_existing_cookie) ||
-        (GetScopeSemanticsForCookieDomain(cookie_being_set.Domain()) ==
-             CookieScopeSemantics::LEGACY &&
+    if (cookie_being_set.IsEquivalent(cookie_being_set_key,
+                                      *cur_existing_cookie) ||
+        (cookie_being_set_scope_semantics == CookieScopeSemantics::LEGACY &&
          cookie_being_set.LegacyUniqueKey() ==
              cur_existing_cookie->LegacyUniqueKey())) {
       // We should never have more than one equivalent cookie, since they should
@@ -1618,7 +1604,9 @@ CookieMonster::CookieMap::iterator CookieMonster::InternalInsertCookie(
 
   auto inserted = cookies_.insert(CookieMap::value_type(key, std::move(cc)));
 
-  LogStoredCookieToUMA(*cc_ptr, access_result);
+  if (metrics_subsampler_.ShouldSample(kHistogramSampleProbability)) {
+    LogStoredCookieToUMA(*cc_ptr, access_result);
+  }
 
   DCHECK(access_result.status.IsInclude());
   if (dispatch_change) {
@@ -1694,7 +1682,9 @@ CookieMonster::InternalInsertPartitionedCookie(
   }
   CHECK_GE(num_partitioned_cookies_, num_nonced_partitioned_cookies_);
 
-  LogStoredCookieToUMA(*cc_ptr, access_result);
+  if (metrics_subsampler_.ShouldSample(kHistogramSampleProbability)) {
+    LogStoredCookieToUMA(*cc_ptr, access_result);
+  }
 
   DCHECK(access_result.status.IsInclude());
   if (dispatch_change) {
@@ -1713,6 +1703,8 @@ void CookieMonster::SetCanonicalCookie(
     SetCookiesCallback callback,
     std::optional<CookieAccessResult> cookie_access_result) {
   DCHECK_CALLED_ON_VALID_THREAD(thread_checker_);
+  bool collect_metrics =
+      metrics_subsampler_.ShouldSample(kHistogramSampleProbability);
 // TODO(crbug.com/40281870): Fix macos specific issue with CHECK_IS_TEST
 // crashing network service process.
 #if !BUILDFLAG(IS_MAC)
@@ -1786,15 +1778,17 @@ void CookieMonster::SetCanonicalCookie(
     DVLOG(net::cookie_util::kVlogSetCookies)
         << "SetCookie() key: " << key << " cc: " << cc->DebugString();
 
-    if (cc->IsEffectivelySameSiteNone()) {
+    if (cc->IsEffectivelySameSiteNone() && collect_metrics) {
       size_t cookie_size = NameValueSizeBytes(*cc);
-      UMA_HISTOGRAM_COUNTS_10000("Cookie.SameSiteNoneSizeBytes", cookie_size);
+      base::UmaHistogramCounts10000("Cookie.SameSiteNoneSizeBytes.Subsampled",
+                                    cookie_size);
       if (cc->IsPartitioned()) {
-        UMA_HISTOGRAM_COUNTS_10000("Cookie.SameSiteNoneSizeBytes.Partitioned",
-                                   cookie_size);
+        base::UmaHistogramCounts10000(
+            "Cookie.SameSiteNoneSizeBytes.Partitioned.Subsampled", cookie_size);
       } else {
-        UMA_HISTOGRAM_COUNTS_10000("Cookie.SameSiteNoneSizeBytes.Unpartitioned",
-                                   cookie_size);
+        base::UmaHistogramCounts10000(
+            "Cookie.SameSiteNoneSizeBytes.Unpartitioned.Subsampled",
+            cookie_size);
       }
     }
 
@@ -1804,9 +1798,12 @@ void CookieMonster::SetCanonicalCookie(
     // Realize that we might be setting an expired cookie, and the only point
     // was to delete the cookie which we've already done.
     if (!already_expired) {
-      HistogramExpirationDuration(*cc, creation_date);
+      if (collect_metrics) {
+        RecordPersistanceHistograms(*cc, creation_date);
 
-      UMA_HISTOGRAM_BOOLEAN("Cookie.DomainSet", cc->IsDomainCookie());
+        base::UmaHistogramBoolean("Cookie.DomainSet.Subsampled",
+                                  cc->IsDomainCookie());
+      }
 
       if (!creation_date_to_inherit.is_null()) {
         cc->SetCreationDate(creation_date_to_inherit);
@@ -1835,18 +1832,20 @@ void CookieMonster::SetCanonicalCookie(
       GarbageCollect(creation_date, key);
     }
 
-    if (IsLocalhost(source_url)) {
-      UMA_HISTOGRAM_ENUMERATION(
-          "Cookie.Port.Set.Localhost",
-          ReducePortRangeForCookieHistogram(source_url.EffectiveIntPort()));
-    } else {
-      UMA_HISTOGRAM_ENUMERATION(
-          "Cookie.Port.Set.RemoteHost",
-          ReducePortRangeForCookieHistogram(source_url.EffectiveIntPort()));
-    }
+    if (collect_metrics) {
+      if (IsLocalhost(source_url)) {
+        base::UmaHistogramEnumeration(
+            "Cookie.Port.Set.Localhost.Subsampled",
+            ReducePortRangeForCookieHistogram(source_url.EffectiveIntPort()));
+      } else {
+        base::UmaHistogramEnumeration(
+            "Cookie.Port.Set.RemoteHost.Subsampled",
+            ReducePortRangeForCookieHistogram(source_url.EffectiveIntPort()));
+      }
 
-    UMA_HISTOGRAM_ENUMERATION("Cookie.CookieSourceSchemeName",
-                              GetSchemeNameEnum(source_url));
+      base::UmaHistogramEnumeration("Cookie.CookieSourceSchemeName.Subsampled",
+                                    GetSchemeNameEnum(source_url));
+    }
   } else {
     // If the cookie would be excluded, don't bother warning about the 3p cookie
     // phaseout.
@@ -1875,7 +1874,9 @@ void CookieMonster::SetAllCookies(CookieList list,
     if (cookie.IsExpired(creation_time))
       continue;
 
-    HistogramExpirationDuration(cookie, creation_time);
+    if (metrics_subsampler_.ShouldSample(kHistogramSampleProbability)) {
+      RecordPersistanceHistograms(cookie, creation_time);
+    }
 
     CookieAccessResult access_result;
     access_result.access_semantics = GetAccessSemanticsForCookie(cookie);

@@ -39,14 +39,19 @@ class ASH_EXPORT CoralRequest {
   ~CoralRequest();
 
   void set_source(CoralSource source) { source_ = source; }
-
-  void set_content(std::vector<ContentItem>&& content) {
-    content_ = std::move(content);
-  }
-
   CoralSource source() const { return source_; }
 
+  void set_content(std::vector<ContentItem> content) {
+    content_ = std::move(content);
+  }
   const std::vector<ContentItem>& content() const { return content_; }
+
+  void set_suppression_context(std::vector<ContentItem>&& suppression_context) {
+    suppression_context_ = std::move(suppression_context);
+  }
+  const std::vector<ContentItem>& suppression_context() const {
+    return suppression_context_;
+  }
 
   std::string ToString() const;
 
@@ -55,6 +60,9 @@ class ASH_EXPORT CoralRequest {
 
   // Tab/app content with arbitrary ordering.
   std::vector<ContentItem> content_;
+
+  // Original tab/app content of the workspace.
+  std::vector<ContentItem> suppression_context_;
 };
 
 // `CoralResponse` contains 0-2 groups in order of relevance.
@@ -115,9 +123,7 @@ class ASH_EXPORT CoralController {
       mojo::PendingRemote<coral::mojom::TitleObserver> title_observer,
       CoralResponseCallback callback);
 
-  // Callback returns whether the request was successful.
-  void CacheEmbeddings(const CoralRequest& request,
-                       base::OnceCallback<void(bool)> callback);
+  void CacheEmbeddings(const CoralRequest& request);
 
   // Creates a new desk for the content group from `source_desk`.
   void OpenNewDeskWithGroup(CoralResponse::Group group,
@@ -142,12 +148,8 @@ class ASH_EXPORT CoralController {
                          const base::TimeTicks& request_time,
                          coral::mojom::GroupResultPtr result);
 
-  // Used as the callback of mojom::CoralProcessor::CacheEmbeddings. `callback`
-  // is the callback passed from `CoralController::CacheEmbeddings`, which
-  // should be triggered with a bool indicating whether the CacheEmbeddings
-  // operation was successful.
+  // Used as the callback of mojom::CoralProcessor::CacheEmbeddings.
   void HandleCacheEmbeddingsResult(
-      base::OnceCallback<void(bool)> callback,
       coral::mojom::CacheEmbeddingsResultPtr result);
 
   // Callback that is run when we call
@@ -155,7 +157,7 @@ class ASH_EXPORT CoralController {
   // directly if a group has no apps in it. If `desk_template` is nullptr, then
   // we create one if `tab_urls` is not empty, otherwise this function does
   // nothing.
-  void OnTemplateCreated(const std::vector<GURL>& tab_urls,
+  void OnTemplateCreated(std::vector<coral::mojom::EntityPtr> tab_app_entities,
                          std::unique_ptr<aura::WindowTracker> window_tracker,
                          std::unique_ptr<DeskTemplate> desk_template);
 

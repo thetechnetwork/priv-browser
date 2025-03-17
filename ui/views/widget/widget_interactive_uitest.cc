@@ -410,7 +410,9 @@ void DeactivateSync(Widget* widget) {
   // activating (and closing) a temporary widget.
   widget->widget_delegate()->SetCanActivate(false);
   Widget* stealer = new Widget;
-  stealer->Init(Widget::InitParams(Widget::InitParams::TYPE_WINDOW));
+  stealer->Init(
+      Widget::InitParams(Widget::InitParams::NATIVE_WIDGET_OWNS_WIDGET,
+                         Widget::InitParams::TYPE_WINDOW));
   ShowSync(stealer);
   stealer->CloseNow();
   widget->widget_delegate()->SetCanActivate(true);
@@ -474,7 +476,7 @@ TEST_F(DesktopWidgetTestInteractive,
   focusable_view1->SetFocusBehavior(View::FocusBehavior::ALWAYS);
   std::unique_ptr<Widget> widget1 = base::WrapUnique(
       CreateTopLevelNativeWidget(Widget::InitParams::CLIENT_OWNS_WIDGET));
-  widget1->GetContentsView()->AddChildView(focusable_view1);
+  widget1->GetContentsView()->AddChildViewRaw(focusable_view1);
   widget1->Show();
   aura::Window* root_window1 = GetRootWindow(widget1.get());
   focusable_view1->RequestFocus();
@@ -489,7 +491,7 @@ TEST_F(DesktopWidgetTestInteractive,
   View* focusable_view2 = new View;
   std::unique_ptr<Widget> widget2 = base::WrapUnique(
       CreateTopLevelNativeWidget(Widget::InitParams::CLIENT_OWNS_WIDGET));
-  widget1->GetContentsView()->AddChildView(focusable_view2);
+  widget1->GetContentsView()->AddChildViewRaw(focusable_view2);
   widget2->Show();
   aura::Window* root_window2 = GetRootWindow(widget2.get());
   focusable_view2->RequestFocus();
@@ -524,8 +526,9 @@ TEST_F(DesktopWidgetTestInteractive, FocusChangesOnBubble) {
 
   // Show a bubble.
   auto owned_bubble_delegate_view =
-      std::make_unique<views::BubbleDialogDelegateView>(focusable_view,
-                                                        BubbleBorder::NONE);
+      std::make_unique<views::BubbleDialogDelegateView>(
+          BubbleDialogDelegateView::CreatePassKey(), focusable_view,
+          BubbleBorder::NONE);
   owned_bubble_delegate_view->SetFocusBehavior(View::FocusBehavior::ALWAYS);
   BubbleDialogDelegateView* bubble_delegate_view =
       owned_bubble_delegate_view.get();
@@ -596,7 +599,7 @@ TEST_F(DesktopWidgetTestInteractive, DISABLED_TouchNoActivateWindow) {
   focusable_view->SetFocusBehavior(View::FocusBehavior::ALWAYS);
   std::unique_ptr<Widget> widget = base::WrapUnique(
       CreateTopLevelNativeWidget(Widget::InitParams::CLIENT_OWNS_WIDGET));
-  widget->GetContentsView()->AddChildView(focusable_view);
+  widget->GetContentsView()->AddChildViewRaw(focusable_view);
   widget->Show();
 
   {

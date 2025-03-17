@@ -24,6 +24,7 @@
 #include "base/task/sequence_manager/task_time_observer.h"
 #include "base/task/sequenced_task_runner.h"
 #include "base/task/single_thread_task_runner.h"
+#include "base/threading/scoped_thread_priority.h"
 #include "base/time/time.h"
 #include "base/trace_event/trace_log.h"
 #include "build/build_config.h"
@@ -156,6 +157,8 @@ class PLATFORM_EXPORT MainThreadSchedulerImpl
     // std::nullopt.
     std::optional<features::TaskDeferralPolicy>
         discrete_input_task_deferral_policy;
+
+    bool input_scenario_priority_boost_enabled;
   };
 
   static const char* RAILModeToString(RAILMode rail_mode);
@@ -211,8 +214,6 @@ class PLATFORM_EXPORT MainThreadSchedulerImpl
   // ThreadScheduler implementation:
   bool ShouldYieldForHighPriorityWork() override;
   void PostIdleTask(const base::Location&, Thread::IdleTask) override;
-  void PostNonNestableIdleTask(const base::Location&,
-                               Thread::IdleTask) override;
   void PostDelayedIdleTask(const base::Location&,
                            base::TimeDelta delay,
                            Thread::IdleTask) override;
@@ -767,11 +768,15 @@ class PLATFORM_EXPORT MainThreadSchedulerImpl
 
     WTF::Vector<AgentGroupSchedulerScope> agent_group_scheduler_scope_stack;
 
-    Persistent<HeapHashSet<WeakMember<AgentGroupSchedulerImpl>>>
+    Persistent<GCedHeapHashSet<WeakMember<AgentGroupSchedulerImpl>>>
         agent_group_schedulers;
     // Task queues that have been detached from their scheduler and may have
     // pending tasks that need to run.
     WTF::HashSet<scoped_refptr<MainThreadTaskQueue>> detached_task_queues;
+
+    // Temporarily boosts the main thread priority. Only used if
+    // kInputScenarioPriorityBoost is enabled.
+    std::optional<base::ScopedBoostPriority> main_thread_priority_boost;
   };
 
   struct AnyThread {

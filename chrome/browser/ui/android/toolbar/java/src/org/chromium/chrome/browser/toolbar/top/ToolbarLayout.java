@@ -503,18 +503,11 @@ public abstract class ToolbarLayout extends FrameLayout
     void updateBackButtonVisibility(boolean canGoBack) {}
 
     /**
-     * Gives inheriting classes the chance to update the visibility of the
-     * forward button.
+     * Gives inheriting classes the chance to update the visibility of the forward button.
+     *
      * @param canGoForward Whether or not the current tab has any history to go forward to.
      */
     void updateForwardButtonVisibility(boolean canGoForward) {}
-
-    /**
-     * Gives inheriting classes the chance to update the visibility of the
-     * reload button.
-     * @param isReloading Whether or not the current tab is loading.
-     */
-    void updateReloadButtonVisibility(boolean isReloading) {}
 
     /**
      * Gives inheriting classes the chance to update the visual status of the bookmark button.
@@ -744,21 +737,6 @@ public abstract class ToolbarLayout extends FrameLayout
     boolean forward() {
         maybeUnfocusUrlBar();
         return mToolbarTabController != null ? mToolbarTabController.forward() : false;
-    }
-
-    /**
-     * If the page is currently loading, this will trigger the tab to stop. If the page is fully
-     * loaded, this will trigger a refresh.
-     *
-     * <p>The buttons of the toolbar will be updated as a result of making this call.
-     *
-     * @param ignoreCache Whether a reload should ignore the cache (hard-reload).
-     */
-    void stopOrReloadCurrentTab(boolean ignoreCache) {
-        maybeUnfocusUrlBar();
-        if (mToolbarTabController != null) {
-            mToolbarTabController.stopOrReloadCurrentTab(ignoreCache);
-        }
     }
 
     /** Opens hompage in the current tab. */

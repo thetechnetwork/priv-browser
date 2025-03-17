@@ -58,10 +58,6 @@
 #include "ui/gfx/image/image_unittest_util.h"
 #include "ui/resources/grit/ui_resources.h"
 
-#if !BUILDFLAG(IS_ANDROID) && !BUILDFLAG(IS_IOS)
-#include "ui/native_theme/native_theme.h"  // nogncheck
-#endif  // !BUILDFLAG(IS_ANDROID) && !BUILDFLAG(IS_IOS)
-
 namespace autofill {
 namespace {
 
@@ -172,10 +168,7 @@ Matcher<Suggestion> EqualsManagePaymentsMethodsSuggestion(bool with_gpay_logo) {
                                     IDS_AUTOFILL_MANAGE_PAYMENT_METHODS),
                                 Suggestion::Icon::kSettings),
                Field(&Suggestion::trailing_icon,
-                     with_gpay_logo ? (ui::NativeTheme::GetInstanceForNativeUi()
-                                               ->ShouldUseDarkColors()
-                                           ? Suggestion::Icon::kGooglePayDark
-                                           : Suggestion::Icon::kGooglePay)
+                     with_gpay_logo ? Suggestion::Icon::kGooglePay
                                     : Suggestion::Icon::kNoIcon));
 #endif
 }
@@ -1361,9 +1354,12 @@ TEST_F(PaymentsSuggestionGeneratorBnplTest, MaybeUpdateSuggestionsWithBnpl) {
       /*should_show_scan_credit_card=*/false,
       /*should_show_cards_from_account=*/false, summary);
 
+  uint64_t extracted_amount_in_micros = 50'000'000;
+
   BnplSuggestionUpdateResult update_suggestions_result =
       MaybeUpdateSuggestionsWithBnpl(suggestions,
-                                     payments_data().GetBnplIssuers());
+                                     payments_data().GetBnplIssuers(),
+                                     extracted_amount_in_micros);
 
   // `updated_suggesions` should contains 7 suggestions which are 4 credit
   // card suggestions, 1 BNPL suggestion, 1 separator, and 1 manage card
@@ -1384,6 +1380,10 @@ TEST_F(PaymentsSuggestionGeneratorBnplTest, MaybeUpdateSuggestionsWithBnpl) {
   }
 
   // Checks BNPL suggestion is inserted.
+  EXPECT_EQ(updated_suggestions[current_suggestion_index]
+                .GetPayload<Suggestion::PaymentsPayload>()
+                .extracted_amount_in_micros,
+            extracted_amount_in_micros);
   EXPECT_THAT(
       updated_suggestions[current_suggestion_index++],
       EqualsSuggestion(
@@ -1522,7 +1522,8 @@ TEST_F(PaymentsSuggestionGeneratorBnplTest,
   payments_data().AddBnplIssuer(test::GetTestLinkedBnplIssuer());
 
   EXPECT_FALSE(
-      MaybeUpdateSuggestionsWithBnpl({}, payments_data().GetBnplIssuers())
+      MaybeUpdateSuggestionsWithBnpl({}, payments_data().GetBnplIssuers(),
+                                     /*extracted_amount_in_micros=*/50'000'000)
           .is_bnpl_suggestion_added);
 }
 
@@ -1544,7 +1545,8 @@ TEST_F(PaymentsSuggestionGeneratorBnplTest,
       /*should_show_cards_from_account=*/false, summary);
   BnplSuggestionUpdateResult update_suggestions_result =
       MaybeUpdateSuggestionsWithBnpl(suggestions,
-                                     payments_data().GetBnplIssuers());
+                                     payments_data().GetBnplIssuers(),
+                                     /*extracted_amount_in_micros=*/50'000'000);
 
   ASSERT_THAT(update_suggestions_result.suggestions,
               ElementsAre(EqualsSuggestion(SuggestionType::kCreditCardEntry),
@@ -1553,9 +1555,39 @@ TEST_F(PaymentsSuggestionGeneratorBnplTest,
                           EqualsSuggestion(SuggestionType::kManageCreditCard)));
   EXPECT_FALSE(
       MaybeUpdateSuggestionsWithBnpl(update_suggestions_result.suggestions,
-                                     payments_data().GetBnplIssuers())
+                                     payments_data().GetBnplIssuers(),
+                                     /*extracted_amount_in_micros=*/50'000'000)
           .is_bnpl_suggestion_added);
 }
+
+TEST_F(PaymentsSuggestionGeneratorBnplTest,
+       MaybeUpdateSuggestionsWithBnpl_IphBubble) {
+  // Add a server card.
+  payments_data().AddServerCreditCard(test::GetMaskedServerCardAmex());
+  // Add BNPL issuers.
+  payments_data().AddBnplIssuer(test::GetTestLinkedBnplIssuer());
+  CreditCardSuggestionSummary summary;
+  std::vector<Suggestion> suggestions = GetCreditCardOrCvcFieldSuggestions(
+      *autofill_client(), FormFieldData(),
+      /*four_digit_combinations_in_dom=*/{},
+      /*autofilled_last_four_digits_in_form_for_filtering=*/
+      {}, CREDIT_CARD_NUMBER,
+      /*should_show_scan_credit_card=*/false,
+      /*should_show_cards_from_account=*/false, summary);
+  BnplSuggestionUpdateResult update_suggestions_result =
+      MaybeUpdateSuggestionsWithBnpl(suggestions,
+                                     payments_data().GetBnplIssuers(),
+                                     /*extracted_amount_in_micros=*/50'000'000);
+
+  ASSERT_TRUE(update_suggestions_result.is_bnpl_suggestion_added);
+  Suggestion bnpl_suggestion = *std::ranges::find_if(
+      update_suggestions_result.suggestions,
+      [](const Suggestion& s) { return s.type == SuggestionType::kBnplEntry; });
+
+  EXPECT_EQ(bnpl_suggestion.iph_metadata.feature,
+            &feature_engagement::kIPHAutofillBnplAffirmOrZipSuggestionFeature);
+}
+
 #endif  // BUILDFLAG(IS_WIN) || BUILDFLAG(IS_MAC) || BUILDFLAG(IS_LINUX) ||
         // BUILDFLAG(IS_CHROMEOS)
 

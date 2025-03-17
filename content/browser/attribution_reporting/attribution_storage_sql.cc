@@ -1609,7 +1609,8 @@ bool AttributionStorageSql::AdjustOfflineReportTimes(
 void AttributionStorageSql::ClearDataWithFilter(
     base::Time delete_begin,
     base::Time delete_end,
-    StoragePartition::StorageKeyMatcherFunction filter,
+    absl::variant<StoragePartition::StorageKeyMatcherFunction, url::Origin>
+        filter_or_origin,
     bool delete_rate_limit_data) {
   DCHECK_CALLED_ON_VALID_SEQUENCE(sequence_checker_);
   if (!LazyInit(DbCreationPolicy::kIgnoreIfAbsent)) {
@@ -1618,8 +1619,23 @@ void AttributionStorageSql::ClearDataWithFilter(
 
   // The deletion of OS-registration data doesn't need to be atomic with respect
   // to deletion of web-registration data as they're completely independent.
-  os_registrations_table_.ClearDataForOriginsInRange(&db_, delete_begin,
-                                                     delete_end, filter);
+  StoragePartition::StorageKeyMatcherFunction filter = absl::visit(
+      base::Overloaded{
+          [&](StoragePartition::StorageKeyMatcherFunction filter_cb) {
+            DCHECK_CALLED_ON_VALID_SEQUENCE(sequence_checker_);
+            os_registrations_table_.ClearDataForOriginsInRange(
+                &db_, delete_begin, delete_end, filter_cb);
+            return filter_cb;
+          },
+          [&](const url::Origin& origin) {
+            DCHECK_CALLED_ON_VALID_SEQUENCE(sequence_checker_);
+            os_registrations_table_.ClearDataForRegistrationOrigin(
+                &db_, delete_begin, delete_end, origin);
+            return base::BindRepeating(
+                std::equal_to<blink::StorageKey>(),
+                blink::StorageKey::CreateFirstParty(origin));
+          }},
+      std::move(filter_or_origin));
 
   // Delete the data in a transaction to avoid cases where the source part
   // of a report is deleted without deleting the associated report, or
@@ -1819,6 +1835,29 @@ int64_t AttributionStorageSql::CountAggregatableReportsWithDestinationSite(
     return -1;
   }
   return statement.ColumnInt64(0);
+}
+
+int64_t AttributionStorageSql::
+    CountUniqueDailyReportingOriginsPerReportingSiteForSource(
+        const net::SchemefulSite& reporting_site,
+        base::Time source_time) {
+  DCHECK_CALLED_ON_VALID_SEQUENCE(sequence_checker_);
+
+  return rate_limit_table_
+      .CountUniqueDailyReportingOriginsPerReportingSiteForSource(
+          &db_, reporting_site, source_time);
+}
+
+int64_t AttributionStorageSql::
+    CountUniqueDailyReportingOriginsPerDestinationAndReportingSiteForSource(
+        const net::SchemefulSite& destination_site,
+        const net::SchemefulSite& reporting_site,
+        base::Time source_time) {
+  DCHECK_CALLED_ON_VALID_SEQUENCE(sequence_checker_);
+
+  return rate_limit_table_
+      .CountUniqueDailyReportingOriginsPerDestinationAndReportingSiteForSource(
+          &db_, destination_site, reporting_site, source_time);
 }
 
 std::vector<StoredSource> AttributionStorageSql::GetActiveSources(int limit) {

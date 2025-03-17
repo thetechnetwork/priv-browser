@@ -181,6 +181,20 @@ constexpr char kHostnameWithAliases[] = "www.example.test";
 
 constexpr char kHostnameWithoutAliases[] = "www.other.test";
 
+const net::MockConnect kAsyncMockConnect =
+    net::MockConnect(net::ASYNC, net::OK);
+
+// MockWrite for requesting "http://origin.test/".
+const net::MockWrite kOriginTestWrites[] = {
+    net::MockWrite(net::SYNCHRONOUS,
+                   0,
+                   "GET / HTTP/1.1\r\n"
+                   "Host: origin.test\r\n"
+                   "Connection: keep-alive\r\n"
+                   "User-Agent: \r\n"
+                   "Accept-Encoding: gzip, deflate\r\n\r\n"),
+};
+
 static ResourceRequest CreateResourceRequest(const char* method,
                                              const GURL& url) {
   ResourceRequest request;
@@ -2176,6 +2190,115 @@ TEST_P(ParameterizedURLLoaderTest,
 
   EXPECT_THAT(params.FindString("result"),
               Pointee(Eq("allowed-potentially-trustworthy-same-origin")));
+}
+
+TEST_P(ParameterizedURLLoaderTest, SecurePublicToLocalPermission) {
+  auto client_security_state = NewSecurityState();
+  client_security_state->ip_address_space = mojom::IPAddressSpace::kPublic;
+  client_security_state->private_network_request_policy =
+      mojom::PrivateNetworkRequestPolicy::kPermissionBlock;
+  set_factory_client_security_state(std::move(client_security_state));
+
+  ResourceRequest request = CreateCrossOriginResourceRequest();
+
+  EXPECT_EQ(net::ERR_BLOCKED_BY_PRIVATE_NETWORK_ACCESS_CHECKS,
+            LoadRequest(request));
+  EXPECT_THAT(
+      client()->completion_status().cors_error_status,
+      Optional(CorsErrorStatus(
+          mojom::CorsError::kLocalNetworkAccessPermissionDenied,
+          mojom::IPAddressSpace::kUnknown, mojom::IPAddressSpace::kLocal)));
+}
+
+TEST_P(ParameterizedURLLoaderTest, SecurePrivateToLocalPermission) {
+  auto client_security_state = NewSecurityState();
+  client_security_state->ip_address_space = mojom::IPAddressSpace::kPrivate;
+  client_security_state->private_network_request_policy =
+      mojom::PrivateNetworkRequestPolicy::kPermissionBlock;
+  set_factory_client_security_state(std::move(client_security_state));
+
+  ResourceRequest request = CreateCrossOriginResourceRequest();
+
+  EXPECT_EQ(net::ERR_BLOCKED_BY_PRIVATE_NETWORK_ACCESS_CHECKS,
+            LoadRequest(request));
+  EXPECT_THAT(
+      client()->completion_status().cors_error_status,
+      Optional(CorsErrorStatus(
+          mojom::CorsError::kLocalNetworkAccessPermissionDenied,
+          mojom::IPAddressSpace::kUnknown, mojom::IPAddressSpace::kLocal)));
+}
+
+TEST_P(ParameterizedURLLoaderTest, SecureLocalToLocalPermission) {
+  auto client_security_state = NewSecurityState();
+  client_security_state->ip_address_space = mojom::IPAddressSpace::kLocal;
+  client_security_state->private_network_request_policy =
+      mojom::PrivateNetworkRequestPolicy::kPermissionBlock;
+  set_factory_client_security_state(std::move(client_security_state));
+
+  ResourceRequest request = CreateCrossOriginResourceRequest();
+
+  EXPECT_EQ(net::OK, LoadRequest(request));
+}
+
+TEST_P(ParameterizedURLLoaderTest, SecurePublicToLocalPermissionWarn) {
+  auto client_security_state = NewSecurityState();
+  client_security_state->ip_address_space = mojom::IPAddressSpace::kPublic;
+  client_security_state->private_network_request_policy =
+      mojom::PrivateNetworkRequestPolicy::kPermissionWarn;
+  set_factory_client_security_state(std::move(client_security_state));
+
+  ResourceRequest request = CreateCrossOriginResourceRequest();
+
+  EXPECT_EQ(net::OK, LoadRequest(request));
+}
+
+TEST_P(ParameterizedURLLoaderTest, SecurePrivateToLocalPermissionWarn) {
+  auto client_security_state = NewSecurityState();
+  client_security_state->ip_address_space = mojom::IPAddressSpace::kPrivate;
+  client_security_state->private_network_request_policy =
+      mojom::PrivateNetworkRequestPolicy::kPermissionWarn;
+  set_factory_client_security_state(std::move(client_security_state));
+
+  ResourceRequest request = CreateCrossOriginResourceRequest();
+
+  EXPECT_EQ(net::OK, LoadRequest(request));
+}
+
+TEST_P(ParameterizedURLLoaderTest, LocalNetworkAccessRequestWarning) {
+  url::Origin initiator =
+      url::Origin::Create(GURL("http://other-origin.test/"));
+
+  ResourceRequest request =
+      CreateResourceRequest("GET", test_server()->GetURL("/simple_page.html"));
+  request.mode = mojom::RequestMode::kNoCors;
+  request.request_initiator = initiator;
+  request.devtools_request_id = "fake-id";
+
+  auto client_security_state = NewSecurityState();
+  client_security_state->is_web_secure_context = false;
+  client_security_state->private_network_request_policy =
+      mojom::PrivateNetworkRequestPolicy::kPermissionWarn;
+  client_security_state->ip_address_space = mojom::IPAddressSpace::kPublic;
+  set_factory_client_security_state(std::move(client_security_state));
+
+  MockDevToolsObserver devtools_observer;
+  set_devtools_observer_for_next_request(&devtools_observer);
+
+  EXPECT_EQ(net::OK, LoadRequest(request));
+
+  devtools_observer.WaitUntilPrivateNetworkRequest();
+  ASSERT_TRUE(devtools_observer.private_network_request_params());
+  auto& params = *devtools_observer.private_network_request_params();
+  ASSERT_TRUE(params.client_security_state);
+  auto& state = params.client_security_state;
+  EXPECT_EQ(state->private_network_request_policy,
+            mojom::PrivateNetworkRequestPolicy::kPermissionWarn);
+  EXPECT_EQ(state->is_web_secure_context, false);
+  EXPECT_EQ(state->ip_address_space, mojom::IPAddressSpace::kPublic);
+  EXPECT_EQ(params.resource_address_space, mojom::IPAddressSpace::kLocal);
+  EXPECT_EQ(params.devtools_request_id, "fake-id");
+  EXPECT_TRUE(params.is_warning);
+  EXPECT_THAT(params.url.spec(), testing::HasSubstr("simple_page.html"));
 }
 
 // Bundles together the inputs to a parameterized private network request test.
@@ -6930,16 +7053,7 @@ TEST_P(ParameterizedURLLoaderTest, OnRawResponseIPAddressSpace) {
 TEST_F(URLLoaderMockSocketTest, OrbDoesNotCloseSocketsWhenResourcesNotBlocked) {
   orb_enabled_ = true;
 
-  net::MockConnect kConnect = net::MockConnect(net::ASYNC, net::OK);
-  const net::MockWrite kWrites[] = {
-      net::MockWrite(net::SYNCHRONOUS, 0,
-                     "GET / HTTP/1.1\r\n"
-                     "Host: origin.test\r\n"
-                     "Connection: keep-alive\r\n"
-                     "User-Agent: \r\n"
-                     "Accept-Encoding: gzip, deflate\r\n\r\n"),
-  };
-  net::MockRead kReads[] = {
+  const net::MockRead kReads[] = {
       net::MockRead(net::SYNCHRONOUS, 1,
                     "HTTP/1.1 200 OK\r\n"
                     "Connection: keep-alive\r\n"
@@ -6947,9 +7061,8 @@ TEST_F(URLLoaderMockSocketTest, OrbDoesNotCloseSocketsWhenResourcesNotBlocked) {
       net::MockRead(net::SYNCHRONOUS, 2, "Hello"),
   };
 
-  net::SequencedSocketData socket_data_connect(
-      kConnect, base::span<net::MockRead>(), base::span<net::MockWrite>());
-  net::SequencedSocketData socket_data_reads_writes(kReads, kWrites);
+  net::SequencedSocketData socket_data_connect(kAsyncMockConnect, {}, {});
+  net::SequencedSocketData socket_data_reads_writes(kReads, kOriginTestWrites);
   socket_factory_.AddSocketDataProvider(&socket_data_connect);
   socket_factory_.AddSocketDataProvider(&socket_data_reads_writes);
 
@@ -6971,16 +7084,7 @@ TEST_F(URLLoaderMockSocketTest, OrbDoesNotCloseSocketsWhenResourcesNotBlocked) {
 TEST_F(URLLoaderMockSocketTest, OrbClosesSocketOnReceivingHeaders) {
   orb_enabled_ = true;
 
-  net::MockConnect kConnect = net::MockConnect(net::ASYNC, net::OK);
-  const net::MockWrite kWrites[] = {
-      net::MockWrite(net::SYNCHRONOUS, 0,
-                     "GET / HTTP/1.1\r\n"
-                     "Host: origin.test\r\n"
-                     "Connection: keep-alive\r\n"
-                     "User-Agent: \r\n"
-                     "Accept-Encoding: gzip, deflate\r\n\r\n"),
-  };
-  net::MockRead kReads[] = {
+  const net::MockRead kReads[] = {
       net::MockRead(net::SYNCHRONOUS, 1,
                     "HTTP/1.1 200 OK\r\n"
                     "Connection: keep-alive\r\n"
@@ -6990,9 +7094,8 @@ TEST_F(URLLoaderMockSocketTest, OrbClosesSocketOnReceivingHeaders) {
       net::MockRead(net::SYNCHRONOUS, 2, "This should not be read"),
   };
 
-  net::SequencedSocketData socket_data_connect(
-      kConnect, base::span<net::MockRead>(), base::span<net::MockWrite>());
-  net::SequencedSocketData socket_data_reads_writes(kReads, kWrites);
+  net::SequencedSocketData socket_data_connect(kAsyncMockConnect, {}, {});
+  net::SequencedSocketData socket_data_reads_writes(kReads, kOriginTestWrites);
   socket_factory_.AddSocketDataProvider(&socket_data_connect);
   socket_factory_.AddSocketDataProvider(&socket_data_reads_writes);
 
@@ -7015,16 +7118,7 @@ TEST_F(URLLoaderMockSocketTest,
        OrbDoesNotCloseSocketsWhenResourcesNotBlockedAfterSniffingMimeType) {
   orb_enabled_ = true;
 
-  net::MockConnect kConnect = net::MockConnect(net::ASYNC, net::OK);
-  const net::MockWrite kWrites[] = {
-      net::MockWrite(net::SYNCHRONOUS, 0,
-                     "GET / HTTP/1.1\r\n"
-                     "Host: origin.test\r\n"
-                     "Connection: keep-alive\r\n"
-                     "User-Agent: \r\n"
-                     "Accept-Encoding: gzip, deflate\r\n\r\n"),
-  };
-  net::MockRead kReads[] = {
+  const net::MockRead kReads[] = {
       net::MockRead(net::SYNCHRONOUS, 1,
                     "HTTP/1.1 200 OK\r\n"
                     "Connection: keep-alive\r\n"
@@ -7033,9 +7127,8 @@ TEST_F(URLLoaderMockSocketTest,
       net::MockRead(net::SYNCHRONOUS, 2, "Not actually JSON"),
   };
 
-  net::SequencedSocketData socket_data_connect(
-      kConnect, base::span<net::MockRead>(), base::span<net::MockWrite>());
-  net::SequencedSocketData socket_data_reads_writes(kReads, kWrites);
+  net::SequencedSocketData socket_data_connect(kAsyncMockConnect, {}, {});
+  net::SequencedSocketData socket_data_reads_writes(kReads, kOriginTestWrites);
   socket_factory_.AddSocketDataProvider(&socket_data_connect);
   socket_factory_.AddSocketDataProvider(&socket_data_reads_writes);
 
@@ -7057,16 +7150,7 @@ TEST_F(URLLoaderMockSocketTest,
 TEST_F(URLLoaderMockSocketTest, OrbClosesSocketOnSniffingMimeType) {
   orb_enabled_ = true;
 
-  net::MockConnect kConnect = net::MockConnect(net::ASYNC, net::OK);
-  const net::MockWrite kWrites[] = {
-      net::MockWrite(net::SYNCHRONOUS, 0,
-                     "GET / HTTP/1.1\r\n"
-                     "Host: origin.test\r\n"
-                     "Connection: keep-alive\r\n"
-                     "User-Agent: \r\n"
-                     "Accept-Encoding: gzip, deflate\r\n\r\n"),
-  };
-  net::MockRead kReads[] = {
+  const net::MockRead kReads[] = {
       net::MockRead(net::SYNCHRONOUS, 1,
                     "HTTP/1.1 200 OK\r\n"
                     "Connection: keep-alive\r\n"
@@ -7075,9 +7159,8 @@ TEST_F(URLLoaderMockSocketTest, OrbClosesSocketOnSniffingMimeType) {
       net::MockRead(net::SYNCHRONOUS, 2, "{\"x\" : 3}"),
   };
 
-  net::SequencedSocketData socket_data_connect(
-      kConnect, base::span<net::MockRead>(), base::span<net::MockWrite>());
-  net::SequencedSocketData socket_data_reads_writes(kReads, kWrites);
+  net::SequencedSocketData socket_data_connect(kAsyncMockConnect, {}, {});
+  net::SequencedSocketData socket_data_reads_writes(kReads, kOriginTestWrites);
   socket_factory_.AddSocketDataProvider(&socket_data_connect);
   socket_factory_.AddSocketDataProvider(&socket_data_reads_writes);
 
@@ -7104,16 +7187,7 @@ TEST_F(URLLoaderMockSocketTest, CorpClosesSocket) {
       mojom::PrivateNetworkRequestPolicy::kAllow;
   set_factory_client_security_state(std::move(client_security_state));
 
-  net::MockConnect kConnect = net::MockConnect(net::ASYNC, net::OK);
-  const net::MockWrite kWrites[] = {
-      net::MockWrite(net::SYNCHRONOUS, 0,
-                     "GET / HTTP/1.1\r\n"
-                     "Host: origin.test\r\n"
-                     "Connection: keep-alive\r\n"
-                     "User-Agent: \r\n"
-                     "Accept-Encoding: gzip, deflate\r\n\r\n"),
-  };
-  net::MockRead kReads[] = {
+  const net::MockRead kReads[] = {
       net::MockRead(net::SYNCHRONOUS, 1,
                     "HTTP/1.1 200 OK\r\n"
                     "Connection: keep-alive\r\n"
@@ -7122,9 +7196,8 @@ TEST_F(URLLoaderMockSocketTest, CorpClosesSocket) {
       net::MockRead(net::SYNCHRONOUS, 2, "This should not be read"),
   };
 
-  net::SequencedSocketData socket_data_connect(
-      kConnect, base::span<net::MockRead>(), base::span<net::MockWrite>());
-  net::SequencedSocketData socket_data_reads_writes(kReads, kWrites);
+  net::SequencedSocketData socket_data_connect(kAsyncMockConnect, {}, {});
+  net::SequencedSocketData socket_data_reads_writes(kReads, kOriginTestWrites);
   socket_factory_.AddSocketDataProvider(&socket_data_connect);
   socket_factory_.AddSocketDataProvider(&socket_data_reads_writes);
 
@@ -7152,15 +7225,6 @@ TEST_P(URLLoaderMockSocketAuctionOnlyTest,
       mojom::PrivateNetworkRequestPolicy::kAllow;
   set_factory_client_security_state(std::move(client_security_state));
 
-  net::MockConnect kConnect = net::MockConnect(net::ASYNC, net::OK);
-  const net::MockWrite kWrites[] = {
-      net::MockWrite(net::SYNCHRONOUS, 0,
-                     "GET / HTTP/1.1\r\n"
-                     "Host: origin.test\r\n"
-                     "Connection: keep-alive\r\n"
-                     "User-Agent: \r\n"
-                     "Accept-Encoding: gzip, deflate\r\n\r\n"),
-  };
   const std::string first_read = base::StringPrintf(
       "HTTP/1.1 200 OK\r\n"
       "Connection: keep-alive\r\n"
@@ -7168,14 +7232,13 @@ TEST_P(URLLoaderMockSocketAuctionOnlyTest,
       "Content-Type: text/plain\r\n"
       "Content-Length: 23\r\n\r\n",
       GetParam().c_str());
-  net::MockRead kReads[] = {
+  const net::MockRead kReads[] = {
       net::MockRead(net::SYNCHRONOUS, 1, first_read.c_str()),
       net::MockRead(net::SYNCHRONOUS, 2, "This should not be read"),
   };
 
-  net::SequencedSocketData socket_data_connect(
-      kConnect, base::span<net::MockRead>(), base::span<net::MockWrite>());
-  net::SequencedSocketData socket_data_reads_writes(kReads, kWrites);
+  net::SequencedSocketData socket_data_connect(kAsyncMockConnect, {}, {});
+  net::SequencedSocketData socket_data_reads_writes(kReads, kOriginTestWrites);
   socket_factory_.AddSocketDataProvider(&socket_data_connect);
   socket_factory_.AddSocketDataProvider(&socket_data_reads_writes);
 
@@ -7200,15 +7263,6 @@ TEST_P(URLLoaderMockSocketAuctionOnlyTest,
       mojom::PrivateNetworkRequestPolicy::kAllow;
   set_factory_client_security_state(std::move(client_security_state));
 
-  net::MockConnect kConnect = net::MockConnect(net::ASYNC, net::OK);
-  const net::MockWrite kWrites[] = {
-      net::MockWrite(net::SYNCHRONOUS, 0,
-                     "GET / HTTP/1.1\r\n"
-                     "Host: origin.test\r\n"
-                     "Connection: keep-alive\r\n"
-                     "User-Agent: \r\n"
-                     "Accept-Encoding: gzip, deflate\r\n\r\n"),
-  };
   const std::string first_read = base::StringPrintf(
       "HTTP/1.1 200 OK\r\n"
       "Connection: keep-alive\r\n"
@@ -7216,14 +7270,13 @@ TEST_P(URLLoaderMockSocketAuctionOnlyTest,
       "Content-Type: text/plain\r\n"
       "Content-Length: 23\r\n\r\n",
       GetParam().c_str());
-  net::MockRead kReads[] = {
+  const net::MockRead kReads[] = {
       net::MockRead(net::SYNCHRONOUS, 1, first_read.c_str()),
       net::MockRead(net::SYNCHRONOUS, 2, "This should not be read"),
   };
 
-  net::SequencedSocketData socket_data_connect(
-      kConnect, base::span<net::MockRead>(), base::span<net::MockWrite>());
-  net::SequencedSocketData socket_data_reads_writes(kReads, kWrites);
+  net::SequencedSocketData socket_data_connect(kAsyncMockConnect, {}, {});
+  net::SequencedSocketData socket_data_reads_writes(kReads, kOriginTestWrites);
   socket_factory_.AddSocketDataProvider(&socket_data_connect);
   socket_factory_.AddSocketDataProvider(&socket_data_reads_writes);
 
@@ -7254,11 +7307,9 @@ TEST_F(URLLoaderMockSocketTest, PrivateNetworkRequestPolicyDoesNotCloseSocket) {
       mojom::PrivateNetworkRequestPolicy::kBlock;
   set_factory_client_security_state(std::move(client_security_state));
 
-  net::MockConnect kConnect = net::MockConnect(net::ASYNC, net::OK);
   // No data should be read or written. Trying to do so will assert.
   net::SequencedSocketData socket_data_no_reads_no_writes;
-  net::SequencedSocketData socket_data_connect(
-      kConnect, base::span<net::MockRead>(), base::span<net::MockWrite>());
+  net::SequencedSocketData socket_data_connect(kAsyncMockConnect, {}, {});
   socket_factory_.AddSocketDataProvider(&socket_data_connect);
   socket_factory_.AddSocketDataProvider(&socket_data_no_reads_no_writes);
 

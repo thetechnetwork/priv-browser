@@ -15,6 +15,7 @@
 #include "chrome/browser/ai/ai_context_bound_object.h"
 #include "chrome/browser/ai/ai_context_bound_object_set.h"
 #include "chrome/browser/ai/ai_utils.h"
+#include "components/optimization_guide/core/model_execution/multimodal_message.h"
 #include "components/optimization_guide/core/optimization_guide_model_executor.h"
 #include "components/optimization_guide/proto/features/prompt_api.pb.h"
 #include "content/public/browser/browser_context.h"
@@ -41,6 +42,7 @@ class AIManager;
 class AILanguageModel : public AIContextBoundObject,
                         public blink::mojom::AILanguageModel {
  public:
+  using PromptApiRole = optimization_guide::proto::PromptApiRole;
   using PromptApiPrompt = optimization_guide::proto::PromptApiPrompt;
   using PromptApiRequest = optimization_guide::proto::PromptApiRequest;
   using PromptApiMetadata = optimization_guide::proto::PromptApiMetadata;
@@ -58,15 +60,14 @@ class AILanguageModel : public AIContextBoundObject,
   // stored in a FIFO and kept below a limited number of tokens.
   class Context {
    public:
-    // The structure storing the text in context and the number of tokens in the
-    // text.
+    // A piece of the prompt history and it's size.
     struct ContextItem {
       ContextItem();
       ContextItem(const ContextItem&);
       ContextItem(ContextItem&&);
       ~ContextItem();
 
-      google::protobuf::RepeatedPtrField<PromptApiPrompt> prompts;
+      std::vector<blink::mojom::AILanguageModelPromptPtr> prompts;
       uint32_t tokens = 0;
     };
 
@@ -97,7 +98,7 @@ class AILanguageModel : public AIContextBoundObject,
 
     // Combines the initial prompts and all current items into a request.
     // The type of request produced is a PromptApiRequest.
-    PromptApiRequest MakeRequest();
+    optimization_guide::MultimodalMessage MakeRequest();
 
     // Returns true if the system prompt is set or there is at least one context
     // item.
@@ -114,20 +115,33 @@ class AILanguageModel : public AIContextBoundObject,
   };
 
   // TODO(crbug.com/385173789): Remove hacky multimodal prototype workarounds.
-  class MultimodalResponder : on_device_model::mojom::StreamingResponder {
+  class MultimodalResponder : public on_device_model::mojom::StreamingResponder,
+                              public on_device_model::mojom::ContextClient {
    public:
     explicit MultimodalResponder(
+        AILanguageModel* model,
+        mojo::PendingReceiver<on_device_model::mojom::StreamingResponder>
+            response_receiver,
+        mojo::PendingReceiver<on_device_model::mojom::ContextClient>
+            context_receiver,
         mojo::PendingRemote<blink::mojom::ModelStreamingResponder> responder);
     ~MultimodalResponder() override;
-    mojo::PendingRemote<on_device_model::mojom::StreamingResponder>
-    BindRemote();
     // on_device_model::mojom::StreamingResponder:
     void OnResponse(on_device_model::mojom::ResponseChunkPtr chunk) override;
     void OnComplete(
         on_device_model::mojom::ResponseSummaryPtr summary) override;
 
+    // on_device_model::mojom::ContextClient:
+    void OnComplete(uint32_t tokens_processed) override;
+
    private:
-    mojo::Receiver<on_device_model::mojom::StreamingResponder> receiver_{this};
+    void OnDisconnect();
+
+    uint32_t tokens_processed_ = 0;
+    raw_ptr<AILanguageModel> model_;
+    mojo::Receiver<on_device_model::mojom::StreamingResponder>
+        response_receiver_;
+    mojo::Receiver<on_device_model::mojom::ContextClient> context_receiver_;
     mojo::Remote<blink::mojom::ModelStreamingResponder> responder_;
     std::string current_response_;
   };
@@ -151,7 +165,7 @@ class AILanguageModel : public AIContextBoundObject,
       const optimization_guide::proto::Any& any);
 
   // `blink::mojom::AILanguageModel` implementation.
-  void Prompt(on_device_model::mojom::InputPtr input,
+  void Prompt(std::vector<blink::mojom::AILanguageModelPromptPtr> prompts,
               mojo::PendingRemote<blink::mojom::ModelStreamingResponder>
                   pending_responder) override;
   void Fork(
@@ -167,26 +181,24 @@ class AILanguageModel : public AIContextBoundObject,
   // and passes the session information back through the callback.
   void SetInitialPrompts(
       const std::optional<std::string> system_prompt,
-      std::vector<blink::mojom::AILanguageModelInitialPromptPtr>
-          initial_prompts,
+      std::vector<blink::mojom::AILanguageModelPromptPtr> initial_prompts,
       CreateLanguageModelCallback callback);
   blink::mojom::AILanguageModelInstanceInfoPtr GetLanguageModelInstanceInfo();
   mojo::PendingRemote<blink::mojom::AILanguageModel> TakePendingRemote();
 
  private:
   void PromptGetInputSizeCompletion(mojo::RemoteSetElementId responder_id,
-                                    PromptApiRequest request,
-                                    uint32_t number_of_tokens);
+                                    Context::ContextItem current_item,
+                                    std::optional<uint32_t> result);
   void ModelExecutionCallback(
-      const PromptApiRequest& input,
+      const Context::ContextItem& current_item,
       mojo::RemoteSetElementId responder_id,
       optimization_guide::OptimizationGuideModelStreamingExecutionResult
           result);
 
-  void InitializeContextWithInitialPrompts(
-      optimization_guide::proto::PromptApiRequest request,
-      CreateLanguageModelCallback callback,
-      uint32_t size);
+  void InitializeContextWithInitialPrompts(Context::ContextItem initial_prompts,
+                                           CreateLanguageModelCallback callback,
+                                           std::optional<uint32_t> result);
 
   // Returns the copy of `expected_input_languages_` for the
   // `AILanguageModelInstanceInfo` or cloning.
@@ -216,7 +228,7 @@ class AILanguageModel : public AIContextBoundObject,
   mojo::Receiver<blink::mojom::AILanguageModel> receiver_;
 
   // TODO(crbug.com/385173789): Remove hacky multimodal prototype workarounds.
-  std::vector<std::unique_ptr<MultimodalResponder>> multimodal_responders_;
+  std::unique_ptr<MultimodalResponder> multimodal_responder_;
 
   base::WeakPtrFactory<AILanguageModel> weak_ptr_factory_{this};
 };

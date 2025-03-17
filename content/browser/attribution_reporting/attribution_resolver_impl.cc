@@ -435,6 +435,29 @@ StoreSourceResult AttributionResolverImpl::StoreSource(StorableSource source) {
     return make_result(StoreSourceResult::InternalError());
   }
 
+  const net::SchemefulSite reporting_site(
+      source.common_info().reporting_origin());
+  if (int64_t count =
+          storage_.CountUniqueDailyReportingOriginsPerReportingSiteForSource(
+              reporting_site, source_time);
+      count >= 0) {
+    base::UmaHistogramCounts100(
+        "Conversions.UniqueReportingOriginsPerReportingSiteForSource", count);
+  }
+
+  for (const net::SchemefulSite& destination_site :
+       source.registration().destination_set.destinations()) {
+    if (int64_t count =
+            storage_
+                .CountUniqueDailyReportingOriginsPerDestinationAndReportingSiteForSource(
+                    destination_site, reporting_site, source_time);
+        count >= 0) {
+      base::UmaHistogramCounts100(
+          "Conversions.UniqueReportingOriginsPerDestAndReportingSiteForSource",
+          count);
+    }
+  }
+
   std::optional<base::Time> min_fake_report_time;
 
   if (attribution_logic == StoredSource::AttributionLogic::kFalsely) {
@@ -1109,13 +1132,9 @@ AttributionResolverImpl::GetAllDataKeys() {
 void AttributionResolverImpl::DeleteByDataKey(
     const AttributionDataModel::DataKey& datakey) {
   DCHECK_CALLED_ON_VALID_SEQUENCE(sequence_checker_);
-  // TODO(linnan): Consider exposing a more efficient implementation to match
-  // origins directly where appropriate, e.g. for the `os_registrations_` table.
-  ClearData(base::Time::Min(), base::Time::Max(),
-            base::BindRepeating(std::equal_to<blink::StorageKey>(),
-                                blink::StorageKey::CreateFirstParty(
-                                    datakey.reporting_origin())),
-            /*delete_rate_limit_data=*/true);
+  storage_.ClearDataWithFilter(base::Time::Min(), base::Time::Max(),
+                               datakey.reporting_origin(),
+                               /*delete_rate_limit_data=*/true);
 }
 
 bool AttributionResolverImpl::DeleteReport(AttributionReport::Id report_id) {
@@ -1144,7 +1163,8 @@ void AttributionResolverImpl::ClearDataIncludingRateLimit(
     base::Time delete_begin,
     base::Time delete_end,
     StoragePartition::StorageKeyMatcherFunction filter) {
-  ClearData(delete_begin, delete_end, filter, /*delete_rate_limit_data=*/true);
+  ClearData(delete_begin, delete_end, std::move(filter),
+            /*delete_rate_limit_data=*/true);
 }
 
 void AttributionResolverImpl::ClearData(

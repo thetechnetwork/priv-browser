@@ -49,6 +49,7 @@
 #include "ash/booting/booting_animation_controller.h"
 #include "ash/calendar/calendar_controller.h"
 #include "ash/capture_mode/capture_mode_controller.h"
+#include "ash/capture_mode/sunfish_scanner_feature_watcher.h"
 #include "ash/child_accounts/parent_access_controller_impl.h"
 #include "ash/clipboard/clipboard_history_controller_delegate.h"
 #include "ash/clipboard/clipboard_history_controller_impl.h"
@@ -229,7 +230,6 @@
 #include "ash/wm/overview/birch/birch_privacy_nudge_controller.h"
 #include "ash/wm/overview/overview_controller.h"
 #include "ash/wm/pip/pip_controller.h"
-#include "ash/wm/raster_scale/raster_scale_controller.h"
 #include "ash/wm/resize_shadow_controller.h"
 #include "ash/wm/screen_pinning_controller.h"
 #include "ash/wm/snap_group/snap_group_controller.h"
@@ -934,7 +934,6 @@ Shell::~Shell() {
 
   shadow_controller_.reset();
   resize_shadow_controller_.reset();
-  raster_scale_controller_.reset();
 
   // Has to happen before ~MruWindowTracker.
   window_cycle_controller_.reset();
@@ -1618,6 +1617,14 @@ void Shell::Init(
 
   multi_capture_service_ = std::make_unique<MultiCaptureService>();
 
+  // Depends on `session_controller_` (instantiated in the constructor).
+  // Must be instantiated before `capture_mode_controller_`,
+  // `scanner_controller_` and `app_list_controller_` (controllers which may use
+  // the watcher), and additionally before `Shelf` is initialised in the
+  // `WindowTreeHostManager::InitHosts` call.
+  sunfish_scanner_feature_watcher_ =
+      std::make_unique<SunfishScannerFeatureWatcher>(*session_controller_);
+
   // |tablet_mode_controller_| |mru_window_tracker_|, and
   // |assistant_controller_| are put before |app_list_controller_| as they are
   // used in its constructor.
@@ -1664,17 +1671,14 @@ void Shell::Init(
   event_client_ = std::make_unique<EventClientImpl>();
 
   resize_shadow_controller_ = std::make_unique<ResizeShadowController>();
-  raster_scale_controller_ = std::make_unique<RasterScaleController>();
   shadow_controller_ = std::make_unique<::wm::ShadowController>(
       focus_controller_.get(), std::make_unique<WmShadowControllerDelegate>(),
       env);
 
-  if (features::IsFocusModeEnabled()) {
-    tasks_controller_ = std::make_unique<api::TasksController>(
-        shell_delegate_->CreateTasksDelegate());
-    focus_mode_controller_ = std::make_unique<FocusModeController>(
-        shell_delegate_->CreateFocusModeDelegate());
-  }
+  tasks_controller_ = std::make_unique<api::TasksController>(
+      shell_delegate_->CreateTasksDelegate());
+  focus_mode_controller_ = std::make_unique<FocusModeController>(
+      shell_delegate_->CreateFocusModeDelegate());
 
   logout_confirmation_controller_ =
       std::make_unique<LogoutConfirmationController>();

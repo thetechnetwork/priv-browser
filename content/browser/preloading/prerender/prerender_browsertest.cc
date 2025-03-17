@@ -119,6 +119,7 @@
 #include "testing/gmock/include/gmock/gmock.h"
 #include "third_party/blink/public/common/features.h"
 #include "third_party/blink/public/common/loader/loader_constants.h"
+#include "third_party/blink/public/common/navigation/preloading_headers.h"
 #include "third_party/blink/public/mojom/browser_interface_broker.mojom.h"
 #include "third_party/blink/public/mojom/frame/fullscreen.mojom.h"
 #include "third_party/blink/public/mojom/page/display_cutout.mojom.h"
@@ -491,7 +492,10 @@ class PrerenderBrowserTest : public ContentBrowserTest,
         ui::PageTransitionFromInt(ui::PAGE_TRANSITION_TYPED |
                                   ui::PAGE_TRANSITION_FROM_ADDRESS_BAR),
         should_warm_up_compositor, /*should_prepare_paint_tree=*/true,
-        PreloadingHoldbackStatus::kUnspecified, preloading_attempt,
+        PreloadingHoldbackStatus::kUnspecified,
+        PreloadPipelineInfo::Create(
+            /*planned_max_preloading_type=*/PreloadingType::kPrerender),
+        preloading_attempt,
         /*url_match_predicate=*/{},
         /*prerender_navigation_handle_callback=*/{});
   }
@@ -518,13 +522,9 @@ class PrerenderBrowserTest : public ContentBrowserTest,
   }
 
   void NavigatePrimaryPageFromAddressBar(const GURL& url) {
-    web_contents()->OpenURL(
-        OpenURLParams(
-            url, Referrer(), WindowOpenDisposition::CURRENT_TAB,
-            ui::PageTransitionFromInt(ui::PAGE_TRANSITION_TYPED |
-                                      ui::PAGE_TRANSITION_FROM_ADDRESS_BAR),
-            /*is_renderer_initiated=*/false),
-        /*navigation_handle_callback=*/{});
+    prerender_helper_->NavigatePrimaryPageAsync(
+        url, ui::PageTransitionFromInt(ui::PAGE_TRANSITION_TYPED |
+                                       ui::PAGE_TRANSITION_FROM_ADDRESS_BAR));
   }
 
   FrameTreeNodeId GetHostForUrl(const GURL& url) {
@@ -828,6 +828,10 @@ class PrerenderBrowserTest : public ContentBrowserTest,
 
   void WaitForPageHide() { pagehide_event_receiver_->WaitForRequest(); }
 
+  bool PageHideReceived() {
+    return pagehide_event_receiver_->has_received_request();
+  }
+
   // Stores all the navigation_ids for all navigations. This is used to check
   // that we record UKMs for correct SourceIds.
   std::vector<int64_t> navigation_ids_;
@@ -883,7 +887,7 @@ class NoVarySearchPrerenderBrowserTest : public PrerenderBrowserTest {
 
   NoVarySearchPrerenderBrowserTest() {
     feature_list_.InitAndEnableFeatureWithParameters(
-        blink::features::kPrerender2NoVarySearch,
+        features::kPrerender2NoVarySearch,
         {{"wait_for_headers_timeout_eager_prerender", "500"}});
   }
 
@@ -892,19 +896,6 @@ class NoVarySearchPrerenderBrowserTest : public PrerenderBrowserTest {
  protected:
   void TestNoVarySearchHeaderFailure(const std::string& no_vary_search_header,
                                      FinishedReason expected_finished_reason);
-
- private:
-  base::test::ScopedFeatureList feature_list_;
-};
-
-class DisabledNoVarySearchPrerenderBrowserTest : public PrerenderBrowserTest {
- public:
-  DisabledNoVarySearchPrerenderBrowserTest() {
-    feature_list_.InitAndDisableFeature(
-        blink::features::kPrerender2NoVarySearch);
-  }
-
-  ~DisabledNoVarySearchPrerenderBrowserTest() override = default;
 
  private:
   base::test::ScopedFeatureList feature_list_;
@@ -1959,28 +1950,6 @@ IN_PROC_BROWSER_TEST_F(NoVarySearchPrerenderBrowserTest,
       blink::mojom::SpeculationEagerness::kEager)});
 }
 
-// Tests that the speculationrules No-Vary-Search hint is not populated for the
-// PrerenderHost if kPrerender2NoVarySearch feature is not enabled.
-IN_PROC_BROWSER_TEST_F(DisabledNoVarySearchPrerenderBrowserTest,
-                       NoVarySearchHintIsNotPopulated) {
-  const GURL kInitialUrl = GetUrl("/empty.html");
-  const GURL kPrerenderingUrl = GetUrl("/no_vary_search_a.html?prerender");
-
-  // Navigate to an initial page.
-  ASSERT_TRUE(NavigateToURL(shell(), kInitialUrl));
-  ASSERT_EQ(web_contents()->GetLastCommittedURL(), kInitialUrl);
-
-  // Start prerendering `kPrerenderingUrl`.
-  ASSERT_EQ(GetRequestCount(kPrerenderingUrl), 0);
-  FrameTreeNodeId host_id =
-      AddPrerender(kPrerenderingUrl, R"(params=(\\\"a\\\"))");
-  auto* host =
-      web_contents_impl()->GetPrerenderHostRegistry()->FindNonReservedHostById(
-          host_id);
-  ASSERT_TRUE(host);
-  ASSERT_FALSE(host->no_vary_search_hint().has_value());
-}
-
 // Tests that the speculationrules trigger works in the presence of
 // No-Vary-Search for inexact URL in the presence of main frame navigation.
 IN_PROC_BROWSER_TEST_F(NoVarySearchPrerenderBrowserTest,
@@ -2032,93 +2001,6 @@ IN_PROC_BROWSER_TEST_F(NoVarySearchPrerenderBrowserTest,
       /*accurate=*/true,
       /*ready_time=*/kMockElapsedTime,
       blink::mojom::SpeculationEagerness::kEager)});
-}
-
-// Test that activation is unsuccessful when navigating to an inexact URL
-// before No-Vary-Search header is back from the server, even if the
-// No-Vary-Search header is matching when it is received.
-IN_PROC_BROWSER_TEST_F(DisabledNoVarySearchPrerenderBrowserTest,
-                       NoVarySearchHintActivationUnsuccessful) {
-  const std::string kTestingRelativeUrl =
-      "/delayed_with_no_vary_search?prerender";
-  const std::string kPrerenderingRelativeUrl = kTestingRelativeUrl + "&a=5";
-  // Create a HTTP response to control prerendering main-frame navigation.
-  net::test_server::ControllableHttpResponse main_prerender_response(
-      embedded_test_server(), kPrerenderingRelativeUrl);
-
-  const std::string kNavigationRelativeUrl = kTestingRelativeUrl + "&a=3";
-  // Create a HTTP response to control main-frame navigation.
-  net::test_server::ControllableHttpResponse main_navigation_response(
-      embedded_test_server(), kNavigationRelativeUrl);
-
-  ASSERT_TRUE(embedded_test_server()->Start());
-
-  const GURL kInitialUrl = embedded_test_server()->GetURL("/empty.html");
-  const GURL kPrerenderingUrl =
-      embedded_test_server()->GetURL(kPrerenderingRelativeUrl);
-  const GURL kNavigationUrl =
-      embedded_test_server()->GetURL(kNavigationRelativeUrl);
-
-  // Navigate to an initial page.
-  ASSERT_TRUE(NavigateToURL(shell(), kInitialUrl));
-  ASSERT_EQ(web_contents()->GetLastCommittedURL(), kInitialUrl);
-
-  // Start prerendering `kPrerenderingUrl`.
-  content::test::PrerenderHostCreationWaiter host_creation_waiter;
-  AddPrerenderAsync(kPrerenderingUrl, R"(params=(\\\"a\\\"))");
-  FrameTreeNodeId host_id = host_creation_waiter.Wait();
-  auto* host =
-      web_contents_impl()->GetPrerenderHostRegistry()->FindNonReservedHostById(
-          host_id);
-  ASSERT_TRUE(host);
-
-  // Start to navigate to kNavigationUrl
-  std::unique_ptr<content::TestNavigationObserver> nav_observer =
-      test::PrerenderTestHelper::NavigatePrimaryPageAsync(*web_contents_impl(),
-                                                          kNavigationUrl);
-  auto* prerender_web_contents =
-      content::WebContents::FromFrameTreeNodeId(host_id);
-  content::test::PrerenderHostObserver host_observer(*prerender_web_contents,
-                                                     host_id);
-
-  NavigationRequest* nav_request =
-      web_contents_impl()->GetPrimaryFrameTree().root()->navigation_request();
-  ASSERT_FALSE(host->were_headers_received());
-  // Make sure PrerenderHostRegistry does not select this prerender as a
-  // potential prerender host to activate.
-  ASSERT_NE(host_id, web_contents_impl()
-                         ->GetPrerenderHostRegistry()
-                         ->FindPotentialHostToActivate(*nav_request));
-  // Make sure that the prerender host is not a match by IsUrlMatch.
-  ASSERT_FALSE(host->IsUrlMatch(kNavigationUrl));
-  main_prerender_response.WaitForRequest();
-  main_prerender_response.Send(
-      net::HTTP_OK, /*content_type=*/"text/html", /*content=*/"",
-      /*cookies=*/{}, /*extra_headers=*/{"No-Vary-Search: params=(\"a\")"});
-  host_observer.WaitForHeaders();
-  ASSERT_TRUE(host->were_headers_received());
-  // Make sure that, after receiving headers the prerender host is not a
-  // match by IsUrlMatch.
-  ASSERT_FALSE(host->IsUrlMatch(kNavigationUrl));
-  ASSERT_NE(host_id, web_contents_impl()
-                         ->GetPrerenderHostRegistry()
-                         ->FindPotentialHostToActivate(*nav_request));
-  // Advance the main navigation.
-  main_navigation_response.WaitForRequest();
-  main_navigation_response.Send(
-      net::HTTP_OK, /*content_type=*/"text/html", /*content=*/"",
-      /*cookies=*/{}, /*extra_headers=*/{"No-Vary-Search: params=(\"a\")"});
-  main_navigation_response.Done();
-  main_prerender_response.Done();
-
-  // Wait for the navigation to finish.
-  nav_observer->Wait();
-
-  // Check that the prerender host was not activated.
-  ASSERT_FALSE(host_observer.was_activated());
-
-  // Navigation should issue a request.
-  ASSERT_EQ(web_contents()->GetLastCommittedURL(), kNavigationUrl);
 }
 
 // Tests that the speculationrules trigger works.
@@ -2524,7 +2406,7 @@ IN_PROC_BROWSER_TEST_P(PrerenderAndPrefetchBrowserTest,
       current_frame_host()->GetFrameTreeNodeId());
   ASSERT_TRUE(prefetch_service);
   base::RunLoop run_loop;
-  PrefetchService::SetPrefetchResponseCompletedCallbackForTesting(
+  PrefetchContainer::SetPrefetchResponseCompletedCallbackForTesting(
       base::BindRepeating(
           [](base::RunLoop* run_loop, const GURL& url,
              base::WeakPtr<PrefetchContainer> prefetch_container) {
@@ -3696,11 +3578,13 @@ IN_PROC_BROWSER_TEST_F(PrerenderTargetHintEnabledBrowserTest,
   WaitForPrerenderLoadCompletion(kPrerenderingUrl);
 
   RenderFrameHost* prerender_host = GetPrerenderedMainFrameHost(host_id);
+  // Call fetchLater() to record that the pagehide event is fired.
   std::string js = R"(
         addEventListener('pagehide', () => {
           fetchLater($1);
         });)";
   EXPECT_TRUE(ExecJs(prerender_host, JsReplace(js, url_ping)));
+  EXPECT_FALSE(PageHideReceived());
 
   // Remove the rules and check that the prerender is cancelled with an
   // appropriate final status.
@@ -3717,6 +3601,7 @@ IN_PROC_BROWSER_TEST_F(PrerenderTargetHintEnabledBrowserTest,
   // expected to dispatch the pagehide event unlike other unexpected prerender
   // failures.
   WaitForPageHide();
+  EXPECT_TRUE(PageHideReceived());
 }
 
 // Tests removing speculation rules whose target_hint is "_blank" (i.e.,
@@ -3724,17 +3609,31 @@ IN_PROC_BROWSER_TEST_F(PrerenderTargetHintEnabledBrowserTest,
 IN_PROC_BROWSER_TEST_F(
     PrerenderTargetHintEnabledBrowserTest,
     CancelOnSpeculationCandidateRemoved_WithTargetHintBlank) {
+  GURL url_ping(GetUrl(kPagehideEventPath));
+
   // Navigate to an initial page.
   const GURL kInitialUrl = GetUrl("/title1.html");
   ASSERT_TRUE(NavigateToURL(shell(), kInitialUrl));
 
   // Start prerendering.
-  const GURL kPrerenderingUrl = GetUrl("/title2.html");
+  const GURL kPrerenderingUrl = GetUrl("/title1.html?prerender");
   FrameTreeNodeId host_id = prerender_helper()->AddPrerender(
       kPrerenderingUrl, /*eagerness=*/std::nullopt, "_blank");
   auto* prerender_web_contents = WebContents::FromFrameTreeNodeId(host_id);
   ASSERT_NE(prerender_web_contents, web_contents_impl());
   ExpectWebContentsIsForNewTabPrerendering(*prerender_web_contents);
+  // Call fetchLater() to record that the pagehide event is fired.
+  std::string js = R"(
+        addEventListener('pagehide', () => {
+          fetchLater($1);
+        });)";
+
+  RenderFrameHost* prerender_host =
+      prerender_helper()->GetPrerenderedMainFrameHost(*prerender_web_contents,
+                                                      host_id);
+
+  EXPECT_TRUE(ExecJs(prerender_host, JsReplace(js, url_ping)));
+  EXPECT_FALSE(PageHideReceived());
 
   base::WeakPtr<WebContents> prerender_web_contents_weak =
       prerender_web_contents->GetWeakPtr();
@@ -3746,10 +3645,17 @@ IN_PROC_BROWSER_TEST_F(
       web_contents_impl()->GetPrimaryMainFrame(),
       "document.querySelector('script[type=speculationrules]').remove()"));
   host_observer.WaitForDestroyed();
-  // During the cancellation, the prerender WebContents should be destroyed.
-  EXPECT_FALSE(prerender_web_contents_weak);
   ExpectFinalStatusForSpeculationRule(
       PrerenderFinalStatus::kSpeculationRuleRemoved);
+
+  // Intended prerender cancellation such as speculation rules removal is
+  // expected to dispatch the pagehide event unlike other unexpected prerender
+  // failures.
+  WaitForPageHide();
+  EXPECT_TRUE(PageHideReceived());
+
+  // During the cancellation, the prerender WebContents should be destroyed.
+  EXPECT_FALSE(prerender_web_contents_weak);
 
   ukm::SourceId triggering_primary_page_source_id =
       web_contents_impl()->GetPrimaryMainFrame()->GetPageUkmSourceId();
@@ -6891,26 +6797,36 @@ IN_PROC_BROWSER_TEST_F(PrerenderBrowserTest, DocumentUserData) {
 // This test cannot be a web test because web tests handles the GamepadMonitor
 // interface on the renderer side. See GamepadController::Install().
 IN_PROC_BROWSER_TEST_F(PrerenderBrowserTest, GamepadMonitorCancelPrerendering) {
-  const GURL kInitialUrl = GetUrl("/empty.html");
-  const GURL kPrerenderingUrl = GetUrl("/empty.html?prerender");
+  const GURL initial_url = GetUrl("/empty.html");
+  const GURL prerender_url = GetUrl("/empty.html?prerender");
+  GURL url_ping(GetUrl(kPagehideEventPath));
 
   // Navigate to an initial page.
-  ASSERT_TRUE(NavigateToURL(shell(), kInitialUrl));
+  ASSERT_TRUE(NavigateToURL(shell(), initial_url));
 
   // Make a prerendered page.
-  FrameTreeNodeId host_id = AddPrerender(kPrerenderingUrl);
+  FrameTreeNodeId host_id = AddPrerender(prerender_url);
   auto* prerender_render_frame_host = GetPrerenderedMainFrameHost(host_id);
+  // Call fetchLater() to record that the pagehide event is fired.
+  std::string js = R"(
+        addEventListener('pagehide', () => {
+          fetchLater($1);
+        });)";
+  EXPECT_TRUE(ExecJs(prerender_render_frame_host, JsReplace(js, url_ping)));
+  EXPECT_FALSE(PageHideReceived());
 
   // Executing `navigator.getGamepads()` to start binding the GamepadMonitor
   // interface.
   std::ignore = EvalJs(prerender_render_frame_host, "navigator.getGamepads()",
                        EvalJsOptions::EXECUTE_SCRIPT_NO_USER_GESTURE);
   // Verify Mojo capability control cancels prerendering.
-  EXPECT_FALSE(HasHostForUrl(kPrerenderingUrl));
+  EXPECT_FALSE(HasHostForUrl(prerender_url));
   ExpectFinalStatusForSpeculationRule(PrerenderFinalStatus::kMojoBinderPolicy);
   histogram_tester().ExpectUniqueSample(
       "Prerender.Experimental.PrerenderCancelledInterface.SpeculationRule",
       PrerenderCancelledInterface::kGamepadMonitor, 1);
+  // Non-intentional prerender cancellation should not receive page hide.
+  EXPECT_FALSE(PageHideReceived());
 }
 
 // Tests that requesting to bind the GamepadMonitor interface after the
@@ -7683,13 +7599,10 @@ IN_PROC_BROWSER_TEST_F(PrerenderSequentialPrerenderingBrowserTest,
   // Activate the embedder triggered prerender.
   test::PrerenderHostObserver embedder_observer(
       *web_contents(), GetHostForUrl(kEmbedderPrerender));
-  shell()->web_contents()->OpenURL(
-      OpenURLParams(
-          kEmbedderPrerender, Referrer(), WindowOpenDisposition::CURRENT_TAB,
-          ui::PageTransitionFromInt(ui::PAGE_TRANSITION_TYPED |
-                                    ui::PAGE_TRANSITION_FROM_ADDRESS_BAR),
-          /*is_renderer_initiated=*/false),
-      /*navigation_handle_callback=*/{});
+  prerender_helper()->NavigatePrimaryPageAsync(
+      kEmbedderPrerender,
+      ui::PageTransitionFromInt(ui::PAGE_TRANSITION_TYPED |
+                                ui::PAGE_TRANSITION_FROM_ADDRESS_BAR));
 
   embedder_observer.WaitForActivation();
   EXPECT_EQ(web_contents()->GetLastCommittedURL(), kEmbedderPrerender);
@@ -11981,14 +11894,10 @@ IN_PROC_BROWSER_TEST_F(PrerenderBrowserTest,
       *shell()->web_contents(), redirected_url_node_2);
   test::PrerenderHostObserver prerender_observer(*web_contents_impl(),
                                                  prerender_initial_url);
-  shell()->web_contents()->OpenURL(
-      OpenURLParams(
-          prerender_initial_url, Referrer(), WindowOpenDisposition::CURRENT_TAB,
-          ui::PageTransitionFromInt(ui::PAGE_TRANSITION_TYPED |
-                                    ui::PAGE_TRANSITION_FROM_ADDRESS_BAR),
-          /*is_renderer_initiated=*/false),
-      /*navigation_handle_callback=*/{});
-
+  prerender_helper()->NavigatePrimaryPageAsync(
+      prerender_initial_url,
+      ui::PageTransitionFromInt(ui::PAGE_TRANSITION_TYPED |
+                                ui::PAGE_TRANSITION_FROM_ADDRESS_BAR));
   prerender_observer.WaitForActivation();
   ASSERT_EQ(1u, activation_redirect_chain_observer.redirect_chain().size());
   EXPECT_EQ(redirected_url_node_2,
@@ -12045,6 +11954,8 @@ PrerenderEmbedderTriggeredCrossOriginRedirectionPage(
           /*should_warm_up_compositor=*/false,
           /*should_prepare_paint_tree=*/true,
           PreloadingHoldbackStatus::kUnspecified,
+          PreloadPipelineInfo::Create(
+              /*planned_max_preloading_type=*/PreloadingType::kPrerender),
           /*preloading_attempt=*/nullptr, /*url_match_predicate=*/{},
           /*prerender_navigation_handle_callback=*/{});
   EXPECT_TRUE(prerender_handle);
@@ -12599,17 +12510,17 @@ class PrerenderPurposePrefetchBrowserTest : public PrerenderBrowserTest {
 
   bool TestPurposePrefetchHeader(const GURL& url) {
     net::test_server::HttpRequest::HeaderMap headers = GetRequestHeaders(url);
-    auto it = headers.find("Purpose");
+    auto it = headers.find(blink::kPurposeHeaderName);
     if (it == headers.end()) {
       return false;
     }
-    EXPECT_EQ("prefetch", it->second);
+    EXPECT_EQ(blink::kSecPurposePrefetchHeaderValue, it->second);
 
-    it = headers.find("Sec-Purpose");
+    it = headers.find(blink::kSecPurposeHeaderName);
     if (it == headers.end()) {
       return false;
     }
-    EXPECT_EQ("prefetch;prerender", it->second);
+    EXPECT_EQ(blink::kSecPurposePrefetchPrerenderHeaderValue, it->second);
     return true;
   }
 };
@@ -13739,13 +13650,10 @@ IN_PROC_BROWSER_TEST_F(PrerenderBrowserTest,
           *web_contents_impl(), prerendering_url, redirected_url);
   test::PrerenderHostObserver prerender_observer(*web_contents_impl(),
                                                  prerendering_url);
-  shell()->web_contents()->OpenURL(
-      OpenURLParams(
-          prerendering_url, Referrer(), WindowOpenDisposition::CURRENT_TAB,
-          ui::PageTransitionFromInt(ui::PAGE_TRANSITION_TYPED |
-                                    ui::PAGE_TRANSITION_FROM_ADDRESS_BAR),
-          /*is_renderer_initiated=*/false),
-      /*navigation_handle_callback=*/{});
+  prerender_helper()->NavigatePrimaryPageAsync(
+      prerendering_url,
+      ui::PageTransitionFromInt(ui::PAGE_TRANSITION_TYPED |
+                                ui::PAGE_TRANSITION_FROM_ADDRESS_BAR));
   prerender_observer.WaitForActivation();
   histogram_tester().ExpectUniqueSample(
       "Prerender.Experimental.PrerenderHostFinalStatus.Embedder_"
@@ -13770,13 +13678,10 @@ IN_PROC_BROWSER_TEST_F(PrerenderBrowserTest,
           *web_contents_impl(), prerendering_url, redirected_url);
   test::PrerenderHostObserver prerender_observer(*web_contents_impl(),
                                                  prerendering_url);
-  shell()->web_contents()->OpenURL(
-      OpenURLParams(
-          prerendering_url, Referrer(), WindowOpenDisposition::CURRENT_TAB,
-          ui::PageTransitionFromInt(ui::PAGE_TRANSITION_TYPED |
-                                    ui::PAGE_TRANSITION_FROM_ADDRESS_BAR),
-          /*is_renderer_initiated=*/false),
-      /*navigation_handle_callback=*/{});
+  prerender_helper()->NavigatePrimaryPageAsync(
+      prerendering_url,
+      ui::PageTransitionFromInt(ui::PAGE_TRANSITION_TYPED |
+                                ui::PAGE_TRANSITION_FROM_ADDRESS_BAR));
   prerender_observer.WaitForActivation();
   histogram_tester().ExpectUniqueSample(
       "Prerender.Experimental.PrerenderHostFinalStatus.Embedder_"

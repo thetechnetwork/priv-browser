@@ -266,20 +266,24 @@ class CookieRetrieverNetworkService
                   const net::CookieAccessResultList& excluded_cookies) {
     for (const auto& cookie_with_access_result : cookies) {
       const net::CanonicalCookie& cookie = cookie_with_access_result.cookie;
-      // TODO (crbug.com/326605834) Once ancestor chain bit changes are
-      // implemented update this method utilize the ancestor bit.
+
       base::expected<net::CookiePartitionKey::SerializedCookiePartitionKey,
                      std::string>
           serialized_partition_key =
               net::CookiePartitionKey::Serialize(cookie.PartitionKey());
       // We could be missing cookies that have unserializable partition key.
       // Reference the CookiePartitionKey::IsSerializable docs for more details.
+      // Default to true for has_cross_site_ancestor if the partition key is
+      // unserializable to avoid false positives.
       std::string key = base::StringPrintf(
-          "%s::%s::%s::%d::%s", cookie.Name().c_str(), cookie.Domain().c_str(),
+          "%s::%s::%s::%d::%s::%d", cookie.Name().c_str(), cookie.Domain().c_str(),
           cookie.Path().c_str(), cookie.SecureAttribute(),
           serialized_partition_key.has_value()
               ? serialized_partition_key->TopLevelSite().c_str()
-              : serialized_partition_key.error().c_str());
+              : serialized_partition_key.error().c_str(),
+          serialized_partition_key.has_value()
+              ? serialized_partition_key->has_cross_site_ancestor()
+              : true);
       all_cookies_.emplace(std::move(key), cookie);
     }
   }
@@ -327,12 +331,9 @@ std::vector<net::CanonicalCookie> FilterCookies(
            partition_key->GetTopLevelSite())) {
         continue;
       }
-      // TODO(crbug.com/328043119): Remove checks for
-      // AncestorChainBitEnabledInPartitionedCookies after feature is removed.
-      if (base::FeatureList::IsEnabled(
-              net::features::kAncestorChainBitEnabledInPartitionedCookies) &&
-          (serialized_result->has_cross_site_ancestor() !=
-           partition_key->GetHasCrossSiteAncestor())) {
+
+      if (serialized_result->has_cross_site_ancestor() !=
+           partition_key->GetHasCrossSiteAncestor()) {
         continue;
       }
     }
@@ -2713,6 +2714,10 @@ String BuildCorsError(network::mojom::CorsError cors_error) {
     case network::mojom::CorsError::kPrivateNetworkAccessPermissionDenied:
       return protocol::Network::CorsErrorEnum::
           PrivateNetworkAccessPermissionDenied;
+
+    case network::mojom::CorsError::kLocalNetworkAccessPermissionDenied:
+      return protocol::Network::CorsErrorEnum::
+          LocalNetworkAccessPermissionDenied;
   }
 }
 }  // namespace
@@ -3426,8 +3431,7 @@ void NetworkHandler::OnResponseReceivedExtraInfo(
     return;
 
   std::unique_ptr<Network::CookiePartitionKey> frontend_partition_key;
-  // TODO (crbug.com/326605834) Once ancestor chain bit changes are implemented
-  // update this method utilize the ancestor bit.
+
   if (cookie_partition_key) {
     base::expected<net::CookiePartitionKey::SerializedCookiePartitionKey,
                    std::string>
@@ -3807,6 +3811,11 @@ String NetworkHandler::BuildPrivateNetworkRequestPolicy(
       return protocol::Network::PrivateNetworkRequestPolicyEnum::PreflightBlock;
     case network::mojom::PrivateNetworkRequestPolicy::kPreflightWarn:
       return protocol::Network::PrivateNetworkRequestPolicyEnum::PreflightWarn;
+    case network::mojom::PrivateNetworkRequestPolicy::kPermissionBlock:
+      return protocol::Network::PrivateNetworkRequestPolicyEnum::
+          PermissionBlock;
+    case network::mojom::PrivateNetworkRequestPolicy::kPermissionWarn:
+      return protocol::Network::PrivateNetworkRequestPolicyEnum::PermissionWarn;
   }
 }
 

@@ -28,6 +28,7 @@
 #include "base/strings/utf_string_conversions.h"
 #include "base/task/single_thread_task_runner.h"
 #include "base/test/bind.h"
+#include "base/test/metrics/histogram_tester.h"
 #include "base/test/metrics/user_action_tester.h"
 #include "base/test/scoped_feature_list.h"
 #include "base/test/test_timeouts.h"
@@ -75,6 +76,7 @@
 #include "chrome/browser/ui/views/side_panel/extensions/extension_side_panel_manager.h"
 #include "chrome/browser/ui/views/side_panel/side_panel_ui.h"
 #include "chrome/common/chrome_paths.h"
+#include "chrome/common/chrome_paths_internal.h"
 #include "chrome/common/chrome_switches.h"
 #include "chrome/common/pref_names.h"
 #include "chrome/common/url_constants.h"
@@ -2675,6 +2677,59 @@ IN_PROC_BROWSER_TEST_F(RemoteDebuggingTest, MAYBE_RemoteDebugger) {
 IN_PROC_BROWSER_TEST_F(RemoteDebuggingTest, DiscoveryPage) {
   ASSERT_TRUE(RunExtensionTest("discovery_page")) << message_;
 }
+
+#if BUILDFLAG(IS_WIN) || BUILDFLAG(IS_MAC) || BUILDFLAG(IS_LINUX)
+class RemoteDebuggingUserDataDirTest
+    : public RemoteDebuggingTest,
+      public ::testing::WithParamInterface<
+          std::tuple</*default_user_dir*/ bool, /*enable_the_feature*/ bool>> {
+ public:
+  void SetUp() override {
+    scoped_feature_list_.InitWithFeatureState(
+        features::kDevToolsDebuggingRestrictions, IsFeatureEnabled());
+    chrome::SetUsingDefaultUserDataDirectoryForTesting(
+        IsUsingStandardUserDataDir());
+    RemoteDebuggingTest::SetUp();
+  }
+
+ protected:
+  static bool IsUsingStandardUserDataDir() { return std::get<0>(GetParam()); }
+
+  static bool IsFeatureEnabled() { return std::get<1>(GetParam()); }
+
+  base::HistogramTester histograms_;
+
+ private:
+  base::test::ScopedFeatureList scoped_feature_list_;
+};
+
+IN_PROC_BROWSER_TEST_P(RemoteDebuggingUserDataDirTest, AttemptDebugging) {
+  histograms_.ExpectUniqueSample(
+      "DevTools.DevToolsDebuggingUserDataDirStatus",
+      IsUsingStandardUserDataDir()
+          ? /*kDebuggingRequestedWithDefaultUserDataDir*/ 2
+          : /*kDebuggingRequestedWithNonDefaultUserDataDir*/ 1,
+      1);
+
+  if (IsUsingStandardUserDataDir() && IsFeatureEnabled()) {
+    EXPECT_FALSE(RunExtensionTest("discovery_page"));
+  } else {
+    EXPECT_TRUE(RunExtensionTest("discovery_page"));
+  }
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    ,
+    RemoteDebuggingUserDataDirTest,
+    testing::Combine(testing::Bool(), testing::Bool()),
+    [](const auto& info) {
+      return base::StrCat({std::get<0>(info.param) ? "DefaultUserDataDir"
+                                                   : "NonDefaultUserDataDir",
+                           "AndFeature",
+                           std::get<1>(info.param) ? "Enabled" : "Disabled"});
+    });
+
+#endif  // BUILDFLAG(IS_WIN) || BUILDFLAG(IS_MAC) || BUILDFLAG(IS_LINUX)
 
 IN_PROC_BROWSER_TEST_F(DevToolsTest, PolicyDisallowed) {
   DisallowDevTools(browser());

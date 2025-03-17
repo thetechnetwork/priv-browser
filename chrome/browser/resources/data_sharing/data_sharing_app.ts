@@ -13,6 +13,7 @@ import '/strings.m.js';
 
 import {ColorChangeUpdater} from '//resources/cr_components/color_change_listener/colors_css_updater.js';
 import {AbslStatusCode} from '//resources/mojo/mojo/public/mojom/base/absl_status.mojom-webui.js';
+import {assert} from 'chrome-untrusted://resources/js/assert.js';
 import {CustomElement} from 'chrome-untrusted://resources/js/custom_element.js';
 import {loadTimeData} from 'chrome-untrusted://resources/js/load_time_data.js';
 
@@ -36,6 +37,9 @@ enum FlowValues {
   SHARE = 'share',
   JOIN = 'join',
   MANAGE = 'manage',
+  DELETE = 'delete',
+  LEAVE = 'leave',
+  CLOSE = 'close',
 }
 
 // Events that can be triggered within the DataSharing UI.
@@ -177,6 +181,9 @@ export function createTranslationMap(): TranslationMap {
           loadTimeData.getString('deleteLastDialogHeader'),
       [StaticMessageKey.KEEP_GROUP]: loadTimeData.getString('keepGroup'),
       [StaticMessageKey.DELETE_GROUP]: loadTimeData.getString('deleteGroup'),
+      [StaticMessageKey.DELETE_FLOW_HEADER]:
+          loadTimeData.getString('deleteFlowHeader'),
+      [StaticMessageKey.DELETE]: loadTimeData.getString('delete'),
     },
     dynamic: {
       /** Invite flow */
@@ -223,7 +230,7 @@ export function createTranslationMap(): TranslationMap {
           ) =>
           loadTimeData.getStringF(
               'ownerRemoveMemberDialogBody', params.displayedUser!.name!,
-              params.displayedUser!.email!),
+              params.displayedUser!.email!, getTabGroupName()),
       [DynamicMessageKey.GET_LEAVE_GROUP_DIALOG_CONTENT]: () =>
           loadTimeData.getStringF('leaveDialogBody', getTabGroupName()),
       [DynamicMessageKey.GET_BLOCK_DIALOG_TITLE]: (
@@ -277,6 +284,9 @@ export function createTranslationMap(): TranslationMap {
               return '';
             }
           },
+      [DynamicMessageKey.GET_DELETE_FLOW_DESCRIPTION_CONTENT]: () =>
+          loadTimeData.getStringF(
+              'deleteFlowDescriptionContent', getTabGroupName()),
     },
   };
 }
@@ -302,6 +312,7 @@ export class DataSharingApp extends CustomElement implements Logger {
   private translationMap_: TranslationMap = createTranslationMap();
   private abandonJoin_: boolean = false;
   private successfullyJoined_: boolean = false;
+  private tabGroupId_: string|null = null;
 
   static get is() {
     return 'data-sharing-app';
@@ -341,6 +352,15 @@ export class DataSharingApp extends CustomElement implements Logger {
 
     if (event.intentType === LoggingIntent.ABANDON_JOIN) {
       this.abandonJoin_ = true;
+    }
+
+    if (event.intentType === LoggingIntent.STOP_SHARING) {
+      assert(this.tabGroupId_);
+      if (event.progress === Progress.STARTED) {
+        this.aboutToUnShareTabGroup(this.tabGroupId_);
+      } else if (event.progress === Progress.SUCCEEDED) {
+        this.onTabGroupUnShareComplete(this.tabGroupId_);
+      }
     }
   }
 
@@ -403,6 +423,14 @@ export class DataSharingApp extends CustomElement implements Logger {
         tabGroupId, groupId);
   }
 
+  private aboutToUnShareTabGroup(tabGroupId: string) {
+    this.browserProxy_.handler!.aboutToUnShareTabGroup(tabGroupId);
+  }
+
+  private onTabGroupUnShareComplete(tabGroupId: string) {
+    this.browserProxy_.handler!.onTabGroupUnShareComplete(tabGroupId);
+  }
+
   private getShareLink(params: DataSharingSdkGetLinkParams): Promise<string> {
     return this.browserProxy_.handler!
         .getShareLink(params.groupId, params.tokenSecret!)
@@ -451,6 +479,8 @@ export class DataSharingApp extends CustomElement implements Logger {
     const tokenSecret = params.get(UrlQueryParams.TOKEN_SECRET);
     const tabGroupId = params.get(UrlQueryParams.TAB_GROUP_ID);
     const parent = this.getRequiredElement('#dialog-container');
+
+    this.tabGroupId_ = tabGroupId;
 
     if (flow === FlowValues.SHARE) {
       parent.classList.add('invite');
@@ -508,6 +538,7 @@ export class DataSharingApp extends CustomElement implements Logger {
             });
         break;
       case FlowValues.MANAGE:
+      case FlowValues.LEAVE:
         // group_id cannot be null for manage flow.
         this.dataSharingSdk_
             .runManageFlow({
@@ -523,6 +554,33 @@ export class DataSharingApp extends CustomElement implements Logger {
                 window.open(
                     loadTimeData.getStringF('activityLogsUrl'), '_blank');
               },
+              logger: this,
+              showLeaveDialogAtStartup: flow === FlowValues.LEAVE,
+            })
+            .then((res) => {
+              this.browserProxy_.closeUi(res.status);
+            });
+        break;
+      case FlowValues.DELETE:
+        // group_id cannot be null for delete flow.
+        this.dataSharingSdk_
+            .runDeleteFlow({
+              parent,
+              groupId: groupId!,
+              translatedMessages: this.translationMap_,
+              logger: this,
+            })
+            .then((res) => {
+              this.browserProxy_.closeUi(res.status);
+            });
+        break;
+      case FlowValues.CLOSE:
+        // group_id cannot be null for close flow.
+        this.dataSharingSdk_
+            .runCloseFlow({
+              parent,
+              groupId: groupId!,
+              translatedMessages: this.translationMap_,
               logger: this,
             })
             .then((res) => {

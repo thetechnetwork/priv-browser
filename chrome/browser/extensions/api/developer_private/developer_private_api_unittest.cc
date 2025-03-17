@@ -25,6 +25,7 @@
 #include "chrome/browser/extensions/account_extension_tracker.h"
 #include "chrome/browser/extensions/api/developer_private/developer_private_functions.h"
 #include "chrome/browser/extensions/api/developer_private/extension_info_generator.h"
+#include "chrome/browser/extensions/api/developer_private/profile_info_generator.h"
 #include "chrome/browser/extensions/chrome_test_extension_loader.h"
 #include "chrome/browser/extensions/error_console/error_console.h"
 #include "chrome/browser/extensions/extension_action_test_util.h"
@@ -68,7 +69,6 @@
 #include "extensions/browser/event_router_factory.h"
 #include "extensions/browser/extension_dialog_auto_confirm.h"
 #include "extensions/browser/extension_error_test_util.h"
-#include "extensions/browser/extension_function_dispatcher.h"
 #include "extensions/browser/extension_prefs.h"
 #include "extensions/browser/extension_registry.h"
 #include "extensions/browser/extension_registry_observer.h"
@@ -476,10 +476,8 @@ class DeveloperPrivateApiUnitTest : public ExtensionServiceTestWithInstall {
 bool DeveloperPrivateApiUnitTest::RunFunction(
     const scoped_refptr<ExtensionFunction>& function,
     const base::Value::List& args) {
-  return api_test_utils::RunFunction(
-      function.get(), args.Clone(),
-      std::make_unique<ExtensionFunctionDispatcher>(profile()),
-      api_test_utils::FunctionMode::kNone);
+  return api_test_utils::RunFunction(function.get(), args.Clone(), profile(),
+                                     api_test_utils::FunctionMode::kNone);
 }
 
 const Extension* DeveloperPrivateApiUnitTest::LoadUnpackedExtension() {
@@ -1659,8 +1657,8 @@ TEST_F(DeveloperPrivateApiUnitTest, LoadUnpackedFailsWithBlocklistingPolicy) {
   EXPECT_TRUE(extension_management->BlocklistedByDefault());
   EXPECT_FALSE(extension_management->HasAllowlistedExtension());
 
-  auto info = DeveloperPrivateEventRouter::CreateProfileInfo(profile());
-  EXPECT_FALSE(info->can_load_unpacked);
+  auto info = CreateProfileInfo(profile());
+  EXPECT_FALSE(info.can_load_unpacked);
 
   auto function =
       base::MakeRefCounted<api::DeveloperPrivateLoadUnpackedFunction>();
@@ -1691,9 +1689,9 @@ TEST_F(DeveloperPrivateApiUnitTest,
       ExtensionManagementFactory::GetForBrowserContext(browser_context())
           ->HasAllowlistedExtension());
 
-  auto info = DeveloperPrivateEventRouter::CreateProfileInfo(profile());
+  auto info = CreateProfileInfo(profile());
 
-  EXPECT_TRUE(info->can_load_unpacked);
+  EXPECT_TRUE(info.can_load_unpacked);
 }
 
 TEST_F(DeveloperPrivateApiUnitTest, InstallDroppedFileNoDraggedPath) {
@@ -3703,7 +3701,7 @@ TEST_F(DeveloperPrivateApiTransportModeUnitTest,
 
   // Double check that the extension is now an account extension.
   EXPECT_EQ(
-      AccountExtensionTracker::AccountExtensionType::kAccountInstalledLocally,
+      AccountExtensionTracker::AccountExtensionType::kAccountInstalledSignedIn,
       GetAccountExtensionType(extension->id()));
 
   // Verify that the extension is now syncing from the sync service.

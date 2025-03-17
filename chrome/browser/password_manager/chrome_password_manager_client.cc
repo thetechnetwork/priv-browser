@@ -69,8 +69,8 @@
 #include "components/password_manager/content/browser/form_meta_data.h"
 #include "components/password_manager/content/browser/password_manager_log_router_factory.h"
 #include "components/password_manager/content/browser/password_requirements_service_factory.h"
+#include "components/password_manager/core/browser/browser_credential_manager_factory.h"
 #include "components/password_manager/core/browser/browser_save_password_progress_logger.h"
-#include "components/password_manager/core/browser/credential_manager_impl.h"
 #include "components/password_manager/core/browser/features/password_features.h"
 #include "components/password_manager/core/browser/hsts_query.h"
 #include "components/password_manager/core/browser/http_auth_manager.h"
@@ -167,13 +167,11 @@
 
 #if BUILDFLAG(ENABLE_EXTENSIONS)
 #include "extensions/common/constants.h"
-
-#if BUILDFLAG(SAFE_BROWSING_AVAILABLE)
-#include "chrome/browser/extensions/api/safe_browsing_private/safe_browsing_private_event_router.h"
-#include "chrome/browser/extensions/api/safe_browsing_private/safe_browsing_private_event_router_factory.h"
-#endif  // BUILDFLAG(SAFE_BROWSING_AVAILABLE)
-
 #endif  // BUILDFLAG(ENABLE_EXTENSIONS)
+
+#if BUILDFLAG(ENTERPRISE_CONTENT_ANALYSIS)
+#include "chrome/browser/enterprise/connectors/reporting/reporting_event_router.h"
+#endif
 
 #if BUILDFLAG(ENABLE_DICE_SUPPORT)
 #include "chrome/browser/signin/dice_web_signin_interceptor_factory.h"
@@ -206,7 +204,7 @@ using Logger = autofill::SavePasswordProgressLogger;
 
 namespace {
 
-#if !BUILDFLAG(IS_ANDROID) && BUILDFLAG(SAFE_BROWSING_AVAILABLE)
+#if BUILDFLAG(ENTERPRISE_CONTENT_ANALYSIS)
 constexpr char kPasswordBreachEntryTrigger[] = "PASSWORD_ENTRY";
 #endif
 
@@ -1154,14 +1152,14 @@ void ChromePasswordManagerClient::CheckSafeBrowsingReputation(
 }
 #endif  // defined(ON_FOCUS_PING_ENABLED) && BUILDFLAG(SAFE_BROWSING_AVAILABLE)
 
-#if BUILDFLAG(ENABLE_EXTENSIONS) && BUILDFLAG(SAFE_BROWSING_AVAILABLE)
+#if BUILDFLAG(ENTERPRISE_CONTENT_ANALYSIS)
 void ChromePasswordManagerClient::MaybeReportEnterpriseLoginEvent(
     const GURL& url,
     bool is_federated,
     const url::SchemeHostPort& federated_origin,
     const std::u16string& login_user_name) const {
-  extensions::SafeBrowsingPrivateEventRouter* router =
-      extensions::SafeBrowsingPrivateEventRouterFactory::GetForProfile(
+  enterprise_connectors::ReportingEventRouter* router =
+      enterprise_connectors::ReportingEventRouterFactory::GetForBrowserContext(
           profile_);
   if (!router) {
     return;
@@ -1174,8 +1172,8 @@ void ChromePasswordManagerClient::MaybeReportEnterpriseLoginEvent(
 
 void ChromePasswordManagerClient::MaybeReportEnterprisePasswordBreachEvent(
     const std::vector<std::pair<GURL, std::u16string>>& identities) const {
-  extensions::SafeBrowsingPrivateEventRouter* router =
-      extensions::SafeBrowsingPrivateEventRouterFactory::GetForProfile(
+  enterprise_connectors::ReportingEventRouter* router =
+      enterprise_connectors::ReportingEventRouterFactory::GetForBrowserContext(
           profile_);
   if (!router) {
     return;
@@ -1185,7 +1183,7 @@ void ChromePasswordManagerClient::MaybeReportEnterprisePasswordBreachEvent(
   // is enabled by the admin.
   router->OnPasswordBreach(kPasswordBreachEntryTrigger, identities);
 }
-#endif  // BUILDFLAG(ENABLE_EXTENSIONS) && BUILDFLAG(SAFE_BROWSING_AVAILABLE)
+#endif  // BUILDFLAG(ENTERPRISE_CONTENT_ANALYSIS)
 
 ukm::SourceId ChromePasswordManagerClient::GetUkmSourceId() {
   return web_contents()->GetPrimaryMainFrame()->GetPageUkmSourceId();
@@ -1784,7 +1782,8 @@ ChromePasswordManagerClient::ChromePasswordManagerClient(
                                 SyncServiceFactory::GetForProfile(profile_)),
       httpauth_manager_(this),
       content_credential_manager_(
-          std::make_unique<password_manager::CredentialManagerImpl>(this)),
+          password_manager::BrowserCredentialManagerFactory(this)
+              .CreateCredentialManager()),
       password_generation_driver_receivers_(web_contents, this),
       observer_(nullptr),
 #if BUILDFLAG(ENABLE_DICE_SUPPORT)

@@ -2,11 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifdef UNSAFE_BUFFERS_BUILD
-// TODO(crbug.com/342213636): Remove this and spanify to fix the errors.
-#pragma allow_unsafe_buffers
-#endif
-
 #include "content/browser/compositor/viz_process_transport_factory.h"
 
 #include <utility>
@@ -79,7 +74,7 @@ scoped_refptr<viz::ContextProviderCommandBuffer> CreateContextProvider(
   attributes.lose_context_when_out_of_memory = true;
   attributes.enable_gles2_interface = false;
   attributes.enable_raster_interface = true;
-  attributes.enable_oop_rasterization = supports_gpu_rasterization;
+  attributes.enable_gpu_rasterization = supports_gpu_rasterization;
 
   gpu::SharedMemoryLimits memory_limits =
       gpu::SharedMemoryLimits::ForDisplayCompositor();

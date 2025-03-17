@@ -2523,6 +2523,15 @@ bool CSSMathExpressionOperation::IsComputationallyIndependent() const {
   return true;
 }
 
+bool CSSMathExpressionOperation::IsElementDependent() const {
+  for (const CSSMathExpressionNode* operand : operands_) {
+    if (operand->IsElementDependent()) {
+      return true;
+    }
+  }
+  return false;
+}
+
 String CSSMathExpressionOperation::CustomCSSText() const {
   switch (operator_) {
     case CSSMathOperator::kAdd:
@@ -3732,11 +3741,17 @@ class CSSMathExpressionNodeParser {
         function_id != CSSValueID::kSiblingIndex) {
       return nullptr;
     }
+    if (!context_.InElementContext()) {
+      return nullptr;
+    }
     if (!stream.AtEnd()) {
       // These do not take any arguments.
       return nullptr;
     }
-    return MakeGarbageCollected<CSSMathExpressionSiblingFunction>(function_id);
+    cssvalue::CSSScopedKeywordValue* scoped_function =
+        MakeGarbageCollected<cssvalue::CSSScopedKeywordValue>(function_id);
+    return MakeGarbageCollected<CSSMathExpressionSiblingFunction>(
+        scoped_function);
   }
 
   CSSMathExpressionNode* ParseMathFunction(CSSValueID function_id,
@@ -4470,8 +4485,9 @@ CSSMathExpressionNode* CSSMathExpressionNode::ParseMathFunction(
 }
 
 String CSSMathExpressionSiblingFunction::CustomCSSText() const {
-  return function_id_ == CSSValueID::kSiblingIndex ? "sibling-index()"
-                                                   : "sibling-count()";
+  return function_->GetValueID() == CSSValueID::kSiblingIndex
+             ? "sibling-index()"
+             : "sibling-count()";
 }
 
 scoped_refptr<const CalculationExpressionNode>
@@ -4484,32 +4500,60 @@ CSSMathExpressionSiblingFunction::ToCalculationExpression(
 bool CSSMathExpressionSiblingFunction::operator==(
     const CSSMathExpressionNode& other) const {
   return other.IsSiblingFunction() &&
-         function_id_ ==
-             To<CSSMathExpressionSiblingFunction>(other).function_id_;
+         *function_ == *To<CSSMathExpressionSiblingFunction>(other).function_;
 }
 
 double CSSMathExpressionSiblingFunction::ComputeDouble(
     const CSSLengthResolver& length_resolver) const {
   length_resolver.ReferenceSibling();
   const Element* element = length_resolver.GetElement();
+  if (const TreeScope* value_scope = function_->GetTreeScope()) {
+    if (!element->GetTreeScope().IsInclusiveAncestorTreeScopeOf(*value_scope)) {
+      return 0;
+    }
+  }
   NthIndexCache* nth_index_cache = element->ownerDocument()->GetNthIndexCache();
-  // TODO(crbug.com/40282719): Use flat tree siblings?
-  if (function_id_ == CSSValueID::kSiblingIndex) {
+  if (function_->GetValueID() == CSSValueID::kSiblingIndex) {
     return nth_index_cache->NthChildIndex(const_cast<Element&>(*element),
                                           /*filter=*/nullptr,
                                           /*selector_checker=*/nullptr,
-                                          /*context=*/nullptr);
+                                          /*context=*/nullptr,
+                                          NthIndexData::kFlatTree);
   } else {
     return nth_index_cache->NthChildIndex(const_cast<Element&>(*element),
                                           /*filter=*/nullptr,
                                           /*selector_checker=*/nullptr,
-                                          /*context=*/nullptr) +
+                                          /*context=*/nullptr,
+                                          NthIndexData::kFlatTree) +
            nth_index_cache->NthLastChildIndex(const_cast<Element&>(*element),
                                               /*filter=*/nullptr,
                                               /*selector_checker=*/nullptr,
-                                              /*context=*/nullptr) -
+                                              /*context=*/nullptr,
+                                              NthIndexData::kFlatTree) -
            1;
   }
+}
+
+const CSSMathExpressionNode&
+CSSMathExpressionSiblingFunction::PopulateWithTreeScope(
+    const TreeScope* tree_scope) const {
+  return *MakeGarbageCollected<CSSMathExpressionSiblingFunction>(
+      &To<cssvalue::CSSScopedKeywordValue>(
+          function_->EnsureScopedValue(tree_scope)));
+}
+
+std::optional<double>
+CSSMathExpressionSiblingFunction::ComputeValueInCanonicalUnit(
+    const CSSLengthResolver& length_resolver) const {
+  if (length_resolver.GetElement()) {
+    return ComputeDouble(length_resolver);
+  }
+  return std::nullopt;
+}
+
+void CSSMathExpressionSiblingFunction::Trace(Visitor* visitor) const {
+  visitor->Trace(function_);
+  CSSMathExpressionNode::Trace(visitor);
 }
 
 }  // namespace blink

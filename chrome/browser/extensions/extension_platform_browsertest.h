@@ -25,6 +25,8 @@ class WebContents;
 
 namespace extensions {
 class Extension;
+class ExtensionBrowserTestPlatformDelegate;
+class ExtensionRegistrar;
 class ExtensionRegistry;
 
 // A cross-platform base class for extensions-related browser tests.
@@ -44,6 +46,10 @@ class ExtensionPlatformBrowserTest : public PlatformBrowserTest {
   ~ExtensionPlatformBrowserTest() override;
 
  protected:
+  // The platform delegate is an implementation detail of the test harness
+  // and should be able to access anything any general test would access.
+  friend class ExtensionBrowserTestPlatformDelegate;
+
   // content::BrowserTestBase:
   void SetUp() override;
   void SetUpOnMainThread() override;
@@ -52,6 +58,7 @@ class ExtensionPlatformBrowserTest : public PlatformBrowserTest {
 
   // Lower-case to match ExtensionBrowserTest.
   ExtensionRegistry* extension_registry();
+  ExtensionRegistrar* extension_registrar();
 
   // Returns the path of the directory from which to serve resources when they
   // are prefixed with "_test_resources/".

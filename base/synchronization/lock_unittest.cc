@@ -263,10 +263,10 @@ TEST(LockTest, InvariantIsCalled) {
   std::unique_ptr<InvariantChecker> checker;
   auto check = [&] { checker->Check(); };
   auto check_ref = base::FunctionRef<void()>(check);
-  Lock lock([&] {
-    checker = std::make_unique<InvariantChecker>(lock);
+  Lock lock([&](Lock* lp) {
+    checker = std::make_unique<InvariantChecker>(*lp);
     return check_ref;
-  }());
+  }(&lock));
 
   EXPECT_FALSE(checker->TestAndReset());
 
@@ -401,7 +401,7 @@ NO_THREAD_SAFETY_ANALYSIS {
     locks[i].Acquire(subtle::LockTracking::kEnabled);
   }
 
-  EXPECT_DCHECK_DEATH({
+  EXPECT_CHECK_DEATH({
     locks[kHeldLocksCapacity].Acquire(subtle::LockTracking::kEnabled);
     locks[kHeldLocksCapacity].Release();
   });

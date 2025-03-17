@@ -2,14 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifdef UNSAFE_BUFFERS_BUILD
-// TODO(crbug.com/40285824): Remove this and convert code to safer constructs.
-#pragma allow_unsafe_buffers
-#endif
-
 #include "ash/app_list/views/search_box_view.h"
 
 #include <algorithm>
+#include <array>
 #include <map>
 #include <memory>
 #include <string>
@@ -28,6 +24,7 @@
 #include "ash/assistant/ui/main_stage/launcher_search_iph_view.h"
 #include "ash/capture_mode/capture_mode_constants.h"
 #include "ash/capture_mode/capture_mode_controller.h"
+#include "ash/capture_mode/sunfish_scanner_feature_watcher.h"
 #include "ash/constants/ash_features.h"
 #include "ash/keyboard/ui/keyboard_ui_controller.h"
 #include "ash/public/cpp/app_list/app_list_config.h"
@@ -38,7 +35,9 @@
 #include "ash/public/cpp/capture_mode/capture_mode_api.h"
 #include "ash/public/cpp/wallpaper/wallpaper_types.h"
 #include "ash/resources/vector_icons/vector_icons.h"
+#include "ash/scanner/scanner_metrics.h"
 #include "ash/search_box/search_box_constants.h"
+#include "ash/shell.h"
 #include "ash/strings/grit/ash_strings.h"
 #include "ash/style/ash_color_id.h"
 #include "ash/style/ash_color_provider.h"
@@ -128,21 +127,23 @@ constexpr int kLensColorIconSize = 24;
 
 // The default PlaceholderTextTypes used for productivity launcher. Randomly
 // selected when placeholder text would be shown.
-constexpr SearchBoxView::PlaceholderTextType kDefaultPlaceholders[] = {
-    SearchBoxView::PlaceholderTextType::kShortcuts,
-    SearchBoxView::PlaceholderTextType::kTabs,
-    SearchBoxView::PlaceholderTextType::kSettings,
-    SearchBoxView::PlaceholderTextType::kImages,
-};
+constexpr auto kDefaultPlaceholders =
+    std::to_array<SearchBoxView::PlaceholderTextType>({
+        SearchBoxView::PlaceholderTextType::kShortcuts,
+        SearchBoxView::PlaceholderTextType::kTabs,
+        SearchBoxView::PlaceholderTextType::kSettings,
+        SearchBoxView::PlaceholderTextType::kImages,
+    });
 
 // PlaceholderTextTypes used for productivity launcher for cloud gaming devices.
 // Randomly selected when placeholder text would be shown.
-constexpr SearchBoxView::PlaceholderTextType kGamingPlaceholders[4] = {
-    SearchBoxView::PlaceholderTextType::kShortcuts,
-    SearchBoxView::PlaceholderTextType::kTabs,
-    SearchBoxView::PlaceholderTextType::kSettings,
-    SearchBoxView::PlaceholderTextType::kGames,
-};
+constexpr auto kGamingPlaceholders =
+    std::to_array<SearchBoxView::PlaceholderTextType>({
+        SearchBoxView::PlaceholderTextType::kShortcuts,
+        SearchBoxView::PlaceholderTextType::kTabs,
+        SearchBoxView::PlaceholderTextType::kSettings,
+        SearchBoxView::PlaceholderTextType::kGames,
+    });
 
 constexpr gfx::RoundedCornersF kAssistantButtonBackgroundRadiiLTR = {
     18,
@@ -1268,15 +1269,16 @@ void SearchBoxView::SunfishButtonPressed() {
     view_delegate_->DismissAppList();
   }
 
-  if (!CanShowSunfishOrScannerUi()) {
+  SunfishScannerFeatureWatcher* feature_watcher =
+      Shell::Get()->sunfish_scanner_feature_watcher();
+  feature_watcher->UpdateFeatureStates();
+
+  if (!feature_watcher->CanShowSunfishOrScannerUi()) {
     // The Sunfish-session allowed state changed between when the launcher was
-    // shown and when the the button was clicked. Hide the Sunfish-session
-    // button immediately for tablet mode.
-    AppListModelProvider::Get()
-        ->search_model()
-        ->search_box()
-        ->SetSunfishButtonVisibility(
-            SearchBoxModel::SunfishButtonVisibility::kHidden);
+    // shown and when the the button was clicked.
+    // No need to manually hide the Sunfish button here -
+    // `AppListControllerImpl` should have hidden the icon already from the
+    // `UpdateFeatureStates()` call.
     return;
   }
 
@@ -1284,6 +1286,8 @@ void SearchBoxView::SunfishButtonPressed() {
   // so set the pref to its limit.
   SetSunfishLauncherNudgeShownCount(capture_mode::kSunfishNudgeMaxShownCount);
 
+  RecordScannerFeatureUserState(
+      ScannerFeatureUserState::kSunfishSessionStartedFromLauncherButton);
   CaptureModeController::Get()->StartSunfishSession();
 }
 
@@ -1833,7 +1837,7 @@ void SearchBoxView::UpdateIphViewVisibility(bool can_show_iph) {
 
     auto radii = base::i18n::IsRTL() ? kAssistantButtonBackgroundRadiiRTL
                                      : kAssistantButtonBackgroundRadiiLTR;
-    assistant_button()->SetBackground(views::CreateThemedRoundedRectBackground(
+    assistant_button()->SetBackground(views::CreateRoundedRectBackground(
         kColorAshControlBackgroundColorInactive, radii));
 
     auto highlight_path_generator =

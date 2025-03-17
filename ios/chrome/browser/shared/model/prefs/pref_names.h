@@ -95,6 +95,11 @@ inline constexpr char kDownloadAutoDeletionEnabled[] =
 inline constexpr char kDownloadAutoDeletionIPHShown[] =
     "ios.download.auto_deletion_iph_shown";
 
+// A list of dictionaries that represent the files scheduled for automatic
+// deletion.
+inline constexpr char kDownloadAutoDeletionScheduledFiles[] =
+    "ios.auto_deletion.scheduled_files";
+
 // Number of times the First Follow UI has been shown.
 inline constexpr char kFirstFollowUIShownCount[] =
     "follow.first_follow_ui_modal_count";
@@ -743,6 +748,11 @@ inline constexpr char kYoutubeIncognitoHasBeenShown[] =
 
 // A dictionary to store reminders that the user has set.
 inline constexpr char kReminderNotifications[] = "ios.notifications.reminders";
+
+// A bool checking that keys used to add multi-profile support to widgets are
+// set.
+inline constexpr char kMigrateWidgetsPrefs[] =
+    "ios.widgets.update_to_support_mim";
 
 }  // namespace prefs
 

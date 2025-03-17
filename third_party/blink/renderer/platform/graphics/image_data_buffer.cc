@@ -34,12 +34,11 @@
 
 #include "base/compiler_specific.h"
 #include "base/memory/ptr_util.h"
-#include "third_party/blink/renderer/platform/image-encoders/image_encoder.h"
+#include "third_party/blink/renderer/platform/image-encoders/image_encoder_utils.h"
 #include "third_party/blink/renderer/platform/wtf/text/base64.h"
 #include "third_party/skia/include/core/SkImage.h"
 #include "third_party/skia/include/core/SkSurface.h"
-#include "third_party/skia/include/encode/SkJpegEncoder.h"
-#include "third_party/skia/include/encode/SkPngEncoder.h"
+#include "ui/gfx/skia_span_util.h"
 
 namespace blink {
 
@@ -124,54 +123,23 @@ std::unique_ptr<ImageDataBuffer> ImageDataBuffer::Create(
 
 base::span<const uint8_t> ImageDataBuffer::PixelData() const {
   DCHECK(is_valid_);
-  // SAFETY: The creator of the SkPixmap ensures that pixmap_.addr() points to
-  // at least pixmap_.computeByteSize() bytes.
-  return UNSAFE_BUFFERS({static_cast<const unsigned char*>(pixmap_.addr()),
-                         pixmap_.computeByteSize()});
+  return gfx::SkPixmapToSpan(pixmap_);
 }
 
 bool ImageDataBuffer::EncodeImage(const ImageEncodingMimeType mime_type,
                                   const double& quality,
                                   Vector<unsigned char>* encoded_image) const {
-  return EncodeImageInternal(mime_type, quality, encoded_image, pixmap_);
-}
-
-bool ImageDataBuffer::EncodeImageInternal(const ImageEncodingMimeType mime_type,
-                                          const double& quality,
-                                          Vector<unsigned char>* encoded_image,
-                                          const SkPixmap& pixmap) const {
-  DCHECK(is_valid_);
-
-  if (mime_type == kMimeTypeJpeg) {
-    SkJpegEncoder::Options options;
-    options.fQuality = ImageEncoder::ComputeJpegQuality(quality);
-    options.fAlphaOption = SkJpegEncoder::AlphaOption::kBlendOnBlack;
-    if (options.fQuality == 100) {
-      options.fDownsample = SkJpegEncoder::Downsample::k444;
-    }
-    return ImageEncoder::Encode(encoded_image, pixmap, options);
-  }
-
-  if (mime_type == kMimeTypeWebp) {
-    SkWebpEncoder::Options options = ImageEncoder::ComputeWebpOptions(quality);
-    return ImageEncoder::Encode(encoded_image, pixmap, options);
-  }
-
-  DCHECK_EQ(mime_type, kMimeTypePng);
-  SkPngEncoder::Options options;
-  options.fFilterFlags = SkPngEncoder::FilterFlag::kSub;
-  options.fZLibLevel = 3;
-  return ImageEncoder::Encode(encoded_image, pixmap, options);
+  return ImageEncoder::Encode(encoded_image, pixmap_, mime_type, quality);
 }
 
 String ImageDataBuffer::ToDataURL(const ImageEncodingMimeType mime_type,
                                   const double& quality) const {
   DCHECK(is_valid_);
   Vector<unsigned char> result;
-  if (!EncodeImageInternal(mime_type, quality, &result, pixmap_))
+  if (!ImageEncoder::Encode(&result, pixmap_, mime_type, quality)) {
     return "data:,";
-
-  return "data:" + ImageEncodingMimeTypeName(mime_type) + ";base64," +
+  }
+  return "data:" + ImageEncoderUtils::MimeTypeName(mime_type) + ";base64," +
          Base64Encode(result);
 }
 

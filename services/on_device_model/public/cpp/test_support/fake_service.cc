@@ -90,10 +90,15 @@ FakeOnDeviceSession::~FakeOnDeviceSession() = default;
 void FakeOnDeviceSession::Append(
     mojom::AppendOptionsPtr options,
     mojo::PendingRemote<mojom::ContextClient> client) {
+  mojo::Remote<mojom::ContextClient> remote;
+  if (client) {
+    // Bind now to catch disconnects.
+    remote.Bind(std::move(client));
+  }
   base::SequencedTaskRunner::GetCurrentDefault()->PostTask(
       FROM_HERE, base::BindOnce(&FakeOnDeviceSession::AppendImpl,
                                 weak_factory_.GetWeakPtr(), std::move(options),
-                                std::move(client)));
+                                std::move(remote)));
 }
 
 void FakeOnDeviceSession::Generate(
@@ -178,7 +183,11 @@ void FakeOnDeviceSession::GenerateImpl(
 
 void FakeOnDeviceSession::AppendImpl(
     mojom::AppendOptionsPtr options,
-    mojo::PendingRemote<mojom::ContextClient> client) {
+    mojo::Remote<mojom::ContextClient> client) {
+  // If the client was bound but is now disconnected, cancel the request.
+  if (client && !client.is_connected()) {
+    return;
+  }
   uint32_t input_tokens =
       static_cast<uint32_t>(OnDeviceInputToString(*options->input).size());
   uint32_t max_tokens =
@@ -187,8 +196,7 @@ void FakeOnDeviceSession::AppendImpl(
   uint32_t tokens_processed = std::min(input_tokens - token_offset, max_tokens);
   context_.emplace_back(std::move(options));
   if (client) {
-    mojo::Remote<mojom::ContextClient> remote(std::move(client));
-    remote->OnComplete(tokens_processed);
+    client->OnComplete(tokens_processed);
   }
 }
 
@@ -202,7 +210,8 @@ FakeOnDeviceModel::FakeOnDeviceModel(FakeOnDeviceServiceSettings* settings,
 FakeOnDeviceModel::~FakeOnDeviceModel() = default;
 
 void FakeOnDeviceModel::StartSession(
-    mojo::PendingReceiver<mojom::Session> session) {
+    mojo::PendingReceiver<mojom::Session> session,
+    mojom::SessionParamsPtr params) {
   AddSession(std::move(session),
              std::make_unique<FakeOnDeviceSession>(settings_, this));
 }
@@ -305,6 +314,20 @@ void FakeOnDeviceModelService::LoadModel(
       settings_, std::move(data), params->performance_hint);
   model_receivers_.Add(std::move(test_model), std::move(model));
   std::move(callback).Run(mojom::LoadModelResult::kSuccess);
+}
+
+void FakeOnDeviceModelService::GetCapabilities(
+    ModelAssets assets,
+    GetCapabilitiesCallback callback) {
+  std::string contents = ReadFile(assets.weights);
+  Capabilities capabilities;
+  if (contents.find("image") != std::string::npos) {
+    capabilities.Put(CapabilityFlags::kImageInput);
+  }
+  if (contents.find("audio") != std::string::npos) {
+    capabilities.Put(CapabilityFlags::kAudioInput);
+  }
+  std::move(callback).Run(capabilities);
 }
 
 void FakeOnDeviceModelService::LoadTextSafetyModel(

@@ -373,7 +373,7 @@ class BookmarkBarView::ButtonSeparatorView : public views::Separator {
         border_insets.left() + separator_thickness_ + border_insets.right(),
         gfx::kFaviconSize));
 
-    SetBorder(views::CreateThemedRoundedRectBorder(
+    SetBorder(views::CreateRoundedRectBorder(
         separator_thickness_ / 2, separator_thickness_ / 2, border_insets,
         kColorBookmarkBarSeparatorChromeRefresh));
   }
@@ -2234,11 +2234,6 @@ const views::View* BookmarkBarView::GetSavedTabGroupsSeparatorViewForTesting()
 }
 
 void BookmarkBarView::MaybeShowSavedTabGroupsIntroPromo() const {
-  // Only show this promo with the V2 enabled flag.
-  if (!tab_groups::IsTabGroupsSaveV2Enabled()) {
-    return;
-  }
-
   // Check whether to show the synced, or unsyned version of the promo.
   tab_groups::TabGroupSyncService* tab_group_service =
       tab_groups::SavedTabGroupUtils::GetServiceForProfile(browser_->profile());

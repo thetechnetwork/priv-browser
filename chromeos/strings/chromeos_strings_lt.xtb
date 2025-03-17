@@ -81,6 +81,7 @@
 <translation id="131461803491198646">Namų tinklas, ne tarptinklinis ryšys</translation>
 <translation id="1327977588028644528">Tinklų sietuvas</translation>
 <translation id="1328223165223065150">Ekrano fono spalva</translation>
+<translation id="1329478709358066995">Transkribuotas tekstas:</translation>
 <translation id="1330426557709298164">JPG</translation>
 <translation id="1337912285145772892">Pritaikyti pagal nuskaitomą sritį</translation>
 <translation id="1343442362630695901">druskų ežeras</translation>
@@ -126,7 +127,17 @@
 <translation id="1515129336378114413">pagrindinis naršyklės puslapis</translation>
 <translation id="1526389707933164996">Ekrano užsklandos animacija</translation>
 <translation id="152892567002884378">Padidinti garsumą</translation>
+<translation id="1531038290222364269">Rodyti skirtukus</translation>
 <translation id="1539864135338521185">lazuritas</translation>
+<translation id="1548555207631326346">Pasirinkite temą, tada – pabrauktus žodžius, kad suasmenintumėte DI vaizdus.<ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          Pasirinkite „Įkvėpk mane“, kad gautumėte unikalesnių ir įvairesnių DI vaizdų.
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          Kai kuriate naudodami DI, užklausa siunčiama į „Google“ DI serverius, kad būtų galima generuoti vaizdus ir tobulinti produktą, vadovaujantis <ph name="BEGIN_LINK_GOOGLE_PRIVACY_POLICY" />„Google“ privatumo politika<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" />.
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          Generatyvinis DI yra eksperimentinis, dar tik kuriamas ir šiuo metu jo pasiekiamumas ribotas.</translation>
 <translation id="1555130319947370107">Mėlyna</translation>
 <translation id="155865706765934889">Jutiklinis kilimėlis</translation>
 <translation id="1561927818299383735">fono spalva</translation>
@@ -252,7 +263,6 @@
 <translation id="2011174342667534258">SDK versija:</translation>
 <translation id="2016697457005847575">Išbandykite trikčių šalinimo veiksmus</translation>
 <translation id="202500043506723828">EID</translation>
-<translation id="2041627599411887437">Pasirinkite temą, tada – pabrauktus žodžius, kad suasmenintumėte DI vaizdus.</translation>
 <translation id="2045814230297767491">stalo įrankiai</translation>
 <translation id="2047316797244836561">Jei norite peržiūrėti ekrano užsklandą, prisijunkite prie tinklo ir iš naujo įkelkite puslapį.</translation>
 <translation id="2056550196601855911">IPv4 / IPv6</translation>
@@ -405,6 +415,7 @@
 <translation id="2787237339470862294">Ši kalba šiuo metu nepalaikoma</translation>
 <translation id="2787435249130282949">klaviatūra šviesesnė</translation>
 <translation id="2805756323405976993">Taikomosios programos</translation>
+<translation id="2822702442014805146">Atsisiunčiamas suvestinės ir pavadinimo kūrimo modelis</translation>
 <translation id="28232023175184696">Nepavyko prisijungti prie interneto. Spustelėkite, jei norite bandyti dar kartą.</translation>
 <translation id="2855718259207180827">vilnos</translation>
 <translation id="2859243502336719778">Kritinis naujinys</translation>
@@ -502,6 +513,7 @@
 <translation id="3373141842870501561">„Earth“ srauto ekrano fonas</translation>
 <translation id="33736539805963175"><ph name="LETTERS_COLOR" /> fonas su raide <ph name="LETTERS_LETTER" /></translation>
 <translation id="3383623117265110236">Išskirtiniai</translation>
+<translation id="3395147534045164351">Perjungti pritraukimo vietą</translation>
 <translation id="3404249063913988450">Įgalinti ekrano užsklandą</translation>
 <translation id="3413935475507503304">Jei norite tęsti atnaujinimo procesą, spustelėkite „Kitas“.</translation>
 <translation id="3428551088151258685">lauke</translation>
@@ -651,6 +663,7 @@
 <translation id="4113067922640381334">Dabar galite pasiekti naujus <ph name="BEGIN_LINK_WALLPAPER_SUBPAGE" />ekrano fonus<ph name="END_LINK_WALLPAPER_SUBPAGE" /></translation>
 <translation id="4117637339509843559">Tamsus režimas</translation>
 <translation id="4126551873361000548">Atsukti 10 sek.</translation>
+<translation id="4128271910628504223">Įveskite užklausą, pvz., „nupiešk miglotą mišką“</translation>
 <translation id="4130035430755296270">Laikykite pelės žymeklį, kad būtų parodyta daugiau išdėstymo parinkčių</translation>
 <translation id="4130750466177569591">Sutinku</translation>
 <translation id="4131410914670010031">Nespalvotai</translation>
@@ -824,6 +837,7 @@
 <translation id="4891842000192098784">Įtampa</translation>
 <translation id="4897058166682006107">Įrenginio kairiosios ausinės akumuliatoriaus energijos lygis: <ph name="BATTERY_PERCENTAGE" /> proc.</translation>
 <translation id="4905998861748258752">Įjunkite funkciją, kad pasirinktumėte ekrano užsklandos parinktis</translation>
+<translation id="4910853326379896417">Suvestinės ir pavadinimo kūrimo modelio atsisiuntimas baigtas</translation>
 <translation id="4910858703033903787">APN tipai</translation>
 <translation id="4917385247580444890">Stiprus</translation>
 <translation id="4917889632206600977">Sustabdyta – baigėsi popierius</translation>
@@ -858,8 +872,10 @@
 <translation id="5050042263972837708">Grupės pavadinimas</translation>
 <translation id="5051044138948155788">Tai vienintelis puslapis. Būsite nukreipti į nuskaitymo pradžios ekraną.</translation>
 <translation id="5053233795640754917">Pristabdyti</translation>
+<translation id="5056587122125565772">Sukurti vaizdą</translation>
 <translation id="5078711626843651677">Balso modeliai laikinai saugomi įrenginyje, kol baigiamas kalbančiųjų žymėjimas etiketėmis. Bet kada galite išjungti šią funkciją skiltyje „Nustatymai“.</translation>
 <translation id="5078983345702708852">futuristinis</translation>
+<translation id="5085224064082122501">Nepavyko atsisiųsti suvestinės ir pavadinimo kūrimo modelio. Bandykite dar kartą arba paleiskite „Chromebook“ iš naujo.</translation>
 <translation id="5087864757604726239">atgal</translation>
 <translation id="5088172560898466307">Prieglobos serverio pavadinimas</translation>
 <translation id="5089810972385038852">Valstija</translation>
@@ -1129,14 +1145,12 @@
 <translation id="6325525973963619867">Nepavyko</translation>
 <translation id="6327262166342360252">Šis ekrano fonas sukurtas naudojant DI ir šį tekstą: „<ph name="PROMPT" />“.</translation>
 <translation id="6331191339300272798">Automatinė tamsioji tema</translation>
-<translation id="6335228876613776082">Modelis atsisiųstas</translation>
 <translation id="6340526405444716530">Suasmeninimas</translation>
 <translation id="6348252528297699679">Vietovės informaciją galite išjungti skiltyje „Nustatymai“ &gt; „Privatumas ir sauga“ &gt; „Privatumo valdikliai“ &gt; „Prieiga prie vietovės informacijos“. <ph name="LINK_BEGIN" />Sužinokite daugiau<ph name="LINK_END" /></translation>
 <translation id="6348738456043757611">Naudotojo vardas ir slaptažodis</translation>
 <translation id="6352210854422428614">kita planeta</translation>
 <translation id="6359706544163531585">Išjungti šviesiąją temą</translation>
 <translation id="6359919876285606596">Šis veiksmas atliekamas visam laikui ir jo anuliuoti negalima</translation>
-<translation id="6368342879959028556">Jei pasirinkote „Kurti naudojant DI“, parašykite tinkintą raginimą. Arba pasirinkite „DI ekrano fonai“, tada pasirinkite temą ir pabrauktus žodžius, kad suasmenintumėte DI ekrano foną.</translation>
 <translation id="636850387210749493">Įmonės registracija</translation>
 <translation id="6369221585240879141">Negalima sukurti šio transkribuoto teksto kalbos įrašų pavadinimų</translation>
 <translation id="6373461326814131011">tvenkinys</translation>
@@ -1209,16 +1223,6 @@
 <translation id="6657240842932274095">Leisti sistemos paslaugoms naudoti jūsų vietovės informaciją?</translation>
 <translation id="6657585470893396449">Slaptažodis</translation>
 <translation id="66621959568103627">koralinės rožinės spalvos</translation>
-<translation id="6667885109186363316"><ph name="SEA_PEN_INTRO_FIRST_PARAGRAPH" />
-          <ph name="LINE_BREAK" />
-          <ph name="LINE_BREAK" />
-          Pasirinkite „Įkvėpk mane“, kad gautumėte unikalesnių ir įvairesnių DI vaizdų.
-          <ph name="LINE_BREAK" />
-          <ph name="LINE_BREAK" />
-          Kai kuriate naudodami DI, užklausa siunčiama į „Google“ DI serverius, kad būtų galima generuoti vaizdus ir tobulinti produktą, vadovaujantis <ph name="BEGIN_LINK_GOOGLE_PRIVACY_POLICY" />„Google“ privatumo politika<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" />.
-          <ph name="LINE_BREAK" />
-          <ph name="LINE_BREAK" />
-          Generatyvinis DI yra eksperimentinis, jis dar kuriamas ir šiuo metu jo pasiekiamumas ribotas.</translation>
 <translation id="6673898378497337661">padidinti klaviatūros šviesumą</translation>
 <translation id="6692996468359469499">Su pasirinkimu susijusios informacijos gavimas</translation>
 <translation id="6694534975463174713">užrakinti</translation>
@@ -1274,6 +1278,7 @@
 <translation id="6930597342185648547">Apie foną</translation>
 <translation id="6939667434404433010">Ieškoti įrašo pavadinimo</translation>
 <translation id="6939766318048400022">Kavinė</translation>
+<translation id="6942253772720771875">Pateikite atsiliepimą arba aprašykite problemą</translation>
 <translation id="6943893908656559156">Nuotolinio ryšio tapatybė (pasirenkama)</translation>
 <translation id="6953137545147683679">aukso spalvos</translation>
 <translation id="6957231940976260713">Paslaugos pavadinimas</translation>
@@ -1295,6 +1300,7 @@
 <translation id="7040230719604914234">Operatorius</translation>
 <translation id="7040729769968826896">Leisti atpažinti kalbantį asmenį</translation>
 <translation id="7041549558901442110">Įrenginys neprijungtas.</translation>
+<translation id="704183341263526038">Jupiteris</translation>
 <translation id="7046522406494308071">Nustatyti visus sparčiuosius klavišus į numatytuosius?</translation>
 <translation id="7049916119678019302">Atsisiųskite transkribavimo modelį skiltyje „Nustatymai“</translation>
 <translation id="7058278511608979688">Baigti ir išsaugoti</translation>
@@ -1427,6 +1433,7 @@ Atsisiųskite transkribavimo modelį (iki 100 MB), kad gautumėte transkribuotus
 <translation id="7569444139234840525"><ph name="QUERY_TEXT" /> · /<ph name="PHONETICS" />/</translation>
 <translation id="7570674786725311828">USB jutiklinis ekranas</translation>
 <translation id="757747079855995705">akmens</translation>
+<translation id="7584853321964440104">Atsisiųsti nepavyko. Bandykite dar kartą arba paleiskite „Chromebook“ iš naujo.</translation>
 <translation id="7590883480672980941">Įvesties nustatymai</translation>
 <translation id="7595982850646262331">Liko <ph name="TIME_VALUE" /></translation>
 <translation id="7600430297804876776"><ph name="MANAGER" /> administratorius apribojo šio „<ph name="DEVICE_TYPE" />“ naudojimo laiką.</translation>
@@ -1557,6 +1564,16 @@ Atsisiųskite transkribavimo modelį (iki 100 MB), kad gautumėte transkribuotus
 <translation id="8179976553408161302">Įvesti</translation>
 <translation id="8183975772394450380">paplūdimys</translation>
 <translation id="819278132617411009">Naudokite „Google“ DI, kad būtumėte produktyvesni</translation>
+<translation id="82003371436638355">Jei pasirinkote „Kurti savo“, parašykite tinkintą užklausą. Arba pasirinkite „Pasirinkti temą“, tada pasirinkite temą ir pabrauktus žodžius, kad suasmenintumėte DI ekrano foną.
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          Pasirinkite „Įkvėpk mane“, kad gautumėte unikalesnių ir įvairesnių DI vaizdų.
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          Kai kuriate savo ekrano foną, užklausa siunčiama į „Google“ serverius, kad būtų galima generuoti vaizdus ir tobulinti produktą, vadovaujantis <ph name="BEGIN_LINK_GOOGLE_PRIVACY_POLICY" />„Google“ paslaugų teikimo sąlygomis ir privatumo politika<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" />. Neįtraukite jokios asmens, neskelbtinos ar konfidencialios informacijos.
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          Generatyvinis DI gali klysti, įskaitant su žmonėmis susijusias klaidas, todėl patikrinkite dar kartą <ph name="BEGIN_LINK_CREATE_YOUR_OWN_WALLPAPER" />Sužinokite daugiau<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" /></translation>
 <translation id="8200772114523450471">Atnaujinti</translation>
 <translation id="8206859287963243715">Mobilusis</translation>
 <translation id="8208861521865154048">Privilegijos</translation>
@@ -1578,6 +1595,7 @@ Atsisiųskite transkribavimo modelį (iki 100 MB), kad gautumėte transkribuotus
 <translation id="8312330582793120272">leisti mediją</translation>
 <translation id="8318753676953949627">Vaizdų nėra</translation>
 <translation id="8320910311642849813">miškas</translation>
+<translation id="8322464149031882595">Spustelėkite, jei norite tęsti</translation>
 <translation id="8329018942023753850">skaičiuotuvo programa</translation>
 <translation id="8336739000755212683">Keisti įrenginio paskyros vaizdą</translation>
 <translation id="8339024191194156249">Sužinokite daugiau apie automatinį paleidimą</translation>
@@ -1598,6 +1616,7 @@ Atsisiųskite transkribavimo modelį (iki 100 MB), kad gautumėte transkribuotus
 <translation id="8395584934117017006">Šį „<ph name="DEVICE_TYPE" />“ įrenginį valdo įmonė</translation>
 <translation id="8398927464629426868">Rodiklis, nurodantis, per kiek laiko įrenginys šiuo metu įkraunamas arba išsikrauna</translation>
 <translation id="8403988360557588704">Paveikslas, kuriame vaizduojama: <ph name="ART_FEATURE" />, šiuo stiliumi: <ph name="ART_MOVEMENT" /></translation>
+<translation id="8409219750150841791">Sugeneruota suvestinė:</translation>
 <translation id="8410244574650205435">Automatiškai aptikta</translation>
 <translation id="8420955526972171689">Atllikti aparatinės įrangos problemų bandymus ir trikčių šalinimą</translation>
 <translation id="8422748173858722634">IMEI</translation>
@@ -1642,6 +1661,7 @@ Atsisiųskite transkribavimo modelį (iki 100 MB), kad gautumėte transkribuotus
 <translation id="8626489604350149811">Daugiau veiksmų („<ph name="APN_NAME" />“)</translation>
 <translation id="86356131183441916">Šviesiai violetinė</translation>
 <translation id="8647595191512746911">Garso įrašo transkribavimas</translation>
+<translation id="8648578954147795914">Sugeneruoti pavadinimai:</translation>
 <translation id="8650852232143958317">Turėkite „Gmail“ ir „Google“ disko failus su savimi</translation>
 <translation id="8651481478098336970">garsumo nutildymas</translation>
 <translation id="8655295600908251630">Kanalas</translation>
@@ -1670,7 +1690,6 @@ Atsisiųskite transkribavimo modelį (iki 100 MB), kad gautumėte transkribuotus
 <translation id="8764414543112028321">WireGuard</translation>
 <translation id="87646919272181953">„Google“ nuotraukų albumas</translation>
 <translation id="8775713578693478175">Modemo APN</translation>
-<translation id="877735394245039557">Atsisiunčiamas modelis</translation>
 <translation id="877985182522063539">A4</translation>
 <translation id="879568662008399081">Šiame tinkle gali būti fiksuotasis portalas</translation>
 <translation id="8797082062139985406">Kurti pavadinimą naudojantis „Google“ DI</translation>
@@ -1723,6 +1742,7 @@ Atsisiųskite transkribavimo modelį (iki 100 MB), kad gautumėte transkribuotus
 <translation id="8961025972867871808">pingvinai</translation>
 <translation id="8968751544471797276">Įkrovimo rodiklis</translation>
 <translation id="8970109610781093811">Paleisti dar kartą</translation>
+<translation id="8972061581514441296">Spustelėkite, jei norite grįžti</translation>
 <translation id="8983038754672563810">HSPA</translation>
 <translation id="8987565828374052507">{NUMBER_OF_PAGES,plural, =0{Nuskaityti}=1{Nuskaityti {NUMBER_OF_PAGES} puslapį}one{Nuskaityti {NUMBER_OF_PAGES} puslapį}few{Nuskaityti {NUMBER_OF_PAGES} puslapį}many{Nuskaityti {NUMBER_OF_PAGES} puslapį}other{Nuskaityti {NUMBER_OF_PAGES} puslapį}}</translation>
 <translation id="89945434909472341">gyvenvietė</translation>
@@ -1784,6 +1804,7 @@ Atsisiųskite transkribavimo modelį (iki 100 MB), kad gautumėte transkribuotus
 <translation id="9218016617214286986">Rodyti žinomus APN</translation>
 <translation id="932327136139879170">Kontaktinė namų informacija</translation>
 <translation id="939519157834106403">SSID</translation>
+<translation id="940663759301549538">Įsitikinkite, kad mikrofonas prijungtas, arba bandykite iš naujo paleisti „Chromebook“</translation>
 <translation id="945522503751344254">Siųsti atsiliepimą</translation>
 <translation id="950520315903467048">Trūksta klavišo, skirto veiksmui „<ph name="DIRECTION" />“. <ph name="ASSIGN_INSTRUCTION" /></translation>
 <translation id="951780398843003443">Palyginti įrašo balsus, kad transkribuotame tekste atsispindėtų, ką ir kada pasakė kiekvienas kalbantysis</translation>

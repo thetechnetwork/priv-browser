@@ -24,6 +24,7 @@ ci.defaults.set(
     properties = {
         "perf_dashboard_machine_group": "ChromiumGPUFYI",
     },
+    reclient_enabled = False,
     service_account = ci.gpu.SERVICE_ACCOUNT,
     shadow_service_account = ci.gpu.SHADOW_SERVICE_ACCOUNT,
     siso_enabled = True,
@@ -94,7 +95,7 @@ ci.thin_tester(
             ],
         ),
         chromium_config = builder_config.chromium_config(
-            config = "android",
+            config = "main_builder_rel_mb",
             target_platform = builder_config.target_platform.ANDROID,
         ),
         android_config = builder_config.android_config(
@@ -136,7 +137,7 @@ ci.thin_tester(
             ],
         ),
         chromium_config = builder_config.chromium_config(
-            config = "android",
+            config = "arm64_builder_rel_mb",
             apply_configs = [
                 "download_xr_test_apks",
             ],
@@ -201,7 +202,7 @@ ci.thin_tester(
             ],
         ),
         chromium_config = builder_config.chromium_config(
-            config = "android",
+            config = "main_builder_rel_mb",
             target_platform = builder_config.target_platform.ANDROID,
         ),
         android_config = builder_config.android_config(
@@ -258,7 +259,7 @@ ci.thin_tester(
             ],
         ),
         chromium_config = builder_config.chromium_config(
-            config = "android",
+            config = "main_builder_rel_mb",
             target_platform = builder_config.target_platform.ANDROID,
         ),
         android_config = builder_config.android_config(
@@ -363,7 +364,7 @@ ci.thin_tester(
             ],
         ),
         chromium_config = builder_config.chromium_config(
-            config = "android",
+            config = "arm64_builder_rel_mb",
             apply_configs = [
                 "download_xr_test_apks",
             ],
@@ -424,7 +425,7 @@ ci.thin_tester(
             ],
         ),
         chromium_config = builder_config.chromium_config(
-            config = "android",
+            config = "arm64_builder_rel_mb",
             apply_configs = [
                 "download_xr_test_apks",
             ],
@@ -491,7 +492,7 @@ ci.thin_tester(
             ],
         ),
         chromium_config = builder_config.chromium_config(
-            config = "android",
+            config = "main_builder_rel_mb",
             target_platform = builder_config.target_platform.ANDROID,
         ),
         android_config = builder_config.android_config(
@@ -541,7 +542,7 @@ ci.thin_tester(
             ],
         ),
         chromium_config = builder_config.chromium_config(
-            config = "android",
+            config = "main_builder_rel_mb",
             target_platform = builder_config.target_platform.ANDROID,
         ),
         android_config = builder_config.android_config(
@@ -591,7 +592,7 @@ ci.thin_tester(
             ],
         ),
         chromium_config = builder_config.chromium_config(
-            config = "android",
+            config = "arm64_builder_rel_mb",
             target_platform = builder_config.target_platform.ANDROID,
         ),
         android_config = builder_config.android_config(
@@ -815,7 +816,7 @@ ci.gpu.linux_builder(
             ],
         ),
         chromium_config = builder_config.chromium_config(
-            config = "android",
+            config = "main_builder_rel_mb",
             target_platform = builder_config.target_platform.ANDROID,
         ),
         android_config = builder_config.android_config(
@@ -853,7 +854,7 @@ ci.gpu.linux_builder(
             ],
         ),
         chromium_config = builder_config.chromium_config(
-            config = "android",
+            config = "arm64_builder_rel_mb",
             apply_configs = [
                 "download_xr_test_apks",
             ],
@@ -2001,6 +2002,22 @@ ci.thin_tester(
             "mac_mini_intel_gpu_stable",
         ],
         per_test_modifications = {
+            "trace_test": targets.per_test_modification(
+                mixins = targets.mixin(
+                    args = [
+                        # TODO(crbug.com/402826437): Remove if this has no
+                        # effect on stability. Otherwisde, update this comment.
+                        "--jobs=2",
+                    ],
+                ),
+                replacements = targets.replacements(
+                    args = {
+                        # Magic substitution happens after regular replacement, so remove it
+                        # now since we are manually applying the number of jobs above.
+                        targets.magic_args.GPU_PARALLEL_JOBS: None,
+                    },
+                ),
+            ),
             "webgl2_conformance_metal_passthrough_graphite_tests": targets.remove(
                 reason = "crbug.com/1270755",
             ),
@@ -2924,26 +2941,24 @@ ci.thin_tester(
     ),
     targets = targets.bundle(
         targets = [
-            "gpu_noop_sleep_telemetry_test",
-            # TODO(crbug.com/396611135): Enable actual tests.
-            # "gpu_fyi_win_gtests",
-            # "gpu_fyi_win_amd_release_telemetry_tests",
+            "gpu_fyi_win_gtests",
+            "gpu_fyi_win_amd_release_telemetry_tests",
         ],
         mixins = [
             "win11_amd_rx_7600_stable",
         ],
         per_test_modifications = {
-            # "gl_unittests": targets.mixin(
-            #     args = [
-            #         "--test-launcher-filter-file=../../testing/buildbot/filters/win.amd.7600.gl_unittests.filter",
-            #     ],
-            # ),
-            # "media_foundation_browser_tests": targets.remove(
-            #     reason = [
-            #         "TODO(crbug.com/40912267): Enable Media Foundation browser tests on ",
-            #         "gpu bots once the Windows OS supports HW secure decryption.",
-            #     ],
-            # ),
+            "gl_tests_passthrough": targets.mixin(
+                args = [
+                    "--test-launcher-filter-file=../../testing/buildbot/filters/win.amd.7600.gl_tests_passthrough.filter",
+                ],
+            ),
+            "media_foundation_browser_tests": targets.remove(
+                reason = [
+                    "TODO(crbug.com/40912267): Enable Media Foundation browser tests on ",
+                    "gpu bots once the Windows OS supports HW secure decryption.",
+                ],
+            ),
         },
     ),
     targets_settings = targets.settings(
@@ -3166,11 +3181,20 @@ ci.thin_tester(
                     },
                 ),
             ),
+            "expected_color_pixel_passthrough_graphite_test": targets.remove(
+                reason = "Graphite on ARM is currently not supported.",
+            ),
             "gl_unittests": targets.mixin(
                 args = [
                     # crbug.com/1523061
                     "--test-launcher-filter-file=../../testing/buildbot/filters/win.win_arm64.gl_unittests.filter",
                 ],
+            ),
+            "pixel_skia_gold_passthrough_graphite_test": targets.remove(
+                reason = "Graphite on ARM is currently not supported.",
+            ),
+            "screenshot_sync_passthrough_graphite_tests": targets.remove(
+                reason = "Graphite on ARM is currently not supported.",
             ),
             "services_webnn_unittests": targets.mixin(
                 args = [

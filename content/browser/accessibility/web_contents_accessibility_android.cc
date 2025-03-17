@@ -697,6 +697,17 @@ void WebContentsAccessibilityAndroid::HandleClicked(int32_t unique_id) {
   Java_WebContentsAccessibilityImpl_handleClicked(env, obj, unique_id);
 }
 
+void WebContentsAccessibilityAndroid::HandleImageAnnotationChanged(
+    int32_t unique_id) {
+  JNIEnv* env = AttachCurrentThread();
+  ScopedJavaLocalRef<jobject> obj = java_ref_.get(env);
+  if (obj.is_null()) {
+    return;
+  }
+  Java_WebContentsAccessibilityImpl_handleImageAnnotationChanged(env, obj,
+                                                                 unique_id);
+}
+
 void WebContentsAccessibilityAndroid::HandleScrollPositionChanged(
     int32_t unique_id) {
   JNIEnv* env = AttachCurrentThread();
@@ -1169,18 +1180,41 @@ jboolean WebContentsAccessibilityAndroid::PopulateAccessibilityNodeInfo(
   }
 
   bool is_link = ui::IsLink(node->GetRole());
-  Java_AccessibilityNodeInfoBuilder_setAccessibilityNodeInfoText(
-      env, obj, info,
-      base::android::ConvertUTF16ToJavaString(env, node->GetTextContentUTF16()),
-      is_link
-          ? base::android::ConvertUTF16ToJavaString(env, node->GetTargetUrl())
-          : base::android::ConvertUTF16ToJavaString(env, std::u16string()),
-      is_link, node->IsTextField(),
-      GetCanonicalJNIString(env, node->GetInheritedString16Attribute(
-                                     ax::mojom::StringAttribute::kLanguage)),
-      suggestion_starts_java, suggestion_ends_java, suggestion_text_java,
-      base::android::ConvertUTF16ToJavaString(env,
-                                              node->GetStateDescription()));
+  if (::features::IsAccessibilityTextFormattingEnabled()) {
+    Java_AccessibilityNodeInfoBuilder_setAccessibilityNodeInfoText(
+        env, obj, info,
+        base::android::ConvertUTF16ToJavaString(env,
+                                                node->GetTextContentUTF16()),
+        is_link
+            ? base::android::ConvertUTF16ToJavaString(env, node->GetTargetUrl())
+            : base::android::ConvertUTF16ToJavaString(env, std::u16string()),
+        is_link, node->IsTextField(),
+        GetCanonicalJNIString(env, node->GetInheritedString16Attribute(
+                                       ax::mojom::StringAttribute::kLanguage)),
+        suggestion_starts_java, suggestion_ends_java, suggestion_text_java,
+        base::android::ConvertUTF16ToJavaString(env,
+                                                node->GetStateDescription()),
+        node->GetTextSize(), node->GetTextStyle(), node->GetTextColor(),
+        node->GetTextBackgroundColor(),
+        GetCanonicalJNIString(env, node->GetFontFamily()), node->IsSubscript(),
+        node->IsSuperscript()
+
+    );
+  } else {
+    Java_AccessibilityNodeInfoBuilder_setAccessibilityNodeInfoText(
+        env, obj, info,
+        base::android::ConvertUTF16ToJavaString(env,
+                                                node->GetTextContentUTF16()),
+        is_link
+            ? base::android::ConvertUTF16ToJavaString(env, node->GetTargetUrl())
+            : base::android::ConvertUTF16ToJavaString(env, std::u16string()),
+        is_link, node->IsTextField(),
+        GetCanonicalJNIString(env, node->GetInheritedString16Attribute(
+                                       ax::mojom::StringAttribute::kLanguage)),
+        suggestion_starts_java, suggestion_ends_java, suggestion_text_java,
+        base::android::ConvertUTF16ToJavaString(env,
+                                                node->GetStateDescription()));
+  }
 
   std::u16string element_id;
   if (node->GetString16Attribute(ax::mojom::StringAttribute::kHtmlId,
@@ -1460,7 +1494,7 @@ jint WebContentsAccessibilityAndroid::FindElementType(
         EnumForPredicate(element_type));
   } else {
     // When TalkBack isn't running, split by AXMode (for TB we know we will for
-    // sure be in a mode with kScreenReader).
+    // sure be in a mode with kExtendedProperties).
     BrowserAccessibilityStateImpl* accessibility_state =
         BrowserAccessibilityStateImpl::GetInstance();
     ui::AXMode mode = accessibility_state->GetAccessibilityMode();
@@ -2155,9 +2189,16 @@ void JNI_WebContentsAccessibilityImpl_SetBrowserAXMode(
     const JavaParamRef<jobject>& obj,
     jboolean is_screen_reader_enabled,
     jboolean form_controls_mode,
+    jboolean is_known_screen_reader_running,
     jboolean is_any_accessibility_tool_present) {
   BrowserAccessibilityStateImpl* accessibility_state =
       BrowserAccessibilityStateImpl::GetInstance();
+
+  // Always update state if a known screen reader is running.
+  auto* accessibility_state_android =
+      static_cast<BrowserAccessibilityStateImplAndroid*>(accessibility_state);
+  accessibility_state_android->SetKnownScreenReaderAppActive(
+      is_known_screen_reader_running);
 
   // The AXMode flags will be set according to requirements of the current
   // system based on running services. This can be disabled with an enterprise
@@ -2181,9 +2222,9 @@ void JNI_WebContentsAccessibilityImpl_SetBrowserAXMode(
   //       |ui::kAXModeBasic|
   //
   if (is_screen_reader_enabled) {
-    // Remove form controls experimental mode to preserve screen reader mode.
+    // Remove form controls filter mode to preserve screen reader mode.
     ui::AXMode flags_to_remove(ui::AXMode::kNone,
-                               ui::AXMode::kExperimentalFormControls);
+                               ui::AXMode::kFormsAndLabelsOnly);
     accessibility_state->RemoveAccessibilityModeFlags(flags_to_remove);
 
     accessibility_state->AddAccessibilityModeFlags(ui::kAXModeComplete);
@@ -2198,15 +2239,15 @@ void JNI_WebContentsAccessibilityImpl_SetBrowserAXMode(
                                ~ui::kAXModeFormControls.flags());
     accessibility_state->RemoveAccessibilityModeFlags(flags_to_remove);
 
-    // Add form controls experimental mode.
+    // Add form controls filter mode.
     accessibility_state->AddAccessibilityModeFlags(ui::kAXModeFormControls);
   } else {
     // Remove the mode flags present in kAXModeComplete and
-    // kExperimentalFormControls but not in kAXModeBasic, thereby reverting
+    // kFormsAndLabelsOnly but not in kAXModeBasic, thereby reverting
     // the mode to kAXModeBasic while not touching any other flags.
     ui::AXMode flags_to_remove(
         ui::kAXModeComplete.flags() & ~ui::kAXModeBasic.flags(),
-        ui::AXMode::kExperimentalFormControls);
+        ui::AXMode::kFormsAndLabelsOnly);
     accessibility_state->RemoveAccessibilityModeFlags(flags_to_remove);
 
     // Add basic mode

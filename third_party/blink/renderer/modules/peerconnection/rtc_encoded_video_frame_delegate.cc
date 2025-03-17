@@ -4,6 +4,7 @@
 
 #include "third_party/blink/renderer/modules/peerconnection/rtc_encoded_video_frame_delegate.h"
 
+#include <optional>
 #include <utility>
 
 #include "base/time/time.h"
@@ -42,7 +43,7 @@ uint32_t RTCEncodedVideoFrameDelegate::RtpTimestamp() const {
 std::optional<webrtc::Timestamp>
 RTCEncodedVideoFrameDelegate::PresentationTimestamp() const {
   base::AutoLock lock(lock_);
-  return webrtc_frame_ ? webrtc_frame_->GetCaptureTimeIdentifier()
+  return webrtc_frame_ ? webrtc_frame_->GetPresentationTimestamp()
                        : std::nullopt;
 }
 
@@ -105,30 +106,29 @@ RTCEncodedVideoFrameDelegate::GetMetadata() const {
 std::optional<base::TimeTicks> RTCEncodedVideoFrameDelegate::ReceiveTime()
     const {
   base::AutoLock lock(lock_);
-  if (webrtc_frame_ && webrtc_frame_->ReceiveTime()) {
-    return ConvertToBaseTimeTicks(*webrtc_frame_->ReceiveTime());
+  if (!webrtc_frame_) {
+    return std::nullopt;
   }
-  return std::nullopt;
+  return ConvertToOptionalTimeTicks(webrtc_frame_->ReceiveTime());
 }
 
 std::optional<base::TimeTicks> RTCEncodedVideoFrameDelegate::CaptureTime()
     const {
   base::AutoLock lock(lock_);
-  if (webrtc_frame_ && webrtc_frame_->CaptureTime()) {
-    return WebRTCFrameNtpEpoch() +
-           (ConvertToBaseTimeTicks(*webrtc_frame_->CaptureTime()) -
-            base::TimeTicks());
+  if (!webrtc_frame_) {
+    return std::nullopt;
   }
-  return std::nullopt;
+  return ConvertToOptionalTimeTicks(webrtc_frame_->CaptureTime(),
+                                    WebRTCFrameNtpEpoch());
 }
 
 std::optional<base::TimeDelta>
 RTCEncodedVideoFrameDelegate::SenderCaptureTimeOffset() const {
   base::AutoLock lock(lock_);
-  if (webrtc_frame_ && webrtc_frame_->SenderCaptureTimeOffset()) {
-    return ConvertToBaseTimeDelta(*webrtc_frame_->SenderCaptureTimeOffset());
+  if (!webrtc_frame_) {
+    return std::nullopt;
   }
-  return std::nullopt;
+  return ConvertToOptionalTimeDelta(webrtc_frame_->SenderCaptureTimeOffset());
 }
 
 base::expected<void, String> RTCEncodedVideoFrameDelegate::SetMetadata(

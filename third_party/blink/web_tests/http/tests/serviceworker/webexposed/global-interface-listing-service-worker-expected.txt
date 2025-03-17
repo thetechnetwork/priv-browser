@@ -18,14 +18,9 @@ interface AILanguageDetector
     method constructor
     method destroy
     method detect
-interface AILanguageDetectorCapabilities
-    attribute @@toStringTag
-    getter available
-    method constructor
-    method languageAvailable
 interface AILanguageDetectorFactory
     attribute @@toStringTag
-    method capabilities
+    method availability
     method constructor
     method create
 interface AILanguageModel : EventTarget
@@ -44,19 +39,9 @@ interface AILanguageModel : EventTarget
     method prompt
     method promptStreaming
     setter oncontextoverflow
-interface AILanguageModelCapabilities
-    attribute @@toStringTag
-    getter available
-    getter defaultTemperature
-    getter defaultTopK
-    getter maxTemperature
-    getter maxTopK
-    method constructor
-    method languageAvailable
 interface AILanguageModelFactory
     attribute @@toStringTag
     method availability
-    method capabilities
     method constructor
     method create
     method params
@@ -72,12 +57,14 @@ interface AIRewriter
     getter expectedContextLanguages
     getter expectedInputLanguages
     getter format
+    getter inputQuota
     getter length
     getter outputLanguage
     getter sharedContext
     getter tone
     method constructor
     method destroy
+    method measureInputUsage
     method rewrite
     method rewriteStreaming
 interface AIRewriterFactory
@@ -90,24 +77,19 @@ interface AISummarizer
     getter expectedContextLanguages
     getter expectedInputLanguages
     getter format
+    getter inputQuota
     getter length
     getter outputLanguage
     getter sharedContext
     getter type
     method constructor
     method destroy
+    method measureInputUsage
     method summarize
     method summarizeStreaming
-interface AISummarizerCapabilities
-    attribute @@toStringTag
-    getter available
-    method constructor
-    method createOptionsAvailable
-    method languageAvailable
 interface AISummarizerFactory
     attribute @@toStringTag
     method availability
-    method capabilities
     method constructor
     method create
 interface AITranslator
@@ -118,15 +100,9 @@ interface AITranslator
     method destroy
     method translate
     method translateStreaming
-interface AITranslatorCapabilities
-    attribute @@toStringTag
-    getter available
-    method constructor
-    method languagePairAvailable
 interface AITranslatorFactory
     attribute @@toStringTag
     method availability
-    method capabilities
     method constructor
     method create
 interface AIWriter
@@ -134,12 +110,14 @@ interface AIWriter
     getter expectedContextLanguages
     getter expectedInputLanguages
     getter format
+    getter inputQuota
     getter length
     getter outputLanguage
     getter sharedContext
     getter tone
     method constructor
     method destroy
+    method measureInputUsage
     method write
     method writeStreaming
 interface AIWriterFactory
@@ -792,10 +770,8 @@ interface GPU
     method requestAdapter
 interface GPUAdapter
     attribute @@toStringTag
-    getter featureLevel
     getter features
     getter info
-    getter isCompatibilityMode
     getter isFallbackAdapter
     getter limits
     method constructor
@@ -1287,18 +1263,13 @@ interface ImageData
     getter colorSpace
     getter data
     getter height
-    getter storageFormat
+    getter pixelFormat
     getter width
     method constructor
 interface InstallEvent : ExtendableEvent
     attribute @@toStringTag
     method addRoutes
     method constructor
-interface LanguageTranslator
-    attribute @@toStringTag
-    method constructor
-    method destroy
-    method translate
 interface Lock
     attribute @@toStringTag
     getter mode
@@ -2063,8 +2034,8 @@ interface TextCluster
     attribute @@toStringTag
     getter align
     getter baseline
-    getter begin
     getter end
+    getter start
     getter x
     getter y
     method constructor
@@ -2134,11 +2105,6 @@ interface TransformStreamDefaultController
     method enqueue
     method error
     method terminate
-interface Translation
-    attribute @@toStringTag
-    method canTranslate
-    method constructor
-    method createTranslator
 interface TrustedHTML
     static method fromLiteral
     attribute @@toStringTag
@@ -3655,7 +3621,6 @@ interface WorkerGlobalScope : EventTarget
     getter performance
     getter scheduler
     getter self
-    getter translation
     getter trustedTypes
     method atob
     method btoa
@@ -3679,7 +3644,6 @@ interface WorkerGlobalScope : EventTarget
     setter origin
     setter performance
     setter scheduler
-    setter translation
 interface WorkerLocation
     attribute @@toStringTag
     getter hash

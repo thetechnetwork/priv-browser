@@ -298,7 +298,11 @@ export class SettingsPrivacyPageElement extends SettingsPrivacyPageElementBase {
         value: SettingsState,
       },
 
-      searchFilter_: String,
+      searchFilter_: {
+        type: String,
+        value: '',
+        observer: 'updateAllSitesPageTitle_',
+      },
 
       /**
        * Expose ContentSettingsTypes enum to HTML bindings.
@@ -351,10 +355,21 @@ export class SettingsPrivacyPageElement extends SettingsPrivacyPageElementBase {
         value: () => loadTimeData.getBoolean('enableWebAppInstallation'),
       },
 
+      enableRelatedWebsiteSetsV2Ui_: {
+        type: Boolean,
+        value: () => loadTimeData.getBoolean('isRelatedWebsiteSetsV2UiEnabled'),
+      },
+
+      enableLocalNetworkAccessSetting_: {
+        type: Boolean,
+        value: () => loadTimeData.getBoolean('enableLocalNetworkAccessSetting'),
+      },
+
       isNotificationAllowed_: Boolean,
       isLocationAllowed_: Boolean,
       notificationPermissionsReviewHeader_: String,
       notificationPermissionsReviewSubeader_: String,
+      allSitesPageTitle_: String,
     };
   }
 
@@ -388,6 +403,7 @@ export class SettingsPrivacyPageElement extends SettingsPrivacyPageElementBase {
   private enableComposeProactiveNudge_: boolean;
   private shouldShowSafetyHub_: boolean;
   private enableWebAppInstallation_: boolean;
+  private enableLocalNetworkAccessSetting_: boolean;
   private focusConfig_: FocusConfig;
   private searchFilter_: string;
   private notificationPermissionsReviewHeader_: string;
@@ -406,6 +422,8 @@ export class SettingsPrivacyPageElement extends SettingsPrivacyPageElementBase {
   private enableCertManagementUIV2_: boolean;
   // </if>
   private enableKeyboardLockPrompt_: boolean;
+  private enableRelatedWebsiteSetsV2Ui_: boolean;
+  private allSitesPageTitle_: string;
 
   override ready() {
     super.ready();
@@ -436,6 +454,7 @@ export class SettingsPrivacyPageElement extends SettingsPrivacyPageElementBase {
     }
 
     this.updateLocationAndNotificationState_();
+    this.updateAllSitesPageTitle_();
   }
 
   override currentRouteChanged() {
@@ -638,6 +657,19 @@ export class SettingsPrivacyPageElement extends SettingsPrivacyPageElementBase {
         return this.i18n('thirdPartyCookiesLinkRowSublabelDisabled');
       default:
         assertNotReached();
+    }
+  }
+
+  private updateAllSitesPageTitle_(): void {
+    const rwsPrefix = 'related:';
+    if (this.enableRelatedWebsiteSetsV2Ui_ &&
+        this.searchFilter_.length > rwsPrefix.length &&
+        this.searchFilter_.startsWith(rwsPrefix)) {
+      this.allSitesPageTitle_ = loadTimeData.getStringF(
+          'allSitesRwsFilterViewTitle',
+          this.searchFilter_.substring(rwsPrefix.length));
+    } else {
+      this.allSitesPageTitle_ = this.i18n('siteSettingsAllSites');
     }
   }
 

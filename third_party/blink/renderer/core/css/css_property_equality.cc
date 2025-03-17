@@ -789,8 +789,6 @@ bool CSSPropertyEquality::PropertiesEqual(const PropertyHandle& property,
       return a.ViewTransitionGroup() == b.ViewTransitionGroup();
     case CSSPropertyID::kViewTransitionName:
       return a.ViewTransitionName() == b.ViewTransitionName();
-    case CSSPropertyID::kViewTransitionCaptureMode:
-      return a.ViewTransitionCaptureMode() == b.ViewTransitionCaptureMode();
     case CSSPropertyID::kVisibility:
       return a.Visibility() == b.Visibility();
     case CSSPropertyID::kWebkitBorderHorizontalSpacing:
@@ -819,6 +817,8 @@ bool CSSPropertyEquality::PropertiesEqual(const PropertyHandle& property,
       return a.ColumnRuleColor() == b.ColumnRuleColor() &&
              a.InternalVisitedColumnRuleColor() ==
                  b.InternalVisitedColumnRuleColor();
+    case CSSPropertyID::kRowRuleColor:
+      return a.RowRuleColor() == b.RowRuleColor();
     case CSSPropertyID::kColumnRuleWidth:
       return a.ColumnRuleWidth() == b.ColumnRuleWidth();
     case CSSPropertyID::kRowRuleWidth:

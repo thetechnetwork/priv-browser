@@ -77,6 +77,7 @@ TAG_SPECIALIZATIONS = {
             'amd-0x67ef',
             'amd-0x6821',
             'amd-0x7340',
+            'amd-0x7480',
         ],
         'apple': [
             'apple-apple-m1',
@@ -219,8 +220,6 @@ TAG_HEADER = """\
 # tags: [ asan no-asan ]
 # Display Server
 # tags: [ display-server-wayland display-server-x ]
-# OOP-Canvas
-# tags: [ oop-c no-oop-c ]
 # WebGPU Backend Validation
 # tags: [ dawn-backend-validation dawn-no-backend-validation ]
 # WebGPU Adapter

@@ -26,7 +26,6 @@
 @class CarouselItem;
 @protocol CarouselItemConsumer;
 class FaviconLoader;
-@class OmniboxPedalAnnotator;
 @class OmniboxPopupController;
 @class OmniboxPopupMediator;
 @class OmniboxPopupPresenter;
@@ -95,8 +94,6 @@ class Tracker;
 /// Whether the default search engine is Google impacts which icon is used in
 /// some cases
 @property(nonatomic, assign) BOOL defaultSearchEngineIsGoogle;
-/// The annotator to create pedals for ths mediator.
-@property(nonatomic) OmniboxPedalAnnotator* pedalAnnotator;
 /// Flag that marks that incognito actions are available. Those can be disabled
 /// by an enterprise policy.
 @property(nonatomic, assign) BOOL allowIncognitoActions;

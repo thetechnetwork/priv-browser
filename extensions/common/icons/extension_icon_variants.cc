@@ -15,10 +15,13 @@ using Diagnostic = diagnostics::icon_variants::Diagnostic;
 
 ExtensionIconVariants::ExtensionIconVariants() = default;
 
+ExtensionIconVariants::~ExtensionIconVariants() = default;
+
 ExtensionIconVariants::ExtensionIconVariants(ExtensionIconVariants&& other) =
     default;
 
-ExtensionIconVariants::~ExtensionIconVariants() = default;
+ExtensionIconVariants::ExtensionIconVariants(
+    const ExtensionIconVariants& other) = default;
 
 void ExtensionIconVariants::Parse(const base::Value::List* list) {
   // Parse each icon variant in `icon_variants`.
@@ -57,6 +60,13 @@ bool ExtensionIconVariants::IsEmpty() const {
 void ExtensionIconVariants::Add(
     std::unique_ptr<ExtensionIconVariant> icon_variant) {
   list_.emplace_back(std::move(*icon_variant));
+}
+
+void ExtensionIconVariants::AddDiagnostic(
+    diagnostics::icon_variants::Feature feature,
+    diagnostics::icon_variants::Id id) {
+  diagnostics_.emplace_back(
+      diagnostics::icon_variants::GetDiagnostic(feature, id));
 }
 
 }  //  namespace extensions

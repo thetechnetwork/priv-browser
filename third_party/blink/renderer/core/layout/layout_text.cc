@@ -63,6 +63,7 @@
 #include "third_party/blink/renderer/core/layout/text_autosizer.h"
 #include "third_party/blink/renderer/core/paint/object_paint_invalidator.h"
 #include "third_party/blink/renderer/platform/fonts/character_range.h"
+#include "third_party/blink/renderer/platform/heap/disallow_new_wrapper.h"
 #include "third_party/blink/renderer/platform/scheduler/public/thread.h"
 #include "third_party/blink/renderer/platform/scheduler/public/thread_scheduler.h"
 #include "third_party/blink/renderer/platform/text/character.h"
@@ -94,9 +95,10 @@ class SecureTextTimer;
 typedef HeapHashMap<WeakMember<const LayoutText>, Member<SecureTextTimer>>
     SecureTextTimerMap;
 static SecureTextTimerMap& GetSecureTextTimers() {
-  DEFINE_STATIC_LOCAL(const Persistent<SecureTextTimerMap>, map,
-                      (MakeGarbageCollected<SecureTextTimerMap>()));
-  return *map;
+  using SecureTextTimerMapHolder = DisallowNewWrapper<SecureTextTimerMap>;
+  DEFINE_STATIC_LOCAL(const Persistent<SecureTextTimerMapHolder>, holder,
+                      (MakeGarbageCollected<SecureTextTimerMapHolder>()));
+  return holder->Value();
 }
 
 class SecureTextTimer final : public GarbageCollected<SecureTextTimer>,
@@ -156,9 +158,12 @@ using SelectionDisplayItemClientMap =
     HeapHashMap<WeakMember<const LayoutText>,
                 Member<SelectionDisplayItemClient>>;
 SelectionDisplayItemClientMap& GetSelectionDisplayItemClientMap() {
-  DEFINE_STATIC_LOCAL(Persistent<SelectionDisplayItemClientMap>, map,
-                      (MakeGarbageCollected<SelectionDisplayItemClientMap>()));
-  return *map;
+  using SelectionDisplayItemClientMapHolder =
+      DisallowNewWrapper<SelectionDisplayItemClientMap>;
+  DEFINE_STATIC_LOCAL(
+      Persistent<SelectionDisplayItemClientMapHolder>, holder,
+      (MakeGarbageCollected<SelectionDisplayItemClientMapHolder>()));
+  return holder->Value();
 }
 
 }  // anonymous namespace
@@ -315,9 +320,11 @@ void LayoutText::DetachAxHooks() {
   }
 }
 
-void LayoutText::ClearBlockFlowCachedData(const LayoutBlockFlow* block_flow) {
+void LayoutText::ClearBlockFlowCachedData() {
+  NOT_DESTROYED();
   if (AXObjectCache* cache = GetDocument().ExistingAXObjectCache()) {
-    cache->ClearBlockFlowCachedData(FragmentItemsContainer());
+    cache->ClearBlockFlowCachedData(this);
+    cache->InlineTextBoxesUpdated(this);
   }
 }
 
@@ -906,9 +913,7 @@ String LayoutText::TransformAndSecureText(const String& original,
     }
     auto [masked, secure_map] = SecureText(transformed, mask);
     if (!secure_map.IsEmpty()) {
-      offset_map = TextOffsetMap(
-          offset_map, secure_map,
-          RuntimeEnabledFeatures::TextTransformAndSecurityFixEnabled());
+      offset_map = TextOffsetMap(offset_map, secure_map);
     }
     return masked;
   }
@@ -956,6 +961,7 @@ std::pair<String, TextOffsetMap> LayoutText::SecureText(const String& plain,
 void LayoutText::SetVariableLengthTransformResult(
     wtf_size_t original_length,
     const TextOffsetMap& offset_map) {
+  NOT_DESTROYED();
   if (offset_map.IsEmpty()) {
     ClearHasVariableLengthTransform();
     return;
@@ -967,6 +973,7 @@ void LayoutText::SetVariableLengthTransformResult(
 
 VariableLengthTransformResult LayoutText::GetVariableLengthTransformResult()
     const {
+  NOT_DESTROYED();
   return View()->GetVariableLengthTransformResult(*this);
 }
 
@@ -997,6 +1004,7 @@ void LayoutText::ForceSetText(String text) {
 
 void LayoutText::SetNeedsLayoutAndIntrinsicWidthsRecalcAndFullPaintInvalidation(
     LayoutInvalidationReasonForTracing reason) {
+  NOT_DESTROYED();
   auto* const text_combine = DynamicTo<LayoutTextCombine>(Parent());
   if (text_combine) [[unlikely]] {
     // Number of characters in text may change compressed font or scaling of

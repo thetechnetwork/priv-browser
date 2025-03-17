@@ -16,6 +16,7 @@
 #include "base/functional/concurrent_closures.h"
 #include "base/memory/weak_ptr.h"
 #include "base/metrics/field_trial_params.h"
+#include "base/no_destructor.h"
 #include "base/notreached.h"
 #include "base/strings/string_split.h"
 #include "base/strings/utf_string_conversions.h"
@@ -77,13 +78,13 @@ constexpr size_t kPdfUploadLimitBytes = 128 * kBytesPerMegabyte;
 
 void OnGotAIPageContentForModelPrototyping(
     AiDataKeyedService::AiDataCallback continue_callback,
-    std::optional<optimization_guide::proto::AnnotatedPageContent> proto) {
+    std::optional<optimization_guide::AIPageContentResult> page_content) {
   TRACE_EVENT("browser", "OnGotAIPageContentForModelPrototyping");
 
   AiDataKeyedService::BrowserData data;
-  if (proto) {
+  if (page_content) {
     *data.mutable_page_context()->mutable_annotated_page_content() =
-        std::move(*proto);
+        std::move(page_content->proto);
     std::move(continue_callback).Run(std::move(data));
     return;
   }
@@ -450,9 +451,8 @@ void GetFormDataByFieldGlobalIdForModelPrototyping(
     std::move(continue_callback).Run(std::move(data));
     return;
   }
-  *data->mutable_form_data() = autofill::ToFormDataProto(
-      form_structure->ToFormData(), /*field_eligibility_map=*/{},
-      /*field_value_sensitivity_map=*/{});
+  *data->mutable_form_data() =
+      autofill::ToFormDataProto(form_structure->ToFormData());
   std::move(continue_callback).Run(std::move(data));
 }
 #endif
@@ -698,16 +698,18 @@ std::vector<std::string> AiDataKeyedService::GetAllowlistedExtensions() {
   std::vector<std::string> allowlisted_extensions =
       base::SplitString(kAllowlistedExtensions.Get(), ",",
                         base::TRIM_WHITESPACE, base::SPLIT_WANT_NONEMPTY);
-  static const std::vector<std::string> kHardcodedAllowlistedExtensions = {
-      // https://issues.chromium.org/373645534
-      "hpkopmikdojpadgmioifjjodbmnjjjca",
-      // https://issues.chromium.org/377129777
-      "bgbpcgpcobgjpnpiginpidndjpggappi",
-      // https://issues.chromium.org/376699519
-      "eefninhhiifgcimjkmkongegpoaikmhm"};
+  static const base::NoDestructor<std::vector<std::string>>
+      kHardcodedAllowlistedExtensions({// https://issues.chromium.org/373645534
+                                       "hpkopmikdojpadgmioifjjodbmnjjjca",
+                                       // https://issues.chromium.org/377129777
+                                       "bgbpcgpcobgjpnpiginpidndjpggappi",
+                                       // https://issues.chromium.org/376699519
+                                       "eefninhhiifgcimjkmkongegpoaikmhm",
+                                       // https://issues.chromium.org/403366603
+                                       "abdciamfdmknaeggbnmafmbdfdmhfgfa"});
   allowlisted_extensions.insert(allowlisted_extensions.end(),
-                                kHardcodedAllowlistedExtensions.begin(),
-                                kHardcodedAllowlistedExtensions.end());
+                                kHardcodedAllowlistedExtensions->begin(),
+                                kHardcodedAllowlistedExtensions->end());
   std::vector<std::string> blocklisted_extensions =
       base::SplitString(kBlocklistedExtensions.Get(), ",",
                         base::TRIM_WHITESPACE, base::SPLIT_WANT_NONEMPTY);

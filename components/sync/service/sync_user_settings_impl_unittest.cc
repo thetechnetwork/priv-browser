@@ -12,6 +12,7 @@
 #include "components/prefs/testing_pref_service.h"
 #include "components/saved_tab_groups/public/pref_names.h"
 #include "components/signin/public/base/signin_pref_names.h"
+#include "components/signin/public/base/signin_prefs.h"
 #include "components/signin/public/base/signin_switches.h"
 #include "components/signin/public/identity_manager/account_info.h"
 #include "components/signin/public/identity_manager/identity_manager.h"
@@ -71,6 +72,7 @@ class SyncUserSettingsImplTest : public testing::Test,
  protected:
   SyncUserSettingsImplTest() {
     SyncPrefs::RegisterProfilePrefs(pref_service_.registry());
+    SigninPrefs::RegisterProfilePrefs(pref_service_.registry());
     SyncTransportDataPrefs::RegisterProfilePrefs(pref_service_.registry());
     signin::IdentityManager::RegisterProfilePrefs(pref_service_.registry());
     // TODO(crbug.com/368409110): Necessary for a workaround in
@@ -136,6 +138,10 @@ TEST_F(SyncUserSettingsImplTest, PreferredTypesSyncEverything) {
   UserSelectableTypeSet all_registered_types =
       sync_user_settings->GetRegisteredSelectableTypes();
 
+  // TODO(crbug.com/397767033): In CL #3, delete (SHARED_TAB_GROUP_ACCOUNT_DATA
+  // is now mapped to a selectable type.
+  expected_types.Remove(SHARED_TAB_GROUP_ACCOUNT_DATA);
+
 #if BUILDFLAG(IS_CHROMEOS)
   expected_types.RemoveAll({WEB_APKS});
 #endif  // BUILDFLAG(IS_CHROMEOS)
@@ -163,11 +169,10 @@ TEST_F(SyncUserSettingsImplTest, GetSelectedTypesWhileSignedOut) {
 TEST_F(SyncUserSettingsImplTest, DefaultSelectedTypesWhileSignedIn) {
   base::test::ScopedFeatureList feature_list;
   feature_list.InitWithFeatures(
-      /*enabled_features=*/{kSyncEnableBookmarksInTransportMode,
+      /*enabled_features=*/{switches::kSyncEnableBookmarksInTransportMode,
                             kReplaceSyncPromosWithSignInPromos,
 #if !BUILDFLAG(IS_IOS) && !BUILDFLAG(IS_ANDROID)
                             kReadingListEnableSyncTransportModeUponSignIn,
-                            switches::kExplicitBrowserSigninUIOnDesktop,
                             kSeparateLocalAndAccountSearchEngines,
                             syncer::kSeparateLocalAndAccountThemes,
                             syncer::kMoveThemePrefsToSpecifics,
@@ -200,6 +205,10 @@ TEST_F(SyncUserSettingsImplTest, DefaultSelectedTypesWhileSignedIn) {
 
 #if BUILDFLAG(IS_IOS) || BUILDFLAG(IS_ANDROID)
   expected_disabled_types.Put(UserSelectableType::kThemes);
+#else
+  // On platforms other than mobile, bookmarks requires a separate pref
+  // `kBookmarksExplicitBrowserSigninEnabled`.
+  expected_disabled_types.Put(UserSelectableType::kBookmarks);
 #endif
 
   EXPECT_EQ(selected_types,
@@ -274,6 +283,9 @@ TEST_F(SyncUserSettingsImplTest, PreferredTypesSyncAllOsTypes) {
 
   DataTypeSet expected_types = GetUserTypes();
   expected_types.RemoveAll({WEB_APKS});
+  // TODO(crbug.com/397767033): In CL #3, delete (SHARED_TAB_GROUP_ACCOUNT_DATA
+  // is now mapped to a selectable type.
+  expected_types.Remove(SHARED_TAB_GROUP_ACCOUNT_DATA);
   EXPECT_TRUE(sync_user_settings->IsSyncAllOsTypesEnabled());
   EXPECT_EQ(expected_types, GetPreferredUserTypes(*sync_user_settings));
 

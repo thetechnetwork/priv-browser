@@ -69,14 +69,14 @@
 #include "content/browser/browser_main_loop.h"
 #include "content/browser/browser_plugin/browser_plugin_embedder.h"
 #include "content/browser/browser_plugin/browser_plugin_guest.h"
+#include "content/browser/btm/btm_bounce_detector.h"
+#include "content/browser/btm/btm_navigation_flow_detector.h"
 #include "content/browser/child_process_security_policy_impl.h"
 #include "content/browser/closewatcher/close_listener_manager.h"
 #include "content/browser/compositor/surface_utils.h"
 #include "content/browser/device_posture/device_posture_provider_impl.h"
 #include "content/browser/devtools/protocol/page_handler.h"
 #include "content/browser/devtools/render_frame_devtools_agent_host.h"
-#include "content/browser/dips/dips_bounce_detector.h"
-#include "content/browser/dips/dips_navigation_flow_detector.h"
 #include "content/browser/display_cutout/display_cutout_host_impl.h"
 #include "content/browser/dom_storage/dom_storage_context_wrapper.h"
 #include "content/browser/dom_storage/session_storage_namespace_impl.h"
@@ -92,7 +92,6 @@
 #include "content/browser/permissions/permission_controller_impl.h"
 #include "content/browser/permissions/permission_util.h"
 #include "content/browser/preloading/prefetch/prefetch_service.h"
-#include "content/browser/preloading/preload_pipeline_info.h"
 #include "content/browser/preloading/preloading.h"
 #include "content/browser/preloading/prerender/prerender_final_status.h"
 #include "content/browser/preloading/prerender/prerender_host_registry.h"
@@ -154,6 +153,7 @@
 #include "content/public/browser/javascript_dialog_manager.h"
 #include "content/public/browser/keyboard_event_processing_result.h"
 #include "content/public/browser/navigation_details.h"
+#include "content/public/browser/preload_pipeline_info.h"
 #include "content/public/browser/preview_cancel_reason.h"
 #include "content/public/browser/render_widget_host_iterator.h"
 #include "content/public/browser/render_widget_host_observer.h"
@@ -177,6 +177,7 @@
 #include "partition_alloc/buildflags.h"
 #include "ppapi/buildflags/buildflags.h"
 #include "services/device/public/mojom/wake_lock.mojom.h"
+#include "services/network/public/cpp/features.h"
 #include "services/network/public/cpp/request_destination.h"
 #include "services/network/public/cpp/web_sandbox_flags.h"
 #include "services/network/public/mojom/network_context.mojom.h"
@@ -711,6 +712,14 @@ void RecordRendererUnresponsiveMetrics(
       rph_priority);
 }
 
+// Helper function to simplify getting the correct HostZoomMapImpl for a
+// RenderFrameHost. Implemented here to be close to its only consumer,
+// GetPendingZoomLevel().
+HostZoomMapImpl* HostZoomMapForRenderFrameHost(const RenderFrameHost* rfh) {
+  return static_cast<HostZoomMapImpl*>(
+      HostZoomMap::Get(rfh->GetSiteInstance()));
+}
+
 }  // namespace
 
 // This is a small helper class created while a JavaScript dialog is showing
@@ -896,6 +905,33 @@ WebContents* WebContentsImpl::GetOpenedPartitionedPopin() const {
         !opened_partitioned_popin_);
 
   return opened_partitioned_popin_.get();
+}
+
+GURL WebContentsImpl::GetPartitionedPopinEmbedderOrigin(
+    base::PassKey<StorageAccessGrantPermissionContext>) const {
+  return GetPartitionedPopinEmbedderOriginImpl();
+}
+
+GURL WebContentsImpl::GetPartitionedPopinEmbedderOriginForTesting() const {
+  return GetPartitionedPopinEmbedderOriginImpl();
+}
+
+GURL WebContentsImpl::GetPartitionedPopinEmbedderOriginImpl() const {
+  // This should only be checked for popins.
+  CHECK(IsPartitionedPopin());
+
+  // If the opener is still around and has not navigated then we want to use the
+  // embedder origin it would have used for its own iframe.
+  if (partitioned_popin_opener_ &&
+      partitioned_popin_opener_->GetMainFrame()->GetLastCommittedOrigin() ==
+          partitioned_popin_opener_properties_->top_frame_origin) {
+    return PermissionUtil::GetLastCommittedOriginAsURL(
+        partitioned_popin_opener_->GetMainFrame());
+  }
+  // If we end up here there was a race condition between a permissions check
+  // and this popin being closed or navigated, so we should fallback to using
+  // the origin we partitioned by.
+  return partitioned_popin_opener_properties_->top_frame_origin.GetURL();
 }
 
 void WebContents::SetScreenOrientationDelegate(
@@ -1311,7 +1347,7 @@ WebContentsImpl::WebContentsImpl(BrowserContext* browser_context)
       std::make_unique<ScreenChangeMonitor>(base::BindRepeating(
           &WebContentsImpl::OnScreensChange, base::Unretained(this)));
 
-  if (base::FeatureList::IsEnabled(blink::features::kSharedStorageAPI)) {
+  if (base::FeatureList::IsEnabled(network::features::kSharedStorageAPI)) {
     SharedStorageBudgetCharger::CreateForWebContents(this);
   }
 
@@ -1648,6 +1684,10 @@ NavigationControllerImpl& WebContentsImpl::GetController() {
   return primary_frame_tree_.controller();
 }
 
+const NavigationControllerImpl& WebContentsImpl::GetController() const {
+  return primary_frame_tree_.controller();
+}
+
 BrowserContext* WebContentsImpl::GetBrowserContext() {
   return GetController().GetBrowserContext();
 }
@@ -1666,9 +1706,9 @@ const GURL& WebContentsImpl::GetVisibleURL() {
   return entry ? entry->GetVirtualURL() : GURL::EmptyGURL();
 }
 
-const GURL& WebContentsImpl::GetLastCommittedURL() {
+const GURL& WebContentsImpl::GetLastCommittedURL() const {
   // We may not have a navigation entry yet.
-  NavigationEntry* entry = GetController().GetLastCommittedEntry();
+  const NavigationEntry* entry = GetController().GetLastCommittedEntry();
   return entry ? entry->GetVirtualURL() : GURL::EmptyGURL();
 }
 
@@ -3400,8 +3440,6 @@ const blink::web_pref::WebPreferences WebContentsImpl::ComputeWebPreferences(
       !command_line.HasSwitch(switches::kDisableRemoteFonts);
   prefs.local_storage_enabled =
       !command_line.HasSwitch(switches::kDisableLocalStorage);
-  prefs.databases_enabled =
-      !command_line.HasSwitch(switches::kDisableDatabases);
 
   prefs.webgl1_enabled = !command_line.HasSwitch(switches::kDisable3DAPIs) &&
                          !command_line.HasSwitch(switches::kDisableWebGL);
@@ -7674,6 +7712,10 @@ WebContentsImpl::GetOrCreateWebPreferences() {
   if (!web_preferences_) {
     OnWebPreferencesChanged();
   }
+
+  CHECK(web_preferences_)
+      << "WebPreferences is not created because GetOrCreateWebPreferences() "
+      << "is called before OnWebPreferencesChanged() returns.";
   return *web_preferences_.get();
 }
 
@@ -8693,15 +8735,35 @@ void WebContentsImpl::RunFileChooser(
 }
 
 double WebContentsImpl::GetPendingZoomLevel(RenderWidgetHostImpl* rwh) {
-  // TODO(372932834): This needs to be modified for the PDF-in-OOPIF case, as
-  // while the PDF will have its own RenderWidgetHost, the associated
-  // RenderFrameHost won't always be at the root of a FrameTree (and the
-  // FrameTree won't be of type kGuest).
-  // Note: this could involve (something like) detecting that the rfh for `rwh`
-  // is *not* a frame-tree root, but *does* have a temporary zoom level set in
-  // HostZoomMap.
-  RenderFrameHostImpl* rfh =
-      rwh->frame_tree()->root()->current_frame_host()->GetOutermostMainFrame();
+  RenderFrameHostImpl* rfh = nullptr;
+  // Find the RenderFrameHost for `rwh`.
+  ForEachRenderFrameHostImplWithAction(
+      [rwh, &rfh](RenderFrameHostImpl* render_frame_host) {
+        if (render_frame_host->GetRenderWidgetHost() == rwh) {
+          rfh = render_frame_host;
+          return RenderFrameHost::FrameIterationAction::kStop;
+        }
+        return RenderFrameHost::FrameIterationAction::kContinue;
+      });
+
+  if (rfh) {
+    // Find nearest ancestor that has independent zoom.
+    // Use GetParentOrOuterDocument() instead of GetParent() in order
+    // to "step out of" any fenced frames that are encountered.
+    while (!HostZoomMapForRenderFrameHost(rfh)->IsIndependentZoomFrameTreeNode(
+               rfh->GetFrameTreeNodeId()) &&
+           rfh->GetParentOrOuterDocument()) {
+      rfh = rfh->GetParentOrOuterDocument();
+    }
+  } else {
+    // Not finding a `rfh` suggests that `rwh` is still in the process of being
+    // set up, or is for a newly created RenderWidgetHost without a
+    // RenderFrameHost (e.g. for a <select> tag popup>), and that this function
+    // will be called again when there is a findable `rfh` for `rwh`. For now,
+    // just return the zoom level of this WebContents, as that will most often
+    // be right.
+    return HostZoomMap::GetZoomLevel(this);
+  }
 
   GURL url;
   if (rfh->IsInBackForwardCache()) {
@@ -8725,13 +8787,12 @@ double WebContentsImpl::GetPendingZoomLevel(RenderWidgetHostImpl* rwh) {
     url = pending_entry->GetURL();
   }
 #if BUILDFLAG(IS_ANDROID)
-  return HostZoomMap::GetForWebContents(this)
+  return HostZoomMapForRenderFrameHost(rfh)
       ->GetZoomLevelForHostAndSchemeAndroid(url.scheme(),
                                             net::GetHostOrSpecFromURL(url));
 #else
-  return HostZoomMap::Get(rfh->GetSiteInstance())
-      ->GetZoomLevelForHostAndScheme(url.scheme(),
-                                     net::GetHostOrSpecFromURL(url));
+  return HostZoomMapForRenderFrameHost(rfh)->GetZoomLevelForHostAndScheme(
+      url.scheme(), net::GetHostOrSpecFromURL(url));
 #endif
 }
 
@@ -11646,6 +11707,8 @@ std::unique_ptr<PrefetchHandle> WebContentsImpl::StartPrefetch(
     bool use_prefetch_proxy,
     const blink::mojom::Referrer& referrer,
     const std::optional<url::Origin>& referring_origin,
+    std::optional<net::HttpNoVarySearchData> no_vary_search_hint,
+    scoped_refptr<PreloadPipelineInfo> preload_pipeline_info,
     base::WeakPtr<PreloadingAttempt> attempt,
     std::optional<PreloadingHoldbackStatus> holdback_status_override) {
   if (!base::FeatureList::IsEnabled(
@@ -11663,8 +11726,8 @@ std::unique_ptr<PrefetchHandle> WebContentsImpl::StartPrefetch(
                              use_prefetch_proxy);
   auto container = std::make_unique<PrefetchContainer>(
       *this, prefetch_url, prefetch_type, referrer, referring_origin,
-      /*no_vary_search_hint=*/std::nullopt, std::move(attempt),
-      holdback_status_override);
+      std::move(no_vary_search_hint), std::move(preload_pipeline_info),
+      std::move(attempt), holdback_status_override);
 
   return prefetch_service->AddPrefetchContainerWithHandle(std::move(container));
 }
@@ -11679,6 +11742,7 @@ std::unique_ptr<PrerenderHandle> WebContentsImpl::StartPrerendering(
     bool should_warm_up_compositor,
     bool should_prepare_paint_tree,
     PreloadingHoldbackStatus holdback_status_override,
+    scoped_refptr<PreloadPipelineInfo> preload_pipeline_info,
     PreloadingAttempt* preloading_attempt,
     base::RepeatingCallback<bool(const GURL&,
                                  const std::optional<UrlMatchType>&)>
@@ -11693,8 +11757,8 @@ std::unique_ptr<PrerenderHandle> WebContentsImpl::StartPrerendering(
       should_warm_up_compositor, should_prepare_paint_tree,
       std::move(url_match_predicate),
       std::move(prerender_navigation_handle_callback),
-      base::MakeRefCounted<PreloadPipelineInfo>(
-          /*planned_max_preloading_type=*/PreloadingType::kPrerender));
+      base::WrapRefCounted(
+          static_cast<PreloadPipelineInfoImpl*>(preload_pipeline_info.get())));
 #if BUILDFLAG(IS_ANDROID)
   attributes.additional_headers = std::move(additional_headers);
 #else

@@ -23,8 +23,6 @@ MAX_WAIT_TIME_TO_DELETE_RUNTIME = 45  # 45 seconds
 SIMULATOR_DEFAULT_PATH = os.path.expanduser(
     '~/Library/Developer/CoreSimulator/Devices')
 
-IOS18_SIM_RUNTIME_ID = 'com.apple.CoreSimulator.SimRuntime.iOS-18-0'
-
 # TODO(crbug.com/40910268): remove Legacy Download once iOS 15.5 is deprecated
 IOS_SIM_RUNTIME_BUILTIN_STATE = ['Legacy Download', 'Bundled with Xcode']
 
@@ -466,13 +464,13 @@ def delete_simulator_runtime(runtime_id, should_wait=False):
     # runtime takes a few seconds to delete
     time_waited = 0
     runtime_to_delete = get_simulator_runtime_info_by_id(runtime_id)
-    while (runtime_to_delete is not None):
+    while runtime_to_delete is not None:
       LOGGER.debug('Waiting for runtime to be deleted. Current state is %s' %
                    runtime_to_delete['state'])
       time.sleep(1)
       time_waited += 1
       if (time_waited > MAX_WAIT_TIME_TO_DELETE_RUNTIME):
-        raise test_runner_errors.SimRuntimeDeleteTimeoutError(ios_version)
+        raise test_runner_errors.SimRuntimeDeleteTimeoutError(runtime_id)
       runtime_to_delete = get_simulator_runtime_info_by_id(runtime_id)
     LOGGER.debug('Runtime successfully deleted!')
 

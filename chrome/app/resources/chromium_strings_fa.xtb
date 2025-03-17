@@ -32,6 +32,7 @@
 <translation id="1478370723027452770">‏دریافت راهنمایی درباره Chrome for Testing</translation>
 <translation id="1497802159252041924">خطای نصب: <ph name="INSTALL_ERROR" /></translation>
 <translation id="1524282610922162960">‏هم‌رسانی برگه Chromium</translation>
+<translation id="1547469039832541117">تکلیف برجسته‌شده را به‌پایان می‌رساند.</translation>
 <translation id="1553461853655228091">‏Chromium برای ایجاد نقشه سه‌بعدی محیط شما باید اجازه دسترسی به دوربین داشته باشد</translation>
 <translation id="1555494096857516577">{NUM_EXTENSIONS,plural, =1{‏دیگر از این افزونه پشتیبانی نمی‌شود. ‫Chromium توصیه می‌کند آن را حذف کنید.}one{‏دیگر از این افزونه‌ها پشتیبانی نمی‌شود. ‫Chromium توصیه می‌کند آن‌ها را بردارید.}other{‏دیگر از این افزونه‌ها پشتیبانی نمی‌شود. ‫Chromium توصیه می‌کند آن‌ها را بردارید.}}</translation>
 <translation id="1574377791422810894">‏ابزارهای ایمنی Chromium</translation>
@@ -88,7 +89,7 @@
 <translation id="2190166659037789668">خطای بررسی به‌روزرسانی: <ph name="UPDATE_CHECK_ERROR" />.</translation>
 <translation id="2199210295479376551">‏برداشتن حساب از Chromium</translation>
 <translation id="2210682093923538346">‏سایت خطرناک. ‫Chromium اعلان‌ها را برداشت.</translation>
-<translation id="2236949375853147973">فعالیت من</translation>
+<translation id="2236949375853147973">فعالیت‌هایم</translation>
 <translation id="2238130810669087193">‏برای دریافت نشانی‌ها و موارد دیگر در همه دستگاه‌هایتان، به سیستم Chromium وارد شوید. بعداز اینکه به سیستم وارد شدید، این نشانی در «حساب Google» شما ذخیره خواهد شد.</translation>
 <translation id="2240214816234246077">‏اخیراً بازدیدی نداشته‌اید. ‫Chromium ‏<ph name="PERMISSION_1" /> و <ph name="PERMISSION_2" /> را برداشت</translation>
 <translation id="2241627712206172106">‏اگر رایانه‌ای را به صورت مشترک استفاده می‌کنید، دوستان و خانواده می‌توانند به صورت جداگانه مرور کنند و Chromium را به صورتی که مایلند تنظیم کنند.</translation>
@@ -117,6 +118,7 @@
 <translation id="2583187216237139145">‏سرپرست نمایه کاری می‌تواند داده‌های Chromium را که درطول استفاده از این نمایه ایجاد شده‌اند (مثل ایجاد سابقه نشانک‌ها، گذرواژه‌ها، و دیگر تنظیمات) بردارد. <ph name="LEARN_MORE" /></translation>
 <translation id="2592940277904433508">‏ادامه استفاده از Chromium</translation>
 <translation id="259935314519650377">نصب‌کننده بارگیری‌شده در حافظه نهان ذخیره نشد. خطا: <ph name="UNPACK_CACHING_ERROR_CODE" />.</translation>
+<translation id="2629740064077610681">‏سازمانتان می‌تواند داده‌های مرور، مثل نشانک‌ها، سابقه، و گذرواژه‌هایتان را ببیند و مدیریت کند. سازمانتان نمی‌تواند داده‌های مرور دیگر نمایه‌های Chromium را ببیند</translation>
 <translation id="2635452620547538388">‏برای استفاده از داده‌های Chromium و ذخیره کردن آن‌ها در حسابتان (<ph name="ACCOUNT_EMAIL" />)، هویت خود را به‌تأیید برسانید</translation>
 <translation id="264613044588233783">‏Chromium سریع‌تر اجرا می‌شود و ویژگی‌هایی که از جاوا اسکریپت استفاده می‌کنند باید طبق طراحی کار کنند (توصیه می‌شود)</translation>
 <translation id="2648074677641340862">‏یک خطای سیستم‌عامل در طول نصب روی داد. لطفاً Chromium را دوباره نصب کنید.</translation>
@@ -127,11 +129,9 @@
 <translation id="2738871930057338499">‏اتصال به اینترنت برقرار نشد. HTTP ۴۰۳ ممنوع است. لطفاً پیکربندی پروکسی‌تان را بررسی کنید.</translation>
 <translation id="2753623023919742414">برای جستجو، کلیک کنید</translation>
 <translation id="2770231113462710648">تغییر مرورگر پیش‌فرض به:</translation>
-<translation id="277338894894732084">‏بعداً Chromium از شما می‌پرسد که آیا می‌خواهید از اطلاعات ذخیره‌شده برای تکمیل خودکار فرم‌ها استفاده کنید</translation>
 <translation id="2785438272836277133">‏این افزونه حاوی بدافزار است و ناامن است. آن را از Chromium حذف کنید تا دیگر نتواند داده‌های شما (ازجمله اطلاعات شخصی) را در سایت‌هایی که بازدید می‌کنید ببیند و تغییر دهد.</translation>
 <translation id="2799223571221894425">راه‌اندازی مجدد</translation>
 <translation id="2803971713792056305">‏‫Chromium شما</translation>
-<translation id="2806241689335397269">‏‫Chromium از شما می‌پرسد که آیا می‌خواهید اطلاعات فرم مثل تاریخ تولد، سن، و شماره گذرنامه‌تان را ذخیره کنید</translation>
 <translation id="2841525013647267359">ترجمه کردن از</translation>
 <translation id="2846251086934905009">خطای نصب: نصب‌کننده کامل نشد. نصب لغو شد.</translation>
 <translation id="2847479871509788944">‏حذف از Chromium...</translation>
@@ -176,7 +176,6 @@
 <translation id="3387527074123400161">ChromiumOS</translation>
 <translation id="3406848076815591792">‏به نمایه Chromium موجود می‌روید؟</translation>
 <translation id="3412460710772753638">در «مدیر گذرواژه» در این دستگاه</translation>
-<translation id="3451656833730006755">‏برای دریافت افزونه‌ها و موارد دیگر در همه رایانه‌هایتان، به سیستم Chromium وارد شوید</translation>
 <translation id="347328004046849135">‏وقتی با گذرواژه‌ای لورفته به سیستم وارد می‌شوید، Chromium شما را مطلع می‌کند</translation>
 <translation id="3474745554856756813">‏این کار <ph name="ITEMS_COUNT" /> مورد را از این دستگاه حذف می‌کند. برای بازیابی داده‌هایتان در فرصتی دیگر، با <ph name="USER_EMAIL" /> به سیستم Chromium وارد شوید.</translation>
 <translation id="3497319089134299931">‏با <ph name="SHORTCUT" /> می‌توانید بین نمایه‌های Chromium جابه‌جا شوید</translation>
@@ -225,6 +224,7 @@
 <translation id="4148957013307229264">در حال نصب...</translation>
 <translation id="419998258129752635">‏<ph name="PAGE_TITLE" /> - ورود به سیستم شبکه - Chromium</translation>
 <translation id="421369550622382712">‏برنامه‌ها، بازی‌ها، افزونه‌ها و طرح‌های زمینه Chromium را کشف کنید.</translation>
+<translation id="4217080900579554343">‏برای دریافت این افزونه و موارد دیگر در همه رایانه‌هایتان، به سیستم Chromium وارد شوید</translation>
 <translation id="4217972271355023382">‏برای ایمن‌تر ماندن در فضای آنلاین با کمک انتخاب‌های ولی‌تان، به همان نمایه Chromium بروید که قبلاً با <ph name="USER_EMAIL_ADDRESS" /> به سیستم وارد شده‌اید</translation>
 <translation id="4222932583846282852">درحال لغو کردن…</translation>
 <translation id="4224210481850767180">نصب لغو شده است.</translation>
@@ -316,6 +316,7 @@
 <translation id="5579324208890605088">خطای راه‌اندازی: لطفاً نصب‌کننده را با نقش کاربر معمولی اجرا کنید، نه با نقش سرپرست.</translation>
 <translation id="5596627076506792578">گزینه‌های بیشتر</translation>
 <translation id="5605834417512968703">هرچیزی را که می‌خواهید برای جستجو کردن با «جستجوی تصویر» انتخاب کنید یا برای خارج شدن از «جستجوی تصویر»، کلید «گریز» را فشار دهید</translation>
+<translation id="5618818588972826921">‏نوشتار یا تصویری را برای جستجو کردن با «جستجوی تصویر» انتخاب کنید یا برای خارج شدن از «جستجوی تصویر»، کلید Escape را فشار دهید</translation>
 <translation id="5623402015214259806">{0,plural, =0{‏به‌روزرسانی Chromium دردسترس است}=1{‏به‌روزرسانی Chromium دردسترس است}one{‏به‌روزرسانی Chromium از # روز پیش دردسترس است}other{‏به‌روزرسانی Chromium از # روز پیش دردسترس است}}</translation>
 <translation id="5643865575100044307">‏داده‌های سایت همواره بعداز بستن Chromium از دستگاه حذف شود</translation>
 <translation id="5653831366781983928">‏لطفاً اکنون Chromium را بازراه‌اندازی کنید</translation>
@@ -380,6 +381,7 @@
 <translation id="6366160072964553914">‏‫Chromium این بارگیری را مسدود کرد زیرا این فایل معمولاً بارگیری نمی‌شود و ممکن است خطرناک باشد</translation>
 <translation id="6373523479360886564">‏آیا مطمئن هستید که می‌خواهید Chromium را حذف نصب کنید؟</translation>
 <translation id="6375219077595103062">میان‌بری به «مدیر گذرواژه» اضافه کنید</translation>
+<translation id="6390800440335263989">‏برای ادامه دادن، با حساب <ph name="EMAIL" /> به سیستم Chromium وارد شوید. با این کار مطمئن می‌شوید که خط‌مشی‌های سازمانتان اعمال شده‌اند.</translation>
 <translation id="6400112897226594999">‏نشان‌واره Chromium درون صفحه‌نمایش رایانه.</translation>
 <translation id="6403826409255603130">‏‫Chromium یک مرورگر وب است که صفحات وب و برنامه‌ها را با سرعت بسیار زیاد اجرا می‌کند. این مرورگر خیلی سریع و پایدار است کار کردن با آن آسان است. با محافظت دربرابر بدافزار و رمزگیری تعبیه‌شده در Chromium، با امنیت بیشتری وب را مرور کنید.</translation>
 <translation id="6436260184216827876">«جستجوی تصویر» دردسترس نیست. بعداً دوباره امتحان کنید.</translation>
@@ -396,6 +398,7 @@
 <translation id="6539122709674868420">‏اگر <ph name="TIMEOUT_DURATION" /> از Chromium استفاده نشود، سازمانتان آن را می‌بندد. داده‌های مرور حذف شد. این داده‌ها می‌تواند شامل سابقه، تکمیل خودکار، و بارگیری‌ها شود.</translation>
 <translation id="6542839706527980775">‏هرکدام از نمایه‌ها دارای اطلاعات Chromium مختص خودش است (مثلاً نشانک‌ها، سابقه، گذرواژه‌ها، و غیره)</translation>
 <translation id="6563921047760808519">‏درباره اینکه <ph name="BEGIN_LINK" />Chromium چگونه داده‌های شما را خصوصی نگه می‌دارد<ph name="END_LINK" /> بیشتر بدانید</translation>
+<translation id="6564039629497156115">‏پس‌از بازراه‌اندازی Chromium، تغییرات این تنظیم اعمال خواهد شد.</translation>
 <translation id="656935081669708576">‏برای دیدن گذرواژه‌های نمایه Chromium دیگر، می‌توانید به آن نمایه بروید</translation>
 <translation id="6570579332384693436">‏برای رفع خطاهای املائی، Chromium نوشتاری را که در فیلد نوشتار تایپ می‌کنید، برای Google ارسال می‌کند</translation>
 <translation id="6598877126913850652">‏رفتن به تنظیمات اعلان Chromium</translation>
@@ -454,9 +457,7 @@ Chromium قادر به بازیابی تنظیمات شما نیست.</translati
 <translation id="7339898014177206373">پنجرهٔ جدید</translation>
 <translation id="734373864078049451">‏وب، نشانک‌ها و موارد دیگر Chromium شما در اینجا هستند.</translation>
 <translation id="7349591376906416160">‏سرپرست سیستم برای باز شدن <ph name="ALTERNATIVE_BROWSER_NAME" /> جهت دسترسی به <ph name="TARGET_URL_HOSTNAME" />، Chromium را پیکربندی کرده است.</translation>
-<translation id="7355355292030546812">‏‫Chromium این بارگیری را مسدود کرد زیرا این فایل می‌تواند به حساب‌های شخصی و شبکه‌های اجتماعی شما ازجمله <ph name="USER_EMAIL" /> آسیب برساند</translation>
 <translation id="7384121030444253939">‏دیگر از این افزونه پشتیبانی نمی‌شود. ‫Chromium توصیه می‌کند آن را حذف کنید.</translation>
-<translation id="7389750180956889333">‏‫Chromium فرم‌ها را بهتر درک می‌کند و می‌تواند با سرعت بیشتری آن‌ها را برایتان پر کند. درباره <ph name="BEGIN_LINK" />تکمیل خودکار Chrome<ph name="END_LINK" /> بیشتر بدانید</translation>
 <translation id="7449453770951226939"><ph name="PAGE_TITLE" /> - Chromium Dev</translation>
 <translation id="7450541714075000668">نوشتار کپی شد</translation>
 <translation id="7451052299415159299">‏Chromium برای این سایت به مجوز دسترسی به دوربین نیاز دارد</translation>
@@ -507,6 +508,7 @@ Chromium قادر به بازیابی تنظیمات شما نیست.</translati
 <translation id="813913629614996137">درحال مقداردهی اولیه…</translation>
 <translation id="8166782796394721554">‏روشن کردن محافظت بیشتر در موتور WebAssembly و جاوا اسکریپت Chromium</translation>
 <translation id="81770708095080097">‏این فایل خطرناک است، بنابراین Chromium آن را مسدود کرده است.</translation>
+<translation id="8177472873527554730">محتوای موردنظر در صفحه پیدا نشد</translation>
 <translation id="8200109504272824693">‏برای استفاده از داده‌های Chromium و ذخیره کردن آن‌ها در حسابتان (<ph name="USER_EMAIL" />)، گذرعبارت خود را وارد کنید</translation>
 <translation id="8221491193165283816">معمولاً اعلان‌ها را مسدود می‌کنید. برای اینکه اجازه دهید این سایت اعلان بفرستد، اینجا را کلیک کنید.</translation>
 <translation id="8223363452568144035">‏برای استفاده از دوربین، در <ph name="BEGIN_LINK" />تنظیمات سیستم<ph name="END_LINK" /> به Chromium دسترسی دهید</translation>
@@ -589,5 +591,6 @@ Chromium قادر به بازیابی تنظیمات شما نیست.</translati
 <translation id="983803489796659991">نصب انجام نشد چون سرور به‌روزرسانی هیچ‌گونه داده درهمی برای برنامه ندارد.</translation>
 <translation id="985498048907240953">‏استفاده از Chromium بدون حساب</translation>
 <translation id="985602178874221306">Chromium Authors</translation>
+<translation id="989970834842471429">نوشتار یا تصویری را برای جستجو کردن با «جستجوی تصویر» انتخاب کنید</translation>
 <translation id="992780518932311116">‏برای استفاده از مکان، در <ph name="BEGIN_LINK" />تنظیمات سیستم<ph name="END_LINK" /> به Chromium دسترسی دهید</translation>
 </translationbundle>

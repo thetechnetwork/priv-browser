@@ -11,6 +11,7 @@
 
 #include "base/containers/flat_map.h"
 #include "base/strings/string_number_conversions.h"
+#include "base/strings/to_string.h"
 #include "base/test/scoped_feature_list.h"
 #include "base/values.h"
 #include "content/browser/interest_group/interest_group_features.h"
@@ -113,7 +114,7 @@ std::ostream& operator<<(std::ostream& os,
                          const BiddingAndAuctionResponse& response) {
   os << "BiddingAndAuctionResponse(";
   os << "nonce: " << testing::PrintToString(response.nonce) << ",";
-  os << "is_chaff: " << (response.is_chaff ? "true" : "false") << ", ";
+  os << "is_chaff: " << base::ToString(response.is_chaff) << ", ";
   os << "ad_render_url: " << response.ad_render_url << ", ";
   os << "ad_components: [";
   for (const auto& component : response.ad_components) {
@@ -642,9 +643,7 @@ MATCHER_P(EqualsBiddingAndAuctionResponse,
 TEST(BiddingAndAuctionResponseTest, ParseFails) {
   static const base::Value kTestCases[] = {
       base::Value(1),                                          // Not a dict
-      base::Value(base::Value::Dict()),                        // empty
       base::Value(base::Value::Dict().Set("isChaff", 1)),      // wrong type
-      base::Value(base::Value::Dict().Set("isChaff", false)),  // missing fields
       base::Value(
           CreateValidResponseDict().Set("adRenderURL", 1)),  // not a string
       base::Value(
@@ -712,6 +711,11 @@ TEST(BiddingAndAuctionResponseTest, ParseSucceeds) {
             return response;
           }(),
       },
+      {
+          base::Value(base::Value::Dict()),
+          {},
+      },
+      {base::Value(base::Value::Dict().Set("isChaff", false)), {}},
       {
           base::Value(CreateValidResponseDict()),
           CreateExpectedValidResponse(),

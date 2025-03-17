@@ -20,6 +20,11 @@ import java.util.concurrent.Executor;
 /** */
 @NullMarked
 public interface WebViewProviderBoundaryInterface {
+    void setAsyncInterceptRequestCallback(
+            /* AsyncShouldInterceptRequestCallback */ InvocationHandler callback);
+
+    void clearAsyncInterceptRequestCallback();
+
     void insertVisualStateCallback(
             long requestId, /* VisualStateCallback */ InvocationHandler callback);
 
@@ -72,4 +77,9 @@ public interface WebViewProviderBoundaryInterface {
             ValueCallback<Throwable> errorCallback);
 
     void saveState(Bundle outState, int maxSize, boolean includeForwardState);
+
+    /* WebViewNavigationClient */ @Nullable InvocationHandler getWebViewNavigationClient();
+
+    void setWebViewNavigationClient(
+            /* WebViewNavigationClient */ @Nullable InvocationHandler webViewNavigationClient);
 }

@@ -34,7 +34,6 @@
 #include "extensions/common/extension_features.h"
 #include "net/base/features.h"
 #include "pdf/buildflags.h"
-#include "printing/buildflags/buildflags.h"
 #include "services/network/public/cpp/features.h"
 #include "testing/gmock/include/gmock/gmock-matchers.h"
 #include "third_party/blink/public/common/features.h"
@@ -195,7 +194,7 @@ class ProfileKeyedServiceBrowserTest : public InProcessBrowserTest {
           features::kEnableCertManagementUIV2Write,
 #endif
           autofill::features::kAutofillAiWithDataSchema,
-          blink::features::kBrowsingTopics,
+          network::features::kBrowsingTopics,
           blink::features::kBuiltInAIAPI,
           extensions_features::kForceWebRequestProxyForTest,
           net::features::kTopLevelTpcdOriginTrial,
@@ -264,6 +263,9 @@ IN_PROC_BROWSER_TEST_F(ProfileKeyedServiceBrowserTest,
     "PasswordRequirementsServiceFactory",
     "PolicyBlocklist",
     "PolicyClipboardRestriction",
+#if BUILDFLAG(ENTERPRISE_CONTENT_ANALYSIS)
+    "ReportingEventRouter",
+#endif  // BUILDFLAG(ENTERPRISE_CONTENT_ANALYSIS)
     "SafeSearch",
     "WebDataService",
 
@@ -305,6 +307,9 @@ IN_PROC_BROWSER_TEST_F(ProfileKeyedServiceBrowserTest,
     "OmniboxSuggestionsWatcher",
     "PolicyBlocklist",
     "PolicyClipboardRestriction",
+#if BUILDFLAG(ENTERPRISE_CONTENT_ANALYSIS)
+    "ReportingEventRouter",
+#endif  // BUILDFLAG(ENTERPRISE_CONTENT_ANALYSIS)
     "SafeSearch",
 
     // in chrome: using `BrowserContextKeyedServiceShutdownNotifierFactory`:
@@ -379,6 +384,7 @@ IN_PROC_BROWSER_TEST_F(ProfileKeyedServiceGuestBrowserTest,
     "ExtensionInstallEventRouter",
 #endif  // BUILDFLAG(ENTERPRISE_CONTENT_ANALYSIS)
     "ChromeEnterpriseRealTimeUrlLookupService",
+    "EnterpriseReportingPrivateEventRouter",
     "ExtensionNavigationRegistry",
     "ExtensionSystem",
     "ExtensionURLLoaderFactory::BrowserContextShutdownNotifierFactory",
@@ -600,6 +606,7 @@ IN_PROC_BROWSER_TEST_F(ProfileKeyedServiceGuestBrowserTest,
     "ExtensionActionDispatcher",
     "ExtensionActionManager",
     "ExtensionCommandsGlobalRegistry",
+    "ExtensionErrorController",
     "ExtensionGCMAppHandler",
     "ExtensionGarbageCollector",
     "ExtensionHostRegistry",
@@ -694,6 +701,7 @@ IN_PROC_BROWSER_TEST_F(ProfileKeyedServiceGuestBrowserTest,
     "PageContentAnnotationsService",
 #endif  // !BUILDFLAG(IS_CHROMEOS)
     "PasswordsPrivateEventRouter",
+    "PendingExtensionManager",
     "PermissionDecisionAutoBlocker",
     "PermissionHelper",
 #if BUILDFLAG(ENABLE_EXTENSIONS)
@@ -712,9 +720,6 @@ IN_PROC_BROWSER_TEST_F(ProfileKeyedServiceGuestBrowserTest,
     "PredictorDatabase",
     "PrefWatcher",
     "PreferenceAPI",
-  #if BUILDFLAG(IS_CHROMEOS) && BUILDFLAG(USE_CUPS)
-    "PrintingMetricsService",
-  #endif // BUILDFLAG(IS_CHROMEOS) && BUILDFLAG(USE_CUPS)
     "PrinterProviderInternal",
     "PrivacySandboxService",
     "PrivacySandboxSettings",
@@ -766,7 +771,6 @@ IN_PROC_BROWSER_TEST_F(ProfileKeyedServiceGuestBrowserTest,
     "SpellcheckService",
 #endif
 
-    "StorageAccessHeaderService",
     "StorageFrontend",
     "StorageNotificationService",
     "SupervisedUserService",

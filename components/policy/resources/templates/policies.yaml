@@ -1325,7 +1325,7 @@ policies:
   1324: WebRtcIPHandlingUrl
   1325: GenAIPhotoEditingSettings
   1326: PartitionedBlobUrlUsage
-  1327: GlicSettings
+  1327: ''
   1328: DefaultControlledFrameSetting
   1329: ControlledFrameAllowedForUrls
   1330: ControlledFrameBlockedForUrls
@@ -1335,6 +1335,14 @@ policies:
   1334: ProvisionManagedClientCertificateForBrowser
   1335: GeminiSettings
   1336: GenAISmartGroupingSettings
+  1337: GenAiChromeOsSmartActionsSettings
+  1338: RelaunchSupersededReleaseAge
+  1339: ClassManagementCaptionsEnabled
+  1340: ClassManagementClassroomIntegrationEnabled
+  1341: ClassManagementNetworkRestrictionEnabled
+  1342: ClassManagementSendingContentEnabled
+  1343: ClassManagementViewScreenEnabled
+  1344: KioskChromeAppsForceAllowed
 
 atomic_groups:
   1: Homepage

@@ -28,6 +28,7 @@
 #include "base/no_destructor.h"
 #include "base/strings/sys_string_conversions.h"
 #include "base/task/single_thread_task_runner.h"
+#include "base/time/time.h"
 #import "components/remote_cocoa/app_shim/NSToolbar+Private.h"
 #import "components/remote_cocoa/app_shim/bridged_content_view.h"
 #import "components/remote_cocoa/app_shim/browser_native_widget_window_mac.h"
@@ -56,6 +57,7 @@
 #include "ui/display/display.h"
 #include "ui/display/screen.h"
 #include "ui/events/cocoa/cocoa_event_utils.h"
+#include "ui/events/types/event_type.h"
 #include "ui/gfx/geometry/dip_util.h"
 #include "ui/gfx/geometry/size_conversions.h"
 #import "ui/gfx/mac/coordinate_conversion.h"
@@ -76,7 +78,7 @@ CG_EXTERN CGError CGSSetWindowCaptureExcludeShape(CGSConnectionID cid,
 CG_EXTERN CGRegionRef CGRegionCreateWithRect(CGRect rect);
 
 namespace {
-constexpr auto kUIPaintTimeout = base::Seconds(5);
+constexpr auto kUIPaintTimeout = base::Milliseconds(500);
 
 // Returns the display that the specified window is on.
 display::Display GetDisplayForWindow(NSWindow* window) {
@@ -374,7 +376,7 @@ NativeWidgetNSWindowBridge::NativeWidgetNSWindowBridge(
 
 NativeWidgetNSWindowBridge::~NativeWidgetNSWindowBridge() {
   SetLocalEventMonitorEnabled(false);
-  DCHECK(!key_down_event_monitor_);
+  DCHECK(!local_event_monitor_);
   GetPendingWindowTitleMap().erase(window_);
   // The delegate should be cleared already. Note this enforces the precondition
   // that -[NSWindow close] is invoked on the hosted window before the
@@ -956,7 +958,7 @@ bool NativeWidgetNSWindowBridge::HasCapture() {
 void NativeWidgetNSWindowBridge::SetLocalEventMonitorEnabled(bool enabled) {
   if (enabled) {
     // Create the event monitor if it does not exist yet.
-    if (key_down_event_monitor_) {
+    if (local_event_monitor_) {
       return;
     }
 
@@ -970,20 +972,24 @@ void NativeWidgetNSWindowBridge::SetLocalEventMonitorEnabled(bool enabled) {
       std::unique_ptr<ui::Event> ui_event =
           ui::EventFromNative(base::apple::OwnedNSEvent(event));
       bool event_handled = false;
-      weak_ptr->host_->DispatchMonitorEvent(std::move(ui_event),
-                                            &event_handled);
+      if (ui_event && ui_event->type() != ui::EventType::kUnknown) {
+        weak_ptr->host_->DispatchMonitorEvent(std::move(ui_event),
+                                              &event_handled);
+      }
+
       return event_handled ? nil : event;
     };
-    key_down_event_monitor_ =
-        [NSEvent addLocalMonitorForEventsMatchingMask:NSEventMaskKeyDown
+    local_event_monitor_ =
+        [NSEvent addLocalMonitorForEventsMatchingMask:NSEventMaskAny
                                               handler:block];
   } else {
     // Destroy the event monitor if it exists.
-    if (!key_down_event_monitor_)
+    if (!local_event_monitor_) {
       return;
+    }
 
-    [NSEvent removeMonitor:key_down_event_monitor_];
-    key_down_event_monitor_ = nil;
+    [NSEvent removeMonitor:local_event_monitor_];
+    local_event_monitor_ = nil;
   }
 }
 
@@ -1508,20 +1514,25 @@ gfx::Rect NativeWidgetNSWindowBridge::FullscreenControllerGetFrame() const {
 // NativeWidgetNSWindowBridge, ui::CATransactionObserver
 
 bool NativeWidgetNSWindowBridge::ShouldWaitInPreCommit() {
-  if (!window_visible_)
+  if (!window_visible_ || !wants_to_be_visible_) {
     return false;
-  if (ca_transaction_sync_suppressed_)
+  }
+  if (ca_transaction_sync_suppressed_) {
     return false;
-  if (!bridged_view_)
+  }
+  if (!bridged_view_) {
     return false;
-  if (content_dip_size_.IsEmpty())
+  }
+  if (content_dip_size_.IsEmpty()) {
     return false;
+  }
   // Suppress synchronous CA transactions during AppKit fullscreen transition
   // since there is no need for updates during such transition.
   // Re-layout and re-paint will be done after the transition. See
   // https://crbug.com/875707 for potential problems if we don't suppress.
-  if (fullscreen_controller_.IsInFullscreenTransition())
+  if (fullscreen_controller_.IsInFullscreenTransition()) {
     return false;
+  }
   return content_dip_size_ != compositor_frame_dip_size_;
 }
 

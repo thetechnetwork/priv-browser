@@ -81,6 +81,7 @@
 <translation id="131461803491198646">Домашна мрежа, не е во роаминг</translation>
 <translation id="1327977588028644528">Портал</translation>
 <translation id="1328223165223065150">Боја на тапет</translation>
+<translation id="1329478709358066995">Транскрипција:</translation>
 <translation id="1330426557709298164">JPG</translation>
 <translation id="1337912285145772892">Приспособи на скенираната област</translation>
 <translation id="1343442362630695901">солено езеро</translation>
@@ -126,7 +127,17 @@
 <translation id="1515129336378114413">почетна страница на прелистувач</translation>
 <translation id="1526389707933164996">Анимација за штедачот на екранот</translation>
 <translation id="152892567002884378">Зголемете ја јачината на звукот</translation>
+<translation id="1531038290222364269">Прикажи ги картичките</translation>
 <translation id="1539864135338521185">син камен</translation>
+<translation id="1548555207631326346">Изберете тема, па изберете ги подвлечените зборови за да се персонализираат вашите слики создадени од AI.<ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          Изберете „Инспирирај ме“ за да добиете повеќе уникатни и разновидни опции за слики создадени од AI.
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          Кога создавате со AI, барањето се испраќа до серверите на Google AI за да се генерираат слики и да се подобрува производот, што подлежи на <ph name="BEGIN_LINK_GOOGLE_PRIVACY_POLICY" />Политиката за приватност на Google<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" />.
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          Генеративната AI е во експериментална фаза и во моментов има ограничена достапност.</translation>
 <translation id="1555130319947370107">Сина</translation>
 <translation id="155865706765934889">Допирна подлога</translation>
 <translation id="1561927818299383735">боја на заднинско осветлување</translation>
@@ -252,7 +263,6 @@
 <translation id="2011174342667534258">Верзија на SDK:</translation>
 <translation id="2016697457005847575">Пробајте ги чекорите за решавање проблеми</translation>
 <translation id="202500043506723828">EID</translation>
-<translation id="2041627599411887437">Изберете тема, па изберете ги подвлечените зборови за да ги персонализирате вашите слики создадени од AI.</translation>
 <translation id="2045814230297767491">прибор за јадење</translation>
 <translation id="2047316797244836561">Поврзете се на мрежа и повторно вчитајте ја страницата за да се прикаже штедачот на екранот.</translation>
 <translation id="2056550196601855911">IPv4/IPv6</translation>
@@ -405,6 +415,7 @@
 <translation id="2787237339470862294">Јазиков не е поддржан во моментов</translation>
 <translation id="2787435249130282949">посветла тастатура</translation>
 <translation id="2805756323405976993">Апликации</translation>
+<translation id="2822702442014805146">Преземањето на моделот за создавање резимеа и имиња е во тек</translation>
 <translation id="28232023175184696">Не може да се поврзе на интернет. Кликнете за повторен обид.</translation>
 <translation id="2855718259207180827">волна</translation>
 <translation id="2859243502336719778">Важно ажурирање</translation>
@@ -502,6 +513,7 @@
 <translation id="3373141842870501561">Тапет Earth Flow</translation>
 <translation id="33736539805963175">Заднина во <ph name="LETTERS_COLOR" /> со буквата „<ph name="LETTERS_LETTER" />“</translation>
 <translation id="3383623117265110236">Ексклузивно</translation>
+<translation id="3395147534045164351">Вклучување/Исклучување на снимањето локација</translation>
 <translation id="3404249063913988450">Овозможете го штедачот на екранот</translation>
 <translation id="3413935475507503304">За да продолжите со ажурирањето, кликнете „Следно“.</translation>
 <translation id="3428551088151258685">надвор</translation>
@@ -651,6 +663,7 @@
 <translation id="4113067922640381334">Сега имате пристап до нови <ph name="BEGIN_LINK_WALLPAPER_SUBPAGE" />тапети<ph name="END_LINK_WALLPAPER_SUBPAGE" /></translation>
 <translation id="4117637339509843559">Темен режим</translation>
 <translation id="4126551873361000548">Премотај назад 10 секунди</translation>
+<translation id="4128271910628504223">Внесете барање како „нацртај маглива шума“</translation>
 <translation id="4130035430755296270">Наместете го курсорот за повеќе опции за распоред</translation>
 <translation id="4130750466177569591">Се согласувам</translation>
 <translation id="4131410914670010031">Црно и бело</translation>
@@ -824,6 +837,7 @@
 <translation id="4891842000192098784">Стрес</translation>
 <translation id="4897058166682006107">Нивото на батерија на левата слушалка е <ph name="BATTERY_PERCENTAGE" /> %.</translation>
 <translation id="4905998861748258752">Вклучете ја функцијата за да ги изберете опциите за штедачот на екранот</translation>
+<translation id="4910853326379896417">Преземањето на моделот за создавање резимеа и имиња е завршено</translation>
 <translation id="4910858703033903787">Типови APN</translation>
 <translation id="4917385247580444890">Силен</translation>
 <translation id="4917889632206600977">Запрено - нема хартија</translation>
@@ -858,8 +872,10 @@
 <translation id="5050042263972837708">Име на групата</translation>
 <translation id="5051044138948155788">Ова е единствената страница. Ќе бидете пренасочени на екранот за започнување на скенирањето.</translation>
 <translation id="5053233795640754917">Паузирај</translation>
+<translation id="5056587122125565772">Создавање слика</translation>
 <translation id="5078711626843651677">Гласовните модели се складираат привремено на уредот додека не заврши доделувањето етикети на говорниците. Ова може да го исклучите во „Поставки“ кога сакате.</translation>
 <translation id="5078983345702708852">футуристичка</translation>
+<translation id="5085224064082122501">Не може да се преземе моделот за создавање резимеа и имиња. Обидете се повторно или рестартирајте го вашиот Chromebook.</translation>
 <translation id="5087864757604726239">назад</translation>
 <translation id="5088172560898466307">Име на хостот на серверот</translation>
 <translation id="5089810972385038852">Држава</translation>
@@ -1129,14 +1145,12 @@
 <translation id="6325525973963619867">Неуспешно</translation>
 <translation id="6327262166342360252">Тапетов е создаден со AI со следниов текст: „<ph name="PROMPT" />“.</translation>
 <translation id="6331191339300272798">Автоматска темна тема</translation>
-<translation id="6335228876613776082">Преземањето на моделот заврши</translation>
 <translation id="6340526405444716530">Персонализација</translation>
 <translation id="6348252528297699679">Локацијата може да ја исклучите во „Поставки &gt; Приватност и безбедност &gt; Контроли за приватност &gt; Пристап до локацијата“. <ph name="LINK_BEGIN" />Дознајте повеќе<ph name="LINK_END" /></translation>
 <translation id="6348738456043757611">Корисничко име и лозинка</translation>
 <translation id="6352210854422428614">друга планета</translation>
 <translation id="6359706544163531585">Оневозможи светла тема</translation>
 <translation id="6359919876285606596">Дејствово е трајно и не може да се врати</translation>
-<translation id="6368342879959028556">Кога ќе изберете „Создавање со AI“, напишете приспособено барање. Или може да изберете „AI-тапети“ за да изберете тема, па да ги изберете подвлечените зборови за да го персонализирате вашиот AI-тапет.</translation>
 <translation id="636850387210749493">Запишување компанија</translation>
 <translation id="6369221585240879141">Не може да се создадат имиња на снимките за овој јазик на транскрипција</translation>
 <translation id="6373461326814131011">езерце</translation>
@@ -1209,16 +1223,6 @@
 <translation id="6657240842932274095">Да се дозволи системските услуги да ја користат вашата локација?</translation>
 <translation id="6657585470893396449">Лозинка</translation>
 <translation id="66621959568103627">коралнорозова</translation>
-<translation id="6667885109186363316"><ph name="SEA_PEN_INTRO_FIRST_PARAGRAPH" />
-          <ph name="LINE_BREAK" />
-          <ph name="LINE_BREAK" />
-          Изберете „Инспирирај ме“ за да добиете повеќе уникатни и разновидни опции за слики создадени од AI.
-          <ph name="LINE_BREAK" />
-          <ph name="LINE_BREAK" />
-          Кога создавате со AI, барањето се испраќа до серверите на Google AI за да се генерираат слики и да се подобрува производот, што подлежи на <ph name="BEGIN_LINK_GOOGLE_PRIVACY_POLICY" />Политиката за приватност на Google<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" />.
-          <ph name="LINE_BREAK" />
-          <ph name="LINE_BREAK" />
-          Генеративната AI е во експериментална фаза и во моментов има ограничена достапност.</translation>
 <translation id="6673898378497337661">зголемување на осветленоста на тастатурата</translation>
 <translation id="6692996468359469499">Добивајте информации поврзани со вашиот избор</translation>
 <translation id="6694534975463174713">брава</translation>
@@ -1274,6 +1278,7 @@
 <translation id="6930597342185648547">За заднината</translation>
 <translation id="6939667434404433010">Пребарајте го името на снимката</translation>
 <translation id="6939766318048400022">Кафуле</translation>
+<translation id="6942253772720771875">Споделете ги вашите повратни информации или опишете го проблемот</translation>
 <translation id="6943893908656559156">Далечински идентитет (незадолжително)</translation>
 <translation id="6953137545147683679">златна</translation>
 <translation id="6957231940976260713">Име на услугата</translation>
@@ -1295,6 +1300,7 @@
 <translation id="7040230719604914234">Оператор</translation>
 <translation id="7040729769968826896">Дозволи идентификација на говорници</translation>
 <translation id="7041549558901442110">Уредот не е поврзан.</translation>
+<translation id="704183341263526038">Јупитер</translation>
 <translation id="7046522406494308071">Да се ресетираат сите кратенки на стандардните вредности?</translation>
 <translation id="7049916119678019302">Преземете го моделот за транскрипции во „Поставки“</translation>
 <translation id="7058278511608979688">Заврши и зачувај</translation>
@@ -1427,6 +1433,7 @@
 <translation id="7569444139234840525"><ph name="QUERY_TEXT" /> · /<ph name="PHONETICS" />/</translation>
 <translation id="7570674786725311828">Допирен екран со USB</translation>
 <translation id="757747079855995705">камен</translation>
+<translation id="7584853321964440104">Не може да се преземе. Обидете се повторно или рестартирајте го вашиот Chromebook.</translation>
 <translation id="7590883480672980941">Поставки за внесување</translation>
 <translation id="7595982850646262331">Уште <ph name="TIME_VALUE" /></translation>
 <translation id="7600430297804876776">Администраторот на <ph name="MANAGER" /> поставил кога може да се користи овој <ph name="DEVICE_TYPE" />.</translation>
@@ -1557,6 +1564,16 @@
 <translation id="8179976553408161302">Enter</translation>
 <translation id="8183975772394450380">плажа</translation>
 <translation id="819278132617411009">Користете ја Google AI за да бидете попродуктивни</translation>
+<translation id="82003371436638355">Кога ќе изберете „Создајте свој“, напишете приспособено барање. Или може да изберете „Изберете тема“, па да ги изберете подвлечените зборови за да се персонализира вашиот AI-тапет.
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          Изберете „Инспирирај ме“ за да добиете повеќе уникатни и разновидни опции за слики создадени од AI.
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          Кога создавате свој тапет, барањето се испраќа до серверите на Google за да се генерираат слики и да се подобрува производот, што подлежи на <ph name="BEGIN_LINK_GOOGLE_PRIVACY_POLICY" />„Условите за користење“ и „Политиката за приватност“ на Google<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" />. Не внесувајте лични, чувствителни или доверливи податоци.
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          Генеративната AI може да прави грешки, што опфаќа и грешки за луѓе, па проверувајте ги одговорите. <ph name="BEGIN_LINK_CREATE_YOUR_OWN_WALLPAPER" />Дознајте повеќе<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" /></translation>
 <translation id="8200772114523450471">Продолжи</translation>
 <translation id="8206859287963243715">Мобилен</translation>
 <translation id="8208861521865154048">Поволности</translation>
@@ -1578,6 +1595,7 @@
 <translation id="8312330582793120272">пуштање аудиовизуелни содржини</translation>
 <translation id="8318753676953949627">Нема слики</translation>
 <translation id="8320910311642849813">шума</translation>
+<translation id="8322464149031882595">Кликнете за да одите напред</translation>
 <translation id="8329018942023753850">апликација „Калкулатор“</translation>
 <translation id="8336739000755212683">Променете ја сликата за сметката на уредот</translation>
 <translation id="8339024191194156249">Дознајте повеќе за автоматското стартување</translation>
@@ -1598,6 +1616,7 @@
 <translation id="8395584934117017006">Организација управува со овој <ph name="DEVICE_TYPE" /></translation>
 <translation id="8398927464629426868">Брзината со која уредот се полни или празни во моментов</translation>
 <translation id="8403988360557588704">Слика на <ph name="ART_FEATURE" /> во стилот на <ph name="ART_MOVEMENT" /></translation>
+<translation id="8409219750150841791">Генерирано резиме:</translation>
 <translation id="8410244574650205435">Автоматски откриено</translation>
 <translation id="8420955526972171689">Извршува тестови и решава проблеми во врска со хардверот</translation>
 <translation id="8422748173858722634">IMEI</translation>
@@ -1642,6 +1661,7 @@
 <translation id="8626489604350149811">Повеќе дејства за <ph name="APN_NAME" /></translation>
 <translation id="86356131183441916">Светловиолетов</translation>
 <translation id="8647595191512746911">Аудиотранскрипција</translation>
+<translation id="8648578954147795914">Генерирани имиња:</translation>
 <translation id="8650852232143958317">Понесете ги датотеките во Gmail и Google Drive со себе</translation>
 <translation id="8651481478098336970">исклучи звук</translation>
 <translation id="8655295600908251630">Канал</translation>
@@ -1670,7 +1690,6 @@
 <translation id="8764414543112028321">WireGuard</translation>
 <translation id="87646919272181953">Албум на „Фотографии на Google“</translation>
 <translation id="8775713578693478175">Модерно APN</translation>
-<translation id="877735394245039557">Преземањето на моделот е во тек</translation>
 <translation id="877985182522063539">A4</translation>
 <translation id="879568662008399081">Мрежава можеби има портал за проверка</translation>
 <translation id="8797082062139985406">Создај име со Google AI</translation>
@@ -1723,6 +1742,7 @@
 <translation id="8961025972867871808">пингвини</translation>
 <translation id="8968751544471797276">Брзина на полнење</translation>
 <translation id="8970109610781093811">Изврши повторно</translation>
+<translation id="8972061581514441296">Кликнете за да се вратите назад</translation>
 <translation id="8983038754672563810">HSPA</translation>
 <translation id="8987565828374052507">{NUMBER_OF_PAGES,plural, =0{Скенирај}=1{Скенирај {NUMBER_OF_PAGES} страница}one{Скенирај {NUMBER_OF_PAGES} страница}other{Скенирај {NUMBER_OF_PAGES} страници}}</translation>
 <translation id="89945434909472341">село</translation>
@@ -1784,6 +1804,7 @@
 <translation id="9218016617214286986">Прикажи ги познатите APN</translation>
 <translation id="932327136139879170">Дома</translation>
 <translation id="939519157834106403">SSID</translation>
+<translation id="940663759301549538">Погрижете се да биде поврзан микрофонот или рестартирајте го вашиот Chromebook</translation>
 <translation id="945522503751344254">Испратете повратни информации</translation>
 <translation id="950520315903467048">Недостасува копче за <ph name="DIRECTION" />. <ph name="ASSIGN_INSTRUCTION" /></translation>
 <translation id="951780398843003443">за да ги споредува гласовите на снимката со цел транскрипцијата да прикаже што кажал секој од говорниците, а и кога</translation>

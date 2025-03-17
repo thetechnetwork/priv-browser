@@ -16,7 +16,7 @@
 #include "chrome/browser/browser_process.h"
 #include "chrome/browser/extensions/extension_disabled_ui.h"
 #include "chrome/browser/extensions/extension_error_controller.h"
-#include "chrome/browser/extensions/extension_error_ui_default.h"
+#include "chrome/browser/extensions/extension_error_ui_desktop.h"
 #include "chrome/browser/extensions/extension_service.h"
 #include "chrome/browser/extensions/external_install_error.h"
 #include "chrome/browser/extensions/test_blocklist.h"
@@ -136,8 +136,7 @@ void GlobalErrorBubbleTest::ShowUi(const std::string& name) {
 
   if (name == "ExtensionDisabledGlobalError") {
     GlobalErrorWaiter waiter(profile);
-    extensions::AddExtensionDisabledError(extension_service,
-                                          test_extension.get(), false);
+    extensions::AddExtensionDisabledError(profile, test_extension.get(), false);
     waiter.Wait();
     ShowPendingError(browser());
   } else if (name == "ExtensionWithLongNameDisabledGlobalError") {
@@ -149,15 +148,13 @@ void GlobalErrorBubbleTest::ShowUi(const std::string& name) {
     extension_service->AddExtension(long_name_extension.get());
 
     GlobalErrorWaiter waiter(profile);
-    extensions::AddExtensionDisabledError(extension_service,
-                                          long_name_extension.get(),
+    extensions::AddExtensionDisabledError(profile, long_name_extension.get(),
                                           /*is_remote_install=*/false);
     waiter.Wait();
     ShowPendingError(browser());
   } else if (name == "ExtensionDisabledGlobalErrorRemote") {
     GlobalErrorWaiter waiter(profile);
-    extensions::AddExtensionDisabledError(extension_service,
-                                          test_extension.get(), true);
+    extensions::AddExtensionDisabledError(profile, test_extension.get(), true);
     waiter.Wait();
     ShowPendingError(browser());
   } else if (name == "ExtensionGlobalError") {

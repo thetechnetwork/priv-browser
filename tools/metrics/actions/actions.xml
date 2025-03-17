@@ -2833,7 +2833,7 @@ should be able to be added at any place in this file.
 </action>
 
 <action name="Android.BookmarkPage.ReadingList.MarkAsRead">
-  <owner>wylieb@chromium.org</owner>
+  <owner>wylieb@google.com</owner>
   <owner>chrome-collections@google.com</owner>
   <description>
     User marked an item as read in the Reading List page from the Android
@@ -2843,7 +2843,7 @@ should be able to be added at any place in this file.
 </action>
 
 <action name="Android.BookmarkPage.ReadingList.MarkAsUnread">
-  <owner>wylieb@chromium.org</owner>
+  <owner>wylieb@google.com</owner>
   <owner>chrome-collections@google.com</owner>
   <description>
     User marked an item as unread in the Reading List page from the Android
@@ -2853,7 +2853,7 @@ should be able to be added at any place in this file.
 </action>
 
 <action name="Android.BookmarkPage.ReadingList.OpenReadingList">
-  <owner>wylieb@chromium.org</owner>
+  <owner>wylieb@google.com</owner>
   <owner>chrome-collections@google.com</owner>
   <description>
     User navigated to the Reading List page from the Android bookmark page by
@@ -2862,7 +2862,7 @@ should be able to be added at any place in this file.
 </action>
 
 <action name="Android.BookmarkPage.ReadingList.RemoveItem">
-  <owner>wylieb@chromium.org</owner>
+  <owner>wylieb@google.com</owner>
   <owner>chrome-collections@google.com</owner>
   <description>
     User removed an item from the Reading List page from the Android bookmarks
@@ -2871,7 +2871,7 @@ should be able to be added at any place in this file.
 </action>
 
 <action name="Android.BookmarkPage.ReadingList.SelectFromMenu">
-  <owner>wylieb@chromium.org</owner>
+  <owner>wylieb@google.com</owner>
   <owner>chrome-collections@google.com</owner>
   <description>
     User selected an item from the Reading List page from the Android bookmark
@@ -6013,7 +6013,7 @@ should be able to be added at any place in this file.
 </action>
 
 <action name="Bookmarks.Added">
-  <owner>wylieb@chromium.org</owner>
+  <owner>wylieb@google.com</owner>
   <owner>chrome-collections@google.com</owner>
   <description>Recorded when the user adds a bookmark.</description>
 </action>
@@ -6041,7 +6041,7 @@ should be able to be added at any place in this file.
 </action>
 
 <action name="Bookmarks.Opened">
-  <owner>wylieb@chromium.org</owner>
+  <owner>wylieb@google.com</owner>
   <owner>chrome-collections@google.com</owner>
   <description>Recorded when the user opens a bookmark.</description>
 </action>
@@ -8777,7 +8777,7 @@ should be able to be added at any place in this file.
 <action name="ContextualSuggestions">
   <obsolete>This feature was deprecated in M74</obsolete>
   <owner>twellington@chromium.org</owner>
-  <owner>wylieb@chromium.org</owner>
+  <owner>wylieb@google.com</owner>
   <description>Android: User interacts with the feature directly.</description>
 </action>
 
@@ -12219,6 +12219,52 @@ should be able to be added at any place in this file.
   </description>
 </action>
 
+<action name="Glic.Fre.Accept">
+  <owner>iwells@google.com</owner>
+  <owner>erikchen@chromium.org</owner>
+  <description>Logged if the FRE is accepted.</description>
+</action>
+
+<action name="Glic.Fre.HelpCenterLinkOpened">
+  <owner>dullweber@chromium.org</owner>
+  <owner>erikchen@chromium.org</owner>
+  <description>
+    Logged if a help center link is opened from the FRE.
+  </description>
+</action>
+
+<action name="Glic.Fre.MyActivityLinkOpened">
+  <owner>dullweber@chromium.org</owner>
+  <owner>erikchen@chromium.org</owner>
+  <description>Logged if a myactivity link is opened from the FRE.</description>
+</action>
+
+<action name="Glic.Fre.NoThanks">
+  <owner>iwells@google.com</owner>
+  <owner>erikchen@chromium.org</owner>
+  <description>Logged if the user clicked on No Thanks in the FRE.</description>
+</action>
+
+<action name="Glic.Fre.PolicyLinkOpened">
+  <owner>dullweber@chromium.org</owner>
+  <owner>erikchen@chromium.org</owner>
+  <description>Logged if a policy link is opened from the FRE.</description>
+</action>
+
+<action name="Glic.Fre.PrivacyNoticeLinkOpened">
+  <owner>dullweber@chromium.org</owner>
+  <owner>erikchen@chromium.org</owner>
+  <description>
+    Logged if a privacy notice link is opened from the FRE.
+  </description>
+</action>
+
+<action name="Glic.Fre.Shown">
+  <owner>iwells@google.com</owner>
+  <owner>erikchen@chromium.org</owner>
+  <description>Logged if the glic FRE is shown.</description>
+</action>
+
 <action name="Glic.Pinned">
   <owner>charlesmeng@chromium.org</owner>
   <owner>erikchen@chromium.org</owner>
@@ -12276,6 +12322,23 @@ should be able to be added at any place in this file.
   <description>
     Tracks clicks on the remove glic icon option from the glic os launcher
     context menu.
+  </description>
+</action>
+
+<action name="GlicOsEntrypoint.Settings.ShortcutDisabled">
+  <owner>agale@chromium.org</owner>
+  <owner>erikchen@chromium.org</owner>
+  <description>
+    Logged anytime glic shortcut (aka hotkey) is disabled from
+    chrome://settings.
+  </description>
+</action>
+
+<action name="GlicOsEntrypoint.Settings.ShortcutEnabled">
+  <owner>agale@chromium.org</owner>
+  <owner>erikchen@chromium.org</owner>
+  <description>
+    Logged anytime glic shortcut (aka hotkey) is enabled from chrome://settings.
   </description>
 </action>
 
@@ -21986,7 +22049,7 @@ should be able to be added at any place in this file.
 </action>
 
 <action name="MobileBookmark.SaveFlow.ClosedWithoutEditAction">
-  <owner>wylieb@chromium.org</owner>
+  <owner>wylieb@google.com</owner>
   <owner>chrome-collections@google.com</owner>
   <description>
     Recorded when a user closes the save flow without editing the boookmark.
@@ -21994,7 +22057,7 @@ should be able to be added at any place in this file.
 </action>
 
 <action name="MobileBookmark.SaveFlow.EditBookmark">
-  <owner>wylieb@chromium.org</owner>
+  <owner>wylieb@google.com</owner>
   <owner>chrome-collections@google.com</owner>
   <description>
     Recorded when a user taps the edit bookmark button in the save flow.
@@ -22002,7 +22065,7 @@ should be able to be added at any place in this file.
 </action>
 
 <action name="MobileBookmark.SaveFlow.EditFolder">
-  <owner>wylieb@chromium.org</owner>
+  <owner>wylieb@google.com</owner>
   <owner>chrome-collections@google.com</owner>
   <description>
     Recorded when a user taps the edit folder button in the save flow.
@@ -22010,7 +22073,7 @@ should be able to be added at any place in this file.
 </action>
 
 <action name="MobileBookmark.SaveFlow.Show">
-  <owner>wylieb@chromium.org</owner>
+  <owner>wylieb@google.com</owner>
   <owner>chrome-collections@google.com</owner>
   <description>
     Recorded when a user saves a bookmark via the improved save flow.
@@ -22163,7 +22226,7 @@ should be able to be added at any place in this file.
 </action>
 
 <action name="MobileBookmarkManagerMultipleEntriesOpened">
-  <owner>wylieb@chromium.org</owner>
+  <owner>wylieb@google.com</owner>
   <owner>chrome-collections@google.com</owner>
   <description>
     Recorded when multi-selection is opened from the bookmark manager. Possible
@@ -22213,7 +22276,7 @@ should be able to be added at any place in this file.
 </action>
 
 <action name="MobileBookmarkManagerReopenBookmarksInSameSession">
-  <owner>wylieb@chromium.org</owner>
+  <owner>wylieb@google.com</owner>
   <owner>clank-app-team@google.com</owner>
   <description>
     Tracks the bookmark manager being reopened while clank was running.
@@ -22651,6 +22714,15 @@ should be able to be added at any place in this file.
   <obsolete>Deprecated as of 8/2015</obsolete>
   <owner>Please list the metric's owners. Add more owner tags as needed.</owner>
   <description>Please enter the description of this user action.</description>
+</action>
+
+<action name="MobileCredentialProviderExtensionPromoTurnOnAutoFill">
+  <owner>noemies@google.com</owner>
+  <description>
+    Reported when the user taps the &quot;Turn on AutoFill…&quot; button from
+    the Credential Provider Extenstion promo. This button triggers an iOS prompt
+    that allows the user to set the app as a credential provider. iOS only.
+  </description>
 </action>
 
 <action name="MobileCreditCardScanner.Close">
@@ -23738,7 +23810,7 @@ should be able to be added at any place in this file.
 </action>
 
 <action name="MobileMenuDeleteFromReadingList">
-  <owner>wylieb@chromium.org</owner>
+  <owner>wylieb@google.com</owner>
   <description>
     User deleted from their reading list in the app menu.
   </description>
@@ -24529,7 +24601,7 @@ should be able to be added at any place in this file.
   <owner>yusuyoutube@google.com</owner>
   <owner>benwgold@google.com</owner>
   <owner>fgorski@chromium.org</owner>
-  <owner>wylieb@chromium.org</owner>
+  <owner>wylieb@google.com</owner>
   <owner>lens-chrome@google.com</owner>
   <description>
     Mobile Omnibox Lens button shown when Omnibox focused.
@@ -24540,7 +24612,7 @@ should be able to be added at any place in this file.
   <owner>yusuyoutube@google.com</owner>
   <owner>benwgold@google.com</owner>
   <owner>fgorski@chromium.org</owner>
-  <owner>wylieb@chromium.org</owner>
+  <owner>wylieb@google.com</owner>
   <owner>lens-chrome@google.com</owner>
   <description>Mobile Omnibox Lens button clicked.</description>
 </action>
@@ -24549,7 +24621,7 @@ should be able to be added at any place in this file.
   <owner>yusuyoutube@google.com</owner>
   <owner>benwgold@google.com</owner>
   <owner>fgorski@chromium.org</owner>
-  <owner>wylieb@chromium.org</owner>
+  <owner>wylieb@google.com</owner>
   <owner>lens-chrome@google.com</owner>
   <description>Mobile Omnibox Lens button shown.</description>
 </action>
@@ -24876,6 +24948,15 @@ should be able to be added at any place in this file.
   <description>
     Reported when user uses the Password Manager search bar to search their
     passwords. iOS only.
+  </description>
+</action>
+
+<action name="MobilePasswordSettingsTurnOnAutoFill">
+  <owner>noemies@google.com</owner>
+  <description>
+    Reported when the user taps the &quot;Turn on AutoFill…&quot; button from
+    the Password Settings UI. This button triggers an iOS prompt that allows the
+    user to set the app as a credential provider. iOS only.
   </description>
 </action>
 
@@ -28221,7 +28302,7 @@ should be able to be added at any place in this file.
   <owner>yusuyoutube@google.com</owner>
   <owner>benwgold@google.com</owner>
   <owner>fgorski@chromium.org</owner>
-  <owner>wylieb@chromium.org</owner>
+  <owner>wylieb@google.com</owner>
   <owner>lens-chrome@google.com</owner>
   <description>
     Recorded when the user taps the Lens button in the search box on the new tab
@@ -28233,7 +28314,7 @@ should be able to be added at any place in this file.
   <owner>yusuyoutube@google.com</owner>
   <owner>benwgold@google.com</owner>
   <owner>fgorski@chromium.org</owner>
-  <owner>wylieb@chromium.org</owner>
+  <owner>wylieb@google.com</owner>
   <owner>lens-chrome@google.com</owner>
   <description>
     Recorded when the Lens button is shown in the search box on the new tab
@@ -37626,6 +37707,14 @@ should be able to be added at any place in this file.
   <description>The user closed the side panel.</description>
 </action>
 
+<action name="SidePanel.History.Shown">
+  <owner>mfacey@chromium.org</owner>
+  <owner>chrome-desktop-ui-sea@google.com</owner>
+  <description>
+    Recorded when the history side panel entry is shown.
+  </description>
+</action>
+
 <action name="SidePanel.HistoryClusters.NewTabButtonClicked">
   <owner>mfacey@chromium.org</owner>
   <owner>chrome-desktop-ui-sea@google.com</owner>
@@ -43384,6 +43473,26 @@ should be able to be added at any place in this file.
   </description>
 </action>
 
+<action name="TabGroupParity.BottomSheetRowSelection">
+  <owner>mfiaz@google.com</owner>
+  <owner>skym@chromium.org</owner>
+  <owner>fredmello@chromium.org</owner>
+  <description>
+    Record when the user attempts to group tabs through the
+    TabGroupListBottomSheet.
+  </description>
+</action>
+
+<action name="TabGroupParity.TabListEditorMenuActions">
+  <owner>mfiaz@google.com</owner>
+  <owner>skym@chromium.org</owner>
+  <owner>fredmello@chromium.org</owner>
+  <description>
+    Record when the user attempts to group tabs through the
+    TabListEditorAddToGroupAction.
+  </description>
+</action>
+
 <action name="TabGroups.Shared.SwitchGroupedTab">
   <owner>dljames@chromium.org</owner>
   <owner>chrome-desktop-ui-sea@google.com</owner>
@@ -43847,7 +43956,7 @@ should be able to be added at any place in this file.
 
 <action name="Tabs.ArchivedDuplicateTab">
   <owner>bjfong@google.com</owner>
-  <owner>wylieb@chromium.org</owner>
+  <owner>wylieb@google.com</owner>
   <owner>clank-tab-dev@google.com</owner>
   <description>
     Recorded when a duplicate tab that is not the most recently used copy is
@@ -43856,7 +43965,7 @@ should be able to be added at any place in this file.
 </action>
 
 <action name="Tabs.ArchivedTabAutoDeleted">
-  <owner>wylieb@chromium.org</owner>
+  <owner>wylieb@google.com</owner>
   <owner>clank-tab-dev@google.com</owner>
   <description>
     Recorded when an archived tab is deleted. This happens when the tab's last
@@ -43865,7 +43974,7 @@ should be able to be added at any place in this file.
 </action>
 
 <action name="Tabs.ArchivedTabRescued">
-  <owner>wylieb@chromium.org</owner>
+  <owner>wylieb@google.com</owner>
   <owner>clank-tab-dev@google.com</owner>
   <description>
     Recorded when an archived tab was rescued. This happens when the feature
@@ -43874,7 +43983,7 @@ should be able to be added at any place in this file.
 </action>
 
 <action name="Tabs.ArchivedTabRestored">
-  <owner>wylieb@chromium.org</owner>
+  <owner>wylieb@google.com</owner>
   <owner>clank-tab-dev@google.com</owner>
   <description>
     Recorded when an archived tab is restored. This happens when a user manually
@@ -43883,7 +43992,7 @@ should be able to be added at any place in this file.
 </action>
 
 <action name="Tabs.ArchivedTabsDialogIphClicked">
-  <owner>wylieb@chromium.org</owner>
+  <owner>wylieb@google.com</owner>
   <owner>clank-tab-dev@google.com</owner>
   <description>
     Recorded when the archived tabs dialog IPH is clicked.
@@ -43891,7 +44000,7 @@ should be able to be added at any place in this file.
 </action>
 
 <action name="Tabs.ArchivedTabsDialogIphDismissed">
-  <owner>wylieb@chromium.org</owner>
+  <owner>wylieb@google.com</owner>
   <owner>clank-tab-dev@google.com</owner>
   <description>
     Recorded when the archived tabs dialog IPH is dismissed.
@@ -43899,7 +44008,7 @@ should be able to be added at any place in this file.
 </action>
 
 <action name="Tabs.ArchivedTabsDialogIphShown">
-  <owner>wylieb@chromium.org</owner>
+  <owner>wylieb@google.com</owner>
   <owner>clank-tab-dev@google.com</owner>
   <description>
     Recorded when the archived tabs dialog IPH is shown.
@@ -43907,13 +44016,13 @@ should be able to be added at any place in this file.
 </action>
 
 <action name="Tabs.ArchivedTabsDialogShown">
-  <owner>wylieb@chromium.org</owner>
+  <owner>wylieb@google.com</owner>
   <owner>clank-tab-dev@google.com</owner>
   <description>Recorded when the archived tabs dialog is shown.</description>
 </action>
 
 <action name="Tabs.CloseAllArchivedTabsMenuItem">
-  <owner>wylieb@chromium.org</owner>
+  <owner>wylieb@google.com</owner>
   <owner>clank-tab-dev@google.com</owner>
   <description>
     Recorded when the close all archived tabs menu item is clicked by a user in
@@ -43922,7 +44031,7 @@ should be able to be added at any place in this file.
 </action>
 
 <action name="Tabs.CloseArchivedTabsMenuItem">
-  <owner>wylieb@chromium.org</owner>
+  <owner>wylieb@google.com</owner>
   <owner>clank-tab-dev@google.com</owner>
   <description>
     Recorded when the close menu item is clicked by a user while selecting in
@@ -43931,7 +44040,7 @@ should be able to be added at any place in this file.
 </action>
 
 <action name="Tabs.OpenArchivedTabsSettingsMenuItem">
-  <owner>wylieb@chromium.org</owner>
+  <owner>wylieb@google.com</owner>
   <owner>clank-tab-dev@google.com</owner>
   <description>
     Recorded when the settings menu item is clicked by a user.
@@ -43939,7 +44048,7 @@ should be able to be added at any place in this file.
 </action>
 
 <action name="Tabs.RestoreAllArchivedTabsMenuItem">
-  <owner>wylieb@chromium.org</owner>
+  <owner>wylieb@google.com</owner>
   <owner>clank-tab-dev@google.com</owner>
   <description>
     Recorded when the restore all menu item is clicked by a user in the archived
@@ -43948,7 +44057,7 @@ should be able to be added at any place in this file.
 </action>
 
 <action name="Tabs.RestoreArchivedTabsMenuItem">
-  <owner>wylieb@chromium.org</owner>
+  <owner>wylieb@google.com</owner>
   <owner>clank-tab-dev@google.com</owner>
   <description>
     Recorded when the restore menu item is clicked by a user while selecting in
@@ -43957,7 +44066,7 @@ should be able to be added at any place in this file.
 </action>
 
 <action name="Tabs.RestoreSingleTab">
-  <owner>wylieb@chromium.org</owner>
+  <owner>wylieb@google.com</owner>
   <owner>clank-tab-dev@google.com</owner>
   <description>
     Recorded when the user selects a single tab from the archived tabs dialog.
@@ -43965,7 +44074,7 @@ should be able to be added at any place in this file.
 </action>
 
 <action name="Tabs.SelectArchivedTabsMenuItem">
-  <owner>wylieb@chromium.org</owner>
+  <owner>wylieb@google.com</owner>
   <owner>clank-tab-dev@google.com</owner>
   <description>
     Recorded when the select tabs menu item is clicked by a user.
@@ -44109,6 +44218,16 @@ should be able to be added at any place in this file.
   </description>
 </action>
 
+<action name="TabSwitcher.ContextMenu">
+  <owner>mfiaz@google.com</owner>
+  <owner>skym@chromium.org</owner>
+  <owner>fredmello@chromium.org</owner>
+  <description>
+    Recorded when a user long presses on a tab card in the tab switcher to show
+    the tab context menu.
+  </description>
+</action>
+
 <action name="TaskManagement.OpenInChromeActionButtonClicked">
   <obsolete>The button option was removed and code deleted.</obsolete>
   <owner>dfalcantara@chromium.org</owner>
@@ -44138,7 +44257,7 @@ should be able to be added at any place in this file.
   <owner>yusuyoutube@google.com</owner>
   <owner>benwgold@google.com</owner>
   <owner>fgorski@chromium.org</owner>
-  <owner>wylieb@chromium.org</owner>
+  <owner>wylieb@google.com</owner>
   <owner>lens-chrome@google.com</owner>
   <description>
     Recorded when the user taps the Lens button in the fake box on the tasks
@@ -44150,7 +44269,7 @@ should be able to be added at any place in this file.
   <owner>yusuyoutube@google.com</owner>
   <owner>benwgold@google.com</owner>
   <owner>fgorski@chromium.org</owner>
-  <owner>wylieb@chromium.org</owner>
+  <owner>wylieb@google.com</owner>
   <owner>lens-chrome@google.com</owner>
   <description>
     Recorded when the Lens button is shown in the fake box on the tasks surface
@@ -47535,6 +47654,9 @@ should be able to be added at any place in this file.
       label="For AutoDarkUserEducationMessage feature."/>
   <suffix name="AutoDarkUserEducationMessageOptIn"
       label="For AutoDarkUserEducationMessageOptIn feature."/>
+  <suffix name="AutofillAiOptIn" label="For AutofillAiOptIn feature."/>
+  <suffix name="AutofillBnplAffirmOrZipSuggestion"
+      label="For AutofillBnplAffirmOrZipSuggestion IPH feature."/>
   <suffix name="AutofillCardInfoRetrievalSuggestion"
       label="For AutofillCardInfoRetrievalSuggestion feature."/>
   <suffix name="AutofillCreditCardBenefit"
@@ -47543,8 +47665,6 @@ should be able to be added at any place in this file.
       label="For AutofillDisabledVirtualCardSuggestion feature."/>
   <suffix name="AutofillExternalAccountProfileSuggestion"
       label="For AutofillExternalAccountProfileSuggestion feature."/>
-  <suffix name="AutofillPredictionImprovements"
-      label="For AutofillPredictionImprovements feature."/>
   <suffix name="AutofillVirtualCardCVCSuggestion"
       label="For autofill suggestion of virtual cards."/>
   <suffix name="AutofillVirtualCardSuggestion"
@@ -47755,7 +47875,7 @@ should be able to be added at any place in this file.
   <suffix name="iOSPageInfoRevamp"
       label="For Page Info Revamp new badge IPH feature. (obsolete)"/>
   <suffix name="iOSParcelTrackingFeature"
-      label="For the iOSParcelTrackingFeature feature"/>
+      label="For the iOSParcelTrackingFeature feature. (obsolete)"/>
   <suffix name="iOSPasswordPromoDesktop"
       label="For iOSPasswordPromoDesktop feature"/>
   <suffix name="iOSPaymentPromoDesktop"
@@ -47801,6 +47921,8 @@ should be able to be added at any place in this file.
       label="For iOSReplaceSyncPromosWithSignInPromos feature"/>
   <suffix name="iOSSavedTabGroupClosed"
       label="For Saved Tab Group closed for the first time."/>
+  <suffix name="iOSSettingsInOverflowMenuBubbleFeature"
+      label="For Settings in the Overflow menu."/>
   <suffix name="iOSSharedTabGroupForeground"
       label="For Shared Tab Group reminder on foreground."/>
   <suffix name="iOSSwipeBackForwardFeature"
@@ -48659,6 +48781,7 @@ should be able to be added at any place in this file.
   <suffix name="kActionShowAddressesBubbleOrPage"
       label="Show addresses action"/>
   <suffix name="kActionShowChromeLabs" label="Show Chrome Labs action"/>
+  <suffix name="kActionShowDownloads" label="Show downloads action"/>
   <suffix name="kActionShowPasswordsBubbleOrPage"
       label="Show passwords bubble or page action"/>
   <suffix name="kActionShowPaymentsBubbleOrPage"
@@ -48666,19 +48789,16 @@ should be able to be added at any place in this file.
   <suffix name="kActionShowTranslate" label="Show translate action"/>
   <suffix name="kActionSidePanelShowBookmarks"
       label="Show bookmarks side panel action"/>
-  <suffix name="kActionSidePanelShowFeed" label="Show feed side panel action"/>
+  <suffix name="kActionSidePanelShowHistory"
+      label="Show history side panel action"/>
   <suffix name="kActionSidePanelShowHistoryCluster"
-      label="Show history clusster side panel action"/>
+      label="Show history cluster side panel action"/>
   <suffix name="kActionSidePanelShowLensOverlayResults"
       label="Show lens overlay action"/>
   <suffix name="kActionSidePanelShowReadAnything"
       label="Show read anything side panel action"/>
   <suffix name="kActionSidePanelShowReadingList"
       label="Show reading list side panel action"/>
-  <suffix name="kActionSidePanelShowSearchCompanion"
-      label="Show search companion side panel action"/>
-  <suffix name="kActionSidePanelShowUserNote"
-      label="Show user note side panel action"/>
   <suffix name="kActionTaskManager" label="Task manager action"/>
   <affected-action name="Actions.PinnedToolbarButton.Pinned"/>
   <affected-action name="Actions.PinnedToolbarButton.Pinned.ByContextMenu"/>
@@ -48748,6 +48868,39 @@ should be able to be added at any place in this file.
   <affected-action name="MerchantTrust.SidePanelClosedOnSameTabNavigation"/>
   <affected-action name="MerchantTrust.SidePanelOpened"/>
   <affected-action name="MerchantTrust.SidePanelOpenedOnSameTabNavigation"/>
+</action-suffix>
+
+<action-suffix separator="." ordering="suffix">
+  <suffix name="ExistingGroup" label="Added to existing tab group."/>
+  <suffix name="NewGroup" label="New tab group created."/>
+  <affected-action name="TabGroupParity.BottomSheetRowSelection"/>
+</action-suffix>
+
+<action-suffix separator="." ordering="suffix">
+  <suffix name="GroupsExist"
+      label="Recorded when tab groups exist when clicked."/>
+  <suffix name="NoGroupsExist"
+      label="Recorded when no tab groups exist when clicked."/>
+  <affected-action name="TabGroupParity.TabListEditorMenuActions"/>
+</action-suffix>
+
+<action-suffix separator="." ordering="suffix">
+  <suffix name="AddTabToGroup"
+      label="Recorded when the 'Add to group' option in the context menu is
+             selected."/>
+  <suffix name="AddToBookmark"
+      label="Recorded when the 'Add to bookmarks' option in the context menu
+             is selected."/>
+  <suffix name="CloseTab"
+      label="Recorded when the 'Close tab' option in the context menu is
+             selected."/>
+  <suffix name="SelectTabs"
+      label="Recorded when the 'Select tabs' option in the context menu is
+             selected."/>
+  <suffix name="ShareTab"
+      label="Recorded when the 'Share' option in the context menu is
+             selected."/>
+  <affected-action name="TabSwitcher.ContextMenu"/>
 </action-suffix>
 
 </actions>

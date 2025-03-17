@@ -29,10 +29,11 @@ chromium-metrics-reviews@google.com.
 
 <variants name="ExoSurfaceCodePaths">
   <variant name="AppendContentsToFrame"/>
+  <variant name="ForceRGBAForOpaque"/>
   <variant name="Occluded"/>
+  <variant name="ProtectedVideoType"/>
   <variant name="SolidColorDrawQuad"/>
   <variant name="TextureDrawQuad"/>
-  <variant name="TileDrawQuad"/>
 </variants>
 
 <variants name="GPUProtectedVideoType">
@@ -1013,7 +1014,7 @@ chromium-metrics-reviews@google.com.
 </histogram>
 
 <histogram name="GPU.HardwareSupportsVulkan" enum="Boolean"
-    expires_after="2025-06-30">
+    expires_after="2025-08-31">
   <owner>kylechar@chromium.org</owner>
   <owner>chrome-gpu-metric-alerts@chromium.org</owner>
   <summary>
@@ -1199,6 +1200,33 @@ chromium-metrics-reviews@google.com.
   </summary>
 </histogram>
 
+<histogram name="GPU.Presentation.FrameHandlesAnimationOrInteraction"
+    enum="FrameHandlingType" expires_after="2025-09-07">
+  <owner>magchen@chromium.org</owner>
+  <owner>vmiura@chromium.org</owner>
+  <owner>chrome-gpu-metric-alerts@chromium.org</owner>
+  <summary>
+    Recorded on Mac when a frame is ready to present and GPU Present() is
+    called. It records whether the current frame is handling interaction,
+    animation, both, or none.
+  </summary>
+</histogram>
+
+<histogram
+    name="GPU.Presentation.NonAnimatedOrInteractiveFrameWithPendingFrame"
+    enum="Boolean" expires_after="2025-09-07">
+  <owner>magchen@chromium.org</owner>
+  <owner>vmiura@chromium.org</owner>
+  <owner>chrome-gpu-metric-alerts@chromium.org</owner>
+  <summary>
+    Recorded on Mac for frames that are not handling interaction and animation
+    at the time when they are ready to present and GPU Present() is called . If
+    VSyncAlignedPresent and kPresentationDelayForInteractiveFrames are enabled,
+    this type of frames can be swapped immediately. However, they must wait in
+    the queue for VSync when there is a pending frame(s).
+  </summary>
+</histogram>
+
 <histogram name="GPU.Presentation.VSyncCallbackDelay" units="microseconds"
     expires_after="2025-08-10">
   <owner>magchen@chromium.org</owner>
@@ -1226,13 +1254,15 @@ chromium-metrics-reviews@google.com.
 </histogram>
 
 <histogram name="GPU.ProcessLifetimeEvents.SwiftShader"
-    enum="GPUProcessLifetimeEvent" expires_after="2024-12-08">
+    enum="GPUProcessLifetimeEvent" expires_after="2025-12-31">
   <owner>vmiura@chromium.org</owner>
   <summary>
     Recorded once for every GPU process launch and crash when GPU process is
     started for SwiftShader WebGL. Crash buckets are based on crash count for
     disabling features. With OOP-D enabled the display compositor with software
     compositing will also run as part of the GPU process.
+
+    Note this was expired from 2024-12-08 to 2015-03-13.
   </summary>
 </histogram>
 
@@ -1492,7 +1522,7 @@ chromium-metrics-reviews@google.com.
 
 <histogram
     name="GPU.{GraphiteDawnOrWebGPU}.MaxTextureDimension2D.{AdapterType}"
-    units="dimensions" expires_after="2025-07-06">
+    units="dimensions" expires_after="2025-09-07">
   <owner>cduvall@chromium.org</owner>
   <owner>mdb.webgpu-dev-team@google.com</owner>
   <summary>
@@ -1553,7 +1583,7 @@ chromium-metrics-reviews@google.com.
 
 <histogram
     name="GPU.{GraphiteDawnOrWebGPU}.{Cacheable}.{CacheHitMiss}.90SecondsPostStartup"
-    units="microseconds" expires_after="2025-07-06">
+    units="microseconds" expires_after="2025-09-07">
   <owner>hitawala@chromium.org</owner>
   <owner>mdb.webgpu-dev-team@google.com</owner>
   <summary>
@@ -1573,7 +1603,7 @@ chromium-metrics-reviews@google.com.
 
 <histogram
     name="GPU.{GraphiteDawnOrWebGPU}.{Cacheable}.{CacheHitMiss}.Counts.90SecondsPostStartup"
-    units="count" expires_after="2025-07-06">
+    units="count" expires_after="2025-09-07">
   <owner>hitawala@chromium.org</owner>
   <owner>mdb.webgpu-dev-team@google.com</owner>
   <summary>
@@ -1804,7 +1834,7 @@ chromium-metrics-reviews@google.com.
 </histogram>
 
 <histogram name="Viz.ExternalBeginFrameSourceMac.DisplayLink"
-    enum="DisplayLinkCreateResult" expires_after="2025-04-13">
+    enum="DisplayLinkCreateResult" expires_after="2026-04-13">
   <owner>magchen@chromium.org</owner>
   <owner>ccameron@chromium.org</owner>
   <owner>chrome-gpu-metric-alerts@chromium.org</owner>

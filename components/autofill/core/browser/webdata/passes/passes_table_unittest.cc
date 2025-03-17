@@ -61,13 +61,38 @@ TEST_F(PassesTableTest, AddOrUpdateLoyaltyCard) {
   EXPECT_TRUE(passes_table().AddOrUpdateLoyaltyCard(card1));
   EXPECT_THAT(passes_table().GetLoyaltyCards(), UnorderedElementsAre(card1));
   // Update `card1`.
-  card1.loyalty_card_number = "123*321";
+  card1.unmasked_loyalty_card_suffix = "9876";
   EXPECT_TRUE(passes_table().AddOrUpdateLoyaltyCard(card1));
   EXPECT_THAT(passes_table().GetLoyaltyCards(), UnorderedElementsAre(card1));
   // Add `card2`.
   EXPECT_TRUE(passes_table().AddOrUpdateLoyaltyCard(card2));
   EXPECT_THAT(passes_table().GetLoyaltyCards(),
               UnorderedElementsAre(card1, card2));
+}
+
+TEST_F(PassesTableTest, AddOrUpdateLoyaltyCard_EmptyProgramLogoUrl) {
+  LoyaltyCard card1 = test::CreateLoyaltyCard();
+  card1.program_logo = GURL("");
+  EXPECT_TRUE(card1.program_logo.is_empty());
+  EXPECT_TRUE(passes_table().AddOrUpdateLoyaltyCard(card1));
+  EXPECT_THAT(passes_table().GetLoyaltyCards(), UnorderedElementsAre(card1));
+}
+
+TEST_F(PassesTableTest, AddOrUpdateLoyaltyCard_InvalidProgramLogoUrl) {
+  LoyaltyCard card1 = test::CreateLoyaltyCard();
+  card1.program_logo = GURL("http:://google.com");
+
+  EXPECT_FALSE(card1.program_logo.is_empty());
+  EXPECT_FALSE(passes_table().AddOrUpdateLoyaltyCard(card1));
+  EXPECT_THAT(passes_table().GetLoyaltyCards(), IsEmpty());
+}
+
+TEST_F(PassesTableTest, AddOrUpdateLoyaltyCard_EmptyLoyaltyCardId) {
+  LoyaltyCard card1 = test::CreateLoyaltyCard();
+  card1.loyalty_card_id = "";
+
+  EXPECT_FALSE(passes_table().AddOrUpdateLoyaltyCard(card1));
+  EXPECT_THAT(passes_table().GetLoyaltyCards(), IsEmpty());
 }
 
 TEST_F(PassesTableTest, RemoveLoyaltyCard) {

@@ -13,7 +13,6 @@
           "--gs-results-bucket=chromium-result-details",
           "--recover-devices"
         ],
-        "ci_only": true,
         "description": "Run with android_35_google_apis_tablet_x64",
         "merge": {
           "args": [
@@ -50,7 +49,7 @@
             }
           },
           "service_account": "chromium-tester@chops-service-accounts.iam.gserviceaccount.com",
-          "shards": 10
+          "shards": 33
         },
         "test": "android_browsertests",
         "test_id_prefix": "ninja://chrome/test:android_browsertests/"

@@ -31,7 +31,6 @@
 #include "chrome/browser/extensions/forced_extensions/force_installed_metrics.h"
 #include "chrome/browser/extensions/forced_extensions/force_installed_tracker.h"
 #include "chrome/browser/extensions/omaha_attributes_handler.h"
-#include "chrome/browser/extensions/pending_extension_manager.h"
 #include "chrome/browser/extensions/safe_browsing_verdict_handler.h"
 #include "chrome/browser/profiles/profile_manager_observer.h"
 #include "chrome/browser/upgrade_detector/upgrade_observer.h"
@@ -77,6 +76,7 @@ class ExtensionRegistry;
 class ExtensionSystem;
 class ExtensionUpdater;
 class ExternalInstallManager;
+class PendingExtensionManager;
 class SharedModuleService;
 class UpdateObserver;
 enum class UnloadedExtensionReason;
@@ -86,9 +86,6 @@ enum class UnloadedExtensionReason;
 class ExtensionServiceInterface {
  public:
   virtual ~ExtensionServiceInterface() = default;
-
-  // Gets the object managing the set of pending extensions.
-  virtual PendingExtensionManager* pending_extension_manager() = 0;
 
   // Gets the object managing reinstalls of the corrupted extensions.
   virtual CorruptedExtensionReinstaller* corrupted_extension_reinstaller() = 0;
@@ -113,14 +110,6 @@ class ExtensionServiceInterface {
   // Returns whether the extension installation was finished.
   virtual bool FinishDelayedInstallationIfReady(const std::string& extension_id,
                                                 bool install_immediately) = 0;
-
-  // Returns true if the extension with the given |extension_id| is enabled.
-  // This will only return a valid answer for installed extensions (regardless
-  // of whether it is currently loaded or not).  Loaded extensions return true
-  // if they are currently loaded or terminated.  Unloaded extensions will
-  // return true if they are not blocked, disabled, blocklisted or uninstalled
-  // (for external extensions).
-  virtual bool IsExtensionEnabled(const std::string& extension_id) const = 0;
 
   // Go through each extension and unload those that are not allowed to run by
   // management policy providers (ie. network admin and Google-managed
@@ -183,6 +172,7 @@ class ExtensionService : public ExtensionServiceInterface,
                    const base::FilePath& unpacked_install_directory,
                    ExtensionPrefs* extension_prefs,
                    Blocklist* blocklist,
+                   ExtensionErrorController* error_controller,
                    bool autoupdate_enabled,
                    bool extensions_enabled,
                    base::OneShotEvent* ready);
@@ -194,12 +184,10 @@ class ExtensionService : public ExtensionServiceInterface,
 
   // ExtensionServiceInterface implementation.
   //
-  PendingExtensionManager* pending_extension_manager() override;
   CorruptedExtensionReinstaller* corrupted_extension_reinstaller() override;
   scoped_refptr<CrxInstaller> CreateUpdateInstaller(
       const CRXFileInfo& file,
       bool file_ownership_passed) override;
-  bool IsExtensionEnabled(const std::string& extension_id) const override;
   void UnloadExtension(const std::string& extension_id,
                        UnloadedExtensionReason reason) override;
   void RemoveComponentExtension(const std::string& extension_id) override;
@@ -358,13 +346,9 @@ class ExtensionService : public ExtensionServiceInterface,
   void UnblockAllExtensions();
 
   // Updates the |extension|'s granted permissions lists to include all
-  // permissions in the |extension|'s manifest and re-enables the
-  // extension.
-  // DEPRECATED: Prefer ExtensionRegistrar::GrantPermissionsAndEnableExtension.
-  void GrantPermissionsAndEnableExtension(const Extension* extension);
-
-  // Updates the |extension|'s granted permissions lists to include all
   // permissions in the |extensions|'s manifest.
+  // TODO(crbug.com/399677154): Migrate callers to use PermissionsUpdater
+  // directly.
   void GrantPermissions(const Extension* extension);
 
   // Check for updates (or potentially new extensions from external providers)
@@ -426,13 +410,15 @@ class ExtensionService : public ExtensionServiceInterface,
   // Returns profile_ as a BrowserContext.
   content::BrowserContext* GetBrowserContext() const;
 
-  bool extensions_enabled() const { return extensions_enabled_; }
-
   bool block_extensions() const { return block_extensions_; }
 
-  const base::FilePath& install_directory() const { return install_directory_; }
+  // TODO(crbug.com/402825212): Migrate callers to use ExtensionRegistrar
+  // directly.
+  const base::FilePath& install_directory() const {
+    return extension_registrar_->install_directory();
+  }
   const base::FilePath& unpacked_install_directory() const {
-    return unpacked_install_directory_;
+    return extension_registrar_->unpacked_install_directory();
   }
 
   DelayedInstallManager* delayed_install_manager() {
@@ -571,7 +557,7 @@ class ExtensionService : public ExtensionServiceInterface,
   // AddExtension.
   // |install_flags| is a bitmask of InstallFlags.
   void AddNewOrUpdatedExtension(const Extension* extension,
-                                Extension::State initial_state,
+                                const base::flat_set<int>& disable_reasons,
                                 int install_flags,
                                 const syncer::StringOrdinal& page_ordinal,
                                 const std::string& install_parameter,
@@ -628,8 +614,6 @@ class ExtensionService : public ExtensionServiceInterface,
 
   SafeBrowsingVerdictHandler safe_browsing_verdict_handler_;
 
-  OmahaAttributesHandler omaha_attributes_handler_;
-
   ExtensionTelemetryServiceVerdictHandler
       extension_telemetry_service_verdict_handler_;
 
@@ -640,18 +624,8 @@ class ExtensionService : public ExtensionServiceInterface,
   // --disable-extensions-except command line flag.
   std::set<std::string> disable_flag_exempted_extensions_;
 
-  // Hold the set of pending extensions.
-  PendingExtensionManager pending_extension_manager_;
-
-  // The full path to the directory where extensions are installed.
-  base::FilePath install_directory_;
-
-  // The full path to the directory where unpacked (e.g. from .zip files)
-  // extensions are installed.
-  base::FilePath unpacked_install_directory_;
-
-  // Whether or not extensions are enabled.
-  bool extensions_enabled_ = true;
+  // Hold the set of pending extensions. Not owned.
+  raw_ptr<PendingExtensionManager> pending_extension_manager_ = nullptr;
 
   // Signaled when all extensions are loaded.
   const raw_ptr<base::OneShotEvent> ready_;
@@ -700,8 +674,8 @@ class ExtensionService : public ExtensionServiceInterface,
   bool block_extensions_ = false;
 
   // The controller for the UI that alerts the user about any blocklisted
-  // extensions.
-  std::unique_ptr<ExtensionErrorController> error_controller_;
+  // extensions. Not owned.
+  raw_ptr<ExtensionErrorController> error_controller_ = nullptr;
 
   // The manager for extensions that were externally installed that is
   // responsible for prompting the user about suspicious extensions.
@@ -720,6 +694,9 @@ class ExtensionService : public ExtensionServiceInterface,
 
   // Helper to register and unregister extensions.
   raw_ptr<ExtensionRegistrar> extension_registrar_ = nullptr;
+
+  // Needs `extension_registrar_` during construction.
+  OmahaAttributesHandler omaha_attributes_handler_;
 
   // Tracker of enterprise policy forced installation.
   ForceInstalledTracker force_installed_tracker_;

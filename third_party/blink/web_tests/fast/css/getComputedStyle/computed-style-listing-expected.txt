@@ -168,7 +168,7 @@ d: none
 direction: ltr
 display: block
 dominant-baseline: auto
-dynamic-range-limit: high
+dynamic-range-limit: no-limit
 empty-cells: show
 field-sizing: fixed
 fill: rgb(0, 0, 0)
@@ -386,7 +386,7 @@ text-decoration-line: none
 text-decoration-skip-ink: auto
 text-decoration-style: solid
 text-emphasis-color: rgb(0, 0, 0)
-text-emphasis-position: over
+text-emphasis-position: auto
 text-emphasis-style: none
 text-indent: 0px
 text-overflow: clip

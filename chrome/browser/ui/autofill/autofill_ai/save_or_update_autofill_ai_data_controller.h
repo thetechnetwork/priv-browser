@@ -12,7 +12,6 @@
 #include "base/types/optional_ref.h"
 #include "components/autofill/core/browser/integrators/autofill_ai_delegate.h"
 #include "components/autofill_ai/core/browser/autofill_ai_client.h"
-#include "components/user_annotations/user_annotations_types.h"
 #include "content/public/browser/web_contents.h"
 
 namespace autofill {
@@ -43,7 +42,6 @@ class SaveOrUpdateAutofillAiDataController {
     kNewEntityAttributeAdded,
     kNewEntityAttributeUpdated,
     kNewEntityAttributeUnchanged,
-    kOldEntityAttributeUpdated
   };
 
   // Specifies for each attribute of a new instance whether the attribute is
@@ -74,7 +72,8 @@ class SaveOrUpdateAutofillAiDataController {
   virtual ~SaveOrUpdateAutofillAiDataController() = default;
 
   static SaveOrUpdateAutofillAiDataController* GetOrCreate(
-      content::WebContents* web_contents);
+      content::WebContents* web_contents,
+      const std::string& app_locale);
 
   // Shows a save or update Autofill AI data bubble which the user can accept or
   // decline. `old_entity` is used in the update case to give users an overview

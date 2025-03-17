@@ -58,11 +58,10 @@ class CORE_EXPORT GridLayoutAlgorithm
 
   // Aggregate all direct out of flow children from the current grid container
   // to `opt_oof_children`, unless it's not provided.
-  wtf_size_t BuildGridSizingSubtree(
+  void BuildGridSizingSubtree(
       GridSizingTree* sizing_tree,
       HeapVector<Member<LayoutBox>>* opt_oof_children,
-      const SubgriddedItemData& opt_subgrid_data =
-          SubgriddedItemData::NoSubgriddedItemData(),
+      const SubgriddedItemData& opt_subgrid_data = kNoSubgriddedItemData,
       const GridLineResolver* opt_parent_line_resolver = nullptr,
       bool must_invalidate_placement_cache = false,
       bool must_ignore_children = false) const;
@@ -73,12 +72,10 @@ class CORE_EXPORT GridLayoutAlgorithm
 
   const LayoutResult* LayoutInternal();
 
-  LayoutUnit Baseline(const GridLayoutData& layout_data,
-                      const GridItemData& grid_item,
-                      GridTrackSizingDirection track_direction) const;
-
-  void ComputeGridGeometry(const GridSizingTree& grid_sizing_tree,
-                           LayoutUnit* intrinsic_block_size);
+  GridLayoutSubtree ComputeGridGeometry(
+      GridItems* grid_items,
+      LayoutUnit* intrinsic_block_size,
+      HeapVector<Member<LayoutBox>>* oof_children);
 
   LayoutUnit ComputeIntrinsicBlockSizeIgnoringChildren() const;
 
@@ -102,11 +99,10 @@ class CORE_EXPORT GridLayoutAlgorithm
 
   // Determines the major/minor alignment baselines for each row/column based on
   // each item in `grid_items`, and stores the results in `track_collection`.
-  void ComputeGridItemBaselines(
-      const scoped_refptr<const GridLayoutTree>& layout_tree,
-      const GridSizingSubtree& sizing_subtree,
-      GridTrackSizingDirection track_direction,
-      SizingConstraint sizing_constraint) const;
+  void ComputeGridItemBaselines(const GridLayoutTreePtr& layout_tree,
+                                const GridSizingSubtree& sizing_subtree,
+                                GridTrackSizingDirection track_direction,
+                                SizingConstraint sizing_constraint) const;
 
   std::unique_ptr<GridLayoutTrackCollection> CreateSubgridTrackCollection(
       const SubgriddedItemData& subgrid_data,
@@ -150,7 +146,7 @@ class CORE_EXPORT GridLayoutAlgorithm
 
   // Performs the final baseline alignment pass of a grid sizing subtree.
   void ComputeBaselineAlignment(
-      const scoped_refptr<const GridLayoutTree>& layout_tree,
+      const GridLayoutTreePtr& layout_tree,
       const GridSizingSubtree& sizing_subtree,
       const SubgriddedItemData& opt_subgrid_data,
       const std::optional<GridTrackSizingDirection>& opt_track_direction,
@@ -237,7 +233,8 @@ class CORE_EXPORT GridLayoutAlgorithm
   // This is used for fragmentation which requires us to know the final offset
   // of each item before fragmentation occurs.
   void PlaceGridItems(
-      const GridSizingTree& sizing_tree,
+      const GridItems& grid_items,
+      const GridLayoutSubtree& layout_subtree,
       Vector<EBreakBetween>* out_row_break_between,
       Vector<GridItemPlacementData>* out_grid_items_placement_data = nullptr);
 
@@ -247,7 +244,8 @@ class CORE_EXPORT GridLayoutAlgorithm
   // This will go through all the grid_items and place fragments which belong
   // within this fragmentainer.
   void PlaceGridItemsForFragmentation(
-      const GridSizingTree& sizing_tree,
+      const GridItems& grid_items,
+      const GridLayoutSubtree& layout_subtree,
       const Vector<EBreakBetween>& row_break_between,
       Vector<GridItemPlacementData>* grid_item_placement_data,
       Vector<LayoutUnit>* row_offset_adjustments,
@@ -265,9 +263,21 @@ class CORE_EXPORT GridLayoutAlgorithm
                         const GridLayoutData& layout_data,
                         HeapVector<LayoutUnit>& intersection_points,
                         GapFragmentData::GapGeometry* gap_geometry) const;
+  // TODO(samomekarajr): Remove this method when done with the new
+  // implementation.
   void PopulateGapIntersectionPoints(
       const HeapVector<LayoutUnit>& intersection_points,
       GapFragmentData::GapBoundaries& gap_boundaries) const;
+
+  void BuildGapIntersectionPoints(
+      const GridLayoutData& layout_data,
+      GapFragmentData::GapGeometry* gap_geometry) const;
+
+  // Updates the blocked status of the relevant gap intersection
+  // points in `gap_geometry` based on the span of `grid_item`.
+  void MarkBlockedStatusForGapIntersections(
+      const GridItemData& grid_item,
+      GapFragmentData::GapGeometry* gap_geometry) const;
 
   // Computes the static position, grid area and its offset of out of flow
   // elements in the grid (as provided by `oof_children`).
@@ -275,8 +285,8 @@ class CORE_EXPORT GridLayoutAlgorithm
                            const LayoutUnit block_size,
                            HeapVector<Member<LayoutBox>>& oof_children);
 
-  // Set reading flow nodes so they can be accessed by LayoutBox.
-  void SetReadingFlowNodes(const GridSizingTree& sizing_tree);
+  // Set reading flow nodes so they can be accessed by `LayoutBox`.
+  void SetReadingFlowNodes(const GridItems& grid_items);
 
   LogicalSize grid_available_size_;
   LogicalSize grid_min_available_size_;

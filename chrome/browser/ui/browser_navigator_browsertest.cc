@@ -38,6 +38,7 @@
 #include "chrome/common/url_constants.h"
 #include "chrome/test/base/ui_test_utils.h"
 #include "components/captive_portal/core/buildflags.h"
+#include "components/content_settings/core/common/features.h"
 #include "components/omnibox/browser/omnibox_edit_model.h"
 #include "components/omnibox/browser/omnibox_view.h"
 #include "components/omnibox/browser/tab_matcher.h"
@@ -56,6 +57,7 @@
 #include "content/public/test/test_frame_navigation_observer.h"
 #include "content/public/test/test_navigation_observer.h"
 #include "content/public/test/test_utils.h"
+#include "net/base/features.h"
 #include "net/dns/mock_host_resolver.h"
 #include "net/test/embedded_test_server/embedded_test_server.h"
 #include "net/test/embedded_test_server/request_handler_util.h"
@@ -137,6 +139,7 @@ BrowserNavigatorTest::BrowserNavigatorTest() {
       {
           features::kFileSystemAccessPersistentPermissions,
           blink::features::kPartitionedPopins,
+          content_settings::features::kTrackingProtection3pcd,
       },
       {});
 }
@@ -1851,19 +1854,13 @@ IN_PROC_BROWSER_TEST_F(BrowserNavigatorTest, ViewSourceUrlMatching) {
 enum class SplitCacheTestCase {
   kEnabledTripleKeyed,
   kEnabledTriplePlusCrossSiteMainFrameNavBool,
-  kEnabledTriplePlusMainFrameNavInitiator,
-  kEnabledTriplePlusNavInitiator
 };
 const struct {
   const SplitCacheTestCase test_case;
   base::test::FeatureRef feature;
 } kTestCaseToFeatureMapping[] = {
     {SplitCacheTestCase::kEnabledTriplePlusCrossSiteMainFrameNavBool,
-     net::features::kSplitCacheByCrossSiteMainFrameNavigationBoolean},
-    {SplitCacheTestCase::kEnabledTriplePlusMainFrameNavInitiator,
-     net::features::kSplitCacheByMainFrameNavigationInitiator},
-    {SplitCacheTestCase::kEnabledTriplePlusNavInitiator,
-     net::features::kSplitCacheByNavigationInitiator}};
+     net::features::kSplitCacheByCrossSiteMainFrameNavigationBoolean}};
 
 class BrowserNavigatorSplitHttpCacheTest
     : public BrowserNavigatorTest,
@@ -1887,19 +1884,13 @@ INSTANTIATE_TEST_SUITE_P(
     BrowserNavigatorSplitHttpCacheTest,
     testing::ValuesIn(
         {SplitCacheTestCase::kEnabledTripleKeyed,
-         SplitCacheTestCase::kEnabledTriplePlusCrossSiteMainFrameNavBool,
-         SplitCacheTestCase::kEnabledTriplePlusMainFrameNavInitiator,
-         SplitCacheTestCase::kEnabledTriplePlusNavInitiator}),
+         SplitCacheTestCase::kEnabledTriplePlusCrossSiteMainFrameNavBool}),
     [](const testing::TestParamInfo<SplitCacheTestCase>& info) {
       switch (info.param) {
         case (SplitCacheTestCase::kEnabledTripleKeyed):
           return "TripleKeyed";
         case (SplitCacheTestCase::kEnabledTriplePlusCrossSiteMainFrameNavBool):
           return "TriplePlusCrossSiteMainFrameNavigationBool";
-        case (SplitCacheTestCase::kEnabledTriplePlusMainFrameNavInitiator):
-          return "TriplePlusMainFrameNavigationInitiator";
-        case (SplitCacheTestCase::kEnabledTriplePlusNavInitiator):
-          return "TriplePlusNavigationInitiator";
       }
     });
 
@@ -2538,6 +2529,7 @@ class BrowserNavigatorPopinPolicyBypassTest
         {blink::features::kPartitionedPopins, true},
         {features::kPartitionedPopinsHeaderPolicyBypass,
          PartitionedPopinsHeaderPolicyBypass()},
+        {content_settings::features::kTrackingProtection3pcd, true},
     });
   }
   bool PartitionedPopinsHeaderPolicyBypass() const { return GetParam(); }
@@ -2624,8 +2616,8 @@ IN_PROC_BROWSER_TEST_F(BrowserNavigatorTest, PopinHttpRedirectNavigation) {
                 .ExtractString());
 }
 
-// Verify that a popin can access cookies when opened from a cross-site context.
-// This scenario was crashing before crrev.com/c/5845330
+// Verify that a popin cannot access third-party cookies when opened from a
+// cross-site context. This scenario was crashing before crrev.com/c/5845330
 IN_PROC_BROWSER_TEST_F(BrowserNavigatorTest,
                        PopinFromCrossSiteContextAccessCookies) {
   // Setup server.
@@ -2644,9 +2636,9 @@ IN_PROC_BROWSER_TEST_F(BrowserNavigatorTest,
 
   // Set a cookie for a.test.
   const GURL url_a_root = embedded_https_test_server().GetURL("a.test", "/");
-  ASSERT_TRUE(
-      content::SetCookie(tab_web_contents->GetBrowserContext(), url_a_root,
-                         "site_a=cookie;Partitioned;SameSite=None;Secure"));
+  ASSERT_TRUE(content::SetCookie(tab_web_contents->GetBrowserContext(),
+                                 url_a_root,
+                                 "site_a=cookie;SameSite=None;Secure"));
 
   // Navigate the iframe to b.test and set a cookie.
   const GURL url_b =
@@ -2670,9 +2662,8 @@ IN_PROC_BROWSER_TEST_F(BrowserNavigatorTest,
   EXPECT_TRUE(popin_web_contents);
   nav_observer.Wait();
 
-  // Read cookies from the popin. Only site A's cookie should be accessible.
-  EXPECT_EQ(content::EvalJs(popin_web_contents, "document.cookie"),
-            "site_a=cookie");
+  // Read cookies from the popin. No cookies should be visible.
+  EXPECT_EQ(content::EvalJs(popin_web_contents, "document.cookie"), "");
 }
 
 #if !BUILDFLAG(IS_CHROMEOS)

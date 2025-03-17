@@ -2166,6 +2166,26 @@ TEST_F(AutocompleteControllerTest,
   EXPECT_FALSE(controller_.ShouldRunProvider(aggregator_provider.get()));
   EXPECT_TRUE(controller_.ShouldRunProvider(document_provider.get()));
 
+  // If the feature param `disable_drive` is false, then the document provider
+  // should run regardless of whether the aggregator provider is ran.
+  omnibox_feature_configs::ScopedConfigForTesting<
+      omnibox_feature_configs::SearchAggregatorProvider>
+      scoped_config;
+  scoped_config.Get().disable_drive = false;
+  pref_service()->SetManagedPref(
+      EnterpriseSearchManager::
+          kEnterpriseSearchAggregatorSettingsRequireShortcutPrefName,
+      base::Value(false));
+  EXPECT_TRUE(controller_.ShouldRunProvider(aggregator_provider.get()));
+  EXPECT_TRUE(controller_.ShouldRunProvider(document_provider.get()));
+
+  pref_service()->SetManagedPref(
+      EnterpriseSearchManager::
+          kEnterpriseSearchAggregatorSettingsRequireShortcutPrefName,
+      base::Value(true));
+  EXPECT_FALSE(controller_.ShouldRunProvider(aggregator_provider.get()));
+  EXPECT_TRUE(controller_.ShouldRunProvider(document_provider.get()));
+
   // Enter keyword mode.
   controller_.input_.set_keyword_mode_entry_method(
       metrics::OmniboxEventProto_KeywordModeEntryMethod_TAB);
@@ -2210,29 +2230,11 @@ TEST_F(AutocompleteControllerTest,
 
 #if BUILDFLAG(IS_ANDROID)
 TEST_F(AutocompleteControllerTest, ShouldRunProvider_AndroidHubSearch) {
-  // For Lens searchboxes, run search provider only.
+  // Include bookmarks and history as default providers for hub search.
   std::set<AutocompleteProvider::Type> expected_provider_types = {
-      AutocompleteProvider::TYPE_SEARCH, AutocompleteProvider::TYPE_OPEN_TAB};
-
-  controller_.input_ =
-      AutocompleteInput(u"a", 1u, metrics::OmniboxEventProto::ANDROID_HUB,
-                        TestSchemeClassifier());
-  for (auto& provider : controller_.providers()) {
-    EXPECT_EQ(controller_.ShouldRunProvider(provider.get()),
-              expected_provider_types.contains(provider->type()))
-        << "Provider Type: "
-        << AutocompleteProvider::TypeToString(provider->type());
-  }
-
-  base::test::ScopedFeatureList scoped_feature_list;
-  scoped_feature_list.InitAndEnableFeatureWithParameters(
-      omnibox::kAndroidHubSearch, {{"enable_bookmark_provider", "true"},
-                                   {"enable_history_provider", "true"}});
-
-  expected_provider_types = {AutocompleteProvider::TYPE_SEARCH,
-                             AutocompleteProvider::TYPE_OPEN_TAB,
-                             AutocompleteProvider::TYPE_BOOKMARK,
-                             AutocompleteProvider::TYPE_HISTORY_QUICK};
+      AutocompleteProvider::TYPE_SEARCH, AutocompleteProvider::TYPE_OPEN_TAB,
+      AutocompleteProvider::TYPE_BOOKMARK,
+      AutocompleteProvider::TYPE_HISTORY_QUICK};
 
   controller_.input_ =
       AutocompleteInput(u"a", 1u, metrics::OmniboxEventProto::ANDROID_HUB,

@@ -62,10 +62,10 @@
 
 namespace {
 
-static constexpr std::array<PageActionIconType, 3> kMigratedPageActionTypes = {
-    PageActionIconType::kLensOverlay,
-    PageActionIconType::kMemorySaver,
-    PageActionIconType::kTranslate,
+static constexpr std::array<PageActionIconType, 5> kMigratedPageActionTypes = {
+    PageActionIconType::kLensOverlay, PageActionIconType::kMemorySaver,
+    PageActionIconType::kTranslate,   PageActionIconType::kIntentPicker,
+    PageActionIconType::kZoom,
 };
 
 void RecordCTRMetrics(const char* name, PageActionCTREvent event) {

@@ -8,6 +8,7 @@
 <translation id="1010200102790553230">စာမျက်နှာကို နောက်မှဖွင့်ရန်</translation>
 <translation id="1010225406377140704">လင့်ခ်အသစ်တောင်းဆိုရန်အတွက် ပို့သူထံ ဆက်သွယ်ပါ</translation>
 <translation id="1011206368273183593">ဖိုင်များကို ပြင်ဆင်နေသည်</translation>
+<translation id="1012264210825687872">သင့်မှာယူမှုကို စစ်ပြီးပါက <ph name="BNPL_ISSUER_NAME" /> အကောင့်သို့ လက်မှတ်ထိုးဝင်ပါ (သို့) အကောင့်ဖွင့်ပါ။ ဤအကောင့်ကို Google Pay နှင့် အလိုအလျောက် လင့်ခ်ချိတ်ပါမည်။</translation>
 <translation id="1014509239502131234">ရလဒ် နောက်ပြန်နေသည်</translation>
 <translation id="1015730422737071372">နောက်ထပ်အသေးစိတ်အချက်အလက်များ ပေးပါ</translation>
 <translation id="1019413721762100891">ပိတ်</translation>
@@ -137,6 +138,7 @@
 <translation id="1230244617745022071"><ph name="SOURCE" /> (အလိုအလျောက် သိရှိသည်)</translation>
 <translation id="1232569758102978740">ခေါင်းစဉ်မဲ့</translation>
 <translation id="1236081509407217141">VR ကို ခွင့်ပြုမလား။</translation>
+<translation id="1236689197410206751">AfterPay</translation>
 <translation id="1240347957665416060">သင့်စက်၏ အမည်</translation>
 <translation id="124116460088058876">နောက်ထပ် ဘာသာစကားများ</translation>
 <translation id="1243027604378859286">စာရေးသူ-</translation>
@@ -251,6 +253,7 @@
 <translation id="1419305130220238697">Chrome တွင် သင်ဒေါင်းလုဒ်လုပ်ထားသည့် ဖိုင်များစီမံရန်အတွက် ‘Chrome တွင် ဒေါင်းလုဒ်များစီမံရန်’ ခလုတ်ကို နှိပ်နိုင်သည်</translation>
 <translation id="1420345875188552368">သိမ်းထားသော အလိုအလျောက်ငွေပေးချေနည်းလမ်းကို ဤပေးချေမှုအတွက် သုံးနိုင်သည်။ Chrome တွင် eWallet များ ပိတ်ရန် <ph name="BEGIN_LINK1" />ငွေပေးချေမှု ဆက်တင်များ<ph name="END_LINK1" /> သို့သွားပါ</translation>
 <translation id="1420920093772172268">တွဲချိတ်ခြင်းအား ခွင့်ပြုရန် <ph name="TURN_ON_BLUETOOTH_LINK" /></translation>
+<translation id="1421484961346698724">ဖျက်ထားသည့် အကောင့်</translation>
 <translation id="14222610277930434">မကြာခဏ သင်ဝင်ကြည့်သည်များ</translation>
 <translation id="1422930527989633628">အနီးရှိ ဘလူးတုသ်သုံးစက်များ ရှာဖွေရန် ခွင့်တောင်းနိုင်သည်</translation>
 <translation id="1426410128494586442">Yes</translation>
@@ -627,6 +630,7 @@
 <translation id="2082238445998314030">အဖြေ <ph name="RESULT_NUMBER" /> / <ph name="TOTAL_RESULTS" /></translation>
 <translation id="2083256696566019397">ဝင်ကြည့်တိုင်း ခွင့်ပြုရန်</translation>
 <translation id="2085876078937250610">သိမ်းရန်…</translation>
+<translation id="2090451897496479509">ပိုမိုသိရှိရန် ဝန်ဆောင်မှုပေးသူကို ဆက်သွယ်နိုင်သည်</translation>
 <translation id="2091887806945687916">အသံ</translation>
 <translation id="2093982008204312032">Google Chrome က စကားဝှက်ဖြည့်ရန်အတွက် Windows Hello ကိုပိတ်လိုသည်။</translation>
 <translation id="2094505752054353250">ဒိုမိန်း မတိုက်ဆိုင်မှု</translation>
@@ -661,6 +665,7 @@
 <translation id="2145193671493396738">စီးပွားရေးသတင်း</translation>
 <translation id="214556005048008348">ငွေပေးချေမှုကို ပယ်ဖျက်ရန်</translation>
 <translation id="2147117373852943630">ဂီတတူရိယာ</translation>
+<translation id="2147254250314124496"><ph name="EMBEDDED_URL" /> က ၎င်းတို့ သိမ်းထားသော သင့်အချက်အလက်ကို သုံးလိုသည်</translation>
 <translation id="2148613324460538318">ကတ်ထည့်ရန်…</translation>
 <translation id="2148716181193084225">ယနေ့</translation>
 <translation id="2149968176347646218">ချိတ်ဆက်မှုသည် မလုံခြုံပါ</translation>
@@ -692,6 +697,7 @@
 <translation id="2187317261103489799">ရှာကြည့်ရန် (မူရင်း)</translation>
 <translation id="2188375229972301266">အောက်ခြေတွင် အများအပြားဖောက်ရန်</translation>
 <translation id="2194856509914051091">စဉ်းစားရန် အချက်များ</translation>
+<translation id="2198071643181968308"><ph name="BNPL_ISSUER_NAME" /> အကြောင်း ပိုမိုလေ့လာရန်</translation>
 <translation id="2200678913752027654">လက်မအောက်စိုက် ခလုတ်၊ ဤအကြံပြုချက်ကို သင်မကြိုက်သည့် အကြောင်းရင်းအပေါ် အသေးစိတ်တုံ့ပြန်ချက် ပေးပို့ရန်အတွက် ဖောင်ဖွင့်ရန် Enter ခလုတ်နှိပ်ပါ</translation>
 <translation id="2202627062836089804">သင့်ကတ်၏ ကျောဘက်ခြမ်း</translation>
 <translation id="2204482073374652408">အပ်ဒိတ်လုပ်ခြင်း ပြီးသွားပြီ။</translation>
@@ -838,6 +844,7 @@
 <translation id="2451607499823206582">စောင့်ကြည့်ခြင်း</translation>
 <translation id="2452098632681057184">ဂေဟဗေဒ၊ ပတ်ဝန်းကျင်</translation>
 <translation id="2452837234288608067">၎င်းကို လုပ်ဆောင်၍မရပါ။ ထပ်စမ်းကြည့်ပါ။</translation>
+<translation id="2453045048779611513">သိမ်းနိုင်သည်များကို သင့်အဖွဲ့အစည်းက ကန့်သတ်ထားသည်</translation>
 <translation id="2456755709261364512">သင့်ဘက်ထရီကို <ph name="REQUIRED_BATTERY_PRECENT" />% အထက် အားသွင်းထားရမည်</translation>
 <translation id="2461385121573678775">Chrome Enterprise Core သည် cloud မှ ဘရောင်ဇာမူဝါဒများကို စီစဉ်သတ်မှတ်ရန်အတွက် ဗဟိုပြုတူးလ်ကို ပေးသည်</translation>
 <translation id="2461822463642141190">လက်ရှိ</translation>
@@ -1091,6 +1098,7 @@
 <translation id="2942492342931589800">ပေါ့ပေါ့ပါးပါး</translation>
 <translation id="2942515540157583425">IT နှင့် နည်းပညာအလုပ်</translation>
 <translation id="2943895734390379394">အပ်လုဒ်လုပ်ချိန်-</translation>
+<translation id="2947281105969315778">တဘ်အုပ်စုများကို မျှဝေရန် (သို့) ၎င်းတို့တွင် ပါဝင်ရန် Chrome သို့ လက်မှတ်ထိုးဝင်နိုင်ရမည်</translation>
 <translation id="2948083400971632585">ကြိုတင်ပြင်ဆင်ခြင်း စာမျက်နှာမှ ချိတ်ဆက်မှုတစ်ခုအတွက် ပရောက်စီပြုပြင်ချက်များအား ပိတ်နိုင်သည်။</translation>
 <translation id="2949183777371959169">စက်ကို ‘Chrome ဘရောင်ဇာ Cloud စီမံခန့်ခွဲရေး’ ဖြင့် စာရင်းသွင်းမထားသဖြင့် လျစ်လျူရှုထားသည်။</translation>
 <translation id="2951588413176968965">ကျွန်ုပ်၏စာတိုက်ပုံး</translation>
@@ -1306,6 +1314,7 @@
 <translation id="33073482541490531">သင်သုံးလိုက်သောစကားဝှက်ကို ဒေတာကျိုးပေါက်မှုတွင် တွေ့ရှိထားသည်။ ‘စကားဝှက်မန်နေဂျာ’ က ဤစကားဝှက်ကို ယခုပြောင်းရန် အကြံပြုပါသည်။</translation>
 <translation id="3307649904964670439">သင့်ဘရောင်ဇာ၏အမြင်ကို စိတ်ကြိုက်ပြုလုပ်ရန်အတွက် ‘Chrome စိတ်ကြိုက်လုပ်ရန်’ ခလုတ်ကို နှိပ်နိုင်သည်</translation>
 <translation id="3308006649705061278">အဖွဲ့အစည်းဆိုင်ရာ ယူနစ် (OU)</translation>
+<translation id="3317077846337994567">အချိန်နှင့်အမျှ ပေးချေခြင်းကို လောလောဆယ် မရနိုင်ပါ။ နောက်မှ ထပ်စမ်းကြည့်ပါ။</translation>
 <translation id="3318016344440038475">ဟာသ TV ရှိုး</translation>
 <translation id="3324687287337751929">၄ x ၆ လက်မ</translation>
 <translation id="3324983252691184275">ကြက်သွေး</translation>
@@ -1433,6 +1442,7 @@
 <translation id="3536227077203206203">ဤတစ်ကြိမ်အတွက် ခွင့်ပြုထားသည်</translation>
 <translation id="3537165859691846083">လက်တာဆိုဒ်လွန်</translation>
 <translation id="353816159217417898">မျက်နှာပြင် (စာမျက်နှာ)</translation>
+<translation id="3541016556608204104">Chrome Enterprise Connectors အကြောင်း ပိုမိုသိရှိရန်</translation>
 <translation id="3542628208405253498">ကတ်၏ပုံ</translation>
 <translation id="3542768452570884558">လင့်ခ်ကို ဝင်ဒိုးအသစ်တွင် ဖွင့်ရန်</translation>
 <translation id="3543935938072367282">အော်တိုဖြည့်ဖြင့် မြန်ဆန်စွာ ငွေရှင်းခြင်း</translation>
@@ -1796,6 +1806,7 @@
 <translation id="415440494507469262">နှိုင်းယှဉ်ပြဇယားတွင် တဘ်ထည့်ရန်</translation>
 <translation id="4159784952369912983">ခရမ်း</translation>
 <translation id="4165422751765527461">တဘ်အသစ်တွင် ‘ကူညီရေးဌာန ဆောင်းပါး’ ကို ဖွင့်ပေးသည်</translation>
+<translation id="4165584779486830267">Affirm (သို့) Zip သုံးပြီး ငွေခွဲ၍ပေးချေနိုင်ပါပြီ။</translation>
 <translation id="4165986682804962316">ဝက်ဆိုက် ဆက်တင်များ</translation>
 <translation id="4169535189173047238">ခွင့်မပြုပါ</translation>
 <translation id="4171400957073367226">ဆိုးရွားသည့် အတည်ပြု လက်မှတ်</translation>
@@ -1947,6 +1958,7 @@
 <translation id="4378154925671717803">ဖုန်း</translation>
 <translation id="4384395682990721132">A4x3</translation>
 <translation id="4387692837058041921">Microsoft OneDrive သို့ ဖိုင်အပ်လုဒ်လုပ်ခြင်းကို ခဏရပ်ထားသည်</translation>
+<translation id="4389931020843542579">တဘ်အုပ်စု ဖွင့်နေသည်</translation>
 <translation id="4390472908992056574">အစွန်အနား</translation>
 <translation id="4395550503472021297">ဤမူဝါဒသည် အောက်ပါမူဝါဒများ၏ မူရင်းလုပ်ဆောင်ပုံကို ထိန်းချုပ်နေသည်- <ph name="POLICIES" /></translation>
 <translation id="4397978002248035985">သင့်ဘဏ်၏ဝဘ်ဆိုက်တွင် အတည်ပြုရန်ပေါ့ပ်အပ်ကို ဖွင့်သည်</translation>
@@ -2316,6 +2328,7 @@
 <translation id="5097501891273180634">A2</translation>
 <translation id="5106405387002409393">Chrome သည် သင့်စက်၏ <ph name="PERMISSION" /> သုံးခွင့်လိုအပ်သည်</translation>
 <translation id="510644072453496781">ကတ်ထူ (အဆုံး)</translation>
+<translation id="5106648964679263509"><ph name="BNPL_ISSUER_NAME" /> အတွက် ပကတိအသွင်ကတ်ကို ဖြည့်ထားသည်</translation>
 <translation id="5108881358339761672">ဝဘ်ဆိုက်သည် မလုံခြုံပါ</translation>
 <translation id="5109892411553231226">ငွေပေးချေနည်းလမ်းများကို စီမံရန်</translation>
 <translation id="5112422516732747637">A5</translation>
@@ -2511,6 +2524,7 @@
             <ph name="LIST_ITEM" />ဖောင်များတွင်ထည့်ထားသော အချက်အလက်များ
           <ph name="END_LIST" /></translation>
 <translation id="5443468954631487277">ပြောင်းပြန်အစဉ်ဖြင့် အပေါ်လှန်ထားရန်</translation>
+<translation id="5445340838622821110">ငွေခွဲ၍ပေးချေသောအခါ တစ်ကြိမ်သုံး ပကတိအသွင်ကတ် နံပါတ်ကို ဖြည့်သည်။ ဤနံပါတ်သည် ဤဝယ်ယူမှုအတွက်သာဖြစ်သည်။ <ph name="IDS_AUTOFILL_BNPL_FILLED_CARD_INFORMATION_BUBBLE_LEARN_MORE_LINK_LABEL" /></translation>
 <translation id="5447235695608032700">၎င်းတို့သိမ်းထားသော သင့်အကြောင်း အချက်အလက်များကို <ph name="SITE" /> အား သုံးခွင့်ပြုရန်</translation>
 <translation id="5452270690849572955">ဤ <ph name="HOST_NAME" /> စာမျက်နှာကို မတွေ့ပါ</translation>
 <translation id="5452923259299906094">eWallet နှင့် Pix တို့ဖြင့် ငွေပေးချေပါ</translation>
@@ -2758,6 +2772,7 @@
 <translation id="5910140988253729859">အော်တိုဖြည့်ကို နောက်ပြန်ရန်</translation>
 <translation id="5911020115933784199">အစီအစဉ်နှင့် ဖော်ပြချက်</translation>
 <translation id="5911110632211230665">ဖွင့်ခွင့် ပိတ်ထားသည်</translation>
+<translation id="5914465277418006379"><ph name="MEMBER_FIRST_NAME" /> က ဤတဘ်ကို ထည့်လိုက်သည်</translation>
 <translation id="5915189366813702112">လိုက်လျောညီထွေ အလုပ်စီစဉ်ပေးမှု</translation>
 <translation id="59174027418879706">ဖွင့်ထားသည်</translation>
 <translation id="5918373444239520146">ဂက်ဂျက်နှင့် သယ်ဆောင်ရလွယ်ကူသော အီလက်ထရွန်းနစ်ပစ္စည်း</translation>
@@ -2838,6 +2853,7 @@
 <translation id="604124094241169006">အလိုအလျောက်</translation>
 <translation id="6041777658117377052">အခန်း အပူချိန်</translation>
 <translation id="6042308850641462728">နောက်ထပ်</translation>
+<translation id="6043357981274314628">ပြီးပါပြီ။</translation>
 <translation id="6044573915096792553">အရွယ်အစား ၁၂</translation>
 <translation id="6045164183059402045">သတ်မှတ်ချက် နမူနာ ပုံစံ</translation>
 <translation id="6047927260846328439">ဤအရာသည် သင့်ကို ဆော့ဖ်ဝဲထည့်သွင်းစေရန် သို့မဟုတ် ကိုယ်ရေးကိုယ်တာ အချက်အလက်များ ဖော်ပြစေရန် လှည့်ဖြားနိုင်ပါသည်။ <ph name="BEGIN_LINK" />မည်သို့ပင်ဖြစ်စေ ပြသရန်<ph name="END_LINK" /></translation>
@@ -2861,7 +2877,6 @@
 <translation id="6062937464449575061">ဈေးနှုန်းစောင့်ကြည့်ခြင်း ရပ်ရန်</translation>
 <translation id="6063415549109819824">အိမ်ဝယ်ယူမှုဆိုင်ရာ ငွေထောက်ပံ့ခြင်း</translation>
 <translation id="6070432475334343308"><ph name="CLOUD_PROVIDER" /> တွင် ဖိုင်တစ်ခုနှင့်အထက်ကို <ph name="FOLDER_NAME" /> သို့ အပ်လုဒ်လုပ်၍ မရလိုက်ပါ</translation>
-<translation id="6080696365213338172">သင်သည် စီမံအုပ်ချုပ်သူက ပေးခဲ့သည့် လက်မှတ်ကို သုံးပြီး အကြောင်းအရာကို ရယူသုံးခဲ့သည်။ သင်က <ph name="DOMAIN" />အား ပေးခဲ့သည့် ဒေတာကို သင်၏ စီမံအုပ်ချုပ်သူက ကြားဖြတ်ယူနိုင်ခဲ့ပါသည်။</translation>
 <translation id="6085149458302186532">လေဘယ်လ် (အရောင်)</translation>
 <translation id="6087312102907839798">ဆက်စပ်သော ရှာဖွေမှုများ</translation>
 <translation id="6089505343295765444">သင့် Chrome မှတ်တမ်းမှ ဖျက်လိုက်သော တဘ်များကို သင်၏နှိုင်းယှဉ်မှုဇယားများတွင် ဆက်ပြပါမည်</translation>
@@ -3002,11 +3017,11 @@
 <translation id="6322182122604171028">Windows Hello ကို အသုံးပြု၍ မရပါ</translation>
 <translation id="6326947323444967009">Chrome ကို iOS ဆက်တင်များတွင် စနစ်၏ မူရင်းဘရောင်ဇာအဖြစ် သတ်မှတ်ရန်</translation>
 <translation id="6328639280570009161">ကွန်ရက် ခန့်မှန်းမှုကို ပိတ်ထားရန် ကြိုးစားပါ</translation>
-<translation id="6328784461820205019">"သင်၏ချိတ်ဆက်မှုသည် သီးသန့်ဖြစ်မနေပါ" သို့မဟုတ် "&lt;span class="error-code"&gt;NET::ERR_CERT_AUTHORITY_INVALID&lt;/span&gt;" သို့မဟုတ် "&lt;span class="error-code"&gt;ERR_CERT_COMMON_NAME_INVALID&lt;/span&gt;" သို့မဟုတ် "&lt;span class="error-code"&gt;NET::ERR_CERT_WEAK_SIGNATURE_ALGORITHM&lt;/span&gt;" သို့မဟုတ် "&lt;span class="error-code"&gt;ERR_CERT_SYMANTEC_LEGACY&lt;/span&gt;" သို့မဟုတ် "SSL အသိအမှတ်ပြုလက်မှတ် အမှားအယွင်း"</translation>
 <translation id="6335029926534404762">အားကစား ဖိနပ်</translation>
 <translation id="6337133576188860026"><ph name="SIZE" /> အောက် နေရာလွတ်ပြုလုပ်ပါ။ အချို့ဝဘ်ဆိုက်များကို နောက်တစ်ကြိမ်ဖွင့်သည့်အခါ ပိုမိုနှေးကွေးစွာ ဖွင့်ပါလိမ့်မည်။</translation>
 <translation id="6337534724793800597">မူဝါဒများကို အမည်များဖြင့် စစ်ထုတ်ရန်</translation>
 <translation id="633770708279464947"><ph name="SECURE_DNS_SALT" /> တန်ဖိုးသည် မမှန်ကန်သဖြင့် သုံးမည်မဟုတ်ပါ။</translation>
+<translation id="6338645927051849741">စကားဝှက် • Google Password Manager</translation>
 <translation id="6340739886198108203">လျှို့ဝှက်အကြောင်းအရာများ မြင်ရပါက ဖန်သားပြင်ဓာတ်ပုံရိုက်ကူးခြင်း (သို့) မှတ်တမ်းတင်ခြင်းတို့ကို စီမံခန့်ခွဲသူမူဝါဒက အကြံပြုမထားပါ-</translation>
 <translation id="6341434961864773665">{0,plural, =1{ဤဖိုင်အား <ph name="DESTINATION_NAME" /> သို့ အပ်လုဒ်လုပ်ခြင်းကို စီမံခန့်ခွဲသူ မူဝါဒက အကြံမပြုပါ}other{ဤဖိုင်များအား <ph name="DESTINATION_NAME" /> သို့ အပ်လုဒ်လုပ်ခြင်းကို စီမံခန့်ခွဲသူ မူဝါဒက အကြံမပြုပါ}}</translation>
 <translation id="6342069812937806050">ယခုပင်</translation>
@@ -3016,6 +3031,7 @@
 <translation id="6351658970066645919">ဖွင့်ကြည့်ထားသည့်မှတ်တမ်းဒေတာ ဖျက်ရန်</translation>
 <translation id="6353505687280762741">{COUNT,plural, =0{မရှိ}=1{စကားဝှက် ၁ ခု (<ph name="DOMAIN_LIST" /> အတွက်၊ စင့်ခ်လုပ်ထားသည်)}=2{စကားဝှက် ၂ ခု (<ph name="DOMAIN_LIST" /> အတွက်၊ စင့်ခ်လုပ်ထားသည်)}other{စကားဝှက် # ခု (<ph name="DOMAIN_LIST" /> အတွက်၊ စင့်ခ်လုပ်ထားသည်)}}</translation>
 <translation id="6355392890578844978">ဤဘရောင်ဇာကို ကုမ္ပဏီ သို့မဟုတ် အခြားအဖွဲ့အစည်းက စီမံခန့်ခွဲမထားပါ။ ဤစက်ပေါ်ရှိ လုပ်ဆောင်ချက်ကို Chromium ပြင်ပမှ စီမံခန့်ခွဲထားခြင်း ဖြစ်နိုင်သည်။ <ph name="BEGIN_LINK" />ပိုမိုလေ့လာရန်<ph name="END_LINK" /></translation>
+<translation id="6357546827188504216">“<ph name="GROUP_TITLE_1" />” နှင့် “<ph name="GROUP_TITLE_2" />” တဘ်အုပ်စုများကို မရတော့ပါ</translation>
 <translation id="6358088212770985041">ငွေပေးချေနည်းလမ်းများကို ပြင်ပါ</translation>
 <translation id="6358450015545214790">ဒါတွေက ဘာကို ဆိုလိုတာလဲ?</translation>
 <translation id="6360213755783740931">‘မဲလ်ဝဲ’ အကာအကွယ်အကြောင်း ပိုမိုလေ့လာရန်</translation>
@@ -3329,6 +3345,7 @@
 <translation id="6917795328362592458">သင်သုံးလိုက်သောစကားဝှက်ကို ဒေတာကျိုးပေါက်မှုတွင် တွေ့ရှိထားသည်။ သင့်အကောင့်များကို လုံခြုံစေရန် ‘စကားဝှက်မန်နေဂျာ’ က သင်သိမ်းထားသော စကားဝှက်များကို စစ်ဆေးရန် အကြံပြုပါသည်။</translation>
 <translation id="6917873303492266709">တဘ်အုပ်စုများကို မျှဝေရန်၊ ၎င်းတို့တွင် ပါဝင်ရန်နှင့် ပူးတွဲလုပ်ကိုင်ရန် ဆက်တင်များကိုဖွင့်ပြီး ‘Chrome သို့ လက်မှတ်ထိုးဝင်ခွင့်ပြုရန်’ ကိုဖွင့်ပါ</translation>
 <translation id="6921197121276419421">ဝဘ်အက်ပ်များ ထည့်သွင်းရန် ခွင့်ပြုလိုက်သည်</translation>
+<translation id="69238565902785824">သင့်အကောင့်ကို လင့်ခ်ချိတ်ထားခြင်းဖြင့် <ph name="BNPL_ISSUER_NAME" /> သုံးပြီး အမြန်ပေးချေနိုင်သည်။ <ph name="IDS_AUTOFILL_BNPL_TOS_LINK_TEXT_WALLET_LINK_TEXT" /> သို့ သွားခြင်းဖြင့်လည်း လင့်ခ်ဖြုတ်နိုင်သည်</translation>
 <translation id="6924013822850225188">ငွေရှင်းသည့်အခါ သင့်ကတ်အကျိုးခံစားခွင့်များကို မြင်ရခြင်း ရှိ၊ မရှိ ရွေးနိုင်သည် (ဘဏ်စည်းမျဉ်းများ ရှိသည်)</translation>
 <translation id="6925267999184670015">မြောက်အမေရိကန် B+</translation>
 <translation id="6926216138694948720">ကိုယ်ပေါ်အလှဆင်ခြင်း အနုပညာ</translation>
@@ -3394,6 +3411,7 @@
 <translation id="701757816833614688">သုခုမအနုပညာနှင့် ဒီဇိုင်းပညာရေး</translation>
 <translation id="702275896380648118">ဤဝဘ်ဆိုက်က သင်နှစ်သက်နိုင်သည့်အရာများအား ဆုံးဖြတ်ပြီး အခြားဝဘ်ဆိုက်များကို ကြော်ငြာများ အကြံပြုသည်။ ပိုမိုသက်ဆိုင်သော ကြော်ငြာများပြရန် ဤဝဘ်ဆိုက်က သင့်ကြော်ငြာအကြောင်းအရာများကိုလည်း Chrome ထံမှ ရယူသည်။</translation>
 <translation id="7023162328967545559">စီမံခန့်ခွဲသူ သတိပေးချက်</translation>
+<translation id="7023765275461720661">အကောင့်လင့်ခ်ချိတ်ပြီး <ph name="BNPL_ISSUER_NAME" /> ဖြင့် ပေးမလား။</translation>
 <translation id="7029809446516969842">စကားဝှက်များ</translation>
 <translation id="7030164307377592766">ငွေပေးချေနည်းလမ်းများ ဖြည့်သည့် ဆက်တင်များကို ပြင်ဆင်ရန်</translation>
 <translation id="7031646650991750659">မည်သည့် Google Play အက်ပ်များကို သင်ထည့်သွင်းထားပါသလဲ</translation>
@@ -3616,6 +3634,7 @@
 <translation id="741204030948306876">ပါဝင်ပါမည်</translation>
 <translation id="7416351320495623771">စကားဝှက်များ စီမံရန်…</translation>
 <translation id="7416898721136759658">ထောက်ပံ့ငွေ၊ ပညာသင်ထောက်ပံ့ကြေး၊ ငွေကြေးအကူအညီ</translation>
+<translation id="741772962178517671">Affirm</translation>
 <translation id="7418620734632363981">ပရိုဂရမ်ရေးခြင်း</translation>
 <translation id="7419091773564635591">ကွန်ပျူတာ၊ အီလက်ထရောနစ်ပစ္စည်း</translation>
 <translation id="7419106976560586862">ပရိုဖိုင် လမ်းကြောင်း</translation>
@@ -3662,6 +3681,7 @@
 <translation id="7485085230273446323">စီးပွားရေး၊ စက်မှုလုပ်ငန်း</translation>
 <translation id="7485870689360869515">ဒေတာ မတွေ့ရပါ။</translation>
 <translation id="7486880426035242089">OneDrive</translation>
+<translation id="7489255442002627311"><ph name="BNPL_ISSUER_NAME" /> သည် သင်၏သတ်မှတ်ချက်ပြည့်မီမှုကို စစ်ဆေးမည် (သင့်ခရက်ဒစ်အမှတ်ကို မသက်ရောက်ပါ)။ အတည်ပြုလိုက်ပါက <ph name="BNPL_ISSUER_NAME" /> သည် ဝယ်ယူမှုအပြီးသတ်နိုင်ရန်အတွက် ရွေးချယ်နိုင်မည့် ငွေပေးချေမှုအစီအစဉ်များကို ပြပါမည်။</translation>
 <translation id="7489392576326061356">ခေါင်းလျှော်ရည်နှင့် ဆံသားထိန်းညှိဆေး</translation>
 <translation id="7495528107193238112">ဤအကြောင်းအရာကို ပိတ်ထားသည်။ ပြဿနာကို ဖြေရှင်းရန် ဝဘ်ဆိုက်ပိုင်ရှင်ကို ဆက်သွယ်ပါ။</translation>
 <translation id="749865518782565832">ရေပိုက်ဆက်သွယ်မှုစနစ်</translation>
@@ -3718,6 +3738,7 @@
 <translation id="7569983096843329377">အနက်ရောင်</translation>
 <translation id="7574998639136359461">ဆောင်းရာသီအားကစား ပစ္စည်း</translation>
 <translation id="7575207903026901870">'အကြံပြုချက်' ခလုတ်ကို ဖယ်ရှားခြင်း၊ ဤအကြံပြုချက်ကို ဖယ်ရှားရန် Enter ကို နှိပ်ပါ</translation>
+<translation id="7575800019233204241">"သင်၏ ချိတ်ဆက်မှုသည် သီးသန့်မဟုတ်ပါ" သို့မဟုတ် "&lt;span class="error-code"&gt;NET::ERR_CERT_AUTHORITY_INVALID&lt;/span&gt;" သို့မဟုတ် "&lt;span class="error-code"&gt;ERR_CERT_COMMON_NAME_INVALID&lt;/span&gt;" သို့မဟုတ် "&lt;span class="error-code"&gt;NET::ERR_CERT_WEAK_SIGNATURE_ALGORITHM&lt;/span&gt;" သို့မဟုတ် "SSL အသိအမှတ်ပြုလက်မှတ် အမှား"</translation>
 <translation id="7575887283389198269">မိုဘိုင်းဖုန်း</translation>
 <translation id="7578104083680115302">သင်က Google နှင့် သိမ်းဆည်းခဲ့သည့် ကဒ်များကို သုံးပြီး ကိရိယာများထဲတွင် ဆိုက်များ နှင့် အက်ပ်များ ပေါ်မှာ လျင်မြန်စွာ ငွေပေးချေပါ။</translation>
 <translation id="7579442726219254162">“<ph name="APPLICATION_ID" />” ၏ စီမံခန့်ခွဲထားသည့် စီစဉ်သတ်မှတ်ချက်ရှိ မသိရသောကိန်းရှင် “<ph name="VARIABLE" />”။</translation>
@@ -3904,6 +3925,7 @@
 <translation id="791107458486222637">ရလဒ် ပြန်လုပ်နေသည်</translation>
 <translation id="791551905239004656">ပုံဆွဲခြင်း၊ ဆေးရောင်ခြယ်ခြင်း</translation>
 <translation id="7916162853251942238">Flexo Base</translation>
+<translation id="791698251820376781">သင့်အဖွဲ့အစည်းသည် သင့်အား လက်မှတ်ထိုးဝင်ခွင့်မပြုပါ</translation>
 <translation id="7926503317156566022">လေကြောင်းဆိုင်ရာလုပ်ငန်း</translation>
 <translation id="793209273132572360">လိပ်စာ အပ်ဒိတ်လုပ်မလား။</translation>
 <translation id="7932579305932748336">အလွှာအုပ်ရန်</translation>
@@ -4228,7 +4250,6 @@
 <translation id="8473626140772740486">၃၀၀ x ၄၅၀ မီလီမီတာ</translation>
 <translation id="8473863474539038330">လိပ်စာများနှင့် အခြားအရာများ</translation>
 <translation id="8474910779563686872">ဆော့ဖ်ဝဲအင်ဂျင်နီယာ အသေးစိတ် ပြရန်</translation>
-<translation id="8476959635632921417">သင့်စက်အားလုံးတွင် ဤလိပ်စာကို သိမ်းရန်နှင့် အသုံးပြုရန် သင်ဖြစ်ကြောင်း အတည်ပြုပါ</translation>
 <translation id="8479754468255770962">ဘယ်ဘက်အောက်ခြေတွင် ချုပ်စက်ဖြင့် ချုပ်ရန်</translation>
 <translation id="8483229036294884935">ဤလိပ်စာကို သင်၏ <ph name="ACCOUNT" /> Google Account မှ ဖျက်လိုက်မည်</translation>
 <translation id="8488350697529856933">သက်ဆိုင်</translation>
@@ -4612,11 +4633,13 @@
 <translation id="9183425211371246419"><ph name="HOST_NAME" /> သည်ထောက်ပံ့မှုမရှိသည့် ပရိုတိုကောကို အသုံးပြုထားသည်။</translation>
 <translation id="918454845714257218"><ph name="SIDE_OF_CARD" /> ရှိ ကုဒ်ကို ကြည့်ပြီး ထပ်စမ်းကြည့်ပါ</translation>
 <translation id="9186203289258525843">Chrome ကို စနစ်၏ မူရင်းဘရောင်ဇာအဖြစ် သတ်မှတ်ရန်အတွက် ‘Chrome ကို မူရင်းဘရောင်ဇာအဖြစ် သတ်မှတ်ရန်’ ခလုတ်ကို နှိပ်နိုင်သည်</translation>
+<translation id="9189468832660648522"><ph name="MEMBER_FIRST_NAME" /> က ဤတဘ်ကို ပြောင်းလိုက်သည်</translation>
 <translation id="9189789270972826888">ကတ်ကို ဖြည့်မထားပါက မိတ္တူကူးပြီး ထည့်ရန် အောက်ရှိ ကတ်အသေးစိတ်ကို နှိပ်ပါ။ <ph name="IDS_AUTOFILL_FILLED_CARD_INFORMATION_BUBBLE_LEARN_MORE_LINK_LABEL" /></translation>
 <translation id="9190557999028587593">၄ ပတ်ထက်ပိုကြာသည့် အကြောင်းအရာများကို အလိုအလျောက်ဖျက်သည်</translation>
 <translation id="9191834167571392248">ဘယ်ဘက်အောက်ခြေတွင် ဖောက်ရန်</translation>
 <translation id="9192361865877479444">သတ္တု (မှိုင်းပျပျ)</translation>
 <translation id="9192947025498305328">သဘာဝ အလှကုန်</translation>
+<translation id="9195969368671142407">သင်၏ Google Account တွင် သိမ်းသည့်အရာများကို သင့်အဖွဲ့အစည်းက ကန့်သတ်လိုက်သည့်အခါ တဘ်အုပ်စုများကို မျှဝေခြင်း (သို့) ၎င်းတို့တွင် ပါဝင်ခြင်းတို့ မလုပ်နိုင်ပါ</translation>
 <translation id="9199905725844810519">ပုံနှိပ်ထုတ်ယူခြင်းကို ပိတ်ထားသည်</translation>
 <translation id="9201904868909900493">စစ်တမ်း ဖွင့်နေသည်…</translation>
 <translation id="9204089334327209740">အပ်လုဒ်လုပ်ပြီးပါက <ph name="CLOUD_PROVIDER" /> တွင် သင့်ဖိုင်များကို ပြင်နိုင်သည်။ အမှိုက်ပုံးထဲရှိ ဖိုင်အားလုံး အပါအဝင် စက်တွင်း သိုလှောင်ခန်းကို အလိုအလျောက် ဖယ်ရှားပါမည်။</translation>

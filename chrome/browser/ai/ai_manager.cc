@@ -265,13 +265,34 @@ void AIManager::CanCreateLanguageModel(
 
 std::unique_ptr<CreateLanguageModelOnDeviceSessionTask>
 AIManager::CreateLanguageModelInternal(
-    const blink::mojom::AILanguageModelSamplingParamsPtr& sampling_params,
+    blink::mojom::AILanguageModelSamplingParamsPtr sampling_params,
     AIContextBoundObjectSet& context_bound_object_set,
     AIUtils::LanguageCodes expected_input_languages,
     base::OnceCallback<void(AILanguageModelOrCreationError)> callback,
-    const std::optional<const AILanguageModel::Context>& context) {
+    const std::optional<const AILanguageModel::Context>& context,
+    std::unique_ptr<optimization_guide::OptimizationGuideModelExecutor::Session>
+        override_session) {
+  blink::mojom::AILanguageModelParamsPtr language_model_params =
+      GetLanguageModelParams();
+
+  optimization_guide::SamplingParams resolved_sampling_params;
+  if (sampling_params) {
+    resolved_sampling_params = optimization_guide::SamplingParams{
+        .top_k = std::min(sampling_params->top_k,
+                          language_model_params->max_sampling_params->top_k),
+        .temperature =
+            std::min(sampling_params->temperature,
+                     language_model_params->max_sampling_params->temperature)};
+  } else {
+    resolved_sampling_params = optimization_guide::SamplingParams{
+        .top_k = language_model_params->default_sampling_params->top_k,
+        .temperature =
+            language_model_params->default_sampling_params->temperature};
+  }
+
   auto task = std::make_unique<CreateLanguageModelOnDeviceSessionTask>(
-      *this, context_bound_object_set, browser_context_, sampling_params,
+      *this, context_bound_object_set, browser_context_,
+      std::move(resolved_sampling_params),
       base::BindOnce(
           [](base::WeakPtr<content::BrowserContext> browser_context,
              AIContextBoundObjectSet& context_bound_object_set,
@@ -301,6 +322,7 @@ AIManager::CreateLanguageModelInternal(
           browser_context_->GetWeakPtr(), std::ref(context_bound_object_set),
           std::move(expected_input_languages), context, std::ref(*this),
           std::move(callback)));
+  task->set_override_session(std::move(override_session));
   task->Start();
   return task;
 }
@@ -343,8 +365,8 @@ void AIManager::CreateLanguageModel(
 
         const std::optional<std::string>& system_prompt =
             options->system_prompt;
-        std::vector<blink::mojom::AILanguageModelInitialPromptPtr>&
-            initial_prompts = options->initial_prompts;
+        std::vector<blink::mojom::AILanguageModelPromptPtr>& initial_prompts =
+            options->initial_prompts;
         if (system_prompt.has_value() || !initial_prompts.empty()) {
           // If the initial prompt is provided, we need to set it and
           // invoke the callback after this, because the token counting
@@ -381,10 +403,10 @@ void AIManager::CreateLanguageModel(
 
   // When creating a new language model, the `context` will not be set since it
   // should start fresh.
-  auto task =
-      CreateLanguageModelInternal(sampling_params, context_bound_object_set_,
-                                  std::move(expected_input_languages),
-                                  std::move(create_language_model_callback));
+  auto task = CreateLanguageModelInternal(
+      std::move(sampling_params), context_bound_object_set_,
+      std::move(expected_input_languages),
+      std::move(create_language_model_callback));
   if (task->IsPending()) {
     // Put `task` to AIContextBoundObjectSet to continue observing the model
     // availability.
@@ -597,7 +619,9 @@ void AIManager::CreateLanguageModelForCloning(
     AIUtils::LanguageCodes expected_input_languages,
     const AILanguageModel::Context& context,
     mojo::Remote<blink::mojom::AIManagerCreateLanguageModelClient>
-        client_remote) {
+        client_remote,
+    std::unique_ptr<optimization_guide::OptimizationGuideModelExecutor::Session>
+        override_session) {
   auto create_language_model_callback = base::BindOnce(
       [](AIContextBoundObjectSet& context_bound_object_set,
          mojo::Remote<blink::mojom::AIManagerCreateLanguageModelClient>
@@ -620,9 +644,10 @@ void AIManager::CreateLanguageModelForCloning(
   // When cloning an existing language model, the `context` from the source of
   // clone should be provided.
   auto task = CreateLanguageModelInternal(
-      sampling_params, context_bound_object_set,
+      std::move(sampling_params), context_bound_object_set,
       std::move(expected_input_languages),
-      std::move(create_language_model_callback), context);
+      std::move(create_language_model_callback), context,
+      std::move(override_session));
   // The on-device model must be available before the existing language model
   // was created, so the `CreateLanguageModelOnDeviceSessionTask` should
   // complete without waiting for the on-device model availability changes.

@@ -230,6 +230,19 @@ CC_BASE_EXPORT BASE_DECLARE_FEATURE(kZeroScrollMetricsUpdate);
 // effect.
 CC_BASE_EXPORT BASE_DECLARE_FEATURE(kViewTransitionFloorTransform);
 
+// Allow the main thread to throttle the main frame rate.
+// Note that the composited animations will not be affected.
+// Typically the throttle is triggered with the render-blocking API <link
+// rel="expect" blocking="full-frame-rate"/>.
+CC_BASE_EXPORT BASE_DECLARE_FEATURE(kRenderThrottleFrameRate);
+// The throttled frame rate when the main thread requests a throttle.
+CC_BASE_EXPORT extern const base::FeatureParam<int>
+    kRenderThrottledFrameIntervalHz;
+
+// Adds a fast path to avoid waking up the thread pool when there are no raster
+// tasks.
+CC_BASE_EXPORT BASE_DECLARE_FEATURE(kFastPathNoRaster);
+
 }  // namespace features
 
 #endif  // CC_BASE_FEATURES_H_

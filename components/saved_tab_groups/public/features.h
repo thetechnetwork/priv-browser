@@ -6,6 +6,7 @@
 #define COMPONENTS_SAVED_TAB_GROUPS_PUBLIC_FEATURES_H_
 
 #include "base/feature_list.h"
+#include "base/time/time.h"
 
 namespace tab_groups {
 
@@ -37,7 +38,7 @@ BASE_DECLARE_FEATURE(kEnableTabTitleSanitization);
 
 BASE_DECLARE_FEATURE(kEnableUrlRestriction);
 
-extern bool IsTabGroupsSaveV2Enabled();
+BASE_DECLARE_FEATURE(kEnableOriginatingSavedGroupCleanUp);
 
 extern bool IsTabGroupSyncServiceDesktopMigrationEnabled();
 
@@ -58,6 +59,10 @@ extern bool ShouldForceRemoveClosedTabGroupsOnStartup();
 extern bool IsTabTitleSanitizationEnabled();
 
 extern bool IsUrlRestrictionEnabled();
+
+extern bool IsOriginatingSavedGroupCleanUpEnabled();
+
+extern base::TimeDelta GetOriginatingSavedGroupCleanUpTimeInterval();
 }  // namespace tab_groups
 
 #endif  // COMPONENTS_SAVED_TAB_GROUPS_PUBLIC_FEATURES_H_

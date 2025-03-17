@@ -17,6 +17,7 @@
 #include "components/content_settings/core/common/content_settings_rules.h"
 #include "components/content_settings/core/common/content_settings_utils.h"
 #include "components/ip_protection/common/ip_protection_data_types.h"
+#include "components/ip_protection/common/ip_protection_probabilistic_reveal_token_manager.h"
 #include "components/ip_protection/common/ip_protection_proxy_config_manager.h"
 #include "components/ip_protection/common/ip_protection_proxy_config_manager_impl.h"
 #include "components/ip_protection/common/ip_protection_telemetry.h"
@@ -28,6 +29,7 @@
 #include "net/base/network_change_notifier.h"
 #include "net/base/proxy_chain.h"
 #include "net/base/proxy_server.h"
+#include "services/network/public/cpp/features.h"
 #include "url/gurl.h"
 
 namespace ip_protection {
@@ -78,18 +80,25 @@ IpProtectionCoreImpl::IpProtectionCoreImpl(
     std::map<ProxyLayer, std::unique_ptr<IpProtectionTokenManager>>
         ip_protection_token_managers,
     ProbabilisticRevealTokenRegistry* probabilistic_reveal_token_registry,
+    std::unique_ptr<IpProtectionProbabilisticRevealTokenManager>
+        ipp_prt_manager,
     bool is_ip_protection_enabled,
-    bool use_regular_mdl)
+    bool ip_protection_incognito)
     : masked_domain_list_manager_(masked_domain_list_manager),
       ipp_proxy_config_manager_(std::move(ip_protection_proxy_config_manager)),
       ipp_token_managers_(std::move(ip_protection_token_managers)),
       probabilistic_reveal_token_registry_(probabilistic_reveal_token_registry),
+      ipp_prt_manager_(std::move(ipp_prt_manager)),
       is_ip_protection_enabled_(is_ip_protection_enabled),
       ipp_over_quic_(net::features::kIpPrivacyUseQuicProxies.Get()),
-      enable_token_caching_by_geo_(
-          net::features::kIpPrivacyCacheTokensByGeo.Get()) {
-  mdl_type_ = use_regular_mdl ? MdlType::kRegularBrowsing : MdlType::kDefault;
+      mdl_type_(network::features::kSplitMaskedDomainList.Get()
+                    ? (ip_protection_incognito ? MdlType::kIncognito
+                                               : MdlType::kRegularBrowsing)
+                    : MdlType::kIncognito) {
   net::NetworkChangeNotifier::AddNetworkChangeObserver(this);
+  if (ip_protection_incognito && ipp_prt_manager_) {
+    ipp_prt_manager_->RequestTokens();
+  }
 }
 
 IpProtectionCoreImpl::~IpProtectionCoreImpl() {
@@ -125,7 +134,10 @@ bool IpProtectionCoreImpl::AreAuthTokensAvailable() {
   for (const auto& manager : ipp_token_managers_) {
     if (!manager.second->IsAuthTokenAvailable(
             ipp_proxy_config_manager_->CurrentGeo())) {
-      Telemetry().EmptyTokenCache(manager.first);
+      // Only emit metric if the cache was ever filled.
+      if (manager.second->WasTokenCacheEverFilled()) {
+        Telemetry().EmptyTokenCache(manager.first);
+      }
       all_caches_have_tokens = false;
     }
   }
@@ -165,6 +177,16 @@ std::optional<BlindSignedAuthToken> IpProtectionCoreImpl::GetAuthToken(
         ipp_proxy_config_manager_->CurrentGeo());
   }
   return result;
+}
+
+std::optional<ProbabilisticRevealToken>
+IpProtectionCoreImpl::GetProbabilisticRevealToken(
+    const std::string& top_level,
+    const std::string& third_party) {
+  if (!ipp_prt_manager_) {
+    return std::nullopt;
+  }
+  return ipp_prt_manager_->GetToken(top_level, third_party);
 }
 
 IpProtectionTokenManager*
@@ -211,11 +233,6 @@ void IpProtectionCoreImpl::RequestRefreshProxyList() {
 }
 
 void IpProtectionCoreImpl::GeoObserved(const std::string& geo_id) {
-  // If token caching by geo is disabled, short-circuit and don't do anything.
-  if (!enable_token_caching_by_geo_) {
-    return;
-  }
-
   if (ipp_proxy_config_manager_ != nullptr &&
       ipp_proxy_config_manager_->CurrentGeo() != geo_id) {
     ipp_proxy_config_manager_->RequestRefreshProxyList();

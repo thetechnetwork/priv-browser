@@ -191,6 +191,7 @@
 #include "third_party/blink/public/common/navigation/navigation_params.h"
 #include "third_party/blink/public/common/navigation/navigation_params_mojom_traits.h"
 #include "third_party/blink/public/common/navigation/navigation_policy.h"
+#include "third_party/blink/public/common/navigation/preloading_headers.h"
 #include "third_party/blink/public/common/origin_trials/trial_token_validator.h"
 #include "third_party/blink/public/common/permissions_policy/document_policy.h"
 #include "third_party/blink/public/common/permissions_policy/policy_helper_public.h"
@@ -413,8 +414,10 @@ void AddAdditionalRequestHeaders(
   // compatibility concerns (See
   // https://github.com/WICG/nav-speculation/issues/133).
   if (frame_tree_node->frame_tree().is_prerendering()) {
-    headers->SetHeader("Sec-Purpose", "prefetch;prerender");
-    headers->SetHeader("Purpose", "prefetch");
+    headers->SetHeader(blink::kSecPurposeHeaderName,
+                       blink::kSecPurposePrefetchPrerenderHeaderValue);
+    headers->SetHeader(blink::kPurposeHeaderName,
+                       blink::kSecPurposePrefetchHeaderValue);
   } else if (frame_tree_node->frame_tree()
                  .page_delegate()
                  ->IsPageInPreviewMode()) {
@@ -423,7 +426,8 @@ void AddAdditionalRequestHeaders(
     // need to identify the preview case from prerendering.
     // Do not send the `Purpose` header as the preview mode is new and don't
     // need to be careful about the compatibility breakage here.
-    headers->SetHeader("Sec-Purpose", "prefetch;prerender;preview");
+    headers->SetHeader(blink::kSecPurposeHeaderName,
+                       blink::kSecPurposePrefetchPrerenderPreviewHeaderValue);
   }
 }
 
@@ -898,7 +902,7 @@ TopicsHeaderValueResult GetTopicsHeaderValueForNavigationRequest(
     return {};
   }
 
-  const blink::PermissionsPolicy* parent_policy =
+  const network::PermissionsPolicy* parent_policy =
       rfh->GetParent()->GetPermissionsPolicy();
 
   DCHECK(parent_policy);
@@ -1008,7 +1012,7 @@ bool IsSharedStorageWritableEligibleForNavigationRequest(
   }
 
   CHECK(frame_tree_node->parent());
-  const blink::PermissionsPolicy* parent_policy =
+  const network::PermissionsPolicy* parent_policy =
       frame_tree_node->parent()->GetPermissionsPolicy();
 
   DCHECK(parent_policy);
@@ -1626,8 +1630,8 @@ NavigationRequest::CreateForSynchronousRendererCommit(
     blink::mojom::AncestorChainBit ancestor_chain_bit =
         blink::mojom::AncestorChainBit::kSameSite;
     if (render_frame_host->ComputeSiteForCookies().IsNull() ||
-        net::SchemefulSite(origin) != top_level_site ||
-        !top_level_site.opaque() || origin.opaque()) {
+        !top_level_site.IsSameSiteWith(origin) || !top_level_site.opaque() ||
+        origin.opaque()) {
       ancestor_chain_bit = blink::mojom::AncestorChainBit::kCrossSite;
     }
 
@@ -1818,7 +1822,7 @@ NavigationRequest::NavigationRequest(
         blink::kFencedFrameForcedSandboxFlags;
   }
 
-  if (base::FeatureList::IsEnabled(blink::features::kSharedStorageAPI)) {
+  if (base::FeatureList::IsEnabled(network::features::kSharedStorageAPI)) {
     shared_storage_writable_opted_in_ =
         frame_tree_node_->shared_storage_writable_opted_in();
     shared_storage_writable_eligible_ =
@@ -4610,7 +4614,6 @@ void NavigationRequest::SelectFrameHostForOnResponseStarted(
       << "`render_frame_host_` should not be set before the "
          "`NavigationRequest` starts to select the RFH.";
   ScopedCrashKeys crash_keys(*this);
-
   std::string rfh_selected_reason;
 
   // Select an appropriate renderer to commit the navigation.
@@ -4641,13 +4644,19 @@ void NavigationRequest::SelectFrameHostForOnResponseStarted(
                                  prerender_frame_tree_node_id_.value())
                              ->GetSafeRef();
   } else if (response_should_be_rendered_) {
+    std::string* reason_output =
+        base::FeatureList::IsEnabled(
+            features::kHoldbackDebugReasonStringRemoval)
+            ? &rfh_selected_reason
+            : nullptr;
+
     if (auto result =
             frame_tree_node_->render_manager()->GetFrameHostForNavigation(
                 this, &browsing_context_group_swap_,
                 ProcessAllocationContext::CreateForNavigationRequest(
                     ProcessAllocationNavigationStage::kAfterResponse,
                     navigation_id_),
-                &rfh_selected_reason);
+                reason_output);
         result.has_value()) {
       render_frame_host_ = result.value()->GetSafeRef();
     } else {
@@ -4868,12 +4877,15 @@ void NavigationRequest::SelectFrameHostForOnResponseStarted(
     return;
   }
 
-  // TODO(crbug.com/40065692): Remove.
-  SCOPED_CRASH_KEY_STRING256(
-      "Bug1454273", "base_host_for_data_url",
-      common_params_->base_url_for_data_url.host_piece());
-  SCOPED_CRASH_KEY_STRING1024("Bug1454273", "rfh_selected_reason",
-                              rfh_selected_reason);
+  // TODO(crbug.com/399783247): Remove
+  if (base::FeatureList::IsEnabled(
+          features::kHoldbackDebugReasonStringRemoval)) {
+    SCOPED_CRASH_KEY_STRING256(
+        "Bug1454273", "base_host_for_data_url",
+        common_params_->base_url_for_data_url.host_piece());
+    SCOPED_CRASH_KEY_STRING1024("Bug1454273", "rfh_selected_reason",
+                                rfh_selected_reason);
+  }
 
   if (HasRenderFrameHost() &&
       !CheckPermissionsPoliciesForFencedFrames(GetOriginToCommit().value())) {
@@ -6349,8 +6361,8 @@ void NavigationRequest::CommitNavigation() {
   commit_params_->should_have_sticky_user_activation =
       !frame_tree_node_->IsMainFrame() &&
       old_frame_host->HasStickyUserActivation() &&
-      net::SchemefulSite(old_frame_host->GetLastCommittedOrigin()) ==
-          net::SchemefulSite(origin_to_commit);
+      net::SchemefulSite::IsSameSite(old_frame_host->GetLastCommittedOrigin(),
+                                     origin_to_commit);
 
   // Generate a UKM source and track it on NavigationRequest. This will be
   // passed down to the blink::Document to be created, if any, and used for UKM
@@ -7924,6 +7936,8 @@ void NavigationRequest::DidCommitNavigation(
   should_update_history_ = params.should_update_history;
   navigation_handle_timing_.navigation_commit_received_time =
       params.commit_navigation_start;
+  navigation_handle_timing_.navigation_commit_reply_sent_time =
+      params.commit_reply_sent;
   navigation_handle_timing_.navigation_did_commit_time = base::TimeTicks::Now();
   // A same document navigation with the same url, and no user-gesture is
   // typically the result of 'history.replaceState().' As the page is
@@ -8213,8 +8227,13 @@ void NavigationRequest::UpdatePrivateNetworkRequestPolicy() {
   if (policy_override ==
       ContentBrowserClient::PrivateNetworkRequestPolicyOverride::
           kBlockInsteadOfWarn) {
+    // Overrides to block instead of warn depend on PNA policy calculations
+    // without LNA being involved until after M136. Look up what the policy
+    // would have been if LNA was off and use that policy to compute the
+    // override's impact.
     private_network_request_policy_ =
-        OverrideBlockWithWarn(private_network_request_policy_);
+        OverrideBlockWithWarn(DerivePrivateNetworkRequestPolicy(
+            policies, PrivateNetworkRequestContext::kSubresource, false));
   }
 }
 
@@ -9561,10 +9580,10 @@ bool NavigationRequest::IsFencedFrameRequiredPolicyFeatureAllowed(
 
   // Check if the outer document's permissions policies allow all of the
   // required policies.
-  std::optional<const blink::PermissionsPolicy::Allowlist> embedder_allowlist =
-      GetParentFrameOrOuterDocument()
-          ->GetPermissionsPolicy()
-          ->GetAllowlistForFeatureIfExists(feature);
+  std::optional<const network::PermissionsPolicy::Allowlist>
+      embedder_allowlist = GetParentFrameOrOuterDocument()
+                               ->GetPermissionsPolicy()
+                               ->GetAllowlistForFeatureIfExists(feature);
   if (embedder_allowlist && !embedder_allowlist->MatchesAll()) {
     return false;
   }
@@ -9809,7 +9828,8 @@ void NavigationRequest::OnCookiesAccessed(
 
     CookieAccessDetails allowed;
     CookieAccessDetails blocked;
-    SplitCookiesIntoAllowedAndBlocked(details, &allowed, &blocked);
+    SplitCookiesIntoAllowedAndBlocked(
+        details, CookieAccessDetails::Source::kNavigation, &allowed, &blocked);
     if (!allowed.cookie_access_result_list.empty()) {
       GetDelegate()->OnCookiesAccessed(this, allowed);
     }
@@ -11246,17 +11266,32 @@ void NavigationRequest::MaybeRecordTraceEventsAndHistograms() {
       begin_navigation_time_ <= loader_start_time &&
       loader_start_time <= receive_response_time_ &&
       receive_response_time_ <= navigation_commit_sent_time) {
-    ukm::builders::NavigationRequestBreakDown(GetNextPageUkmSourceId())
-        .SetNavigationStartToBeginNavigation(
-            (begin_navigation_time_ - navigation_start_time).InMilliseconds())
+    ukm::builders::NavigationRequestBreakDown ukm(GetNextPageUkmSourceId());
+    ukm.SetNavigationStartToBeginNavigation(
+           (begin_navigation_time_ - navigation_start_time).InMilliseconds())
         .SetBeginNavigationToLoaderStart(
             (loader_start_time - begin_navigation_time_).InMilliseconds())
         .SetLoaderStartToReceiveResponse(
             (receive_response_time_ - loader_start_time).InMilliseconds())
         .SetReceiveResponseToCommitNavigation(
             (navigation_commit_sent_time - receive_response_time_)
-                .InMilliseconds())
-        .Record(ukm::UkmRecorder::Get());
+                .InMilliseconds());
+
+    // To avoid affecting other metrics, we check the following conditions
+    // separately. These conditions should usually be true, but there can be
+    // uncommon error cases.
+    if (!first_fetch_start_time_.is_null() &&
+        !first_request_start_time.is_null() &&
+        loader_start_time <= first_fetch_start_time_ &&
+        first_fetch_start_time_ <= first_request_start_time) {
+      ukm.SetLoaderStartToFetchStart(
+             (first_fetch_start_time_ - loader_start_time).InMilliseconds())
+          .SetFetchStartToRequestStart(
+              (first_request_start_time - first_fetch_start_time_)
+                  .InMilliseconds());
+    }
+
+    ukm.Record(ukm::UkmRecorder::Get());
   }
 
 #undef MAYBE_RECORD_TRACE_AND_HISTOGRAM0

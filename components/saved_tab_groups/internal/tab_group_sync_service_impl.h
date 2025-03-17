@@ -36,6 +36,10 @@
 
 class PrefService;
 
+namespace data_sharing {
+class Logger;
+}  // namespace data_sharing
+
 namespace tab_groups {
 
 struct SyncDataTypeConfiguration;
@@ -56,7 +60,8 @@ class TabGroupSyncServiceImpl : public TabGroupSyncService,
       std::unique_ptr<TabGroupSyncMetricsLogger> metrics_logger,
       optimization_guide::OptimizationGuideDecider* optimization_guide_decider,
       signin::IdentityManager* identity_manager,
-      std::unique_ptr<CollaborationFinder> collaboration_finder);
+      std::unique_ptr<CollaborationFinder> collaboration_finder,
+      data_sharing::Logger* logger);
   ~TabGroupSyncServiceImpl() override;
 
   // Disallow copy/assign.
@@ -173,7 +178,8 @@ class TabGroupSyncServiceImpl : public TabGroupSyncService,
       const signin::PrimaryAccountChangeEvent& event_details) override;
 
   // tab_groups::CollaborationFinder::Client:
-  void OnCollaborationAvailable(const std::string& collaboration_id) override;
+  void OnCollaborationAvailable(
+      const syncer::CollaborationId& collaboration_id) override;
 
   // For testing only.
   void SetIsInitializedForTesting(bool initialized) override;
@@ -260,6 +266,9 @@ class TabGroupSyncServiceImpl : public TabGroupSyncService,
   // bug.
   void ForceRemoveClosedTabGroupsOnStartup();
 
+  // Called to clean up originating saved tab groups if needed.
+  void CleanUpOriginatingSavedTabGroupsIfNeeded();
+
   // Helper function to update attributions for a group and optionally a tab.
   void UpdateAttributions(
       const LocalTabGroupID& group_id,
@@ -322,6 +331,10 @@ class TabGroupSyncServiceImpl : public TabGroupSyncService,
   void NotifyTabGroupSharingResult(const base::Uuid& group_guid,
                                    TabGroupSharingResult result);
 
+  // Find tab group by collaboration Id.
+  std::optional<SavedTabGroup> FindGroupWithCollaborationId(
+      const syncer::CollaborationId& collaboration_id);
+
   // The in-memory model representing the currently present saved tab groups.
   std::unique_ptr<SavedTabGroupModel> model_;
 
@@ -337,6 +350,9 @@ class TabGroupSyncServiceImpl : public TabGroupSyncService,
 
   // For finding collaboration availability info from DataSharingService.
   std::unique_ptr<CollaborationFinder> collaboration_finder_;
+
+  // Logger for logging to debug UI.
+  raw_ptr<data_sharing::Logger> logger_ = nullptr;
 
   // The pref service for storing migration status.
   raw_ptr<PrefService> pref_service_ = nullptr;
@@ -355,7 +371,7 @@ class TabGroupSyncServiceImpl : public TabGroupSyncService,
   // handle these groups, hence the service needs to wait before notifying the
   // observers. Once the group becomes available, OnTabGroupAdded() will be
   // invoked for the shared tab group.
-  std::vector<std::tuple<std::string, base::Uuid, TriggerSource>>
+  std::vector<std::tuple<syncer::CollaborationId, base::Uuid, TriggerSource>>
       shared_tab_groups_waiting_for_collaboration_;
 
   // Obsevers of the model.

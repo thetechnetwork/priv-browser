@@ -235,7 +235,11 @@ void HandleBadMessage(const std::string& error) {
   // dump in official build or ipc fuzzer build where it is expected to received
   // bad message, and crash otherwise so that it is more visible when unexpected
   // bad message is encountered in tests.
-#if defined(OFFICIAL_BUILD) || defined(ENABLE_IPC_FUZZER)
+  // Also create dump instead of crash for builds without DCHECK on as some
+  // fuzzing tests are done using builds without ENABLE_IPC_FUZZER, but those
+  // builds are always with DCHECK disabled. As DCHECK is on for most builds,
+  // we still have enough coverage for crashing upon bad message behavior.
+#if defined(OFFICIAL_BUILD) || defined(ENABLE_IPC_FUZZER) || !DCHECK_IS_ON()
   mojo::debug::ScopedMessageErrorCrashKey crash_key_value(error);
   base::debug::DumpWithoutCrashing();
   network::debug::ClearDeserializationCrashKeyString();
@@ -462,9 +466,11 @@ void NetworkService::Initialize(mojom::NetworkServiceParamsPtr params,
 
   dns_config_change_manager_ = std::make_unique<DnsConfigChangeManager>();
 
+  net::HostResolver::ManagerOptions manager_options;
+  manager_options.enable_happy_eyeballs_v3 = params->happy_eyeballs_v3_enabled;
   host_resolver_manager_ = std::make_unique<net::HostResolverManager>(
-      net::HostResolver::ManagerOptions(),
-      net::NetworkChangeNotifier::GetSystemDnsConfigNotifier(), net_log_);
+      manager_options, net::NetworkChangeNotifier::GetSystemDnsConfigNotifier(),
+      net_log_);
   host_resolver_factory_ = std::make_unique<net::HostResolver::Factory>();
 
   http_auth_cache_copier_ = std::make_unique<HttpAuthCacheCopier>();

@@ -135,10 +135,18 @@ void BrowserAccessibilityManagerWin::UserIsReloading() {
 void BrowserAccessibilityManagerWin::FireAriaNotificationEvent(
     BrowserAccessibility* node,
     const std::string& announcement,
+    ax::mojom::AriaNotificationPriority priority_property,
     const std::string& notification_id,
-    ax::mojom::AriaNotificationInterrupt interrupt_property,
-    ax::mojom::AriaNotificationPriority priority_property) {
+    ax::mojom::AriaNotificationInterrupt interrupt_property) {
   DCHECK(node);
+  if (!AXPlatform::GetInstance().IsUiaProviderEnabled()) {
+    return;
+  }
+
+  auto* provider = ToBrowserAccessibilityWin(node)->GetCOM();
+  if (!provider->HasEventListenerForEvent(UIA_NotificationEventId)) {
+    return;
+  }
 
   // This API is only supported from Windows10 (version 1709) onwards.
   // Check if the function pointer is valid or not.
@@ -188,8 +196,7 @@ void BrowserAccessibilityManagerWin::FireAriaNotificationEvent(
   const base::win::ScopedBstr notification_id_bstr(
       base::UTF8ToWide(notification_id));
 
-  uia_raise_notification_event_func(ToBrowserAccessibilityWin(node)->GetCOM(),
-                                    NotificationKind_ActionCompleted,
+  uia_raise_notification_event_func(provider, NotificationKind_ActionCompleted,
                                     MapPropertiesToUiaNotificationProcessing(),
                                     announcement_bstr.Get(),
                                     notification_id_bstr.Get());
@@ -665,10 +672,14 @@ void BrowserAccessibilityManagerWin::FireUiaAccessibilityEvent(
     return;
   }
 
+  auto* provider = ToBrowserAccessibilityWin(node)->GetCOM();
+  if (!provider->HasEventListenerForEvent(uia_event)) {
+    return;
+  }
+
   WinAccessibilityAPIUsageScopedUIAEventsNotifier scoped_events_notifier;
 
-  ::UiaRaiseAutomationEvent(ToBrowserAccessibilityWin(node)->GetCOM(),
-                            uia_event);
+  ::UiaRaiseAutomationEvent(provider, uia_event);
 }
 
 void BrowserAccessibilityManagerWin::FireUiaPropertyChangedEvent(
@@ -691,9 +702,12 @@ void BrowserAccessibilityManagerWin::FireUiaPropertyChangedEvent(
   VARIANT old_value = {};
   old_value.vt = VT_EMPTY;
 
+  auto* provider = ToBrowserAccessibilityWin(node)->GetCOM();
+  if (!provider->HasEventListenerForProperty(uia_property)) {
+    return;
+  }
   WinAccessibilityAPIUsageScopedUIAEventsNotifier scoped_events_notifier;
 
-  auto* provider = ToBrowserAccessibilityWin(node)->GetCOM();
   base::win::ScopedVariant new_value;
   if (SUCCEEDED(
           provider->GetPropertyValueImpl(uia_property, new_value.Receive()))) {
@@ -723,10 +737,10 @@ void BrowserAccessibilityManagerWin::FireUiaStructureChangedEvent(
     return;
   }
 
-  auto* provider = ToBrowserAccessibilityWin(node);
-  auto* provider_com = provider ? provider->GetCOM() : nullptr;
-  if (!provider || !provider_com)
+  auto* provider = ToBrowserAccessibilityWin(node)->GetCOM();
+  if (!provider->HasEventListenerForEvent(UIA_StructureChangedEventId)) {
     return;
+  }
 
   WinAccessibilityAPIUsageScopedUIAEventsNotifier scoped_events_notifier;
 
@@ -738,7 +752,7 @@ void BrowserAccessibilityManagerWin::FireUiaStructureChangedEvent(
       auto* parent_com = parent ? parent->GetCOM() : nullptr;
       if (parent && parent_com) {
         AXPlatformNodeWin::RuntimeIdArray runtime_id;
-        provider_com->GetRuntimeIdArray(runtime_id);
+        provider->GetRuntimeIdArray(runtime_id);
         UiaRaiseStructureChangedEvent(parent_com, change_type,
                                       runtime_id.data(), runtime_id.size());
       }
@@ -748,7 +762,7 @@ void BrowserAccessibilityManagerWin::FireUiaStructureChangedEvent(
     default: {
       // All other types are fired on |node|.  For 'ChildAdded' |node| is the
       // child that was added; for other types, it's the parent container.
-      UiaRaiseStructureChangedEvent(provider_com, change_type, nullptr, 0);
+      UiaRaiseStructureChangedEvent(provider, change_type, nullptr, 0);
     }
   }
 }
@@ -776,24 +790,30 @@ BrowserAccessibilityManagerWin::GetUiaActiveTextPositionChangedEventFunction() {
 
 void BrowserAccessibilityManagerWin::FireUiaActiveTextPositionChangedEvent(
     BrowserAccessibility* node) {
-  if (!ShouldFireEventForNode(node))
+  if (!ShouldFireEventForNode(node)) {
     return;
+  }
 
   UiaRaiseActiveTextPositionChangedEventFunction
       active_text_position_changed_func =
           GetUiaActiveTextPositionChangedEventFunction();
 
-  if (!active_text_position_changed_func)
+  if (!active_text_position_changed_func) {
     return;
+  }
 
   // Create the text range contained by the target node.
-  auto* target_node = ToBrowserAccessibilityWin(node)->GetCOM();
+  auto* provider = ToBrowserAccessibilityWin(node)->GetCOM();
+  if (!provider->HasEventListenerForEvent(
+          UIA_ActiveTextPositionChangedEventId)) {
+    return;
+  }
   Microsoft::WRL::ComPtr<ITextRangeProvider> text_range;
-  AXPlatformNodeTextProviderWin::CreateDegenerateRangeAtStart(target_node,
+  AXPlatformNodeTextProviderWin::CreateDegenerateRangeAtStart(provider,
                                                               &text_range);
 
   // Fire the UiaRaiseActiveTextPositionChangedEvent.
-  active_text_position_changed_func(target_node, text_range.Get());
+  active_text_position_changed_func(provider, text_range.Get());
 }
 
 bool BrowserAccessibilityManagerWin::CanFireEvents() const {

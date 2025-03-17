@@ -157,8 +157,6 @@ OnDeviceModelServiceController::CreateSession(
     ModelBasedCapabilityKey feature,
     ExecuteRemoteFn execute_remote_fn,
     base::WeakPtr<OptimizationGuideLogger> optimization_guide_logger,
-    base::WeakPtr<ModelQualityLogsUploaderService>
-        model_quality_uploader_service,
     const std::optional<SessionConfigParams>& config_params) {
   OnDeviceModelEligibilityReason reason = CanCreateSession(feature);
   CHECK_NE(reason, OnDeviceModelEligibilityReason::kUnknown);
@@ -198,11 +196,6 @@ OnDeviceModelServiceController::CreateSession(
   opts.adapter = adaptation_metadata->adapter();
 
   opts.logger = optimization_guide_logger;
-  opts.log_uploader =
-      (config_params && config_params->logging_mode ==
-                            SessionConfigParams::LoggingMode::kAlwaysDisable
-           ? nullptr
-           : model_quality_uploader_service);
 
   return std::make_unique<SessionImpl>(
       feature, std::move(opts), std::move(execute_remote_fn), config_params);
@@ -358,7 +351,8 @@ void OnDeviceModelServiceController::StartValidation() {
 
   MaybeCreateBaseModelRemote(PopulateModelPaths());
   mojo::Remote<on_device_model::mojom::Session> session;
-  base_model_remote_->StartSession(session.BindNewPipeAndPassReceiver());
+  base_model_remote_->StartSession(session.BindNewPipeAndPassReceiver(),
+                                   nullptr);
   model_validator_ = std::make_unique<OnDeviceModelValidator>(
       model_metadata_->validation_config(),
       base::BindOnce(&OnDeviceModelServiceController::FinishValidation,
@@ -463,10 +457,11 @@ bool OnDeviceModelServiceController::OnDeviceModelClient::ShouldUse() {
              OnDeviceModelEligibilityReason::kSuccess;
 }
 
-mojo::Remote<on_device_model::mojom::OnDeviceModel>&
-OnDeviceModelServiceController::OnDeviceModelClient::GetModelRemote() {
-  return controller_->GetOrCreateModelRemote(feature_, model_paths_,
-                                             adaptation_assets_);
+void OnDeviceModelServiceController::OnDeviceModelClient::StartSession(
+    mojo::PendingReceiver<on_device_model::mojom::Session> pending) {
+  controller_
+      ->GetOrCreateModelRemote(feature_, model_paths_, adaptation_assets_)
+      ->StartSession(std::move(pending), nullptr);
 }
 
 void OnDeviceModelServiceController::OnDeviceModelClient::

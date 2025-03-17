@@ -744,7 +744,7 @@ class InterestGroupBrowserTest : public ContentBrowserTest {
   InterestGroupBrowserTest() {
     feature_list_.InitWithFeaturesAndParameters(
         /*enabled_features=*/
-        {{blink::features::kInterestGroupStorage, {}},
+        {{network::features::kInterestGroupStorage, {}},
          {blink::features::kFledgeBiddingAndAuctionServer, {}},
          {features::kPrivacySandboxAdsAPIsOverride, {}},
          {blink::features::kAdInterestGroupAPI, {}},
@@ -756,7 +756,6 @@ class InterestGroupBrowserTest : public ContentBrowserTest {
          {blink::features::kFencedFramesLocalUnpartitionedDataAccess, {}},
          {blink::features::kFledgeDeprecatedRenderURLReplacements, {}},
          {blink::features::kFledgeMultiBid, {}},
-         {blink::features::kFledgeReportingTimeout, {}},
          {blink::features::kFledgeSampleDebugReports, {}},
          {blink::features::kFledgeEnableSampleDebugReportOnCookieSetting, {}},
          // These are in field trial config, but we want this consistent among
@@ -18287,6 +18286,155 @@ IN_PROC_BROWSER_TEST_F(InterestGroupRestrictedPermissionsPolicyBrowserTest,
   }
 }
 
+class ExtraJoinPermissionsInterestGroupBrowserTest
+    : public InterestGroupBrowserTest {
+ public:
+  ExtraJoinPermissionsInterestGroupBrowserTest() {
+    feature_list_.InitWithFeatures(
+        {features::kFledgeModifyInterestGroupPolicyCheckOnOwner},
+        /*disabled_features=*/{});
+  }
+
+ protected:
+  base::test::ScopedFeatureList feature_list_;
+};
+
+// When features::kFledgeJoinAdInterestGroupExtraPolicyCheck is enabled, a
+// declared policy of (self) should prevent a x-origin owner from joining in the
+// top frame.
+IN_PROC_BROWSER_TEST_F(
+    ExtraJoinPermissionsInterestGroupBrowserTest,
+    JoinAdInterestGroupFailsForCrossOriginWithSelfDeclaredPolicy) {
+  const char kGroup[] = "aardvarks";
+  GURL join_declared_self_url = embedded_https_test_server().GetURL(
+      "b.test", "/interest_group/join_declared_self.html");
+  network_responder_->RegisterNetworkResponse(
+      join_declared_self_url.path(), "", "text/html",
+      {{"Permissions-Policy", "join-ad-interest-group=(self)"}});
+
+  url::Origin allow_join_origin = url::Origin::Create(
+      GURL(embedded_https_test_server().GetURL("allow-join.a.test", "/")));
+  url::Origin allow_leave_origin =
+      embedded_https_test_server().GetOrigin("allow-leave.a.test");
+
+  // Navigate to a cross-origin URL that declares Permissions-Policy:
+  // join-ad-interest-group=(self)
+  ASSERT_TRUE(
+      NavigateToURL(shell(), embedded_https_test_server().GetURL(
+                                 "b.test", join_declared_self_url.path())));
+
+  // Joining a group cross-origin should fail.
+  EXPECT_EQ("NotAllowedError: Permission to join interest group denied.",
+            JoinInterestGroupAndVerify(allow_join_origin, kGroup));
+
+  // Leaving a group cross-origin should fail.
+  EXPECT_EQ("NotAllowedError: Permission to leave interest group denied.",
+            LeaveInterestGroupAndVerify(allow_leave_origin, kGroup));
+
+  // Clearing a cross-origin's igs should fail.
+  EXPECT_EQ("NotAllowedError: Permission to leave interest groups denied.",
+            ClearOriginJoinedInterestGroupsAndVerify(allow_leave_origin));
+}
+
+class ExtraJoinPermissionsAndDefaultSelfInterestGroupBrowserTest
+    : public InterestGroupBrowserTest {
+ public:
+  ExtraJoinPermissionsAndDefaultSelfInterestGroupBrowserTest() {
+    feature_list_.InitWithFeatures(
+        {features::kFledgeModifyInterestGroupPolicyCheckOnOwner,
+         network::features::kAdInterestGroupAPIRestrictedPolicyByDefault},
+        /*disabled_features=*/{});
+  }
+
+ protected:
+  base::test::ScopedFeatureList feature_list_;
+};
+
+// When default self and features::kFledgeJoinAdInterestGroupExtraPolicyCheck
+// are enabled, a x-origin join should be possible from the top-frame.
+IN_PROC_BROWSER_TEST_F(
+    ExtraJoinPermissionsAndDefaultSelfInterestGroupBrowserTest,
+    JoinAdInterestGroupFailsForCrossOriginWithSelfDeclaredPolicy) {
+  const char kGroup[] = "aardvarks";
+  GURL join_declared_self_url = embedded_https_test_server().GetURL(
+      "b.test", "/interest_group/empty.html");
+  network_responder_->RegisterNetworkResponse(join_declared_self_url.path(), "",
+                                              "text/html", {{}});
+
+  url::Origin allow_join_origin = url::Origin::Create(
+      GURL(embedded_https_test_server().GetURL("allow-join.a.test", "/")));
+  url::Origin allow_leave_origin =
+      embedded_https_test_server().GetOrigin("allow-leave.a.test");
+
+  // Navigate to a URL without a document policy.
+  ASSERT_TRUE(
+      NavigateToURL(shell(), embedded_https_test_server().GetURL(
+                                 "b.test", join_declared_self_url.path())));
+
+  // Joining a group cross-origin should succeed.
+  EXPECT_EQ(kSuccess, JoinInterestGroupAndVerify(allow_join_origin, kGroup));
+
+  // Leaving a group cross-origin should succeed.
+  EXPECT_EQ(kSuccess, LeaveInterestGroupAndVerify(allow_leave_origin, kGroup));
+
+  // Clearing a cross-origin's igs should succeed.
+  EXPECT_EQ(kSuccess,
+            ClearOriginJoinedInterestGroupsAndVerify(allow_leave_origin));
+}
+
+// Delete this class and the test using it once
+// kFledgeJoinAdInterestGroupExtraPolicyCheck is enabled by default. It is
+// simply verifying the existing broken behavior.
+class NoExtraJoinPermissionsInterestGroupBrowserTest
+    : public InterestGroupBrowserTest {
+ public:
+  NoExtraJoinPermissionsInterestGroupBrowserTest() {
+    feature_list_.InitWithFeatures(
+        /*enabled_features=*/{},
+        /*disabled_features=*/{
+            features::kFledgeModifyInterestGroupPolicyCheckOnOwner});
+  }
+
+ protected:
+  base::test::ScopedFeatureList feature_list_;
+};
+
+// When features::kFledgeJoinAdInterestGroupExtraPolicyCheck is disabled, a
+// declared policy of (self) won't prevent a x-origin owner from joining in the
+// top frame. Delete this test and the associated class once
+// kFledgeJoinAdInterestGroupExtraPolicyCheck is enabled by default.
+IN_PROC_BROWSER_TEST_F(
+    NoExtraJoinPermissionsInterestGroupBrowserTest,
+    JoinAdInterestGroupFailsForCrossOriginWithSelfDeclaredPolicy) {
+  const char kGroup[] = "aardvarks";
+  GURL join_declared_self_url = embedded_https_test_server().GetURL(
+      "b.test", "/interest_group/join_declared_self.html");
+  network_responder_->RegisterNetworkResponse(
+      join_declared_self_url.path(), "", "text/html",
+      {{"Permissions-Policy", "join-ad-interest-group=(self)"}});
+
+  url::Origin allow_join_origin = url::Origin::Create(
+      GURL(embedded_https_test_server().GetURL("allow-join.a.test", "/")));
+  url::Origin allow_leave_origin =
+      embedded_https_test_server().GetOrigin("allow-leave.a.test");
+
+  // Navigate to a cross-origin URL that declares Permissions-Policy:
+  // join-ad-interest-group=(self)
+  ASSERT_TRUE(
+      NavigateToURL(shell(), embedded_https_test_server().GetURL(
+                                 "b.test", join_declared_self_url.path())));
+
+  // Joining a group cross-origin should work.
+  EXPECT_EQ(kSuccess, JoinInterestGroupAndVerify(allow_join_origin, kGroup));
+
+  // Leaving a group cross-origin should work.
+  EXPECT_EQ(kSuccess, LeaveInterestGroupAndVerify(allow_leave_origin, kGroup));
+
+  // Clearing a cross-origin's igs should work.
+  EXPECT_EQ(kSuccess,
+            ClearOriginJoinedInterestGroupsAndVerify(allow_leave_origin));
+}
+
 IN_PROC_BROWSER_TEST_F(InterestGroupBrowserTest,
                        LotsOfInterestGroupsEpsilonTimeout) {
   GURL test_url = embedded_https_test_server().GetURL("a.test", "/echo");
@@ -20700,7 +20848,7 @@ class BiddingAndAuctionServerAPIsOriginTrialBrowserTest
   BiddingAndAuctionServerAPIsOriginTrialBrowserTest() {
     feature_list_.InitWithFeatures(
         /*enabled_features=*/{blink::features::kFledge,
-                              blink::features::kInterestGroupStorage,
+                              network::features::kInterestGroupStorage,
                               blink::features::kFledgeBiddingAndAuctionServer},
         {});
   }
@@ -24291,6 +24439,274 @@ IN_PROC_BROWSER_TEST_F(InterestGroupBrowserTest, RunAdAuctionTraceTimeout) {
   stop_run_loop.Run();
 }
 
+IN_PROC_BROWSER_TEST_F(InterestGroupBrowserTest,
+                       ReportingTimeoutPassedToWorklets) {
+  const char kHostA[] = "a.test";
+  const char kHostB[] = "b.test";
+  GURL test_url =
+      embedded_https_test_server().GetURL(kHostA, "/page_with_iframe.html");
+  ASSERT_TRUE(NavigateToURL(shell(), test_url));
+  url::Origin test_origin = url::Origin::Create(test_url);
+  url::Origin test_origin_b =
+      url::Origin::Create(embedded_https_test_server().GetURL(kHostB, "/echo"));
+  GURL ad_url =
+      embedded_https_test_server().GetURL(kHostA, "/echo?render_cars");
+
+  EXPECT_EQ(
+      kSuccess,
+      JoinInterestGroupAndVerify(
+          /*owner=*/test_origin,
+          /*name=*/"cars",
+          /*priority=*/0.0,
+          /*execution_mode=*/
+          blink::InterestGroup::ExecutionMode::kCompatibilityMode,
+          /*bidding_url=*/
+          embedded_https_test_server().GetURL(
+              kHostA, "/interest_group/report_win_reporting_timeout_value.js"),
+          /*ads=*/{{{ad_url, /*metadata=*/std::nullopt}}}));
+
+  const char kConfigTemplate[] = R"({
+    seller: $1,
+    decisionLogicURL: $2,
+    reportingTimeout: 3000,
+    componentAuctions: [{
+      seller: $3,
+      decisionLogicURL: $4,
+      interestGroupBuyers: [$1],
+      reportingTimeout: 2000,
+    }]
+  })";
+
+  std::string auction_config = JsReplace(
+      kConfigTemplate, test_origin,
+      embedded_https_test_server().GetURL(
+          kHostA, "/interest_group/report_result_reporting_timeout_value.js"),
+      test_origin_b,
+      embedded_https_test_server().GetURL(
+          kHostB, "/interest_group/report_result_reporting_timeout_value.js"));
+  RunAuctionAndWaitForURLAndNavigateIframe(auction_config, ad_url);
+
+  // All report functions succeeded as expected, and reportResult() worklets get
+  // expected auctionConfig.reportingTimeout.
+  WaitForUrl(embedded_https_test_server().GetURL(
+      kHostA, "/echoall?report_bidder,reportingTimeout=2000"));
+  WaitForUrl(embedded_https_test_server().GetURL(
+      kHostA, "/echoall?report_seller,reportingTimeout=3000"));
+  WaitForUrl(embedded_https_test_server().GetURL(
+      kHostB, "/echoall?report_seller,reportingTimeout=2000"));
+}
+
+IN_PROC_BROWSER_TEST_F(InterestGroupBrowserTest,
+                       ReportResultTimedOutWithCustomReportingTimeout) {
+  const char kHostA[] = "a.test";
+  GURL test_url =
+      embedded_https_test_server().GetURL(kHostA, "/page_with_iframe.html");
+  ASSERT_TRUE(NavigateToURL(shell(), test_url));
+  url::Origin test_origin = url::Origin::Create(test_url);
+  GURL ad_url =
+      embedded_https_test_server().GetURL(kHostA, "/echo?render_cars");
+  WebContentsConsoleObserver console_observer(shell()->web_contents());
+  console_observer.SetPattern(
+      "Worklet error: https://a.test:* execution of `reportResult` timed out.");
+
+  EXPECT_EQ(kSuccess,
+            JoinInterestGroupAndVerify(
+                /*owner=*/test_origin,
+                /*name=*/"cars",
+                /*priority=*/0.0,
+                /*execution_mode=*/
+                blink::InterestGroup::ExecutionMode::kCompatibilityMode,
+                /*bidding_url=*/
+                embedded_https_test_server().GetURL(
+                    kHostA, "/interest_group/bidding_logic.js"),
+                /*ads=*/{{{ad_url, /*metadata=*/std::nullopt}}}));
+
+  const char kConfigTemplate[] = R"({
+    seller: $1,
+    decisionLogicURL: $2,
+    interestGroupBuyers: [$1],
+    reportingTimeout: 500,
+  })";
+
+  std::string auction_config =
+      JsReplace(kConfigTemplate, test_origin,
+                embedded_https_test_server().GetURL(
+                    kHostA, "/interest_group/report_result_loop_forever.js"));
+  RunAuctionAndWaitForURLAndNavigateIframe(auction_config, ad_url);
+
+  // reportWin()'s report should be sent still since it didn't timeout.
+  WaitForUrl(
+      embedded_https_test_server().GetURL(kHostA, "/echoall?report_bidder"));
+
+  // reportResult() timed out.
+  EXPECT_TRUE(console_observer.Wait());
+}
+
+IN_PROC_BROWSER_TEST_F(InterestGroupBrowserTest,
+                       ReportingTimeoutTopLevelNotAffectComponentAuction) {
+  const char kHostA[] = "a.test";
+  const char kHostB[] = "b.test";
+  const char decisionLogicJs[] =
+      "/interest_group/report_result_reporting_timeout_value.js";
+  GURL test_url =
+      embedded_https_test_server().GetURL(kHostA, "/page_with_iframe.html");
+  ASSERT_TRUE(NavigateToURL(shell(), test_url));
+  url::Origin test_origin = url::Origin::Create(test_url);
+  url::Origin test_origin_b =
+      url::Origin::Create(embedded_https_test_server().GetURL(kHostB, "/echo"));
+  GURL ad_url =
+      embedded_https_test_server().GetURL(kHostA, "/echo?render_cars");
+  WebContentsConsoleObserver console_observer(shell()->web_contents());
+  console_observer.SetPattern("*Worklet error*");
+
+  EXPECT_EQ(
+      kSuccess,
+      JoinInterestGroupAndVerify(
+          /*owner=*/test_origin,
+          /*name=*/"cars",
+          /*priority=*/0.0,
+          /*execution_mode=*/
+          blink::InterestGroup::ExecutionMode::kCompatibilityMode,
+          /*bidding_url=*/
+          embedded_https_test_server().GetURL(
+              kHostA, "/interest_group/report_win_reporting_timeout_value.js"),
+          /*ads=*/{{{ad_url, /*metadata=*/std::nullopt}}}));
+
+  const char kConfigTemplate[] = R"({
+    seller: $1,
+    decisionLogicURL: $2,
+    reportingTimeout: 0,
+    componentAuctions: [{
+      seller: $3,
+      decisionLogicURL: $4,
+      interestGroupBuyers: [$1],
+      reportingTimeout: 2000,
+    }]
+  })";
+
+  std::string auction_config =
+      JsReplace(kConfigTemplate, test_origin,
+                embedded_https_test_server().GetURL(kHostA, decisionLogicJs),
+                test_origin_b,
+                embedded_https_test_server().GetURL(kHostB, decisionLogicJs));
+  RunAuctionAndWaitForURLAndNavigateIframe(auction_config, ad_url);
+
+  ASSERT_TRUE(console_observer.Wait());
+  // Top level reportResult() aborted due to 0 timeout.
+  EXPECT_EQ("Worklet error: reportResult() aborted due to zero timeout.",
+            console_observer.GetMessageAt(0));
+  // Component auction's reportResult() and reportWin() both succeeded, and get
+  // reporting timeouts from component auction.
+  WaitForUrl(embedded_https_test_server().GetURL(
+      kHostB, "/echoall?report_seller,reportingTimeout=2000"));
+  WaitForUrl(embedded_https_test_server().GetURL(
+      kHostA, "/echoall?report_bidder,reportingTimeout=2000"));
+}
+
+// Worklet handling of zero reporting timeout.
+IN_PROC_BROWSER_TEST_F(InterestGroupBrowserTest, ZeroReportingTimeout) {
+  GURL test_url =
+      embedded_https_test_server().GetURL("a.test", "/page_with_iframe.html");
+  ASSERT_TRUE(NavigateToURL(shell(), test_url));
+  url::Origin test_origin = url::Origin::Create(test_url);
+  GURL ad_url =
+      embedded_https_test_server().GetURL("c.test", "/echo?render_cars");
+  WebContentsConsoleObserver console_observer(shell()->web_contents());
+  console_observer.SetPattern("*Worklet error*");
+
+  EXPECT_EQ(kSuccess,
+            JoinInterestGroupAndVerify(
+                blink::TestInterestGroupBuilder(
+                    /*owner=*/test_origin,
+                    /*name=*/"cars")
+                    .SetBiddingUrl(embedded_https_test_server().GetURL(
+                        "a.test", "/interest_group/report_win_loop_forever.js"))
+                    .SetAds(/*ads=*/{{{ad_url, "null"}}})
+                    .Build()));
+
+  const char kConfigTemplate[] = R"({
+    seller: $1,
+    decisionLogicURL: $2,
+    interestGroupBuyers: [$1],
+    reportingTimeout: 0,
+  })";
+
+  std::string auction_config =
+      JsReplace(kConfigTemplate, test_origin,
+                embedded_https_test_server().GetURL(
+                    "a.test", "/interest_group/decision_logic.js"));
+  RunAuctionAndWaitForURLAndNavigateIframe(auction_config, ad_url);
+
+  ASSERT_TRUE(console_observer.Wait());
+  // We should get nice errors, not worklet crashes.
+  EXPECT_EQ(2u, console_observer.messages().size());
+  EXPECT_EQ("Worklet error: reportResult() aborted due to zero timeout.",
+            console_observer.GetMessageAt(0));
+  EXPECT_EQ("Worklet error: reportWin() aborted due to zero timeout.",
+            console_observer.GetMessageAt(1));
+}
+
+IN_PROC_BROWSER_TEST_F(InterestGroupBrowserTest,
+                       ZeroComponentReportingTimeout) {
+  const char kHostA[] = "a.test";
+  const char kHostB[] = "b.test";
+  GURL test_url =
+      embedded_https_test_server().GetURL(kHostA, "/page_with_iframe.html");
+  ASSERT_TRUE(NavigateToURL(shell(), test_url));
+  url::Origin test_origin = url::Origin::Create(test_url);
+  url::Origin test_origin_b =
+      url::Origin::Create(embedded_https_test_server().GetURL(kHostB, "/echo"));
+  GURL ad_url =
+      embedded_https_test_server().GetURL(kHostA, "/echo?render_cars");
+  WebContentsConsoleObserver console_observer(shell()->web_contents());
+  console_observer.SetPattern("*Worklet error*");
+
+  EXPECT_EQ(kSuccess,
+            JoinInterestGroupAndVerify(
+                /*owner=*/test_origin,
+                /*name=*/"cars",
+                /*priority=*/0.0,
+                /*execution_mode=*/
+                blink::InterestGroup::ExecutionMode::kCompatibilityMode,
+                /*bidding_url=*/
+                embedded_https_test_server().GetURL(
+                    kHostA, "/interest_group/report_win_loop_forever.js"),
+                /*ads=*/{{{ad_url, /*metadata=*/std::nullopt}}}));
+
+  const char kConfigTemplate[] = R"({
+    seller: $1,
+    decisionLogicURL: $2,
+    auctionSignals: "sellerAllowsComponentAuction",
+    reportingTimeout: 500,
+    componentAuctions: [{
+      seller: $3,
+      decisionLogicURL: $4,
+      interestGroupBuyers: [$1],
+      reportingTimeout: 0,
+    }]
+  })";
+
+  std::string auction_config =
+      JsReplace(kConfigTemplate, test_origin,
+                embedded_https_test_server().GetURL(
+                    kHostA, "/interest_group/decision_logic.js"),
+                test_origin_b,
+                embedded_https_test_server().GetURL(
+                    kHostB, "/interest_group/report_result_loop_forever.js"));
+  RunAuctionAndWaitForURLAndNavigateIframe(auction_config, ad_url);
+
+  ASSERT_TRUE(console_observer.Wait());
+  // Component auction's reportResult() and reportWin() aborted due to 0
+  // timeout.
+  EXPECT_EQ("Worklet error: reportResult() aborted due to zero timeout.",
+            console_observer.GetMessageAt(0));
+  EXPECT_EQ("Worklet error: reportWin() aborted due to zero timeout.",
+            console_observer.GetMessageAt(1));
+  // Top level's reportResult() does not timeout.
+  WaitForUrl(
+      embedded_https_test_server().GetURL(kHostA, "/echoall?report_seller"));
+}
+
 class UsesAnticipatoryProcessesTest : public InterestGroupBrowserTest {
  public:
   UsesAnticipatoryProcessesTest() {
@@ -24366,7 +24782,7 @@ IN_PROC_BROWSER_TEST_F(UsesAnticipatoryProcessesTest,
   {
     base::HistogramTester histogram_tester;
     auto result = RunAuctionAndWait(auction_config);
-    histogram_tester.ExpectUniqueSample("Ads.InterestGroup.Auction.Result",
+    histogram_tester.ExpectUniqueSample("Ads.InterestGroup.Auction.Result2",
                                         AuctionResult::kNoBids, 1);
     histogram_tester.ExpectUniqueSample(
         "Ads.InterestGroup.Auction.Seller.RequestWorkletServiceOutcome",
@@ -24397,7 +24813,7 @@ IN_PROC_BROWSER_TEST_F(UsesAnticipatoryProcessesTest,
   {
     base::HistogramTester histogram_tester;
     auto result = RunAuctionAndWait(auction_config);
-    histogram_tester.ExpectUniqueSample("Ads.InterestGroup.Auction.Result",
+    histogram_tester.ExpectUniqueSample("Ads.InterestGroup.Auction.Result2",
                                         AuctionResult::kNoBids, 1);
     histogram_tester.ExpectUniqueSample(
         "Ads.InterestGroup.Auction.Seller.RequestWorkletServiceOutcome",
@@ -24409,418 +24825,6 @@ IN_PROC_BROWSER_TEST_F(UsesAnticipatoryProcessesTest,
         AuctionProcessManager::RequestWorkletServiceOutcome::kUsedIdleProcess,
         1);
   }
-}
-
-class AuctionConfigReportingTimeoutEnabledTest
-    : public InterestGroupBrowserTest {
- public:
-  AuctionConfigReportingTimeoutEnabledTest() {
-    feature_list_.InitAndEnableFeature(
-        {blink::features::kFledgeReportingTimeout});
-  }
-
- private:
-  base::test::ScopedFeatureList feature_list_;
-};
-
-IN_PROC_BROWSER_TEST_F(AuctionConfigReportingTimeoutEnabledTest,
-                       ReportingTimeoutPassedToWorklets) {
-  const char kHostA[] = "a.test";
-  const char kHostB[] = "b.test";
-  GURL test_url =
-      embedded_https_test_server().GetURL(kHostA, "/page_with_iframe.html");
-  ASSERT_TRUE(NavigateToURL(shell(), test_url));
-  url::Origin test_origin = url::Origin::Create(test_url);
-  url::Origin test_origin_b =
-      url::Origin::Create(embedded_https_test_server().GetURL(kHostB, "/echo"));
-  GURL ad_url =
-      embedded_https_test_server().GetURL(kHostA, "/echo?render_cars");
-
-  EXPECT_EQ(
-      kSuccess,
-      JoinInterestGroupAndVerify(
-          /*owner=*/test_origin,
-          /*name=*/"cars",
-          /*priority=*/0.0,
-          /*execution_mode=*/
-          blink::InterestGroup::ExecutionMode::kCompatibilityMode,
-          /*bidding_url=*/
-          embedded_https_test_server().GetURL(
-              kHostA, "/interest_group/report_win_reporting_timeout_value.js"),
-          /*ads=*/{{{ad_url, /*metadata=*/std::nullopt}}}));
-
-  const char kConfigTemplate[] = R"({
-    seller: $1,
-    decisionLogicURL: $2,
-    reportingTimeout: 3000,
-    componentAuctions: [{
-      seller: $3,
-      decisionLogicURL: $4,
-      interestGroupBuyers: [$1],
-      reportingTimeout: 2000,
-    }]
-  })";
-
-  std::string auction_config = JsReplace(
-      kConfigTemplate, test_origin,
-      embedded_https_test_server().GetURL(
-          kHostA, "/interest_group/report_result_reporting_timeout_value.js"),
-      test_origin_b,
-      embedded_https_test_server().GetURL(
-          kHostB, "/interest_group/report_result_reporting_timeout_value.js"));
-  RunAuctionAndWaitForURLAndNavigateIframe(auction_config, ad_url);
-
-  // All report functions succeeded as expected, and reportResult() worklets get
-  // expected auctionConfig.reportingTimeout.
-  WaitForUrl(embedded_https_test_server().GetURL(
-      kHostA, "/echoall?report_bidder,reportingTimeout=2000"));
-  WaitForUrl(embedded_https_test_server().GetURL(
-      kHostA, "/echoall?report_seller,reportingTimeout=3000"));
-  WaitForUrl(embedded_https_test_server().GetURL(
-      kHostB, "/echoall?report_seller,reportingTimeout=2000"));
-}
-
-IN_PROC_BROWSER_TEST_F(AuctionConfigReportingTimeoutEnabledTest,
-                       ReportResultTimedOutWithCustomReportingTimeout) {
-  const char kHostA[] = "a.test";
-  GURL test_url =
-      embedded_https_test_server().GetURL(kHostA, "/page_with_iframe.html");
-  ASSERT_TRUE(NavigateToURL(shell(), test_url));
-  url::Origin test_origin = url::Origin::Create(test_url);
-  GURL ad_url =
-      embedded_https_test_server().GetURL(kHostA, "/echo?render_cars");
-  WebContentsConsoleObserver console_observer(shell()->web_contents());
-  console_observer.SetPattern(
-      "Worklet error: https://a.test:* execution of `reportResult` timed out.");
-
-  EXPECT_EQ(kSuccess,
-            JoinInterestGroupAndVerify(
-                /*owner=*/test_origin,
-                /*name=*/"cars",
-                /*priority=*/0.0,
-                /*execution_mode=*/
-                blink::InterestGroup::ExecutionMode::kCompatibilityMode,
-                /*bidding_url=*/
-                embedded_https_test_server().GetURL(
-                    kHostA, "/interest_group/bidding_logic.js"),
-                /*ads=*/{{{ad_url, /*metadata=*/std::nullopt}}}));
-
-  const char kConfigTemplate[] = R"({
-    seller: $1,
-    decisionLogicURL: $2,
-    interestGroupBuyers: [$1],
-    reportingTimeout: 500,
-  })";
-
-  std::string auction_config =
-      JsReplace(kConfigTemplate, test_origin,
-                embedded_https_test_server().GetURL(
-                    kHostA, "/interest_group/report_result_loop_forever.js"));
-  RunAuctionAndWaitForURLAndNavigateIframe(auction_config, ad_url);
-
-  // reportWin()'s report should be sent still since it didn't timeout.
-  WaitForUrl(
-      embedded_https_test_server().GetURL(kHostA, "/echoall?report_bidder"));
-
-  // reportResult() timed out.
-  EXPECT_TRUE(console_observer.Wait());
-}
-
-IN_PROC_BROWSER_TEST_F(AuctionConfigReportingTimeoutEnabledTest,
-                       ReportingTimeoutTopLevelNotAffectComponentAuction) {
-  const char kHostA[] = "a.test";
-  const char kHostB[] = "b.test";
-  const char decisionLogicJs[] =
-      "/interest_group/report_result_reporting_timeout_value.js";
-  GURL test_url =
-      embedded_https_test_server().GetURL(kHostA, "/page_with_iframe.html");
-  ASSERT_TRUE(NavigateToURL(shell(), test_url));
-  url::Origin test_origin = url::Origin::Create(test_url);
-  url::Origin test_origin_b =
-      url::Origin::Create(embedded_https_test_server().GetURL(kHostB, "/echo"));
-  GURL ad_url =
-      embedded_https_test_server().GetURL(kHostA, "/echo?render_cars");
-  WebContentsConsoleObserver console_observer(shell()->web_contents());
-  console_observer.SetPattern("*Worklet error*");
-
-  EXPECT_EQ(
-      kSuccess,
-      JoinInterestGroupAndVerify(
-          /*owner=*/test_origin,
-          /*name=*/"cars",
-          /*priority=*/0.0,
-          /*execution_mode=*/
-          blink::InterestGroup::ExecutionMode::kCompatibilityMode,
-          /*bidding_url=*/
-          embedded_https_test_server().GetURL(
-              kHostA, "/interest_group/report_win_reporting_timeout_value.js"),
-          /*ads=*/{{{ad_url, /*metadata=*/std::nullopt}}}));
-
-  const char kConfigTemplate[] = R"({
-    seller: $1,
-    decisionLogicURL: $2,
-    reportingTimeout: 0,
-    componentAuctions: [{
-      seller: $3,
-      decisionLogicURL: $4,
-      interestGroupBuyers: [$1],
-      reportingTimeout: 2000,
-    }]
-  })";
-
-  std::string auction_config =
-      JsReplace(kConfigTemplate, test_origin,
-                embedded_https_test_server().GetURL(kHostA, decisionLogicJs),
-                test_origin_b,
-                embedded_https_test_server().GetURL(kHostB, decisionLogicJs));
-  RunAuctionAndWaitForURLAndNavigateIframe(auction_config, ad_url);
-
-  ASSERT_TRUE(console_observer.Wait());
-  // Top level reportResult() aborted due to 0 timeout.
-  EXPECT_EQ("Worklet error: reportResult() aborted due to zero timeout.",
-            console_observer.GetMessageAt(0));
-  // Component auction's reportResult() and reportWin() both succeeded, and get
-  // reporting timeouts from component auction.
-  WaitForUrl(embedded_https_test_server().GetURL(
-      kHostB, "/echoall?report_seller,reportingTimeout=2000"));
-  WaitForUrl(embedded_https_test_server().GetURL(
-      kHostA, "/echoall?report_bidder,reportingTimeout=2000"));
-}
-
-// Worklet handling of zero reporting timeout.
-IN_PROC_BROWSER_TEST_F(AuctionConfigReportingTimeoutEnabledTest,
-                       ZeroReportingTimeout) {
-  GURL test_url =
-      embedded_https_test_server().GetURL("a.test", "/page_with_iframe.html");
-  ASSERT_TRUE(NavigateToURL(shell(), test_url));
-  url::Origin test_origin = url::Origin::Create(test_url);
-  GURL ad_url =
-      embedded_https_test_server().GetURL("c.test", "/echo?render_cars");
-  WebContentsConsoleObserver console_observer(shell()->web_contents());
-  console_observer.SetPattern("*Worklet error*");
-
-  EXPECT_EQ(kSuccess,
-            JoinInterestGroupAndVerify(
-                blink::TestInterestGroupBuilder(
-                    /*owner=*/test_origin,
-                    /*name=*/"cars")
-                    .SetBiddingUrl(embedded_https_test_server().GetURL(
-                        "a.test", "/interest_group/report_win_loop_forever.js"))
-                    .SetAds(/*ads=*/{{{ad_url, "null"}}})
-                    .Build()));
-
-  const char kConfigTemplate[] = R"({
-    seller: $1,
-    decisionLogicURL: $2,
-    interestGroupBuyers: [$1],
-    reportingTimeout: 0,
-  })";
-
-  std::string auction_config =
-      JsReplace(kConfigTemplate, test_origin,
-                embedded_https_test_server().GetURL(
-                    "a.test", "/interest_group/decision_logic.js"));
-  RunAuctionAndWaitForURLAndNavigateIframe(auction_config, ad_url);
-
-  ASSERT_TRUE(console_observer.Wait());
-  // We should get nice errors, not worklet crashes.
-  EXPECT_EQ(2u, console_observer.messages().size());
-  EXPECT_EQ("Worklet error: reportResult() aborted due to zero timeout.",
-            console_observer.GetMessageAt(0));
-  EXPECT_EQ("Worklet error: reportWin() aborted due to zero timeout.",
-            console_observer.GetMessageAt(1));
-}
-
-IN_PROC_BROWSER_TEST_F(AuctionConfigReportingTimeoutEnabledTest,
-                       ZeroComponentReportingTimeout) {
-  const char kHostA[] = "a.test";
-  const char kHostB[] = "b.test";
-  GURL test_url =
-      embedded_https_test_server().GetURL(kHostA, "/page_with_iframe.html");
-  ASSERT_TRUE(NavigateToURL(shell(), test_url));
-  url::Origin test_origin = url::Origin::Create(test_url);
-  url::Origin test_origin_b =
-      url::Origin::Create(embedded_https_test_server().GetURL(kHostB, "/echo"));
-  GURL ad_url =
-      embedded_https_test_server().GetURL(kHostA, "/echo?render_cars");
-  WebContentsConsoleObserver console_observer(shell()->web_contents());
-  console_observer.SetPattern("*Worklet error*");
-
-  EXPECT_EQ(kSuccess,
-            JoinInterestGroupAndVerify(
-                /*owner=*/test_origin,
-                /*name=*/"cars",
-                /*priority=*/0.0,
-                /*execution_mode=*/
-                blink::InterestGroup::ExecutionMode::kCompatibilityMode,
-                /*bidding_url=*/
-                embedded_https_test_server().GetURL(
-                    kHostA, "/interest_group/report_win_loop_forever.js"),
-                /*ads=*/{{{ad_url, /*metadata=*/std::nullopt}}}));
-
-  const char kConfigTemplate[] = R"({
-    seller: $1,
-    decisionLogicURL: $2,
-    auctionSignals: "sellerAllowsComponentAuction",
-    reportingTimeout: 500,
-    componentAuctions: [{
-      seller: $3,
-      decisionLogicURL: $4,
-      interestGroupBuyers: [$1],
-      reportingTimeout: 0,
-    }]
-  })";
-
-  std::string auction_config =
-      JsReplace(kConfigTemplate, test_origin,
-                embedded_https_test_server().GetURL(
-                    kHostA, "/interest_group/decision_logic.js"),
-                test_origin_b,
-                embedded_https_test_server().GetURL(
-                    kHostB, "/interest_group/report_result_loop_forever.js"));
-  RunAuctionAndWaitForURLAndNavigateIframe(auction_config, ad_url);
-
-  ASSERT_TRUE(console_observer.Wait());
-  // Component auction's reportResult() and reportWin() aborted due to 0
-  // timeout.
-  EXPECT_EQ("Worklet error: reportResult() aborted due to zero timeout.",
-            console_observer.GetMessageAt(0));
-  EXPECT_EQ("Worklet error: reportWin() aborted due to zero timeout.",
-            console_observer.GetMessageAt(1));
-  // Top level's reportResult() does not timeout.
-  WaitForUrl(
-      embedded_https_test_server().GetURL(kHostA, "/echoall?report_seller"));
-}
-
-class AuctionConfigReportingTimeoutDisabledTest
-    : public InterestGroupBrowserTest {
- public:
-  AuctionConfigReportingTimeoutDisabledTest() {
-    feature_list_.InitAndDisableFeature(
-        {blink::features::kFledgeReportingTimeout});
-  }
-
- private:
-  base::test::ScopedFeatureList feature_list_;
-};
-
-IN_PROC_BROWSER_TEST_F(AuctionConfigReportingTimeoutDisabledTest,
-                       FeatureDetection) {
-  const char kTestExpression[] = R"(
-    navigator.protectedAudience.queryFeatureSupport(
-        'reportingTimeout');
-  )";
-
-  GURL test_url =
-      embedded_https_test_server().GetURL("a.test", "/simple_page.html");
-
-  ASSERT_TRUE(NavigateToURL(shell(), test_url));
-  EXPECT_EQ(false, EvalJs(shell(), kTestExpression));
-}
-
-IN_PROC_BROWSER_TEST_F(AuctionConfigReportingTimeoutDisabledTest,
-                       ReportResultTimedOutWithDefaultTimeout) {
-  const char kHostA[] = "a.test";
-  GURL test_url =
-      embedded_https_test_server().GetURL(kHostA, "/page_with_iframe.html");
-  ASSERT_TRUE(NavigateToURL(shell(), test_url));
-  url::Origin test_origin = url::Origin::Create(test_url);
-  GURL ad_url =
-      embedded_https_test_server().GetURL(kHostA, "/echo?render_cars");
-  WebContentsConsoleObserver console_observer(shell()->web_contents());
-  console_observer.SetPattern(
-      "Worklet error: https://a.test:* execution of `reportResult` timed out.");
-
-  EXPECT_EQ(kSuccess,
-            JoinInterestGroupAndVerify(
-                /*owner=*/test_origin,
-                /*name=*/"cars",
-                /*priority=*/0.0,
-                /*execution_mode=*/
-                blink::InterestGroup::ExecutionMode::kCompatibilityMode,
-                /*bidding_url=*/
-                embedded_https_test_server().GetURL(
-                    kHostA, "/interest_group/bidding_logic.js"),
-                /*ads=*/{{{ad_url, /*metadata=*/std::nullopt}}}));
-
-  const char kConfigTemplate[] = R"({
-    seller: $1,
-    decisionLogicURL: $2,
-    interestGroupBuyers: [$1],
-  })";
-
-  std::string auction_config =
-      JsReplace(kConfigTemplate, test_origin,
-                embedded_https_test_server().GetURL(
-                    kHostA, "/interest_group/report_result_loop_forever.js"));
-  RunAuctionAndWaitForURLAndNavigateIframe(auction_config, ad_url);
-
-  // reportWin()'s report should be sent still since it didn't timeout.
-  WaitForUrl(
-      embedded_https_test_server().GetURL(kHostA, "/echoall?report_bidder"));
-
-  // reportResult() timed out.
-  EXPECT_TRUE(console_observer.Wait());
-}
-
-// When kFledgeReportingTimeout is disabled, reportingTimeout in auction config
-// will be ignored. And the worklets don't have reportingTimeout field in the
-// auctionConfig they get.
-IN_PROC_BROWSER_TEST_F(AuctionConfigReportingTimeoutDisabledTest,
-                       ConfigReportingTimeoutIgnored) {
-  const char kHostA[] = "a.test";
-  const char kHostB[] = "b.test";
-  GURL test_url =
-      embedded_https_test_server().GetURL(kHostA, "/page_with_iframe.html");
-  ASSERT_TRUE(NavigateToURL(shell(), test_url));
-  url::Origin test_origin = url::Origin::Create(test_url);
-  url::Origin test_origin_b =
-      url::Origin::Create(embedded_https_test_server().GetURL(kHostB, "/echo"));
-  GURL ad_url =
-      embedded_https_test_server().GetURL(kHostA, "/echo?render_cars");
-
-  EXPECT_EQ(
-      kSuccess,
-      JoinInterestGroupAndVerify(
-          /*owner=*/test_origin,
-          /*name=*/"cars",
-          /*priority=*/0.0,
-          /*execution_mode=*/
-          blink::InterestGroup::ExecutionMode::kCompatibilityMode,
-          /*bidding_url=*/
-          embedded_https_test_server().GetURL(
-              kHostA, "/interest_group/report_win_reporting_timeout_value.js"),
-          /*ads=*/{{{ad_url, /*metadata=*/std::nullopt}}}));
-
-  const char kConfigTemplate[] = R"({
-    seller: $1,
-    decisionLogicURL: $2,
-    reportingTimeout: 0,
-    componentAuctions: [{
-      seller: $3,
-      decisionLogicURL: $4,
-      interestGroupBuyers: [$1],
-      reportingTimeout: 0,
-    }]
-  })";
-
-  std::string auction_config = JsReplace(
-      kConfigTemplate, test_origin,
-      embedded_https_test_server().GetURL(
-          kHostA, "/interest_group/report_result_reporting_timeout_value.js"),
-      test_origin_b,
-      embedded_https_test_server().GetURL(
-          kHostB, "/interest_group/report_result_reporting_timeout_value.js"));
-  RunAuctionAndWaitForURLAndNavigateIframe(auction_config, ad_url);
-
-  // All report functions succeeded as expected, which means the auction
-  // config's 0 reporting timeouts were ignored.
-  WaitForUrl(embedded_https_test_server().GetURL(
-      kHostA, "/echoall?report_bidder,reportingTimeout=undefined"));
-  WaitForUrl(embedded_https_test_server().GetURL(
-      kHostA, "/echoall?report_seller,reportingTimeout=undefined"));
-  WaitForUrl(embedded_https_test_server().GetURL(
-      kHostB, "/echoall?report_seller,reportingTimeout=undefined"));
 }
 
 class InterestGroupBFCacheBrowserTest : public InterestGroupBrowserTest {
@@ -27139,7 +27143,7 @@ IN_PROC_BROWSER_TEST_P(InterestGroupPreconnectOwnerAndSignalsOriginsTest,
   // We have no interest groups & nothing cached at this point.
   base::HistogramTester histogram_tester;
   auto result1 = RunAuctionAndWait(auction_config);
-  histogram_tester.ExpectUniqueSample("Ads.InterestGroup.Auction.Result",
+  histogram_tester.ExpectUniqueSample("Ads.InterestGroup.Auction.Result2",
                                       AuctionResult::kNoInterestGroups, 1);
   histogram_tester.ExpectUniqueSample(
       "Ads.InterestGroup.Auction.NumOwnerOriginsCachedForPreconnect", 0, 1);
@@ -27174,7 +27178,7 @@ IN_PROC_BROWSER_TEST_P(InterestGroupPreconnectOwnerAndSignalsOriginsTest,
   EXPECT_EQ(cached_signals_origin, signals_origin);
 
   auto result2 = RunAuctionAndWait(auction_config);
-  histogram_tester.ExpectUniqueSample("Ads.InterestGroup.Auction.Result",
+  histogram_tester.ExpectUniqueSample("Ads.InterestGroup.Auction.Result2",
                                       AuctionResult::kNoInterestGroups, 2);
   histogram_tester.ExpectBucketCount(
       "Ads.InterestGroup.Auction.NumOwnerOriginsCachedForPreconnect", 1, 1);
@@ -27194,8 +27198,8 @@ IN_PROC_BROWSER_TEST_P(InterestGroupPreconnectOwnerAndSignalsOriginsTest,
                           interest_group.owner, "interest_group"}});
 
   auto result3 = RunAuctionAndWait(auction_config);
-  histogram_tester.ExpectTotalCount("Ads.InterestGroup.Auction.Result", 3);
-  histogram_tester.ExpectBucketCount("Ads.InterestGroup.Auction.Result",
+  histogram_tester.ExpectTotalCount("Ads.InterestGroup.Auction.Result2", 3);
+  histogram_tester.ExpectBucketCount("Ads.InterestGroup.Auction.Result2",
                                      AuctionResult::kNoInterestGroups, 2);
   histogram_tester.ExpectBucketCount(
       "Ads.InterestGroup.Auction.NumOwnerOriginsCachedForPreconnect", 1, 2);
@@ -28322,6 +28326,112 @@ IN_PROC_BROWSER_TEST_P(InterestGroupTrustedSignalsKVv2BrowserTest,
                                          seller_signals_url, bidder_origin);
 
   EXPECT_EQ(ad_url, RunAuctionAndWaitForUrl(auction_config));
+}
+
+class DisableLocalAuctionInterestGroupBrowserTest
+    : public InterestGroupBrowserTest {
+ public:
+  DisableLocalAuctionInterestGroupBrowserTest() {
+    feature_list_.InitWithFeatures(
+        /*enabled_features=*/
+        {blink::features::kFledgeDisableLocalAdsAuctions},
+        /*disabled_features=*/
+        {});
+  }
+
+  ~DisableLocalAuctionInterestGroupBrowserTest() override {
+    content_browser_client_.reset();
+  }
+
+  void SetUpTestWithOneInterestGroup() {
+    test_url_ =
+        embedded_https_test_server().GetURL("a.test", "/page_with_iframe.html");
+    ASSERT_TRUE(NavigateToURL(shell(), test_url_));
+    test_origin_ = url::Origin::Create(test_url_);
+
+    ad_url_ = embedded_https_test_server().GetURL(
+        "c.test", "/set-header?Supports-Loading-Mode: fenced-frame");
+    EXPECT_EQ(
+        kSuccess,
+        JoinInterestGroupAndVerify(
+            blink::TestInterestGroupBuilder(
+                /*owner=*/test_origin_,
+                /*name=*/"cars")
+                .SetBiddingUrl(embedded_https_test_server().GetURL(
+                    "a.test", "/interest_group/bidding_logic.js"))
+                .SetTrustedBiddingSignalsUrl(
+                    embedded_https_test_server().GetURL(
+                        "a.test",
+                        "/interest_group/trusted_bidding_signals.json"))
+                .SetTrustedBiddingSignalsKeys({{"key1"}})
+                .SetAds({{{ad_url_, R"({"ad":"metadata","here":[1,2]})"}}})
+                .SetAllSellersCapabilities(
+                    {blink::SellerCapabilities::kInterestGroupCounts,
+                     blink::SellerCapabilities::kLatencyStats})
+                .Build()));
+  }
+
+ protected:
+  base::test::ScopedFeatureList feature_list_;
+  GURL test_url_;
+  url::Origin test_origin_;
+  GURL ad_url_;
+};
+
+IN_PROC_BROWSER_TEST_F(DisableLocalAuctionInterestGroupBrowserTest,
+                       DisableLocalAuctions) {
+  SetUpTestWithOneInterestGroup();
+  // If local auctions are disable via kFledgeDisableLocalAdsAuctions and
+  // there's no "serverResponse" key in the auctionConfig, runAdAuction will not
+  // throw an error. It will return nullptr, which matches what happens when
+  // there is no auction winner.
+  EXPECT_EQ(nullptr, RunAuctionAndWait(JsReplace(
+                         R"({
+    seller: $1,
+    decisionLogicURL: $2,
+    interestGroupBuyers: [$1],
+    auctionReportBuyerKeys: [1n],
+    auctionReportBuyers: {
+      bidCount: { bucket: 100n, scale: 10 },
+    }})",
+                         test_origin_,
+                         embedded_https_test_server().GetURL(
+                             "a.test", "/interest_group/decision_logic.js"))));
+}
+
+IN_PROC_BROWSER_TEST_F(DisableLocalAuctionInterestGroupBrowserTest,
+                       DisableLocalComponentAuctions) {
+  SetUpTestWithOneInterestGroup();
+
+  // Even if the top-level auction has a server response, verify that the
+  // component auctions are also not locally hosted.
+  std::string auction_config = JsReplace(
+      R"({
+        seller: $1,
+        decisionLogicURL: $2,
+        serverResponse: "serverResponse",
+        auctionSignals: "bidderAllowsComponentAuction,"+
+                        "sellerAllowsComponentAuction",
+        componentAuctions:
+            [{
+              seller: $1,
+              decisionLogicURL: $2,
+              interestGroupBuyers: [$1],
+              auctionSignals: "bidderAllowsComponentAuction,"+
+                              "sellerAllowsComponentAuction"
+            },
+            {
+              seller: $1,
+              decisionLogicURL: $2,
+              interestGroupBuyers: [$1],
+              auctionSignals: "bidderAllowsComponentAuction,"+
+                              "sellerAllowsComponentAuction"
+            }]
+      })",
+      test_origin_,
+      embedded_https_test_server().GetURL(test_origin_.host(),
+                                          "/interest_group/decision_logic.js"));
+  EXPECT_EQ(nullptr, RunAuctionAndWait(auction_config));
 }
 
 }  // namespace

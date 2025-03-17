@@ -18,6 +18,7 @@
 #include "net/log/net_log_with_source.h"
 
 namespace net {
+class FirstPartySetMetadata;
 class IsolationInfo;
 class URLRequest;
 class URLRequestContext;
@@ -94,7 +95,9 @@ class NET_EXPORT SessionService {
   // `DeferralParams` containing the session id if the request should be
   // deferred due to a session, and returns std::nullopt if the request
   // does not need to be deferred.
-  virtual std::optional<DeferralParams> ShouldDefer(URLRequest* request) = 0;
+  virtual std::optional<DeferralParams> ShouldDefer(
+      URLRequest* request,
+      const FirstPartySetMetadata& first_party_set_metadata) = 0;
 
   // Defer a request and maybe refresh the corresponding session.
   // `deferral` is either the identifier of the session that is required to be
@@ -135,7 +138,9 @@ class NET_EXPORT SessionService {
   virtual void DeleteAllSessions(
       std::optional<base::Time> created_after_time,
       std::optional<base::Time> created_before_time,
-      base::RepeatingCallback<bool(const net::SchemefulSite&)> site_matcher,
+      base::RepeatingCallback<bool(const url::Origin&,
+                                   const net::SchemefulSite&)>
+          origin_and_site_matcher,
       base::OnceClosure completion_callback) = 0;
 
   // Add an observer for session changes that include `url`. `callback`

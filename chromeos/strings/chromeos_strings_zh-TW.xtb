@@ -81,6 +81,7 @@
 <translation id="131461803491198646">家用網路，非漫遊狀態</translation>
 <translation id="1327977588028644528">閘道</translation>
 <translation id="1328223165223065150">桌布顏色</translation>
+<translation id="1329478709358066995">轉錄稿：</translation>
 <translation id="1330426557709298164">JPG</translation>
 <translation id="1337912285145772892">符合掃描區大小</translation>
 <translation id="1343442362630695901">鹽湖</translation>
@@ -126,7 +127,17 @@
 <translation id="1515129336378114413">瀏覽器首頁</translation>
 <translation id="1526389707933164996">螢幕保護程式動畫</translation>
 <translation id="152892567002884378">調高音量</translation>
+<translation id="1531038290222364269">顯示分頁</translation>
 <translation id="1539864135338521185">青金石</translation>
+<translation id="1548555207631326346">請選擇主題，然後選取畫底線的字詞，打造個人化 AI 圖像。<ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          選取「給我靈感」可取得更多獨特而有變化的 AI 圖像選項。
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          使用 AI 製作內容時，系統會將提示傳送至 Google AI 伺服器，以便生成圖像及提升產品品質，過程中會遵守《<ph name="BEGIN_LINK_GOOGLE_PRIVACY_POLICY" />Google 隱私權政策<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" />》的規定。
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          生成式 AI 為實驗功能，處於初期開發階段，目前未全面開放。</translation>
 <translation id="1555130319947370107">藍色</translation>
 <translation id="155865706765934889">觸控板</translation>
 <translation id="1561927818299383735">背光顏色</translation>
@@ -252,7 +263,6 @@
 <translation id="2011174342667534258">SDK 版本：</translation>
 <translation id="2016697457005847575">試試疑難排解步驟</translation>
 <translation id="202500043506723828">EID</translation>
-<translation id="2041627599411887437">選擇主題並選取加上底線的字詞，即可打造個人化的 AI 圖像。</translation>
 <translation id="2045814230297767491">餐具</translation>
 <translation id="2047316797244836561">如要查看螢幕保護程式，請連上網路並重新載入頁面。</translation>
 <translation id="2056550196601855911">IPv4/IPv6</translation>
@@ -405,6 +415,7 @@
 <translation id="2787237339470862294">目前不支援這個語言</translation>
 <translation id="2787435249130282949">調亮鍵盤</translation>
 <translation id="2805756323405976993">應用程式</translation>
+<translation id="2822702442014805146">正在下載摘要和名稱建立模型</translation>
 <translation id="28232023175184696">無法連線至網際網路。按一下即可重試。</translation>
 <translation id="2855718259207180827">羊毛</translation>
 <translation id="2859243502336719778">重大更新</translation>
@@ -502,6 +513,7 @@
 <translation id="3373141842870501561">地球動態桌布</translation>
 <translation id="33736539805963175">搭配字母 <ph name="LETTERS_LETTER" /> 的<ph name="LETTERS_COLOR" />背景</translation>
 <translation id="3383623117265110236">專屬</translation>
+<translation id="3395147534045164351">切換貼齊位置</translation>
 <translation id="3404249063913988450">啟用螢幕保護程式</translation>
 <translation id="3413935475507503304">如要繼續執行更新作業，請按「下一步」</translation>
 <translation id="3428551088151258685">露天</translation>
@@ -651,6 +663,7 @@
 <translation id="4113067922640381334">現在起，你可以使用全新的<ph name="BEGIN_LINK_WALLPAPER_SUBPAGE" />桌布<ph name="END_LINK_WALLPAPER_SUBPAGE" /></translation>
 <translation id="4117637339509843559">深色模式</translation>
 <translation id="4126551873361000548">倒轉 10 秒</translation>
+<translation id="4128271910628504223">輸入提示，例如「畫出籠罩在薄霧下的森林」</translation>
 <translation id="4130035430755296270">將滑鼠游標懸停在上方，即可查看更多版面配置選項</translation>
 <translation id="4130750466177569591">我同意</translation>
 <translation id="4131410914670010031">黑白</translation>
@@ -824,6 +837,7 @@
 <translation id="4891842000192098784">壓力</translation>
 <translation id="4897058166682006107">裝置的左側無線耳機電池電量為 <ph name="BATTERY_PERCENTAGE" />%。</translation>
 <translation id="4905998861748258752">開啟這項功能即可選取螢幕保護程式選項</translation>
+<translation id="4910853326379896417">摘要和名稱建立模型下載完畢</translation>
 <translation id="4910858703033903787">APN 類型</translation>
 <translation id="4917385247580444890">強</translation>
 <translation id="4917889632206600977">已停止 - 紙張用盡</translation>
@@ -858,8 +872,10 @@
 <translation id="5050042263972837708">群組名稱</translation>
 <translation id="5051044138948155788">這是唯一的頁面。系統會將你導向掃描開始畫面。</translation>
 <translation id="5053233795640754917">暫停</translation>
+<translation id="5056587122125565772">生成圖像</translation>
 <translation id="5078711626843651677">語音模型會暫時儲存在裝置端，直到發言者標籤作業完成為止。你隨時可以前往「設定」關閉這項功能。</translation>
 <translation id="5078983345702708852">未來主義</translation>
+<translation id="5085224064082122501">無法下載摘要和名稱建立模型，請再試一次或重新啟動 Chromebook。</translation>
 <translation id="5087864757604726239">返回</translation>
 <translation id="5088172560898466307">伺服器主機名稱</translation>
 <translation id="5089810972385038852">州</translation>
@@ -1129,14 +1145,12 @@
 <translation id="6325525973963619867">失敗</translation>
 <translation id="6327262166342360252">這張桌布是使用下列文字由 AI 建立而成：「<ph name="PROMPT" />」。</translation>
 <translation id="6331191339300272798">自動深色主題</translation>
-<translation id="6335228876613776082">模型下載完成</translation>
 <translation id="6340526405444716530">個人化</translation>
 <translation id="6348252528297699679">如要關閉定位功能，請依序前往「設定」&gt;「隱私權和安全性」&gt;「隱私權控制項」&gt;「位置資訊存取權」。<ph name="LINK_BEGIN" />瞭解詳情<ph name="LINK_END" /></translation>
 <translation id="6348738456043757611">使用者名稱和密碼</translation>
 <translation id="6352210854422428614">不同的星球</translation>
 <translation id="6359706544163531585">停用淺色主題</translation>
 <translation id="6359919876285606596">這項操作無法復原</translation>
-<translation id="6368342879959028556">如果選取「使用 AI 製作」，請自行輸入提示；如果選取「AI 桌布」，只要再選擇主題並選取加上底線的字詞，就能打造個人化的 AI 桌布。</translation>
 <translation id="636850387210749493">企業註冊</translation>
 <translation id="6369221585240879141">無法為這個轉錄稿語言建立錄音檔名稱</translation>
 <translation id="6373461326814131011">漥池</translation>
@@ -1209,16 +1223,6 @@
 <translation id="6657240842932274095">要允許系統服務使用你的位置資訊嗎？</translation>
 <translation id="6657585470893396449">密碼</translation>
 <translation id="66621959568103627">珊瑚粉</translation>
-<translation id="6667885109186363316"><ph name="SEA_PEN_INTRO_FIRST_PARAGRAPH" />
-          <ph name="LINE_BREAK" />
-          <ph name="LINE_BREAK" />
-          選取「給我靈感」可獲得更多獨特而有變化的 AI 圖像選項。
-          <ph name="LINE_BREAK" />
-          <ph name="LINE_BREAK" />
-          使用 AI 製作內容時，系統會將提示傳送到 Google AI 伺服器，以生成圖像及提升產品品質。資料處理過程會遵守《<ph name="BEGIN_LINK_GOOGLE_PRIVACY_POLICY" />Google 隱私權政策<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" />》的規定。
-          <ph name="LINE_BREAK" />
-          <ph name="LINE_BREAK" />
-          生成式 AI 為實驗功能，處於初期開發階段，目前未全面開放使用。</translation>
 <translation id="6673898378497337661">調高鍵盤亮度</translation>
 <translation id="6692996468359469499">取得選取項目的相關資訊</translation>
 <translation id="6694534975463174713">鎖定</translation>
@@ -1274,6 +1278,7 @@
 <translation id="6930597342185648547">關於背景</translation>
 <translation id="6939667434404433010">搜尋錄音檔名稱</translation>
 <translation id="6939766318048400022">咖啡廳</translation>
+<translation id="6942253772720771875">分享意見回饋或說明你的問題</translation>
 <translation id="6943893908656559156">遠端識別 (選用)</translation>
 <translation id="6953137545147683679">金色</translation>
 <translation id="6957231940976260713">服務名稱</translation>
@@ -1295,6 +1300,7 @@
 <translation id="7040230719604914234">電信業者</translation>
 <translation id="7040729769968826896">允許辨識講者</translation>
 <translation id="7041549558901442110">未連接裝置。</translation>
+<translation id="704183341263526038">木星</translation>
 <translation id="7046522406494308071">要將所有快速鍵重設為預設值嗎？</translation>
 <translation id="7049916119678019302">請前往「設定」下載語音轉錄模型</translation>
 <translation id="7058278511608979688">結束並儲存</translation>
@@ -1389,6 +1395,7 @@
 <translation id="7388345524791662148">更多「<ph name="RECORDING_NAME" />」的選項</translation>
 <translation id="7388959671917308825">內建觸控板</translation>
 <translation id="7397270852490618635">關閉淺色主題</translation>
+<translation id="7400166052988585408">老師將在 <ph name="NUM_SECONDS" /> 秒後鎖定你的畫面</translation>
 <translation id="7401543881546089382">刪除捷徑</translation>
 <translation id="7405493795721832710"><ph name="DEVICE_NAME" />已可更新</translation>
 <translation id="741244894080940828">轉換</translation>
@@ -1427,6 +1434,7 @@
 <translation id="7569444139234840525"><ph name="QUERY_TEXT" /> · /<ph name="PHONETICS" />/</translation>
 <translation id="7570674786725311828">USB 觸控螢幕</translation>
 <translation id="757747079855995705">石頭</translation>
+<translation id="7584853321964440104">無法下載，請再試一次或重新啟動 Chromebook。</translation>
 <translation id="7590883480672980941">輸入法設定</translation>
 <translation id="7595982850646262331">還剩 <ph name="TIME_VALUE" /></translation>
 <translation id="7600430297804876776"><ph name="MANAGER" /> 的系統管理員已設定可使用這部 <ph name="DEVICE_TYPE" /> 的時間。</translation>
@@ -1557,6 +1565,16 @@
 <translation id="8179976553408161302">Enter</translation>
 <translation id="8183975772394450380">海灘</translation>
 <translation id="819278132617411009">運用 Google AI 提升工作效率</translation>
+<translation id="82003371436638355">如果選取「自製桌布」，請自行輸入提示。或者，你可以選取「選擇主題」，然後選取畫底線的字詞，打造個人化 AI 桌布。
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          選取「給我靈感」可取得更多獨特而有變化的 AI 圖像選項。
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          自訂桌布時，系統會將提示傳送到 Google 伺服器，以產生圖像及提升產品品質，過程中會遵守《<ph name="BEGIN_LINK_GOOGLE_PRIVACY_POLICY" />Google 服務條款和隱私權政策<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" />》的規定。請勿加入任何個人、敏感或機密資訊。
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          生成式 AI 提供的內容未必準確 (包括人物相關資訊)，因此請多加查證。<ph name="BEGIN_LINK_CREATE_YOUR_OWN_WALLPAPER" />瞭解詳情<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" /></translation>
 <translation id="8200772114523450471">繼續</translation>
 <translation id="8206859287963243715">手機</translation>
 <translation id="8208861521865154048">獎勵</translation>
@@ -1578,6 +1596,7 @@
 <translation id="8312330582793120272">播放媒體</translation>
 <translation id="8318753676953949627">沒有圖片</translation>
 <translation id="8320910311642849813">森林</translation>
+<translation id="8322464149031882595">按一下即可前往下一頁</translation>
 <translation id="8329018942023753850">計算機應用程式</translation>
 <translation id="8336739000755212683">變更裝置的帳戶圖片</translation>
 <translation id="8339024191194156249">進一步瞭解自動啟動功能</translation>
@@ -1598,6 +1617,7 @@
 <translation id="8395584934117017006">這部 <ph name="DEVICE_TYPE" /> 是由企業管理</translation>
 <translation id="8398927464629426868">裝置目前的充電或放電速率</translation>
 <translation id="8403988360557588704"><ph name="ART_MOVEMENT" />風格的<ph name="ART_FEATURE" />畫作</translation>
+<translation id="8409219750150841791">生成的摘要：</translation>
 <translation id="8410244574650205435">已自動偵測</translation>
 <translation id="8420955526972171689">針對硬體問題進行測試及疑難排解</translation>
 <translation id="8422748173858722634">IMEI</translation>
@@ -1642,6 +1662,7 @@
 <translation id="8626489604350149811">可對 <ph name="APN_NAME" /> 執行的其他動作</translation>
 <translation id="86356131183441916">淺紫色</translation>
 <translation id="8647595191512746911">音訊轉錄</translation>
+<translation id="8648578954147795914">生成的名稱：</translation>
 <translation id="8650852232143958317">將 Gmail 和 Google 雲端硬碟檔案帶著走</translation>
 <translation id="8651481478098336970">靜音</translation>
 <translation id="8655295600908251630">版本</translation>
@@ -1670,7 +1691,6 @@
 <translation id="8764414543112028321">WireGuard</translation>
 <translation id="87646919272181953">Google 相簿中的相簿</translation>
 <translation id="8775713578693478175">數據機 APN</translation>
-<translation id="877735394245039557">正在下載模型</translation>
 <translation id="877985182522063539">A4</translation>
 <translation id="879568662008399081">這個網站可能有網頁認證入口</translation>
 <translation id="8797082062139985406">使用 Google AI 設定名稱</translation>
@@ -1723,6 +1743,7 @@
 <translation id="8961025972867871808">企鵝</translation>
 <translation id="8968751544471797276">充電率</translation>
 <translation id="8970109610781093811">再執行一次</translation>
+<translation id="8972061581514441296">按一下即可返回上一頁</translation>
 <translation id="8983038754672563810">HSPA</translation>
 <translation id="8987565828374052507">{NUMBER_OF_PAGES,plural, =0{掃描}=1{掃描第 {NUMBER_OF_PAGES} 頁}other{掃描第 {NUMBER_OF_PAGES} 頁}}</translation>
 <translation id="89945434909472341">鄉村</translation>
@@ -1784,6 +1805,7 @@
 <translation id="9218016617214286986">顯示已知 APN</translation>
 <translation id="932327136139879170">首頁</translation>
 <translation id="939519157834106403">SSID</translation>
+<translation id="940663759301549538">請確認已接上麥克風，你也可以試著重新啟動 Chromebook</translation>
 <translation id="945522503751344254">提供意見</translation>
 <translation id="950520315903467048">缺少「<ph name="DIRECTION" />」的按鍵。<ph name="ASSIGN_INSTRUCTION" /></translation>
 <translation id="951780398843003443">比較整段錄音中的語音，並在轉錄稿中標出每位講者所說的內容和說話時間</translation>

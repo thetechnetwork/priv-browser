@@ -24,6 +24,7 @@
 #import "components/sync_preferences/pref_service_mock_factory.h"
 #import "components/sync_preferences/pref_service_syncable.h"
 #import "ios/chrome/browser/authentication/ui_bundled/authentication_flow/authentication_flow_performer.h"
+#import "ios/chrome/browser/authentication/ui_bundled/authentication_ui_util.h"
 #import "ios/chrome/browser/ntp/ui_bundled/new_tab_page_feature.h"
 #import "ios/chrome/browser/policy/model/cloud/user_policy_constants.h"
 #import "ios/chrome/browser/policy/model/enterprise_policy_test_helper.h"
@@ -39,6 +40,7 @@
 #import "ios/chrome/browser/signin/model/fake_authentication_service_delegate.h"
 #import "ios/chrome/browser/signin/model/fake_system_identity.h"
 #import "ios/chrome/browser/signin/model/fake_system_identity_manager.h"
+#import "ios/chrome/browser/sync/model/sync_service_factory.h"
 #import "ios/chrome/test/ios_chrome_scoped_testing_local_state.h"
 #import "ios/web/public/test/web_task_environment.h"
 #import "testing/gtest_mac.h"
@@ -120,7 +122,9 @@ class AuthenticationFlowTest : public PlatformTest {
                                            identity:identity
                                         accessPoint:accessPoint
                                   postSignInActions:postSignInActions
-                           presentingViewController:view_controller_mock_];
+                           presentingViewController:view_controller_mock_
+                                         anchorView:nil
+                                         anchorRect:CGRectNull];
     performer_mock_ = OCMStrictClassMock([AuthenticationFlowPerformer class]);
     [authentication_flow_ setPerformerForTesting:performer_mock_];
   }
@@ -178,7 +182,7 @@ class AuthenticationFlowTest : public PlatformTest {
     if (hosted_domain.length) {
       OCMStub([performer_mock_
                   showManagedConfirmationForHostedDomain:hosted_domain
-                                               userEmail:user_email
+                                                identity:identity
                                           viewController:view_controller_mock_
                                                  browser:browser_.get()
                                skipBrowsingDataMigration:NO
@@ -228,7 +232,7 @@ class AuthenticationFlowTest : public PlatformTest {
     // Can't use a RunLoop multiple times, create a new one.
     run_loop_ = std::make_unique<base::RunLoop>();
     authentication_service->SignOut(
-        signin_metrics::ProfileSignout::kChangeAccountInAccountMenu,
+        signin_metrics::ProfileSignout::kSignoutForAccountSwitching,
         base::CallbackToBlock(run_loop_->QuitClosure()));
     run_loop_->Run();
   }
@@ -375,6 +379,76 @@ TEST_F(AuthenticationFlowTest, TestShowManagedConfirmationOnlyOnce) {
   SignOut();
   SignIn(managed_identity2_, signin_metrics::AccessPoint::kAccountMenu);
   EXPECT_EQ(2, managed_confirmation_dialog_shown_count_);
+}
+
+TEST_F(AuthenticationFlowTest, TestDontShowUnsyncedDataConfirmation) {
+  // Another account is already signed in.
+  AuthenticationServiceFactory::GetForProfile(profile_.get())
+      ->SignIn(identity1_, signin_metrics::AccessPoint::kStartPage);
+
+  // Without signing out first, start signing in with a different identity. This
+  // should trigger the check for unsynced data.
+  CreateAuthenticationFlow(PostSignInActionSet(), identity2_,
+                           signin_metrics::AccessPoint::kStartPage);
+
+  syncer::SyncService* sync_service =
+      SyncServiceFactory::GetForProfile(profile_.get());
+  OCMExpect([performer_mock_ fetchUnsyncedDataWithSyncService:sync_service])
+      .andDo(^(NSInvocation*) {
+        [authentication_flow_
+            didFetchUnsyncedDataWithUnsyncedDataTypes:syncer::DataTypeSet()];
+      });
+  // There is no unsynced data in this case, so no confirmation should be
+  // shown - the next step is fetching the managed status.
+  // Don't bother continuing the flow beyond that step for this test.
+  OCMExpect([performer_mock_ fetchManagedStatus:profile_.get()
+                                    forIdentity:identity2_])
+      .andDo(^(NSInvocation*) {
+        run_loop_->Quit();
+      });
+
+  [authentication_flow_ startSignInWithCompletion:sign_in_completion_];
+  run_loop_->Run();
+}
+
+TEST_F(AuthenticationFlowTest, TestShowUnsyncedDataConfirmation) {
+  // Another account is already signed in.
+  AuthenticationServiceFactory::GetForProfile(profile_.get())
+      ->SignIn(identity1_, signin_metrics::AccessPoint::kStartPage);
+
+  // Without signing out first, start signing in with a different identity. This
+  // should trigger the check for unsynced data.
+  CreateAuthenticationFlow(PostSignInActionSet(), identity2_,
+                           signin_metrics::AccessPoint::kStartPage);
+
+  syncer::SyncService* sync_service =
+      SyncServiceFactory::GetForProfile(profile_.get());
+  OCMExpect([performer_mock_ fetchUnsyncedDataWithSyncService:sync_service])
+      .andDo(^(NSInvocation*) {
+        [authentication_flow_ didFetchUnsyncedDataWithUnsyncedDataTypes:
+                                  {syncer::DataType::BOOKMARKS}];
+      });
+  // There is unsynced data, so a confirmation should be shown.
+  // Don't bother continuing the flow beyond that step for this test.
+  OCMExpect(
+      [performer_mock_
+          showLeavingPrimaryAccountConfirmationWithBaseViewController:[OCMArg
+                                                                          any]
+                                                              browser:browser_
+                                                                          .get()
+                                                    signedInUserState:
+                                                        SignedInUserState::
+                                                            kNotSyncingAndReplaceSyncWithSignin
+                                                           anchorView:[OCMArg
+                                                                          any]
+                                                           anchorRect:CGRect()])
+      .ignoringNonObjectArgs()  // Don't care about the CGRect values.
+      .andDo(^(NSInvocation*) {
+        run_loop_->Quit();
+      });
+
+  [authentication_flow_ startSignInWithCompletion:sign_in_completion_];
+  run_loop_->Run();
 }
 
 }  // namespace

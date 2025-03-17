@@ -10,6 +10,7 @@
 
 import argparse
 import glob
+import json
 import math
 import os
 import subprocess
@@ -153,6 +154,10 @@ def _run_fuzzer_target(args):
   fullcorpus_profraw = os.path.join(profraw_dir, target + "_%p.profraw")
   env['LLVM_PROFILE_FILE'] = fullcorpus_profraw
   fullcorpus_cmd = cmd.copy()
+  if corpus_files not in [None, '*']:
+    # Fuzzilli's case
+    jsfiles = corpus_files.split()
+    fullcorpus_cmd.extend([os.path.join(corpus_dir, file) for file in jsfiles])
   _erase_profraws(fullcorpus_profraw)
   for i in range(WHOLE_CORPUS_RETRIES):
     ok = _run_and_log(fullcorpus_cmd, env, WHOLE_CORPUS_TIMEOUT_SECS,
@@ -360,7 +365,7 @@ def _get_fuzzilli_target_details(args):
     jsfiles = [
         file for file in os.listdir(path_to_js_dir) if file.endswith('.js')
     ]
-    files_per_chunk = 10
+    files_per_chunk = 80
     num_of_chunks = math.ceil(len(jsfiles) / files_per_chunk)
     for i in range(num_of_chunks):
       chunk = jsfiles[files_per_chunk * i:files_per_chunk * (i + 1)]
@@ -372,14 +377,15 @@ def _get_fuzzilli_target_details(args):
           'profdata_file':
           os.path.join(REPORT_DIR, f'{corpora_dir}_{i}.profdata'),
           'env':
-          env,
+          dict(),
           'cmd':
-          cmd + chunk,
+          cmd,
           'corpus':
-          fuzzer_target_corporadir,
+          path_to_js_dir,
           'files':
           ' '.join(chunk)
       })
+  return all_target_details
 
 
 def main():

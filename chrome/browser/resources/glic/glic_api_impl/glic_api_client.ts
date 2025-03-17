@@ -2,11 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import type {AnnotatedPageData, ChromeVersion, DraggableArea, FocusedTabCandidate, FocusedTabData, GlicBrowserHost, GlicBrowserHostMetrics, GlicHostRegistry, GlicWebClient, ObservableValue, OpenPanelInfo, PanelState, PdfDocumentData, Screenshot, ScrollToParams, Subscriber, TabContextOptions, TabContextResult, TabData, UserProfileInfo} from '../glic_api/glic_api.js';
+import type {ActInFocusedTabParams, ActInFocusedTabResult, AnnotatedPageData, ChromeVersion, DraggableArea, FocusedTabCandidate, FocusedTabData, GlicBrowserHost, GlicBrowserHostMetrics, GlicHostRegistry, GlicWebClient, ObservableValue, OpenPanelInfo, PanelOpeningData, PanelState, PdfDocumentData, Screenshot, ScrollToParams, Subscriber, TabContextOptions, TabContextResult, TabData, UserProfileInfo} from '../glic_api/glic_api.js';
 
 import {replaceProperties} from './conversions.js';
-import {PostMessageRequestReceiver, PostMessageRequestSender} from './post_message_transport.js';
-import type {AnnotatedPageDataPrivate, FocusedTabCandidatePrivate, FocusedTabDataPrivate, PdfDocumentDataPrivate, RgbaImage, TabContextResultPrivate, TabDataPrivate, TransferableException, WebClientRequestTypes} from './request_types.js';
+import {newSenderId, PostMessageRequestReceiver, PostMessageRequestSender} from './post_message_transport.js';
+import type {ResponseExtras} from './post_message_transport.js';
+import type {ActInFocusedTabResultPrivate, AnnotatedPageDataPrivate, FocusedTabCandidatePrivate, FocusedTabDataPrivate, PdfDocumentDataPrivate, RequestRequestType, RequestResponseType, RgbaImage, TabContextResultPrivate, TabDataPrivate, TransferableException, WebClientRequestTypes} from './request_types.js';
 import {ImageAlphaType, ImageColorType, newTransferableException} from './request_types.js';
 
 
@@ -14,15 +15,16 @@ import {ImageAlphaType, ImageColorType, newTransferableException} from './reques
 // Communicates with the Chrome-WebUI-side in glic_api_host.ts
 
 export class GlicHostRegistryImpl implements GlicHostRegistry {
+  private host: GlicBrowserHostImpl|undefined;
   constructor(private windowProxy: WindowProxy) {}
 
   async registerWebClient(webClient: GlicWebClient): Promise<void> {
-    const host = new GlicBrowserHostImpl(webClient, this.windowProxy);
-    await host.webClientCreated();
+    this.host = new GlicBrowserHostImpl(webClient, this.windowProxy);
+    await this.host.webClientCreated();
     let success = false;
     let exception: TransferableException|undefined;
     try {
-      await webClient.initialize(host);
+      await webClient.initialize(this.host);
       success = true;
     } catch (e) {
       console.warn(e);
@@ -30,7 +32,9 @@ export class GlicHostRegistryImpl implements GlicHostRegistry {
         exception = newTransferableException(e);
       }
     }
-    host.webClientInitialized(success, exception);
+    if (this.host) {
+      this.host.webClientInitialized(success, exception);
+    }
   }
 }
 
@@ -42,11 +46,8 @@ type Promisify<T> = T extends void ? void : Promise<T>;
 type WebClientMessageHandlerInterface = {
   [Property in keyof WebClientRequestTypes]:
       // `payload` is the message payload.
-      // `responseTransfer` is populated by objects that should be transferred
-      // when sending the message.
-  (payload: WebClientRequestTypes[Property]['request'],
-   responseTransfer: Transferable[]) =>
-      Promisify<WebClientRequestTypes[Property]['response']>;
+  (payload: RequestRequestType<Property>, extras: ResponseExtras) =>
+      Promisify<RequestResponseType<Property>>;
 };
 
 class WebClientMessageHandler implements WebClientMessageHandlerInterface {
@@ -61,12 +62,14 @@ class WebClientMessageHandler implements WebClientMessageHandlerInterface {
     }
   }
 
-  async glicWebClientNotifyPanelWillOpen(payload: {panelState: PanelState}):
-      Promise<{openPanelInfo?: OpenPanelInfo}> {
+  async glicWebClientNotifyPanelWillOpen(payload: {
+    panelOpeningData: PanelOpeningData,
+  }): Promise<{openPanelInfo?: OpenPanelInfo}> {
     let openPanelInfo: OpenPanelInfo|undefined;
     try {
-      const result =
-          await this.webClient.notifyPanelWillOpen?.(payload.panelState);
+      const mergedArgument: PanelOpeningData&PanelState = Object.assign(
+          {}, payload.panelOpeningData, payload.panelOpeningData.panelState);
+      const result = await this.webClient.notifyPanelWillOpen?.(mergedArgument);
       if (result) {
         openPanelInfo = result;
       }
@@ -129,9 +132,14 @@ class WebClientMessageHandler implements WebClientMessageHandlerInterface {
   glicWebClientNotifyPanelActiveChanged(payload: {panelActive: boolean}): void {
     this.host.panelActiveValue.assignAndSignal(payload.panelActive);
   }
+
+  async glicWebClientCheckResponsive(): Promise<void> {
+    return this.webClient.checkResponsive?.();
+  }
 }
 
 class GlicBrowserHostImpl implements GlicBrowserHost {
+  private readonly hostId = newSenderId();
   private sender: PostMessageRequestSender;
   private receiver: PostMessageRequestReceiver;
   private handlerFunctionNames: Set<string> = new Set();
@@ -150,10 +158,17 @@ class GlicBrowserHostImpl implements GlicBrowserHost {
   panelActiveValue = ObservableValueImpl.withNoValue<boolean>();
   private metrics: GlicBrowserHostMetricsImpl;
 
-  constructor(private webClient: GlicWebClient, windowProxy: WindowProxy) {
-    this.sender = new PostMessageRequestSender(windowProxy, 'chrome://glic');
-    this.receiver =
-        new PostMessageRequestReceiver('chrome://glic', windowProxy, this);
+  constructor(public webClient: GlicWebClient, windowProxy: WindowProxy) {
+    // TODO(harringtond): Ideally, we could ensure we only process requests from
+    // the single senderId used by the web client. This would avoid accidental
+    // processing of requests from a previous client. This risk is very minimal,
+    // as it would require reloading the webview page and initializing a new
+    // web client very quickly, and in normal operation, the webview does not
+    // reload after successful load.
+    this.sender = new PostMessageRequestSender(
+        windowProxy, 'chrome://glic', this.hostId, 'glic_api_client');
+    this.receiver = new PostMessageRequestReceiver(
+        'chrome://glic', windowProxy, this, 'glic_api_client');
     this.webClientMessageHandler =
         new WebClientMessageHandler(this.webClient, this);
     this.metrics = new GlicBrowserHostMetricsImpl(this.sender);
@@ -171,8 +186,10 @@ class GlicBrowserHostImpl implements GlicBrowserHost {
   }
 
   async webClientCreated() {
-    const state = await this.sender.requestWithResponse(
-        'glicBrowserWebClientCreated', {});
+    const response = await this.sender.requestWithResponse(
+        'glicBrowserWebClientCreated', undefined);
+    const state = response.initialState;
+    this.receiver.setLoggingEnabled(state.loggingEnabled);
     this.panelState.assignAndSignal(state.panelState);
     const focusedTabData =
         convertFocusedTabDataFromPrivate(state.focusedTabData);
@@ -191,6 +208,10 @@ class GlicBrowserHostImpl implements GlicBrowserHost {
     if (!state.scrollToEnabled) {
       (this as GlicBrowserHost).scrollTo = undefined;
     }
+
+    if (!state.actInFocusedTabEnabled) {
+      (this as GlicBrowserHost).actInFocusedTab = undefined;
+    }
   }
 
   webClientInitialized(
@@ -199,20 +220,23 @@ class GlicBrowserHostImpl implements GlicBrowserHost {
         'glicBrowserWebClientInitialized', {success, exception});
   }
 
-  async handleRawRequest(type: string, payload: any):
-      Promise<{payload: any, transfer: Transferable[]}|undefined> {
+  async handleRawRequest(type: string, payload: any, extras: ResponseExtras):
+      Promise<{payload: any}|undefined> {
     if (!this.handlerFunctionNames.has(type)) {
       return;
     }
     const handlerFunction = (this.webClientMessageHandler as any)[type];
-    const transfer: Transferable[] = [];
     const response = await handlerFunction.call(
-        this.webClientMessageHandler, payload, transfer);
+        this.webClientMessageHandler, payload, extras);
     if (!response) {
       return;
     }
-    return {payload: response, transfer};
+    return {payload: response};
   }
+
+  onRequestReceived(_type: string): void {}
+  onRequestHandlerException(_type: string): void {}
+  onRequestCompleted(_type: string): void {}
 
   // GlicBrowserHost implementation.
 
@@ -236,23 +260,23 @@ class GlicBrowserHostImpl implements GlicBrowserHost {
   }
 
   openGlicSettingsPage(): void {
-    this.sender.requestNoResponse('glicBrowserOpenGlicSettingsPage', {});
+    this.sender.requestNoResponse('glicBrowserOpenGlicSettingsPage', undefined);
   }
 
   closePanel(): Promise<void> {
-    return this.sender.requestWithResponse('glicBrowserClosePanel', {});
+    return this.sender.requestWithResponse('glicBrowserClosePanel', undefined);
   }
 
   attachPanel(): void {
-    return this.sender.requestNoResponse('glicBrowserAttachPanel', {});
+    this.sender.requestNoResponse('glicBrowserAttachPanel', undefined);
   }
 
   detachPanel(): void {
-    return this.sender.requestNoResponse('glicBrowserDetachPanel', {});
+    this.sender.requestNoResponse('glicBrowserDetachPanel', undefined);
   }
 
   showProfilePicker(): void {
-    this.sender.requestNoResponse('glicBrowserShowProfilePicker', {});
+    this.sender.requestNoResponse('glicBrowserShowProfilePicker', undefined);
   }
 
   async getContextFromFocusedTab(options: TabContextOptions):
@@ -260,6 +284,15 @@ class GlicBrowserHostImpl implements GlicBrowserHost {
     const context = await this.sender.requestWithResponse(
         'glicBrowserGetContextFromFocusedTab', {options});
     return convertTabContextResultFromPrivate(context.tabContextResult);
+  }
+
+  async actInFocusedTab(
+      actInFocusedTabParams: ActInFocusedTabParams):
+      Promise<ActInFocusedTabResult> {
+    const context = await this.sender.requestWithResponse(
+        'glicBrowserActInFocusedTab', {actInFocusedTabParams});
+    return convertActInFocusedTabResultFromPrivate(
+        context.actInFocusedTabResult);
   }
 
   async resizeWindow(width: number, height: number, options?: {
@@ -271,13 +304,18 @@ class GlicBrowserHostImpl implements GlicBrowserHost {
 
   async captureScreenshot(): Promise<Screenshot> {
     const screenshotResult = await this.sender.requestWithResponse(
-        'glicBrowserCaptureScreenshot', {});
+        'glicBrowserCaptureScreenshot', undefined);
     return screenshotResult.screenshot;
   }
 
-  setWindowDraggableAreas(areas: DraggableArea[]) {
+  setWindowDraggableAreas(areas: DraggableArea[]): Promise<void> {
     return this.sender.requestWithResponse(
         'glicBrowserSetWindowDraggableAreas', {areas});
+  }
+
+  setMinimumWidgetSize(width: number, height: number): Promise<void> {
+    return this.sender.requestWithResponse(
+        'glicBrowserSetMinimumWidgetSize', {size: {width, height}});
   }
 
   getPanelState(): ObservableValueImpl<PanelState> {
@@ -334,7 +372,7 @@ class GlicBrowserHostImpl implements GlicBrowserHost {
 
   async getUserProfileInfo?(): Promise<UserProfileInfo> {
     const {profileInfo} = await this.sender.requestWithResponse(
-        'glicBrowserGetUserProfileInfo', {});
+        'glicBrowserGetUserProfileInfo', undefined);
     if (!profileInfo) {
       throw new Error('getUserProfileInfo failed');
     }
@@ -346,7 +384,7 @@ class GlicBrowserHostImpl implements GlicBrowserHost {
 
   async refreshSignInCookies(): Promise<void> {
     const result = await this.sender.requestWithResponse(
-        'glicBrowserRefreshSignInCookies', {});
+        'glicBrowserRefreshSignInCookies', undefined);
     if (!result.success) {
       throw Error('refreshSignInCookies failed');
     }
@@ -363,6 +401,16 @@ class GlicBrowserHostImpl implements GlicBrowserHost {
   scrollTo(params: ScrollToParams): Promise<void> {
     return this.sender.requestWithResponse('glicBrowserScrollTo', {params});
   }
+
+  setSyntheticExperimentState(trialName: string, groupName: string): void {
+    this.sender.requestNoResponse(
+        'glicBrowserSetSyntheticExperimentState', {trialName, groupName});
+  }
+
+  openOsPermissionSettingsMenu(permission: string): void {
+    this.sender.requestNoResponse(
+        'glicBrowserOpenOsPermissionSettingsMenu', {permission});
+  }
 }
 
 class GlicBrowserHostMetricsImpl implements GlicBrowserHostMetrics {
@@ -373,38 +421,20 @@ class GlicBrowserHostMetricsImpl implements GlicBrowserHostMetrics {
   }
 
   onResponseStarted(): void {
-    this.sender.requestNoResponse('glicBrowserOnResponseStarted', {});
+    this.sender.requestNoResponse('glicBrowserOnResponseStarted', undefined);
   }
 
   onResponseStopped(): void {
-    this.sender.requestNoResponse('glicBrowserOnResponseStopped', {});
+    this.sender.requestNoResponse('glicBrowserOnResponseStopped', undefined);
   }
 
   onSessionTerminated(): void {
-    this.sender.requestNoResponse('glicBrowserOnSessionTerminated', {});
+    this.sender.requestNoResponse('glicBrowserOnSessionTerminated', undefined);
   }
 
   onResponseRated(positive: boolean): void {
     this.sender.requestNoResponse('glicBrowserOnResponseRated', {positive});
   }
-}
-
-// Returns a promise which resolves to the `GlicHostRegistry`. This promise
-// never resolves if a message from Chromium glic is not received.
-// This should be called on or before page load.
-export function createGlicHostRegistryOnLoad(): Promise<GlicHostRegistry> {
-  const {promise, resolve} = Promise.withResolvers<GlicHostRegistry>();
-  const messageHandler = (event: MessageEvent) => {
-    if (event.origin !== 'chrome://glic' || event.source === null) {
-      return;
-    }
-    if (event.data && event.data['type'] === 'glic-bootstrap') {
-      resolve(new GlicHostRegistryImpl(event.source as WindowProxy));
-      window.removeEventListener('message', messageHandler);
-    }
-  };
-  window.addEventListener('message', messageHandler);
-  return promise;
 }
 
 // Converts an RgbaImage into a Blob through the canvas API. Output is a PNG.
@@ -517,6 +547,13 @@ function convertTabContextResultFromPrivate(data: TabContextResultPrivate):
   return replaceProperties(data, {tabData, pdfDocumentData, annotatedPageData});
 }
 
+function convertActInFocusedTabResultFromPrivate(
+    data: ActInFocusedTabResultPrivate): ActInFocusedTabResult {
+  const tabContextResult =
+      convertTabContextResultFromPrivate(data.tabContextResult);
+  return replaceProperties(data, {tabContextResult});
+}
+
 class ObservableSubscription<T> implements Subscriber {
   constructor(
       public onChange: (newValue: T) => void,
@@ -555,7 +592,11 @@ class ObservableValueImpl<T> implements ObservableValue<T> {
     this.subscribers.forEach((sub) => {
       // Ignore if removed since forEach was called.
       if (this.subscribers.has(sub)) {
-        sub.onChange(v);
+        try {
+          sub.onChange(v);
+        } catch (e) {
+          console.warn(e);
+        }
       }
     });
   }

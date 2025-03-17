@@ -27,7 +27,6 @@
 #include "third_party/blink/renderer/core/execution_context/execution_context.h"
 #include "third_party/blink/renderer/modules/ai/ai.h"
 #include "third_party/blink/renderer/modules/ai/ai_availability.h"
-#include "third_party/blink/renderer/modules/ai/ai_capability_availability.h"
 #include "third_party/blink/renderer/modules/ai/ai_create_monitor.h"
 #include "third_party/blink/renderer/modules/ai/ai_language_model.h"
 #include "third_party/blink/renderer/modules/ai/ai_language_model_params.h"
@@ -43,19 +42,6 @@ namespace blink {
 
 namespace {
 
-mojom::blink::AILanguageModelInitialPromptRole AILanguageModelInitialPromptRole(
-    V8AILanguageModelPromptRole role) {
-  switch (role.AsEnum()) {
-    case V8AILanguageModelPromptRole::Enum::kSystem:
-      return mojom::blink::AILanguageModelInitialPromptRole::kSystem;
-    case V8AILanguageModelPromptRole::Enum::kUser:
-      return mojom::blink::AILanguageModelInitialPromptRole::kUser;
-    case V8AILanguageModelPromptRole::Enum::kAssistant:
-      return mojom::blink::AILanguageModelInitialPromptRole::kAssistant;
-  }
-  NOTREACHED();
-}
-
 class CreateLanguageModelClient
     : public GarbageCollected<CreateLanguageModelClient>,
       public mojom::blink::AIManagerCreateLanguageModelClient,
@@ -68,8 +54,7 @@ class CreateLanguageModelClient
       AbortSignal* signal,
       mojom::blink::AILanguageModelSamplingParamsPtr sampling_params,
       WTF::String system_prompt,
-      WTF::Vector<mojom::blink::AILanguageModelInitialPromptPtr>
-          initial_prompts,
+      WTF::Vector<mojom::blink::AILanguageModelPromptPtr> initial_prompts,
       AICreateMonitor* monitor,
       std::optional<WTF::Vector<WTF::String>> expected_input_languages)
       : AIMojoClient(script_state, ai, resolver, signal),
@@ -187,68 +172,6 @@ void AILanguageModelFactory::Trace(Visitor* visitor) const {
   visitor->Trace(ai_);
 }
 
-// TODO(crbug.com/390459309): remove `OnGetModelInfoComplete()`.
-void AILanguageModelFactory::OnGetModelInfoComplete(
-    ScriptPromiseResolver<AILanguageModelCapabilities>* resolver,
-    AILanguageModelCapabilities* capabilities,
-    mojom::blink::AILanguageModelParamsPtr params) {
-  CHECK(params);
-  capabilities->SetDefaultTopK(params->default_sampling_params->top_k);
-  capabilities->SetDefaultTemperature(
-      params->default_sampling_params->temperature);
-  capabilities->SetMaxTopK(params->max_sampling_params->top_k);
-  capabilities->SetMaxTemperature(params->max_sampling_params->temperature);
-
-  resolver->Resolve(capabilities);
-}
-
-// TODO(crbug.com/390459309): remove `OnCanCreateSessionComplete()`.
-void AILanguageModelFactory::OnCanCreateSessionComplete(
-    ScriptPromiseResolver<AILanguageModelCapabilities>* resolver,
-    mojom::blink::ModelAvailabilityCheckResult check_result) {
-  AICapabilityAvailability availability =
-      AIAvailabilityToAICapabilityAvailability(
-          HandleModelAvailabilityCheckResult(
-              GetExecutionContext(), AIMetrics::AISessionType::kLanguageModel,
-              check_result));
-  auto* capabilities = MakeGarbageCollected<AILanguageModelCapabilities>(
-      AICapabilityAvailabilityToV8(availability));
-  if (availability != AICapabilityAvailability::kReadily) {
-    resolver->Resolve(capabilities);
-    return;
-  }
-
-  ai_->GetAIRemote()->GetLanguageModelParams(WTF::BindOnce(
-      &AILanguageModelFactory::OnGetModelInfoComplete, WrapPersistent(this),
-      WrapPersistent(resolver), WrapPersistent(capabilities)));
-}
-
-// TODO(crbug.com/390459309): remove `capabilities()`.
-ScriptPromise<AILanguageModelCapabilities> AILanguageModelFactory::capabilities(
-    ScriptState* script_state,
-    ExceptionState& exception_state) {
-  if (!script_state->ContextIsValid()) {
-    ThrowInvalidContextException(exception_state);
-    return ScriptPromise<AILanguageModelCapabilities>();
-  }
-
-  auto* resolver =
-      MakeGarbageCollected<ScriptPromiseResolver<AILanguageModelCapabilities>>(
-          script_state);
-  auto promise = resolver->Promise();
-
-  base::UmaHistogramEnumeration(AIMetrics::GetAIAPIUsageMetricName(
-                                    AIMetrics::AISessionType::kLanguageModel),
-                                AIMetrics::AIAPI::kCanCreateSession);
-
-  ai_->GetAIRemote()->CanCreateLanguageModel(
-      std::nullopt,
-      WTF::BindOnce(&AILanguageModelFactory::OnCanCreateSessionComplete,
-                    WrapPersistent(this), WrapPersistent(resolver)));
-
-  return promise;
-}
-
 void AILanguageModelFactory::OnCanCreateLanguageModelComplete(
     ScriptPromiseResolver<V8AIAvailability>* resolver,
     mojom::blink::ModelAvailabilityCheckResult check_result) {
@@ -356,7 +279,7 @@ ScriptPromise<AILanguageModel> AILanguageModelFactory::create(
 
   mojom::blink::AILanguageModelSamplingParamsPtr sampling_params;
   WTF::String system_prompt;
-  WTF::Vector<mojom::blink::AILanguageModelInitialPromptPtr> initial_prompts;
+  WTF::Vector<mojom::blink::AILanguageModelPromptPtr> initial_prompts;
   AbortSignal* signal = nullptr;
   AICreateMonitor* monitor = MakeGarbageCollected<AICreateMonitor>(
       GetExecutionContext(), task_runner_);
@@ -453,10 +376,10 @@ ScriptPromise<AILanguageModel> AILanguageModelFactory::create(
             resolver->RejectWithTypeError("Input type not supported");
             return promise;
           }
-          initial_prompts.push_back(
-              mojom::blink::AILanguageModelInitialPrompt::New(
-                  AILanguageModelInitialPromptRole(dict->role()),
-                  dict->content()->GetAsString()));
+          initial_prompts.push_back(mojom::blink::AILanguageModelPrompt::New(
+              AILanguageModel::ConvertRoleToMojo(dict->role()),
+              mojom::blink::AILanguageModelPromptContent::NewText(
+                  dict->content()->GetAsString())));
         }
       }
     }

@@ -331,7 +331,7 @@ void AXRelationCache::GetExplicitlySetElementsForAttr(
     const QualifiedName& attr_name,
     HeapVector<Member<Element>>& target_elements) {
   if (source.HasExplicitlySetAttrAssociatedElements(attr_name)) {
-    HeapLinkedHashSet<WeakMember<Element>>* explicitly_set_elements =
+    GCedHeapLinkedHashSet<WeakMember<Element>>* explicitly_set_elements =
         source.GetExplicitlySetElementsForAttr(attr_name);
     for (const WeakMember<Element>& element : *explicitly_set_elements) {
       target_elements.push_back(element);
@@ -873,8 +873,13 @@ void AXRelationCache::UpdateAriaOwnsWithCleanLayout(AXObject* owner,
   // that |owner| is replacing may have previously been a valid owner. In this
   // case, the old owned child mappings will need to be removed.
   bool is_valid_owner = IsValidOwner(owner);
-  if (!force && !is_valid_owner)
+  if (!force && !is_valid_owner) {
+    // Make sure that the owner's children are updated even in the case where
+    // aria-owns is empty, or the object is not a valid owner. This protects
+    // from ending up with a previous owner containing invalid children.
+    ChildrenChangedWithCleanLayout(owner);
     return;
+  }
 
   HeapVector<Member<AXObject>> owned_children;
 
@@ -974,6 +979,7 @@ void AXRelationCache::UpdateAriaOwnerToChildrenMappingWithCleanLayout(
   // there is nothing to refresh even for a new AXObject replacing an old owner.
   if (previously_owned_child_ids == validated_owned_child_axids &&
       (!force || previously_owned_child_ids.empty())) {
+    ChildrenChangedWithCleanLayout(owner);
     return;
   }
 

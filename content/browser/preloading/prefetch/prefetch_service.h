@@ -28,9 +28,12 @@
 #include "services/network/public/mojom/url_response_head.mojom.h"
 #include "url/gurl.h"
 
+namespace network {
+class SharedURLLoaderFactory;
+}  // namespace network
+
 namespace network::mojom {
 class NetworkContext;
-class URLLoaderFactory;
 }  // namespace network::mojom
 
 namespace content {
@@ -115,17 +118,14 @@ class CONTENT_EXPORT PrefetchService {
   // |prefetch_container| to the default network context.
   virtual void CopyIsolatedCookies(const PrefetchContainer::Reader& reader);
 
-  // Add `PrefetchContainer` under control of `PrefetchService`.
+  // Adds `PrefetchContainer` under control of `PrefetchService` and returns
+  // PrefetchHandle so that the caller can control prefetch resources associated
+  // with this.
   //
-  // `AddPrefetchContainer()` synchronously destruct `prefetch_container` if the
-  // key conflicted to the one already added with migration of some attributes.
-  // See also `MigrateNewlyaAdded()`.
-  //
-  // `AddPrefetchContainerWithHandle()` additionally returns PrefetchHandle so
-  // that the caller can control prefetch resources associated with this.
-  void AddPrefetchContainer(
-      std::unique_ptr<PrefetchContainer> prefetch_container);
-  std::unique_ptr<PrefetchHandle> AddPrefetchContainerWithHandle(
+  // `AddPrefetchContainer*()` synchronously destruct `prefetch_container` if
+  // the key conflicted to the one already added with migration of some
+  // attributes. See also `MigrateNewlyaAdded()`.
+  [[nodiscard]] std::unique_ptr<PrefetchHandle> AddPrefetchContainerWithHandle(
       std::unique_ptr<PrefetchContainer> prefetch_container);
   void AddPrefetchContainerWithoutStartingPrefetchForTesting(
       std::unique_ptr<PrefetchContainer> prefetch_container);
@@ -140,6 +140,13 @@ class CONTENT_EXPORT PrefetchService {
   bool IsPrefetchDuplicate(
       GURL& url,
       std::optional<net::HttpNoVarySearchData> no_vary_search_hint);
+
+  // Whether the prefetch attempt for `key` has failed or discarded.
+  // Note: the semantics of this method is not super clear and thus is exposed
+  // only for the existing `PrefetchDocumentManager` use case for now.
+  bool IsPrefetchAttemptFailedOrDiscardedInternal(
+      base::PassKey<PrefetchDocumentManager>,
+      PrefetchContainer::Key key) const;
 
   // An interface to notify `PrefetchService` that the given `PrefetchContainer`
   // is no longer needed from outside of the service.
@@ -160,7 +167,7 @@ class CONTENT_EXPORT PrefetchService {
   // that this does not take ownership of |url_loader_factory|, and caller must
   // keep ownership over the course of the test.
   static void SetURLLoaderFactoryForTesting(
-      network::mojom::URLLoaderFactory* url_loader_factory);
+      network::SharedURLLoaderFactory* url_loader_factory);
 
   // Sets the NetworkContext to use just for the proxy lookup. Note that this
   // does not take ownership of |network_context|, and the caller must keep
@@ -175,11 +182,6 @@ class CONTENT_EXPORT PrefetchService {
       DelayEligibilityCheckForTesting callback);
   // Set an ineligibility to make eligibility check always fail in tests.
   static void SetForceIneligibilityForTesting(PreloadingEligibility);
-  // Set a callback for waiting for prefetch completion in tests.
-  using PrefetchResponseCompletedCallbackForTesting =
-      base::RepeatingCallback<void(base::WeakPtr<PrefetchContainer>)>;
-  static void SetPrefetchResponseCompletedCallbackForTesting(
-      PrefetchResponseCompletedCallbackForTesting callback);
 
   base::WeakPtr<PrefetchContainer> MatchUrl(
       const PrefetchContainer::Key& key) const;
@@ -292,7 +294,7 @@ class CONTENT_EXPORT PrefetchService {
       PreloadingEligibility eligibility);
 
   // Adds `prefetch_container` to the cache but doesn't initiate prefetching.
-  // Use `AddPrefetchContainer()` for non-test cases.
+  // Use `AddPrefetchContainerWithHandle()` for non-test cases.
   void AddPrefetchContainerWithoutStartingPrefetch(
       std::unique_ptr<PrefetchContainer> prefetch_container);
 
@@ -327,7 +329,8 @@ class CONTENT_EXPORT PrefetchService {
 
   // Gets the URL loader for the given |prefetch_container|. If an override was
   // set by |SetURLLoaderFactoryForTesting|, then that will be returned instead.
-  network::mojom::URLLoaderFactory* GetURLLoaderFactoryForCurrentPrefetch(
+  scoped_refptr<network::SharedURLLoaderFactory>
+  GetURLLoaderFactoryForCurrentPrefetch(
       base::WeakPtr<PrefetchContainer> prefetch_container);
 
   // Called when the request for |prefetch_container| is redirected.
@@ -446,9 +449,8 @@ class CONTENT_EXPORT PrefetchService {
   // Current prefetch with an in-progress request (if any).
   std::optional<PrefetchContainer::Key> active_prefetch_;
 
-  // Prefetches owned by |this|. Once the network request for a prefetch is
-  // started, |this| takes ownership of the prefetch so the response can be used
-  // on future page loads.
+  // Prefetches owned by `this`. All `PrefetchContainer`s added by
+  // `AddPrefetchContainer*` will be stored here.
   std::map<PrefetchContainer::Key, std::unique_ptr<PrefetchContainer>>
       owned_prefetches_;
 

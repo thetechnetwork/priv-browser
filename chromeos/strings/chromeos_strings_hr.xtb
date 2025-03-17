@@ -81,6 +81,7 @@
 <translation id="131461803491198646">Matična mreža, bez roaminga</translation>
 <translation id="1327977588028644528">Pristupnik</translation>
 <translation id="1328223165223065150">Boja pozadine</translation>
+<translation id="1329478709358066995">Prijepis:</translation>
 <translation id="1330426557709298164">JPG</translation>
 <translation id="1337912285145772892">Prilagodi području skeniranja</translation>
 <translation id="1343442362630695901">slano jezero</translation>
@@ -126,7 +127,17 @@
 <translation id="1515129336378114413">početna stranica preglednika</translation>
 <translation id="1526389707933164996">Animirani čuvari zaslona</translation>
 <translation id="152892567002884378">Pojačavanje glasnoće</translation>
+<translation id="1531038290222364269">Prikažite kartice</translation>
 <translation id="1539864135338521185">lapis lazuli</translation>
+<translation id="1548555207631326346">Odaberite temu, a zatim podcrtane riječi da biste personalizirali svoje AI slike.<ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          Odaberite Nadahni me da biste dobili jedinstvenije i raznolikije opcije AI slika.
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          Kad izrađujete sadržaj pomoću umjetne inteligencije, poslužiteljima Googleovog AI-ja šalje se upit radi generiranja slika i poboljšanja proizvoda, u skladu s <ph name="BEGIN_LINK_GOOGLE_PRIVACY_POLICY" />Googleovim pravilima o privatnosti<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" />.
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          Generativni AI u eksperimentalnoj je fazi, odnosno u ranom razvoju, a dostupnost je trenutačno ograničena.</translation>
 <translation id="1555130319947370107">Plava</translation>
 <translation id="155865706765934889">Dodirna površina</translation>
 <translation id="1561927818299383735">boja pozadinskog osvjetljenja</translation>
@@ -252,7 +263,6 @@
 <translation id="2011174342667534258">Verzija SDK-a:</translation>
 <translation id="2016697457005847575">Isprobajte upute za rješavanje problema</translation>
 <translation id="202500043506723828">EID</translation>
-<translation id="2041627599411887437">Odaberite temu, a zatim podcrtane riječi da biste personalizirali svoje AI slike.</translation>
 <translation id="2045814230297767491">pribor za jelo</translation>
 <translation id="2047316797244836561">Povežite se s mrežom i ponovo učitajte stranicu da biste pregledali čuvar zaslona.</translation>
 <translation id="2056550196601855911">IPv4/IPv6</translation>
@@ -405,6 +415,7 @@
 <translation id="2787237339470862294">Taj jezik trenutačno nije podržan</translation>
 <translation id="2787435249130282949">svjetlija tipkovnica</translation>
 <translation id="2805756323405976993">Aplikacije</translation>
+<translation id="2822702442014805146">U tijeku je preuzimanje modela za izradu sažetaka i naziva</translation>
 <translation id="28232023175184696">Povezivanje s internetom nije uspjelo. Kliknite da biste pokušali ponovo.</translation>
 <translation id="2855718259207180827">vune</translation>
 <translation id="2859243502336719778">Kritično ažuriranje</translation>
@@ -502,6 +513,7 @@
 <translation id="3373141842870501561">Pozadina sa Zemljom</translation>
 <translation id="33736539805963175">Pozadina: <ph name="LETTERS_COLOR" /> sa slovom <ph name="LETTERS_LETTER" /></translation>
 <translation id="3383623117265110236">Ekskluzivno</translation>
+<translation id="3395147534045164351">Uključi/isključi lokaciju poravnanja</translation>
 <translation id="3404249063913988450">Omogućivanje čuvara zaslona</translation>
 <translation id="3413935475507503304">Da biste nastavili s ažuriranjem, kliknite Dalje.</translation>
 <translation id="3428551088151258685">na otvorenom</translation>
@@ -651,6 +663,7 @@
 <translation id="4113067922640381334">Sada imate pristup novim <ph name="BEGIN_LINK_WALLPAPER_SUBPAGE" />pozadinama<ph name="END_LINK_WALLPAPER_SUBPAGE" /></translation>
 <translation id="4117637339509843559">Tamni način</translation>
 <translation id="4126551873361000548">10 s unatrag</translation>
+<translation id="4128271910628504223">Unesite upit kao što je "nacrtaj maglovitu šumu"</translation>
 <translation id="4130035430755296270">Zadržite pokazivač miša za više opcija izgleda</translation>
 <translation id="4130750466177569591">Slažem se</translation>
 <translation id="4131410914670010031">Crno-bijelo</translation>
@@ -824,6 +837,7 @@
 <translation id="4891842000192098784">Stres</translation>
 <translation id="4897058166682006107">Uređaj ima <ph name="BATTERY_PERCENTAGE" />% baterije za lijevu slušalicu.</translation>
 <translation id="4905998861748258752">Uključite tu značajku da biste odabrali opcije čuvara zaslona</translation>
+<translation id="4910853326379896417">Dovršeno je preuzimanje modela za izradu sažetaka i naziva</translation>
 <translation id="4910858703033903787">Vrste APN-ova</translation>
 <translation id="4917385247580444890">Jak</translation>
 <translation id="4917889632206600977">Zaustavljeno – nema papira</translation>
@@ -858,8 +872,10 @@
 <translation id="5050042263972837708">Naziv grupe</translation>
 <translation id="5051044138948155788">To je jedina stranica. To će vas vratiti na početni zaslon skeniranja.</translation>
 <translation id="5053233795640754917">Pauzirajte</translation>
+<translation id="5056587122125565772">Izradi sliku</translation>
 <translation id="5078711626843651677">Glasovni modeli privremeno se pohranjuju na uređaju dok se ne dovrši označavanje govornika. Tu značajku uvijek možete isključiti u postavkama.</translation>
 <translation id="5078983345702708852">futuristički</translation>
+<translation id="5085224064082122501">Preuzimanje modela za izradu sažetaka i naziva nije uspjelo. Pokušajte ponovo ili ponovo pokrenite Chromebook.</translation>
 <translation id="5087864757604726239">natrag</translation>
 <translation id="5088172560898466307">Naziv hosta poslužitelja</translation>
 <translation id="5089810972385038852">Savezna država</translation>
@@ -1028,6 +1044,7 @@
 <translation id="5896602941605730551">Reproducirajte</translation>
 <translation id="5901630391730855834">Žuta</translation>
 <translation id="5903200662178656908">Uređaj je kombinacija tipkovnice i miša.</translation>
+<translation id="5903822368221507416">Sakrij kartice</translation>
 <translation id="5904994456462260490">Dodajte novi APN</translation>
 <translation id="590746845088109442">mačke</translation>
 <translation id="5907649332524363701">boja tipke</translation>
@@ -1129,14 +1146,12 @@
 <translation id="6325525973963619867">Nije uspjelo</translation>
 <translation id="6327262166342360252">Ova je pozadina izrađena s pomoću umjetne inteligencije i sljedećeg teksta: "<ph name="PROMPT" />".</translation>
 <translation id="6331191339300272798">Automatska tamna tema</translation>
-<translation id="6335228876613776082">Preuzimanje modela dovršeno</translation>
 <translation id="6340526405444716530">Prilagodba</translation>
 <translation id="6348252528297699679">Lokaciju možete isključiti u odjeljku Postavke &gt; Privatnost i sigurnost &gt; Kontrole privatnosti &gt; Pristup lokaciji. <ph name="LINK_BEGIN" />Saznajte više<ph name="LINK_END" /></translation>
 <translation id="6348738456043757611">Korisničko ime i zaporka</translation>
 <translation id="6352210854422428614">različiti planet</translation>
 <translation id="6359706544163531585">Onemogućivanje svijetle teme</translation>
 <translation id="6359919876285606596">Ta je radnja trajna i ne može se poništiti</translation>
-<translation id="6368342879959028556">Kad odaberete Izradite pomoću AI-ja, napišite prilagođeni upit. Možete odabrati i opciju AI pozadine da biste odabrali temu, a zatim podcrtane riječi kako biste personalizirali svoju AI pozadinu.</translation>
 <translation id="636850387210749493">Prijava poduzeća</translation>
 <translation id="6369221585240879141">Izrada naziva snimki za taj jezik prijepisa nije uspjela</translation>
 <translation id="6373461326814131011">jezero</translation>
@@ -1209,16 +1224,6 @@
 <translation id="6657240842932274095">Želite li uslugama sustava dopustiti da upotrebljavaju vašu lokaciju?</translation>
 <translation id="6657585470893396449">Zaporka</translation>
 <translation id="66621959568103627">koraljno ružičaste boje</translation>
-<translation id="6667885109186363316"><ph name="SEA_PEN_INTRO_FIRST_PARAGRAPH" />
-          <ph name="LINE_BREAK" />
-          <ph name="LINE_BREAK" />
-          Odaberite Nadahni me da biste dobili jedinstvenije i raznolikije opcije AI slika.
-          <ph name="LINE_BREAK" />
-          <ph name="LINE_BREAK" />
-          Kad izrađujete sadržaj pomoću AI-ja, poslužiteljima Googleovog AI-ja šalje se upit radi generiranja slika i poboljšanja proizvoda, u skladu s <ph name="BEGIN_LINK_GOOGLE_PRIVACY_POLICY" />Googleovim pravilima o privatnosti<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" />.
-          <ph name="LINE_BREAK" />
-          <ph name="LINE_BREAK" />
-          Generativni AI u eksperimentalnoj je fazi ranog razvoja, a dostupnost je trenutačno ograničena.</translation>
 <translation id="6673898378497337661">pojačavanje svjetline tipkovnice</translation>
 <translation id="6692996468359469499">Dohvaćanje informacija povezanih s vašim odabirom</translation>
 <translation id="6694534975463174713">zaključaj</translation>
@@ -1274,6 +1279,7 @@
 <translation id="6930597342185648547">O pozadini</translation>
 <translation id="6939667434404433010">Pretražite naziv snimke</translation>
 <translation id="6939766318048400022">Kafić</translation>
+<translation id="6942253772720771875">Podijelite povratne informacije ili opišite svoj problem</translation>
 <translation id="6943893908656559156">Udaljeni identitet (nije obavezno)</translation>
 <translation id="6953137545147683679">zlatne boje</translation>
 <translation id="6957231940976260713">Naziv usluge</translation>
@@ -1295,6 +1301,7 @@
 <translation id="7040230719604914234">Mobilni operater</translation>
 <translation id="7040729769968826896">Omogući identifikaciju govornika</translation>
 <translation id="7041549558901442110">Uređaj nije povezan.</translation>
+<translation id="704183341263526038">Jupiter</translation>
 <translation id="7046522406494308071">Želite li sve prečace vratiti na zadane?</translation>
 <translation id="7049916119678019302">Preuzmite model prijepisa u postavkama</translation>
 <translation id="7058278511608979688">Završi i spremi</translation>
@@ -1389,6 +1396,7 @@ Da biste dobili te prijepise, preuzmite model prijepisa (do 100 MB).</translati
 <translation id="7388345524791662148">Više opcija za snimku <ph name="RECORDING_NAME" /></translation>
 <translation id="7388959671917308825">Ugrađena dodirna podloga</translation>
 <translation id="7397270852490618635">Isključivanje svijetle teme</translation>
+<translation id="7400166052988585408">Nastavnik će zaključati tvoj zaslon za <ph name="NUM_SECONDS" /> s</translation>
 <translation id="7401543881546089382">Izbriši prečac</translation>
 <translation id="7405493795721832710">Uređaj <ph name="DEVICE_NAME" /> spreman je za ažuriranje</translation>
 <translation id="741244894080940828">preračunavanje</translation>
@@ -1427,6 +1435,7 @@ Da biste dobili te prijepise, preuzmite model prijepisa (do 100 MB).</translati
 <translation id="7569444139234840525"><ph name="QUERY_TEXT" /> · /<ph name="PHONETICS" />/</translation>
 <translation id="7570674786725311828">USB dodirni zaslon</translation>
 <translation id="757747079855995705">kamena</translation>
+<translation id="7584853321964440104">Preuzimanje nije uspjelo. Pokušajte ponovo ili ponovo pokrenite Chromebook.</translation>
 <translation id="7590883480672980941">Postavke unosa</translation>
 <translation id="7595982850646262331">Još <ph name="TIME_VALUE" /></translation>
 <translation id="7600430297804876776">Administrator <ph name="MANAGER" /> odredio je kada se ovaj uređaj <ph name="DEVICE_TYPE" /> može upotrebljavati.</translation>
@@ -1557,6 +1566,16 @@ Da biste dobili te prijepise, preuzmite model prijepisa (do 100 MB).</translati
 <translation id="8179976553408161302">Enter</translation>
 <translation id="8183975772394450380">plaže</translation>
 <translation id="819278132617411009">Googleov AI može vam pomoći da budete produktivniji</translation>
+<translation id="82003371436638355">Kad odaberete Izradite vlastitu, napišite prilagođeni upit. Možete odabrati i opciju Odaberi temu, a zatim odabrati podcrtane riječi da biste personalizirali svoju AI pozadinu.
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          Odaberite Nadahni me da biste dobili jedinstvenije i raznolikije opcije AI slika.
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          Kad izradite vlastitu pozadinu, upit se šalje Googleovim poslužiteljima radi generiranja slika i poboljšanja proizvoda, u skladu s <ph name="BEGIN_LINK_GOOGLE_PRIVACY_POLICY" />Googleovim uvjetima pružanja usluge i pravilima o privatnosti<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" />. Nemojte navoditi ništa osobno, osjetljivo ni povjerljivo.
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          Generativni AI može pogriješiti, uključujući kada daje informacije o osobama, stoga provjerite njegove odgovore. <ph name="BEGIN_LINK_CREATE_YOUR_OWN_WALLPAPER" />Saznajte više<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" /></translation>
 <translation id="8200772114523450471">Nastavi</translation>
 <translation id="8206859287963243715">Mobitel</translation>
 <translation id="8208861521865154048">Pogodnosti</translation>
@@ -1578,6 +1597,7 @@ Da biste dobili te prijepise, preuzmite model prijepisa (do 100 MB).</translati
 <translation id="8312330582793120272">reprodukcija medijskih sadržaja</translation>
 <translation id="8318753676953949627">Nema slika</translation>
 <translation id="8320910311642849813">šume</translation>
+<translation id="8322464149031882595">Kliknite da biste nastavili</translation>
 <translation id="8329018942023753850">aplikacija kalkulator</translation>
 <translation id="8336739000755212683">Promijenite sliku računa uređaja</translation>
 <translation id="8339024191194156249">Saznajte više o automatskom pokretanju</translation>
@@ -1598,6 +1618,7 @@ Da biste dobili te prijepise, preuzmite model prijepisa (do 100 MB).</translati
 <translation id="8395584934117017006">Uređajem <ph name="DEVICE_TYPE" /> upravlja poduzeće</translation>
 <translation id="8398927464629426868">Brzina punjenja ili pražnjenja uređaja</translation>
 <translation id="8403988360557588704">Slika <ph name="ART_FEATURE" /> u <ph name="ART_MOVEMENT" /> stilu</translation>
+<translation id="8409219750150841791">Generirani sažetak:</translation>
 <translation id="8410244574650205435">Automatski detektirano</translation>
 <translation id="8420955526972171689">Izvođenje testova i rješavanje problema s hardverom</translation>
 <translation id="8422748173858722634">IMEI</translation>
@@ -1642,6 +1663,7 @@ Da biste dobili te prijepise, preuzmite model prijepisa (do 100 MB).</translati
 <translation id="8626489604350149811">Više radnji za <ph name="APN_NAME" /></translation>
 <translation id="86356131183441916">Svijetloljubičasta</translation>
 <translation id="8647595191512746911">Prijepis audiozapisa</translation>
+<translation id="8648578954147795914">Generirani nazivi:</translation>
 <translation id="8650852232143958317">Ponesite svoje datoteke s Gmaila i Google diska sa sobom</translation>
 <translation id="8651481478098336970">isključivanje zvuka</translation>
 <translation id="8655295600908251630">Kanal</translation>
@@ -1670,7 +1692,6 @@ Da biste dobili te prijepise, preuzmite model prijepisa (do 100 MB).</translati
 <translation id="8764414543112028321">WireGuard</translation>
 <translation id="87646919272181953">Album Google fotografija</translation>
 <translation id="8775713578693478175">Modemski APN</translation>
-<translation id="877735394245039557">U tijeku je preuzimanje modela</translation>
 <translation id="877985182522063539">A4</translation>
 <translation id="879568662008399081">Mreža možda ima zaštitni portal</translation>
 <translation id="8797082062139985406">Izradite naziv pomoću Googleovog AI-ja</translation>
@@ -1723,6 +1744,7 @@ Da biste dobili te prijepise, preuzmite model prijepisa (do 100 MB).</translati
 <translation id="8961025972867871808">pingvini</translation>
 <translation id="8968751544471797276">Brzina punjenja</translation>
 <translation id="8970109610781093811">Pokreni ponovo</translation>
+<translation id="8972061581514441296">Kliknite za povratak</translation>
 <translation id="8983038754672563810">HSPA</translation>
 <translation id="8987565828374052507">{NUMBER_OF_PAGES,plural, =0{Skeniraj}=1{Skeniraj stranicu {NUMBER_OF_PAGES}}one{Skeniraj stranicu {NUMBER_OF_PAGES}}few{Skeniraj stranicu {NUMBER_OF_PAGES}}other{Skeniraj stranicu {NUMBER_OF_PAGES}}}</translation>
 <translation id="89945434909472341">sela</translation>
@@ -1784,6 +1806,7 @@ Da biste dobili te prijepise, preuzmite model prijepisa (do 100 MB).</translati
 <translation id="9218016617214286986">Pokaži poznate APN-ove</translation>
 <translation id="932327136139879170">Početna stranica</translation>
 <translation id="939519157834106403">SSID</translation>
+<translation id="940663759301549538">Provjerite je li mikrofon povezan ili pokušajte ponovo pokrenuti Chromebook</translation>
 <translation id="945522503751344254">Pošaljite povratne informacije</translation>
 <translation id="950520315903467048">Nedostaje tipka za <ph name="DIRECTION" />. <ph name="ASSIGN_INSTRUCTION" /></translation>
 <translation id="951780398843003443">usporedio glasove na cijeloj snimci da bi se u prijepisu naznačilo što je svaki govornik izgovorio i kada.</translation>

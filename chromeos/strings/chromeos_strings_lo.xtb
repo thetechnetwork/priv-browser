@@ -81,6 +81,7 @@
 <translation id="131461803491198646">ເຄືອຂ່າຍພາຍໃນ, ບໍ່ໂຣມມິງ</translation>
 <translation id="1327977588028644528">​ເກດ​ເວ</translation>
 <translation id="1328223165223065150">ສີຮູບພື້ນຫຼັງ</translation>
+<translation id="1329478709358066995">ຖອດຂໍ້ຄວາມຈາກສຽງ:</translation>
 <translation id="1330426557709298164">JPG</translation>
 <translation id="1337912285145772892">ພໍດີກັບພື້ນທີ່ສະແກນ</translation>
 <translation id="1343442362630695901">ຊໍລທ໌ເລກ</translation>
@@ -126,7 +127,17 @@
 <translation id="1515129336378114413">ໜ້າຫຼັກຂອງໂປຣແກຣມທ່ອງເວັບ</translation>
 <translation id="1526389707933164996">ອະນິເມຊັນພາບພັກໜ້າຈໍ</translation>
 <translation id="152892567002884378">ເປີດສຽງຂຶ້ນ</translation>
+<translation id="1531038290222364269">ສະແດງແຖບ</translation>
 <translation id="1539864135338521185">ລາພິສ ລາຊູລີ</translation>
+<translation id="1548555207631326346">ເລືອກຮູບແບບສີສັນ ແລ້ວຈາກນັ້ນເລືອກຄຳທີ່ຂີດກ້ອງໄວ້ເພື່ອປັບແຕ່ງຮູບ AI ຂອງທ່ານໃຫ້ເປັນແບບສ່ວນຕົວ.<ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          ເລືອກ "ຂໍແຮງບັນດານໃຈໃຫ້ຂ້ອຍແດ່" ເພື່ອຮັບຕົວເລືອກຮູບ AI ທີ່ເປັນເອກະລັກ ແລະ ຫຼາກຫຼາຍຍິ່ງຂຶ້ນ.
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          ເມື່ອທ່ານສ້າງດ້ວຍ AI, ລະບົບຈະສົ່ງພຣອມໄປຫາເຊີບເວີ Google AI ເພື່ອສ້າງຮູບ ແລະ ປັບປຸງຜະລິດຕະພັນ, ໂດຍເປັນໄປຕາມ <ph name="BEGIN_LINK_GOOGLE_PRIVACY_POLICY" />ນະໂຍບາຍຄວາມເປັນສ່ວນຕົວ Google<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" />.
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          AI ສ້າງເນື້ອຫາເປັນເວີຊັນທົດລອງ, ທີ່ຢູ່ໃນຊ່ວງການພັດທະນາຂັ້ນຕົ້ນ ແລະ ມີໃຫ້ບໍລິການແບບຈຳກັດໃນຕອນນີ້.</translation>
 <translation id="1555130319947370107">ສີ​ຟ້າ</translation>
 <translation id="155865706765934889">ແຜ່ນສໍາຜັດ</translation>
 <translation id="1561927818299383735">ສີຂອງແສງຈາກສາກຫຼັງ</translation>
@@ -252,7 +263,6 @@
 <translation id="2011174342667534258">ເວີຊັນ SDK:</translation>
 <translation id="2016697457005847575">ກະລຸນາລອງເຮັດຂັ້ນຕອນການແກ້ໄຂບັນຫາ</translation>
 <translation id="202500043506723828">EID</translation>
-<translation id="2041627599411887437">ເລືອກຮູບແບບສີສັນ ແລະ ຈາກນັ້ນເລືອກຄຳທີ່ຂີດກ້ອງໄວ້ເພື່ອປັບແຕ່ງຮູບ AI ຂອງທ່ານໃຫ້ເປັນແບບສ່ວນຕົວ.</translation>
 <translation id="2045814230297767491">ເຄື່ອງໃຊ້ເທິງໂຕະກິນເຂົ້າ</translation>
 <translation id="2047316797244836561">ກະລຸນາເຊື່ອມຕໍ່ກັບເຄືອຂ່າຍ ແລະ ໂຫຼດໜ້າຄືນໃໝ່ເພື່ອເບິ່ງຕົວພັກໜ້າຈໍ.</translation>
 <translation id="2056550196601855911">IPv4/IPv6</translation>
@@ -405,6 +415,7 @@
 <translation id="2787237339470862294">ປັດຈຸບັນລະບົບຍັງບໍ່ຮອງຮັບພາສານີ້</translation>
 <translation id="2787435249130282949">ແປ້ນພິມແຈ້ງຂຶ້ນ</translation>
 <translation id="2805756323405976993">ແອັບ</translation>
+<translation id="2822702442014805146">ກຳລັງດາວໂຫຼດໂມເດວສະຫຼຸບ ແລະ ການສ້າງຊື່</translation>
 <translation id="28232023175184696">ບໍ່ສາມາດເຊື່ອມຕໍ່ກັບອິນເຕີເນັດໄດ້. ຄລິກເພື່ອລອງໃໝ່.</translation>
 <translation id="2855718259207180827">ຜ້າຂົນສັດ</translation>
 <translation id="2859243502336719778">ອັບເດດວິກິດ</translation>
@@ -502,6 +513,7 @@
 <translation id="3373141842870501561">ຮູບພື້ນຫຼັງການເຄື່ອນທີ່ຂອງໂລກ</translation>
 <translation id="33736539805963175">ພາບພື້ນຫຼັງ <ph name="LETTERS_COLOR" /> ທີ່ມີຕົວອັກສອນ <ph name="LETTERS_LETTER" /></translation>
 <translation id="3383623117265110236">ພິເສດສະເພາະ</translation>
+<translation id="3395147534045164351">ເປີດ/ປິດການແບ່ງປັນສະຖານທີ່ແບບດ່ວນ</translation>
 <translation id="3404249063913988450">ເປີດການນຳໃຊ້ສະກຣີນເຊັບເວີແລ້ວ</translation>
 <translation id="3413935475507503304">ເພື່ອດຳເນີນການຕໍ່ກັບອັບເດດ, ໃຫ້ຄລິກຕໍ່ໄປ</translation>
 <translation id="3428551088151258685">ກາງແຈ້ງ</translation>
@@ -651,6 +663,7 @@
 <translation id="4113067922640381334">ຕອນນີ້ທ່ານມີສິດເຂົ້າເຖິງ <ph name="BEGIN_LINK_WALLPAPER_SUBPAGE" />ຮູບພື້ນຫຼັງ<ph name="END_LINK_WALLPAPER_SUBPAGE" /> ໃໝ່ແລ້ວ</translation>
 <translation id="4117637339509843559">ໂໝດມືດ</translation>
 <translation id="4126551873361000548">ຍ້ອນກັບຄືນ 10 ວິນາທີ</translation>
+<translation id="4128271910628504223">ລະບຸພຣອມ ເຊັ່ນ: "ແຕ້ມຮູບປ່າທີ່ປົກຄຸມດ້ວຍໝອກ"</translation>
 <translation id="4130035430755296270">ສືບຕໍ່ເລື່ອນເມົ້າສຳລັບຕົວເລືອກໂຄງຮ່າງເພີ່ມເຕີມ</translation>
 <translation id="4130750466177569591">ຂ້ອຍເຫັນ​ດີ</translation>
 <translation id="4131410914670010031">ຂາວດໍາ</translation>
@@ -824,6 +837,7 @@
 <translation id="4891842000192098784">ປະສິດທິພາບເມື່ອເພີ່ມແຮງກົດດັນ</translation>
 <translation id="4897058166682006107">ອຸປະກອນມີແບັດເຕີຣີຫູຟັງຂ້າງຊ້າຍເຫຼືອ <ph name="BATTERY_PERCENTAGE" />%.</translation>
 <translation id="4905998861748258752">ເປີດໃຊ້ຄຸນສົມບັດເພື່ອເລືອກຕົວເລືອກພາບພັກໜ້າຈໍ</translation>
+<translation id="4910853326379896417">ດາວໂຫຼດໂມເດວສະຫຼຸບ ແລະ ການສ້າງຊື່ສຳເລັດແລ້ວ</translation>
 <translation id="4910858703033903787">ປະເພດ APN</translation>
 <translation id="4917385247580444890">ແຮງ</translation>
 <translation id="4917889632206600977">ຢຸດພິມ, ເຈ້ຍໝົດ</translation>
@@ -858,8 +872,10 @@
 <translation id="5050042263972837708">ຊື່​ກຸ່ມ​</translation>
 <translation id="5051044138948155788">ນີ້ແມ່ນໜ້າດຽວເທົ່ານັ້ນ. ນີ້ຈະພາທ່ານໄປໜ້າຈໍເລີ່ມຕົ້ນການສະແກນ.</translation>
 <translation id="5053233795640754917">ຢຸດຊົ່ວຄາວ</translation>
+<translation id="5056587122125565772">ສ້າງຮູບ</translation>
 <translation id="5078711626843651677">ລະບົບຈະຈັດເກັບຮູບແບບສຽງໄວ້ຢູ່ອຸປະກອນຊົ່ວຄາວຈົນກວ່າການຕິດປ້າຍກຳກັບຜູ້ເວົ້າຈະສຳເລັດ. ທ່ານສາມາດປິດການດຳເນີນການນີ້ໄດ້ທຸກເວລາໃນການຕັ້ງຄ່າ.</translation>
 <translation id="5078983345702708852">ລ້ຳສະໄໝ</translation>
+<translation id="5085224064082122501">ບໍ່ສາມາດດາວໂຫຼດໂມເດວສຳລັບສະຫຼຸບ ແລະ ການສ້າງຊື່ໄດ້. ກະລຸນາລອງໃໝ່ ຫຼື ຣີສະຕາດ Chromebook ຂອງທ່ານ.</translation>
 <translation id="5087864757604726239">ກັບ​ຄືນ​</translation>
 <translation id="5088172560898466307">ຊື່ໂຮ​ສເຊີບເວີ</translation>
 <translation id="5089810972385038852">ລັດ</translation>
@@ -913,6 +929,7 @@
 <translation id="5286263799730375393">ສີຂອງແສງພື້ນຫຼັງ</translation>
 <translation id="5292579816060236070">ຮູບພື້ນຫຼັງຕາເວັນຂຶ້ນ</translation>
 <translation id="5294769550414936029">ເວີຊັນ <ph name="MILESTONE_VERSION" /></translation>
+<translation id="5300172019534884676">ເປີດ/ປິດການເຂົ້າເຖິງກ້ອງ</translation>
 <translation id="5300814202279832142">ຍ້າຍໜ້າຈໍໄປຍັງໂຕະ</translation>
 <translation id="5302048478445481009">ພາ​ສາ</translation>
 <translation id="5303837385540978511">ຮູບພື້ນຫຼັງແບບພິເສດຈາກ <ph name="PRODUCT_NAME" /></translation>
@@ -1129,14 +1146,12 @@
 <translation id="6325525973963619867">ບໍ່ສຳເລັດ</translation>
 <translation id="6327262166342360252">ຮູບພື້ນຫຼັງນີ້ຖືກສ້າງຂຶ້ນດ້ວຍ AI ໂດຍໃຊ້ຂໍ້ຄວາມຕໍ່ໄປນີ້: "<ph name="PROMPT" />."</translation>
 <translation id="6331191339300272798">ຮູບແບບສີສັນມືດອັດຕະໂນມັດ</translation>
-<translation id="6335228876613776082">ດາວໂຫຼດໂມເດວສຳເລັດແລ້ວ</translation>
 <translation id="6340526405444716530">ການປັບແຕ່ງໃຫ້ເປັນແບບສ່ວນຕົວ</translation>
 <translation id="6348252528297699679">ທ່ານສາມາດປິດສະຖານທີ່ໄດ້ໃນ ການຕັ້ງຄ່າ &gt; ຄວາມເປັນສ່ວນຕົວ ແລະ ຄວາມປອດໄພ &gt; ການຄວບຄຸມຄວາມເປັນສ່ວນຕົວ &gt; ສິດເຂົ້າເຖິງສະຖານທີ່. <ph name="LINK_BEGIN" />ສຶກສາເພີ່ມເຕີມ<ph name="LINK_END" /></translation>
 <translation id="6348738456043757611">ຊື່ຜູ້ໃຊ້ ແລະ ລະຫັດຜ່ານ</translation>
 <translation id="6352210854422428614">ດາວເຄາະດວງອື່ນ</translation>
 <translation id="6359706544163531585">ປິດການນຳໃຊ້ຮູບແບບສີສັນແຈ້ງ</translation>
 <translation id="6359919876285606596">ການດຳເນີນການນີ້ມີຜົນຖາວອນ ແລະ ບໍ່ສາມາດຍົກເລີກໄດ້</translation>
-<translation id="6368342879959028556">ເມື່ອທ່ານເລືອກ “ສ້າງດ້ວຍ AI”, ໃຫ້ຂຽນ prompt ທີ່ກຳນົດເອງ. ຫຼື ທ່ານສາມາດເລືອກ “ຮູບພື້ນຫຼັງ AI” ເພື່ອເລືອກຮູບແບບສີສັນ ແລ້ວເລືອກຄຳທີ່ຂີດກ້ອງໄວ້ເພື່ອປັບແຕ່ງຮູບພື້ນຫຼັງ AI ຂອງທ່ານໃຫ້ເປັນແບບສ່ວນຕົວ.</translation>
 <translation id="636850387210749493">ການລົງທະບຽນວິສາຫະກິດ</translation>
 <translation id="6369221585240879141">ບໍ່ສາມາດສ້າງຊື່ການບັນທຶກສຳລັບພາສາຂອງການຖອດຂໍ້ຄວາມຈາກສຽງນີ້ໄດ້</translation>
 <translation id="6373461326814131011">ໜອງປາ</translation>
@@ -1209,16 +1224,6 @@
 <translation id="6657240842932274095">ອະນຸຍາດໃຫ້ບໍລິການລະບົບໃຊ້ສະຖານທີ່ຂອງທ່ານບໍ?</translation>
 <translation id="6657585470893396449">ລະຫັດຜ່ານ</translation>
 <translation id="66621959568103627">ບົວໂຄລໍລ໌</translation>
-<translation id="6667885109186363316"><ph name="SEA_PEN_INTRO_FIRST_PARAGRAPH" />
-          <ph name="LINE_BREAK" />
-          <ph name="LINE_BREAK" />
-          ເລືອກ "ຂໍແຮງບັນດານໃຈໃຫ້ຂ້ອຍແດ່" ເພື່ອຮັບຕົວເລືອກຮູບ AI ທີ່ເປັນເອກະລັກ ແລະ ຫຼາກຫຼາຍຍິ່ງຂຶ້ນ.
-          <ph name="LINE_BREAK" />
-          <ph name="LINE_BREAK" />
-          ເມື່ອທ່ານສ້າງດ້ວຍ AI, ລະບົບຈະສົ່ງ prompt ໄປຫາເຊີບເວີ Google AI ເພື່ອສ້າງຮູບ ແລະ ປັບປຸງຜະລິດຕະພັນ, ໂດຍເປັນໄປຕາມ <ph name="BEGIN_LINK_GOOGLE_PRIVACY_POLICY" />ນະໂຍບາຍຄວາມເປັນສ່ວນຕົວ Google<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" />.
-          <ph name="LINE_BREAK" />
-          <ph name="LINE_BREAK" />
-          AI ສ້າງເນື້ອຫາແມ່ນເວີຊັນທົດລອງ, ທີ່ຢູ່ໃນຊ່ວງການພັດທະນາຂັ້ນຕົ້ນ ແລະ ມີໃຫ້ບໍລິການແບບຈຳກັດໃນຕອນນີ້.</translation>
 <translation id="6673898378497337661">ເພີ່ມຄວາມສະຫວ່າງແປ້ນພິມ</translation>
 <translation id="6692996468359469499">ຮັບຂໍ້ມູນທີ່ກ່ຽວຂ້ອງກັບການເລືອກຂອງທ່ານ</translation>
 <translation id="6694534975463174713">ລັອກ</translation>
@@ -1274,6 +1279,7 @@
 <translation id="6930597342185648547">ກ່ຽວກັບພາບພື້ນຫຼັງ</translation>
 <translation id="6939667434404433010">ຊອກຫາຊື່ການບັນທຶກ</translation>
 <translation id="6939766318048400022">ຄາເຟ່</translation>
+<translation id="6942253772720771875">ແບ່ງປັນຄຳຕິຊົມ ຫຼື ອະທິບາຍບັນຫາຂອງທ່ານ</translation>
 <translation id="6943893908656559156">ຂໍ້ມູນປະຈຳຕົວໄລຍະໄກ (ບໍ່ບັງຄັບ)</translation>
 <translation id="6953137545147683679">ຄຳ</translation>
 <translation id="6957231940976260713">ຊື່ການບໍລິການ</translation>
@@ -1295,6 +1301,7 @@
 <translation id="7040230719604914234">ຜູ້ໃຫ້ບໍລິການ</translation>
 <translation id="7040729769968826896">ອະນຸຍາດການລະບຸຜູ້ເວົ້າ</translation>
 <translation id="7041549558901442110">ອຸປະກອນບໍ່ໄດ້ເຊື່ອມຕໍ່.</translation>
+<translation id="704183341263526038">ດາວພະຫັດ</translation>
 <translation id="7046522406494308071">ຣີເຊັດທາງລັດທັງໝົດເປັນຄ່າເລີ່ມຕົ້ນບໍ?</translation>
 <translation id="7049916119678019302">ດາວໂຫຼດໂມເດວການຖອດຖ່າຍຂໍ້ຄວາມໃນການຕັ້ງຄ່າ</translation>
 <translation id="7058278511608979688">ສິ້ນສຸດ ແລະ ບັນທຶກ</translation>
@@ -1390,6 +1397,7 @@
 <translation id="7388345524791662148">ຕົວເລືອກເພີ່ມເຕີມສຳລັບ <ph name="RECORDING_NAME" /></translation>
 <translation id="7388959671917308825">ແຜ່ນສຳຜັດໃນຕົວ</translation>
 <translation id="7397270852490618635">ປິດຮູບແບບສີສັນແຈ້ງ</translation>
+<translation id="7400166052988585408">ຄູຂອງທ່ານຈະລັອກໜ້າຈໍຂອງທ່ານໃນ <ph name="NUM_SECONDS" /> ວິນາທີ</translation>
 <translation id="7401543881546089382">ລຶບ​ທາງລັດ</translation>
 <translation id="7405493795721832710"><ph name="DEVICE_NAME" /> ພ້ອມອັບເດດແລ້ວ</translation>
 <translation id="741244894080940828">ການປ່ຽນ</translation>
@@ -1428,6 +1436,7 @@
 <translation id="7569444139234840525"><ph name="QUERY_TEXT" /> · /<ph name="PHONETICS" />/</translation>
 <translation id="7570674786725311828">ໜ້າຈໍສຳຜັດ USB</translation>
 <translation id="757747079855995705">ຫິນ</translation>
+<translation id="7584853321964440104">ບໍ່ສາມາດດາວໂຫຼດໄດ້. ກະລຸນາລອງໃໝ່ ຫຼື ຣີສະຕາດ Chromebook ຂອງທ່ານ.</translation>
 <translation id="7590883480672980941">ການຕັ້ງຄ່າການປ້ອນຂໍ້ມູນ</translation>
 <translation id="7595982850646262331">ຍັງເຫຼືອ <ph name="TIME_VALUE" /></translation>
 <translation id="7600430297804876776">ຜູ້ເບິ່ງແຍງລະບົບ <ph name="MANAGER" /> ໄດ້ກຳນົດເວລາທີ່ຈະສາມາດໃຊ້ <ph name="DEVICE_TYPE" /> ເຄື່ອງນີ້ໄດ້.</translation>
@@ -1558,6 +1567,16 @@
 <translation id="8179976553408161302">ປ້ອນເຂົ້າ</translation>
 <translation id="8183975772394450380">ຫາດຊາຍ</translation>
 <translation id="819278132617411009">ໃຊ້ Google AI ເພື່ອເຮັດວຽກຢ່າງມີຜະລິດຕະພາບຫຼາຍຂຶ້ນ</translation>
+<translation id="82003371436638355">ເມື່ອທ່ານເລືອກ “ສ້າງຂອງທ່ານເອງ,” ໃຫ້ຂຽນພຣອມທີ່ກຳນົດເອງ. ຫຼື ທ່ານສາມາດເລືອກ “ເລືອກຮູບແບບສີສັນ” ແລ້ວຈາກນັ້ນເລືອກຄຳທີ່ຂີດກ້ອງໄວ້ເພື່ອປັບແຕ່ງຮູບພື້ນຫຼັງ AI ຂອງທ່ານໃຫ້ເປັນແບບສ່ວນຕົວ.
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          ເລືອກ "ຂໍແຮງບັນດານໃຈໃຫ້ຂ້ອຍແດ່" ເພື່ອຮັບຕົວເລືອກຮູບ AI ທີ່ເປັນເອກະລັກ ແລະ ຫຼາກຫຼາຍຍິ່ງຂຶ້ນ.
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          ເມື່ອທ່ານສ້າງຮູບພື້ນຫຼັງຂອງທ່ານເອງ, ລະບົບຈະສົ່ງພຣອມໄປຫາເຊີບເວີຂອງ Google ເພື່ອສ້າງຮູບ ແລະ ປັບປຸງຜະລິດຕະພັນ, ໂດຍເປັນໄປຕາມ <ph name="BEGIN_LINK_GOOGLE_PRIVACY_POLICY" />ຂໍ້ກຳນົດບໍລິການ ແລະ ນະໂຍບາຍຄວາມເປັນສ່ວນຕົວຂອງ Google<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" />. ຢ່າລະບຸຂໍ້ມູນໃດກໍຕາມທີ່ເປັນສ່ວນຕົວ, ລະອຽດອ່ອນ ຫຼື ເປັນຄວາມລັບ.
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          AI ສ້າງເນື້ອຫາອາດເຮັດຜິດພາດໄດ້, ເຊິ່ງຮວມທັງການໃຫ້ຂໍ້ມູນກ່ຽວກັບບຸກຄົນ, ດັ່ງນັ້ນກະລຸນາກວດສອບຄຳຕອບຊ້ຳ. <ph name="BEGIN_LINK_CREATE_YOUR_OWN_WALLPAPER" />ສຶກສາເພີ່ມເຕີມ<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" /></translation>
 <translation id="8200772114523450471">ເລີ່ມຕົ້ນປິດເປີດໃໝ່</translation>
 <translation id="8206859287963243715">ເຊວລູລາ</translation>
 <translation id="8208861521865154048">ສິດທິປະໂຫຍດຕ່າງໆ</translation>
@@ -1579,6 +1598,7 @@
 <translation id="8312330582793120272">ຫຼິ້ນມີເດຍ</translation>
 <translation id="8318753676953949627">ບໍ່ມີຮູບ</translation>
 <translation id="8320910311642849813">ປ່າ</translation>
+<translation id="8322464149031882595">ຄລິກເພື່ອດຳເນີນການຕໍ່</translation>
 <translation id="8329018942023753850">ແອັບຈັກຄິດໄລ່</translation>
 <translation id="8336739000755212683">ປ່ຽນຮູບບັນຊີຂອງອຸປະກອນ</translation>
 <translation id="8339024191194156249">ສຶກສາເພີ່ມເຕີມກ່ຽວກັບການເປີດໃຊ້ອັດຕະໂນມັດ</translation>
@@ -1599,6 +1619,7 @@
 <translation id="8395584934117017006"><ph name="DEVICE_TYPE" /> ຈັດການໂດຍວິສາຫະກິດ</translation>
 <translation id="8398927464629426868">ອັດຕາການສາກ ຫຼື ຄາຍປະຈຸຂອງອຸປະກອນໃນປັດຈຸບັນ</translation>
 <translation id="8403988360557588704">ຮູບແຕ້ມ <ph name="ART_FEATURE" /> ໃນຮູບແບບ <ph name="ART_MOVEMENT" /></translation>
+<translation id="8409219750150841791">ສະຫຼຸບທີ່ສ້າງຂຶ້ນ:</translation>
 <translation id="8410244574650205435">ກວດສອບອັດຕະໂນມັດ</translation>
 <translation id="8420955526972171689">ທົດສອບ ແລະ ແກ້ໄຂບັນຫາຮາດແວ</translation>
 <translation id="8422748173858722634">IMEI</translation>
@@ -1643,6 +1664,7 @@
 <translation id="8626489604350149811">ຄຳສັ່ງເພີ່ມເຕີມສຳລັບ <ph name="APN_NAME" /></translation>
 <translation id="86356131183441916">ສີມ່ວງອ່ອນ</translation>
 <translation id="8647595191512746911">ການຖອດຂໍ້ຄວາມຈາກສຽງ</translation>
+<translation id="8648578954147795914">ຊື່ທີ່ສ້າງຂຶ້ນ:</translation>
 <translation id="8650852232143958317">ນຳເອົາໄຟລ໌ Gmail ແລະ Google Drive ຂອງທ່ານໄປກັບທ່ານ</translation>
 <translation id="8651481478098336970">ປິດ​ສຽງ</translation>
 <translation id="8655295600908251630">ຊ່ອງ</translation>
@@ -1671,7 +1693,6 @@
 <translation id="8764414543112028321">WireGuard</translation>
 <translation id="87646919272181953">ອະລະບໍ້າ Google ຮູບພາບ</translation>
 <translation id="8775713578693478175">APN ຂອງໂມເດັມ</translation>
-<translation id="877735394245039557">ກຳລັງດາວໂຫຼດໂມເດວ</translation>
 <translation id="877985182522063539">A4</translation>
 <translation id="879568662008399081">ເຄືອຂ່າຍນີ້ອາດມີຊ່ອງ​ທາງ​ເຂົ້າ​ຮັກ​ສາ​ໄວ້</translation>
 <translation id="8797082062139985406">ສ້າງຊື່ໂດຍໃຊ້ Google AI</translation>
@@ -1724,6 +1745,7 @@
 <translation id="8961025972867871808">ເພນກວິນ</translation>
 <translation id="8968751544471797276">ອັດຕາການສາກ</translation>
 <translation id="8970109610781093811">ເອີ້ນໃຊ້ອີກຄັ້ງ</translation>
+<translation id="8972061581514441296">ຄລິກເພື່ອກັບຄືນ</translation>
 <translation id="8983038754672563810">HSPA</translation>
 <translation id="8987565828374052507">{NUMBER_OF_PAGES,plural, =0{ສະແກນ}=1{ສະແກນໜ້າ {NUMBER_OF_PAGES}}other{ສະແກນໜ້າ {NUMBER_OF_PAGES}}}</translation>
 <translation id="89945434909472341">ໝູ່ບ້ານ</translation>
@@ -1785,6 +1807,7 @@
 <translation id="9218016617214286986">ສະແດງ APN ທີ່ຮູ້ຈັກ</translation>
 <translation id="932327136139879170">ບ້ານ</translation>
 <translation id="939519157834106403">SSID</translation>
+<translation id="940663759301549538">ກວດສອບວ່າໄມຂອງທ່ານເຊື່ອມຕໍ່ຢູ່ ຫຼື ລອງຣີສະຕາດ Chromebook ຂອງທ່ານ</translation>
 <translation id="945522503751344254">ສົ່ງ​ຄໍາ​ຄິດ​​ເຫັນ</translation>
 <translation id="950520315903467048">ບໍ່ມີປຸ່ມສຳລັບ <ph name="DIRECTION" />. <ph name="ASSIGN_INSTRUCTION" /></translation>
 <translation id="951780398843003443">ປຽບທຽບສຽງໃນສຽງທີ່ບັນທຶກໄວ້ຕັ້ງແຕ່ຕົ້ນຈົນຈົບເພື່ອໃຫ້ຂໍ້ຄວາມຖອດສຽງສະແດງຂໍ້ຄວາມຂອງຜູ້ເວົ້າແຕ່ລະຄົນ ແລະ ເວລາທີ່ເວົ້າ</translation>

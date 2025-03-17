@@ -10,6 +10,7 @@
 #include "base/metrics/histogram_functions.h"
 #include "base/task/sequenced_task_runner.h"
 #include "components/unexportable_keys/unexportable_key_service.h"
+#include "net/base/features.h"
 #include "net/base/schemeful_site.h"
 #include "net/device_bound_sessions/registration_request_param.h"
 #include "net/device_bound_sessions/session_store.h"
@@ -20,12 +21,19 @@ namespace net::device_bound_sessions {
 
 namespace {
 
+// Parameters for the refresh quota. We currently allow 2 refreshes in 5
+// minutes. This allows sites to refresh every 5 minutes with some error
+// tolerance (e.g. a failed refresh or user cookie clearing).
+constexpr size_t kRefreshQuota = 2;
+constexpr base::TimeDelta kRefreshQuotaInterval = base::Minutes(5);
+
 bool SessionMatchesFilter(
     const SchemefulSite& site,
     const Session& session,
     std::optional<base::Time> created_after_time,
     std::optional<base::Time> created_before_time,
-    base::RepeatingCallback<bool(const net::SchemefulSite&)> site_matcher) {
+    base::RepeatingCallback<bool(const url::Origin&, const net::SchemefulSite&)>
+        origin_and_site_matcher) {
   if (created_before_time && *created_before_time < session.creation_date()) {
     return false;
   }
@@ -34,7 +42,8 @@ bool SessionMatchesFilter(
     return false;
   }
 
-  if (!site_matcher.is_null() && !site_matcher.Run(site)) {
+  if (!origin_and_site_matcher.is_null() &&
+      !origin_and_site_matcher.Run(session.origin(), site)) {
     return false;
   }
 
@@ -67,6 +76,8 @@ SessionServiceImpl::SessionServiceImpl(
       key_service_(key_service),
       context_(request_context),
       session_store_(store) {
+  ignore_refresh_quota_ =
+      !base::FeatureList::IsEnabled(features::kDeviceBoundSessionsRefreshQuota);
   CHECK(context_);
 }
 
@@ -152,14 +163,15 @@ SessionServiceImpl::GetSessionsForSite(const SchemefulSite& site) {
 }
 
 std::optional<SessionService::DeferralParams> SessionServiceImpl::ShouldDefer(
-    URLRequest* request) {
+    URLRequest* request,
+    const FirstPartySetMetadata& first_party_set_metadata) {
   if (pending_initialization_) {
     return DeferralParams();
   }
   SchemefulSite site(request->url());
   auto range = GetSessionsForSite(site);
   for (auto it = range.first; it != range.second; ++it) {
-    if (it->second->ShouldDeferRequest(request)) {
+    if (it->second->ShouldDeferRequest(request, first_party_set_metadata)) {
       NotifySessionAccess(request->device_bound_session_access_callback(),
                           SessionAccess::AccessType::kUpdate, site,
                           *it->second);
@@ -182,12 +194,9 @@ void SessionServiceImpl::DeferRequestForRefresh(
   if (deferral.is_pending_initialization) {
     CHECK(pending_initialization_);
     requests_before_initialization_++;
-    queued_operations_.push_back(base::BindOnce(
-        &SessionServiceImpl::ResumePreInitializationRequest,
-        // `base::Unretained` is safe because the callback is stored in
-        // `queued_operations_`, which is owned by `this`.
-        base::Unretained(this), request, std::move(restart_callback),
-        std::move(continue_callback)));
+    // Due to the need to recompute `first_party_set_metadata`, we always
+    // restart the request after initialization completes.
+    queued_operations_.push_back(std::move(restart_callback));
     return;
   }
 
@@ -217,6 +226,11 @@ void SessionServiceImpl::DeferRequestForRefresh(
     return;
   }
 
+  if (RefreshQuotaExceeded(site)) {
+    UnblockDeferredRequests(session_id, /*is_cookie_refreshed=*/false);
+    return;
+  }
+
   const Session::KeyIdOrError& key_id = session->unexportable_key_id();
   if (!key_id.has_value()) {
     if (key_id.error() == unexportable_keys::ServiceError::kKeyNotReady) {
@@ -242,8 +256,14 @@ void SessionServiceImpl::OnRefreshRequestCompletion(
     Session::Id session_id,
     base::expected<SessionParams, SessionError> params_or_error) {
   SessionError::ErrorType result = OnRefreshRequestCompletionInternal(
-      std::move(on_access_callback), std::move(site), std::move(session_id),
+      std::move(on_access_callback), site, session_id,
       std::move(params_or_error));
+
+  Session* session = GetSession(site, session_id);
+  if (session) {
+    session->InformOfRefreshResult(result);
+  }
+
   base::UmaHistogramEnumeration("Net.DeviceBoundSessions.RefreshResult",
                                 result);
 }
@@ -344,19 +364,20 @@ void SessionServiceImpl::AddSession(const SchemefulSite& site,
   if (session_store_) {
     session_store_->SaveSession(site, *session);
   }
-  // TODO(crbug.com/353774923): Enforce unique session ids per site.
+  // TODO(crbug.com/402020386): Enforce unique session ids per site.
   unpartitioned_sessions_.emplace(site, std::move(session));
 }
 
 void SessionServiceImpl::DeleteAllSessions(
     std::optional<base::Time> created_after_time,
     std::optional<base::Time> created_before_time,
-    base::RepeatingCallback<bool(const net::SchemefulSite&)> site_matcher,
+    base::RepeatingCallback<bool(const url::Origin&, const net::SchemefulSite&)>
+        origin_and_site_matcher,
     base::OnceClosure completion_callback) {
   for (auto it = unpartitioned_sessions_.begin();
        it != unpartitioned_sessions_.end();) {
     if (SessionMatchesFilter(it->first, *it->second, created_after_time,
-                             created_before_time, site_matcher)) {
+                             created_before_time, origin_and_site_matcher)) {
       it = DeleteSessionAndNotifyInternal(it, base::NullCallback());
     } else {
       ++it;
@@ -389,7 +410,6 @@ SessionServiceImpl::DeleteSessionAndNotifyInternal(
                       SessionAccess::AccessType::kTermination, it->first,
                       *it->second);
 
-  // TODO(crbug.com/353774923): Clear BFCache entries for this session.
   return unpartitioned_sessions_.erase(it);
 }
 
@@ -472,8 +492,8 @@ SessionError::ErrorType SessionServiceImpl::OnRegistrationCompleteInternal(
 
 SessionError::ErrorType SessionServiceImpl::OnRefreshRequestCompletionInternal(
     OnAccessCallback on_access_callback,
-    SchemefulSite site,
-    Session::Id session_id,
+    const SchemefulSite& site,
+    const Session::Id& session_id,
     base::expected<SessionParams, SessionError> params_or_error) {
   // If refresh succeeded:
   // 1. update the session by adding a new session and deleting the old one
@@ -523,28 +543,11 @@ SessionError::ErrorType SessionServiceImpl::OnRefreshRequestCompletionInternal(
     UnblockDeferredRequests(session_id, /*is_cookie_refreshed=*/false);
   } else {
     // Transient error, unblock the request without cookies.
-    UnblockDeferredRequests(session_id, /*is_cookie_refreshed=*/true);
+    UnblockDeferredRequests(session_id, /*is_cookie_refreshed=*/false);
   }
 
   return params_or_error.has_value() ? SessionError::ErrorType::kSuccess
                                      : params_or_error.error().type;
-}
-
-void SessionServiceImpl::ResumePreInitializationRequest(
-    URLRequest* request,
-    RefreshCompleteCallback restart_callback,
-    RefreshCompleteCallback continue_callback) {
-  CHECK(!pending_initialization_);
-
-  std::optional<DeferralParams> deferral = ShouldDefer(request);
-  if (!deferral) {
-    std::move(continue_callback).Run();
-    return;
-  }
-
-  CHECK(!deferral->is_pending_initialization);
-  DeferRequestForRefresh(request, *deferral, std::move(restart_callback),
-                         std::move(continue_callback));
 }
 
 void SessionServiceImpl::OnSessionKeyRestored(
@@ -578,6 +581,8 @@ void SessionServiceImpl::RefreshSessionInternal(
   request->net_log().AddEventReferencingSource(
       net::NetLogEventType::DBSC_REFRESH_REQUEST, net_log_source_for_refresh);
 
+  refresh_times_[site].push_back(base::TimeTicks::Now());
+
   auto callback = base::BindOnce(
       &SessionServiceImpl::OnRefreshRequestCompletion,
       weak_factory_.GetWeakPtr(),
@@ -586,6 +591,31 @@ void SessionServiceImpl::RefreshSessionInternal(
       RegistrationRequestParam::CreateForRefresh(*session), key_service_.get(),
       context_.get(), request->isolation_info(), net_log_source_for_refresh,
       request->initiator(), std::move(callback), key_id);
+}
+
+bool SessionServiceImpl::RefreshQuotaExceeded(const SchemefulSite& site) {
+  if (ignore_refresh_quota_) {
+    return false;
+  }
+
+  auto it = refresh_times_.find(site);
+  if (it == refresh_times_.end()) {
+    return false;
+  }
+
+  it->second.erase(std::remove_if(it->second.begin(), it->second.end(),
+                                  [](base::TimeTicks time) {
+                                    return base::TimeTicks::Now() - time >=
+                                           kRefreshQuotaInterval;
+                                  }),
+                   it->second.end());
+
+  size_t refresh_count = it->second.size();
+  if (refresh_count == 0) {
+    refresh_times_.erase(it);
+  }
+
+  return refresh_count >= kRefreshQuota;
 }
 
 }  // namespace net::device_bound_sessions

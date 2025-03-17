@@ -288,8 +288,7 @@ bool PrerendererImpl::MaybePrerender(
   }
 
   std::optional<net::HttpNoVarySearchData> no_vary_search_hint;
-  if (base::FeatureList::IsEnabled(blink::features::kPrerender2NoVarySearch) &&
-      candidate->no_vary_search_hint) {
+  if (candidate->no_vary_search_hint) {
     no_vary_search_hint = no_vary_search::ParseHttpNoVarySearchDataFromMojom(
         candidate->no_vary_search_hint);
   }
@@ -306,7 +305,7 @@ bool PrerendererImpl::MaybePrerender(
       /*should_prepare_paint_tree=*/false,
       /*url_match_predicate=*/{},
       /*prerender_navigation_handle_callback=*/{},
-      base::MakeRefCounted<PreloadPipelineInfo>(
+      PreloadPipelineInfoImpl::Create(
           /*planned_max_preloading_type=*/PreloadingType::kPrerender));
 
   PreloadingTriggerType trigger_type =
@@ -323,6 +322,9 @@ bool PrerendererImpl::MaybePrerender(
       case blink::mojom::SpeculationTargetHint::kBlank: {
         if (base::FeatureList::IsEnabled(
                 blink::features::kPrerender2InNewTab)) {
+          GetContentClient()->browser()->LogWebFeatureForCurrentPage(
+              &rfhi,
+              blink::mojom::WebFeature::kSpeculationRulesTargetHintBlank);
           // For the prerender-in-new-tab, PreloadingAttempt will be managed by
           // a prerender WebContents to be created later.
           return registry_->CreateAndStartHostForNewTab(

@@ -37,7 +37,6 @@
 #include "third_party/blink/renderer/modules/webgpu/texture_utils.h"
 #include "third_party/blink/renderer/platform/graphics/gpu/image_extractor.h"
 #include "third_party/blink/renderer/platform/graphics/gpu/webgpu_mailbox_texture.h"
-#include "third_party/blink/renderer/platform/graphics/graphics_types.h"
 #include "third_party/blink/renderer/platform/graphics/skia/skia_utils.h"
 #include "third_party/blink/renderer/platform/graphics/unaccelerated_static_bitmap_image.h"
 #include "third_party/blink/renderer/platform/heap/garbage_collected.h"
@@ -241,16 +240,14 @@ ExternalSource GetExternalSourceFromExternalImage(
       gfx::SizeF(),  // It will be ignored and won't affect size.
       kRespectImageOrientation);
 
-  // TODO(crbug.com/1197369): Ensure kUnpremultiplyAlpha impl will also make
-  // image live on GPU if possible.
-  // Use kDontChangeAlpha here to bypass the alpha type conversion here.
-  // Left the alpha op to CopyTextureForBrowser() and CopyContentFromCPU().
-  // This will help combine more transforms (e.g. flipY, color-space)
-  // into a single blit.
+  // The alpha op will happen at CopyTextureForBrowser() and
+  // CopyContentFromCPU(). This will help combine more transforms (e.g. flipY,
+  // color-space) into a single blit.
+  // TODO(https://crbug.com/40760113): Ensure unpremultiplied images will live
+  // on GPU if possible.
   SourceImageStatus source_image_status = kInvalidSourceImageStatus;
   auto image_for_canvas = canvas_image_source->GetSourceImageForCanvas(
-      FlushReason::kWebGPUExternalImage, &source_image_status, image_size,
-      kDontChangeAlpha);
+      FlushReason::kWebGPUExternalImage, &source_image_status, image_size);
   if (source_image_status != kNormalSourceImageStatus) {
     // Canvas back resource is broken, zero size, incomplete or invalid.
     // but developer can do nothing. Return nullptr and issue an noop.
@@ -834,16 +831,6 @@ bool GPUQueue::CopyFromCanvasSourceImage(
     use_webgpu_mailbox_texture = false;
     unaccelerated_image = image->MakeUnaccelerated();
     image = unaccelerated_image.get();
-  }
-
-  // TODO(crbug.com/1426666): If disable OOP-R, using webgpu mailbox to upload
-  // cpu-backed resource which has unpremultiply alpha type causes issues
-  // due to alpha type has been dropped. Disable that
-  // upload path if the image is not texture backed, OOP-R is disabled and image
-  // alpha type is unpremultiplied.
-  if (!features::IsCanvasOopRasterizationEnabled() &&
-      !image->IsTextureBacked() && !image->IsPremultiplied()) {
-    use_webgpu_mailbox_texture = false;
   }
 
   bool noop = copy_size.width == 0 || copy_size.height == 0 ||

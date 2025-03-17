@@ -9,6 +9,7 @@
 #include "base/check_op.h"
 #include "base/trace_event/trace_event.h"
 #include "chrome/browser/ui/tabs/public/tab_interface.h"
+#include "chrome/browser/ui/tabs/tab_group_tab_collection.h"
 #include "chrome/browser/ui/tabs/tab_strip_model.h"
 #include "content/public/browser/web_contents.h"
 #include "third_party/perfetto/include/perfetto/tracing/traced_value.h"
@@ -165,9 +166,43 @@ TabGroupChange::~TabGroupChange() = default;
 TabGroupChange::VisualsChange::VisualsChange() = default;
 TabGroupChange::VisualsChange::~VisualsChange() = default;
 
+TabGroupChange::CreateChange::CreateChange(
+    TabGroupChange::TabGroupCreationReason reason,
+    tabs::TabGroupTabCollection* detached_group)
+    : reason_(reason), detached_group_(detached_group) {}
+TabGroupChange::CreateChange::~CreateChange() = default;
+
+TabGroupChange::CloseChange::CloseChange(
+    TabGroupChange::TabGroupClosureReason reason,
+    tabs::TabGroupTabCollection* detached_group)
+    : reason_(reason), detached_group_(detached_group) {}
+TabGroupChange::CloseChange::~CloseChange() = default;
+
 const TabGroupChange::VisualsChange* TabGroupChange::GetVisualsChange() const {
   DCHECK_EQ(type, Type::kVisualsChanged);
   return static_cast<const VisualsChange*>(delta.get());
+}
+
+const TabGroupChange::CreateChange* TabGroupChange::GetCreateChange() const {
+  DCHECK_EQ(type, Type::kCreated);
+  return static_cast<const CreateChange*>(delta.get());
+}
+
+std::vector<tabs::TabModel*> TabGroupChange::CreateChange::GetDetachedTabs()
+    const {
+  CHECK(detached_group_);
+  return detached_group_->GetTabs();
+}
+
+std::vector<tabs::TabModel*> TabGroupChange::CloseChange::GetDetachedTabs()
+    const {
+  CHECK(detached_group_);
+  return detached_group_->GetTabs();
+}
+
+const TabGroupChange::CloseChange* TabGroupChange::GetCloseChange() const {
+  DCHECK_EQ(type, Type::kClosed);
+  return static_cast<const CloseChange*>(delta.get());
 }
 
 TabGroupChange::TabGroupChange(TabStripModel* model,
@@ -177,6 +212,22 @@ TabGroupChange::TabGroupChange(TabStripModel* model,
                      group,
                      Type::kVisualsChanged,
                      std::make_unique<VisualsChange>(std::move(deltap))) {}
+
+TabGroupChange::TabGroupChange(TabStripModel* model,
+                               tab_groups::TabGroupId group,
+                               CreateChange deltap)
+    : TabGroupChange(model,
+                     group,
+                     Type::kCreated,
+                     std::make_unique<CreateChange>(std::move(deltap))) {}
+
+TabGroupChange::TabGroupChange(TabStripModel* model,
+                               tab_groups::TabGroupId group,
+                               CloseChange deltap)
+    : TabGroupChange(model,
+                     group,
+                     Type::kClosed,
+                     std::make_unique<CloseChange>(std::move(deltap))) {}
 
 ////////////////////////////////////////////////////////////////////////////////
 // TabStripModelObserver
@@ -201,12 +252,6 @@ void TabStripModelObserver::OnTabWillBeAdded() {}
 void TabStripModelObserver::OnTabWillBeRemoved(content::WebContents* contents,
                                                int index) {}
 
-void TabStripModelObserver::OnTabGroupDetached(TabStripModel* model,
-                                               const TabGroup& group) {}
-
-void TabStripModelObserver::OnTabGroupAttached(TabStripModel* model,
-                                               const TabGroup& group) {}
-
 void TabStripModelObserver::OnTabGroupChanged(const TabGroupChange& change) {}
 
 void TabStripModelObserver::OnTabGroupAdded(
@@ -215,8 +260,7 @@ void TabStripModelObserver::OnTabGroupAdded(
 void TabStripModelObserver::OnTabGroupWillBeRemoved(
     const tab_groups::TabGroupId& group_id) {}
 
-void TabStripModelObserver::OnSplitViewAdded(
-    std::vector<tabs::TabInterface*> tabs) {}
+void TabStripModelObserver::OnSplitViewAdded(std::vector<int> indices) {}
 
 void TabStripModelObserver::TabChangedAt(WebContents* contents,
                                          int index,

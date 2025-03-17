@@ -94,6 +94,13 @@ SessionImpl::SessionImpl(
   }
 }
 
+SessionImpl::SessionImpl(ModelBasedCapabilityKey feature,
+                         ExecuteRemoteFn execute_remote_fn,
+                         const SamplingParams& sampling_params)
+    : feature_(feature),
+      execute_remote_fn_(std::move(execute_remote_fn)),
+      sampling_params_(sampling_params) {}
+
 SessionImpl::~SessionImpl() {}
 
 on_device_model::mojom::Session& SessionImpl::GetSession() {
@@ -225,16 +232,18 @@ void SessionImpl::DestroyOnDeviceState() {
 void SessionImpl::GetSizeInTokens(
     const std::string& text,
     OptimizationGuideModelSizeInTokenCallback callback) {
-  // TODO(crbug.com/377539962): Return nullopt on error instead.
   if (!ShouldUseOnDeviceModel()) {
-    std::move(callback).Run(0);
+    std::move(callback).Run(std::nullopt);
     return;
   }
   auto input = on_device_model::mojom::Input::New();
   input->pieces.push_back(text);
   on_device_context_->GetOrCreateSession()->GetSizeInTokens(
-      std::move(input),
-      mojo::WrapCallbackWithDefaultInvokeIfNotRun(std::move(callback), 0));
+      std::move(input), base::BindOnce([](uint32_t size) {
+                          return std::optional<uint32_t>(size);
+                        })
+                            .Then(mojo::WrapCallbackWithDefaultInvokeIfNotRun(
+                                std::move(callback), std::nullopt)));
 }
 
 void SessionImpl::GetExecutionInputSizeInTokens(
@@ -259,24 +268,37 @@ const SamplingParams SessionImpl::GetSamplingParams() const {
   return sampling_params_;
 }
 
+std::unique_ptr<OptimizationGuideModelExecutor::Session> SessionImpl::Clone() {
+  auto session = std::make_unique<SessionImpl>(feature_, execute_remote_fn_,
+                                               sampling_params_);
+  session->context_ = context_.Clone();
+  session->context_start_time_ = context_start_time_;
+  if (on_device_context_ && on_device_context_->CanUse()) {
+    session->on_device_context_ = on_device_context_->Clone();
+  }
+  return session;
+}
+
 void SessionImpl::GetSizeInTokensInternal(
     MultimodalMessageReadView request,
     OptimizationGuideModelSizeInTokenCallback callback,
     bool want_input_context) {
-  // TODO(crbug.com/377539962): Return nullopt on error instead.
   if (!ShouldUseOnDeviceModel()) {
-    std::move(callback).Run(0);
+    std::move(callback).Run(std::nullopt);
     return;
   }
   auto input = on_device_context_->opts().adapter->ConstructInputString(
       request, want_input_context);
   if (!input) {
-    std::move(callback).Run(0);
+    std::move(callback).Run(std::nullopt);
     return;
   }
   on_device_context_->GetOrCreateSession()->GetSizeInTokens(
       std::move(input->input),
-      mojo::WrapCallbackWithDefaultInvokeIfNotRun(std::move(callback), 0));
+      base::BindOnce(
+          [](uint32_t size) { return std::optional<uint32_t>(size); })
+          .Then(mojo::WrapCallbackWithDefaultInvokeIfNotRun(std::move(callback),
+                                                            std::nullopt)));
 }
 
 }  // namespace optimization_guide

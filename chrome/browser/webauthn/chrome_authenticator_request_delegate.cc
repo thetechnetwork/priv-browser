@@ -47,7 +47,6 @@
 #include "chrome/browser/ui/browser_navigator_params.h"
 #include "chrome/browser/ui/browser_window.h"
 #include "chrome/browser/ui/passwords/passwords_client_ui_delegate.h"
-#include "chrome/browser/ui/webauthn/passkey_upgrade_request_controller.h"
 #include "chrome/browser/ui/webauthn/user_actions.h"
 #include "chrome/browser/webauthn/authenticator_request_dialog_controller.h"
 #include "chrome/browser/webauthn/authenticator_request_dialog_model.h"
@@ -55,7 +54,6 @@
 #include "chrome/browser/webauthn/enclave_manager.h"
 #include "chrome/browser/webauthn/gpm_enclave_controller.h"
 #include "chrome/browser/webauthn/passkey_model_factory.h"
-#include "chrome/browser/webauthn/password_credential_controller.h"
 #include "chrome/browser/webauthn/webauthn_metrics_util.h"
 #include "chrome/browser/webauthn/webauthn_pref_names.h"
 #include "chrome/common/chrome_version.h"
@@ -120,7 +118,6 @@
 #include "ui/aura/window.h"
 #endif
 
-using webauthn::PasswordCredentialController;
 using PasswordCredentials = PasswordCredentialController::PasswordCredentials;
 using UIPresentation = ChromeAuthenticatorRequestDelegate::UIPresentation;
 using TransportAvailabilityInfo =
@@ -343,7 +340,7 @@ void ChromeAuthenticatorRequestDelegate::SetRelyingPartyId(
 
 void ChromeAuthenticatorRequestDelegate::SetUIPresentation(
     UIPresentation ui_presentation) {
-  dialog_controller_->set_ui_presentation(ui_presentation);
+  dialog_controller_->SetUIPresentation(ui_presentation);
 }
 
 bool ChromeAuthenticatorRequestDelegate::DoesBlockRequestOnFailure(
@@ -483,14 +480,9 @@ void ChromeAuthenticatorRequestDelegate::RegisterActionCallbacks(
       bluetooth_adapter_power_on_callback);
   dialog_controller_->SetRequestBlePermissionCallback(
       request_ble_permission_callback);
-  if (PasswordsUsable(credential_types_,
-                      dialog_controller_->ui_presentation())) {
-    auto* password_controller =
-        PasswordCredentialController::MaybeGet(GetRenderFrameHost());
-    if (password_controller) {
-      password_controller->SetPasswordSelectedCallback(
-          password_selected_callback_);
-    }
+  if (password_controller_) {
+    password_controller_->SetPasswordSelectedCallback(
+        password_selected_callback_);
   }
 }
 
@@ -695,12 +687,15 @@ void ChromeAuthenticatorRequestDelegate::ConfigureDiscoveries(
 
   if (PasswordsUsable(credential_types_,
                       dialog_controller_->ui_presentation())) {
-    auto* controller =
-        PasswordCredentialController::MaybeGet(GetRenderFrameHost());
-    if (!controller) {
+    // Only valid for the main frame.
+    if (!password_controller_ && GetRenderFrameHost()->IsInPrimaryMainFrame()) {
+      password_controller_ = std::make_unique<PasswordCredentialController>(
+          render_frame_host_id_, dialog_model_.get());
+    }
+    if (!password_controller_) {
       return;
     }
-    controller->FetchPasswords(
+    password_controller_->FetchPasswords(
         origin.GetURL(),
         base::BindOnce(
             &ChromeAuthenticatorRequestDelegate::OnPasswordCredentialsReceived,
@@ -912,6 +907,11 @@ void ChromeAuthenticatorRequestDelegate::SetMockTimeForTesting(
   timer_task_runner_ = std::move(task_runner);
 }
 
+void ChromeAuthenticatorRequestDelegate::SetPasswordControllerForTesting(
+    std::unique_ptr<PasswordCredentialController> controller) {
+  password_controller_ = std::move(controller);
+}
+
 content::RenderFrameHost*
 ChromeAuthenticatorRequestDelegate::GetRenderFrameHost() const {
   content::RenderFrameHost* ret =
@@ -943,20 +943,7 @@ bool ChromeAuthenticatorRequestDelegate::MaybeHandleImmediateMediation(
     return true;
   }
 
-  // Do not consider `kPhone` credentials as they're not locally available.
-  const auto kLocalTypes =
-      std::unordered_set{device::AuthenticatorType::kEnclave,
-                         device::AuthenticatorType::kICloudKeychain,
-                         device::AuthenticatorType::kWinNative,
-                         device::AuthenticatorType::kChromeOS,
-                         device::AuthenticatorType::kTouchID};
-  int immediate_webauthn_count = std::ranges::count_if(
-      data.recognized_credentials,
-      [&kLocalTypes](const device::AuthenticatorType& type) {
-        return kLocalTypes.contains(type);
-      },
-      &device::DiscoverableCredentialMetadata::source);
-  if (immediate_webauthn_count + passwords.size() == 0) {
+  if (data.recognized_credentials.size() + passwords.size() == 0) {
     return true;
   }
 
@@ -1123,6 +1110,20 @@ void ChromeAuthenticatorRequestDelegate::FilterRecognizedCredentials(
       }
     }
     tai->recognized_credentials = std::move(filtered_list);
+  }
+
+  const auto kImmediateTypes =
+      std::unordered_set{device::AuthenticatorType::kEnclave,
+                         device::AuthenticatorType::kICloudKeychain,
+                         device::AuthenticatorType::kWinNative,
+                         device::AuthenticatorType::kChromeOS,
+                         device::AuthenticatorType::kTouchID};
+  if (dialog_controller_->ui_presentation() ==
+      UIPresentation::kModalImmediate) {
+    std::erase_if(tai->recognized_credentials,
+                  [&kImmediateTypes](const auto& passkey) {
+                    return !kImmediateTypes.contains(passkey.source);
+                  });
   }
 }
 

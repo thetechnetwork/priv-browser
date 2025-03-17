@@ -25,6 +25,7 @@
 #include "components/input/native_web_keyboard_event.h"
 #include "third_party/abseil-cpp/absl/types/variant.h"
 #include "ui/accessibility/ax_action_data.h"
+#include "ui/base/interaction/element_identifier.h"
 #include "ui/base/metadata/metadata_header_macros.h"
 #include "ui/events/event.h"
 #include "ui/views/widget/widget.h"
@@ -66,6 +67,16 @@ class PopupViewViews : public PopupBaseView,
   METADATA_HEADER(PopupViewViews, PopupBaseView)
 
  public:
+  DECLARE_CLASS_ELEMENT_IDENTIFIER_VALUE(
+      kAutofillBnplAffirmOrZipSuggestionElementId);
+  DECLARE_CLASS_ELEMENT_IDENTIFIER_VALUE(kAutofillCreditCardBenefitElementId);
+  DECLARE_CLASS_ELEMENT_IDENTIFIER_VALUE(
+      kAutofillCreditCardSuggestionEntryElementId);
+  DECLARE_CLASS_ELEMENT_IDENTIFIER_VALUE(kAutofillAiOptInIphElementId);
+  DECLARE_CLASS_ELEMENT_IDENTIFIER_VALUE(
+      kAutofillStandaloneCvcSuggestionElementId);
+  DECLARE_CLASS_ELEMENT_IDENTIFIER_VALUE(kAutofillSuggestionElementId);
+
   using RowPointer = absl::variant<PopupRowView*,
                                    PopupSeparatorView*,
                                    PopupTitleView*,
@@ -150,6 +161,12 @@ class PopupViewViews : public PopupBaseView,
                        PopupCellSelectionSource source,
                        AutoselectFirstSuggestion autoselect_first_suggestion,
                        bool suppress_popup = false);
+
+  // Shows any available in-product-help (IPH) promos associated with the
+  // current suggestions. This function iterates through the suggestions and
+  // displays a feature promo bubble if the suggestion has associated IPH
+  // metadata.
+  void ShowIPHFeaturePromos();
 
   // Returns the `PopupRowView` at line number `index`. Assumes that there is
   // such a view at that line number - otherwise the underlying variant will

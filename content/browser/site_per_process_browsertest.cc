@@ -38,6 +38,7 @@
 #include "base/strings/string_split.h"
 #include "base/strings/string_util.h"
 #include "base/strings/stringprintf.h"
+#include "base/strings/to_string.h"
 #include "base/strings/utf_string_conversions.h"
 #include "base/task/sequenced_task_runner.h"
 #include "base/task/single_thread_task_runner.h"
@@ -156,7 +157,6 @@
 #include "third_party/blink/public/common/associated_interfaces/associated_interface_provider.h"
 #include "third_party/blink/public/common/features.h"
 #include "third_party/blink/public/common/input/web_input_event.h"
-#include "third_party/blink/public/common/permissions_policy/permissions_policy.h"
 #include "third_party/blink/public/common/permissions_policy/policy_value.h"
 #include "third_party/blink/public/common/switches.h"
 #include "third_party/blink/public/common/tokens/tokens.h"
@@ -180,7 +180,7 @@
 #include "ui/gfx/geometry/rect.h"
 #include "ui/gfx/geometry/transform.h"
 #include "ui/latency/latency_info.h"
-#include "ui/native_theme/native_theme_features.h"
+#include "ui/native_theme/features/native_theme_features.h"
 
 #if defined(USE_AURA)
 #include "content/browser/renderer_host/render_widget_host_view_aura.h"
@@ -14090,7 +14090,7 @@ class SitePerProcessWithMainFrameThresholdLocalhostTest
         {{"ProcessPerSiteMainFrameThreshold",
           base::StringPrintf("%zu", kDefaultThreshold)},
          {"ProcessPerSiteMainFrameAllowIPAndLocalhost",
-          IsLocalhostAllowed() ? "true" : "false"}});
+          base::ToString(IsLocalhostAllowed())}});
   }
   ~SitePerProcessWithMainFrameThresholdLocalhostTest() override = default;
 

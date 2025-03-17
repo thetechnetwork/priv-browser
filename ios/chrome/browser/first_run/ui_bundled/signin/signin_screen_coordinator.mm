@@ -145,23 +145,8 @@
 
 #pragma mark - InterruptibleChromeCoordinator
 
-- (void)interruptWithAction:(SigninCoordinatorInterrupt)action
-                 completion:(ProceduralBlock)completion {
-  if (self.addAccountSigninCoordinator) {
-    if (IsInterruptibleCoordinatorStoppedSynchronouslyEnabled()) {
-      [self.addAccountSigninCoordinator interruptWithAction:action
-                                                 completion:nil];
-
-      if (completion) {
-        completion();
-      }
-    } else {
-      [self.addAccountSigninCoordinator interruptWithAction:action
-                                                 completion:completion];
-    }
-  } else if (completion) {
-    completion();
-  }
+- (void)interruptAnimated:(BOOL)animated {
+  [self.addAccountSigninCoordinator interruptAnimated:animated];
 }
 
 #pragma mark - Private
@@ -219,7 +204,9 @@
                                          identity:self.mediator.selectedIdentity
                                       accessPoint:_accessPoint
                                 postSignInActions:PostSignInActionSet()
-                         presentingViewController:self.viewController];
+                         presentingViewController:self.viewController
+                                       anchorView:nil
+                                       anchorRect:CGRectNull];
   authenticationFlow.precedingHistorySync = YES;
   __weak __typeof(self) weakSelf = self;
   ProceduralBlock completion = ^() {

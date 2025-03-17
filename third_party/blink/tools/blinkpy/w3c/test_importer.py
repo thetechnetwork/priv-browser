@@ -275,6 +275,9 @@ class TestImporter:
                     self.project_git.add_list([path])
 
                 self._generate_manifest()
+            except ParseError as e:
+                raise
+            finally:
                 message = 'Update test expectations and baselines.'
                 if self.project_git.has_working_directory_changes():
                     self._commit_changes(message)
@@ -282,11 +285,6 @@ class TestImporter:
                 # `TestExpectations`, which are committed earlier (before
                 # rebaselining).
                 self._upload_patchset(message)
-            except ParseError as e:
-                # When there is an error when parse TestExpectations, upload
-                # the updated TestExpectations for easier debugging later.
-                self._upload_patchset('Dump invalid expectations')
-                raise
 
         return True
 
@@ -494,11 +492,12 @@ class TestImporter:
         self.project_git.commit_locally_with_message(commit_message)
 
     def _has_wpt_changes(self):
+        port = self.host.port_factory.get()
         changed_files = self.project_git.changed_files()
         test_roots = [
             self.fs.relpath(self.finder.path_from_web_tests(subdir),
                             self.finder.chromium_base())
-            for subdir in Port.WPT_DIRS
+            for subdir in port.wpt_dirs()
         ]
         for changed_file in changed_files:
             if any(changed_file.startswith(root) for root in test_roots):

@@ -44,12 +44,14 @@
 #include "chrome/browser/ui/toolbar/pinned_toolbar/pinned_toolbar_actions_model.h"
 #include "chrome/browser/ui/toolbar/pinned_toolbar/pinned_translate_action_listener.h"
 #include "chrome/browser/ui/ui_features.h"
+#include "chrome/browser/ui/views/intent_picker/intent_picker_view_page_action_controller.h"
 #include "chrome/browser/ui/views/page_action/action_ids.h"
 #include "chrome/browser/ui/views/page_action/page_action_controller.h"
 #include "chrome/browser/ui/views/side_panel/customize_chrome/side_panel_controller_views.h"
 #include "chrome/browser/ui/views/side_panel/extensions/extension_side_panel_manager.h"
 #include "chrome/browser/ui/views/side_panel/read_anything/read_anything_side_panel_controller.h"
 #include "chrome/browser/ui/views/translate/translate_page_action_controller.h"
+#include "chrome/browser/ui/views/zoom/zoom_page_action_controller.h"
 #include "chrome/browser/ui/webui/webui_embedding_context.h"
 #include "chrome/browser/web_applications/web_app_tab_helper.h"
 #include "chrome/browser/web_applications/web_app_utils.h"
@@ -57,12 +59,15 @@
 #include "components/favicon/content/content_favicon_driver.h"
 #include "components/fingerprinting_protection_filter/common/fingerprinting_protection_filter_features.h"
 #include "components/image_fetcher/core/image_fetcher_service.h"
+#include "components/ip_protection/common/ip_protection_status.h"
 #include "components/metrics/content/dwa_web_contents_observer.h"
+#include "components/passage_embeddings/passage_embeddings_features.h"
 #include "components/permissions/permission_indicators_tab_data.h"
+#include "net/base/features.h"
 
 #if BUILDFLAG(ENABLE_GLIC)
+#include "chrome/browser/glic/browser_ui/glic_tab_indicator_helper.h"
 #include "chrome/browser/glic/glic_enabling.h"
-#include "chrome/browser/glic/glic_tab_indicator_helper.h"
 #endif
 namespace tabs {
 
@@ -129,8 +134,7 @@ void TabFeatures::Init(TabInterface& tab, Profile* profile) {
             tab.GetContents());
 
     chrome_autofill_ai_client_ =
-        ChromeAutofillAiClient::MaybeCreateForWebContents(tab.GetContents(),
-                                                          profile);
+        ChromeAutofillAiClient::MaybeCreateForWebContents(tab.GetContents());
 
     pinned_translate_action_listener_ =
         std::make_unique<PinnedTranslateActionListener>(&tab);
@@ -163,9 +167,11 @@ void TabFeatures::Init(TabInterface& tab, Profile* profile) {
           std::make_unique<tab_groups::CollaborationMessagingTabData>(profile);
     }
 
-    embedder_tab_observer_ =
-        std::make_unique<passage_embeddings::EmbedderTabObserver>(
-            tab.GetContents());
+    if (base::FeatureList::IsEnabled(passage_embeddings::kPassageEmbedder)) {
+      embedder_tab_observer_ =
+          std::make_unique<passage_embeddings::EmbedderTabObserver>(
+              tab.GetContents());
+    }
 
 #if BUILDFLAG(ENABLE_GLIC)
     if (glic::GlicEnabling::IsProfileEligible(
@@ -191,6 +197,12 @@ void TabFeatures::Init(TabInterface& tab, Profile* profile) {
     memory_saver_chip_controller_ =
         std::make_unique<memory_saver::MemorySaverChipController>(
             *page_action_controller());
+
+    intent_picker_view_page_action_controller_ =
+        std::make_unique<IntentPickerViewPageActionController>(tab);
+
+    zoom_page_action_controller_ =
+        std::make_unique<zoom::ZoomPageActionController>(tab);
   }
 
   customize_chrome_side_panel_controller_ =
@@ -218,6 +230,11 @@ void TabFeatures::Init(TabInterface& tab, Profile* profile) {
         HostContentSettingsMapFactory::GetForProfile(profile),
         TrackingProtectionSettingsFactory::GetForProfile(profile),
         profile->IsIncognitoProfile());
+  }
+
+  // Only create the IpProtectionStatus if the User Bypass feature is enabled.
+  if (net::features::kIpPrivacyEnableUserBypass.Get()) {
+    ip_protection::IpProtectionStatus::CreateForWebContents(tab.GetContents());
   }
 
   if (web_app::AreWebAppsEnabled(profile)) {
@@ -286,8 +303,7 @@ void TabFeatures::WillDiscardContents(tabs::TabInterface* tab,
   }
   if (chrome_autofill_ai_client_) {
     chrome_autofill_ai_client_ =
-        ChromeAutofillAiClient::MaybeCreateForWebContents(new_contents,
-                                                          profile);
+        ChromeAutofillAiClient::MaybeCreateForWebContents(new_contents);
   }
 
   if (privacy_sandbox_tab_observer_) {

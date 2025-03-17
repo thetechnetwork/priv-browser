@@ -10,6 +10,7 @@
 #include <type_traits>
 
 #include "base/containers/span.h"
+#include "base/notreached.h"
 #include "components/autofill/core/browser/data_model/autofill_ai/entity_type_names.h"
 #include "components/autofill/core/browser/field_types.h"
 #include "components/autofill/core/common/dense_set.h"
@@ -37,6 +38,16 @@ class AttributeType;
 // merely a thin wrapper with member functions.
 class AttributeType final {
  public:
+  // The underlying representation of the data stored in this attribute.
+  enum class DataType {
+    kCountry,
+    kDate,
+    kName,
+    kState,
+    kString,
+    kMaxValue = kString,
+  };
+
   // Comparator that ranks types by their priority for disambiguating different
   // instances of the same entity type, as specified in the schema.
   // `DisambiguationOrder(x, y) == true` means `x` has higher priority than `y`.
@@ -62,16 +73,14 @@ class AttributeType final {
 
   EntityType entity_type() const;
 
+  constexpr DataType data_type() const;
+
   // Maps this AttributeType to the corresponding Autofill AI `FieldType`.
   constexpr FieldType field_type() const;
 
   // Returns whether the attribute should be obfuscated in preview and
   // suggestion labels.
   bool is_obfuscated() const;
-
-  // Returns whether the corresponding type has a non-trivial structure (e.g.
-  // Name, Address) or whether the structure is trivial.
-  constexpr bool is_structured_type() const;
 
   // The string representation of the name. This is unique among all attribute
   // types of the associated entity type. (It is not globally unique!)
@@ -92,6 +101,34 @@ class AttributeType final {
   AttributeTypeName name_{};
 };
 
+constexpr AttributeType::DataType AttributeType::data_type() const {
+  switch (name_) {
+    case AttributeTypeName::kPassportName:
+    case AttributeTypeName::kDriversLicenseName:
+      return DataType::kName;
+    case AttributeTypeName::kPassportCountry:
+      return DataType::kCountry;
+    case AttributeTypeName::kPassportExpirationDate:
+    case AttributeTypeName::kPassportIssueDate:
+    case AttributeTypeName::kDriversLicenseExpirationDate:
+    case AttributeTypeName::kDriversLicenseIssueDate:
+      return DataType::kDate;
+    case AttributeTypeName::kVehiclePlateState:
+    case AttributeTypeName::kDriversLicenseState:
+      return DataType::kState;
+    case AttributeTypeName::kPassportNumber:
+    case AttributeTypeName::kVehicleOwner:
+    case AttributeTypeName::kVehiclePlateNumber:
+    case AttributeTypeName::kVehicleVin:
+    case AttributeTypeName::kVehicleMake:
+    case AttributeTypeName::kVehicleModel:
+    case AttributeTypeName::kVehicleYear:
+    case AttributeTypeName::kDriversLicenseNumber:
+      return DataType::kString;
+  }
+  NOTREACHED();
+}
+
 constexpr FieldType AttributeType::field_type() const {
   switch (name_) {
     case AttributeTypeName::kPassportName:
@@ -99,20 +136,15 @@ constexpr FieldType AttributeType::field_type() const {
     case AttributeTypeName::kPassportNumber:
       return PASSPORT_NUMBER;
     case AttributeTypeName::kPassportCountry:
-      return PASSPORT_ISSUING_COUNTRY_TAG;
-    case AttributeTypeName::kPassportExpiryDate:
-      return PASSPORT_EXPIRATION_DATE_TAG;
+      return PASSPORT_ISSUING_COUNTRY;
+    case AttributeTypeName::kPassportExpirationDate:
+      return PASSPORT_EXPIRATION_DATE;
     case AttributeTypeName::kPassportIssueDate:
-      return PASSPORT_ISSUE_DATE_TAG;
-    case AttributeTypeName::kLoyaltyCardProgram:
-      return LOYALTY_MEMBERSHIP_PROGRAM;
-    case AttributeTypeName::kLoyaltyCardProvider:
-      return LOYALTY_MEMBERSHIP_PROVIDER;
-    case AttributeTypeName::kLoyaltyCardMemberId:
-      return LOYALTY_MEMBERSHIP_ID;
+      return PASSPORT_ISSUE_DATE;
+
     case AttributeTypeName::kVehicleOwner:
       return VEHICLE_OWNER_TAG;
-    case AttributeTypeName::kVehicleLicensePlate:
+    case AttributeTypeName::kVehiclePlateNumber:
       return VEHICLE_LICENSE_PLATE;
     case AttributeTypeName::kVehicleVin:
       return VEHICLE_VIN;
@@ -120,48 +152,21 @@ constexpr FieldType AttributeType::field_type() const {
       return VEHICLE_MAKE;
     case AttributeTypeName::kVehicleModel:
       return VEHICLE_MODEL;
+    case AttributeTypeName::kVehicleYear:
+      return VEHICLE_YEAR;
+    case AttributeTypeName::kVehiclePlateState:
+      return VEHICLE_PLATE_STATE;
+
     case AttributeTypeName::kDriversLicenseName:
       return DRIVERS_LICENSE_NAME_TAG;
-    case AttributeTypeName::kDriversLicenseRegion:
+    case AttributeTypeName::kDriversLicenseState:
       return DRIVERS_LICENSE_REGION;
     case AttributeTypeName::kDriversLicenseNumber:
       return DRIVERS_LICENSE_NUMBER;
     case AttributeTypeName::kDriversLicenseExpirationDate:
-      return DRIVERS_LICENSE_EXPIRATION_DATE_TAG;
+      return DRIVERS_LICENSE_EXPIRATION_DATE;
     case AttributeTypeName::kDriversLicenseIssueDate:
-      return DRIVERS_LICENSE_ISSUE_DATE_TAG;
-  }
-  NOTREACHED();
-}
-
-constexpr bool AttributeType::is_structured_type() const {
-  switch (name_) {
-    case AttributeTypeName::kPassportName:
-    case AttributeTypeName::kDriversLicenseName:
-      return true;
-    case AttributeTypeName::kPassportCountry:
-      // TODO(crbug.com/389625753): Add special support for country types.
-      return false;
-    case AttributeTypeName::kDriversLicenseRegion:
-      // TODO(crbug.com/389625753): Add special support for state types.
-      return false;
-    case AttributeTypeName::kPassportExpiryDate:
-    case AttributeTypeName::kPassportIssueDate:
-    case AttributeTypeName::kDriversLicenseExpirationDate:
-    case AttributeTypeName::kDriversLicenseIssueDate:
-      // TODO(crbug.com/389625753): Add special support for date types.
-      return false;
-    case AttributeTypeName::kPassportNumber:
-    case AttributeTypeName::kLoyaltyCardProgram:
-    case AttributeTypeName::kLoyaltyCardProvider:
-    case AttributeTypeName::kLoyaltyCardMemberId:
-    case AttributeTypeName::kVehicleOwner:
-    case AttributeTypeName::kVehicleLicensePlate:
-    case AttributeTypeName::kVehicleVin:
-    case AttributeTypeName::kVehicleMake:
-    case AttributeTypeName::kVehicleModel:
-    case AttributeTypeName::kDriversLicenseNumber:
-      return false;
+      return DRIVERS_LICENSE_ISSUE_DATE;
   }
   NOTREACHED();
 }

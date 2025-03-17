@@ -44,6 +44,7 @@
 #include "base/strings/strcat.h"
 #include "base/strings/string_number_conversions.h"
 #include "base/strings/string_util.h"
+#include "base/strings/to_string.h"
 #include "base/syslog_logging.h"
 #include "base/task/sequenced_task_runner.h"
 #include "base/task/single_thread_task_runner.h"
@@ -184,6 +185,7 @@
 #include "content/public/browser/clipboard_types.h"
 #include "content/public/browser/content_browser_client.h"
 #include "content/public/browser/context_menu_params.h"
+#include "content/public/browser/cookie_access_details.h"
 #include "content/public/browser/disallow_activation_reason.h"
 #include "content/public/browser/document_ref.h"
 #include "content/public/browser/document_service_internal.h"
@@ -238,9 +240,11 @@
 #include "services/network/public/cpp/is_potentially_trustworthy.h"
 #include "services/network/public/cpp/network_service_buildflags.h"
 #include "services/network/public/cpp/not_implemented_url_loader_factory.h"
+#include "services/network/public/cpp/permissions_policy/permissions_policy.h"
 #include "services/network/public/cpp/permissions_policy/permissions_policy_declaration.h"
 #include "services/network/public/cpp/simple_url_loader.h"
 #include "services/network/public/cpp/web_sandbox_flags.h"
+#include "services/network/public/mojom/cookie_access_observer.mojom.h"
 #include "services/network/public/mojom/permissions_policy/permissions_policy_feature.mojom-shared.h"
 #include "services/network/public/mojom/url_loader_factory.mojom.h"
 #include "services/network/public/mojom/web_sandbox_flags.mojom-shared.h"
@@ -261,7 +265,6 @@
 #include "third_party/blink/public/common/page/browsing_context_group_info.h"
 #include "third_party/blink/public/common/permissions/permission_utils.h"
 #include "third_party/blink/public/common/permissions_policy/document_policy.h"
-#include "third_party/blink/public/common/permissions_policy/permissions_policy.h"
 #include "third_party/blink/public/common/privacy_budget/identifiability_study_document_created.h"
 #include "third_party/blink/public/common/privacy_budget/identifiability_study_settings.h"
 #include "third_party/blink/public/common/runtime_feature_state/runtime_feature_state_context.h"
@@ -643,7 +646,7 @@ DetermineWhetherToForbidTrustTokenOperation(
     const blink::mojom::CommitNavigationParams& commit_params,
     const url::Origin& subframe_origin,
     const network::mojom::TrustTokenOperationType& operation) {
-  std::unique_ptr<blink::PermissionsPolicy> subframe_policy;
+  std::unique_ptr<network::PermissionsPolicy> subframe_policy;
   // TODO(crbug.com/40263106): Add WPT to test how TrustTokens behave in
   // a FencedFrame's subframe.
   if (frame->IsFencedFrameRoot()) {
@@ -654,18 +657,19 @@ DetermineWhetherToForbidTrustTokenOperation(
       // effective enabled permissions or information about the embedder's
       // permissions policies, so we create a permissions policy with every
       // permission disabled.
-      subframe_policy = blink::PermissionsPolicy::CreateFixedForFencedFrame(
+      subframe_policy = network::PermissionsPolicy::CreateFixedForFencedFrame(
           subframe_origin, /*header_policy=*/{}, {});
     } else if (fenced_frame_properties->parent_permissions_info().has_value()) {
       // Fenced frames with flexible permissions are allowed to inherit certain
       // permissions from their parent's permissions policy.
-      const blink::PermissionsPolicy* parent_policy =
+      const network::PermissionsPolicy* parent_policy =
           frame->GetParentOrOuterDocument()->GetPermissionsPolicy();
       network::ParsedPermissionsPolicy container_policy =
           commit_params.frame_policy.container_policy;
-      subframe_policy = blink::PermissionsPolicy::CreateFlexibleForFencedFrame(
-          parent_policy, /*header_policy=*/{}, container_policy,
-          subframe_origin);
+      subframe_policy =
+          network::PermissionsPolicy::CreateFlexibleForFencedFrame(
+              parent_policy, /*header_policy=*/{}, container_policy,
+              subframe_origin);
     } else {
       // Fenced frames with fixed permissions have a list of required permission
       // policies to load and can't be granted extra policies, so use the
@@ -673,7 +677,7 @@ DetermineWhetherToForbidTrustTokenOperation(
       // parent policies must allow the required policies, which is checked
       // separately in
       // NavigationRequest::CheckPermissionsPoliciesForFencedFrames.
-      subframe_policy = blink::PermissionsPolicy::CreateFixedForFencedFrame(
+      subframe_policy = network::PermissionsPolicy::CreateFixedForFencedFrame(
           subframe_origin, /*header_policy=*/{},
           fenced_frame_properties->effective_enabled_permissions());
     }
@@ -684,12 +688,12 @@ DetermineWhetherToForbidTrustTokenOperation(
       return network::mojom::TrustTokenOperationPolicyVerdict::
           kPotentiallyPermit;
 
-    const blink::PermissionsPolicy* parent_policy =
+    const network::PermissionsPolicy* parent_policy =
         frame->GetParent()->GetPermissionsPolicy();
     network::ParsedPermissionsPolicy container_policy =
         commit_params.frame_policy.container_policy;
 
-    subframe_policy = blink::PermissionsPolicy::CreateFromParentPolicy(
+    subframe_policy = network::PermissionsPolicy::CreateFromParentPolicy(
         parent_policy, /*header_policy=*/{}, container_policy, subframe_origin);
   }
 
@@ -1783,7 +1787,8 @@ class RenderFrameHostImpl::SubresourceLoaderFactoriesConfig {
     // be applied so SameSite=None cookies are included in requests from this
     // context. See
     // https://github.com/explainers-by-googlers/csp-sandbox-allow-same-site-none-cookies
-    if (IsOriginSandboxedWithAllowSameSiteNoneCookiesValue(
+    if (frame.HasPolicyContainerHost() &&
+        IsOriginSandboxedWithAllowSameSiteNoneCookiesValue(
             frame.active_sandbox_flags()) &&
         frame.AncestorsAllowSameSiteNoneCookiesOverride(result.origin())) {
       result.cookie_setting_overrides_.Put(
@@ -2320,6 +2325,7 @@ RenderFrameHostImpl::RenderFrameHostImpl(
       media_device_id_salt_base_(CreateRandomMediaDeviceIDSalt()),
       document_associated_data_(std::in_place, *this, document_token),
       lifecycle_state_(lifecycle_state),
+      cookie_observers_(*this),
       code_cache_host_receivers_(
           GetProcess()->GetStoragePartition()->GetGeneratedCodeCacheContext()),
       fenced_frame_status_(fenced_frame_status),
@@ -3838,10 +3844,9 @@ bool RenderFrameHostImpl::AccessibilityIsWebContentSource() {
 
 ui::AXPlatformNodeId RenderFrameHostImpl::GetOrCreateAXNodeUniqueId(
     ui::AXNodeID ax_node_id) {
-  auto iter = ax_unique_ids_.lower_bound(ax_node_id);
-  if (iter == ax_unique_ids_.end() || iter->first != ax_node_id) {
-    iter =
-        ax_unique_ids_.emplace_hint(iter, ax_node_id, ui::AXUniqueId::Create());
+  auto iter = ax_unique_ids_.find(ax_node_id);
+  if (iter == ax_unique_ids_.end()) {
+    iter = ax_unique_ids_.emplace(ax_node_id, ui::AXUniqueId::Create()).first;
   }
   return iter->second;
 }
@@ -5287,7 +5292,7 @@ blink::StorageKey RenderFrameHostImpl::CalculateStorageKey(
       blink::mojom::AncestorChainBit::kSameSite;
   if (!new_rfh_origin.opaque() && !top_level_site.opaque()) {
     for (auto* ancestor : ancestor_chain) {
-      if (top_level_site != net::SchemefulSite(origin(ancestor))) {
+      if (!top_level_site.IsSameSiteWith(origin(ancestor))) {
         ancestor_chain_bit = blink::mojom::AncestorChainBit::kCrossSite;
         break;
       }
@@ -5384,8 +5389,14 @@ void RenderFrameHostImpl::SetOriginDependentStateOfNewFrame(
       break;
     case ContentBrowserClient::PrivateNetworkRequestPolicyOverride::
         kBlockInsteadOfWarn:
+      // Overrides to block instead of warn depend on PNA policy calculations
+      // without LNA being involved until after M136. Look up what the policy
+      // would have been if LNA was off and use that policy to compute the
+      // override's impact.
       private_network_request_policy_ =
-          OverrideBlockWithWarn(private_network_request_policy_);
+          OverrideBlockWithWarn(DerivePrivateNetworkRequestPolicy(
+              policy_container_host_->policies(),
+              PrivateNetworkRequestContext::kSubresource, false));
       break;
     case ContentBrowserClient::PrivateNetworkRequestPolicyOverride::kDefault:
       break;
@@ -6048,7 +6059,10 @@ void RenderFrameHostImpl::DidCommitPageActivation(
     DCHECK(prerender_main_frame_replication_state ==
            frame_tree()->root()->current_replication_state());
 
-    document_associated_data_->OnDidCommitPrerenderedPageActivation();
+    ForEachRenderFrameHostImpl([](RenderFrameHostImpl* rfh) {
+      rfh->document_associated_data_->RunPostPrerenderingActivationSteps();
+    });
+
   } else if (auto* view = GetView()) {
     view->ActivatedOrEvictedFromBackForwardCache();
   }
@@ -6410,6 +6424,15 @@ void RenderFrameHostImpl::SwapOuterDelegateFrame(
       should_swap_devtools_frame_token
           ? std::make_optional(devtools_frame_token)
           : std::nullopt);
+
+  // Drop all accessibility state for this frame to release resources and ensure
+  // that any in-flight tree updates received before the unload ACK are ignored.
+  last_ax_mode_ = ui::AXMode();
+  render_accessibility_.reset();
+  browser_accessibility_manager_.reset();
+  ax_unique_ids_.clear();
+  accessibility_reset_token_.reset();
+  ax_tree_data_ = ui::AXTreeData();
 }
 
 void RenderFrameHostImpl::DetachFromProxy() {
@@ -7639,7 +7662,7 @@ bool RenderFrameHostImpl::IsFeatureEnabled(
                                     feature, GetLastCommittedOrigin());
 }
 
-const blink::PermissionsPolicy* RenderFrameHostImpl::GetPermissionsPolicy() {
+const network::PermissionsPolicy* RenderFrameHostImpl::GetPermissionsPolicy() {
   return permissions_policy_.get();
 }
 
@@ -8004,7 +8027,7 @@ void RenderFrameHostImpl::DraggableRegionsChanged(
 }
 
 void RenderFrameHostImpl::NotifyDocumentInteractive() {
-  if (IsOutermostMainFrame()) {
+  if (IsInPrimaryMainFrame()) {
     double trigger_rate = GetConfidenceRandomizedTriggerRate();
     blink::mojom::ConfidenceLevel randomized_confidence =
         GenerateRandomizedConfidenceLevel(
@@ -9155,7 +9178,7 @@ void RenderFrameHostImpl::DidChangeIframeAttributes(
   }
 
   if (attributes->browsing_topics &&
-      !base::FeatureList::IsEnabled(blink::features::kBrowsingTopics)) {
+      !base::FeatureList::IsEnabled(network::features::kBrowsingTopics)) {
     bad_message::ReceivedBadMessage(
         GetProcess(),
         bad_message::RFH_RECEIVED_INVALID_BROWSING_TOPICS_ATTRIBUTE);
@@ -9163,7 +9186,7 @@ void RenderFrameHostImpl::DidChangeIframeAttributes(
   }
 
   if (attributes->shared_storage_writable_opted_in &&
-      (!base::FeatureList::IsEnabled(blink::features::kSharedStorageAPI))) {
+      (!base::FeatureList::IsEnabled(network::features::kSharedStorageAPI))) {
     bad_message::ReceivedBadMessage(
         GetProcess(),
         bad_message::RFH_RECEIVED_INVALID_SHARED_STORAGE_WRITABLE_ATTRIBUTE);
@@ -9734,36 +9757,18 @@ void RenderFrameHostImpl::CreateNewWindow(
             isolation_info_.network_anonymization_key()));
   }
 
-  mojo::PendingAssociatedRemote<mojom::Frame> pending_frame_remote;
-  mojo::PendingAssociatedReceiver<mojom::Frame> pending_frame_receiver =
-      pending_frame_remote.InitWithNewEndpointAndPassReceiver();
-  new_main_rfh->SetMojomFrameRemote(std::move(pending_frame_remote));
-
-  mojo::PendingRemote<blink::mojom::BrowserInterfaceBroker>
-      browser_interface_broker;
+  new_main_rfh->SetMojomFrameRemote(std::move(params->frame_remote));
   new_main_rfh->BindBrowserInterfaceBrokerReceiver(
-      browser_interface_broker.InitWithNewPipeAndPassReceiver());
-
-  mojo::PendingAssociatedRemote<blink::mojom::AssociatedInterfaceProvider>
-      pending_associated_interface_provider;
+      std::move(params->main_frame_interface_broker));
   new_main_rfh->BindAssociatedInterfaceProviderReceiver(
-      pending_associated_interface_provider
-          .InitWithNewEndpointAndPassReceiver());
-
-  // With this path, RenderViewHostImpl::CreateRenderView is never called
-  // because `blink::WebView` is already created on the renderer side. Thus we
-  // need to establish the connection here.
-  mojo::PendingAssociatedRemote<blink::mojom::PageBroadcast> page_broadcast;
-  mojo::PendingAssociatedReceiver<blink::mojom::PageBroadcast>
-      page_broadcast_receiver =
-          page_broadcast.InitWithNewEndpointAndPassReceiver();
-
-  auto widget_params =
-      new_main_rfh->GetLocalRenderWidgetHost()
-          ->BindAndGenerateCreateFrameWidgetParamsForNewWindow();
-
+      std::move(params->associated_interface_provider));
   new_main_rfh->render_view_host()->BindPageBroadcast(
-      std::move(page_broadcast));
+      std::move(params->page_broadcast_remote));
+  auto* new_rwh = new_main_rfh->GetLocalRenderWidgetHost();
+  new_rwh->BindWidgetInterfaces(std::move(params->widget_host),
+                                std::move(params->widget));
+  new_rwh->BindFrameWidgetInterfaces(std::move(params->frame_widget_host),
+                                     std::move(params->frame_widget));
 
   bool wait_for_debugger =
       devtools_instrumentation::ShouldWaitForDebuggerInWindowOpen();
@@ -9778,11 +9783,11 @@ void RenderFrameHostImpl::CreateNewWindow(
                                    .AsMojom();
   }
 
+  blink::VisualProperties visual_properties;
+  visual_properties.screen_infos = new_rwh->GetScreenInfos();
   mojom::CreateNewWindowReplyPtr reply = mojom::CreateNewWindowReply::New(
       new_main_rfh->GetFrameToken(), new_main_rfh->GetRoutingID(),
-      std::move(pending_frame_receiver), std::move(widget_params),
-      std::move(page_broadcast_receiver), std::move(browser_interface_broker),
-      std::move(pending_associated_interface_provider), cloned_namespace->id(),
+      new_rwh->GetRoutingID(), visual_properties, cloned_namespace->id(),
       new_main_rfh->GetDevToolsFrameToken(), wait_for_debugger,
       new_main_rfh->GetDocumentToken(),
       new_main_rfh->policy_container_host()->CreatePolicyContainerForBlink(),
@@ -13555,17 +13560,18 @@ void RenderFrameHostImpl::ResetPermissionsPolicy(
       // effective enabled permissions or information about the embedder's
       // permissions policies, so we create a permissions policy with every
       // permission disabled.
-      permissions_policy_ = blink::PermissionsPolicy::CreateFixedForFencedFrame(
-          last_committed_origin_, header_policy, {});
+      permissions_policy_ =
+          network::PermissionsPolicy::CreateFixedForFencedFrame(
+              last_committed_origin_, header_policy, {});
     } else if (fenced_frame_properties->parent_permissions_info().has_value()) {
       // Fenced frames with flexible permissions are allowed to inherit certain
       // permissions from their parent's permissions policy.
-      const blink::PermissionsPolicy* parent_policy =
+      const network::PermissionsPolicy* parent_policy =
           GetParentOrOuterDocument()->GetPermissionsPolicy();
       network::ParsedPermissionsPolicy container_policy =
           browsing_context_state_->effective_frame_policy().container_policy;
       permissions_policy_ =
-          blink::PermissionsPolicy::CreateFlexibleForFencedFrame(
+          network::PermissionsPolicy::CreateFlexibleForFencedFrame(
               parent_policy, header_policy, container_policy,
               last_committed_origin_);
     } else {
@@ -13575,9 +13581,10 @@ void RenderFrameHostImpl::ResetPermissionsPolicy(
       // parent policies must allow the required policies, which is checked
       // separately in
       // NavigationRequest::CheckPermissionsPoliciesForFencedFrames.
-      permissions_policy_ = blink::PermissionsPolicy::CreateFixedForFencedFrame(
-          last_committed_origin_, header_policy,
-          fenced_frame_properties->effective_enabled_permissions());
+      permissions_policy_ =
+          network::PermissionsPolicy::CreateFixedForFencedFrame(
+              last_committed_origin_, header_policy,
+              fenced_frame_properties->effective_enabled_permissions());
     }
     return;
   }
@@ -13592,19 +13599,19 @@ void RenderFrameHostImpl::ResetPermissionsPolicy(
     // behavior, which uses a fully permissive policy as its base permissions
     // policy and accepts rules specifying which permissions policy features
     // should be blocked, aka a blocklist.
-    permissions_policy_ = blink::PermissionsPolicy::CreateFromParsedPolicy(
+    permissions_policy_ = network::PermissionsPolicy::CreateFromParsedPolicy(
         header_policy, delegate_->GetPermissionsPolicyForIsolatedWebApp(this),
         last_committed_origin_);
     return;
   }
 
   RenderFrameHostImpl* parent_frame_host = GetParent();
-  const blink::PermissionsPolicy* parent_policy =
+  const network::PermissionsPolicy* parent_policy =
       parent_frame_host ? parent_frame_host->GetPermissionsPolicy() : nullptr;
   network::ParsedPermissionsPolicy container_policy =
       browsing_context_state_->effective_frame_policy().container_policy;
 
-  permissions_policy_ = blink::PermissionsPolicy::CreateFromParentPolicy(
+  permissions_policy_ = network::PermissionsPolicy::CreateFromParentPolicy(
       parent_policy, header_policy, container_policy, last_committed_origin_);
 }
 
@@ -14066,7 +14073,7 @@ void RenderFrameHostImpl::BindRestrictedCookieManagerWithOrigin(
       /*is_service_worker=*/false, GetProcess()->GetDeprecatedID(),
       GetRoutingID(), cookie_setting_overrides,
       devtools_cookie_setting_overrides, std::move(receiver),
-      CreateCookieAccessObserver());
+      CreateCookieAccessObserver(CookieAccessDetails::Source::kNonNavigation));
 }
 
 void RenderFrameHostImpl::BindTrustTokenQueryAnswerer(
@@ -15211,14 +15218,11 @@ bool RenderFrameHostImpl::DidCommitNavigationInternal(
     document_associated_data_->set_devtools_navigation_token(
         navigation_request->devtools_navigation_token());
 
-    // Stores fetch keepalive and fetch later FactoryContexts created before
-    // committing into document-associated data, such that it can be referenced
-    // later when DevTools tries to intercepts requests, or when the prerendered
-    // page is activated.
+    // Stores fetch keepalive FactoryContext created before committing into
+    // document-associated data, such that it can be referenced later when
+    // DevTools tries to intercepts requests.
     document_associated_data_->set_keep_alive_url_loader_factory_context(
         navigation_request->keep_alive_url_loader_factory_context());
-    document_associated_data_->set_fetch_later_loader_factory_context(
-        navigation_request->fetch_later_loader_factory_context());
 
     const std::optional<FencedFrameProperties>& fenced_frame_properties =
         navigation_request->ComputeFencedFrameProperties();
@@ -15260,7 +15264,8 @@ bool RenderFrameHostImpl::DidCommitNavigationInternal(
     // the network service. When the remote interface in the network service is
     // destructed, `mojo::ReceiverSet` automatically removes the receiver.
     for (auto& receiver : navigation_request->TakeCookieObservers()) {
-      cookie_observers_.Add(this, std::move(receiver));
+      cookie_observers_.Add(std::move(receiver),
+                            CookieAccessDetails::Source::kNavigation);
     }
     for (auto& receiver : navigation_request->TakeTrustTokenObservers()) {
       trust_token_observers_.Add(this, std::move(receiver));
@@ -16372,59 +16377,56 @@ void RenderFrameHostImpl::LogCannotCommitUrlCrashKeys(
 
   // Temporary instrumentation to debug the root cause of renderer process
   // terminations. See https://crbug.com/931895.
-  auto bool_to_crash_key = [](bool b) { return b ? "true" : "false"; };
-
   static auto* const navigation_url_key = base::debug::AllocateCrashKeyString(
       "navigation_url", base::debug::CrashKeySize::Size256);
   base::debug::SetCrashKeyString(navigation_url_key, url.spec());
 
   static auto* const is_same_document_key = base::debug::AllocateCrashKeyString(
       "is_same_document", base::debug::CrashKeySize::Size32);
-  base::debug::SetCrashKeyString(
-      is_same_document_key, bool_to_crash_key(is_same_document_navigation));
+  base::debug::SetCrashKeyString(is_same_document_key,
+                                 base::ToString(is_same_document_navigation));
 
   static auto* const is_main_frame_key = base::debug::AllocateCrashKeyString(
       "is_main_frame", base::debug::CrashKeySize::Size32);
   base::debug::SetCrashKeyString(is_main_frame_key,
-                                 bool_to_crash_key(is_main_frame()));
+                                 base::ToString(is_main_frame()));
 
   static auto* const is_outermost_frame_key =
       base::debug::AllocateCrashKeyString("is_outermost_frame",
                                           base::debug::CrashKeySize::Size32);
   base::debug::SetCrashKeyString(is_outermost_frame_key,
-                                 bool_to_crash_key(IsOutermostMainFrame()));
+                                 base::ToString(IsOutermostMainFrame()));
 
   static auto* const is_cross_process_subframe_key =
       base::debug::AllocateCrashKeyString("is_cross_process_subframe",
                                           base::debug::CrashKeySize::Size32);
   base::debug::SetCrashKeyString(is_cross_process_subframe_key,
-                                 bool_to_crash_key(IsCrossProcessSubframe()));
+                                 base::ToString(IsCrossProcessSubframe()));
 
   static auto* const is_local_root_key = base::debug::AllocateCrashKeyString(
       "is_local_root", base::debug::CrashKeySize::Size32);
   base::debug::SetCrashKeyString(is_local_root_key,
-                                 bool_to_crash_key(is_local_root()));
+                                 base::ToString(is_local_root()));
 
   static auto* const is_opaque_origin_key = base::debug::AllocateCrashKeyString(
       "is_opaque_origin", base::debug::CrashKeySize::Size32);
   base::debug::SetCrashKeyString(is_opaque_origin_key,
-                                 bool_to_crash_key(origin.opaque()));
+                                 base::ToString(origin.opaque()));
 
   static auto* const is_file_origin_key = base::debug::AllocateCrashKeyString(
       "is_file_origin", base::debug::CrashKeySize::Size32);
   base::debug::SetCrashKeyString(
-      is_file_origin_key,
-      bool_to_crash_key(origin.scheme() == url::kFileScheme));
+      is_file_origin_key, base::ToString(origin.scheme() == url::kFileScheme));
 
   static auto* const is_data_url_key = base::debug::AllocateCrashKeyString(
       "is_data_url", base::debug::CrashKeySize::Size32);
   base::debug::SetCrashKeyString(
-      is_data_url_key, bool_to_crash_key(url.SchemeIs(url::kDataScheme)));
+      is_data_url_key, base::ToString(url.SchemeIs(url::kDataScheme)));
 
   static auto* const is_srcdoc_url_key = base::debug::AllocateCrashKeyString(
       "is_srcdoc_url", base::debug::CrashKeySize::Size32);
   base::debug::SetCrashKeyString(is_srcdoc_url_key,
-                                 bool_to_crash_key(url.IsAboutSrcdoc()));
+                                 base::ToString(url.IsAboutSrcdoc()));
 
   static auto* const is_loaddatawithbaseurl_key =
       base::debug::AllocateCrashKeyString("is_loaddatawithbaseurl_navrequest",
@@ -16432,7 +16434,7 @@ void RenderFrameHostImpl::LogCannotCommitUrlCrashKeys(
   bool is_loaddatawithbaseurl =
       navigation_request && navigation_request->IsLoadDataWithBaseURL();
   base::debug::SetCrashKeyString(is_loaddatawithbaseurl_key,
-                                 bool_to_crash_key(is_loaddatawithbaseurl));
+                                 base::ToString(is_loaddatawithbaseurl));
 
   static auto* const is_loaddatawithbaseurl_samedoc_key =
       base::debug::AllocateCrashKeyString("is_loaddatawithbaseurl_samedoc",
@@ -16442,7 +16444,7 @@ void RenderFrameHostImpl::LogCannotCommitUrlCrashKeys(
       renderer_url_info_.was_loaded_from_load_data_with_base_url;
   base::debug::SetCrashKeyString(
       is_loaddatawithbaseurl_samedoc_key,
-      bool_to_crash_key(is_loaddatawithbaseurl_samedoc));
+      base::ToString(is_loaddatawithbaseurl_samedoc));
 
   static auto* const site_lock_key = base::debug::AllocateCrashKeyString(
       "site_lock", base::debug::CrashKeySize::Size256);
@@ -16460,7 +16462,7 @@ void RenderFrameHostImpl::LogCannotCommitUrlCrashKeys(
                                           base::debug::CrashKeySize::Size32);
   base::debug::SetCrashKeyString(
       is_process_locked_key,
-      bool_to_crash_key(GetProcess()->GetProcessLock().is_locked_to_site()));
+      base::ToString(GetProcess()->GetProcessLock().is_locked_to_site()));
 
   if (!GetSiteInstance()->IsDefaultSiteInstance()) {
     static auto* const original_url_origin_key =
@@ -16475,7 +16477,7 @@ void RenderFrameHostImpl::LogCannotCommitUrlCrashKeys(
       base::debug::AllocateCrashKeyString("is_mhtml_document",
                                           base::debug::CrashKeySize::Size32);
   base::debug::SetCrashKeyString(is_mhtml_document_key,
-                                 bool_to_crash_key(is_mhtml_document()));
+                                 base::ToString(is_mhtml_document()));
 
   static auto* const last_committed_url_origin_key =
       base::debug::AllocateCrashKeyString("last_committed_url_origin",
@@ -16496,7 +16498,7 @@ void RenderFrameHostImpl::LogCannotCommitUrlCrashKeys(
                                           base::debug::CrashKeySize::Size32);
   base::debug::SetCrashKeyString(
       is_on_initial_empty_document_key,
-      bool_to_crash_key(frame_tree_node_->is_on_initial_empty_document()));
+      base::ToString(frame_tree_node_->is_on_initial_empty_document()));
 
   static auto* const origin_calculation_debug_info_key =
       base::debug::AllocateCrashKeyString("origin_calculation_debug_info",
@@ -16510,34 +16512,33 @@ void RenderFrameHostImpl::LogCannotCommitUrlCrashKeys(
                                             base::debug::CrashKeySize::Size32);
     base::debug::SetCrashKeyString(
         is_renderer_initiated_key,
-        bool_to_crash_key(navigation_request->IsRendererInitiated()));
+        base::ToString(navigation_request->IsRendererInitiated()));
 
     static auto* const is_server_redirect_key =
         base::debug::AllocateCrashKeyString("is_server_redirect",
                                             base::debug::CrashKeySize::Size32);
     base::debug::SetCrashKeyString(
         is_server_redirect_key,
-        bool_to_crash_key(navigation_request->WasServerRedirect()));
+        base::ToString(navigation_request->WasServerRedirect()));
 
     static auto* const is_form_submission_key =
         base::debug::AllocateCrashKeyString("is_form_submission",
                                             base::debug::CrashKeySize::Size32);
     base::debug::SetCrashKeyString(
         is_form_submission_key,
-        bool_to_crash_key(navigation_request->IsFormSubmission()));
+        base::ToString(navigation_request->IsFormSubmission()));
 
     static auto* const is_error_page_key = base::debug::AllocateCrashKeyString(
         "is_error_page", base::debug::CrashKeySize::Size32);
     base::debug::SetCrashKeyString(
-        is_error_page_key,
-        bool_to_crash_key(navigation_request->IsErrorPage()));
+        is_error_page_key, base::ToString(navigation_request->IsErrorPage()));
 
     static auto* const from_begin_navigation_key =
         base::debug::AllocateCrashKeyString("from_begin_navigation",
                                             base::debug::CrashKeySize::Size32);
     base::debug::SetCrashKeyString(
         from_begin_navigation_key,
-        bool_to_crash_key(navigation_request->from_begin_navigation()));
+        base::ToString(navigation_request->from_begin_navigation()));
 
     static auto* const net_error_key = base::debug::AllocateCrashKeyString(
         "net_error", base::debug::CrashKeySize::Size32);
@@ -16577,7 +16578,7 @@ void RenderFrameHostImpl::LogCannotCommitUrlCrashKeys(
             base::debug::CrashKeySize::Size32);
     base::debug::SetCrashKeyString(
         does_recomputed_site_instance_match_key,
-        bool_to_crash_key(dest_instance == GetSiteInstance()));
+        base::ToString(dest_instance == GetSiteInstance()));
   }
 }
 
@@ -17212,7 +17213,6 @@ void RenderFrameHostImpl::LogCannotCommitOriginCrashKeys(
 
   // Temporary instrumentation to debug the root cause of
   // https://crbug.com/923144.
-  auto bool_to_crash_key = [](bool b) { return b ? "true" : "false"; };
 
   static auto* const target_url_key = base::debug::AllocateCrashKeyString(
       "target_url", base::debug::CrashKeySize::Size256);
@@ -17259,13 +17259,13 @@ void RenderFrameHostImpl::LogCannotCommitOriginCrashKeys(
 
   static auto* const is_same_document_key = base::debug::AllocateCrashKeyString(
       "is_same_document", base::debug::CrashKeySize::Size32);
-  base::debug::SetCrashKeyString(
-      is_same_document_key, bool_to_crash_key(is_same_document_navigation));
+  base::debug::SetCrashKeyString(is_same_document_key,
+                                 base::ToString(is_same_document_navigation));
 
   static auto* const is_subframe_key = base::debug::AllocateCrashKeyString(
       "is_subframe", base::debug::CrashKeySize::Size32);
   base::debug::SetCrashKeyString(is_subframe_key,
-                                 bool_to_crash_key(GetMainFrame() != this));
+                                 base::ToString(GetMainFrame() != this));
 
   static auto* const lifecycle_state_key = base::debug::AllocateCrashKeyString(
       "lifecycle_state", base::debug::CrashKeySize::Size32);
@@ -17274,18 +17274,18 @@ void RenderFrameHostImpl::LogCannotCommitOriginCrashKeys(
 
   static auto* const is_active_key = base::debug::AllocateCrashKeyString(
       "is_active", base::debug::CrashKeySize::Size32);
-  base::debug::SetCrashKeyString(is_active_key, bool_to_crash_key(IsActive()));
+  base::debug::SetCrashKeyString(is_active_key, base::ToString(IsActive()));
 
   static auto* const is_cross_process_subframe_key =
       base::debug::AllocateCrashKeyString("is_cross_process_subframe",
                                           base::debug::CrashKeySize::Size32);
   base::debug::SetCrashKeyString(is_cross_process_subframe_key,
-                                 bool_to_crash_key(IsCrossProcessSubframe()));
+                                 base::ToString(IsCrossProcessSubframe()));
 
   static auto* const is_local_root_key = base::debug::AllocateCrashKeyString(
       "is_local_root", base::debug::CrashKeySize::Size32);
   base::debug::SetCrashKeyString(is_local_root_key,
-                                 bool_to_crash_key(is_local_root()));
+                                 base::ToString(is_local_root()));
 
   if (navigation_request && navigation_request->IsNavigationStarted()) {
     static auto* const is_renderer_initiated_key =
@@ -17293,27 +17293,26 @@ void RenderFrameHostImpl::LogCannotCommitOriginCrashKeys(
                                             base::debug::CrashKeySize::Size32);
     base::debug::SetCrashKeyString(
         is_renderer_initiated_key,
-        bool_to_crash_key(navigation_request->IsRendererInitiated()));
+        base::ToString(navigation_request->IsRendererInitiated()));
 
     static auto* const is_server_redirect_key =
         base::debug::AllocateCrashKeyString("is_server_redirect",
                                             base::debug::CrashKeySize::Size32);
     base::debug::SetCrashKeyString(
         is_server_redirect_key,
-        bool_to_crash_key(navigation_request->WasServerRedirect()));
+        base::ToString(navigation_request->WasServerRedirect()));
 
     static auto* const is_form_submission_key =
         base::debug::AllocateCrashKeyString("is_form_submission",
                                             base::debug::CrashKeySize::Size32);
     base::debug::SetCrashKeyString(
         is_form_submission_key,
-        bool_to_crash_key(navigation_request->IsFormSubmission()));
+        base::ToString(navigation_request->IsFormSubmission()));
 
     static auto* const is_error_page_key = base::debug::AllocateCrashKeyString(
         "is_error_page", base::debug::CrashKeySize::Size32);
     base::debug::SetCrashKeyString(
-        is_error_page_key,
-        bool_to_crash_key(navigation_request->IsErrorPage()));
+        is_error_page_key, base::ToString(navigation_request->IsErrorPage()));
 
     static auto* const initiator_origin_key =
         base::debug::AllocateCrashKeyString("initiator_origin",
@@ -17805,8 +17804,8 @@ void RenderFrameHostImpl::RecordDocumentCreatedUkmEvent(
   // site from its parent frame B. This value is only used in manual analysis.
   bool is_cross_site_frame =
       !IsOutermostMainFrame() &&
-      (net::SchemefulSite(origin) !=
-       net::SchemefulSite(GetOutermostMainFrame()->GetLastCommittedOrigin()));
+      !net::SchemefulSite::IsSameSite(
+          origin, GetOutermostMainFrame()->GetLastCommittedOrigin());
 
   bool is_main_frame = IsOutermostMainFrame();
 
@@ -17873,9 +17872,10 @@ RenderFrameHostImpl::FaviconURLs() {
 }
 
 mojo::PendingRemote<network::mojom::CookieAccessObserver>
-RenderFrameHostImpl::CreateCookieAccessObserver() {
+RenderFrameHostImpl::CreateCookieAccessObserver(
+    CookieAccessDetails::Source source) {
   mojo::PendingRemote<network::mojom::CookieAccessObserver> remote;
-  cookie_observers_.Add(this, remote.InitWithNewPipeAndPassReceiver());
+  cookie_observers_.Add(remote.InitWithNewPipeAndPassReceiver(), source);
   return remote;
 }
 
@@ -17918,9 +17918,28 @@ void RenderFrameHostImpl::CreateMdnsResponder(
 }
 #endif  // BUILDFLAG(ENABLE_MDNS)
 
-void RenderFrameHostImpl::Clone(
+RenderFrameHostImpl::CookieAccessObservers::CookieAccessObservers(
+    RenderFrameHostImpl& parent)
+    : parent_(parent) {}
+
+RenderFrameHostImpl::CookieAccessObservers::~CookieAccessObservers() = default;
+
+void RenderFrameHostImpl::CookieAccessObservers::Add(
+    mojo::PendingReceiver<network::mojom::CookieAccessObserver> receiver,
+    CookieAccessDetails::Source source) {
+  cookie_observer_set_.Add(this, std::move(receiver), source);
+}
+
+void RenderFrameHostImpl::CookieAccessObservers::OnCookiesAccessed(
+    std::vector<network::mojom::CookieAccessDetailsPtr> details_vector) {
+  parent_->NotifyCookiesAccessed(std::move(details_vector),
+                                 cookie_observer_set_.current_context());
+}
+
+void RenderFrameHostImpl::CookieAccessObservers::Clone(
     mojo::PendingReceiver<network::mojom::CookieAccessObserver> observer) {
-  cookie_observers_.Add(this, std::move(observer));
+  cookie_observer_set_.Add(this, std::move(observer),
+                           cookie_observer_set_.current_context());
 }
 
 void RenderFrameHostImpl::Clone(
@@ -17940,8 +17959,9 @@ void RenderFrameHostImpl::Clone(
   device_bound_session_observers_.Add(this, std::move(observer));
 }
 
-void RenderFrameHostImpl::OnCookiesAccessed(
-    std::vector<network::mojom::CookieAccessDetailsPtr> details_vector) {
+void RenderFrameHostImpl::NotifyCookiesAccessed(
+    std::vector<network::mojom::CookieAccessDetailsPtr> details_vector,
+    CookieAccessDetails::Source source) {
   UMA_HISTOGRAM_COUNTS_1M("Cookie.OnCookiesAccessed.BatchSize",
                           details_vector.size());
   size_t access_sum = 0;
@@ -17951,7 +17971,7 @@ void RenderFrameHostImpl::OnCookiesAccessed(
 
     CookieAccessDetails allowed;
     CookieAccessDetails blocked;
-    SplitCookiesIntoAllowedAndBlocked(details, &allowed, &blocked);
+    SplitCookiesIntoAllowedAndBlocked(details, source, &allowed, &blocked);
     if (!allowed.cookie_access_result_list.empty()) {
       delegate_->OnCookiesAccessed(this, allowed);
     }

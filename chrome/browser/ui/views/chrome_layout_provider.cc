@@ -209,6 +209,8 @@ int ChromeLayoutProvider::GetDistanceMetric(int metric) const {
       return 16;
     case DISTANCE_RECENT_ACTIVITY_AVATAR_SIZE:
       return 32;
+    case DISTANCE_RECENT_ACTIVITY_AVATAR_FALLBACK_SIZE:
+      return 24;
     case DISTANCE_RECENT_ACTIVITY_FAVICON_CONTAINER_RADIUS:
       return 9;
     case DISTANCE_RECENT_ACTIVITY_FAVICON_CONTAINER_BORDER_WIDTH:
@@ -227,6 +229,12 @@ int ChromeLayoutProvider::GetDistanceMetric(int metric) const {
       return 6;
     case DISTANCE_ACCOUNT_INFO_ROW_AVATAR_EMAIL:
       return 8;
+    case DISTANCE_COLLABORATION_MESSAGING_AVATAR_FALLBACK_ICON_PADDING:
+      return 2;
+    case DISTANCE_COLLABORATION_MESSAGING_AVATAR_FALLBACK_ICON_BORDER_SIZE:
+      return 1;
+    case DISTANCE_TEXTFIELD_ACCOUNT_CARD_VERTICAL:
+      return 4;
   }
   NOTREACHED();
 }

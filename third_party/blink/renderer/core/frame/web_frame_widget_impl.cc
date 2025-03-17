@@ -53,6 +53,7 @@
 #include "cc/trees/layer_tree_host.h"
 #include "cc/trees/swap_promise.h"
 #include "third_party/blink/public/common/features.h"
+#include "third_party/blink/public/common/features_generated.h"
 #include "third_party/blink/public/common/metrics/document_update_reason.h"
 #include "third_party/blink/public/common/page/page_zoom.h"
 #include "third_party/blink/public/mojom/frame/intrinsic_sizing_info.mojom-blink.h"
@@ -1609,9 +1610,7 @@ void WebFrameWidgetImpl::Trace(Visitor* visitor) const {
   visitor->Trace(frame_widget_host_);
   visitor->Trace(receiver_);
   visitor->Trace(input_target_receivers_);
-#if BUILDFLAG(IS_ANDROID)
   visitor->Trace(ime_render_widget_host_);
-#endif
   visitor->Trace(mouse_capture_element_);
   visitor->Trace(device_emulator_);
   visitor->Trace(animation_frame_timing_monitor_);
@@ -2167,6 +2166,14 @@ std::unique_ptr<cc::ScopedPauseRendering> WebFrameWidgetImpl::PauseRendering() {
   return widget_base_->LayerTreeHost()->PauseRendering();
 }
 
+void WebFrameWidgetImpl::SetShouldThrottleFrameRate(bool flag) {
+  if (!View()->does_composite() || flag == throttling_frame_rate_) {
+    return;
+  }
+  throttling_frame_rate_ = flag;
+  return widget_base_->LayerTreeHost()->SetShouldThrottleFrameRate(flag);
+}
+
 std::optional<int> WebFrameWidgetImpl::GetMaxRenderBufferBounds() const {
   if (!View()->does_composite()) {
     return std::nullopt;
@@ -2583,6 +2590,8 @@ void WebFrameWidgetImpl::InitializeCompositingInternal(
 
   probe::DidInitializeFrameWidget(local_root_->GetFrame());
   local_root_->GetFrame()->NotifyFrameWidgetCreated();
+  SetShouldThrottleFrameRate(
+      features::kThrottleFrameRateOnInitialization.Get());
 
   // TODO(bokan): This seems wrong. Page may host multiple FrameWidgets so this
   // will call DidInitializeCompositing once per FrameWidget. It probably makes
@@ -3098,6 +3107,12 @@ WebInputEventResult WebFrameWidgetImpl::HandleInputEvent(
   // handle it appropriately.
   if (ShouldIgnoreInputEvents()) {
     return WebInputEventResult::kNotHandled;
+  }
+
+  // Only unthrottle once to avoid repeatedly posting tasks to the cc impl
+  // thread.
+  if (throttling_frame_rate_) {
+    SetShouldThrottleFrameRate(false);
   }
 
   base::AutoReset<const WebInputEvent*> current_event_change(
@@ -4198,7 +4213,8 @@ Vector<gfx::Rect> WebFrameWidgetImpl::CalculateVisibleLineBoundsOnScreen() {
 }
 #endif  // BUILDFLAG(IS_ANDROID)
 
-Vector<gfx::Rect>& WebFrameWidgetImpl::GetVisibleLineBoundsOnScreen() {
+Vector<gfx::Rect>&
+WebFrameWidgetImpl::GetVisibleLineBoundsOnScreenForTesting() {
   return input_visible_line_bounds_;
 }
 
@@ -4209,16 +4225,7 @@ void WebFrameWidgetImpl::UpdateLineBounds() {
     return;
   }
   input_visible_line_bounds_.swap(line_bounds);
-  if (RuntimeEnabledFeatures::CursorAnchorInfoMojoPipeEnabled()) {
-    UpdateCursorAnchorInfo();
-    return;
-  }
-  if (mojom::blink::WidgetInputHandlerHost* host =
-          widget_base_->widget_input_handler_manager()
-              ->GetWidgetInputHandlerHost()) {
-    host->ImeCompositionRangeChanged(gfx::Range::InvalidRange(), std::nullopt,
-                                     input_visible_line_bounds_);
-  }
+  UpdateCursorAnchorInfo();
 #endif  // BUILDFLAG(IS_ANDROID)
 }
 
@@ -4569,6 +4576,26 @@ void WebFrameWidgetImpl::MoveCaret(const gfx::Point& point_in_dips) {
   focused_frame->MoveCaretSelection(
       widget_base_->DIPsToRoundedBlinkSpace(point_in_dips));
 }
+
+#if BUILDFLAG(IS_IOS)
+void WebFrameWidgetImpl::StartAutoscrollForSelectionToPoint(
+    const gfx::PointF& point_in_dips) {
+  WebLocalFrameImpl* focused_frame = FocusedWebLocalFrameInWidget();
+  if (!focused_frame) {
+    return;
+  }
+  focused_frame->StartAutoscrollForSelectionToPoint(
+      widget_base_->DIPsToBlinkSpace(point_in_dips));
+}
+
+void WebFrameWidgetImpl::StopAutoscroll() {
+  WebLocalFrameImpl* focused_frame = FocusedWebLocalFrameInWidget();
+  if (!focused_frame) {
+    return;
+  }
+  focused_frame->StopAutoscroll();
+}
+#endif  // BUILDFLAG(IS_IOS)
 
 void WebFrameWidgetImpl::SelectAroundCaret(
     mojom::blink::SelectionGranularity granularity,

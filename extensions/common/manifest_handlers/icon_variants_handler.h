@@ -9,6 +9,7 @@
 #include <string>
 
 #include "extensions/common/extension.h"
+#include "extensions/common/icons/extension_icon_variant.h"
 #include "extensions/common/icons/extension_icon_variants.h"
 #include "extensions/common/manifest_handler.h"
 
@@ -22,13 +23,20 @@ struct IconVariantsInfo : public Extension::ManifestData {
   static bool HasIconVariants(const Extension* extension);
 
   // Get IconVariants for the given `extension`, if they exist.
-  static const IconVariantsInfo* GetIconVariants(const Extension* extension);
+  static const IconVariantsInfo* GetIconVariants(const Extension& extension);
+
+  // Available e.g. when the extension feature enabled.
+  static bool SupportsIconVariants(const Extension& extension);
 
   // Retrieve a matching ExtensionIconSet.
-  const ExtensionIconSet& Get() const;
+  const ExtensionIconSet& Get() const {
+    return Get(ExtensionIconVariant::ColorScheme::kLight);
+  }
+  const ExtensionIconSet& Get(
+      std::optional<ExtensionIconVariant::ColorScheme> color_scheme) const;
 
   // Data structure for `icon_variants`, based on icon_variants.idl.
-  std::unique_ptr<ExtensionIconVariants> icon_variants;
+  std::optional<ExtensionIconVariants> icon_variants;
 
   // Populate member variable extension sets from `icon_variants`.
   void InitializeIconSets();

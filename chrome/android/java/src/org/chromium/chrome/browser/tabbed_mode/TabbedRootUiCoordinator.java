@@ -173,7 +173,6 @@ import org.chromium.components.browser_ui.widget.TouchEventObserver;
 import org.chromium.components.browser_ui.widget.loading.LoadingFullscreenCoordinator;
 import org.chromium.components.browser_ui.widget.scrim.ScrimManager;
 import org.chromium.components.collaboration.CollaborationService;
-import org.chromium.components.collaboration.ServiceStatus;
 import org.chromium.components.feature_engagement.FeatureConstants;
 import org.chromium.components.feature_engagement.Tracker;
 import org.chromium.components.search_engines.SearchEnginesFeatures;
@@ -1350,13 +1349,13 @@ public class TabbedRootUiCoordinator extends RootUiCoordinator {
     }
 
     private void initCollaborationDelegatesOnProfile(Profile profile) {
+        if (!ChromeFeatureList.isEnabled(ChromeFeatureList.DATA_SHARING)) return;
+
         // We must use the original non-OTR profile here.
         Profile originalProfile = profile.getOriginalProfile();
 
         CollaborationService collaborationService =
                 CollaborationServiceFactory.getForProfile(originalProfile);
-        @NonNull ServiceStatus serviceStatus = collaborationService.getServiceStatus();
-        if (!serviceStatus.isAllowedToJoin()) return;
 
         mDataSharingTabManager.initWithProfile(
                 originalProfile,
@@ -1387,9 +1386,11 @@ public class TabbedRootUiCoordinator extends RootUiCoordinator {
 
             @Override
             public void openTabGroupWithTabId(int tabId) {
-                // TODO(crbug.com/395847973): calling navigateToTabSwitcher is a stopgap until
-                // DataSharingTabManager#initiateJoinFlow() properly waits on
-                // ChromeTabbedActivity#doRunnableOnTabSwitcher() to finish before proceeding.
+                // Due to crbug.com/396159718 (see also crbug.com/395847973) it was possible to
+                // reach this method without the tab switcher being open. For now this will
+                // remain as a safegaurd against bugs as internally it will noop if the tab switcher
+                // is already opened. It could be removed in the future with some care taken to add
+                // an assert and verify no callers are using it in an unexpected flow.
                 TabSwitcherUtils.navigateToTabSwitcher(
                         mLayoutManager,
                         /* animate= */ false,

@@ -75,13 +75,23 @@ class AbandonedPageLoadMetricsObserver
     kSecondRedirectedRequestStart = 22,
     kSecondRedirectResponseStart = 23,
 
-    kMaxValue = kSecondRedirectResponseStart,
+    // `kCommitReplySent` is the milestone placed between `kCommitReceived` and
+    // `kDidCommit`.
+    kCommitReplySent = 24,
+
+    kMaxValue = kCommitReplySent,
     // `kFirstEssentialLoadingEvent` and `kLastEssentialLoadingEvent` aliases to
     // the first / last loading milestones which always exists unless abandoned.
     // Note that events such as `kAFT*`, `kHeaderChunk*` and `kBodyChunk*` only
     // appears in certain navigations, hence these events may not be mandatory.
     kFirstEssentialLoadingEvent = kParseStart,
-    kLastEssentialLoadingEvent = kBodyChunkEnd,
+    kLastEssentialLoadingEvent = kLargestContentfulPaint,
+
+    // `kFirstGwsEssentialLoadingEvent` and `kLastGwsEssentialLoadingEvent`
+    // aliases to the first / last loading milestones which always exists
+    // unless abandoned for navigations to Gws.
+    kFirstGwsEssentialLoadingEvent = kFirstEssentialLoadingEvent,
+    kLastGwsEssentialLoadingEvent = kBodyChunkEnd,
   };
   // LINT.ThenChange(//tools/metrics/histograms/metadata/page/enums.xml:NavigationMilestoneEnum2)
 
@@ -108,6 +118,11 @@ class AbandonedPageLoadMetricsObserver
     kNewDuplicateNavigation = 14,
     kMaxValue = kNewDuplicateNavigation,
   };
+  // When updating milestones, the corresponding milestones list in test
+  // `GWSAbandonedPageLoadMetricsObserverBrowserTest::all_milestones()` should
+  // be updated as well. As LINT can't annotate multiple targets, we need to
+  // take care of it manually.
+  //
   // LINT.ThenChange(//tools/metrics/histograms/metadata/page/enums.xml:NavigationAbandonReasonEnum)
 
   static std::string AbandonReasonToString(AbandonReason abandon_reason);
@@ -197,6 +212,11 @@ class AbandonedPageLoadMetricsObserver
   virtual ObservePolicy OnNavigationEvent(
       content::NavigationHandle* navigation_handle);
   bool IsResponseFromCache() const { return was_cached_; }
+  int64_t navigation_id() const { return navigation_id_; }
+  const std::map<NavigationMilestone, base::TimeDelta>& loading_milestones()
+      const {
+    return loading_milestones_;
+  }
 
   // Adds the abandonment related metrics to UKM Builder `T`.
   template <typename T>
@@ -277,7 +297,7 @@ class AbandonedPageLoadMetricsObserver
 
   // Whether we've reached and logged all loading milestones, from kParseStart
   // to kBodyChunkEnd.
-  bool DidLogAllLoadingMilestones() const;
+  virtual bool DidLogAllLoadingMilestones() const;
 
   // The ID, start time, and type of the navigation being tracked.
   int64_t navigation_id_ = 0;
@@ -481,6 +501,7 @@ void AbandonedPageLoadMetricsObserver::LogUKMHistogramsForMilestoneMetrics(
       case NavigationMilestone::kNonRedirectResponseLoaderCallback:
       case NavigationMilestone::kCommitSent:
       case NavigationMilestone::kCommitReceived:
+      case NavigationMilestone::kCommitReplySent:
       case NavigationMilestone::kDidCommit:
       case NavigationMilestone::kSecondRedirectResponseStart:
       case NavigationMilestone::kSecondRedirectedRequestStart:

@@ -952,7 +952,7 @@ void URLRequestHttpJob::SetCookieHeaderAndStart(
       request_->context()->device_bound_session_service();
   if (service) {
     std::optional<device_bound_sessions::SessionService::DeferralParams>
-        deferral = service->ShouldDefer(request_);
+        deferral = service->ShouldDefer(request_, first_party_set_metadata_);
     // If the request needs to be deferred while waiting for refresh, do not
     // start the transaction at this time. This may also kick off a refresh.
     if (deferral) {
@@ -1169,6 +1169,11 @@ void URLRequestHttpJob::OnSetCookieResult(const CookieOptions& options,
 
 #if BUILDFLAG(ENABLE_DEVICE_BOUND_SESSIONS)
 void URLRequestHttpJob::ProcessDeviceBoundSessionsHeader() {
+  if (!request_->allows_device_bound_sessions() &&
+      !features::kDeviceBoundSessionsForceEnableForTesting.Get()) {
+    return;
+  }
+
   device_bound_sessions::SessionService* service =
       request_->context()->device_bound_session_service();
   if (!service) {
@@ -1503,6 +1508,13 @@ std::unique_ptr<SourceStream> URLRequestHttpJob::SetUpSourceStream() {
     return nullptr;
 
   std::unique_ptr<SourceStream> upstream = URLRequestJob::SetUpSourceStream();
+
+  if (request()->client_side_content_decoding_enabled()) {
+    // When client side content encoding is enabled, the client will decode the
+    // body. So returns the original stream.
+    return upstream;
+  }
+
   HttpResponseHeaders* headers = GetResponseHeaders();
   const std::vector<SourceStreamType> types =
       FilterSourceStream::GetContentEncodingTypes(

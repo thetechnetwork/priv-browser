@@ -9,6 +9,7 @@
 #include <utility>
 #include <vector>
 
+#include "ash/accelerators/accelerator_controller_impl.h"
 #include "ash/app_list/app_list_bubble_presenter.h"
 #include "ash/app_list/app_list_controller_impl.h"
 #include "ash/app_list/app_list_public_test_util.h"
@@ -36,20 +37,25 @@
 #include "ash/constants/ash_features.h"
 #include "ash/constants/ash_pref_names.h"
 #include "ash/constants/ash_switches.h"
+#include "ash/constants/url_constants.h"
+#include "ash/public/cpp/capture_mode/capture_mode_api.h"
 #include "ash/public/cpp/capture_mode/capture_mode_delegate.h"
 #include "ash/public/cpp/capture_mode/capture_mode_test_api.h"
 #include "ash/public/cpp/scanner/scanner_delegate.h"
 #include "ash/public/cpp/shell_window_ids.h"
 #include "ash/public/cpp/system/toast_manager.h"
+#include "ash/public/cpp/test/test_new_window_delegate.h"
 #include "ash/resources/vector_icons/vector_icons.h"
 #include "ash/scanner/fake_scanner_profile_scoped_delegate.h"
 #include "ash/scanner/scanner_controller.h"
+#include "ash/scanner/scanner_disclaimer.h"
 #include "ash/scanner/scanner_enterprise_policy.h"
 #include "ash/scanner/scanner_metrics.h"
 #include "ash/session/session_controller_impl.h"
 #include "ash/shelf/home_button.h"
 #include "ash/shelf/shelf_navigation_widget.h"
 #include "ash/shell.h"
+#include "ash/strings/grit/ash_strings.h"
 #include "ash/style/icon_button.h"
 #include "ash/style/pill_button.h"
 #include "ash/style/tab_slider_button.h"
@@ -58,6 +64,7 @@
 #include "ash/test/ash_test_util.h"
 #include "ash/test/test_ash_web_view_factory.h"
 #include "ash/wm/tablet_mode/tablet_mode_controller_test_api.h"
+#include "ash/wm/window_util.h"
 #include "base/auto_reset.h"
 #include "base/memory/ref_counted_memory.h"
 #include "base/memory/scoped_refptr.h"
@@ -78,16 +85,21 @@
 #include "third_party/skia/include/core/SkBitmap.h"
 #include "ui/aura/client/aura_constants.h"
 #include "ui/base/clipboard/clipboard.h"
+#include "ui/base/l10n/l10n_util.h"
 #include "ui/compositor/scoped_animation_duration_scale_mode.h"
+#include "ui/events/event_constants.h"
 #include "ui/events/keycodes/keyboard_codes.h"
 #include "ui/gfx/animation/throb_animation.h"
 #include "ui/gfx/geometry/rect.h"
 #include "ui/gfx/image/image_skia.h"
 #include "ui/views/controls/label.h"
 #include "ui/views/controls/link.h"
+#include "ui/views/controls/styled_label.h"
 #include "ui/views/controls/textfield/textfield.h"
 #include "ui/views/test/widget_test.h"
 #include "ui/views/view_utils.h"
+#include "ui/views/widget/widget_delegate.h"
+#include "ui/wm/core/window_util.h"
 #include "url/gurl.h"
 
 namespace ash {
@@ -114,8 +126,6 @@ using ::testing::Return;
 using ::testing::SizeIs;
 using ::testing::WithArg;
 
-constexpr char kSunfishConsentDisclaimerAccepted[] =
-    "ash.capture_mode.sunfish_consent_disclaimer_accepted";
 constexpr char kCaptureModeTextCopiedToastId[] = "capture_mode_text_copied";
 
 // The number of focusable points or areas for the region overlay.
@@ -130,6 +140,8 @@ constexpr int kSmallRegionEdgeLength = 20;
 // The number of focusable points for the search results panel.
 constexpr int kSearchResultsPanelFocusCount = 2;
 
+// TODO: crbug.com/402548933 - Update this to work when the Lens Web API
+// integration is enabled.
 void WaitForImageCapturedForSearch(PerformCaptureType expected_capture_type) {
   base::test::TestFuture<void> image_captured_future;
   CaptureModeTestApi().SetOnImageCapturedForSearchCallback(
@@ -151,6 +163,27 @@ void WaitForCaptureModeWidgetsVisible() {
       .Wait();
 }
 
+// Acknowledges the Scanner disclaimer for a given entrypoint. Used to disable
+// Scanner disclaimers for most tests.
+void AckScannerDisclaimer(ScannerEntryPoint entry_point) {
+  SetScannerDisclaimerAcked(*capture_mode_util::GetActiveUserPrefService(),
+                            entry_point);
+}
+
+// Unacknowledges all Scanner disclaimers. Used to test Scanner disclaimer
+// logic.
+void UnackAllScannerDisclaimers() {
+  SetAllScannerDisclaimersUnackedForTest(
+      *capture_mode_util::GetActiveUserPrefService());
+}
+
+// An overload for `GetScannerDisclaimerType` which avoids specifying the active
+// pref service.
+ScannerDisclaimerType GetScannerDisclaimerType(ScannerEntryPoint entry_point) {
+  return GetScannerDisclaimerType(
+      *capture_mode_util::GetActiveUserPrefService(), entry_point);
+}
+
 FakeScannerProfileScopedDelegate* GetFakeScannerProfileScopedDelegate(
     ScannerController& scanner_controller) {
   return static_cast<FakeScannerProfileScopedDelegate*>(
@@ -170,6 +203,15 @@ Matcher<ActionButtonView*> ActionButtonIsCollapsed() {
                   Property(&views::Label::GetVisible, false));
 }
 
+class MockNewWindowDelegate : public testing::NiceMock<TestNewWindowDelegate> {
+ public:
+  // TestNewWindowDelegate:
+  MOCK_METHOD(void,
+              OpenUrl,
+              (const GURL& url, OpenUrlFrom from, Disposition disposition),
+              (override));
+};
+
 class SunfishTestBase : public AshTestBase {
  public:
   SunfishTestBase()
@@ -185,8 +227,8 @@ class SunfishTestBase : public AshTestBase {
         switches::kAshDebugShortcuts);
     AshTestBase::SetUp();
 
-    Shell::Get()->session_controller()->GetActivePrefService()->SetBoolean(
-        kSunfishConsentDisclaimerAccepted, true);
+    AckScannerDisclaimer(ScannerEntryPoint::kSmartActionsButton);
+    AckScannerDisclaimer(ScannerEntryPoint::kSunfishSession);
   }
   void TearDown() override {
     // Clear the clipboard in case text was saved during a test.
@@ -228,6 +270,22 @@ TEST_F(SunfishDisabledScannerDisabledTest, AccelEntryPointIsNoop) {
 
   auto* controller = CaptureModeController::Get();
   EXPECT_FALSE(controller->IsActive());
+}
+
+// Tests that the accelerator entry point does not emit metrics when neither
+// Sunfish nor Scanner is enabled.
+TEST_F(SunfishDisabledScannerDisabledTest, AccelEntryPointDoesNotEmitMetrics) {
+  base::HistogramTester histogram_tester;
+  histogram_tester.ExpectBucketCount(
+      "Ash.ScannerFeature.UserState",
+      ScannerFeatureUserState::kSunfishSessionStartedFromDebugShortcut, 0);
+
+  PressAndReleaseKey(ui::VKEY_8,
+                     ui::EF_CONTROL_DOWN | ui::EF_ALT_DOWN | ui::EF_SHIFT_DOWN);
+
+  histogram_tester.ExpectBucketCount(
+      "Ash.ScannerFeature.UserState",
+      ScannerFeatureUserState::kSunfishSessionStartedFromDebugShortcut, 0);
 }
 
 TEST_F(SunfishDisabledScannerDisabledTest,
@@ -462,9 +520,25 @@ TEST_F(SunfishTest, AccelEntryPoint) {
   EXPECT_EQ(active_behavior->behavior_type(), BehaviorType::kSunfish);
 }
 
+// Tests that the accelerator entry point emits the correct metrics.
+TEST_F(SunfishTest, AccelEntryPointMetrics) {
+  base::HistogramTester histogram_tester;
+  histogram_tester.ExpectBucketCount(
+      "Ash.ScannerFeature.UserState",
+      ScannerFeatureUserState::kSunfishSessionStartedFromDebugShortcut, 0);
+
+  PressAndReleaseKey(ui::VKEY_8,
+                     ui::EF_CONTROL_DOWN | ui::EF_ALT_DOWN | ui::EF_SHIFT_DOWN);
+
+  histogram_tester.ExpectBucketCount(
+      "Ash.ScannerFeature.UserState",
+      ScannerFeatureUserState::kSunfishSessionStartedFromDebugShortcut, 1);
+}
+
 // Tests that the accelerator entry point is a no-op when the enabled pref is
 // false.
-TEST_F(SunfishTest, AccelEntryPointIsNoopIfEnabledPrefIsFalse) {
+TEST_F(SunfishEnabledScannerDisabledTest,
+       AccelEntryPointIsNoopIfEnabledPrefIsFalse) {
   Shell::Get()->session_controller()->GetActivePrefService()->SetBoolean(
       prefs::kSunfishEnabled, false);
 
@@ -790,7 +864,7 @@ TEST_F(SunfishTest, DragSearchResultsPanel) {
                                                  /*is_active=*/false);
   widget->SetBounds(gfx::Rect(100, 100,
                               capture_mode::kSearchResultsPanelTotalWidth,
-                              capture_mode::kSearchResultsPanelHeight));
+                              capture_mode::kSearchResultsPanelTotalHeight));
   widget->Show();
 
   auto* search_results_panel =
@@ -1187,6 +1261,58 @@ TEST_F(SunfishTest, CaptureRegionOverlay) {
   EXPECT_FALSE(session->active_behavior()->CanPaintRegionOverlay());
 }
 
+// Tests that the action container window has a title and accessible title in
+// default capture mode.
+TEST_F(SunfishTest, ActionContainerWindowTitleDefaultMode) {
+  auto* controller =
+      StartCaptureSession(CaptureModeSource::kRegion, CaptureModeType::kImage);
+
+  SelectCaptureModeRegion(GetEventGenerator(), gfx::Rect(10, 10, 50, 50),
+                          /*release_mouse=*/true, /*verify_region=*/true);
+  capture_mode_util::AddActionButton(
+      views::Button::PressedCallback(), u"Copy Text", &kCaptureModeImageIcon,
+      ActionButtonRank(ActionButtonType::kCopyText, 0),
+      ActionButtonViewID::kCopyTextButton);
+
+  views::Widget* action_container_widget =
+      CaptureModeSessionTestApi(controller->capture_mode_session())
+          .GetActionContainerWidget();
+  ASSERT_TRUE(action_container_widget);
+  const std::u16string kActionContainerWindowTitle = l10n_util::GetStringUTF16(
+      IDS_ASH_SCREEN_CAPTURE_DEFAULT_ACTION_BUTTON_WINDOW_TITLE);
+  EXPECT_EQ(action_container_widget->widget_delegate()->GetWindowTitle(),
+            kActionContainerWindowTitle);
+  EXPECT_EQ(
+      action_container_widget->widget_delegate()->GetAccessibleWindowTitle(),
+      kActionContainerWindowTitle);
+}
+
+// Tests that the action container window has a title and accessible title in
+// Sunfish mode.
+TEST_F(SunfishTest, ActionContainerWindowTitleSunfishMode) {
+  auto* controller = CaptureModeController::Get();
+  controller->StartSunfishSession();
+
+  SelectCaptureModeRegion(GetEventGenerator(), gfx::Rect(10, 10, 50, 50),
+                          /*release_mouse=*/true, /*verify_region=*/true);
+  capture_mode_util::AddActionButton(
+      views::Button::PressedCallback(), u"Copy Text", &kCaptureModeImageIcon,
+      ActionButtonRank(ActionButtonType::kCopyText, 0),
+      ActionButtonViewID::kCopyTextButton);
+
+  views::Widget* action_container_widget =
+      CaptureModeSessionTestApi(controller->capture_mode_session())
+          .GetActionContainerWidget();
+  ASSERT_TRUE(action_container_widget);
+  const std::u16string kActionContainerWindowTitle = l10n_util::GetStringUTF16(
+      IDS_ASH_SCREEN_CAPTURE_SUNFISH_ACTION_BUTTON_WINDOW_TITLE);
+  EXPECT_EQ(action_container_widget->widget_delegate()->GetWindowTitle(),
+            kActionContainerWindowTitle);
+  EXPECT_EQ(
+      action_container_widget->widget_delegate()->GetAccessibleWindowTitle(),
+      kActionContainerWindowTitle);
+}
+
 // Tests that the action container widget's opacity is updated properly before a
 // region is selected, while a region is selected, and while the region is being
 // adjusted.
@@ -1539,6 +1665,8 @@ TEST_F(SunfishTest, SendMultimodalSearch) {
   controller->ShowSearchResultsPanel(gfx::ImageSkia(), GURL("kTestUrl2"));
 }
 
+// TODO: crbug.com/398259275 - Update or remove unit test when Lens Web API
+// implementation is enabled by default.
 TEST_F(SunfishTest, SearchBoxInDefaultMode) {
   auto* controller = CaptureModeController::Get();
   auto* test_delegate =
@@ -1573,6 +1701,8 @@ TEST_F(SunfishTest, SearchBoxInDefaultMode) {
   EXPECT_EQ(1, test_delegate->num_multimodal_search_requests());
 }
 
+// TODO: crbug.com/398259275 - Update or remove unit test when Lens Web API
+// implementation is enabled by default.
 // Tests that the search box sends multimodal search requests.
 TEST_F(SunfishTest, SearchBoxTextfield) {
   base::HistogramTester histogram_tester;
@@ -1616,6 +1746,8 @@ TEST_F(SunfishTest, SearchBoxTextfield) {
   histogram_tester.ExpectTotalCount(kMultimodalSearchRequestHistogram, 1);
 }
 
+// TODO: crbug.com/398259275 - Update or remove unit test when Lens Web API
+// implementation is enabled by default.
 // Tests that the search results panel is preserved between sessions.
 TEST_F(SunfishTest, SwitchSessionsWhilePanelOpen) {
   // Open the search results panel.
@@ -1753,7 +1885,8 @@ TEST_F(SunfishTest, FeedbackButtonShownInDefaultMode) {
 
 // Tests that the feedback button is hidden in default capture mode if the
 // enabled pref is false.
-TEST_F(SunfishTest, FeedbackButtonNotShownInDefaultModeIfEnabledPrefIsFalse) {
+TEST_F(SunfishEnabledScannerDisabledTest,
+       FeedbackButtonNotShownInDefaultModeIfEnabledPrefIsFalse) {
   ui::ScopedAnimationDurationScaleMode animation_scale(
       ui::ScopedAnimationDurationScaleMode::ZERO_DURATION);
   Shell::Get()->session_controller()->GetActivePrefService()->SetBoolean(
@@ -1903,17 +2036,17 @@ TEST_F(SunfishTest, PanelBounds) {
                       capture_mode::kSearchResultsPanelTotalWidth -
                       capture_mode::kPanelWorkAreaSpacing;
   const int default_y = work_area.bottom() -
-                        capture_mode::kSearchResultsPanelHeight -
+                        capture_mode::kSearchResultsPanelTotalHeight -
                         capture_mode::kPanelWorkAreaSpacing;
   // TODO(hewer): Remove this when the feedback button is removed.
   const int above_button_y = feedback_bounds.y() -
-                             capture_mode::kSearchResultsPanelHeight -
+                             capture_mode::kSearchResultsPanelTotalHeight -
                              capture_mode::kPanelButtonSpacing;
 
   // By default, the panel should appear on the left side.
   gfx::Rect target_bounds(left_x, default_y,
                           capture_mode::kSearchResultsPanelTotalWidth,
-                          capture_mode::kSearchResultsPanelHeight);
+                          capture_mode::kSearchResultsPanelTotalHeight);
   EXPECT_EQ(controller->GetSearchResultsPanel()->GetBoundsInScreen(),
             target_bounds);
 
@@ -2568,6 +2701,24 @@ TEST_F(SunfishTest, PressingSearchButtonShowsErrorIfOffline) {
   EXPECT_TRUE(error_view->GetVisible());
 }
 
+TEST_F(SunfishTest, PinnedWindowExitSession) {
+  auto* controller = CaptureModeController::Get();
+
+  std::unique_ptr<aura::Window> pinned_window = CreateAppWindow();
+  wm::ActivateWindow(pinned_window.get());
+  window_util::PinWindow(pinned_window.get(), /*trusted=*/false);
+  EXPECT_FALSE(ash::CanShowSunfishUi());
+
+  Shell::Get()->accelerator_controller()->PerformActionIfEnabled(
+      AcceleratorAction::kUnpin, {});
+  EXPECT_TRUE(ash::CanShowSunfishUi());
+
+  controller->StartSunfishSession();
+  EXPECT_TRUE(controller->IsActive());
+  window_util::PinWindow(pinned_window.get(), /*trusted=*/false);
+  EXPECT_FALSE(controller->IsActive());
+}
+
 using SunfishMultiDisplayTest = SunfishTest;
 
 TEST_F(SunfishMultiDisplayTest, SelectNewRegionAndPanelRoot) {
@@ -2642,9 +2793,8 @@ TEST_F(SunfishMultiDisplayTest, SelectNewRegionAndPanelRoot) {
 }
 
 // Should not show scanner disclaimer since scanner is not enabled.
-TEST_F(SunfishTest, DoesNotShowScannerDisclaimer) {
-  Shell::Get()->session_controller()->GetActivePrefService()->SetBoolean(
-      kSunfishConsentDisclaimerAccepted, false);
+TEST_F(SunfishEnabledScannerDisabledTest, DoesNotShowScannerDisclaimer) {
+  UnackAllScannerDisclaimers();
 
   auto* controller = CaptureModeController::Get();
   controller->StartSunfishSession();
@@ -2721,6 +2871,41 @@ TEST_F(SunfishTest, PanelCreationWithMenuObserved) {
       ActionButtonViewID::kSearchButton);
   ASSERT_TRUE(search_button);
   LeftClickOn(search_button);
+}
+
+// TODO: crbug.com/398259275 - Remove this class and remove or integrate each
+// test when the Lens Web API implementation is enabled by default.
+class SunfishLensWebTest : public SunfishTestBase {
+ public:
+  SunfishLensWebTest() {
+    scoped_feature_list_.InitWithFeatures(
+        /*enabled_features=*/{features::kSunfishFeature,
+                              features::kSunfishLensWeb},
+        /*disabled_features=*/{{}});
+  }
+  SunfishLensWebTest(const SunfishLensWebTest&) = delete;
+  SunfishLensWebTest& operator=(const SunfishLensWebTest&) = delete;
+  ~SunfishLensWebTest() override = default;
+
+ private:
+  base::test::ScopedFeatureList scoped_feature_list_;
+};
+
+// Tests that the native search box is removed from the search results panel
+// when the Lens Web API implementation is enabled.
+TEST_F(SunfishLensWebTest, NoNativeSearchBox) {
+  views::Widget::InitParams params(
+      views::Widget::InitParams::CLIENT_OWNS_WIDGET,
+      views::Widget::InitParams::TYPE_WINDOW_FRAMELESS);
+  params.bounds = gfx::Rect{capture_mode::kSearchResultsPanelTotalWidth,
+                            capture_mode::kSearchResultsPanelTotalHeight};
+  params.parent =
+      Shell::GetContainer(Shell::GetPrimaryRootWindow(),
+                          kShellWindowId_CaptureModeSearchResultsPanel);
+  auto widget = std::make_unique<views::Widget>(std::move(params));
+  auto* search_results_panel =
+      widget->SetContentsView(std::make_unique<SearchResultsPanel>());
+  EXPECT_FALSE(search_results_panel->GetSearchBoxTextfield());
 }
 
 using SunfishDisplayMetricsTest = SunfishTest;
@@ -2836,12 +3021,15 @@ class ScannerTest : public AshTestBase {
   void SetUp() override {
     AshTestBase::SetUp();
 
-    Shell::Get()->session_controller()->GetActivePrefService()->SetBoolean(
-        kSunfishConsentDisclaimerAccepted, true);
+    AckScannerDisclaimer(ScannerEntryPoint::kSmartActionsButton);
+    AckScannerDisclaimer(ScannerEntryPoint::kSunfishSession);
   }
+
+  MockNewWindowDelegate& new_window_delegate() { return new_window_delegate_; }
 
  private:
   base::test::ScopedFeatureList scoped_feature_list_{features::kScannerUpdate};
+  MockNewWindowDelegate new_window_delegate_;
 };
 
 // Tests that a Scanner session is created when a Sunfish session begins.
@@ -4175,6 +4363,68 @@ TEST_F(ScannerTest, ActionButtonsUpdatedWhenRegionAdjustedWithKeyboard) {
                   ActionButtonIdIs(ActionButtonViewID::kCopyTextButton)));
 }
 
+// Tests that the user can use keyboard navigation to use the smart actions
+// button.
+TEST_F(ScannerTest, KeyboardNavigationSmartActionsButton) {
+  // Start default capture mode.
+  auto* controller =
+      StartCaptureSession(CaptureModeSource::kRegion, CaptureModeType::kImage);
+  // Set up text detection expectations.
+  auto* test_delegate =
+      static_cast<TestCaptureModeDelegate*>(controller->delegate_for_testing());
+  base::test::TestFuture<OnTextDetectionComplete> detect_text_future;
+  EXPECT_CALL(*test_delegate, DetectTextInImage)
+      .WillRepeatedly(WithArg<1>(InvokeFuture(detect_text_future)));
+  // Set up Scanner action fetching expectations.
+  base::test::TestFuture<manta::ScannerProvider::ScannerProtoResponseCallback>
+      fetch_actions_future;
+  base::test::TestFuture<manta::ScannerProvider::ScannerProtoResponseCallback>
+      fetch_action_details_future;
+  ScannerController* scanner_controller = Shell::Get()->scanner_controller();
+  ASSERT_TRUE(scanner_controller);
+  FakeScannerProfileScopedDelegate& fake_profile_scoped_delegate =
+      *GetFakeScannerProfileScopedDelegate(*scanner_controller);
+  EXPECT_CALL(fake_profile_scoped_delegate, FetchActionsForImage)
+      .WillOnce(WithArg<1>(InvokeFuture(fetch_actions_future)));
+  EXPECT_CALL(fake_profile_scoped_delegate, FetchActionDetailsForImage)
+      .WillOnce(WithArg<2>(InvokeFuture(fetch_action_details_future)));
+
+  // Hit space to select a default region.
+  ui::test::EventGenerator* event_generator = GetEventGenerator();
+  SendKey(ui::VKEY_SPACE, event_generator);
+  detect_text_future.Take().Run("detected text");
+
+  // Check that smart actions button has appeared.
+  const CaptureModeSessionTestApi session_test_api(
+      controller->capture_mode_session());
+  const ActionButtonView* smart_actions_button =
+      session_test_api.GetActionButtonByViewId(
+          ActionButtonViewID::kSmartActionsButton);
+  ASSERT_TRUE(smart_actions_button);
+  ASSERT_EQ(session_test_api.GetActionButtons()[0], smart_actions_button);
+
+  // Use tab and enter to navigate to and select the smart actions button.
+  SendKey(ui::VKEY_TAB, event_generator, ui::EF_SHIFT_DOWN, /*count=*/4);
+  SendKey(ui::VKEY_RETURN, event_generator);
+
+  // Simulate a single fetched Scanner action.
+  auto output = std::make_unique<manta::proto::ScannerOutput>();
+  manta::proto::ScannerObject& objects = *output->add_objects();
+  objects.add_actions()->mutable_new_event()->set_title("Event");
+  fetch_actions_future.Take().Run(std::move(output), manta::MantaStatus());
+
+  // Check for a Scanner action button and a copy text button.
+  EXPECT_THAT(
+      session_test_api.GetActionButtons(),
+      ElementsAre(ActionButtonIdIs(ActionButtonViewID::kScannerButton),
+                  ActionButtonIdIs(ActionButtonViewID::kCopyTextButton)));
+
+  // Press enter to select the Scanner action button.
+  SendKey(ui::VKEY_RETURN, event_generator);
+
+  EXPECT_TRUE(fetch_action_details_future.Wait());
+}
+
 // Tests that Scanner actions are updated when the user selects or adjusts a
 // capture region with their keyboard in Sunfish mode.
 TEST_F(ScannerTest,
@@ -4491,10 +4741,27 @@ TEST_F(ScannerTest, GlowAnimationRemovedOnCaptureSourceChange) {
   EXPECT_FALSE(region_overlay_controller->HasGlowAnimation());
 }
 
-TEST_F(ScannerTest, DisclaimerAcceptContinuesScannerSession) {
+TEST_F(ScannerTest, DisclaimerAcceptContinuesScreenshotSession) {
   base::HistogramTester histogram_tester;
-  Shell::Get()->session_controller()->GetActivePrefService()->SetBoolean(
-      kSunfishConsentDisclaimerAccepted, false);
+  UnackAllScannerDisclaimers();
+  ScannerController* scanner_controller = Shell::Get()->scanner_controller();
+  ASSERT_TRUE(scanner_controller);
+  // Ensure that `CheckFeatureAccess` succeeds iff the consent disclaimer has
+  // been accepted.
+  EXPECT_CALL(*GetFakeScannerProfileScopedDelegate(*scanner_controller),
+              CheckFeatureAccess)
+      .WillRepeatedly([]() {
+        // Explicitly use the pref here as that is the source of truth for
+        // feature access checking.
+        return Shell::Get()
+                       ->session_controller()
+                       ->GetActivePrefService()
+                       ->GetBoolean(prefs::kSunfishConsentDisclaimerAccepted)
+                   ? specialized_features::FeatureAccessFailureSet{}
+                   : specialized_features::FeatureAccessFailureSet{
+                         specialized_features::FeatureAccessFailure::
+                             kConsentNotAccepted};
+      });
 
   auto* controller = CaptureModeController::Get();
   StartCaptureSession(CaptureModeSource::kRegion, CaptureModeType::kImage);
@@ -4504,8 +4771,6 @@ TEST_F(ScannerTest, DisclaimerAcceptContinuesScannerSession) {
   EXPECT_CALL(*test_delegate, DetectTextInImage)
       .WillOnce(WithArg<1>(InvokeFuture(detect_text_future)));
 
-  ScannerController* scanner_controller = Shell::Get()->scanner_controller();
-  ASSERT_TRUE(scanner_controller);
   base::test::TestFuture<manta::ScannerProvider::ScannerProtoResponseCallback>
       fetch_actions_future;
   EXPECT_CALL(*GetFakeScannerProfileScopedDelegate(*scanner_controller),
@@ -4538,9 +4803,10 @@ TEST_F(ScannerTest, DisclaimerAcceptContinuesScannerSession) {
       "Ash.ScannerFeature.UserState",
       ScannerFeatureUserState::kConsentDisclaimerAccepted, 1);
   EXPECT_EQ(session_test_api.GetDisclaimerWidget(), nullptr);
-  EXPECT_TRUE(
-      Shell::Get()->session_controller()->GetActivePrefService()->GetBoolean(
-          kSunfishConsentDisclaimerAccepted));
+  EXPECT_EQ(GetScannerDisclaimerType(ScannerEntryPoint::kSmartActionsButton),
+            ScannerDisclaimerType::kNone);
+  EXPECT_EQ(GetScannerDisclaimerType(ScannerEntryPoint::kSunfishSession),
+            ScannerDisclaimerType::kNone);
   EXPECT_TRUE(controller->IsActive());
   WaitForImageCapturedForSearch(PerformCaptureType::kScanner);
 
@@ -4566,19 +4832,94 @@ TEST_F(ScannerTest, DisclaimerAcceptContinuesScannerSession) {
                         ActionButtonIsCollapsed())));
 }
 
-TEST_F(ScannerTest, DisclaimerDeclinedGoesBackToScreenshotMode) {
+TEST_F(ScannerTest, DisclaimerAcceptInSunfishSessionStartsScannerSession) {
   base::HistogramTester histogram_tester;
-  Shell::Get()->session_controller()->GetActivePrefService()->SetBoolean(
-      kSunfishConsentDisclaimerAccepted, false);
+  UnackAllScannerDisclaimers();
+  ScannerController* scanner_controller = Shell::Get()->scanner_controller();
+  ASSERT_TRUE(scanner_controller);
+  // Ensure that `CheckFeatureAccess` succeeds iff the consent disclaimer has
+  // been accepted.
+  EXPECT_CALL(*GetFakeScannerProfileScopedDelegate(*scanner_controller),
+              CheckFeatureAccess)
+      .WillRepeatedly([]() {
+        // Explicitly use the pref here as that is the source of truth for
+        // feature access checking.
+        return Shell::Get()
+                       ->session_controller()
+                       ->GetActivePrefService()
+                       ->GetBoolean(prefs::kSunfishConsentDisclaimerAccepted)
+                   ? specialized_features::FeatureAccessFailureSet{}
+                   : specialized_features::FeatureAccessFailureSet{
+                         specialized_features::FeatureAccessFailure::
+                             kConsentNotAccepted};
+      });
+
+  auto* controller = CaptureModeController::Get();
+  controller->StartSunfishSession();
+  CaptureModeSessionTestApi session_test_api(
+      controller->capture_mode_session());
+  views::Widget* disclaimer = session_test_api.GetDisclaimerWidget();
+  ASSERT_TRUE(disclaimer);
+  views::View* accept_button =
+      disclaimer->GetContentsView()->GetViewByID(kDisclaimerViewAcceptButtonId);
+  LeftClickOn(accept_button);
+
+  histogram_tester.ExpectBucketCount(
+      "Ash.ScannerFeature.UserState",
+      ScannerFeatureUserState::kConsentDisclaimerAccepted, 1);
+  EXPECT_TRUE(scanner_controller->HasActiveSessionForTesting());
+}
+
+TEST_F(ScannerTest, DisclaimerAcceptedInSunfishSessionStartsScannerSession) {
+  AckScannerDisclaimer(ScannerEntryPoint::kSunfishSession);
+  ScannerController* scanner_controller = Shell::Get()->scanner_controller();
+  ASSERT_TRUE(scanner_controller);
+
+  auto* controller = CaptureModeController::Get();
+  controller->StartSunfishSession();
+  CaptureModeSessionTestApi session_test_api(
+      controller->capture_mode_session());
+
+  EXPECT_FALSE(session_test_api.GetDisclaimerWidget());
+  EXPECT_TRUE(scanner_controller->HasActiveSessionForTesting());
+}
+
+TEST_F(ScannerTest, DisclaimerDeclineGoesBackToScreenshotMode) {
+  base::HistogramTester histogram_tester;
+  UnackAllScannerDisclaimers();
+  ScannerController* scanner_controller = Shell::Get()->scanner_controller();
+  ASSERT_TRUE(scanner_controller);
+  // `CheckFeatureAccess` should reflect the enabled and disclaimer pref.
+  EXPECT_CALL(*GetFakeScannerProfileScopedDelegate(*scanner_controller),
+              CheckFeatureAccess)
+      .WillRepeatedly([]() {
+        specialized_features::FeatureAccessFailureSet failures;
+        PrefService* prefs =
+            Shell::Get()->session_controller()->GetActivePrefService();
+        if (!prefs->GetBoolean(prefs::kScannerEnabled)) {
+          failures.Put(
+              specialized_features::FeatureAccessFailure::kDisabledInSettings);
+        }
+        // Explicitly use the pref here as that is the source of truth for
+        // feature access checking.
+        if (!prefs->GetBoolean(prefs::kSunfishConsentDisclaimerAccepted)) {
+          failures.Put(
+              specialized_features::FeatureAccessFailure::kConsentNotAccepted);
+        }
+
+        return failures;
+      });
 
   ActionButtonView* smart_actions_button = GetSmartActionsButton();
-  ASSERT_TRUE(smart_actions_button);
-
-  // Click the smart actions button.
-  LeftClickOn(smart_actions_button);
   auto* controller = CaptureModeController::Get();
   CaptureModeSessionTestApi session_test_api(
       controller->capture_mode_session());
+  ASSERT_TRUE(smart_actions_button);
+  EXPECT_THAT(session_test_api.GetActionButtons(),
+              ElementsAre(smart_actions_button, _));
+
+  // Click the smart actions button.
+  LeftClickOn(smart_actions_button);
   views::Widget* disclaimer = session_test_api.GetDisclaimerWidget();
   ASSERT_TRUE(disclaimer);
 
@@ -4590,48 +4931,24 @@ TEST_F(ScannerTest, DisclaimerDeclinedGoesBackToScreenshotMode) {
       "Ash.ScannerFeature.UserState",
       ScannerFeatureUserState::kConsentDisclaimerRejected, 1);
   EXPECT_EQ(session_test_api.GetDisclaimerWidget(), nullptr);
+  EXPECT_EQ(GetScannerDisclaimerType(ScannerEntryPoint::kSmartActionsButton),
+            ScannerDisclaimerType::kFull);
+  EXPECT_EQ(GetScannerDisclaimerType(ScannerEntryPoint::kSunfishSession),
+            ScannerDisclaimerType::kFull);
   EXPECT_FALSE(
       Shell::Get()->session_controller()->GetActivePrefService()->GetBoolean(
-          kSunfishConsentDisclaimerAccepted));
+          prefs::kScannerEnabled));
+  EXPECT_FALSE(ScannerController::CanShowUiForShell());
   EXPECT_TRUE(controller->IsActive());
-  // Did not get filled with new actions buttons, stays the same as before.
-  EXPECT_THAT(session_test_api.GetActionButtons(),
-              ElementsAre(smart_actions_button, _));
-
-  // Click the smart actions button again, should show the disclaimer again.
-  LeftClickOn(smart_actions_button);
-  EXPECT_TRUE(session_test_api.GetDisclaimerWidget());
-
-  // Exit the session. The disclaimer will be dismissed.
-  controller->Stop();
-  ASSERT_FALSE(controller->IsActive());
-
-  // Re-enter the session. The disclaimer will be re-shown. Note text detection
-  // will start immediately as the captured region is preserved from the last
-  // session.
-  StartCaptureSession(CaptureModeSource::kRegion, CaptureModeType::kImage);
-  base::test::TestFuture<OnTextDetectionComplete> detect_text_future;
-  auto* test_delegate =
-      static_cast<TestCaptureModeDelegate*>(controller->delegate_for_testing());
-  EXPECT_CALL(*test_delegate, DetectTextInImage)
-      .WillOnce(WithArg<1>(InvokeFuture(detect_text_future)));
-  detect_text_future.Take().Run("detected text");
-
-  smart_actions_button =
-      CaptureModeSessionTestApi(controller->capture_mode_session())
-          .GetActionButtonByViewId(ActionButtonViewID::kSmartActionsButton);
-  ASSERT_TRUE(smart_actions_button);
-  LeftClickOn(smart_actions_button);
-  EXPECT_TRUE(CaptureModeSessionTestApi(controller->capture_mode_session())
-                  .GetDisclaimerWidget());
+  // The smart actions button is now removed.
+  EXPECT_THAT(session_test_api.GetActionButtons(), SizeIs(1));
 }
 
-// Tests that the consent disclaimer can be properly navigated using the
-// keyboard.
-TEST_F(ScannerTest, KeyboardNavigationDisclaimer) {
+// Tests that the consent disclaimer can be properly navigated from the smart
+// actions button using the keyboard.
+TEST_F(ScannerTest, KeyboardNavigationDisclaimerFromSmartActionsButton) {
   base::HistogramTester histogram_tester;
-  Shell::Get()->session_controller()->GetActivePrefService()->SetBoolean(
-      kSunfishConsentDisclaimerAccepted, false);
+  UnackAllScannerDisclaimers();
 
   ActionButtonView* smart_actions_button = GetSmartActionsButton();
   ASSERT_TRUE(smart_actions_button);
@@ -4653,29 +4970,180 @@ TEST_F(ScannerTest, KeyboardNavigationDisclaimer) {
   auto* disclaimer = session_test_api.GetDisclaimerWidget();
   ASSERT_TRUE(disclaimer);
 
-  // Press tab once. The focus should shift to the decline button in the consent
-  // disclaimer.
-  SendKey(ui::VKEY_TAB, event_generator);
-  views::View* decline_button = disclaimer->GetContentsView()->GetViewByID(
-      kDisclaimerViewDeclineButtonId);
-  EXPECT_TRUE(decline_button->HasFocus());
-
-  // Press tab again. The accept button should now be focused.
-  SendKey(ui::VKEY_TAB, event_generator);
+  // The accept button should already be focused.
   views::View* accept_button =
       disclaimer->GetContentsView()->GetViewByID(kDisclaimerViewAcceptButtonId);
   EXPECT_TRUE(accept_button->HasFocus());
 
-  // Press tab one more time. The focus should stay inside the disclaimer, and
-  // loop back around to the decline button.
+  // Press tab once. The focus should stay inside the disclaimer, and loop back
+  // around to the link in paragraph one.
   SendKey(ui::VKEY_TAB, event_generator);
+  auto* paragraph_one = views::AsViewClass<views::StyledLabel>(
+      disclaimer->GetContentsView()->GetViewByID(
+          kDisclaimerViewParagraphOneId));
+  ASSERT_TRUE(paragraph_one);
+  views::Link* paragraph_one_first_link =
+      paragraph_one->GetFirstLinkForTesting();
+  ASSERT_TRUE(paragraph_one_first_link);
+  EXPECT_TRUE(paragraph_one_first_link->HasFocus());
+
+  // Unfortunately, if a link spans across more than one line, each line has its
+  // own focus target: https://crbug.com/391154477
+  // Assume that each link spans at most two lines, so press the tab button
+  // up to two times to focus the link in paragraph two.
+  SendKey(ui::VKEY_TAB, event_generator);
+  auto* paragraph_three = views::AsViewClass<views::StyledLabel>(
+      disclaimer->GetContentsView()->GetViewByID(
+          kDisclaimerViewParagraphThreeId));
+  ASSERT_TRUE(paragraph_three);
+  views::Link* paragraph_three_first_link =
+      paragraph_three->GetFirstLinkForTesting();
+  ASSERT_TRUE(paragraph_three_first_link);
+  if (!paragraph_three_first_link->HasFocus()) {
+    SendKey(ui::VKEY_TAB, event_generator);
+  }
+  EXPECT_TRUE(paragraph_three_first_link->HasFocus());
+
+  // Press tab up to two times to focus the decline button.
+  SendKey(ui::VKEY_TAB, event_generator);
+  views::View* decline_button = disclaimer->GetContentsView()->GetViewByID(
+      kDisclaimerViewDeclineButtonId);
+  if (!decline_button->HasFocus()) {
+    SendKey(ui::VKEY_TAB, event_generator);
+  }
   EXPECT_TRUE(decline_button->HasFocus());
+
+  // Press tab again. The accept button should now be focused.
+  SendKey(ui::VKEY_TAB, event_generator);
+  EXPECT_TRUE(accept_button->HasFocus());
+
+  // Press tab one more time. The focus should loop back around to the link in
+  // paragraph one again.
+  SendKey(ui::VKEY_TAB, event_generator);
+  EXPECT_TRUE(paragraph_one_first_link->HasFocus());
+}
+
+TEST_F(ScannerTest, DisclaimerTosLinkFromScreenshotMode) {
+  EXPECT_CALL(new_window_delegate(),
+              OpenUrl(GURL(chrome::kGooglePrivacyPolicyUrl), _, _));
+
+  UnackAllScannerDisclaimers();
+  ActionButtonView* smart_actions_button = GetSmartActionsButton();
+  ASSERT_TRUE(smart_actions_button);
+  auto* controller = CaptureModeController::Get();
+  CaptureModeSessionTestApi session_test_api(
+      controller->capture_mode_session());
+  LeftClickOn(smart_actions_button);
+  views::Widget* disclaimer = session_test_api.GetDisclaimerWidget();
+  ASSERT_TRUE(disclaimer);
+  auto* paragraph_one = views::AsViewClass<views::StyledLabel>(
+      disclaimer->GetContentsView()->GetViewByID(
+          kDisclaimerViewParagraphOneId));
+  ASSERT_TRUE(paragraph_one);
+
+  paragraph_one->ClickFirstLinkForTesting();
+
+  EXPECT_FALSE(controller->IsActive());
+  EXPECT_EQ(GetScannerDisclaimerType(ScannerEntryPoint::kSmartActionsButton),
+            ScannerDisclaimerType::kFull);
+  EXPECT_EQ(GetScannerDisclaimerType(ScannerEntryPoint::kSunfishSession),
+            ScannerDisclaimerType::kFull);
+  EXPECT_TRUE(
+      Shell::Get()->session_controller()->GetActivePrefService()->GetBoolean(
+          prefs::kScannerEnabled));
+}
+
+TEST_F(ScannerTest, DisclaimerLearnMoreLinkFromScreenshotMode) {
+  EXPECT_CALL(new_window_delegate(),
+              OpenUrl(GURL(chrome::kScannerLearnMoreUrl), _, _));
+
+  UnackAllScannerDisclaimers();
+  ActionButtonView* smart_actions_button = GetSmartActionsButton();
+  ASSERT_TRUE(smart_actions_button);
+  auto* controller = CaptureModeController::Get();
+  CaptureModeSessionTestApi session_test_api(
+      controller->capture_mode_session());
+  LeftClickOn(smart_actions_button);
+  views::Widget* disclaimer = session_test_api.GetDisclaimerWidget();
+  ASSERT_TRUE(disclaimer);
+  auto* paragraph_three = views::AsViewClass<views::StyledLabel>(
+      disclaimer->GetContentsView()->GetViewByID(
+          kDisclaimerViewParagraphThreeId));
+  ASSERT_TRUE(paragraph_three);
+
+  paragraph_three->ClickFirstLinkForTesting();
+
+  EXPECT_FALSE(controller->IsActive());
+  EXPECT_EQ(GetScannerDisclaimerType(ScannerEntryPoint::kSmartActionsButton),
+            ScannerDisclaimerType::kFull);
+  EXPECT_EQ(GetScannerDisclaimerType(ScannerEntryPoint::kSunfishSession),
+            ScannerDisclaimerType::kFull);
+  EXPECT_TRUE(
+      Shell::Get()->session_controller()->GetActivePrefService()->GetBoolean(
+          prefs::kScannerEnabled));
+}
+
+TEST_F(ScannerTest, DisclaimerTosLinkFromSunfishMode) {
+  EXPECT_CALL(new_window_delegate(),
+              OpenUrl(GURL(chrome::kGooglePrivacyPolicyUrl), _, _));
+
+  UnackAllScannerDisclaimers();
+  auto* controller = CaptureModeController::Get();
+  controller->StartSunfishSession();
+  ASSERT_TRUE(controller->IsActive());
+  CaptureModeSessionTestApi session_test_api(
+      controller->capture_mode_session());
+  views::Widget* disclaimer = session_test_api.GetDisclaimerWidget();
+  ASSERT_TRUE(disclaimer);
+  auto* paragraph_one = views::AsViewClass<views::StyledLabel>(
+      disclaimer->GetContentsView()->GetViewByID(
+          kDisclaimerViewParagraphOneId));
+  ASSERT_TRUE(paragraph_one);
+
+  paragraph_one->ClickFirstLinkForTesting();
+
+  EXPECT_FALSE(controller->IsActive());
+  EXPECT_EQ(GetScannerDisclaimerType(ScannerEntryPoint::kSmartActionsButton),
+            ScannerDisclaimerType::kFull);
+  EXPECT_EQ(GetScannerDisclaimerType(ScannerEntryPoint::kSunfishSession),
+            ScannerDisclaimerType::kFull);
+  EXPECT_TRUE(
+      Shell::Get()->session_controller()->GetActivePrefService()->GetBoolean(
+          prefs::kScannerEnabled));
+}
+
+TEST_F(ScannerTest, DisclaimerLearnMoreLinkFromSunfishMode) {
+  EXPECT_CALL(new_window_delegate(),
+              OpenUrl(GURL(chrome::kScannerLearnMoreUrl), _, _));
+
+  UnackAllScannerDisclaimers();
+  auto* controller = CaptureModeController::Get();
+  controller->StartSunfishSession();
+  ASSERT_TRUE(controller->IsActive());
+  CaptureModeSessionTestApi session_test_api(
+      controller->capture_mode_session());
+  views::Widget* disclaimer = session_test_api.GetDisclaimerWidget();
+  ASSERT_TRUE(disclaimer);
+  auto* paragraph_three = views::AsViewClass<views::StyledLabel>(
+      disclaimer->GetContentsView()->GetViewByID(
+          kDisclaimerViewParagraphThreeId));
+  ASSERT_TRUE(paragraph_three);
+
+  paragraph_three->ClickFirstLinkForTesting();
+
+  EXPECT_FALSE(controller->IsActive());
+  EXPECT_EQ(GetScannerDisclaimerType(ScannerEntryPoint::kSmartActionsButton),
+            ScannerDisclaimerType::kFull);
+  EXPECT_EQ(GetScannerDisclaimerType(ScannerEntryPoint::kSunfishSession),
+            ScannerDisclaimerType::kFull);
+  EXPECT_TRUE(
+      Shell::Get()->session_controller()->GetActivePrefService()->GetBoolean(
+          prefs::kScannerEnabled));
 }
 
 TEST_F(ScannerTest, DisclaimerAcceptRecordsHistogramOnce) {
   base::HistogramTester histogram_tester;
-  Shell::Get()->session_controller()->GetActivePrefService()->SetBoolean(
-      kSunfishConsentDisclaimerAccepted, false);
+  UnackAllScannerDisclaimers();
 
   auto* controller = CaptureModeController::Get();
   controller->StartSunfishSession();
@@ -4697,8 +5165,7 @@ TEST_F(ScannerTest, DisclaimerAcceptRecordsHistogramOnce) {
 
 TEST_F(ScannerTest, DisclaimerDeclineRecordsHistogramOnce) {
   base::HistogramTester histogram_tester;
-  Shell::Get()->session_controller()->GetActivePrefService()->SetBoolean(
-      kSunfishConsentDisclaimerAccepted, false);
+  UnackAllScannerDisclaimers();
 
   auto* controller = CaptureModeController::Get();
   controller->StartSunfishSession();
@@ -4720,8 +5187,7 @@ TEST_F(ScannerTest, DisclaimerDeclineRecordsHistogramOnce) {
 
 TEST_F(ScannerTest,
        DisclaimerAcceptHidesDisclaimerSetPrefsAndContinuesSession) {
-  Shell::Get()->session_controller()->GetActivePrefService()->SetBoolean(
-      kSunfishConsentDisclaimerAccepted, false);
+  UnackAllScannerDisclaimers();
 
   auto* controller = CaptureModeController::Get();
   controller->StartSunfishSession();
@@ -4737,15 +5203,16 @@ TEST_F(ScannerTest,
   LeftClickOn(accept_button);
 
   EXPECT_EQ(session_test_api.GetDisclaimerWidget(), nullptr);
-  EXPECT_TRUE(
-      Shell::Get()->session_controller()->GetActivePrefService()->GetBoolean(
-          kSunfishConsentDisclaimerAccepted));
+  EXPECT_EQ(GetScannerDisclaimerType(ScannerEntryPoint::kSmartActionsButton),
+            ScannerDisclaimerType::kNone);
+  EXPECT_EQ(GetScannerDisclaimerType(ScannerEntryPoint::kSunfishSession),
+            ScannerDisclaimerType::kNone);
   EXPECT_TRUE(controller->IsActive());
 }
 
-TEST_F(ScannerTest, DisclaimerDeclineHidesDisclaimerSetPrefsAndEndsSession) {
-  Shell::Get()->session_controller()->GetActivePrefService()->SetBoolean(
-      kSunfishConsentDisclaimerAccepted, false);
+TEST_F(ScannerTest,
+       DisclaimerDeclineInSunfishSessionHidesDisclaimerSetPrefsAndEndsSession) {
+  UnackAllScannerDisclaimers();
 
   auto* controller = CaptureModeController::Get();
   controller->StartSunfishSession();
@@ -4760,9 +5227,13 @@ TEST_F(ScannerTest, DisclaimerDeclineHidesDisclaimerSetPrefsAndEndsSession) {
       kDisclaimerViewDeclineButtonId);
   LeftClickOn(decline_button);
 
+  EXPECT_EQ(GetScannerDisclaimerType(ScannerEntryPoint::kSmartActionsButton),
+            ScannerDisclaimerType::kFull);
+  EXPECT_EQ(GetScannerDisclaimerType(ScannerEntryPoint::kSunfishSession),
+            ScannerDisclaimerType::kFull);
   EXPECT_FALSE(
       Shell::Get()->session_controller()->GetActivePrefService()->GetBoolean(
-          kSunfishConsentDisclaimerAccepted));
+          prefs::kScannerEnabled));
   EXPECT_FALSE(controller->capture_mode_session());
   EXPECT_FALSE(controller->IsActive());
 }
@@ -4772,8 +5243,7 @@ TEST_F(
     DisclaimerDeclineHidesDisclaimerSetPrefsAndDoesNotEndIfSunfishFlagEnabled) {
   base::test::ScopedFeatureList scoped_feature_list;
   scoped_feature_list.InitAndEnableFeature(features::kSunfishFeature);
-  Shell::Get()->session_controller()->GetActivePrefService()->SetBoolean(
-      kSunfishConsentDisclaimerAccepted, false);
+  UnackAllScannerDisclaimers();
 
   auto* controller = CaptureModeController::Get();
   controller->StartSunfishSession();
@@ -4789,10 +5259,58 @@ TEST_F(
   LeftClickOn(decline_button);
 
   EXPECT_EQ(session_test_api.GetDisclaimerWidget(), nullptr);
+  EXPECT_EQ(GetScannerDisclaimerType(ScannerEntryPoint::kSmartActionsButton),
+            ScannerDisclaimerType::kFull);
+  EXPECT_EQ(GetScannerDisclaimerType(ScannerEntryPoint::kSunfishSession),
+            ScannerDisclaimerType::kFull);
   EXPECT_FALSE(
       Shell::Get()->session_controller()->GetActivePrefService()->GetBoolean(
-          kSunfishConsentDisclaimerAccepted));
+          prefs::kScannerEnabled));
   EXPECT_TRUE(controller->IsActive());
+}
+
+TEST_F(ScannerTest, KeyboardNavigationDisclaimerAcceptedFromSunfishMode) {
+  UnackAllScannerDisclaimers();
+  auto* controller = CaptureModeController::Get();
+  controller->StartSunfishSession();
+
+  CaptureModeSessionTestApi session_test_api(
+      controller->capture_mode_session());
+  views::Widget* disclaimer = session_test_api.GetDisclaimerWidget();
+  ASSERT_TRUE(disclaimer);
+
+  // Press enter to accept the disclaimer.
+  SendKey(ui::VKEY_RETURN, GetEventGenerator());
+
+  EXPECT_EQ(session_test_api.GetDisclaimerWidget(), nullptr);
+  EXPECT_EQ(GetScannerDisclaimerType(ScannerEntryPoint::kSmartActionsButton),
+            ScannerDisclaimerType::kNone);
+  EXPECT_EQ(GetScannerDisclaimerType(ScannerEntryPoint::kSunfishSession),
+            ScannerDisclaimerType::kNone);
+}
+
+TEST_F(ScannerTest, KeyboardNavigationDisclaimerDeclinedFromSunfishMode) {
+  base::test::ScopedFeatureList scoped_feature_list;
+  scoped_feature_list.InitAndEnableFeature(features::kSunfishFeature);
+  UnackAllScannerDisclaimers();
+  auto* controller = CaptureModeController::Get();
+  controller->StartSunfishSession();
+
+  CaptureModeSessionTestApi session_test_api(
+      controller->capture_mode_session());
+  views::Widget* disclaimer = session_test_api.GetDisclaimerWidget();
+  ASSERT_TRUE(disclaimer);
+
+  // Press shift tab then enter to select the decline button in the disclaimer.
+  ui::test::EventGenerator* event_generator = GetEventGenerator();
+  SendKey(ui::VKEY_TAB, event_generator, ui::EF_SHIFT_DOWN);
+  SendKey(ui::VKEY_RETURN, event_generator);
+
+  EXPECT_EQ(session_test_api.GetDisclaimerWidget(), nullptr);
+  EXPECT_EQ(GetScannerDisclaimerType(ScannerEntryPoint::kSmartActionsButton),
+            ScannerDisclaimerType::kFull);
+  EXPECT_EQ(GetScannerDisclaimerType(ScannerEntryPoint::kSunfishSession),
+            ScannerDisclaimerType::kFull);
 }
 
 }  // namespace

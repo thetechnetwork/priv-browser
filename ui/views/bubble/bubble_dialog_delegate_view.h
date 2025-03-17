@@ -16,6 +16,7 @@
 #include "base/memory/raw_ptr.h"
 #include "base/memory/raw_span.h"
 #include "base/memory/weak_ptr.h"
+#include "base/types/pass_key.h"
 #include "build/build_config.h"
 #include "ui/accessibility/ax_enums.mojom-forward.h"
 #include "ui/base/class_property.h"
@@ -402,7 +403,6 @@ class VIEWS_EXPORT BubbleDialogDelegate : public DialogDelegate {
   class AnchorViewObserver;
   class AnchorWidgetObserver;
   class BubbleWidgetObserver;
-  class ThemeObserver;
 
   FRIEND_TEST_ALL_PREFIXES(BubbleDialogDelegateViewTest,
                            VisibleWidgetShowsInkDropOnAttaching);
@@ -417,7 +417,6 @@ class VIEWS_EXPORT BubbleDialogDelegate : public DialogDelegate {
   friend class AnchorWidgetObserver;
   friend class BubbleWidgetObserver;
   friend class TestBubbleUmaLogger;
-  friend class ThemeObserver;
 
   friend class BubbleBorderDelegate;
   friend class BubbleWindowTargeter;
@@ -435,9 +434,7 @@ class VIEWS_EXPORT BubbleDialogDelegate : public DialogDelegate {
   void OnBubbleWidgetPaintAsActiveChanged();
 
   void OnDeactivate();
-
-  // Update the bubble color from the NativeTheme unless it was explicitly set.
-  void UpdateColorsFromTheme();
+  void UpdateFrameColors();
 
   // Notify this bubble that it is now the primary anchored bubble. When a new
   // bubble becomes the primary anchor, the previous primary silently loses its
@@ -460,7 +457,6 @@ class VIEWS_EXPORT BubbleDialogDelegate : public DialogDelegate {
   std::unique_ptr<AnchorViewObserver> anchor_view_observer_;
   std::unique_ptr<AnchorWidgetObserver> anchor_widget_observer_;
   std::unique_ptr<BubbleWidgetObserver> bubble_widget_observer_;
-  std::unique_ptr<ThemeObserver> theme_observer_;
   bool adjust_if_offscreen_ = true;
   bool focus_traversable_from_anchor_view_ = true;
   ViewTracker highlighted_button_tracker_;
@@ -503,7 +499,7 @@ class VIEWS_EXPORT BubbleDialogDelegate : public DialogDelegate {
   bool paint_client_to_layer_ = false;
 
   // If true, contents view will be forced to create a solid color background in
-  // UpdateColorsFromTheme().
+  // `UpdateFrameColors()`.
   bool force_create_contents_background_ = false;
 
 #if BUILDFLAG(IS_MAC)
@@ -538,6 +534,8 @@ class VIEWS_EXPORT BubbleDialogDelegateView : public View,
   METADATA_HEADER(BubbleDialogDelegateView, View)
 
  public:
+  using PassKey = base::PassKey<BubbleDialogDelegateView>;
+
   template <typename T>
   static bool IsBubbleDialogDelegateView(const BubbleDialogDelegateView* view) {
     return ui::metadata::IsClass<T, BubbleDialogDelegateView>(view);
@@ -561,18 +559,30 @@ class VIEWS_EXPORT BubbleDialogDelegateView : public View,
       Widget::InitParams::Ownership ownership =
           Widget::InitParams::NATIVE_WIDGET_OWNS_WIDGET);
 
-  BubbleDialogDelegateView();
   // |shadow| usually doesn't need to be explicitly set, just uses the default
   // argument. Unless on Mac when the bubble needs to use Views base shadow,
   // override it with suitable bubble border type.
-  BubbleDialogDelegateView(
-      View* anchor_view,
-      BubbleBorder::Arrow arrow,
+  explicit BubbleDialogDelegateView(
+      View* anchor_view = nullptr,
+      BubbleBorder::Arrow arrow = views::BubbleBorder::TOP_LEFT,
       BubbleBorder::Shadow shadow = BubbleBorder::DIALOG_SHADOW,
       bool autosize = false);
+
+  // For use with std::make_unique<>(). Callers still must be in the friend list
+  // below, just as with the private constructor.
+  explicit BubbleDialogDelegateView(
+      PassKey,
+      View* anchor_view = nullptr,
+      BubbleBorder::Arrow arrow = views::BubbleBorder::TOP_LEFT,
+      BubbleBorder::Shadow shadow = BubbleBorder::DIALOG_SHADOW,
+      bool autosize = false)
+      : BubbleDialogDelegateView(anchor_view, arrow, shadow, autosize) {}
+
   BubbleDialogDelegateView(const BubbleDialogDelegateView&) = delete;
   BubbleDialogDelegateView& operator=(const BubbleDialogDelegateView&) = delete;
   ~BubbleDialogDelegateView() override;
+
+  static PassKey CreatePassKey() { return PassKey(); }
 
   // BubbleDialogDelegate:
   View* GetContentsView() override;

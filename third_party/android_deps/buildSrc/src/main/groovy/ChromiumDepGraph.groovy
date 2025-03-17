@@ -6,16 +6,13 @@
 import groovy.transform.AutoClone
 import groovy.util.slurpersupport.GPathResult
 import org.gradle.api.Project
-import org.gradle.api.artifacts.Configuration
-import org.gradle.api.artifacts.ResolvedArtifact
-import org.gradle.api.artifacts.ResolvedDependency
-import org.gradle.api.artifacts.ResolvedModuleVersion
+import org.gradle.api.artifacts.*
 import org.gradle.api.artifacts.component.ComponentIdentifier
 import org.gradle.api.artifacts.repositories.ArtifactRepository
-import org.gradle.api.artifacts.result.DependencyResult
-import org.gradle.api.artifacts.result.ResolvedDependencyResult
-import org.gradle.api.logging.Logger
+import org.gradle.api.artifacts.result.*
 import java.util.concurrent.*
+import java.time.*
+import org.gradle.api.logging.Logger
 
 /**
  * Parses the project dependencies and generates a graph of {@link ChromiumDepGraph.DependencyDescription} objects to
@@ -32,10 +29,6 @@ class ChromiumDepGraph {
                     url: 'https://maven.google.com/androidx/multidex/multidex/2.0.0/multidex-2.0.0.aar'),
             com_google_android_datatransport_transport_api: new PropertyOverride(
                     description: 'Interfaces for data logging in gmscore SDKs.'),
-            com_google_android_datatransport_transport_backend_cct: new PropertyOverride(
-                    exclude: true),  // We're not using datatransport functionality.
-            com_google_android_datatransport_transport_runtime: new PropertyOverride(
-                    exclude: true),  // We're not using datatransport functionality.
             com_google_android_gms_play_services_cloud_messaging: new PropertyOverride(
                     description: 'Firebase Cloud Messaging library that interfaces with gmscore.'),
             com_google_android_gms_play_services_location: new PropertyOverride(
@@ -74,8 +67,6 @@ class ChromiumDepGraph {
                     description: 'Common classes for Firebase SDKs.'),
             com_google_firebase_firebase_components: new PropertyOverride(
                     description: 'Provides dependency management for Firebase SDKs.'),
-            com_google_firebase_firebase_datatransport: new PropertyOverride(
-                    exclude: true),  // We're not using datatransport functionality.
             com_google_firebase_firebase_encoders_json: new PropertyOverride(
                     description: 'JSON encoders used in Firebase SDKs.'),
             com_google_firebase_firebase_encoders: new PropertyOverride(
@@ -310,33 +301,48 @@ class ChromiumDepGraph {
         return makeModuleIdInner(componentId.group, componentId.module, componentId.version)
     }
 
+    static boolean anyContains(String value, Set<String>... sets) {
+        for (Set<String> curSet : sets) {
+            if (curSet.contains(value)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     void collectDependencies() {
         Set<ResolvedDependency> deps = [] as Set
         Map<String, SortedSet<String>> resolvedDeps = [:]
+        ExecutorService downloadExecutor = Executors.newCachedThreadPool()
+        List<Future> futures = []
         String[] configNames = [
                 'compile',
                 'compileLatest',
                 'buildCompile',
+                'buildCompileLatest',
                 'testCompile',
+                'testCompileLatest',
                 'androidTestCompile',
                 'androidTestCompileLatest',
                 'buildCompileNoDeps'
         ]
-        for (Project project : projects) {
-            for (String configName : configNames) {
-                Configuration configuration = project.configurations.getByName(configName)
-                deps += configuration.resolvedConfiguration.firstLevelModuleDependencies
-                if (!resolvedDeps.containsKey(configName)) {
-                    resolvedDeps[configName] = [] as SortedSet
-                }
-                configuration.incoming.resolutionResult.allDependencies { DependencyResult it ->
-                    if (it instanceof ResolvedDependencyResult) {
-                        resolvedDeps[configName] += makeModuleId(it)
-                    } else {
-                        // We don't currently have any unresolved deps, though it is a potential return type of
-                        // ResolutionResult#allDependencies, see:
-                        // https://docs.gradle.org/current/javadoc/org/gradle/api/artifacts/result/ResolutionResult.html#getAllDependencies()
-                        logger.warn("Unresolved ${it.from} -> ${it.requested}")
+        timeIt('** Resolving all deps') {
+            for (Project project : projects) {
+                for (String configName : configNames) {
+                    Configuration configuration = project.configurations.getByName(configName)
+                    deps += configuration.resolvedConfiguration.firstLevelModuleDependencies
+                    if (!resolvedDeps.containsKey(configName)) {
+                        resolvedDeps[configName] = [] as SortedSet
+                    }
+                    configuration.incoming.resolutionResult.allDependencies { DependencyResult dr ->
+                        if (dr instanceof ResolvedDependencyResult) {
+                            resolvedDeps[configName] += makeModuleId(dr)
+                        } else {
+                            // We don't currently have any unresolved deps, though it is a potential return type of
+                            // ResolutionResult#allDependencies, see:
+                            // https://docs.gradle.org/current/javadoc/org/gradle/api/artifacts/result/ResolutionResult.html#getAllDependencies()
+                            logger.warn("Unresolved ${dr.from} -> ${dr.requested}")
+                        }
                     }
                 }
             }
@@ -350,49 +356,66 @@ class ChromiumDepGraph {
         }
         ExecutorService taskExecutor = Executors.newCachedThreadPool()
         List<Future> taskList = []
-        buildDepDescriptionsAsync(resolvedVersions, taskExecutor, taskList)
-        taskExecutor.shutdown()
-        taskList.each { task -> task.get() }
-
-        topLevelIds.each { id -> dependencies.get(id).visible = true }
-
-        resolvedDeps['testCompile'].each { id ->
-            DependencyDescription dep = dependencies.get(id)
-            assert dep: "No dependency collected for artifact ${id}"
-            dep.testOnly = true
+        timeIt("** Parse all pom files") {
+            buildDepDescriptionsAsync(resolvedVersions, taskExecutor, taskList)
+            taskExecutor.shutdown()
+            taskList.each { task -> task.get() }
         }
 
-        (resolvedDeps['androidTestCompile'] + resolvedDeps['androidTestCompileLatest']).each { id ->
-            DependencyDescription dep = dependencies.get(id)
-            assert dep: "No dependency collected for artifact ${id}"
-            dep.supportsAndroid = true
-            dep.testOnly = true
-        }
-
-        (resolvedDeps['buildCompile'] + resolvedDeps['buildCompileNoDeps']).each { id ->
-            DependencyDescription dep = dependencies.get(id)
-            assert dep: "No dependency collected for artifact ${id}"
-            dep.usedInBuild = true
-            dep.testOnly = false
-        }
-
-        (resolvedDeps['compile'] + resolvedDeps['compileLatest']).each { id ->
-            DependencyDescription dep = dependencies.get(id)
-            assert dep: "No dependency collected for artifact ${id}"
-            dep.supportsAndroid = true
-            dep.testOnly = false
-            dep.isShipped = true
-        }
-
-        // We only add testOnly after constructing the dependencies map, so now go through and see
-        // if we need to add testOnly to anything which depends on testOnly. In theory, this may
-        // need some recursion or looping to deal with multiple levels of unmarked targets, but I
-        // think in practice the only things getting annotated here will be a single level of
-        // synthetic groups which depend on testOnly targets.
-        dependencies.each { _, dep ->
-            dep.testOnly |= dep.children.any { id ->
-                dependencies.get(id).testOnly
+        // Collect these using prefix match to allow variants "Latest", "NoDeps", "Autorolled".
+        Set<String> compileIds = [] as Set
+        Set<String> testIds = [] as Set
+        Set<String> androidTestIds = [] as Set
+        Set<String> buildIds = [] as Set
+        Set<String> autorolledIds = [] as Set
+        resolvedDeps.each { key, values ->
+            if (key.startsWith('compile')) {
+                compileIds.addAll(values);
+            } else if (key.startsWith('testCompile')) {
+                testIds.addAll(values);
+            } else if (key.startsWith('androidTest')) {
+                androidTestIds.addAll(values);
+            } else if (key.startsWith('build')) {
+                buildIds.addAll(values);
+            } else {
+                assert false : 'Unknown config ' + key
             }
+            if (key.endsWith("Latest")) {
+                autorolledIds.addAll(values)
+            }
+        }
+
+        dependencies.each { id, dep ->
+            dep.visible = topLevelIds.contains(id)
+            dep.isRobolectric = !anyContains(id, compileIds, androidTestIds, buildIds)
+            dep.testOnly = !anyContains(id, compileIds, buildIds)
+            dep.supportsAndroid = anyContains(id, compileIds, androidTestIds)
+            dep.requiresAndroid = dep.supportsAndroid && !anyContains(id, buildIds)
+            dep.usedInBuild = anyContains(id, buildIds)
+            dep.isShipped = anyContains(id, compileIds)
+            dep.isAutorolled = anyContains(id, autorolledIds)
+        }
+
+        // Find all reachable deps and mark unreachable ones as excluded.
+        // Required to prune deps of excluded deps.
+        Set<String> seen = new HashSet<>(topLevelIds);
+        seen.addAll(BuildConfigGenerator.EXISTING_LIBS.keySet());
+        ArrayList<String> workList = new ArrayList<>(topLevelIds);
+        while (!workList.isEmpty()) {
+          String id = workList.remove(workList.size() - 1);
+          DependencyDescription dep = dependencies.get(id)
+          dep.children.each { childId ->
+            DependencyDescription childDep = dependencies.get(childId)
+            if (!childDep.exclude && seen.add(childId)) {
+              workList.add(childId);
+            }
+          }
+        }
+
+        dependencies.each { id, dep ->
+          if (!seen.contains(id)) {
+            dep.exclude = true
+          }
         }
 
         PROPERTY_OVERRIDES.each { id, overrides ->
@@ -413,9 +436,27 @@ class ChromiumDepGraph {
                 }
                 dep.versionFilter = overrides.versionFilter
             } else {
+                // TODO: only output this warning if we are in the main project,
+                // since it is expected that subprojects do not have all the
+                // deps.
                 logger.warn('PROPERTY_OVERRIDES has stale dep: ' + id)
             }
         }
+    }
+
+    <T> T timeIt(boolean enable, String actionName, Closure<T> closure) {
+        if (enable) {
+            return timeIt(actionName, closure)
+        }
+        return closure()
+    }
+
+    <T> T timeIt(String actionName, Closure<T> closure) {
+        def start = Instant.now()
+        def ret = closure()
+        def elapsed = Duration.between(start, Instant.now()).toMillis()
+        logger.warn "${actionName} took ${elapsed} ms"
+        return ret
     }
 
     private static String sanitize(String input) {
@@ -434,6 +475,7 @@ class ChromiumDepGraph {
     }
 
     private static boolean areAllModuleArtifactsSameFile(Set<ResolvedArtifact> artifacts) {
+        if (artifacts.size() == 1) return true
         String expectedPath = artifacts[0].file.absolutePath
         for (ResolvedArtifact artifact : artifacts) {
             if (expectedPath != artifact.file.absolutePath) {
@@ -506,31 +548,31 @@ class ChromiumDepGraph {
                 children: Collections.unmodifiableList(new ArrayList<>(childModules)),
                 directoryName: id.toLowerCase(),
                 displayName: dependency.module.id.name,
-                exclude: false,
+                exclude: childModules.isEmpty(),
                 cipdSuffix: DEFAULT_CIPD_SUFFIX,
         ))
     }
 
     private DependencyDescription buildDepDescription(
             String id, ResolvedDependency dependency, ResolvedArtifact artifact, List<String> childModules) {
-        String pomUrl, repoUrl
+        String pomUrl, repoUrl, fileUrl, description, displayName
         GPathResult pomContent
+        List<LicenseSpec> licenses = []
         (repoUrl, pomUrl, pomContent) = computePomFromArtifact(artifact)
 
-        List<LicenseSpec> licenses = []
         if (!skipLicenses) {
             licenses = resolveLicenseInformation(pomContent)
         }
 
         // Build |fileUrl| by swapping '.pom' file extension with artifact file extension.
-        String fileUrl = pomUrl[0..-4] + artifact.extension
+        fileUrl = pomUrl[0..-4] + artifact.extension
         // Check that the URL is correct explicitly here. Otherwise, we won't
         // find out until 3pp bot runs.
         checkDownloadable(fileUrl)
 
         // Get rid of irrelevant indent that might be present in the XML file.
-        String description = pomContent.description?.text()?.trim()?.replaceAll(/\s+/, ' ')
-        String displayName = pomContent.name?.text()
+        description = pomContent.description?.text()?.trim()?.replaceAll(/\s+/, ' ')
+        displayName = pomContent.name?.text()
         displayName = displayName ?: dependency.module.id.name
 
         return customizeDep(new DependencyDescription(
@@ -639,10 +681,6 @@ class ChromiumDepGraph {
                 url = overrides.url ?: url
                 cipdSuffix = overrides.cipdSuffix ?: cipdSuffix
                 cpePrefix = overrides.cpePrefix ?: cpePrefix
-                // Boolean properties require explicit null checks instead of only when truish.
-                if (overrides.generateTarget != null) {
-                    generateTarget = overrides.generateTarget
-                }
                 if (overrides.exclude != null) {
                     exclude = overrides.exclude
                 }
@@ -798,8 +836,11 @@ class ChromiumDepGraph {
         // lowercase since 3pp uses the directory name as part of the CIPD names. However CIPD does not allow uppercase
         // in names.
         String directoryName
-        boolean supportsAndroid, visible, exclude, testOnly, isShipped, usedInBuild
-        boolean generateTarget = true
+        boolean visible, exclude, testOnly, isShipped, usedInBuild
+        boolean supportsAndroid
+        boolean requiresAndroid
+        boolean isRobolectric
+        boolean isAutorolled = false
         boolean licenseAndroidCompatible
         ComponentIdentifier componentId
         List<String> children
@@ -812,7 +853,6 @@ class ChromiumDepGraph {
         // When set, //third_party/android_deps/fetch_common.py will only versions that contain this string to be valid.
         // This variable is not used in groovy code.
         String versionFilter
-
     }
 
     static class LicenseSpec {
@@ -833,8 +873,6 @@ class ChromiumDepGraph {
         Boolean supportsAndroid
         // Set to true if this dependency is not needed.
         Boolean exclude
-        // Set to false to skip creation of BUILD.gn target.
-        Boolean generateTarget
         Boolean overrideLatest
         String versionFilter
 

@@ -5,13 +5,7 @@
 
 [TOC]
 
-Changes that only modify files in //infra/config, which do not change any build
-outputs, only require the chromium_presubmit builder to pass before landing.
-
-Each builder name links to that builder on Milo. The "matching builders" links
-point to the file used to determine which configurations a builder should copy
-when running. These links might 404 or error; they are hard-coded right now,
-using common assumptions about how builders are configured.
+Each builder name links to that builder on Milo.
 
 ## Required builders
 These builders must pass before a CL may land that affects files outside of
@@ -29,7 +23,7 @@ These builders must pass before a CL may land that affects files outside of
 
 * [android-cronet-arm-rel](https://ci.chromium.org/p/chromium/builders/try/android-cronet-arm-rel) ([definition](https://cs.chromium.org/search?q=+file:/try/.*\.star$+""android-cronet-arm-rel""))
 
-* [android-desktop-x64-compile-rel](https://ci.chromium.org/p/chromium/builders/try/android-desktop-x64-compile-rel) ([definition](https://cs.chromium.org/search?q=+file:/try/.*\.star$+""android-desktop-x64-compile-rel""))
+* [android-desktop-x64-rel](https://ci.chromium.org/p/chromium/builders/try/android-desktop-x64-rel) ([definition](https://cs.chromium.org/search?q=+file:/try/.*\.star$+""android-desktop-x64-rel""))
 
 * [android-x64-rel](https://ci.chromium.org/p/chromium/builders/try/android-x64-rel) ([definition](https://cs.chromium.org/search?q=+file:/try/.*\.star$+""android-x64-rel""))
 
@@ -44,6 +38,8 @@ These builders must pass before a CL may land that affects files outside of
 * [chromeos-arm64-generic-rel](https://ci.chromium.org/p/chromium/builders/try/chromeos-arm64-generic-rel) ([definition](https://cs.chromium.org/search?q=+file:/try/.*\.star$+""chromeos-arm64-generic-rel""))
 
 * [chromium_presubmit](https://ci.chromium.org/p/chromium/builders/try/chromium_presubmit) ([definition](https://cs.chromium.org/search?q=+file:/try/.*\.star$+""chromium_presubmit""))
+
+* [compile-size](https://ci.chromium.org/p/chromium/builders/try/compile-size) ([definition](https://cs.chromium.org/search?q=+file:/try/.*\.star$+""compile-size""))
 
 * [fuchsia-binary-size](https://ci.chromium.org/p/chromium/builders/try/fuchsia-binary-size) ([definition](https://cs.chromium.org/search?q=+file:/try/.*\.star$+""fuchsia-binary-size""))
 
@@ -135,6 +131,7 @@ builder.
   Location filters:
   * [`//build/android/.+`](https://cs.chromium.org/chromium/src/build/android/)
   * [`//build/config/android/.+`](https://cs.chromium.org/chromium/src/build/config/android/)
+  * [`//chrome/browser/safe_browsing/BUILD.gn`](https://cs.chromium.org/search?q=+file:chrome/browser/safe_browsing/BUILD.gn)
   * [`//chromecast/.+`](https://cs.chromium.org/chromium/src/chromecast/)
   * [`//components/cast/.+`](https://cs.chromium.org/chromium/src/components/cast/)
   * [`//components/cast_receiver/.+`](https://cs.chromium.org/chromium/src/components/cast_receiver/)
@@ -147,6 +144,7 @@ builder.
   Location filters:
   * [`//build/android/.+`](https://cs.chromium.org/chromium/src/build/android/)
   * [`//build/config/android/.+`](https://cs.chromium.org/chromium/src/build/config/android/)
+  * [`//chrome/browser/safe_browsing/BUILD.gn`](https://cs.chromium.org/search?q=+file:chrome/browser/safe_browsing/BUILD.gn)
   * [`//chromecast/.+`](https://cs.chromium.org/chromium/src/chromecast/)
   * [`//components/cast/.+`](https://cs.chromium.org/chromium/src/components/cast/)
   * [`//components/cast_receiver/.+`](https://cs.chromium.org/chromium/src/components/cast_receiver/)
@@ -159,6 +157,7 @@ builder.
   Location filters:
   * [`//build/android/.+`](https://cs.chromium.org/chromium/src/build/android/)
   * [`//build/config/android/.+`](https://cs.chromium.org/chromium/src/build/config/android/)
+  * [`//chrome/browser/safe_browsing/BUILD.gn`](https://cs.chromium.org/search?q=+file:chrome/browser/safe_browsing/BUILD.gn)
   * [`//chromecast/.+`](https://cs.chromium.org/chromium/src/chromecast/)
   * [`//components/cast/.+`](https://cs.chromium.org/chromium/src/components/cast/)
   * [`//components/cast_receiver/.+`](https://cs.chromium.org/chromium/src/components/cast_receiver/)
@@ -171,6 +170,7 @@ builder.
   Location filters:
   * [`//build/android/.+`](https://cs.chromium.org/chromium/src/build/android/)
   * [`//build/config/android/.+`](https://cs.chromium.org/chromium/src/build/config/android/)
+  * [`//chrome/browser/safe_browsing/BUILD.gn`](https://cs.chromium.org/search?q=+file:chrome/browser/safe_browsing/BUILD.gn)
   * [`//chromecast/.+`](https://cs.chromium.org/chromium/src/chromecast/)
   * [`//components/cast/.+`](https://cs.chromium.org/chromium/src/components/cast/)
   * [`//components/cast_receiver/.+`](https://cs.chromium.org/chromium/src/components/cast_receiver/)
@@ -818,17 +818,11 @@ by CQ. These are often used to test new configurations before they are added
 as required builders.
 
 ### chromium
-* [android-desktop-x64-rel](https://ci.chromium.org/p/chromium/builders/try/android-desktop-x64-rel) ([definition](https://cs.chromium.org/search?q=+file:/try/.*\.star$+""android-desktop-x64-rel""))
-  * Experiment percentage: 100.0
-
 * [chromeos-js-coverage-rel](https://ci.chromium.org/p/chromium/builders/try/chromeos-js-coverage-rel) ([definition](https://cs.chromium.org/search?q=+file:/try/.*\.star$+""chromeos-js-coverage-rel""))
   * Experiment percentage: 50.0
 
   Location filters:
   * [`//.*\.(js|ts)`](https://cs.chromium.org/search?q=+file:.*\.(js|ts))
-
-* [compile-size](https://ci.chromium.org/p/chromium/builders/try/compile-size) ([definition](https://cs.chromium.org/search?q=+file:/try/.*\.star$+""compile-size""))
-  * Experiment percentage: 100.0
 
 * [dawn-android-arm64-deps-rel](https://ci.chromium.org/p/chromium/builders/try/dawn-android-arm64-deps-rel) ([definition](https://cs.chromium.org/search?q=+file:/try/.*\.star$+""dawn-android-arm64-deps-rel""))
   * Experiment percentage: 100.0

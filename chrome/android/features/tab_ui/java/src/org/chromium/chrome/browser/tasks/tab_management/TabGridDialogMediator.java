@@ -615,7 +615,11 @@ public class TabGridDialogMediator
         mModel.set(TabGridDialogProperties.BINDING_TOKEN, null);
     }
 
-    void onReset(@Nullable List<Tab> tabs) {
+    /**
+     * Loads the provided list of tabs into the dialog and returns whether the dialog started to
+     * show.
+     */
+    boolean onReset(@Nullable List<Tab> tabs) {
         TabGroupModelFilter filter = mCurrentTabGroupModelFilterSupplier.get();
         if (tabs == null) {
             mCurrentTabId = Tab.INVALID_TAB_ID;
@@ -644,9 +648,11 @@ public class TabGridDialogMediator
             mModel.set(TabGridDialogProperties.IS_DIALOG_VISIBLE, true);
 
             requestShowBottomSheet();
+            return true;
         } else if (isVisible()) {
             mModel.set(TabGridDialogProperties.IS_DIALOG_VISIBLE, false);
         }
+        return false;
     }
 
     /** Destroy any members that needs clean up. */
@@ -1358,8 +1364,10 @@ public class TabGridDialogMediator
         for (PersistentMessage message : messages) {
             collaborationEventCounts.merge(message.collaborationEvent, 1, Integer::sum);
         }
-        int tabsAdded = collaborationEventCounts.getOrDefault(CollaborationEvent.TAB_ADDED, 0);
-        int tabsChanged = collaborationEventCounts.getOrDefault(CollaborationEvent.TAB_UPDATED, 0);
+        // Added and updated will both be presented as new changes.
+        int tabsAdded =
+                collaborationEventCounts.getOrDefault(CollaborationEvent.TAB_ADDED, 0)
+                        + collaborationEventCounts.getOrDefault(CollaborationEvent.TAB_UPDATED, 0);
 
         // Query for tombstoned entries from backend and look for the tab removals.
         List<PersistentMessage> tombstonedMessages =
@@ -1372,7 +1380,7 @@ public class TabGridDialogMediator
             tabsClosed++;
         }
 
-        if (tabsAdded == 0 && tabsChanged == 0 && tabsClosed == 0) {
+        if (tabsAdded == 0 && tabsClosed == 0) {
             removeCollaborationActivityMessageCard();
             return;
         }
@@ -1390,8 +1398,7 @@ public class TabGridDialogMediator
                                 dismissAllDirtyTabMessagesForCurrentGroup();
                             });
         }
-        mCollaborationActivityPropertyModel.updateDescriptionText(
-                mActivity, tabsAdded, tabsChanged, tabsClosed);
+        mCollaborationActivityPropertyModel.updateDescriptionText(mActivity, tabsAdded, tabsClosed);
 
         if (!mDialogController.messageCardExists(MessageType.COLLABORATION_ACTIVITY)) {
             mDialogController.addMessageCardItem(

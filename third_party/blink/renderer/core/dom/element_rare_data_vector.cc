@@ -97,6 +97,12 @@ PseudoElement* ElementRareDataVector::GetPseudoElement(
     return nullptr;
   return data->GetPseudoElement(pseudo_id, document_transition_tag);
 }
+bool ElementRareDataVector::HasViewTransitionGroupPseudoElement() const {
+  PseudoElementData* data =
+      static_cast<PseudoElementData*>(GetField(FieldId::kPseudoElementData));
+  return data && data->HasViewTransitionGroupPseudoElement();
+}
+
 PseudoElementData::PseudoElementVector
 ElementRareDataVector::GetPseudoElements() const {
   PseudoElementData* data =
@@ -481,7 +487,7 @@ void ElementRareDataVector::DecrementImplicitlyAnchoredElementCount() {
 bool ElementRareDataVector::HasImplicitlyAnchoredElement() const {
   wtf_size_t* anchored_element_count =
       GetWrappedField<wtf_size_t>(FieldId::kImplicitlyAnchoredElementCount);
-  return anchored_element_count ? *anchored_element_count : false;
+  return anchored_element_count && *anchored_element_count;
 }
 
 void ElementRareDataVector::Trace(blink::Visitor* visitor) const {

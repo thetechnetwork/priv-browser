@@ -687,7 +687,7 @@ OverflowMenuFooter* CreateOverflowMenuManagedFooter(
                                  handler:^{
                                    [weakSelf beginCustomization];
                                  }];
-  if (IsLensOverlayAvailable()) {
+  if (IsLensOverlayAvailable(_profilePrefs)) {
     self.lensOverlayAction = [self openLensOverlayAction];
   }
 
@@ -1417,11 +1417,12 @@ OverflowMenuFooter* CreateOverflowMenuManagedFooter(
   self.openIncognitoTabAction.enterpriseDisabled =
       IsIncognitoModeDisabled(self.profilePrefs);
 
-  if (IsLensOverlayAvailable()) {
+  if (IsLensOverlayAvailable(_profilePrefs)) {
     BOOL isPortrait = !IsCompactHeight(self.baseViewController.traitCollection);
     BOOL isSupported =
         search_engines::SupportsSearchImageWithLens(self.templateURLService);
-    BOOL portraitOverride = IsLensOverlayLandscapeOrientationEnabled();
+    BOOL portraitOverride =
+        IsLensOverlayLandscapeOrientationEnabled(_profilePrefs);
     self.lensOverlayAction.enabled =
         isSupported && (isPortrait || portraitOverride);
   }
@@ -1978,7 +1979,7 @@ OverflowMenuFooter* CreateOverflowMenuManagedFooter(
   actions.push_back(overflow_menu::ActionType::FindInPage);
   actions.push_back(overflow_menu::ActionType::TextZoom);
 
-  if (IsLensOverlayAvailable()) {
+  if (IsLensOverlayAvailable(_profilePrefs)) {
     actions.push_back(overflow_menu::ActionType::LensOverlay);
   }
 
@@ -2377,7 +2378,7 @@ OverflowMenuFooter* CreateOverflowMenuManagedFooter(
   _engagementTracker->NotifyEvent(
       feature_engagement::events::kPriceNotificationsUsed);
   [self dismissMenu];
-  [self.priceNotificationHandler showPriceNotifications];
+  [self.priceNotificationHandler showPriceNotificationsWithCurrentPage];
 }
 
 // Dismisses the menu and opens downloads.

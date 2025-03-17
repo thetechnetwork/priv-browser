@@ -81,6 +81,7 @@
 <translation id="131461803491198646">Thuisnetwerk zonder roaming</translation>
 <translation id="1327977588028644528">Gateway</translation>
 <translation id="1328223165223065150">Achtergrondkleur</translation>
+<translation id="1329478709358066995">Transcript:</translation>
 <translation id="1330426557709298164">Jpg</translation>
 <translation id="1337912285145772892">Aanpassen aan scangebied</translation>
 <translation id="1343442362630695901">zoutmeer</translation>
@@ -126,7 +127,17 @@
 <translation id="1515129336378114413">homepage van browser</translation>
 <translation id="1526389707933164996">Screensaveranimatie</translation>
 <translation id="152892567002884378">Volume omhoog</translation>
+<translation id="1531038290222364269">Tabbladen tonen</translation>
 <translation id="1539864135338521185">lapis lazuli</translation>
+<translation id="1548555207631326346">Kies een thema en selecteer de onderstreepte woorden om je AI-afbeeldingen te personaliseren.<ph name="LINE_BREAK" />
+<ph name="LINE_BREAK" />
+Selecteer Inspireer me voor meer unieke en gevarieerde opties voor AI-afbeeldingen.
+          <ph name="LINE_BREAK" />
+<ph name="LINE_BREAK" />
+Als je iets maakt met AI, wordt de prompt naar de AI-servers van Google gestuurd om afbeeldingen te genereren en het product te verbeteren, in overeenstemming met het <ph name="BEGIN_LINK_GOOGLE_PRIVACY_POLICY" />Privacybeleid van Google<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" />.
+          <ph name="LINE_BREAK" />
+<ph name="LINE_BREAK" />
+Generatieve AI is experimenteel, in vroege ontwikkeling en op dit moment beperkt beschikbaar.</translation>
 <translation id="1555130319947370107">Blauw</translation>
 <translation id="155865706765934889">Touchpad</translation>
 <translation id="1561927818299383735">kleur van achtergrondverlichting</translation>
@@ -252,7 +263,6 @@
 <translation id="2011174342667534258">SDK-versie:</translation>
 <translation id="2016697457005847575">Probeer de stappen voor probleemoplossing</translation>
 <translation id="202500043506723828">EID</translation>
-<translation id="2041627599411887437">Kies een thema en selecteer de onderstreepte woorden om je AI-afbeeldingen te personaliseren.</translation>
 <translation id="2045814230297767491">bestek</translation>
 <translation id="2047316797244836561">Maak verbinding met een netwerk en laad de pagina opnieuw om de screensaver te bekijken.</translation>
 <translation id="2056550196601855911">IPv4/IPv6</translation>
@@ -405,6 +415,7 @@
 <translation id="2787237339470862294">Deze taal wordt op dit moment niet ondersteund</translation>
 <translation id="2787435249130282949">toetsenbord helderder</translation>
 <translation id="2805756323405976993">Apps</translation>
+<translation id="2822702442014805146">Model voor het maken van overzichten en namen wordt gedownload</translation>
 <translation id="28232023175184696">Kan geen verbinding maken met internet. Klik om het opnieuw te proberen.</translation>
 <translation id="2855718259207180827">wol</translation>
 <translation id="2859243502336719778">Kritieke update</translation>
@@ -502,6 +513,7 @@
 <translation id="3373141842870501561">Achtergrond Aardestroom</translation>
 <translation id="33736539805963175"><ph name="LETTERS_COLOR" /> achtergrond met de letter <ph name="LETTERS_LETTER" /></translation>
 <translation id="3383623117265110236">Exclusief</translation>
+<translation id="3395147534045164351">Locatie uitlijnen aan- of uitzetten</translation>
 <translation id="3404249063913988450">Screensaver aanzetten</translation>
 <translation id="3413935475507503304">Klik op Volgende om door te gaan met de update.</translation>
 <translation id="3428551088151258685">buiten</translation>
@@ -651,6 +663,7 @@
 <translation id="4113067922640381334">Je hebt nu toegang tot nieuwe <ph name="BEGIN_LINK_WALLPAPER_SUBPAGE" />achtergronden<ph name="END_LINK_WALLPAPER_SUBPAGE" /></translation>
 <translation id="4117637339509843559">Donkere modus</translation>
 <translation id="4126551873361000548">10 seconden terug</translation>
+<translation id="4128271910628504223">Voer een prompt in, zoals 'teken een mistig bos'</translation>
 <translation id="4130035430755296270">Plaats de cursor voor meer lay-outopties.</translation>
 <translation id="4130750466177569591">Ik ga akkoord</translation>
 <translation id="4131410914670010031">Zwart/wit</translation>
@@ -824,6 +837,7 @@
 <translation id="4891842000192098784">Stress</translation>
 <translation id="4897058166682006107">Apparaat heeft nog <ph name="BATTERY_PERCENTAGE" />% batterijlading in het linkeroordopje.</translation>
 <translation id="4905998861748258752">Zet de functie aan om screensaveropties te selecteren</translation>
+<translation id="4910853326379896417">Download van model voor het maken van overzichten en namen afgerond</translation>
 <translation id="4910858703033903787">APN-typen</translation>
 <translation id="4917385247580444890">Sterk</translation>
 <translation id="4917889632206600977">Gestopt: geen papier meer</translation>
@@ -858,8 +872,10 @@
 <translation id="5050042263972837708">Groepsnaam</translation>
 <translation id="5051044138948155788">Dit is de enige pagina. Hierna kom je op het startscherm voor scannen.</translation>
 <translation id="5053233795640754917">Pauzeren</translation>
+<translation id="5056587122125565772">Afbeelding maken</translation>
 <translation id="5078711626843651677">Spraakmodellen worden tijdelijk op het apparaat opgeslagen totdat het labelen van sprekers is afgerond. Je kunt dit altijd uitzetten in Instellingen.</translation>
 <translation id="5078983345702708852">futuristisch</translation>
+<translation id="5085224064082122501">Kan model voor het maken van overzichten en namen niet downloaden. Probeer het nogmaals of start je Chromebook opnieuw op.</translation>
 <translation id="5087864757604726239">terug</translation>
 <translation id="5088172560898466307">Hostnaam van server</translation>
 <translation id="5089810972385038852">Staat</translation>
@@ -1129,14 +1145,12 @@
 <translation id="6325525973963619867">Mislukt</translation>
 <translation id="6327262166342360252">Deze achtergrond is gemaakt met AI met de volgende tekst: <ph name="PROMPT" />.</translation>
 <translation id="6331191339300272798">Automatisch donker thema</translation>
-<translation id="6335228876613776082">Model gedownload</translation>
 <translation id="6340526405444716530">Personalisatie</translation>
 <translation id="6348252528297699679">Je kunt de locatie uitzetten via Instellingen &gt; Privacy en beveiliging &gt; Privacyopties &gt; Locatietoegang. <ph name="LINK_BEGIN" />Meer informatie<ph name="LINK_END" /></translation>
 <translation id="6348738456043757611">Gebruikersnaam en wachtwoord</translation>
 <translation id="6352210854422428614">andere planeet</translation>
 <translation id="6359706544163531585">Licht thema uitzetten</translation>
 <translation id="6359919876285606596">Deze actie is definitief en kan niet ongedaan worden gemaakt</translation>
-<translation id="6368342879959028556">Als je Maken met AI selecteert, schrijf je een aangepaste prompt. Je kunt ook AI-achtergronden selecteren om een thema te kiezen en dan de onderstreepte woorden selecteren om je AI-achtergrond te personaliseren.</translation>
 <translation id="636850387210749493">Aanmelding voor Enterprise</translation>
 <translation id="6369221585240879141">Kan geen namen voor opnamen maken voor deze transcripttaal</translation>
 <translation id="6373461326814131011">vijver</translation>
@@ -1209,16 +1223,6 @@
 <translation id="6657240842932274095">Systeemservices toestaan je locatie te gebruiken?</translation>
 <translation id="6657585470893396449">Wachtwoord</translation>
 <translation id="66621959568103627">koraalroze</translation>
-<translation id="6667885109186363316"><ph name="SEA_PEN_INTRO_FIRST_PARAGRAPH" />
-<ph name="LINE_BREAK" />
-<ph name="LINE_BREAK" />
-Selecteer Inspireer me voor meer unieke en gevarieerde opties voor AI-afbeeldingen.
-          <ph name="LINE_BREAK" />
-<ph name="LINE_BREAK" />
-Als je iets maakt met AI, wordt de prompt naar de AI-servers van Google gestuurd om afbeeldingen te genereren en het product te verbeteren, in overeenstemming met het <ph name="BEGIN_LINK_GOOGLE_PRIVACY_POLICY" />Privacybeleid van Google<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" />.
-          <ph name="LINE_BREAK" />
-<ph name="LINE_BREAK" />
-Generatieve AI is experimenteel, in vroege ontwikkeling en op dit moment beperkt beschikbaar.</translation>
 <translation id="6673898378497337661">helderheid van toetsenbord verhogen</translation>
 <translation id="6692996468359469499">Informatie over je selectie bekijken</translation>
 <translation id="6694534975463174713">slot</translation>
@@ -1274,6 +1278,7 @@ Generatieve AI is experimenteel, in vroege ontwikkeling en op dit moment beperkt
 <translation id="6930597342185648547">Over de achtergrond</translation>
 <translation id="6939667434404433010">Naam van opname zoeken</translation>
 <translation id="6939766318048400022">Café</translation>
+<translation id="6942253772720771875">Deel je feedback of beschrijf je probleem</translation>
 <translation id="6943893908656559156">Externe identiteit (optioneel)</translation>
 <translation id="6953137545147683679">goud</translation>
 <translation id="6957231940976260713">Servicenaam</translation>
@@ -1295,6 +1300,7 @@ Generatieve AI is experimenteel, in vroege ontwikkeling en op dit moment beperkt
 <translation id="7040230719604914234">Operator</translation>
 <translation id="7040729769968826896">Identificatie van sprekers toestaan</translation>
 <translation id="7041549558901442110">Apparaat is niet verbonden.</translation>
+<translation id="704183341263526038">Jupiter</translation>
 <translation id="7046522406494308071">Alle sneltoetsen resetten naar standaardinstellingen?</translation>
 <translation id="7049916119678019302">Transcriptiemodel downloaden in Instellingen</translation>
 <translation id="7058278511608979688">Stoppen en opslaan</translation>
@@ -1427,6 +1433,7 @@ Download het transcriptiemodel (maximaal 100 MB) om deze transcripties te krijg
 <translation id="7569444139234840525"><ph name="QUERY_TEXT" /> · /<ph name="PHONETICS" />/</translation>
 <translation id="7570674786725311828">USB-touchscreen</translation>
 <translation id="757747079855995705">steen</translation>
+<translation id="7584853321964440104">Kan niet downloaden. Probeer het nogmaals of start je Chromebook opnieuw op.</translation>
 <translation id="7590883480672980941">Invoerinstellingen</translation>
 <translation id="7595982850646262331">Nog <ph name="TIME_VALUE" /></translation>
 <translation id="7600430297804876776">De beheerder van <ph name="MANAGER" /> heeft ingesteld wanneer dit <ph name="DEVICE_TYPE" /> kan worden gebruikt.</translation>
@@ -1557,6 +1564,16 @@ Download het transcriptiemodel (maximaal 100 MB) om deze transcripties te krijg
 <translation id="8179976553408161302">Enter</translation>
 <translation id="8183975772394450380">strand</translation>
 <translation id="819278132617411009">AI van Google gebruiken om productiever te zijn</translation>
+<translation id="82003371436638355">Als je 'Je eigen achtergrond maken' selecteert, schrijf je een aangepaste prompt. Je kunt ook 'Thema kiezen' selecteren en dan de onderstreepte woorden selecteren om je AI-achtergrond te personaliseren.
+          <ph name="LINE_BREAK" />
+<ph name="LINE_BREAK" />
+Selecteer Inspireer me voor meer unieke en gevarieerde opties voor AI-afbeeldingen.
+          <ph name="LINE_BREAK" />
+<ph name="LINE_BREAK" />
+Als je je eigen achtergrond maakt, wordt de prompt naar de servers van Google gestuurd om afbeeldingen te genereren en het product te verbeteren, in overeenstemming met de <ph name="BEGIN_LINK_GOOGLE_PRIVACY_POLICY" />Servicevoorwaarden en het Privacybeleid van Google<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" />. Voeg geen persoonlijke, gevoelige of vertrouwelijke informatie toe.
+          <ph name="LINE_BREAK" />
+<ph name="LINE_BREAK" />
+Generatieve AI kan fouten maken, ook in informatie over mensen, dus dubbelcheck de reacties. <ph name="BEGIN_LINK_CREATE_YOUR_OWN_WALLPAPER" />Meer informatie<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" /></translation>
 <translation id="8200772114523450471">Doorgaan</translation>
 <translation id="8206859287963243715">Mobiel</translation>
 <translation id="8208861521865154048">Speciale voordelen</translation>
@@ -1578,6 +1595,7 @@ Download het transcriptiemodel (maximaal 100 MB) om deze transcripties te krijg
 <translation id="8312330582793120272">media afspelen</translation>
 <translation id="8318753676953949627">Geen afbeeldingen</translation>
 <translation id="8320910311642849813">bos</translation>
+<translation id="8322464149031882595">Klik om verder te gaan</translation>
 <translation id="8329018942023753850">rekenmachine-app</translation>
 <translation id="8336739000755212683">Accountafbeelding van apparaat wijzigen</translation>
 <translation id="8339024191194156249">Meer informatie over automatisch starten</translation>
@@ -1598,6 +1616,7 @@ Download het transcriptiemodel (maximaal 100 MB) om deze transcripties te krijg
 <translation id="8395584934117017006">Deze <ph name="DEVICE_TYPE" /> wordt zakelijk beheerd</translation>
 <translation id="8398927464629426868">De snelheid waarmee het apparaat op dit moment wordt opgeladen of ontladen</translation>
 <translation id="8403988360557588704">Een schilderij van een <ph name="ART_FEATURE" /> in de stijl <ph name="ART_MOVEMENT" /></translation>
+<translation id="8409219750150841791">Gegenereerde samenvatting:</translation>
 <translation id="8410244574650205435">Automatisch gevonden</translation>
 <translation id="8420955526972171689">Tests uitvoeren en hardwareproblemen oplossen</translation>
 <translation id="8422748173858722634">IMEI</translation>
@@ -1642,6 +1661,7 @@ Download het transcriptiemodel (maximaal 100 MB) om deze transcripties te krijg
 <translation id="8626489604350149811">Meer acties voor <ph name="APN_NAME" /></translation>
 <translation id="86356131183441916">Lichtpaars</translation>
 <translation id="8647595191512746911">Audiotranscriptie</translation>
+<translation id="8648578954147795914">Gegenereerde namen:</translation>
 <translation id="8650852232143958317">Je Gmail- en Google Drive-bestanden meenemen</translation>
 <translation id="8651481478098336970">geluid uitzetten</translation>
 <translation id="8655295600908251630">Kanaal</translation>
@@ -1670,7 +1690,6 @@ Download het transcriptiemodel (maximaal 100 MB) om deze transcripties te krijg
 <translation id="8764414543112028321">WireGuard</translation>
 <translation id="87646919272181953">Google Foto's-album</translation>
 <translation id="8775713578693478175">Modem-APN</translation>
-<translation id="877735394245039557">Model wordt gedownload</translation>
 <translation id="877985182522063539">A4</translation>
 <translation id="879568662008399081">Dit netwerk heeft misschien een captive portal</translation>
 <translation id="8797082062139985406">Naam maken met AI van Google</translation>
@@ -1723,6 +1742,7 @@ Download het transcriptiemodel (maximaal 100 MB) om deze transcripties te krijg
 <translation id="8961025972867871808">pinguïns</translation>
 <translation id="8968751544471797276">Oplaadsnelheid</translation>
 <translation id="8970109610781093811">Opnieuw uitvoeren</translation>
+<translation id="8972061581514441296">Klik om terug te gaan</translation>
 <translation id="8983038754672563810">HSPA</translation>
 <translation id="8987565828374052507">{NUMBER_OF_PAGES,plural, =0{Scannen}=1{Pagina {NUMBER_OF_PAGES} scannen}other{Pagina {NUMBER_OF_PAGES} scannen}}</translation>
 <translation id="89945434909472341">dorp</translation>
@@ -1784,6 +1804,7 @@ Download het transcriptiemodel (maximaal 100 MB) om deze transcripties te krijg
 <translation id="9218016617214286986">Bekende APN's tonen</translation>
 <translation id="932327136139879170">Homepage</translation>
 <translation id="939519157834106403">SSID</translation>
+<translation id="940663759301549538">Zorg dat je microfoon is aangesloten of start je Chromebook opnieuw op</translation>
 <translation id="945522503751344254">Feedback sturen</translation>
 <translation id="950520315903467048">De toets ontbreekt voor <ph name="DIRECTION" />. <ph name="ASSIGN_INSTRUCTION" /></translation>
 <translation id="951780398843003443">De stemmen in de hele opname vergelijken zodat het transcript aangeeft wat elke spreker heeft gezegd en wanneer</translation>
