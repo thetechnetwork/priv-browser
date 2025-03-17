@@ -6,6 +6,11 @@ on:
   pull_request:
     branches: [ main ]
   workflow_dispatch:
+    inputs:
+      fork_branch:
+        description: 'Branch to build (defaults to main)'
+        required: false
+        default: 'main'
 
 jobs:
   build:
@@ -17,17 +22,11 @@ jobs:
       fail-fast: false
 
     steps:
-    - name: Checkout repository
+    - name: Checkout bootstrap repository
       uses: actions/checkout@v3
       with:
-        fetch-depth: 0
-
-    - name: Clean workspace before build
-      run: |
-        if [ -d "out" ]; then
-          rm -rf out
-        fi
-      shell: bash
+        path: bootstrap
+        fetch-depth: 1
 
     - name: Set up Python
       uses: actions/setup-python@v4
@@ -52,7 +51,6 @@ jobs:
       if: contains(matrix.runner, 'windows')
       run: |
         # Install dependencies if needed
-        # Most dependencies should be pre-installed on your self-hosted runner
         if (!(Get-Command ninja -ErrorAction SilentlyContinue)) {
           choco install ninja -y
         }
@@ -81,12 +79,58 @@ jobs:
         echo "CXX=ccache c++" >> $GITHUB_ENV
       shell: bash
 
+    - name: Set fork details
+      run: |
+        # Set the fork URL and branch
+        FORK_URL="https://github.com/TheTechNetwork/priv-browser.git"
+        
+        # Use the input branch if provided, otherwise default to main
+        if [ -n "${{ github.event.inputs.fork_branch }}" ]; then
+          FORK_BRANCH="${{ github.event.inputs.fork_branch }}"
+        else
+          FORK_BRANCH="main"
+        fi
+        
+        echo "FORK_URL=$FORK_URL" >> $GITHUB_ENV
+        echo "FORK_BRANCH=$FORK_BRANCH" >> $GITHUB_ENV
+        
+        echo "Using Chromium fork: $FORK_URL ($FORK_BRANCH)"
+      shell: bash
+
+    - name: Fetch Chromium source
+      run: |
+        # Create src directory
+        mkdir -p chromium
+        cd chromium
+        
+        # Configure gclient
+        cat > .gclient << EOF
+        solutions = [
+          {
+            "name": "src",
+            "url": "$FORK_URL",
+            "deps_file": "DEPS",
+            "managed": False,
+            "custom_deps": {},
+            "custom_vars": {},
+          },
+        ]
+        EOF
+        
+        # Fetch the source code
+        git clone $FORK_URL src
+        cd src
+        git checkout $FORK_BRANCH
+        gclient sync --with_branch_heads --with_tags -D
+      shell: bash
+
     - name: Configure Chromium build
       run: |
+        cd chromium/src
+        
         # Set up environment variables
         echo "CHROMIUM_BUILDTOOLS_PATH=$(pwd)/buildtools" >> $GITHUB_ENV
         echo "GYP_DEFINES=use_sysroot=0" >> $GITHUB_ENV
-        echo "GN_ARGS=is_debug=false use_sysroot=false" >> $GITHUB_ENV
         echo "GYP_CHROMIUM_NO_ACTION=1" >> $GITHUB_ENV
         
         # Configure with gn
@@ -96,6 +140,7 @@ jobs:
 
     - name: Build Chromium
       run: |
+        cd chromium/src
         ninja -C out/Release chrome
       shell: bash
 
@@ -103,7 +148,7 @@ jobs:
       if: contains(matrix.runner, 'linux')
       run: |
         mkdir -p artifacts
-        cd out/Release
+        cd chromium/src/out/Release
         # Create directory structure
         mkdir -p chromium-linux
         # Copy the main executable and needed files
@@ -117,14 +162,14 @@ jobs:
         cp -r icudtl.dat chromium-linux/ || true
         cp -r *.so chromium-linux/ || true
         # Create archive
-        tar -czf ../../artifacts/chromium-linux.tar.gz chromium-linux
+        tar -czf ../../../../artifacts/chromium-linux.tar.gz chromium-linux
       shell: bash
 
     - name: Package Windows build
       if: contains(matrix.runner, 'windows')
       run: |
         mkdir -p artifacts
-        cd out/Release
+        cd chromium/src/out/Release
         # Create directory structure
         mkdir -p chromium-windows
         # Copy the main executable and needed files
@@ -139,34 +184,39 @@ jobs:
         cp -r *.dll chromium-windows/ || true
         # Create archive
         cd ..
-        7z a -tzip ../artifacts/chromium-windows.zip Release/chromium-windows
+        7z a -tzip ../../../artifacts/chromium-windows.zip Release/chromium-windows
       shell: bash
 
     - name: Package macOS build
       if: contains(matrix.runner, 'macos')
       run: |
         mkdir -p artifacts
-        cd out/Release
+        cd chromium/src/out/Release
         # The macOS build is already packaged as Chromium.app
-        ditto -c -k --keepParent Chromium.app ../../artifacts/chromium-macos.zip
+        ditto -c -k --keepParent Chromium.app ../../../../artifacts/chromium-macos.zip
       shell: bash
 
-    # Use a manual upload step instead of the GitHub Action
-    - name: Upload artifacts (Custom)
+    - name: Store artifacts
       run: |
         # Create output directory for artifacts
-        mkdir -p $GITHUB_WORKSPACE/build-artifacts
+        mkdir -p $GITHUB_WORKSPACE/build-artifacts/${{ matrix.runner }}
         
         # Copy artifacts to a location accessible by the GitHub runner
-        cp -r artifacts/* $GITHUB_WORKSPACE/build-artifacts/
+        cp -r artifacts/* $GITHUB_WORKSPACE/build-artifacts/${{ matrix.runner }}/
+        
+        # Create a build info file
+        echo "Build date: $(date)" > $GITHUB_WORKSPACE/build-artifacts/${{ matrix.runner }}/build-info.txt
+        echo "Branch: $FORK_BRANCH" >> $GITHUB_WORKSPACE/build-artifacts/${{ matrix.runner }}/build-info.txt
+        echo "Commit: $(cd chromium/src && git rev-parse HEAD)" >> $GITHUB_WORKSPACE/build-artifacts/${{ matrix.runner }}/build-info.txt
+        echo "Runner: ${{ matrix.runner }}" >> $GITHUB_WORKSPACE/build-artifacts/${{ matrix.runner }}/build-info.txt
         
         # Output information about the artifacts for the GitHub Actions logs
         echo "::group::Artifacts"
-        echo "Artifacts available at: $GITHUB_WORKSPACE/build-artifacts"
-        ls -la $GITHUB_WORKSPACE/build-artifacts
+        echo "Artifacts available at: $GITHUB_WORKSPACE/build-artifacts/${{ matrix.runner }}"
+        ls -la $GITHUB_WORKSPACE/build-artifacts/${{ matrix.runner }}
         echo "::endgroup::"
         
         # Set outputs for use in other steps or jobs
-        echo "artifacts_path=$GITHUB_WORKSPACE/build-artifacts" >> $GITHUB_OUTPUT
+        echo "artifacts_path=$GITHUB_WORKSPACE/build-artifacts/${{ matrix.runner }}" >> $GITHUB_OUTPUT
       shell: bash
-      id: upload-artifacts
+      id: store-artifacts
