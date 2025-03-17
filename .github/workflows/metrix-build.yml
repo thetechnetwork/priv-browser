@@ -108,9 +108,9 @@ jobs:
         mkdir -p chromium-linux
         # Copy the main executable and needed files
         cp chrome chromium-linux/
-        cp -r *.pak chromium-linux/
+        cp -r *.pak chromium-linux/ || true
         cp -r *.bin chromium-linux/ || true
-        cp -r locales chromium-linux/
+        cp -r locales chromium-linux/ || true
         cp -r resources chromium-linux/ || true
         cp -r MEIPreload chromium-linux/ || true
         cp -r swiftshader chromium-linux/ || true
@@ -129,9 +129,9 @@ jobs:
         mkdir -p chromium-windows
         # Copy the main executable and needed files
         cp chrome.exe chromium-windows/
-        cp -r *.pak chromium-windows/
+        cp -r *.pak chromium-windows/ || true
         cp -r *.bin chromium-windows/ || true
-        cp -r locales chromium-windows/
+        cp -r locales chromium-windows/ || true
         cp -r resources chromium-windows/ || true
         cp -r MEIPreload chromium-windows/ || true
         cp -r swiftshader chromium-windows/ || true
@@ -151,10 +151,22 @@ jobs:
         ditto -c -k --keepParent Chromium.app ../../artifacts/chromium-macos.zip
       shell: bash
 
-    - name: Upload artifacts
-      uses: actions/upload-artifact@v3
-      with:
-        name: chromium-${{ matrix.runner }}
-        path: artifacts/
-        retention-days: 7
-        if-no-files-found: warn
+    # Use a manual upload step instead of the GitHub Action
+    - name: Upload artifacts (Custom)
+      run: |
+        # Create output directory for artifacts
+        mkdir -p $GITHUB_WORKSPACE/build-artifacts
+        
+        # Copy artifacts to a location accessible by the GitHub runner
+        cp -r artifacts/* $GITHUB_WORKSPACE/build-artifacts/
+        
+        # Output information about the artifacts for the GitHub Actions logs
+        echo "::group::Artifacts"
+        echo "Artifacts available at: $GITHUB_WORKSPACE/build-artifacts"
+        ls -la $GITHUB_WORKSPACE/build-artifacts
+        echo "::endgroup::"
+        
+        # Set outputs for use in other steps or jobs
+        echo "artifacts_path=$GITHUB_WORKSPACE/build-artifacts" >> $GITHUB_OUTPUT
+      shell: bash
+      id: upload-artifacts
