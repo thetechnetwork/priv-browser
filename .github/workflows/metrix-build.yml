@@ -22,20 +22,32 @@ jobs:
       fail-fast: false
 
     steps:
-    # (1) Optional: Checkout this repository (the "bootstrap" repo)
+    # (1) [OPTIONAL] Checkout "bootstrap" repo if desired
     - name: Checkout bootstrap repository
       uses: actions/checkout@v3
       with:
         path: bootstrap
         fetch-depth: 1
 
-    # (2) Setup Python
+    # (2) Set up Python
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: '3.10'
 
-    # (3) Install OS-specific dependencies
+    # (3) Enable long paths on Windows & configure Git
+    - name: Enable Windows long paths (registry) + Git config
+      if: contains(matrix.runner, 'windows')
+      shell: pwsh
+      run: |
+        Write-Host "Enabling long paths on Windows..."
+        # Registry for long paths (requires a reboot once in runner's lifetime)
+        reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\FileSystem" /v LongPathsEnabled /t REG_DWORD /d 1 /f
+        
+        # Allow Git to handle long paths
+        git config --system core.longpaths true
+
+    # (4) Install OS-specific dependencies
     - name: Install Linux dependencies
       if: contains(matrix.runner, 'linux')
       run: |
@@ -43,7 +55,8 @@ jobs:
         sudo apt-get install -y git python3 python3-pip pkg-config libssl-dev ninja-build \
           ccache libglib2.0-dev libpango1.0-dev libdbus-1-dev libatk1.0-dev libatk-bridge2.0-dev \
           libcups2-dev libxkbcommon-dev libxcomposite-dev libxdamage-dev libxrandr-dev \
-          libgbm-dev libasound2-dev libpulse-dev libnss3-dev libxss-dev libgtk-3-dev
+          libgbm-dev libasound2-dev libpulse-dev libnss3-dev libxss-dev libgtk-3-dev \
+          libx11-xcb-dev    # <-- IMPORTANT: needed for X11/Xlib-xcb.h
 
     - name: Install macOS dependencies
       if: contains(matrix.runner, 'macos')
@@ -61,7 +74,7 @@ jobs:
           choco install ccache -y
         }
 
-    # (4) Clean up old 'chromium' folder (prevents cloning conflicts)
+    # (5) Clean up old 'chromium' folder
     - name: Clean workspace - Linux/macOS
       if: "runner.os != 'Windows'"
       run: |
@@ -75,7 +88,7 @@ jobs:
           Remove-Item "chromium" -Recurse -Force
         }
 
-    # (5) Install depot_tools
+    # (6) Install depot_tools
     - name: Install depot_tools
       shell: bash
       run: |
@@ -86,7 +99,7 @@ jobs:
         fi
         echo "PATH=$PATH:$(pwd)/depot_tools" >> $GITHUB_ENV
 
-    # (6) Setup ccache
+    # (7) Setup ccache
     - name: Setup ccache
       shell: bash
       run: |
@@ -97,27 +110,31 @@ jobs:
         echo "CC=ccache cc" >> $GITHUB_ENV
         echo "CXX=ccache c++" >> $GITHUB_ENV
 
-    # (7) Set fork details
+    # (8) Set fork details
     - name: Set fork details
       shell: bash
       run: |
         FORK_URL="https://github.com/TheTechNetwork/priv-browser.git"
+        
+        # Use the input branch if provided, otherwise default to main
         if [ -n "${{ github.event.inputs.fork_branch }}" ]; then
           FORK_BRANCH="${{ github.event.inputs.fork_branch }}"
         else
           FORK_BRANCH="main"
         fi
+        
         echo "FORK_URL=$FORK_URL" >> $GITHUB_ENV
         echo "FORK_BRANCH=$FORK_BRANCH" >> $GITHUB_ENV
+        
         echo "Using Chromium fork: $FORK_URL ($FORK_BRANCH)"
 
-    # (8) Fetch Chromium source
+    # (9) Fetch Chromium source + run hooks
     - name: Fetch Chromium source
       shell: bash
       run: |
         mkdir -p chromium
         cd chromium
-        # Write .gclient
+        
         cat > .gclient << EOF
         solutions = [
           {
@@ -130,16 +147,18 @@ jobs:
           },
         ]
         EOF
-        # Clone fork
-        git clone $FORK_URL src
+        
+        git clone "$FORK_URL" src
         cd src
-        git checkout $FORK_BRANCH
+        git checkout "$FORK_BRANCH"
+        
         # Sync dependencies
         gclient sync --with_branch_heads --with_tags -D
-        # Run hooks so GN is fetched
+        
+        # IMPORTANT: run hooks so GN is downloaded/built
         gclient runhooks
 
-    # (9) Configure Chromium
+    # (10) Configure Chromium build
     - name: Configure Chromium build
       shell: bash
       run: |
@@ -147,14 +166,14 @@ jobs:
         mkdir -p out/Release
         gn gen out/Release --args="is_debug=false use_sysroot=false is_component_build=false symbol_level=0"
 
-    # (10) Build Chromium
+    # (11) Build Chromium
     - name: Build Chromium
       shell: bash
       run: |
         cd chromium/src
         ninja -C out/Release chrome
 
-    # (11) Package artifacts - Linux
+    # (12) Package Linux build
     - name: Package Linux build
       if: contains(matrix.runner, 'linux')
       shell: bash
@@ -171,15 +190,21 @@ jobs:
         cp -r swiftshader chromium-linux/ || true
         cp -r icudtl.dat chromium-linux/ || true
         cp -r *.so chromium-linux/ || true
+        
+        # Optionally: copy chrome_sandbox if you use it
+        # cp chrome_sandbox chromium-linux/ || true
+        # chmod 4755 chromium-linux/chrome_sandbox || true
+        
         tar -czf ../../../../artifacts/chromium-linux.tar.gz chromium-linux
 
-    # (12) Package artifacts - Windows
+    # (13) Package Windows build
     - name: Package Windows build
       if: contains(matrix.runner, 'windows')
       shell: pwsh
       run: |
         mkdir -p artifacts
         cd chromium/src/out/Release
+        
         mkdir -p chromium-windows
         Copy-Item "chrome.exe" "chromium-windows/" -ErrorAction SilentlyContinue
         Copy-Item "*.pak" "chromium-windows/" -Recurse -ErrorAction SilentlyContinue
@@ -190,10 +215,11 @@ jobs:
         Copy-Item "swiftshader" "chromium-windows/" -Recurse -ErrorAction SilentlyContinue
         Copy-Item "icudtl.dat" "chromium-windows/" -ErrorAction SilentlyContinue
         Copy-Item "*.dll" "chromium-windows/" -Recurse -ErrorAction SilentlyContinue
+        
         cd ..
         7z a -tzip ../../../artifacts/chromium-windows.zip Release/chromium-windows
 
-    # (13) Package artifacts - macOS
+    # (14) Package macOS build
     - name: Package macOS build
       if: contains(matrix.runner, 'macos')
       shell: bash
@@ -202,7 +228,7 @@ jobs:
         cd chromium/src/out/Release
         ditto -c -k --keepParent Chromium.app ../../../../artifacts/chromium-macos.zip
 
-    # (14) Store artifacts
+    # (15) Store artifacts
     - name: Store artifacts
       shell: bash
       run: |
@@ -221,3 +247,10 @@ jobs:
 
         echo "artifacts_path=$GITHUB_WORKSPACE/build-artifacts/${{ matrix.runner }}" >> $GITHUB_OUTPUT
       id: store-artifacts
+
+    # (OPTIONAL) Upload artifacts to GitHub Action UI
+    # - name: Upload build artifacts
+    #   uses: actions/upload-artifact@v3
+    #   with:
+    #     name: chromium-${{ matrix.runner }}
+    #     path: $GITHUB_WORKSPACE/build-artifacts/${{ matrix.runner }}
