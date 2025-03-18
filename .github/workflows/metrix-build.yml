@@ -89,12 +89,12 @@ jobs:
           }
 
       # (6) Clean up old 'chromium' folder
-      - name: Clean workspace - Linux/macOS
+      - name: Clean workspace (Linux/macOS)
         if: runner.os != 'Windows'
         run: |
           rm -rf chromium
 
-      - name: Clean workspace - Windows
+      - name: Clean workspace (Windows)
         if: runner.os == 'Windows'
         shell: powershell
         run: |
@@ -141,7 +141,8 @@ jobs:
           echo "CXX=ccache c++" >> $GITHUB_ENV
 
       # (9) Set fork details
-      - name: Set fork details
+      - name: Set fork details (Linux/macOS)
+        if: runner.os != 'Windows'
         shell: bash
         run: |
           FORK_URL="https://github.com/TheTechNetwork/priv-browser.git"
@@ -153,6 +154,21 @@ jobs:
           echo "FORK_URL=$FORK_URL" >> $GITHUB_ENV
           echo "FORK_BRANCH=$FORK_BRANCH" >> $GITHUB_ENV
           echo "Using Chromium fork: $FORK_URL ($FORK_BRANCH)"
+
+      - name: Set fork details (Windows)
+        if: runner.os == 'Windows'
+        shell: powershell
+        run: |
+          $FORK_URL = "https://github.com/TheTechNetwork/priv-browser.git"
+          if ($Env:github_event_inputs_fork_branch -and $Env:github_event_inputs_fork_branch -ne "") {
+            $FORK_BRANCH = $Env:github_event_inputs_fork_branch
+          }
+          else {
+            $FORK_BRANCH = "main"
+          }
+          Add-Content -Path $Env:GITHUB_ENV -Value "FORK_URL=$FORK_URL"
+          Add-Content -Path $Env:GITHUB_ENV -Value "FORK_BRANCH=$FORK_BRANCH"
+          Write-Host "Using Chromium fork: $FORK_URL ($FORK_BRANCH)"
 
       # (10) Fetch Chromium source + run hooks
       - name: Fetch Chromium source
@@ -269,7 +285,7 @@ jobs:
           echo "artifacts_path=$GITHUB_WORKSPACE/build-artifacts/${{ matrix.runner }}" >> $GITHUB_OUTPUT
         id: store-artifacts
 
-      # (OPTIONAL) Upload artifacts to GitHub UI
+      # (OPTIONAL) Upload artifacts
       # - name: Upload build artifacts
       #   uses: actions/upload-artifact@v3
       #   with:
