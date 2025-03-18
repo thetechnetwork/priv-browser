@@ -36,10 +36,19 @@ jobs:
           python-version: '3.10'   # Ensures Python 3.10 is on PATH, overriding any older/newer installed Python
 
       # (3) Verify Python version
-      - name: Verify Python
+      - name: Verify Python (Linux/macOS)
+        if: runner.os != 'Windows'
         shell: bash
         run: |
-          echo "Checking Python version..."
+          echo "Checking Python version (Linux/macOS)..."
+          python --version
+          pip --version
+
+      - name: Verify Python (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          Write-Host "Checking Python version (Windows)..."
           python --version
           pip --version
 
@@ -199,7 +208,7 @@ jobs:
           cp -r icudtl.dat chromium-linux/ || true
           cp -r *.so chromium-linux/ || true
           
-          # Optionally: copy chrome_sandbox if you use it
+          # Optionally: copy chrome_sandbox if used
           # cp chrome_sandbox chromium-linux/ || true
           # chmod 4755 chromium-linux/chrome_sandbox || true
           
