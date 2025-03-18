@@ -22,20 +22,26 @@ jobs:
       fail-fast: false
 
     steps:
-      # (1) [OPTIONAL] Checkout "bootstrap" repo if desired
+      #######################################################################
+      # 1) CHECKOUT (no special shell usage, so we can keep a single step)  #
+      #######################################################################
       - name: Checkout bootstrap repository
         uses: actions/checkout@v3
         with:
           path: bootstrap
           fetch-depth: 1
 
-      # (2) Force Python 3.10
+      #######################################################################
+      # 2) SET UP PYTHON                                                    #
+      #######################################################################
       - name: Set up Python 3.10
         uses: actions/setup-python@v5
         with:
-          python-version: '3.10'   # Ensures Python 3.10 is on PATH
+          python-version: '3.10'
 
-      # (3) Verify Python version
+      #######################################################################
+      # 3) VERIFY PYTHON                                                    #
+      #######################################################################
       - name: Verify Python (Linux/macOS)
         if: runner.os != 'Windows'
         shell: bash
@@ -52,18 +58,23 @@ jobs:
           python --version
           pip --version
 
-      # (4) Enable long paths on Windows & configure Git
-      - name: Enable Windows long paths (registry) + Git config
-        if: contains(matrix.runner, 'windows')
+      #######################################################################
+      # 4) ENABLE WINDOWS LONG PATHS & GIT CONFIG                            #
+      #######################################################################
+      - name: Enable Windows long paths + Git config
+        if: runner.os == 'Windows'
         shell: powershell
         run: |
           Write-Host "Enabling long paths on Windows..."
           reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\FileSystem" /v LongPathsEnabled /t REG_DWORD /d 1 /f
           git config --system core.longpaths true
 
-      # (5) Install OS-specific dependencies
+      #######################################################################
+      # 5) INSTALL OS-SPECIFIC DEPENDENCIES                                 #
+      #######################################################################
       - name: Install Linux dependencies
         if: contains(matrix.runner, 'linux')
+        shell: bash
         run: |
           sudo apt-get update
           sudo apt-get install -y git python3 python3-pip pkg-config libssl-dev ninja-build \
@@ -74,11 +85,12 @@ jobs:
 
       - name: Install macOS dependencies
         if: contains(matrix.runner, 'macos')
+        shell: bash
         run: |
           brew install ninja ccache
 
       - name: Install Windows dependencies
-        if: contains(matrix.runner, 'windows')
+        if: runner.os == 'Windows'
         shell: powershell
         run: |
           if (!(Get-Command ninja -ErrorAction SilentlyContinue)) {
@@ -88,9 +100,12 @@ jobs:
             choco install ccache -y
           }
 
-      # (6) Clean up old 'chromium' folder
+      #######################################################################
+      # 6) CLEAN WORKSPACE                                                  #
+      #######################################################################
       - name: Clean workspace (Linux/macOS)
         if: runner.os != 'Windows'
+        shell: bash
         run: |
           rm -rf chromium
 
@@ -102,7 +117,9 @@ jobs:
             Remove-Item "chromium" -Recurse -Force
           }
 
-      # (7) Install depot_tools
+      #######################################################################
+      # 7) INSTALL DEPOT_TOOLS                                              #
+      #######################################################################
       - name: Install depot_tools (Linux/macOS)
         if: runner.os != 'Windows'
         shell: bash
@@ -129,7 +146,9 @@ jobs:
           $newPath = "PATH=$($Env:PATH);$(Resolve-Path .\depot_tools)"
           $newPath | Out-File -FilePath $Env:GITHUB_ENV -Append
 
-      # (8) Setup ccache
+      #######################################################################
+      # 8) SETUP CCACHE                                                     #
+      #######################################################################
       - name: Setup ccache (Linux/macOS)
         if: runner.os != 'Windows'
         shell: bash
@@ -140,7 +159,23 @@ jobs:
           echo "CC=ccache cc" >> $GITHUB_ENV
           echo "CXX=ccache c++" >> $GITHUB_ENV
 
-      # (9) Set fork details
+      #
+      # If you want ccache on Windows as well, you can add a Windows step too:
+      #
+      # - name: Setup ccache (Windows)
+      #   if: runner.os == 'Windows'
+      #   shell: powershell
+      #   run: |
+      #     # Note: ccache on Windows is more complicated, but here's a placeholder:
+      #     if (!(Test-Path "$Env:USERPROFILE\.ccache")) {
+      #       New-Item -ItemType Directory -Path "$Env:USERPROFILE\.ccache" | Out-Null
+      #     }
+      #     Add-Content -Path $Env:GITHUB_ENV -Value "CCACHE_DIR=$($Env:USERPROFILE)\.ccache"
+      #
+
+      #######################################################################
+      # 9) SET FORK DETAILS                                                 #
+      #######################################################################
       - name: Set fork details (Linux/macOS)
         if: runner.os != 'Windows'
         shell: bash
@@ -170,8 +205,11 @@ jobs:
           Add-Content -Path $Env:GITHUB_ENV -Value "FORK_BRANCH=$FORK_BRANCH"
           Write-Host "Using Chromium fork: $FORK_URL ($FORK_BRANCH)"
 
-      # (10) Fetch Chromium source + run hooks
-      - name: Fetch Chromium source
+      #######################################################################
+      # 10) FETCH CHROMIUM SOURCE + RUN HOOKS                               #
+      #######################################################################
+      - name: Fetch Chromium source (Linux/macOS)
+        if: runner.os != 'Windows'
         shell: bash
         run: |
           mkdir -p chromium
@@ -188,33 +226,87 @@ jobs:
             },
           ]
           EOF
-          
+
           git clone "$FORK_URL" src
           cd src
           git checkout "$FORK_BRANCH"
-          
+
           # Sync dependencies
           gclient sync --with_branch_heads --with_tags -D
-          
+
           # Run hooks
           gclient runhooks
 
-      # (11) Configure Chromium build
-      - name: Configure Chromium build
+      - name: Fetch Chromium source (Windows)
+        if: runner.os == 'Windows'
+        shell: powershell
+        run: |
+          New-Item -ItemType Directory -Path "chromium" -Force | Out-Null
+          Set-Location chromium
+
+          # Create the .gclient file
+          @"
+solutions = [
+  {
+    ""name"": ""src"",
+    ""url"": ""$Env:FORK_URL"",
+    ""deps_file"": ""DEPS"",
+    ""managed"": False,
+    ""custom_deps"": {},
+    ""custom_vars"": {},
+  },
+]
+"@ | Out-File -FilePath .gclient -Encoding utf8
+
+          git clone $Env:FORK_URL src
+          Set-Location src
+          git checkout $Env:FORK_BRANCH
+
+          # Sync dependencies
+          gclient sync --with_branch_heads --with_tags -D
+
+          # Run hooks
+          gclient runhooks
+
+      #######################################################################
+      # 11) CONFIGURE CHROMIUM BUILD                                        #
+      #######################################################################
+      - name: Configure Chromium build (Linux/macOS)
+        if: runner.os != 'Windows'
         shell: bash
         run: |
           cd chromium/src
           mkdir -p out/Release
           gn gen out/Release --args="is_debug=false use_sysroot=false is_component_build=false symbol_level=0"
 
-      # (12) Build Chromium
-      - name: Build Chromium
+      - name: Configure Chromium build (Windows)
+        if: runner.os == 'Windows'
+        shell: powershell
+        run: |
+          Set-Location chromium/src
+          New-Item -ItemType Directory -Path out/Release -Force | Out-Null
+          gn gen out/Release --args="is_debug=false use_sysroot=false is_component_build=false symbol_level=0"
+
+      #######################################################################
+      # 12) BUILD CHROMIUM                                                  #
+      #######################################################################
+      - name: Build Chromium (Linux/macOS)
+        if: runner.os != 'Windows'
         shell: bash
         run: |
           cd chromium/src
           ninja -C out/Release chrome
 
-      # (13) Package Linux build
+      - name: Build Chromium (Windows)
+        if: runner.os == 'Windows'
+        shell: powershell
+        run: |
+          Set-Location chromium/src
+          ninja -C out/Release chrome
+
+      #######################################################################
+      # 13) PACKAGE LINUX BUILD                                             #
+      #######################################################################
       - name: Package Linux build
         if: contains(matrix.runner, 'linux')
         shell: bash
@@ -234,15 +326,17 @@ jobs:
           
           tar -czf ../../../../artifacts/chromium-linux.tar.gz chromium-linux
 
-      # (14) Package Windows build
+      #######################################################################
+      # 14) PACKAGE WINDOWS BUILD                                           #
+      #######################################################################
       - name: Package Windows build
-        if: contains(matrix.runner, 'windows')
+        if: runner.os == 'Windows'
         shell: powershell
         run: |
-          mkdir -p artifacts
-          cd chromium/src/out/Release
-          
-          mkdir -p chromium-windows
+          New-Item -ItemType Directory -Path artifacts -Force | Out-Null
+          Set-Location chromium/src/out/Release
+
+          New-Item -ItemType Directory -Path chromium-windows -Force | Out-Null
           Copy-Item "chrome.exe" "chromium-windows/" -ErrorAction SilentlyContinue
           Copy-Item "*.pak" "chromium-windows/" -Recurse -ErrorAction SilentlyContinue
           Copy-Item "*.bin" "chromium-windows/" -Recurse -ErrorAction SilentlyContinue
@@ -252,11 +346,13 @@ jobs:
           Copy-Item "swiftshader" "chromium-windows/" -Recurse -ErrorAction SilentlyContinue
           Copy-Item "icudtl.dat" "chromium-windows/" -ErrorAction SilentlyContinue
           Copy-Item "*.dll" "chromium-windows/" -Recurse -ErrorAction SilentlyContinue
-          
-          cd ..
-          7z a -tzip ../../../artifacts/chromium-windows.zip Release/chromium-windows
 
-      # (15) Package macOS build
+          Set-Location ..
+          7z a -tzip ..\..\..\artifacts\chromium-windows.zip "Release\chromium-windows"
+
+      #######################################################################
+      # 15) PACKAGE MACOS BUILD                                             #
+      #######################################################################
       - name: Package macOS build
         if: contains(matrix.runner, 'macos')
         shell: bash
@@ -265,13 +361,16 @@ jobs:
           cd chromium/src/out/Release
           ditto -c -k --keepParent Chromium.app ../../../../artifacts/chromium-macos.zip
 
-      # (16) Store artifacts
-      - name: Store artifacts
+      #######################################################################
+      # 16) STORE ARTIFACTS                                                 #
+      #######################################################################
+      - name: Store artifacts (Linux/macOS)
+        if: runner.os != 'Windows'
         shell: bash
         run: |
           mkdir -p $GITHUB_WORKSPACE/build-artifacts/${{ matrix.runner }}
           cp -r artifacts/* $GITHUB_WORKSPACE/build-artifacts/${{ matrix.runner }}/ || true
-          
+
           echo "Build date: $(date)" > $GITHUB_WORKSPACE/build-artifacts/${{ matrix.runner }}/build-info.txt
           echo "Branch: $FORK_BRANCH" >> $GITHUB_WORKSPACE/build-artifacts/${{ matrix.runner }}/build-info.txt
           echo "Commit: $(cd chromium/src && git rev-parse HEAD)" >> $GITHUB_WORKSPACE/build-artifacts/${{ matrix.runner }}/build-info.txt
@@ -283,9 +382,34 @@ jobs:
           echo "::endgroup::"
 
           echo "artifacts_path=$GITHUB_WORKSPACE/build-artifacts/${{ matrix.runner }}" >> $GITHUB_OUTPUT
-        id: store-artifacts
 
-      # (OPTIONAL) Upload artifacts
+      - name: Store artifacts (Windows)
+        if: runner.os == 'Windows'
+        shell: powershell
+        run: |
+          New-Item -ItemType Directory -Path "$Env:GITHUB_WORKSPACE\build-artifacts\${{ matrix.runner }}" -Force | Out-Null
+          Copy-Item -Path artifacts\* -Destination "$Env:GITHUB_WORKSPACE\build-artifacts\${{ matrix.runner }}" -Recurse -ErrorAction SilentlyContinue
+
+          $buildInfoPath = "$Env:GITHUB_WORKSPACE\build-artifacts\${{ matrix.runner }}\build-info.txt"
+          "Build date: $(Get-Date)" | Out-File $buildInfoPath
+          "Branch: $Env:FORK_BRANCH" | Out-File $buildInfoPath -Append
+          # Move into chromium/src to get the commit
+          Push-Location chromium\src
+          $commitId = git rev-parse HEAD
+          Pop-Location
+          "Commit: $commitId" | Out-File $buildInfoPath -Append
+          "Runner: ${{ matrix.runner }}" | Out-File $buildInfoPath -Append
+
+          Write-Host "::group::Artifacts"
+          Write-Host "Artifacts available at: $Env:GITHUB_WORKSPACE\build-artifacts\${{ matrix.runner }}"
+          Get-ChildItem "$Env:GITHUB_WORKSPACE\build-artifacts\${{ matrix.runner }}" -Recurse
+          Write-Host "::endgroup::"
+
+          "artifacts_path=$Env:GITHUB_WORKSPACE\build-artifacts\${{ matrix.runner }}" | Out-File $Env:GITHUB_OUTPUT -Append
+
+      #######################################################################
+      # (OPTIONAL) UPLOAD ARTIFACTS                                         #
+      #######################################################################
       # - name: Upload build artifacts
       #   uses: actions/upload-artifact@v3
       #   with:
