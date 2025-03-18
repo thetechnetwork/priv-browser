@@ -33,14 +33,14 @@ jobs:
       - name: Set up Python 3.10
         uses: actions/setup-python@v5
         with:
-          python-version: '3.10'   # Ensures Python 3.10 is on PATH, overriding any older/newer installed Python
+          python-version: '3.10'   # Ensures Python 3.10 is on PATH
 
       # (3) Verify Python version
       - name: Verify Python (Linux/macOS)
         if: runner.os != 'Windows'
         shell: bash
         run: |
-          echo "Checking Python version (Linux/macOS)..."
+          echo "Checking Python version on Linux/macOS..."
           python --version
           pip --version
 
@@ -48,7 +48,7 @@ jobs:
         if: runner.os == 'Windows'
         shell: powershell
         run: |
-          Write-Host "Checking Python version (Windows)..."
+          Write-Host "Checking Python version on Windows..."
           python --version
           pip --version
 
@@ -58,10 +58,7 @@ jobs:
         shell: powershell
         run: |
           Write-Host "Enabling long paths on Windows..."
-          # Registry for long paths (requires a reboot once in runner's lifetime)
           reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\FileSystem" /v LongPathsEnabled /t REG_DWORD /d 1 /f
-          
-          # Allow Git to handle long paths
           git config --system core.longpaths true
 
       # (5) Install OS-specific dependencies
@@ -73,7 +70,7 @@ jobs:
             ccache libglib2.0-dev libpango1.0-dev libdbus-1-dev libatk1.0-dev libatk-bridge2.0-dev \
             libcups2-dev libxkbcommon-dev libxcomposite-dev libxdamage-dev libxrandr-dev \
             libgbm-dev libasound2-dev libpulse-dev libnss3-dev libxss-dev libgtk-3-dev \
-            libx11-xcb-dev    # <-- IMPORTANT: needed for X11/Xlib-xcb.h
+            libx11-xcb-dev  # needed for X11/Xlib-xcb.h
 
       - name: Install macOS dependencies
         if: contains(matrix.runner, 'macos')
@@ -93,12 +90,12 @@ jobs:
 
       # (6) Clean up old 'chromium' folder
       - name: Clean workspace - Linux/macOS
-        if: "runner.os != 'Windows'"
+        if: runner.os != 'Windows'
         run: |
           rm -rf chromium
 
       - name: Clean workspace - Windows
-        if: "runner.os == 'Windows'"
+        if: runner.os == 'Windows'
         shell: powershell
         run: |
           if (Test-Path "chromium") {
@@ -106,7 +103,8 @@ jobs:
           }
 
       # (7) Install depot_tools
-      - name: Install depot_tools
+      - name: Install depot_tools (Linux/macOS)
+        if: runner.os != 'Windows'
         shell: bash
         run: |
           if [ ! -d "depot_tools" ]; then
@@ -116,13 +114,28 @@ jobs:
           fi
           echo "PATH=$PATH:$(pwd)/depot_tools" >> $GITHUB_ENV
 
+      - name: Install depot_tools (Windows)
+        if: runner.os == 'Windows'
+        shell: powershell
+        run: |
+          if (!(Test-Path "depot_tools")) {
+            git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
+          } else {
+            Push-Location .\depot_tools
+            git pull
+            Pop-Location
+          }
+          # Add to PATH via GITHUB_ENV
+          $newPath = "PATH=$($Env:PATH);$(Resolve-Path .\depot_tools)"
+          $newPath | Out-File -FilePath $Env:GITHUB_ENV -Append
+
       # (8) Setup ccache
-      - name: Setup ccache
+      - name: Setup ccache (Linux/macOS)
+        if: runner.os != 'Windows'
         shell: bash
         run: |
           mkdir -p ~/.ccache
           echo "max_size = 50G" > ~/.ccache/ccache.conf
-          echo "PATH=$(pwd)/depot_tools:$PATH" >> $GITHUB_ENV
           echo "CCACHE_DIR=$(pwd)/.ccache" >> $GITHUB_ENV
           echo "CC=ccache cc" >> $GITHUB_ENV
           echo "CXX=ccache c++" >> $GITHUB_ENV
@@ -132,17 +145,13 @@ jobs:
         shell: bash
         run: |
           FORK_URL="https://github.com/TheTechNetwork/priv-browser.git"
-          
-          # Use the input branch if provided, otherwise default to main
           if [ -n "${{ github.event.inputs.fork_branch }}" ]; then
             FORK_BRANCH="${{ github.event.inputs.fork_branch }}"
           else
             FORK_BRANCH="main"
           fi
-          
           echo "FORK_URL=$FORK_URL" >> $GITHUB_ENV
           echo "FORK_BRANCH=$FORK_BRANCH" >> $GITHUB_ENV
-          
           echo "Using Chromium fork: $FORK_URL ($FORK_BRANCH)"
 
       # (10) Fetch Chromium source + run hooks
@@ -151,7 +160,6 @@ jobs:
         run: |
           mkdir -p chromium
           cd chromium
-          
           cat > .gclient << EOF
           solutions = [
             {
@@ -172,7 +180,7 @@ jobs:
           # Sync dependencies
           gclient sync --with_branch_heads --with_tags -D
           
-          # IMPORTANT: run hooks so GN is downloaded/built
+          # Run hooks
           gclient runhooks
 
       # (11) Configure Chromium build
@@ -207,10 +215,6 @@ jobs:
           cp -r swiftshader chromium-linux/ || true
           cp -r icudtl.dat chromium-linux/ || true
           cp -r *.so chromium-linux/ || true
-          
-          # Optionally: copy chrome_sandbox if used
-          # cp chrome_sandbox chromium-linux/ || true
-          # chmod 4755 chromium-linux/chrome_sandbox || true
           
           tar -czf ../../../../artifacts/chromium-linux.tar.gz chromium-linux
 
@@ -265,7 +269,7 @@ jobs:
           echo "artifacts_path=$GITHUB_WORKSPACE/build-artifacts/${{ matrix.runner }}" >> $GITHUB_OUTPUT
         id: store-artifacts
 
-      # (OPTIONAL) Upload artifacts to GitHub Action UI
+      # (OPTIONAL) Upload artifacts to GitHub UI
       # - name: Upload build artifacts
       #   uses: actions/upload-artifact@v3
       #   with:
