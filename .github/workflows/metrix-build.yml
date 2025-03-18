@@ -46,7 +46,7 @@ jobs:
 
       - name: Verify Python (Windows)
         if: runner.os == 'Windows'
-        shell: pwsh
+        shell: powershell
         run: |
           Write-Host "Checking Python version (Windows)..."
           python --version
