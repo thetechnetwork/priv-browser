@@ -246,17 +246,17 @@ jobs:
 
           # Create the .gclient file
           @"
-solutions = [
-  {
-    ""name"": ""src"",
-    ""url"": ""$Env:FORK_URL"",
-    ""deps_file"": ""DEPS"",
-    ""managed"": False,
-    ""custom_deps"": {},
-    ""custom_vars"": {},
-  },
-]
-"@ | Out-File -FilePath .gclient -Encoding utf8
+          solutions = [
+          {
+          ""name"": ""src"",
+          ""url"": ""$Env:FORK_URL"",
+          ""deps_file"": ""DEPS"",
+          ""managed"": False,
+          ""custom_deps"": {},
+          ""custom_vars"": {},
+          },
+          ]
+          "@ | Out-File -FilePath .gclient -Encoding utf8
 
           git clone $Env:FORK_URL src
           Set-Location src
