@@ -55,7 +55,7 @@ jobs:
       # (4) Enable long paths on Windows & configure Git
       - name: Enable Windows long paths (registry) + Git config
         if: contains(matrix.runner, 'windows')
-        shell: pwsh
+        shell: powershell
         run: |
           Write-Host "Enabling long paths on Windows..."
           # Registry for long paths (requires a reboot once in runner's lifetime)
@@ -82,7 +82,7 @@ jobs:
 
       - name: Install Windows dependencies
         if: contains(matrix.runner, 'windows')
-        shell: pwsh
+        shell: powershell
         run: |
           if (!(Get-Command ninja -ErrorAction SilentlyContinue)) {
             choco install ninja -y
@@ -99,7 +99,7 @@ jobs:
 
       - name: Clean workspace - Windows
         if: "runner.os == 'Windows'"
-        shell: pwsh
+        shell: powershell
         run: |
           if (Test-Path "chromium") {
             Remove-Item "chromium" -Recurse -Force
@@ -217,7 +217,7 @@ jobs:
       # (14) Package Windows build
       - name: Package Windows build
         if: contains(matrix.runner, 'windows')
-        shell: pwsh
+        shell: powershell
         run: |
           mkdir -p artifacts
           cd chromium/src/out/Release
