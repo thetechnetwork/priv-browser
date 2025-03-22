@@ -139,7 +139,7 @@ jobs:
             git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
           } else {
             Push-Location .\depot_tools
-            git pull
+            git fetch --all
             Pop-Location
           }
           # Add to PATH via GITHUB_ENV
