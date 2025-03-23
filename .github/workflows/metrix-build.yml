@@ -232,7 +232,7 @@ jobs:
           git checkout "$FORK_BRANCH"
 
           # Sync dependencies
-          gclient sync --with_branch_heads --with_tags -D
+          gclient sync --no-history --with_branch_heads --with_tags -D
 
           # Run hooks
           gclient runhooks
@@ -263,7 +263,7 @@ jobs:
           git checkout $Env:FORK_BRANCH
 
           # Sync dependencies
-          gclient sync --with_branch_heads --with_tags -D
+          gclient sync --no-history --with_branch_heads --with_tags -D
 
           # Run hooks
           gclient runhooks
