@@ -128,8 +128,13 @@ jobs:
             git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
           } else {
             Push-Location .\depot_tools
-            git fetch --all
-            git pull
+            # Make sure we're on a local 'main' branch before pulling.
+            # If local 'main' doesn’t exist yet, you can create it from origin/main.
+            if ((git branch --show-current) -ne "main") {
+              git checkout -B main origin/main
+            }
+            git fetch --prune --all
+            git pull origin main
             Pop-Location
           }
           # Add to PATH via GITHUB_ENV
