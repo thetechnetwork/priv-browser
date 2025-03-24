@@ -128,7 +128,7 @@ jobs:
             git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
           } else {
             Push-Location .\depot_tools
-            git fetch --all
+            git fetch --prune --all
             git pull
             Pop-Location
           }
