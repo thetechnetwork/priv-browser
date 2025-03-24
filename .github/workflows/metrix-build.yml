@@ -256,15 +256,15 @@ jobs:
           @"
           solutions = [
             {
-            "name": "src",
-            "url": "$Env:FORK_URL",
-            "deps_file": "DEPS",
-            "managed": false,
-            "custom_deps": {},
-            "custom_vars": {},
+              "name": "src",
+              "url": "$Env:FORK_URL",
+              "deps_file": "DEPS",
+              "managed": false,
+              "custom_deps": {},
+              "custom_vars": {},
             },
-            ]
-            "@ | Out-File -FilePath .gclient -Encoding utf8
+          ]
+          "@ | Out-File -FilePath .gclient -Encoding utf8
           }
 
           if (Test-Path "src\.git") {
