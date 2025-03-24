@@ -101,21 +101,10 @@ jobs:
           }
 
       #######################################################################
-      # 6) CLEAN WORKSPACE                                                  #
+      # (REMOVED) CLEAN WORKSPACE                                           #
       #######################################################################
-      - name: Clean workspace (Linux/macOS)
-        if: runner.os != 'Windows'
-        shell: bash
-        run: |
-          rm -rf chromium
-
-      - name: Clean workspace (Windows)
-        if: runner.os == 'Windows'
-        shell: powershell
-        run: |
-          if (Test-Path "chromium") {
-            Remove-Item "chromium" -Recurse -Force
-          }
+      # Removed so that local clone persists on self-hosted runners.
+      # (Was previously "rm -rf chromium" or "Remove-Item chromium -Recurse -Force")
 
       #######################################################################
       # 7) INSTALL DEPOT_TOOLS                                              #
@@ -140,6 +129,7 @@ jobs:
           } else {
             Push-Location .\depot_tools
             git fetch --all
+            git pull
             Pop-Location
           }
           # Add to PATH via GITHUB_ENV
@@ -166,7 +156,6 @@ jobs:
       #   if: runner.os == 'Windows'
       #   shell: powershell
       #   run: |
-      #     # Note: ccache on Windows is more complicated, but here's a placeholder:
       #     if (!(Test-Path "$Env:USERPROFILE\.ccache")) {
       #       New-Item -ItemType Directory -Path "$Env:USERPROFILE\.ccache" | Out-Null
       #     }
@@ -206,7 +195,7 @@ jobs:
           Write-Host "Using Chromium fork: $FORK_URL ($FORK_BRANCH)"
 
       #######################################################################
-      # 10) FETCH CHROMIUM SOURCE + RUN HOOKS                               #
+      # 10) FETCH CHROMIUM SOURCE (Incremental Sync)                        #
       #######################################################################
       - name: Fetch Chromium source (Linux/macOS)
         if: runner.os != 'Windows'
@@ -214,22 +203,36 @@ jobs:
         run: |
           mkdir -p chromium
           cd chromium
-          cat > .gclient << EOF
-          solutions = [
-            {
-              "name": "src",
-              "url": "$FORK_URL",
-              "deps_file": "DEPS",
-              "managed": False,
-              "custom_deps": {},
-              "custom_vars": {},
-            },
-          ]
-          EOF
 
-          git clone "$FORK_URL" src
-          cd src
-          git checkout "$FORK_BRANCH"
+          # Create a .gclient if it doesn't exist
+          if [ ! -f .gclient ]; then
+            cat > .gclient << EOF
+solutions = [
+  {
+    "name": "src",
+    "url": "$FORK_URL",
+    "deps_file": "DEPS",
+    "managed": False,
+    "custom_deps": {},
+    "custom_vars": {},
+  },
+]
+EOF
+          fi
+
+          if [ -d src/.git ]; then
+            echo "Found existing clone; fetching latest changes..."
+            cd src
+            git remote set-url origin "$FORK_URL"
+            git fetch --prune
+            git checkout "$FORK_BRANCH"
+            git pull
+          else
+            echo "No local clone found; cloning fresh..."
+            git clone "$FORK_URL" src
+            cd src
+            git checkout "$FORK_BRANCH"
+          fi
 
           # Sync dependencies
           gclient sync --no-history --with_branch_heads --with_tags -D
@@ -244,23 +247,35 @@ jobs:
           New-Item -ItemType Directory -Path "chromium" -Force | Out-Null
           Set-Location chromium
 
-          # Create the .gclient file
-          @"
-          solutions = [
-          {
-          ""name"": ""src"",
-          ""url"": ""$Env:FORK_URL"",
-          ""deps_file"": ""DEPS"",
-          ""managed"": False,
-          ""custom_deps"": {},
-          ""custom_vars"": {},
-          },
-          ]
-          "@ | Out-File -FilePath .gclient -Encoding utf8
+          if (!(Test-Path ".gclient")) {
+@"
+solutions = [
+  {
+    "name": "src",
+    "url": "$Env:FORK_URL",
+    "deps_file": "DEPS",
+    "managed": false,
+    "custom_deps": {},
+    "custom_vars": {},
+  },
+]
+"@ | Out-File -FilePath .gclient -Encoding utf8
+          }
 
-          git clone $Env:FORK_URL src
-          Set-Location src
-          git checkout $Env:FORK_BRANCH
+          if (Test-Path "src\.git") {
+            Write-Host "Found existing clone; fetching latest changes..."
+            Set-Location src
+            git remote set-url origin $Env:FORK_URL
+            git fetch --prune
+            git checkout $Env:FORK_BRANCH
+            git pull
+          }
+          else {
+            Write-Host "No local clone found; cloning fresh..."
+            git clone $Env:FORK_URL src
+            Set-Location src
+            git checkout $Env:FORK_BRANCH
+          }
 
           # Sync dependencies
           gclient sync --no-history --with_branch_heads --with_tags -D
