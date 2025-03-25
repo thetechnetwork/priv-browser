@@ -176,6 +176,7 @@
 <translation id="3140883423282498090">Өзгөртүүлөрүңүз Google Chrome кийинки жолу кайра ишке киргизилгенде күчүнө кирет.</translation>
 <translation id="3149510190863420837">Chrome колдонмолору</translation>
 <translation id="3161522574479303604">Бардык тилдер</translation>
+<translation id="319199214552513804">Бул кеңейтүүнү жана башкаларды бардык компьютерлериңизде колдонуу үчүн Chrome'го кириңиз</translation>
 <translation id="3196187562065225381">Файл кооптуу болгондуктан, Chrome бул жүктөп алууну бөгөттөдү</translation>
 <translation id="3222857603094643834">Google Lens менен бул барактан каалаган нерсени издеңиз</translation>
 <translation id="3226612997184048185">Эгер кыстармаларды Google аккаунтуңузга сактап койсоңуз, товарлардын бааларына Chrome'до көз салып, баалар төмөндөгөндө кабар аласыз</translation>
@@ -489,6 +490,7 @@ Google Chrome параметрлериңизди калыбына келтире
 <translation id="7514258452813684157">Google Updater Service</translation>
 <translation id="7515191208480168435">Оңой колдонуу үчүн Google Lens функциясын кадап койсоңуз болот</translation>
 <translation id="7535429826459677826">Google Chrome Dev</translation>
+<translation id="7543146567111253230">Бул кыстарманы жана башкаларды бардык түзмөктөрүңүздө пайдалануу үчүн Chrome'го кириңиз</translation>
 <translation id="756809126120519699">Chrome дайындары тазаланды</translation>
 <translation id="7572537927358445944">Өчүк • Chrome бул кеңейтүү кайдан алынганын текшере албайт</translation>
 <translation id="7583399374488819119"><ph name="COMPANY_NAME" /> орноткучу</translation>
@@ -515,6 +517,7 @@ Google Chrome параметрлериңизди калыбына келтире
 <translation id="7787950393032327779">Бул профилди Google Chrome'догу башка процесс (<ph name="PROCESS_ID" />) (<ph name="HOST_NAME" />) компьютери аркылуу колдонуп жатат окшойт. Профиль бурмаланып кетпеши үчүн, Chrome аны кулпулап койду. Эгер бул профилди башка процесстер колдонгон жок деп ишенсеңиз, профилдин кулпусун ачып туруп Chrome'ду кайра ишке киргизсеңиз болот.</translation>
 <translation id="7801699035218095297">Google Chrome сырсөздөрдү көчүргөнгө аракет кылып жатат. Ага уруксат берүү үчүн Windows сырсөзүңүздү териңиз.</translation>
 <translation id="7808348361785373670">Chrome'дон чыгарып салуу…</translation>
+<translation id="782480918904119604">Бул профилди Glic менен колдонуу үчүн Chrome'ду ачып, аккаунтуңузга кириңиз</translation>
 <translation id="7825851276765848807">Аныкталбаган катадан улам орнотулган жок. Google Chrome'ду кайра жүктөп алыңыз.</translation>
 <translation id="7845233973568007926">Орнотуп алганыңыз үчүн рахмат. <ph name="BUNDLE_NAME" /> топтомун колдонуп баштоодон мурда компьютерди өчүрүп күйгүзүңүз.</translation>
 <translation id="7872446069773932638">Жүктөлүп алынууда... <ph name="SECONDS" /> секунд калды</translation>

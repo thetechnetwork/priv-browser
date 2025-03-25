@@ -55,10 +55,6 @@ base::TimeDelta kPromoDisplayDelayForTests = base::Seconds(1);
 @property(nonatomic, strong)
     BubbleViewControllerPresenter* overflowMenuBubblePresenter;
 
-// The profile. May return null after the coordinator has been stopped
-// (thus the returned value must be checked for null).
-@property(nonatomic, readonly) ProfileIOS* profile;
-
 // The layout guide installed in the base view controller on which to anchor the
 // potential IPH bubble.
 @property(nonatomic, strong) UILayoutGuide* layoutGuide;
@@ -101,17 +97,12 @@ base::TimeDelta kPromoDisplayDelayForTests = base::Seconds(1);
 
 #pragma mark - Getters
 
-- (ProfileIOS*)profile {
-  return self.browser ? self.browser->GetProfile() : nullptr;
-}
-
 - (feature_engagement::Tracker*)featureEngagementTracker {
-  ProfileIOS* profile = self.profile;
-  if (!profile) {
+  if (!self.profile) {
     return nullptr;
   }
   feature_engagement::Tracker* tracker =
-      feature_engagement::TrackerFactory::GetForProfile(profile);
+      feature_engagement::TrackerFactory::GetForProfile(self.profile);
   DCHECK(tracker);
   return tracker;
 }
@@ -270,8 +261,7 @@ base::TimeDelta kPromoDisplayDelayForTests = base::Seconds(1);
 // Returns whether blue dot should be shown.
 - (BOOL)shouldShowBlueDot {
   // Don't show blue dot if cannot make a decision.
-  ProfileIOS* profile = self.profile;
-  if (!profile) {
+  if (!self.profile) {
     return NO;
   }
 
@@ -298,10 +288,8 @@ base::TimeDelta kPromoDisplayDelayForTests = base::Seconds(1);
 - (BubbleViewControllerPresenter*)newPopupMenuBubblePresenter {
   __weak __typeof(self) weakSelf = self;
   CallbackWithIPHDismissalReasonType dismissalCallback =
-      ^(IPHDismissalReasonType IPHDismissalReasonType,
-        feature_engagement::Tracker::SnoozeAction snoozeAction) {
-        [weakSelf popupMenuIPHDidDismissWithReasonType:IPHDismissalReasonType
-                                          SnoozeAction:snoozeAction];
+      ^(IPHDismissalReasonType reason) {
+        [weakSelf popupMenuIPHDidDismissWithReasonType:reason];
       };
 
   NSString* text =
@@ -322,13 +310,9 @@ base::TimeDelta kPromoDisplayDelayForTests = base::Seconds(1);
   return bubbleViewControllerPresenter;
 }
 
-- (void)popupMenuIPHDidDismissWithReasonType:
-            (IPHDismissalReasonType)IPHDismissalReasonType
-                                SnoozeAction:
-                                    (feature_engagement::Tracker::SnoozeAction)
-                                        snoozeAction {
-  if (IPHDismissalReasonType == IPHDismissalReasonType::kTappedAnchorView ||
-      IPHDismissalReasonType == IPHDismissalReasonType::kTimedOut) {
+- (void)popupMenuIPHDidDismissWithReasonType:(IPHDismissalReasonType)reason {
+  if (reason == IPHDismissalReasonType::kTappedAnchorView ||
+      reason == IPHDismissalReasonType::kTimedOut) {
     self.inSessionWithHistoryMenuItemIPH = YES;
   }
 
@@ -337,7 +321,7 @@ base::TimeDelta kPromoDisplayDelayForTests = base::Seconds(1);
   if (tracker) {
     const base::Feature& feature =
         feature_engagement::kIPHiOSHistoryOnOverflowMenuFeature;
-    tracker->DismissedWithSnooze(feature, snoozeAction);
+    tracker->Dismissed(feature);
   }
 
   [self.UIUpdater updateUIForIPHDismissed];
@@ -446,12 +430,11 @@ base::TimeDelta kPromoDisplayDelayForTests = base::Seconds(1);
       IDS_IOS_REMINDER_NOTIFICATIONS_TOOLS_MENU_BUBBLE_IPH);
 
   __weak __typeof(self) weakSelf = self;
-  CallbackWithIPHDismissalReasonType dismissalCallback =
-      ^(IPHDismissalReasonType IPHDismissalReasonType,
-        feature_engagement::Tracker::SnoozeAction /* snoozeAction */) {
-        [weakSelf reminderNotificationsOverflowMenuIPHDidDismissWithReasonType:
-                      IPHDismissalReasonType];
-      };
+  CallbackWithIPHDismissalReasonType dismissalCallback = ^(
+      IPHDismissalReasonType reason) {
+    [weakSelf
+        reminderNotificationsOverflowMenuIPHDidDismissWithReasonType:reason];
+  };
 
   BubbleViewControllerPresenter* bubbleViewControllerPresenter =
       [self createPopupMenuBubblePresenterWithText:text
@@ -467,12 +450,12 @@ base::TimeDelta kPromoDisplayDelayForTests = base::Seconds(1);
 // Handles the dismissal of the reminder notifications IPH in the overflow menu.
 // `IPHDismissalReasonType`: The reason why the IPH was dismissed.
 - (void)reminderNotificationsOverflowMenuIPHDidDismissWithReasonType:
-    (IPHDismissalReasonType)IPHDismissalReasonType {
+    (IPHDismissalReasonType)reason {
   CHECK(
       send_tab_to_self::IsSendTabIOSPushNotificationsEnabledWithTabReminders());
 
-  if (IPHDismissalReasonType == IPHDismissalReasonType::kTappedAnchorView ||
-      IPHDismissalReasonType == IPHDismissalReasonType::kTappedIPH) {
+  if (reason == IPHDismissalReasonType::kTappedAnchorView ||
+      reason == IPHDismissalReasonType::kTappedIPH) {
     // If the user interacted with the IPH by tapping on it or its anchor view,
     // consider this as a successful interaction and set
     // `inSessionWithTabRemindersIPH` to YES to enable highlighting the
@@ -504,9 +487,8 @@ base::TimeDelta kPromoDisplayDelayForTests = base::Seconds(1);
   // Prepare the dismissal callback.
   __weak __typeof(self) weakSelf = self;
   CallbackWithIPHDismissalReasonType dismissalCallback =
-      ^(IPHDismissalReasonType IPHDismissalReasonType,
-        feature_engagement::Tracker::SnoozeAction snoozeAction) {
-        [weakSelf overflowMenuIPHDidDismissWithSnoozeAction:snoozeAction];
+      ^(IPHDismissalReasonType reason) {
+        [weakSelf overflowMenuIPHDidDismiss];
       };
 
   BubbleAlignment alignment = anchorXInParent < 0.5 * parentViewWidth
@@ -529,8 +511,7 @@ base::TimeDelta kPromoDisplayDelayForTests = base::Seconds(1);
   return bubbleViewControllerPresenter;
 }
 
-- (void)overflowMenuIPHDidDismissWithSnoozeAction:
-    (feature_engagement::Tracker::SnoozeAction)snoozeAction {
+- (void)overflowMenuIPHDidDismiss {
   self.overflowMenuBubblePresenter = nil;
   self.uiConfiguration.highlightDestination = -1;
 }
@@ -542,15 +523,10 @@ base::TimeDelta kPromoDisplayDelayForTests = base::Seconds(1);
 
   // Prepare the dismissal callback.
   __weak __typeof(self) weakSelf = self;
-  CallbackWithIPHDismissalReasonType dismissalCallback = ^(
-      IPHDismissalReasonType IPHDismissalReasonType,
-      feature_engagement::Tracker::SnoozeAction snoozeAction) {
-    if (IPHDismissalReasonType == IPHDismissalReasonType::kTappedIPH) {
-      [self scrollToEditActionsButton];
-    }
-    [weakSelf
-        overflowMenuCustomizationIPHDidDismissWithSnoozeAction:snoozeAction];
-  };
+  CallbackWithIPHDismissalReasonType dismissalCallback =
+      ^(IPHDismissalReasonType reason) {
+        [weakSelf overflowMenuCustomizationIPHDidDismissWithReasonType:reason];
+      };
 
   BubbleAlignment alignment = BubbleAlignmentCenter;
 
@@ -569,8 +545,11 @@ base::TimeDelta kPromoDisplayDelayForTests = base::Seconds(1);
   return bubbleViewControllerPresenter;
 }
 
-- (void)overflowMenuCustomizationIPHDidDismissWithSnoozeAction:
-    (feature_engagement::Tracker::SnoozeAction)snoozeAction {
+- (void)overflowMenuCustomizationIPHDidDismissWithReasonType:
+    (IPHDismissalReasonType)reason {
+  if (reason == IPHDismissalReasonType::kTappedIPH) {
+    [self scrollToEditActionsButton];
+  }
   feature_engagement::Tracker* tracker = self.featureEngagementTracker;
   if (tracker) {
     const base::Feature& feature =

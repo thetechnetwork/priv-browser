@@ -5,6 +5,7 @@
 #include "chrome/browser/ash/policy/skyvault/local_files_migration_manager.h"
 
 #include <memory>
+#include <optional>
 #include <string>
 
 #include "base/files/file_util.h"
@@ -27,6 +28,7 @@
 #include "chrome/browser/ash/policy/skyvault/policy_utils.h"
 #include "chrome/browser/ash/policy/skyvault/test/skyvault_test_utils.h"
 #include "chrome/browser/browser_process.h"
+#include "chrome/browser/chromeos/extensions/login_screen/login/cleanup/files_cleanup_handler.h"
 #include "chrome/browser/download/download_dir_util.h"
 #include "chrome/browser/policy/policy_test_utils.h"
 #include "chrome/browser/policy/profile_policy_connector.h"
@@ -98,6 +100,32 @@ MigrationDestination GetCloudProvider(const std::string& destination) {
   return MigrationDestination::kNotSpecified;
 }
 
+class MockCleanupHandler : public chromeos::FilesCleanupHandler {
+ public:
+  MockCleanupHandler() {
+    ON_CALL(*this, Cleanup)
+        .WillByDefault(
+            [](base::OnceCallback<void(
+                   const std::optional<std::string>& error_message)> callback) {
+              std::move(callback).Run(std::nullopt);
+            });
+  }
+
+  MockCleanupHandler(const MockCleanupHandler&) = delete;
+  MockCleanupHandler& operator=(const MockCleanupHandler&) = delete;
+
+  ~MockCleanupHandler() override = default;
+
+  base::WeakPtr<MockCleanupHandler> GetWeakPtr() {
+    return weak_ptr_factory_.GetWeakPtr();
+  }
+
+  MOCK_METHOD(void, Cleanup, (CleanupHandlerCallback callback), (override));
+
+ private:
+  base::WeakPtrFactory<MockCleanupHandler> weak_ptr_factory_{this};
+};
+
 }  // namespace
 
 class LocalFilesMigrationManagerTest : public policy::PolicyTest {
@@ -105,6 +133,7 @@ class LocalFilesMigrationManagerTest : public policy::PolicyTest {
   LocalFilesMigrationManagerTest() {
     scoped_feature_list_.InitWithFeatures(
         /*enabled_features=*/{features::kSkyVault, features::kSkyVaultV2,
+                              features::kSkyVaultV3,
                               chromeos::features::kUploadOfficeToCloud},
         /*disabled_features=*/{});
   }
@@ -200,6 +229,14 @@ class LocalFilesMigrationManagerTest : public policy::PolicyTest {
     return copied_file_path;
   }
 
+  void SetMockCleanupHandler() {
+    if (!cleanup_handler_) {
+      cleanup_handler_ =
+          std::make_unique<testing::NiceMock<MockCleanupHandler>>();
+    }
+    manager()->SetCleanupHandlerForTesting(cleanup_handler_->GetWeakPtr());
+  }
+
   LocalFilesMigrationManager* manager() {
     return LocalFilesMigrationManagerFactory::GetInstance()
         ->GetForBrowserContext(browser()->profile());
@@ -210,6 +247,8 @@ class LocalFilesMigrationManagerTest : public policy::PolicyTest {
   base::FilePath my_files_dir_;
   ash::system::FakeStatisticsProvider statistics_provider_;
   std::unique_ptr<MockMigrationNotificationManager> notification_manager_ =
+      nullptr;
+  std::unique_ptr<testing::NiceMock<MockCleanupHandler>> cleanup_handler_ =
       nullptr;
   testing::StrictMock<MockMigrationObserver> observer_;
   testing::StrictMock<ash::MockUserDataAuthClient> userdataauth_;
@@ -260,6 +299,16 @@ IN_PROC_BROWSER_TEST_P(LocalFilesMigrationManagerLocationTest,
 
   manager()->SetCoordinatorForTesting(std::move(coordinator));
 
+  SetMockCleanupHandler();
+
+  base::RunLoop run_loop;
+  // Write access will be disallowed.
+  EXPECT_CALL(userdataauth_,
+              SetUserDataStorageWriteEnabled(WithEnabled(false), _))
+      .WillOnce(testing::DoAll(
+          base::test::RunClosure(run_loop.QuitClosure()),
+          ReplyWith(::user_data_auth::SetUserDataStorageWriteEnabledReply())));
+
   // Logged during initialization.
   histogram_tester_.ExpectBucketCount(
       "Enterprise.SkyVault.LocalStorage.Enabled", true, 1);
@@ -274,6 +323,7 @@ IN_PROC_BROWSER_TEST_P(LocalFilesMigrationManagerLocationTest,
       base::TimeDelta(kTotalMigrationTimeout - kFinalMigrationTimeout));
   // Fast forward again. The "now" doesn't advance so skip the full timeout.
   task_runner->FastForwardBy(base::TimeDelta(kTotalMigrationTimeout));
+  run_loop.Run();
 
   histogram_tester_.ExpectBucketCount(
       "Enterprise.SkyVault.LocalStorage.Enabled", false, 1);
@@ -320,6 +370,8 @@ IN_PROC_BROWSER_TEST_P(LocalFilesMigrationManagerLocationTest,
       });
 
   manager()->SetCoordinatorForTesting(std::move(coordinator));
+
+  SetMockCleanupHandler();
 
   base::RunLoop run_loop;
   // Write access will be disallowed.
@@ -369,11 +421,22 @@ IN_PROC_BROWSER_TEST_P(LocalFilesMigrationManagerLocationTest,
 
   manager()->SetCoordinatorForTesting(std::move(coordinator));
 
+  SetMockCleanupHandler();
+
+  base::RunLoop run_loop;
+  // Write access will be disallowed.
+  EXPECT_CALL(userdataauth_,
+              SetUserDataStorageWriteEnabled(WithEnabled(false), _))
+      .WillOnce(testing::DoAll(
+          base::test::RunClosure(run_loop.QuitClosure()),
+          ReplyWith(::user_data_auth::SetUserDataStorageWriteEnabledReply())));
+
   SetMigrationPolicies(/*local_user_files_allowed=*/false,
                        /*destination=*/GetMigrationDestination());
   // Fast forward only to the second dialog.
   task_runner->FastForwardBy(
       base::TimeDelta(kTotalMigrationTimeout - kFinalMigrationTimeout));
+  run_loop.Run();
 }
 
 IN_PROC_BROWSER_TEST_P(LocalFilesMigrationManagerLocationTest,
@@ -542,6 +605,8 @@ IN_PROC_BROWSER_TEST_F(LocalFilesMigrationManagerTest,
 
   manager()->SetCoordinatorForTesting(std::move(coordinator));
 
+  SetMockCleanupHandler();
+
   // Enable migration to OneDrive.
   SetMigrationPolicies(/*local_user_files_allowed=*/false,
                        /*destination=*/download_dir_util::kLocationOneDrive);
@@ -595,6 +660,37 @@ IN_PROC_BROWSER_TEST_F(LocalFilesMigrationManagerTest,
   SetMigrationPolicies(/*local_user_files_allowed=*/false,
                        /*destination=*/kReadOnly);
 
+  task_runner->FastForwardBy(
+      base::TimeDelta(kTotalMigrationTimeout - kFinalMigrationTimeout));
+  task_runner->FastForwardBy(base::TimeDelta(kTotalMigrationTimeout));
+}
+
+// Tests that when LocalFilesMigrationDestination policy is set to "delete", the
+// flow completes without errors.
+IN_PROC_BROWSER_TEST_F(LocalFilesMigrationManagerTest, DeleteLocalFiles) {
+  EXPECT_CALL(observer_, OnMigrationSucceeded).Times(1);
+  SetUpMyFiles();
+  base::FilePath source_file_path = CreateTestFile(kTestFile, my_files_dir_);
+
+  base::ScopedMockTimeMessageLoopTaskRunner task_runner;
+
+  SetMockCleanupHandler();
+  // Since it's the delete case, ensure that the cleanup is called.
+  EXPECT_CALL(*cleanup_handler_, Cleanup)
+      .WillOnce(
+          [](base::OnceCallback<void(
+                 const std::optional<std::string>& error_message)> callback) {
+            std::move(callback).Run(std::nullopt);
+          });
+
+  // Write access will be disallowed.
+  EXPECT_CALL(userdataauth_, SetUserDataStorageWriteEnabled)
+      .WillOnce(
+          ReplyWith(::user_data_auth::SetUserDataStorageWriteEnabledReply()));
+
+  // Set the policy to delete local files.
+  SetMigrationPolicies(/*local_user_files_allowed=*/false,
+                       /*destination=*/"delete");
   task_runner->FastForwardBy(
       base::TimeDelta(kTotalMigrationTimeout - kFinalMigrationTimeout));
   task_runner->FastForwardBy(base::TimeDelta(kTotalMigrationTimeout));

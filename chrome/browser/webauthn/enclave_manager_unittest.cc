@@ -13,6 +13,7 @@
 #include <string_view>
 #include <tuple>
 #include <utility>
+#include <variant>
 #include <vector>
 
 #include "base/check.h"
@@ -47,6 +48,7 @@
 #include "components/signin/public/identity_manager/identity_test_environment.h"
 #include "components/sync/protocol/webauthn_credential_specifics.pb.h"
 #include "components/trusted_vault/command_line_switches.h"
+#include "components/trusted_vault/proto/vault.pb.h"
 #include "components/trusted_vault/trusted_vault_connection.h"
 #include "crypto/scoped_fake_user_verifying_key_provider.h"
 #include "crypto/scoped_mock_unexportable_key_provider.h"
@@ -714,8 +716,9 @@ TEST_F(EnclaveManagerTest, AddWithExistingPIN) {
   BoolFuture add_future;
   ASSERT_TRUE(manager_.AddDeviceToAccount(
       trusted_vault::GpmPinMetadata(std::string(kTestPINPublicKey),
-                                    GetTestWrappedPIN().SerializeAsString(),
-                                    /*expiry=*/base::Time()),
+                                    trusted_vault::UsableRecoveryPinMetadata(
+                                        GetTestWrappedPIN().SerializeAsString(),
+                                        /*expiry=*/base::Time())),
       add_future.GetCallback()));
   EXPECT_TRUE(add_future.Wait());
 
@@ -740,9 +743,10 @@ TEST_F(EnclaveManagerTest, InvalidWrappedPIN) {
   BoolFuture add_future;
   // A wrapped PIN that isn't a valid protobuf should be rejected.
   EXPECT_FALSE(manager_.AddDeviceToAccount(
-      trusted_vault::GpmPinMetadata(std::string(kTestPINPublicKey),
-                                    "nonsense wrapped PIN",
-                                    /*expiry=*/base::Time()),
+      trusted_vault::GpmPinMetadata(
+          std::string(kTestPINPublicKey),
+          trusted_vault::UsableRecoveryPinMetadata("nonsense wrapped PIN",
+                                                   /*expiry=*/base::Time())),
       add_future.GetCallback()));
 
   // A valid protobuf, but which fails invariants, should be rejected.
@@ -750,8 +754,9 @@ TEST_F(EnclaveManagerTest, InvalidWrappedPIN) {
   wrapped_pin.set_wrapped_pin("too short");
   EXPECT_FALSE(manager_.AddDeviceToAccount(
       trusted_vault::GpmPinMetadata(std::string(kTestPINPublicKey),
-                                    wrapped_pin.SerializeAsString(),
-                                    /*expiry=*/base::Time()),
+                                    trusted_vault::UsableRecoveryPinMetadata(
+                                        wrapped_pin.SerializeAsString(),
+                                        /*expiry=*/base::Time())),
       add_future.GetCallback()));
 }
 
@@ -960,8 +965,9 @@ TEST_F(EnclaveManagerTest, ChangePINWithTwoDevices) {
   const std::string intermediate_pin = "intermediate_pin";
   const std::string new_pin = "newpin";
 
+  const TempDir temp_dir_2;
   EnclaveManager second_manager(
-      temp_dir_.GetPath(), identity_test_env_.identity_manager(),
+      temp_dir_2.GetPath(), identity_test_env_.identity_manager(),
       base::BindLambdaForTesting([&]() -> network::mojom::NetworkContext* {
         return network_context_.get();
       }),
@@ -1047,8 +1053,9 @@ TEST_F(EnclaveManagerTest, EnclaveForgetsClient_AddDeviceToAccount) {
   BoolFuture add_future;
   ASSERT_TRUE(manager_.AddDeviceToAccount(
       trusted_vault::GpmPinMetadata(std::string(kTestPINPublicKey),
-                                    GetTestWrappedPIN().SerializeAsString(),
-                                    /*expiry=*/base::Time()),
+                                    trusted_vault::UsableRecoveryPinMetadata(
+                                        GetTestWrappedPIN().SerializeAsString(),
+                                        /*expiry=*/base::Time())),
       add_future.GetCallback()));
   EXPECT_TRUE(add_future.Wait());
   EXPECT_FALSE(add_future.Get());
@@ -1104,6 +1111,101 @@ TEST_F(EnclaveManagerTest, RenewPIN) {
   EXPECT_TRUE(*LastPINRenewalTime() > *initial_time);
 }
 
+// Regression test for crbug.com/403218779.
+// Simulates two chrome clients by standing up a second Enclave Manager. The
+// second Enclave Manager will renew a PIN. This invalidates the data from the
+// first manager. Then, the first manager will attempt renewing the PIN. This
+// used to be broken because the first manager would not download the updated
+// PIN data, causing a public key mismatch on the join security domain query.
+TEST_F(EnclaveManagerTest, RenewPINWithStaleDataFromAnotherClient) {
+  const std::string kPin = "123456";
+
+  // Set up the first manager with the PIN.
+  ASSERT_TRUE(Register());
+  BoolFuture setup_future;
+  manager_.SetupWithPIN(kPin, setup_future.GetCallback());
+  ASSERT_TRUE(setup_future.Wait());
+  ASSERT_TRUE(manager_.is_ready());
+  ASSERT_TRUE(manager_.has_wrapped_pin());
+  ASSERT_EQ(security_domain_service_->num_physical_members(), 1u);
+  ASSERT_EQ(security_domain_service_->num_pin_members(), 1u);
+  std::optional<std::pair<int32_t, std::vector<uint8_t>>> secret =
+      manager_.TakeSecret();
+  ASSERT_TRUE(secret);
+  const std::string initial_pin_key =
+      security_domain_service_->GetPinMemberPublicKey();
+
+  // Set up the second manager.
+  const TempDir temp_dir_2;
+  EnclaveManager second_manager(
+      temp_dir_2.GetPath(), identity_test_env_.identity_manager(),
+      base::BindLambdaForTesting([&]() -> network::mojom::NetworkContext* {
+        return network_context_.get();
+      }),
+      url_loader_factory_.GetSafeWeakWrapper());
+  second_manager.StoreKeys(gaia_id_, {secret->second}, secret->first);
+  BoolFuture add_future;
+  second_manager.AddDeviceToAccount(security_domain_service_->GetPinMetadata(),
+                                    add_future.GetCallback());
+  ASSERT_TRUE(add_future.Wait());
+  ASSERT_TRUE(add_future.Get());
+  ASSERT_EQ(security_domain_service_->num_physical_members(), 2u);
+  ASSERT_EQ(security_domain_service_->num_pin_members(), 1u);
+
+  // Renew the PIN with the second manager.
+  {
+    BoolFuture renew_future;
+    second_manager.RenewPIN(renew_future.GetCallback());
+    ASSERT_TRUE(renew_future.Wait());
+    ASSERT_TRUE(renew_future.Get());
+  }
+  const std::string second_pin_key =
+      security_domain_service_->GetPinMemberPublicKey();
+  ASSERT_NE(initial_pin_key, second_pin_key);
+
+  // Attempt renewing the PIN with the first enclave.
+  {
+    BoolFuture renew_future;
+    manager_.RenewPIN(renew_future.GetCallback());
+    ASSERT_TRUE(renew_future.Wait());
+    ASSERT_TRUE(renew_future.Get());
+  }
+  const std::string third_pin_key =
+      security_domain_service_->GetPinMemberPublicKey();
+  EXPECT_NE(second_pin_key, third_pin_key);
+}
+
+// Regression test for crbug.com/402425846.
+// Attempts renewing a PIN from local data when the security domain indicates
+// that the current PIN changed, and is also not usable for recovery.
+TEST_F(EnclaveManagerTest, RenewUnusablePINFromLocalData) {
+  const std::string kPin = "123456";
+
+  // Set up the manager with the PIN.
+  ASSERT_TRUE(Register());
+  BoolFuture setup_future;
+  manager_.SetupWithPIN(kPin, setup_future.GetCallback());
+  ASSERT_TRUE(setup_future.Wait());
+  ASSERT_TRUE(manager_.is_ready());
+  ASSERT_TRUE(manager_.has_wrapped_pin());
+  ASSERT_EQ(security_domain_service_->num_physical_members(), 1u);
+  ASSERT_EQ(security_domain_service_->num_pin_members(), 1u);
+  const std::string initial_pin_key =
+      security_domain_service_->GetPinMemberPublicKey();
+
+  // Update the joined PIN to one that has a different public key and is not
+  // usable for recovery.
+  security_domain_service_->MakePinMemberUnusable();
+  security_domain_service_->SetPinMemberPublicKey("Bad PK");
+
+  // Renew the PIN.
+  BoolFuture renew_future;
+  manager_.RenewPIN(renew_future.GetCallback());
+  ASSERT_TRUE(renew_future.Wait());
+  EXPECT_TRUE(renew_future.Get());
+  EXPECT_NE(security_domain_service_->GetPinMemberPublicKey(), "Bad PK");
+}
+
 TEST_F(EnclaveManagerTest, EpochChanged) {
   ASSERT_TRUE(Register());
 
@@ -1145,9 +1247,10 @@ TEST_F(EnclaveManagerTest, PINChanged) {
   state.state = trusted_vault::
       DownloadAuthenticationFactorsRegistrationStateResult::State::kRecoverable;
   state.key_version = kSecretVersion;
-  state.gpm_pin_metadata.emplace(user.pin_public_key(),
+  state.gpm_pin_metadata = trusted_vault::GpmPinMetadata(
+      user.pin_public_key(), trusted_vault::UsableRecoveryPinMetadata(
                                  wrapped_pin.SerializeAsString(),
-                                 /*expiry=*/base::Time::FromTimeT(1));
+                                 /*expiry=*/base::Time::FromTimeT(1)));
 
   BoolFuture update_future;
   EXPECT_TRUE(
@@ -1549,9 +1652,9 @@ class EnclaveUVTest : public EnclaveManagerTest {
 #endif
   }
 
-  absl::variant<crypto::ScopedFakeUserVerifyingKeyProvider,
-                crypto::ScopedNullUserVerifyingKeyProvider,
-                crypto::ScopedFailingUserVerifyingKeyProvider>
+  std::variant<crypto::ScopedFakeUserVerifyingKeyProvider,
+               crypto::ScopedNullUserVerifyingKeyProvider,
+               crypto::ScopedFailingUserVerifyingKeyProvider>
       fake_provider_;
 
 #if BUILDFLAG(IS_MAC)

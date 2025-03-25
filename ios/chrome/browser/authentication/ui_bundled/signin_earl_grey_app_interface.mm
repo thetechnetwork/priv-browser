@@ -23,12 +23,15 @@
 #import "components/sync/service/sync_service.h"
 #import "components/sync/service/sync_user_settings.h"
 #import "ios/chrome/browser/authentication/ui_bundled/cells/table_view_identity_cell.h"
+#import "ios/chrome/browser/authentication/ui_bundled/enterprise/enterprise_utils.h"
 #import "ios/chrome/browser/bookmarks/model/bookmarks_utils.h"
 #import "ios/chrome/browser/shared/coordinator/scene/scene_controller.h"
 #import "ios/chrome/browser/shared/model/application_context/application_context.h"
 #import "ios/chrome/browser/shared/model/prefs/pref_names.h"
 #import "ios/chrome/browser/shared/model/profile/profile_ios.h"
 #import "ios/chrome/browser/shared/public/commands/show_signin_command.h"
+#import "ios/chrome/browser/shared/public/features/features.h"
+#import "ios/chrome/browser/signin/model/account_profile_mapper.h"
 #import "ios/chrome/browser/signin/model/authentication_service.h"
 #import "ios/chrome/browser/signin/model/authentication_service_factory.h"
 #import "ios/chrome/browser/signin/model/capabilities_types.h"
@@ -144,31 +147,28 @@
                                 signin_metrics::AccessPoint::kSettings);
 }
 
-+ (void)signinAndEnableLegacySyncFeature:(FakeSystemIdentity*)identity {
-  [self signinWithFakeIdentity:identity];
++ (void)signinWithFakeManagedIdentityInPersonalProfile:
+    (FakeSystemIdentity*)identity {
+  CHECK(AreSeparateProfilesForManagedAccountsEnabled());
+  CHECK(IsIdentityManaged(identity).value_or(NO));
+  if (![self isIdentityAdded:identity]) {
+    // For convenience, add the identity, if it was not added yet.
+    [self addFakeIdentity:identity withUnknownCapabilities:NO];
+  }
 
-  // "Upgrade" the account to ConsentLevel::kSync.
+  GetApplicationContext()
+      ->GetAccountProfileMapper()
+      ->MakePersonalProfileManagedWithGaiaID(GaiaId(identity.gaiaID));
+
   ProfileIOS* profile = chrome_test_util::GetOriginalProfile();
-  signin::IdentityManager* identityManager =
-      IdentityManagerFactory::GetForProfile(profile);
-  CoreAccountId coreAccountId =
-      identityManager->GetPrimaryAccountId(signin::ConsentLevel::kSignin);
-  CHECK(!coreAccountId.empty());
-  signin::PrimaryAccountMutator::PrimaryAccountError error =
-      identityManager->GetPrimaryAccountMutator()->SetPrimaryAccount(
-          coreAccountId, signin::ConsentLevel::kSync,
-          signin_metrics::AccessPoint::kSettings);
-  CHECK_EQ(error, signin::PrimaryAccountMutator::PrimaryAccountError::kNoError);
-
-  // Mark Sync-the-feature setup as complete, so it can start up.
-  syncer::SyncService* syncService = SyncServiceFactory::GetForProfile(profile);
-  syncService->SetSyncFeatureRequested();
-  syncService->GetUserSettings()->SetInitialSyncFeatureSetupComplete(
-      syncer::SyncFirstSetupCompleteSource::BASIC_FLOW);
+  AuthenticationService* authenticationService =
+      AuthenticationServiceFactory::GetForProfile(profile);
+  authenticationService->SignIn(identity,
+                                signin_metrics::AccessPoint::kSettings);
 }
 
 + (void)signInWithoutHistorySyncWithFakeIdentity:(FakeSystemIdentity*)identity {
-  chrome_test_util::SignInWithoutSync(identity);
+  chrome_test_util::SignIn(identity);
 }
 
 + (void)triggerReauthDialogWithFakeIdentity:(FakeSystemIdentity*)identity {

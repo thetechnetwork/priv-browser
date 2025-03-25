@@ -299,7 +299,23 @@ bool IsAccessibilityManifestV3EnabledForEnhancedNetworkTts() {
       ::features::kAccessibilityManifestV3EnhancedNetworkTts);
 }
 
+BASE_FEATURE(kAccessibilityManifestV3SwitchAccess,
+             "AccessibilityManifestV3SwitchAccess",
+             base::FEATURE_DISABLED_BY_DEFAULT);
+bool IsAccessibilityManifestV3EnabledForSwitchAccess() {
+  return base::FeatureList::IsEnabled(
+      ::features::kAccessibilityManifestV3SwitchAccess);
+}
+
 #endif  // BUILDFLAG(IS_CHROMEOS)
+
+BASE_FEATURE(kAccessibilityOnScreenMode,
+             "AccessibilityOnScreenAXMode",
+             base::FEATURE_DISABLED_BY_DEFAULT);
+
+bool IsAccessibilityOnScreenAXModeEnabled() {
+  return base::FeatureList::IsEnabled(::features::kAccessibilityOnScreenMode);
+}
 
 #if !BUILDFLAG(IS_ANDROID)
 BASE_FEATURE(kAXTreeFixing, "AXTreeFixing", base::FEATURE_DISABLED_BY_DEFAULT);

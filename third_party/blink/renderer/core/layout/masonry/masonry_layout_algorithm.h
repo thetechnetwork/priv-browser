@@ -36,12 +36,11 @@ class CORE_EXPORT MasonryLayoutAlgorithm
   GridSizingTrackCollection BuildGridAxisTracks(
       const GridLineResolver& line_resolver,
       SizingConstraint sizing_constraint,
-      wtf_size_t* start_offset) const;
+      wtf_size_t& start_offset) const;
 
-  GridItems* BuildMasonryItems(
-      const GridLineResolver& line_resolver,
-      const GridLayoutTrackCollection& track_collection,
-      wtf_size_t start_offset) const;
+  GridItems BuildMasonryItems(const GridLineResolver& line_resolver,
+                              const GridLayoutTrackCollection& track_collection,
+                              wtf_size_t start_offset) const;
 
   wtf_size_t ComputeAutomaticRepetitions() const;
 
@@ -50,8 +49,8 @@ class CORE_EXPORT MasonryLayoutAlgorithm
   //   intrinsic size contribution among the items in that group."
   // Returns a collection of items that reflect the intrinsic contributions from
   // the item groups, which will be used to resolve the grid axis' track sizes.
-  GridItems* BuildVirtualMasonryItems(const GridLineResolver& line_resolver,
-                                      wtf_size_t* start_offset) const;
+  GridItems BuildVirtualMasonryItems(const GridLineResolver& line_resolver,
+                                     wtf_size_t& start_offset) const;
 
   ConstraintSpace CreateConstraintSpace(
       const GridItemData& masonry_item,

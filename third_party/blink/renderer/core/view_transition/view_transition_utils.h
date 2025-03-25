@@ -24,13 +24,19 @@ class CORE_EXPORT ViewTransitionUtils {
   using PseudoFunctor = base::FunctionRef<void(PseudoElement*)>;
   using PseudoPredicate = base::FunctionRef<bool(PseudoElement*)>;
 
-  static void ForEachTransitionPseudo(Document&, PseudoFunctor);
-  static PseudoElement* FindPseudoIf(const Document&, PseudoPredicate);
+  static void ForEachTransitionPseudo(Element&, PseudoFunctor);
+  static PseudoElement* FindPseudoIf(const Element&, PseudoPredicate);
   static void ForEachDirectTransitionPseudo(const Element*, PseudoFunctor);
 
   // Returns the view transition in-progress in the given document, if one
   // exists.
   static ViewTransition* GetTransition(const Document& document);
+
+  static ViewTransition* GetTransition(const Element& element);
+
+  // Returns the view transition that the element associated with the specified
+  // layout object is participating in, if one exists.
+  static ViewTransition* TransitionForTaggedElement(const LayoutObject&);
 
   // Calls the supplied function for every active transition (document-level or
   // element-scoped).

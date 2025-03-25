@@ -20,7 +20,6 @@
 #include "chrome/browser/app_mode/test/fake_origin_test_server_mixin.h"
 #include "chrome/browser/ash/app_mode/fake_cws.h"
 #include "chrome/browser/ash/app_mode/fake_cws_mixin.h"
-#include "chrome/browser/ash/app_mode/kiosk_app.h"
 #include "chrome/browser/ash/login/test/device_state_mixin.h"
 #include "chrome/browser/ash/login/test/scoped_policy_update.h"
 #include "chrome/test/base/mixin_based_in_process_browser_test.h"
@@ -34,9 +33,9 @@ namespace ash {
 // the device and can set policies in Kiosk device local accounts based on a
 // `Config`.
 //
-// Prefer this mixin over `KioskBaseTest` and `WebKioskBaseTest` when writing
-// Kiosk browser tests because its set up is more realistic, and the mixin
-// allows tests for Kiosk web apps and Chrome apps in the same fixture.
+// Prefer this mixin over `WebKioskBaseTest` when writing Kiosk browser tests
+// because its set up is more realistic, and the mixin allows tests for Kiosk
+// web apps and Chrome apps in the same fixture.
 class KioskMixin : public InProcessBrowserTestMixin {
  public:
   // Option for a web app configured to use `web_server_`. `url_path` should
@@ -185,10 +184,6 @@ class KioskMixin : public InProcessBrowserTestMixin {
   // `Option` to configure a simple Chrome app.
   static CwsChromeAppOption SimpleChromeAppOption();
 
-  // Returns the `KioskApp` known by the system given its corresponding
-  // `account_id` configured in policies.
-  static std::optional<KioskApp> GetAppByAccountId(std::string_view account_id);
-
   // Uses `cached_configuration` to set up Kiosk policies. The configuration is
   // set in the beginning of the test, simulating policies being pre-cached in
   // the device.
@@ -223,20 +218,6 @@ class KioskMixin : public InProcessBrowserTestMixin {
   // policies using `DeviceStateMixin`.
   void Configure(ScopedDevicePolicyUpdate& device_policy_update,
                  const Config& config);
-
-  // Launches the given `app`, simulating a manual launch from the login screen.
-  // Returns true if the launch started.
-  [[nodiscard]] bool LaunchManually(const KioskApp& app);
-
-  // Launches the app identified by the given `account_id`, simulating a manual
-  // launch from the login screen. Returns true if the launch started.
-  //
-  // `account_id` must have been previously configured in policies.
-  [[nodiscard]] bool LaunchManually(std::string_view account_id);
-
-  // Waits until a Kiosk session launched. Returns true if the launch was
-  // successful.
-  [[nodiscard]] bool WaitSessionLaunched();
 
   // Returns a URL to the default web server with `url_suffix` appended to it.
   //

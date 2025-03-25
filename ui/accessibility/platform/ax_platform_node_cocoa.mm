@@ -8,6 +8,7 @@
 #include <Foundation/Foundation.h>
 
 #include "base/apple/foundation_util.h"
+#include "base/compiler_specific.h"
 #include "base/logging.h"
 #include "base/mac/mac_util.h"
 #include "base/memory/raw_ptr_exclusion.h"
@@ -438,8 +439,13 @@ const ui::CocoaActionList& GetCocoaActionListForTesting() {
 }
 
 - (BOOL)conditionallyRespondsToSelector:(SEL)selector {
-  static base::NoDestructor<std::unordered_set<SEL>> methodSelectorsForActions(
-      { @selector(accessibilityPerformPress), });
+  static base::NoDestructor<std::unordered_set<SEL>> methodSelectorsForActions({
+    @selector(accessibilityPerformPress),
+        @selector(accessibilityPerformDecrement),
+        @selector(accessibilityPerformIncrement),
+        @selector(accessibilityPerformShowMenu),
+        @selector(accessibilityPerformConfirm)
+  });
 
   static base::NoDestructor<std::unordered_set<SEL>>
       methodSelectorsForParameterizedAttributes({
@@ -1013,12 +1019,14 @@ const ui::CocoaActionList& GetCocoaActionListForTesting() {
   return self;
 }
 
-- (void)detach {
+- (void)detachAndNotifyDestroyed:(BOOL)shouldNotify {
   if (!_node)
     return;
   _node = nil;
-  NSAccessibilityPostNotification(
-      self, NSAccessibilityUIElementDestroyedNotification);
+  if (shouldNotify) {
+    NSAccessibilityPostNotification(
+        self, NSAccessibilityUIElementDestroyedNotification);
+  }
 }
 
 - (NSRect)boundsInScreen {
@@ -1384,6 +1392,7 @@ const ui::CocoaActionList& GetCocoaActionListForTesting() {
               containsObject:evaluatedObject];
         }]];
   }
+
   return actions;
 }
 
@@ -2478,8 +2487,9 @@ const ui::CocoaActionList& GetCocoaActionListForTesting() {
 
 - (id)AXStringForRange:(id)parameter {
   if (![parameter isKindOfClass:[NSValue class]] ||
-      (0 != strcmp([parameter objCType], @encode(NSRange))))
+      (0 != UNSAFE_TODO(strcmp([parameter objCType], @encode(NSRange))))) {
     return nil;
+  }
 
   return [self accessibilityStringForRange:[parameter rangeValue]];
 }

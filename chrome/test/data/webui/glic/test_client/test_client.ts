@@ -48,8 +48,12 @@ interface PageElementTypes {
   getlocation: HTMLButtonElement;
   location: HTMLElement;
   locationStatus: HTMLDivElement;
-  locationErrorUI: HTMLDivElement;
+  locationOsErrorUI: HTMLDivElement;
+  locationGlicErrorUI: HTMLDivElement;
   openOsLocationSettingsButton: HTMLButtonElement;
+  openOsMicrophoneSettings: HTMLButtonElement;
+  openOsLocationSettings: HTMLButtonElement;
+  openGlicLocationSettingsButton: HTMLButtonElement;
   permissionSelect: HTMLSelectElement;
   enabledSelect: HTMLSelectElement;
   closebn: HTMLButtonElement;
@@ -86,17 +90,22 @@ interface PageElementTypes {
   contentSizingTest: HTMLElement;
   enableTestSizingMode: HTMLButtonElement;
   disableTestSizingMode: HTMLButtonElement;
+  enableDragResize: HTMLInputElement;
   growHeight: HTMLButtonElement;
   resetHeight: HTMLButtonElement;
   dump: HTMLElement;
   fitWindow: HTMLInputElement;
-  fitContent: HTMLInputElement;
+  naturalSizing: HTMLInputElement;
   startMic: HTMLButtonElement;
   successUI: HTMLDivElement;
   localDenialUI: HTMLDivElement;
   osDenialUI: HTMLDivElement;
   openLocalSettingsButton: HTMLButtonElement;
   openOsSettingsButton: HTMLButtonElement;
+  osGeolocationPermissionSwitch: HTMLInputElement;
+  getOsMicrophonePermissionButton: HTMLButtonElement;
+  osMicrophonePermissionResult: HTMLSpanElement;
+  osGlicHotkey: HTMLInputElement;
 }
 
 const $: PageElementTypes = new Proxy({}, {
@@ -137,6 +146,8 @@ class WebClient implements GlicWebClient {
     logMessage('initialize called');
     $.pageHeader!.classList.add('connected');
 
+
+
     const ver = await browser.getChromeVersion();
     logMessage(`Chrome version: ${JSON.stringify(ver)}`);
 
@@ -151,6 +162,7 @@ class WebClient implements GlicWebClient {
           microphone: this.browser.getMicrophonePermissionState!(),
           geolocation: this.browser.getLocationPermissionState!(),
           tabContext: this.browser.getTabContextPermissionState!(),
+          osGeolocation: this.browser.getOsLocationPermissionState!(),
         };
     for (const permission of Object.keys(permissionStates) as
          PermissionSwitchName[]) {
@@ -165,6 +177,17 @@ class WebClient implements GlicWebClient {
     browser.panelActive?.().subscribe((active) => {
       $.panelActiveCheckbox.checked = active;
     });
+    browser.isManuallyResizing?.().subscribe((resizing) => {
+      logMessage('Manually resizing state changed: ' + resizing);
+    });
+    if (browser.getOsHotkeyState) {
+      const hotkeyState = await browser.getOsHotkeyState();
+      hotkeyState.subscribe((data: {hotkey: string}) => {
+        $.osGlicHotkey.value = data.hotkey === '' ? 'Not Set' : data.hotkey;
+      });
+    } else {
+      logMessage('getOsHotkeyState not available');
+    }
   }
 
   async notifyPanelWillOpen(panelOpeningData: PanelOpeningData&PanelState):
@@ -232,33 +255,15 @@ async function focusedTabChangedV2(focusedTabData: FocusedTabData|undefined) {
     return;
   }
 
-  if (focusedTabData.noCandidateTabError &&
-      !focusedTabData.focusedTabCandidate?.invalidCandidateError) {
-    $.focusedTabLogsV2.innerText = `No Candidate Tab Error: ${
-        JSON.stringify(focusedTabData.noCandidateTabError)}`;
+  if (focusedTabData.hasNoFocus) {
+    $.focusedTabLogsV2.innerText = `No focus reason: ${
+        focusedTabData.hasNoFocus.noFocusReason} active tab url: ${
+        focusedTabData.hasNoFocus.tabFocusCandidateData?.url}`;
     return;
   }
 
-  if (focusedTabData.focusedTabCandidate?.invalidCandidateError) {
-    $.focusedTabLogsV2.innerText = `Focus Invalid For Extraction Error: ${
-        JSON.stringify(
-            focusedTabData.focusedTabCandidate.invalidCandidateError)}`;
-    const candidateData =
-        focusedTabData.focusedTabCandidate.focusedTabCandidateData;
-    if (candidateData) {
-      $.focusedUrlV2.value = candidateData.url || '';
-      if (candidateData.favicon) {
-        const fav = await candidateData.favicon();
-        if (fav) {
-          $.focusedFaviconV2.src = URL.createObjectURL(fav);
-        }
-      }
-    }
-    return;
-  }
-
-  if (focusedTabData.focusedTab) {
-    const focusedTab = focusedTabData.focusedTab;
+  if (focusedTabData.hasFocus) {
+    const focusedTab = focusedTabData.hasFocus.tabData;
     $.focusedTabLogsV2.innerText =
         'Focused Tab State Changed: TabData available';
     $.focusedUrlV2.value = focusedTab.url || '';
@@ -306,15 +311,25 @@ async function checkMicrophonePermission():
   }
 }
 
+$.pageHeader.addEventListener('contextmenu', function(event) {
+  event.preventDefault();
+});
+
 // Test Sizing:
 $.enableTestSizingMode.addEventListener('click', () => {
   $.content.setAttribute('hidden', '');
   $.contentSizingTest.removeAttribute('hidden');
+  updateSizingMode(true);
 });
 
 $.disableTestSizingMode.addEventListener('click', () => {
   $.content.removeAttribute('hidden');
   $.contentSizingTest.setAttribute('hidden', '');
+  updateSizingMode(false);
+});
+
+$.enableDragResize.addEventListener('change', () => {
+  getBrowser()!.enableDragResize!($.enableDragResize.checked);
 });
 
 $.growHeight.addEventListener('click', () => {
@@ -329,27 +344,32 @@ $.resetHeight.addEventListener('click', () => {
   $.dump.innerHTML = '';
 });
 
-$.fitWindow.addEventListener('change', () => {
-  if (!$.fitWindow.checked) {
+async function updateSizingMode(inSizingTest: boolean) {
+  if (!inSizingTest) {
+    document.documentElement.classList.remove('fitWindow');
     return;
   }
-  document.documentElement.style.height = '100%';
-});
 
-$.fitContent.addEventListener('change', () => {
-  if (!$.fitContent.checked) {
-    return;
+  if (await getBrowser()!.shouldFitWindow!()) {
+    $.fitWindow.checked = true;
+    $.naturalSizing.checked = false;
+    document.documentElement.classList.add('fitWindow');
+  } else {
+    $.fitWindow.checked = false;
+    $.naturalSizing.checked = true;
+    document.documentElement.classList.remove('fitWindow');
   }
-  document.documentElement.style.height = 'unset';
-});
+}
 
 // Permissions:
 
-type PermissionSwitchName = 'microphone'|'geolocation'|'tabContext';
+type PermissionSwitchName =
+    'microphone'|'geolocation'|'tabContext'|'osGeolocation';
 const permissionSwitches: Record<PermissionSwitchName, HTMLInputElement> = {
   microphone: $.microphoneSwitch,
   geolocation: $.geolocationSwitch,
   tabContext: $.tabContextSwitch,
+  osGeolocation: $.osGeolocationPermissionSwitch,
 };
 
 // Update a permission switch display state.
@@ -540,9 +560,10 @@ $.getlocation.addEventListener('click', async () => {
       if (error instanceof GeolocationPositionError) {
         if (error.code === 1) {
           $.locationStatus.innerText = `Permission Denied.`;
-          const locPermissionStatus = permissionSwitches['geolocation'].checked;
-          if (locPermissionStatus) {
-            $.locationErrorUI.style.display = 'block';
+          if (!permissionSwitches['osGeolocation'].checked) {
+            $.locationOsErrorUI.style.display = 'block';
+          } else if (!permissionSwitches['geolocation'].checked) {
+            $.locationGlicErrorUI.style.display = 'block';
           }
         }
       }
@@ -810,6 +831,21 @@ window.addEventListener('load', () => {
   $.openOsLocationSettingsButton.addEventListener('click', () => {
     getBrowser()!.openOsPermissionSettingsMenu!('geolocation');
   });
+  $.openOsLocationSettings.addEventListener('click', () => {
+    getBrowser()!.openOsPermissionSettingsMenu!('geolocation');
+  });
+  $.openOsMicrophoneSettings.addEventListener('click', () => {
+    getBrowser()!.openOsPermissionSettingsMenu!('media');
+  });
+  $.openGlicLocationSettingsButton.addEventListener('click', () => {
+    getBrowser()!.openGlicSettingsPage!();
+  });
+  $.getOsMicrophonePermissionButton.addEventListener('click', async () => {
+    const permission = await getBrowser()!.getOsMicrophonePermissionStatus!();
+    $.osMicrophonePermissionResult.textContent =
+        `OS Microphone Permission: ${permission}`;
+  });
+  $.enableDragResize.disabled = getBrowser()!.enableDragResize !== undefined;
 });
 
 function readStream(stream: ReadableStream<Uint8Array>): Promise<Uint8Array> {

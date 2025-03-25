@@ -3285,9 +3285,6 @@ void AccessibilityController::UpdateCaretBlinkIntervalFromPrefs() const {
 }
 
 void AccessibilityController::UpdateUseOverlayScrollbarFromPref() const {
-  if (!::features::IsOverlayScrollbarOSSettingEnabled()) {
-    return;
-  }
   const bool overlay_scrollbar_enabled_by_feature_flag =
       ::ui::IsOverlayScrollbarEnabledByFeatureFlag();
   const bool overlay_scrollbar_enabled_by_os_setting =
@@ -3961,7 +3958,9 @@ void AccessibilityController::UpdateFeatureFromPref(FeatureType feature) {
       if (enabled && ::features::IsAccessibilityFaceGazeEnabled()) {
         if (!facegaze_bubble_controller_) {
           facegaze_bubble_controller_ =
-              std::make_unique<FaceGazeBubbleController>();
+              std::make_unique<FaceGazeBubbleController>(base::BindRepeating(
+                  &AccessibilityController::RequestDisableFaceGaze,
+                  GetWeakPtr()));
         }
         if (!drag_event_rewriter_) {
           drag_event_rewriter_ = std::make_unique<DragEventRewriter>();
@@ -4145,7 +4144,9 @@ void AccessibilityController::UpdateFaceGazeBubble(const std::u16string& text,
 FaceGazeBubbleController*
 AccessibilityController::GetFaceGazeBubbleControllerForTest() {
   if (!facegaze_bubble_controller_) {
-    facegaze_bubble_controller_ = std::make_unique<FaceGazeBubbleController>();
+    facegaze_bubble_controller_ =
+        std::make_unique<FaceGazeBubbleController>(base::BindRepeating(
+            &AccessibilityController::RequestDisableFaceGaze, GetWeakPtr()));
   }
 
   return facegaze_bubble_controller_.get();
@@ -4165,6 +4166,16 @@ void AccessibilityController::EnableDragEventRewriter(bool enabled) {
   }
 
   drag_event_rewriter_->SetEnabled(enabled);
+}
+
+void AccessibilityController::RequestDisableFaceGaze() {
+  if (!active_user_prefs_) {
+    return;
+  }
+
+  active_user_prefs_->SetBoolean(prefs::kAccessibilityFaceGazeEnabledSentinel,
+                                 false);
+  active_user_prefs_->CommitPendingWrite();
 }
 
 }  // namespace ash

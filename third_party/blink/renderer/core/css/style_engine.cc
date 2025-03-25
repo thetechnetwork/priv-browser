@@ -2638,8 +2638,8 @@ void StyleEngine::EnsureUAStyleForForcedColors() {
   }
 }
 
-RuleSet* StyleEngine::DefaultViewTransitionStyle() const {
-  auto* transition = ViewTransitionUtils::GetTransition(GetDocument());
+RuleSet* StyleEngine::DefaultViewTransitionStyle(const Element& element) const {
+  auto* transition = ViewTransitionUtils::GetTransition(element);
   if (!transition) {
     return nullptr;
   }
@@ -3254,21 +3254,15 @@ bool StyleEngine::HasComplexSafaAreaConstraints() {
 
 void StyleEngine::NodeWillBeRemoved(Node& node) {
   if (auto* element = DynamicTo<Element>(node)) {
-    if (const ComputedStyle* style = element->GetComputedStyle();
-        style && style->GetCounterDirectives()) {
-      MarkCountersDirty();
-    }
-    if (element->GetComputedStyle() &&
-        element->ComputedStyleRef().ContainsStyle()) {
-      MarkCountersDirty();
-    }
-    if (element->PseudoElementStylesAffectCounters()) {
-      MarkCountersDirty();
-    }
-    if (StyleContainmentScopeTree* tree = GetStyleContainmentScopeTree()) {
-      if (element->GetComputedStyle() &&
-          element->ComputedStyleRef().ContainsStyle()) {
-        tree->RemoveScopeForElement(*element);
+    if (const ComputedStyle* style = element->GetComputedStyle()) {
+      if (style->GetCounterDirectives() || style->ContainsStyle() ||
+          element->PseudoElementStylesAffectCounters()) {
+        MarkCountersDirty();
+      }
+      if (style->ContainsStyle()) {
+        if (StyleContainmentScopeTree* tree = GetStyleContainmentScopeTree()) {
+          tree->RemoveScopeForElement(*element);
+        }
       }
     }
     pending_invalidations_.RescheduleSiblingInvalidationsAsDescendants(
@@ -3763,6 +3757,8 @@ void StyleEngine::UpdateStyleAndLayoutTreeForContainer(
   GetDocument().GetLayoutView()->UpdateCountersAfterStyleChange(
       container.GetLayoutObject());
   GetDocument().InvalidatePendingSVGResources();
+  GetDocument().UpdateScrollMarkerGroupRelations();
+  GetDocument().UpdateScrollMarkerGroupToScrollableAreasMap();
 }
 
 void StyleEngine::UpdateStyleForOutOfFlow(Element& element,
@@ -3853,8 +3849,20 @@ void StyleEngine::RecalcTransitionPseudoStyle() {
   // we can optimize this to only when the pseudo element tree is dirtied.
   SelectorFilterParentScope filter_scope(
       nullptr, SelectorFilterParentScope::ScopeType::kRoot);
-  document_->documentElement()->RecalcTransitionPseudoTreeStyle(
-      view_transition_names_);
+
+  ViewTransitionUtils::ForEachTransition(
+      *document_, [&](ViewTransition& transition) {
+        Element* scope = transition.Scope();
+        if (!scope) {
+          scope = document_->documentElement();
+        }
+        if (!scope || !scope->InActiveDocument()) {
+          return;
+        }
+
+        // TODO(crbug.com/405117185): Use only the v-t-names inside the scope.
+        scope->RecalcTransitionPseudoTreeStyle(view_transition_names_);
+      });
 }
 
 void StyleEngine::RecalcStyle() {
@@ -3991,6 +3999,8 @@ void StyleEngine::UpdateStyleAndLayoutTree() {
       tree->UpdateQuotes();
     }
     UpdateCounters();
+    GetDocument().UpdateScrollMarkerGroupRelations();
+    GetDocument().UpdateScrollMarkerGroupToScrollableAreasMap();
   } else {
     style_recalc_root_.Clear();
   }
@@ -4307,13 +4317,12 @@ void StyleEngine::SetPageColorSchemes(const CSSValue* color_scheme) {
         static_cast<ColorSchemeFlags>(ColorSchemeFlag::kNormal);
   }
   DCHECK(GetDocument().documentElement());
-  // kSubtreeStyleChange is necessary since the page color schemes may affect
-  // used values of any element in the document with a specified color-scheme of
-  // 'normal'. A more targeted invalidation would need to traverse the whole
-  // document tree for specified values.
-  GetDocument().documentElement()->SetNeedsStyleRecalc(
-      kSubtreeStyleChange, StyleChangeReasonForTracing::Create(
-                               style_change_reason::kPlatformColorChange));
+  // MarkAllElementsForStyleRecalc is necessary since the page color schemes
+  // may affect used values of any element in the document with a specified
+  // color-scheme of 'normal'. A more targeted invalidation would need
+  // to traverse the whole document tree for specified values.
+  MarkAllElementsForStyleRecalc(StyleChangeReasonForTracing::Create(
+      style_change_reason::kPlatformColorChange));
   UpdateColorScheme();
   UpdateColorSchemeBackground();
 }
@@ -4701,27 +4710,19 @@ bool StyleEngine::UpdateLastSuccessfulPositionFallbacksAndAnchorScrollShift() {
   return invalidated;
 }
 
-void StyleEngine::RevisitActiveStyleSheetsForInspector() {
-  // TODO(crbug.com/337076014): Also revisit other stylesheets such as those in
-  // shadow trees, user sheets, and UA sheets.
-  const RuleFeatureSet& global_features = GetRuleFeatureSet();
-  const ActiveStyleSheetVector& active_style_sheets =
-      GetDocumentStyleSheetCollection().ActiveStyleSheets();
-  for (const ActiveStyleSheet& sheet : active_style_sheets) {
-    // We need to revisit each sheet twice, once with the global rule set and
-    // once with the sheet's associated rule set.
-    // The global rule set contains the rule invalidation data we're currently
-    // using for style invalidations. However, if a stylesheet change occurs,
-    // we may throw out the global rule set data and rebuild it from the
-    // individual sheets' data, so the inspector needs to know about both.
-    StyleSheetContents* contents = sheet.first->Contents();
-    InvalidationSetToSelectorMap::StyleSheetContentsScope contents_scope(
-        contents);
-    RevisitStyleRulesForInspector(global_features, contents->ChildRules());
-    if (contents->HasRuleSet()) {
-      RevisitStyleRulesForInspector(contents->GetRuleSet().Features(),
-                                    contents->ChildRules());
-    }
+void StyleEngine::RevisitStyleSheetForInspector(StyleSheetContents* contents) {
+  // We need to revisit the sheet twice, once with the global rule set and
+  // once with the sheet's associated rule set.
+  // The global rule set contains the rule invalidation data we're currently
+  // using for style invalidations. However, if a stylesheet change occurs,
+  // we may throw out the global rule set data and rebuild it from the
+  // individual sheets' data, so the inspector needs to know about both.
+  InvalidationSetToSelectorMap::StyleSheetContentsScope contents_scope(
+      contents);
+  RevisitStyleRulesForInspector(GetRuleFeatureSet(), contents->ChildRules());
+  if (contents->HasRuleSet()) {
+    RevisitStyleRulesForInspector(contents->GetRuleSet().Features(),
+                                  contents->ChildRules());
   }
 }
 

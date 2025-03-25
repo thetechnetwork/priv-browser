@@ -63,10 +63,6 @@ GURL GetWebstoreExtensionsCategoryURL();
 std::string GetWebstoreItemDetailURLPrefix();
 
 // Returns the URL used to get webstore data (ratings, manifest, icon URL,
-// etc.) about an extension from the webstore as JSON.
-GURL GetWebstoreItemJsonDataURL(const extensions::ExtensionId& extension_id);
-
-// Returns the URL used to get webstore data (ratings, manifest, icon URL,
 // etc.) about an extension from the webstore using the new itemSnippets API.
 GURL GetWebstoreItemSnippetURL(const extensions::ExtensionId& extension_id);
 
@@ -103,6 +99,10 @@ bool IsWebstoreOrigin(const url::Origin& origin);
 // Returns whether the URL is the webstore update URL (just considering host
 // and path, not scheme, query, etc.)
 bool IsWebstoreUpdateUrl(const GURL& update_url);
+
+// Returns whether the URL is the same origin with the Webstore API URL
+// (https://chromewebstore.googleapis.com/).
+bool IsWebstoreApiUrl(const GURL& url);
 
 // Returns true if the URL points to an extension blocklist.
 bool IsBlocklistUpdateUrl(const GURL& url);

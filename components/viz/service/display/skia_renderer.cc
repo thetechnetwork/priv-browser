@@ -10,6 +10,7 @@
 #include <optional>
 #include <string>
 #include <utility>
+#include <variant>
 
 #include "base/auto_reset.h"
 #include "base/command_line.h"
@@ -1439,9 +1440,25 @@ bool SkiaRenderer::NeedsLayerForColorConversion(
 }
 
 gfx::ColorSpace SkiaRenderer::CurrentDrawLayerColorSpace() const {
-  return hdr_color_conversion_layer_reset_
-             ? gfx::ColorSpace::CreateExtendedSRGB()
-             : RenderPassColorSpace(current_frame()->current_render_pass);
+  if (hdr_color_conversion_layer_reset_) {
+    // A color conversion layer allows us to draw everything in extended sRGB.
+    return gfx::ColorSpace::CreateExtendedSRGB();
+  }
+
+  // `NeedsLayerForColorConversion` can return false when no quads in a render
+  // pass require blending. To correctly handle color conversion, the
+  // destination color space (the result of this function) must match the actual
+  // render pass backing. We thus cannot unconditionally use the compositing
+  // color space because it may not be what SCANOUT render pass backings use.
+  const auto it =
+      render_pass_backings_.find(current_frame()->current_render_pass->id);
+  if (it != render_pass_backings_.end()) {
+    return it->second.color_space;
+  }
+
+  // If there is no render pass backing, we must be drawing the root pass.
+  CHECK(!output_surface_->capabilities().renderer_allocates_images);
+  return RenderPassColorSpace(current_frame()->root_render_pass);
 }
 
 void SkiaRenderer::BeginDrawingRenderPass(
@@ -2899,7 +2916,7 @@ void SkiaRenderer::ScheduleOverlays() {
 #if BUILDFLAG(ENABLE_VULKAN) && BUILDFLAG(IS_CHROMEOS) && \
     BUILDFLAG(USE_V4L2_CODEC)
     if (overlay.needs_detiling) {
-      if (!absl::holds_alternative<gfx::OverlayTransform>(overlay.transform)) {
+      if (!std::holds_alternative<gfx::OverlayTransform>(overlay.transform)) {
         LOG(ERROR) << "Unsupported transform on tiled protected content.";
         continue;
       }
@@ -2912,7 +2929,7 @@ void SkiaRenderer::ScheduleOverlays() {
       skia_output_surface_->DetileOverlay(
           overlay.mailbox, overlay.resource_size_in_pixels, lock.sync_token(),
           detiled_image, overlay.display_rect, overlay.uv_rect,
-          absl::get<gfx::OverlayTransform>(overlay.transform), is_10bit);
+          std::get<gfx::OverlayTransform>(overlay.transform), is_10bit);
       overlay.uv_rect = gfx::RectF(
           static_cast<float>(overlay.display_rect.width()) /
               static_cast<float>(kMaxProtectedContentWidth),
@@ -3642,7 +3659,8 @@ void SkiaRenderer::AllocateRenderPassResourceIfNeeded(
     DCHECK(!requirements.is_scanout);
     usage |= gpu::SHARED_IMAGE_USAGE_MIPMAP;
   }
-  if (requirements.is_scanout) {
+  if (requirements.is_scanout &&
+      !settings_->force_non_scanout_backing_for_pixel_tests) {
     usage |= gpu::SHARED_IMAGE_USAGE_SCANOUT;
 
 #if BUILDFLAG(IS_WIN)
@@ -4126,7 +4144,7 @@ void SkiaRenderer::PrepareRenderPassOverlay(
   overlay->uv_rect = gfx::RectF(filter_bounds.size());
   overlay->uv_rect.InvScale(buffer_size.width(), buffer_size.height());
 
-  if (absl::holds_alternative<gfx::OverlayTransform>(overlay->transform)) {
+  if (std::holds_alternative<gfx::OverlayTransform>(overlay->transform)) {
     // When using an OverlayTransform, the transform should be baked into the
     // display_rect.
     overlay->display_rect =

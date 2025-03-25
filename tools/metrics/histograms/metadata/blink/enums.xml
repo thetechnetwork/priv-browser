@@ -146,7 +146,7 @@ chromium-metrics-reviews@google.com.
   <int value="18" label="Transfer"/>
   <int value="19" label="Printing"/>
   <int value="20" label="WebGPU external image"/>
-  <int value="21" label="Shape detector"/>
+  <int value="21" label="Copy to SkBitmap"/>
   <int value="22" label="WebGL texture upload"/>
   <int value="23" label="CreatePattern"/>
   <int value="24" label="Copy to clipboard"/>
@@ -228,6 +228,7 @@ chromium-metrics-reviews@google.com.
   <int value="0" label="Optional"/>
   <int value="1" label="Silent"/>
   <int value="2" label="Required"/>
+  <int value="3" label="Conditional"/>
 </enum>
 
 <enum name="DecodedImageType">
@@ -5728,7 +5729,8 @@ Called by update_use_counter_feature_enum.py.-->
   <int value="5142" label="V8AILanguageModel_Destroy_Method"/>
   <int value="5143" label="V8AILanguageModel_Prompt_Method"/>
   <int value="5144" label="V8AILanguageModel_PromptStreaming_Method"/>
-  <int value="5145" label="V8AILanguageModel_CountPromptTokens_Method"/>
+  <int value="5145"
+      label="OBSOLETE_V8AILanguageModel_CountPromptTokens_Method"/>
   <int value="5146"
       label="V8AILanguageModelCapabilities_LanguageAvailable_Method"/>
   <int value="5147"
@@ -5741,9 +5743,12 @@ Called by update_use_counter_feature_enum.py.-->
       label="V8AILanguageModelCapabilities_DefaultTemperature_AttributeGetter"/>
   <int value="5151" label="V8AILanguageModelFactory_Capabilities_Method"/>
   <int value="5152" label="V8AILanguageModelFactory_Create_Method"/>
-  <int value="5153" label="V8AILanguageModel_MaxTokens_AttributeGetter"/>
-  <int value="5154" label="V8AILanguageModel_TokensSoFar_AttributeGetter"/>
-  <int value="5155" label="V8AILanguageModel_TokensLeft_AttributeGetter"/>
+  <int value="5153"
+      label="OBSOLETE_V8AILanguageModel_MaxTokens_AttributeGetter"/>
+  <int value="5154"
+      label="OBSOLETE_V8AILanguageModel_TokensSoFar_AttributeGetter"/>
+  <int value="5155"
+      label="OBSOLETE_V8AILanguageModel_TokensLeft_AttributeGetter"/>
   <int value="5156" label="SvgContextFillOrStroke"/>
   <int value="5157" label="ARIAActionsAttribute"/>
   <int value="5158" label="OBSOLETE_ResolveToConfigValueCoercedToTrue"/>
@@ -5975,6 +5980,25 @@ Called by update_use_counter_feature_enum.py.-->
   <int value="5370" label="V8AIWriter_MeasureInputUsage_Method"/>
   <int value="5371" label="V8AIWriter_InputQuota_AttributeGetter"/>
   <int value="5372" label="SpeculationRulesTargetHintBlank"/>
+  <int value="5373" label="InterestTarget"/>
+  <int value="5374" label="TextAutoSizingDisabledOnFlexbox"/>
+  <int value="5375" label="AriaLabeledByAlternativeSpelling"/>
+  <int value="5376" label="CanvasTextNg"/>
+  <int value="5377" label="DOMWindowOpenPopup"/>
+  <int value="5378" label="FencedFrameDisableUntrustedNetwork"/>
+  <int value="5379" label="FencedFrameNotifyEvent"/>
+  <int value="5380" label="SharedStorageGetInFencedFrame"/>
+  <int value="5381" label="Translator_MeasureInputUsage_Method"/>
+  <int value="5382" label="Translator_InputQuota_AttributeGetter"/>
+  <int value="5383" label="AriaNotify"/>
+  <int value="5384" label="LanguageDetector_MeasureInputUsage"/>
+  <int value="5385" label="LanguageDetector_InputQuota"/>
+  <int value="5386" label="V8AILanguageModel_InputUsage_AttributeGetter"/>
+  <int value="5387" label="V8AILanguageModel_InputQuota_AttributeGetter"/>
+  <int value="5388" label="V8AILanguageModel_MeasureInputUsage_Method"/>
+  <int value="5389" label="CredentialsGetImmediateMediationWithWebAuthnOnly"/>
+  <int value="5390"
+      label="CredentialsGetImmediateMediationWithWebAuthnAndPasswords"/>
 </enum>
 
 <!-- LINT.ThenChange(//third_party/blink/public/mojom/use_counter/metrics/web_feature.mojom:WebFeature) -->
@@ -6115,6 +6139,11 @@ Called by update_permissions_policy_enum.py.-->
   <int value="127" label="FencedUnpartitionedStorageRead"/>
   <int value="128" label="DeferredFetchMinimal"/>
   <int value="129" label="ClientHintUAHighEntropyValues"/>
+  <int value="130" label="Summarizer"/>
+  <int value="131" label="Writer"/>
+  <int value="132" label="Rewriter"/>
+  <int value="133" label="Translator"/>
+  <int value="134" label="LanguageDetector"/>
 </enum>
 
 <enum name="FedCmAccountChooserResult">
@@ -6544,6 +6573,29 @@ Called by update_permissions_policy_enum.py.-->
              opted-in"/>
 </enum>
 
+<!-- LINT.IfChange(FencedFrameDisableUntrustedNetworkOutcome) -->
+
+<enum name="FencedFrameDisableUntrustedNetworkOutcome">
+  <int value="0" label="Network disabled and promise resolved"/>
+  <int value="1" label="Document not fully active"/>
+  <int value="2" label="Not allowed to disable network"/>
+</enum>
+
+<!-- LINT.ThenChange(//third_party/blink/public/common/fenced_frame/fenced_frame_utils.h:DisableUntrustedNetworkOutcome) -->
+
+<!-- LINT.IfChange(FencedFrameNotifyEventOutcome) -->
+
+<enum name="FencedFrameNotifyEventOutcome">
+  <int value="0" label="Success"/>
+  <int value="1" label="Document not active"/>
+  <int value="2" label="Not called from a fenced frame root"/>
+  <int value="3" label="Invalid event passed in"/>
+  <int value="4" label="Unsupported event type passed in"/>
+  <int value="5" label="No transient user activation"/>
+</enum>
+
+<!-- LINT.ThenChange(//third_party/blink/public/common/fenced_frame/fenced_frame_utils.h:NotifyEventOutcome) -->
+
 <!-- LINT.IfChange(FirstCookieRequest) -->
 
 <enum name="FirstCookieRequest">
@@ -6970,7 +7022,7 @@ Called by update_use_counter_css.py.-->
   <int value="309" label="alias-webkit-perspective-origin"/>
   <int value="310" label="webkit-perspective-origin-x"/>
   <int value="311" label="webkit-perspective-origin-y"/>
-  <int value="312" label="webkit-print-color-adjust"/>
+  <int value="312" label="alias-webkit-print-color-adjust"/>
   <int value="313" label="webkit-rtl-ordering"/>
   <int value="314" label="webkit-ruby-position"/>
   <int value="315" label="webkit-text-combine"/>
@@ -7506,6 +7558,9 @@ Called by update_use_counter_css.py.-->
   <int value="845" label="gap-rule-paint-order"/>
   <int value="846" label="row-rule-width"/>
   <int value="847" label="row-rule-color"/>
+  <int value="848" label="print-color-adjust"/>
+  <int value="849" label="column-height"/>
+  <int value="850" label="column-wrap"/>
 </enum>
 
 <!-- LINT.ThenChange(//third_party/blink/public/mojom/use_counter/metrics/css_property_id.mojom:CSSSampleId) -->
@@ -7575,6 +7630,21 @@ Called by update_use_counter_css.py.-->
   <int value="6" label="Immediate"/>
   <int value="7" label="ForceDefer (Deprecated 2023)"/>
 </enum>
+
+<!-- LINT.IfChange(SharedStorageGetInFencedFrameOutcome) -->
+
+<enum name="SharedStorageGetInFencedFrameOutcome">
+  <int value="0" label="Success"/>
+  <int value="1" label="Called from an insecure context"/>
+  <int value="2" label="Fenced storage read is disabled"/>
+  <int value="3" label="Untrusted network not disabled"/>
+  <int value="4" label="Shared Storage key not found"/>
+  <int value="5" label="Error calling get()"/>
+  <int value="6" label="Unpartitioned data access feature disabled"/>
+  <int value="7" label="Unpartitioned data access permission disabled"/>
+</enum>
+
+<!-- LINT.ThenChange(//third_party/blink/public/common/fenced_frame/fenced_frame_utils.h:SharedStorageGetInFencedFrameOutcome) -->
 
 <enum name="SmsParsingStatus">
   <int value="0" label="Parsed"/>
@@ -7912,6 +7982,8 @@ Called by update_use_counter_feature_enum.py.-->
   <int value="307" label="DRAFT_WasmBranchHinting"/>
   <int value="308" label="DRAFT_ExplicitResourceManagement"/>
   <int value="309" label="LaunchHandler"/>
+  <int value="310" label="DRAFT_CssFunction"/>
+  <int value="311" label="DRAFT_CssIf"/>
 </enum>
 
 <!-- LINT.ThenChange(//third_party/blink/public/mojom/use_counter/metrics/webdx_feature.mojom:WebDXFeature) -->
@@ -7938,6 +8010,7 @@ Called by update_use_counter_feature_enum.py.-->
   <int value="7" label="WebGL1, SwiftShader"/>
   <int value="8" label="WebGL1, Metal"/>
   <int value="9" label="WebGL1, Default"/>
+  <int value="10" label="WebGL1, D3D11Warp"/>
   <int value="20" label="WebGL2, None"/>
   <int value="21" label="WebGL2, D3D9 (should never happen)"/>
   <int value="22" label="WebGL2, D3D11"/>
@@ -7948,6 +8021,7 @@ Called by update_use_counter_feature_enum.py.-->
   <int value="27" label="WebGL2, SwiftShader"/>
   <int value="28" label="WebGL2, Metal"/>
   <int value="29" label="WebGL2, Default"/>
+  <int value="30" label="WebGL2, D3D11Warp"/>
 </enum>
 
 <enum name="WebOTPBackendAvailability">

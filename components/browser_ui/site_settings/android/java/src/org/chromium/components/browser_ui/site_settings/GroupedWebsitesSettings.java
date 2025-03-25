@@ -45,6 +45,7 @@ public class GroupedWebsitesSettings extends BaseSiteSettingsFragment
     // Preference keys, see grouped_websites_preferences.xml.
     public static final String PREF_SITE_TITLE = "site_title";
     public static final String PREF_CLEAR_DATA = "clear_data";
+    public static final String PREF_USAGE = "site_usage";
     public static final String PREF_RELATED_SITES = "related_sites";
     public static final String PREF_RELATED_SITES_CLEAR_DATA = "related_sites_delete_data_button";
     public static final String PREF_SITES_IN_GROUP = "sites_in_group";
@@ -90,9 +91,9 @@ public class GroupedWebsitesSettings extends BaseSiteSettingsFragment
 
         // Preferences screen
         SettingsUtils.addPreferencesFromResource(this, R.xml.grouped_websites_preferences);
-        Preference siteTitlePref = assumeNonNull(findPreference(PREF_SITE_TITLE));
+        Preference siteTitlePref = findPreference(PREF_SITE_TITLE);
         siteTitlePref.setTitle(domainAndRegistry);
-        Preference siteInGroupPref = assumeNonNull(findPreference(PREF_SITES_IN_GROUP));
+        Preference siteInGroupPref = findPreference(PREF_SITES_IN_GROUP);
         siteInGroupPref.setTitle(
                 activity.getString(R.string.domain_settings_sites_in_group, domainAndRegistry));
         setUpClearDataPreference();
@@ -223,7 +224,6 @@ public class GroupedWebsitesSettings extends BaseSiteSettingsFragment
 
     private void setUpClearDataPreference() {
         ClearWebsiteStorage preference = findPreference(PREF_CLEAR_DATA);
-        assumeNonNull(preference);
         long storage = mSiteGroup.getTotalUsage();
         int cookies = mSiteGroup.getNumberOfCookies();
         if (storage > 0 || cookies > 0) {
@@ -246,7 +246,6 @@ public class GroupedWebsitesSettings extends BaseSiteSettingsFragment
 
     private void setUpResetGroupPreference() {
         Preference preference = findPreference(PREF_RESET_GROUP);
-        assumeNonNull(preference);
         if (mSiteGroup.isCookieDeletionDisabled(
                 getSiteSettingsDelegate().getBrowserContextHandle())) {
             preference.setEnabled(false);
@@ -261,6 +260,10 @@ public class GroupedWebsitesSettings extends BaseSiteSettingsFragment
         assumeNonNull(rwsInfo);
         WebsiteGroup group = new WebsiteGroup(rwsInfo.getOwner(), rwsInfo.getMembers());
         SiteDataCleaner.clearData(getSiteSettingsDelegate(), group, mDataClearedCallback);
+        RecordHistogram.recordEnumeratedHistogram(
+                "Privacy.DeleteBrowsingData.Action",
+                DeleteBrowsingDataAction.RWS_DELETE_ALL_DATA,
+                DeleteBrowsingDataAction.MAX_VALUE);
     }
 
     public boolean onDeleteRwsDataPreferenceClick(Preference preference) {
@@ -294,18 +297,16 @@ public class GroupedWebsitesSettings extends BaseSiteSettingsFragment
 
     private void setUpRelatedSitesPreferences() {
         PreferenceCategory relatedSitesHeader = findPreference(PREF_RELATED_SITES);
-        assumeNonNull(relatedSitesHeader);
         TextMessagePreference relatedSitesText = new TextMessagePreference(getContext(), null);
         var rwsInfo = mSiteGroup.getRwsInfo();
         boolean shouldRelatedSitesPrefBeVisible =
-                getSiteSettingsDelegate().isPrivacySandboxFirstPartySetsUiFeatureEnabled()
-                        && getSiteSettingsDelegate().isRelatedWebsiteSetsDataAccessEnabled()
+                getSiteSettingsDelegate().isRelatedWebsiteSetsDataAccessEnabled()
                         && rwsInfo != null;
         relatedSitesText.setVisible(shouldRelatedSitesPrefBeVisible);
         relatedSitesHeader.setVisible(shouldRelatedSitesPrefBeVisible);
         ButtonPreference relatedSitesClearDataButton =
                 findPreference(PREF_RELATED_SITES_CLEAR_DATA);
-        assumeNonNull(relatedSitesClearDataButton)
+        relatedSitesClearDataButton
                 .setVisible(
                         shouldRelatedSitesPrefBeVisible
                                 && getSiteSettingsDelegate().shouldShowPrivacySandboxRwsUi());
@@ -353,6 +354,17 @@ public class GroupedWebsitesSettings extends BaseSiteSettingsFragment
                                     getSiteSettingsDelegate(),
                                     entry,
                                     getActivity().getLayoutInflater());
+                    // Remove preference upon single site deletion
+                    preference.setOnDeleteCallback(
+                            () -> {
+                                relatedSitesHeader.removePreference(preference);
+                                // Remove RWS section if only remaining preference is the
+                                // description
+                                if (relatedSitesHeader.getPreferenceCount() == 1) {
+                                    removePreferenceSafely(PREF_RELATED_SITES);
+                                    removePreferenceSafely(PREF_RELATED_SITES_CLEAR_DATA);
+                                }
+                            });
                     relatedSitesHeader.addPreference(preference);
                 }
                 relatedSitesClearDataButton.setOnPreferenceClickListener(
@@ -378,7 +390,6 @@ public class GroupedWebsitesSettings extends BaseSiteSettingsFragment
 
     private void updateSitesInGroup() {
         PreferenceCategory category = findPreference(PREF_SITES_IN_GROUP);
-        assumeNonNull(category);
         category.removeAll();
         for (Website site : mSiteGroup.getWebsites()) {
             WebsiteRowPreference preference =
@@ -394,5 +405,14 @@ public class GroupedWebsitesSettings extends BaseSiteSettingsFragment
                     });
             category.addPreference(preference);
         }
+    }
+
+    /**
+     * Ensures preference exists before removing to avoid NPE in {@link
+     * PreferenceScreen#removePreference}.
+     */
+    private void removePreferenceSafely(CharSequence prefKey) {
+        Preference preference = findPreference(prefKey);
+        if (preference != null) getPreferenceScreen().removePreference(preference);
     }
 }

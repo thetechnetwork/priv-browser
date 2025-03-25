@@ -42,11 +42,9 @@ BASE_FEATURE_PARAM(int,
 
 // Serves as killswitch for changing CanCreateCanvasResourceProvider() to
 // create resource provider internally rather than Canvas2DLayerBridge.
-// TODO(crbug.com/40280152): Fix issues between interaction of this code and
-// CanvasRenderingContext2D::Restore() and re-enable.
 BASE_FEATURE(kAdjustCanCreateCanvas2dResourceProvider,
              "AdjustCanCreateCanvas2dResourceProvider",
-             base::FEATURE_DISABLED_BY_DEFAULT);
+             base::FEATURE_ENABLED_BY_DEFAULT);
 
 // Serves as killswitch for changing GetOrCreateCanvasResourceProvider() away
 // from using GetOrCreateCanvas2DLayerBridge() for 2D contexts.
@@ -500,6 +498,12 @@ BASE_FEATURE_PARAM(int,
                    "max_disk_capacity_mb",
                    -1);
 
+// When enabled, CreateNewWindow() and ShowCreatedWindow() mojo calls are
+// coalesced into a single call to CreateNewWindow().
+BASE_FEATURE(kCombineNewWindowIPCs,
+             "CombineNewWindowIPCs",
+             base::FEATURE_ENABLED_BY_DEFAULT);
+
 // Controls off-thread code cache consumption.
 BASE_FEATURE(kConsumeCodeCacheOffThread,
              "ConsumeCodeCacheOffThread",
@@ -722,7 +726,14 @@ BASE_FEATURE(kDropInputEventsWhilePaintHolding,
 
 BASE_FEATURE(kEstablishGpuChannelAsync,
              "EstablishGpuChannelAsync",
-             base::FEATURE_ENABLED_BY_DEFAULT);
+#if BUILDFLAG(IS_ANDROID)
+             base::FEATURE_ENABLED_BY_DEFAULT
+#else
+             // TODO(crbug.com/1278147): Experiment with this more on desktop to
+             // see if it can help.
+             base::FEATURE_DISABLED_BY_DEFAULT
+#endif
+);
 
 // Whether to respect loading=lazy attribute for images when they are on
 // invisible pages.
@@ -1147,6 +1158,10 @@ BASE_FEATURE(kInputPredictorTypeChoice,
 BASE_FEATURE(kInputScenarioPriorityBoost,
              "InputScenarioPriorityBoost",
              base::FEATURE_DISABLED_BY_DEFAULT);
+
+constexpr base::FeatureParam<bool> kInputScenarioPriorityBoostIncludesLoading{
+    &features::kInputScenarioPriorityBoost,
+    "input_scenario_priority_boost_includes_loading", false};
 
 // When enabled, wake ups from throttleable TaskQueues are limited to 1 per
 // minute in a page that has been backgrounded for 5 minutes.
@@ -1820,6 +1835,15 @@ BASE_FEATURE_PARAM(int,
                    &kMemoryCacheStrongReference,
                    "memory_cache_strong_ref_resource_size_threshold",
                    3 * 1024 * 1024);
+
+BASE_FEATURE(kMemorySaverModeRenderTuning,
+             "MemorySaverModeRenderTuning",
+             base::FEATURE_DISABLED_BY_DEFAULT);
+BASE_FEATURE_PARAM(int,
+                   kAvailableMemoryThresholdParamMb,
+                   &kMemorySaverModeRenderTuning,
+                   "available_memory_threshold_mb",
+                   740);
 
 BASE_FEATURE(kMHTML_Improvements,
              "MHTML_Improvements",
@@ -2548,6 +2572,12 @@ BASE_FEATURE(kUnloadBlocklisted,
              "UnloadBlocklisted",
              base::FEATURE_DISABLED_BY_DEFAULT);
 
+// When BeginMainFrame() is throttled, whether input-related BeginMainFrame()s
+// are marked urgent, and thus unthtrottled.
+BASE_FEATURE(kUrgentMainFrameForInput,
+             "UrgentMainFrameForInput",
+             base::FEATURE_DISABLED_BY_DEFAULT);
+
 // Uses page viewport instead of frame viewport in the Largest Contentful Paint
 // heuristic where images occupying the full viewport are ignored.
 BASE_FEATURE(kUsePageViewportInLCP,
@@ -2653,6 +2683,15 @@ BASE_FEATURE_PARAM(bool,
                    &kWebAudioBypassOutputBuffering,
                    "latency_exact",
                    true);
+
+// This feature flag controls whether the WebAudio destination resampler is
+// bypassed. When enabled, if the WebAudio context's sample rate differs from
+// the hardware's sample rate, the resampling step that normally occurs within
+// the WebAudio destination node is skipped. This allows the AudioService to
+// handle any necessary resampling, potentially reducing latency and overhead.
+BASE_FEATURE(kWebAudioRemoveAudioDestinationResampler,
+             "WebAudioRemoveAudioDestinationResampler",
+             base::FEATURE_DISABLED_BY_DEFAULT);
 
 /// Enables cache-aware WebFonts loading. See https://crbug.com/570205.
 // The feature is disabled on Android for WebView API issue discussed at

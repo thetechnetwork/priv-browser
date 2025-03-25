@@ -50,22 +50,50 @@ BASE_DECLARE_FEATURE_PARAM(bool, kBackgroundTabLoadingRestoreMainFrameState);
 // toggling it.
 BASE_DECLARE_FEATURE(kBatterySaverModeAvailable);
 
-// Flag to control a baseline HaTS survey for Chrome performance.
+// Flags to control HaTS surveys about Chrome performance.
 BASE_DECLARE_FEATURE(kPerformanceControlsPerformanceSurvey);
 BASE_DECLARE_FEATURE(kPerformanceControlsBatteryPerformanceSurvey);
 BASE_DECLARE_FEATURE(kPerformanceControlsMemorySaverOptOutSurvey);
 BASE_DECLARE_FEATURE(kPerformanceControlsBatterySaverOptOutSurvey);
+BASE_DECLARE_FEATURE(kPerformanceControlsPPMSurvey);
 
 // Defines the time delta to look back when checking if a device has used
 // battery.
 extern const base::FeatureParam<base::TimeDelta>
     kPerformanceControlsBatterySurveyLookback;
 
+// Defines the minimum and maximum delay before showing the PPM survey. It will
+// be shown the next time the user opens the New Tab Page after a random time in
+// this range.
+BASE_DECLARE_FEATURE_PARAM(base::TimeDelta,
+                           kPerformanceControlsPPMSurveyMinDelay);
+BASE_DECLARE_FEATURE_PARAM(base::TimeDelta,
+                           kPerformanceControlsPPMSurveyMaxDelay);
+
 // This enables performance intervention to run in demo mode. While in demo
 // mode, performance intervention will ignore rate throttling and CPU thresholds
 // to make it easier to trigger performance intervention for testing purposes.
 BASE_DECLARE_FEATURE(kPerformanceInterventionDemoMode);
 
+// This enables performance intervention to use the improved notification
+// prompting algorithm to show the intervention more often.
+BASE_DECLARE_FEATURE(kPerformanceInterventionNotificationImprovements);
+
+// Minimum time needed before showing another performance intervention.
+BASE_DECLARE_FEATURE_PARAM(base::TimeDelta, kMinimumTimeBetweenReshow);
+
+// Number of recent samples to be taken into consideration when determining
+// performance intervention acceptance rate.
+BASE_DECLARE_FEATURE_PARAM(int, kAcceptanceRateWindowSize);
+
+// Upper bounds for showing performance intervention and will be scaled down
+// based on the acceptance rate.
+BASE_DECLARE_FEATURE_PARAM(int, kScaleMaxTimesPerDay);
+BASE_DECLARE_FEATURE_PARAM(int, kScaleMaxTimesPerWeek);
+
+// The amount of time a user needs to wait before being shown performance
+// intervention with a 0% acceptance rate
+BASE_DECLARE_FEATURE_PARAM(base::TimeDelta, kNoAcceptanceBackOff);
 #endif
 
 BASE_DECLARE_FEATURE(kPMProcessPriorityPolicy);

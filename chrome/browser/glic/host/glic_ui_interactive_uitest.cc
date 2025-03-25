@@ -8,9 +8,9 @@
 #include "base/strings/to_string.h"
 #include "base/test/scoped_feature_list.h"
 #include "base/time/time.h"
-#include "chrome/browser/glic/glic.mojom-shared.h"
+#include "chrome/browser/glic/host/glic.mojom-shared.h"
 #include "chrome/browser/glic/host/glic_ui.h"
-#include "chrome/browser/glic/interactive_glic_test.h"
+#include "chrome/browser/glic/test_support/interactive_glic_test.h"
 #include "chrome/browser/glic/widget/glic_window_controller.h"
 #include "chrome/common/chrome_features.h"
 #include "content/public/test/browser_test.h"
@@ -245,11 +245,11 @@ IN_PROC_BROWSER_TEST_F(GlicUiConnectedUiTest, DoesNavigateToSupportedOrigin) {
       WaitForElementVisible(test::kGlicContentsElementId, {"body"}),
       InAnyContext(ExecuteJs(test::kGlicContentsElementId,
                              R"js(()=>{location = './notexist';})js")),
-      // Page should navigate, and result in an error page.
-      InAnyContext(WaitForJsResult(test::kGlicContentsElementId,
-                                   R"js(()=>window.location.href)js",
-                                   testing::Eq("chrome-error://chromewebdata/"),
-                                   /*continue_across_navigation=*/true)));
+      // It should navigate to a 404, and then reload the webview successfully.
+      InAnyContext(WaitForState(kGlicUiStateHistory,
+                                IsNotCurrently(WebUiState::kReady))),
+      InAnyContext(
+          WaitForState(kGlicUiStateHistory, IsCurrently(WebUiState::kReady))));
 }
 
 // Tests the network being unavailable at startup.

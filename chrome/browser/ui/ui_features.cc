@@ -61,6 +61,18 @@ BASE_FEATURE(kLightweightExtensionOverrideConfirmations,
              base::FEATURE_ENABLED_BY_DEFAULT);
 #endif
 
+#if BUILDFLAG(IS_WIN)
+BASE_FEATURE(kOfferPinToTaskbarWhenSettingToDefault,
+             "OfferPinToTaskbarWhenSettingDefault",
+             base::FEATURE_DISABLED_BY_DEFAULT);
+#endif
+
+#if BUILDFLAG(IS_WIN) || BUILDFLAG(IS_MAC)
+// Shows an infobar on PDFs offering to become the default PDF viewer if Chrome
+// isn't the default already.
+BASE_FEATURE(kPdfInfoBar, "kPdfInfoBar", base::FEATURE_DISABLED_BY_DEFAULT);
+#endif
+
 // Preloads a WebContents with a Top Chrome WebUI on BrowserView initialization,
 // so that it can be shown instantly at a later time when necessary.
 BASE_FEATURE(kPreloadTopChromeWebUI,
@@ -236,10 +248,6 @@ BASE_FEATURE(kTearOffWebAppTabOpensWebAppWindow,
 BASE_FEATURE(kPinnedCastButton,
              "PinnedCastButton",
              base::FEATURE_DISABLED_BY_DEFAULT);
-
-BASE_FEATURE(kPinnableDownloadsButton,
-             "PinnableDownloadsButton",
-             base::FEATURE_ENABLED_BY_DEFAULT);
 #endif
 
 // Enables enterprise profile badging for managed profiles on the toolbar
@@ -343,6 +351,18 @@ BASE_FEATURE(kInlineFullscreenPerfExperiment,
 BASE_FEATURE(kPageActionsMigration,
              "PageActionsMigration",
              base::FEATURE_DISABLED_BY_DEFAULT);
+const base::FeatureParam<bool> kPageActionsMigrationLensOverlay{
+    &kPageActionsMigration, "lens_overlay", false};
+const base::FeatureParam<bool> kPageActionsMigrationMemorySaver{
+    &kPageActionsMigration, "memory_saver", false};
+const base::FeatureParam<bool> kPageActionsMigrationTranslate{
+    &kPageActionsMigration, "translate", false};
+const base::FeatureParam<bool> kPageActionsMigrationIntentPicker{
+    &kPageActionsMigration, "intent_picker", false};
+const base::FeatureParam<bool> kPageActionsMigrationZoom{&kPageActionsMigration,
+                                                         "zoom", false};
+const base::FeatureParam<bool> kPageActionsMigrationOfferNotification{
+    &kPageActionsMigration, "offer_notification", false};
 
 BASE_FEATURE(kCompositorLoadingAnimations,
              "CompositorLoadingAnimations",

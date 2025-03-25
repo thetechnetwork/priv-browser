@@ -43,7 +43,7 @@ Stvari za razmatranje:
 <translation id="1799920918471566157">Savjeti za Chrome</translation>
 <translation id="1830634592642484976">Adresa je trenutno sačuvana u Chromeu. Da je koristite na Googleovim proizvodima, sačuvajte je na Google računu <ph name="USER_EMAIL" />.</translation>
 <translation id="1891812034154776216">Sakrijte otvorene anonimne kartice prilikom napuštanja Chromea</translation>
-<translation id="1894434821386148799">Ovdje možete pronaći postavke Chromea i još mnogo toga</translation>
+<translation id="1894434821386148799">Ovdje možete pronaći postavke Chromea i druge stavke</translation>
 <translation id="1917964099031477364">Ovaj račun i svi podaci koji nisu sačuvani će se ukloniti iz Chromea i drugih Googleovih aplikacija na ovom uređaju.</translation>
 <translation id="1919130412786645364">Omogući prijavu na Chrome</translation>
 <translation id="1965935827552890526">Završite započetu radnju na drugom otvorenom prozoru Chromea.</translation>
@@ -261,6 +261,7 @@ Za više postavki koje koriste podatke radi poboljšanja iskustva u Chromeu idit
 <translation id="7575971113404272499">Savjet za Chrome: koristite Chrome prema zadanim postavkama</translation>
 <translation id="7581063337314642333">Otvorite mrežu kartica u Chromeu</translation>
 <translation id="7599894504325210080">Prošireni prikaz automatskog popunjavanja u Chromeu</translation>
+<translation id="7617512710641355143">Chromeom se upravlja</translation>
 <translation id="7642373780953416937">Primajte upozorenja o problemima s privatnošću ili sigurnošću koje Chrome automatski otkrije za vas.</translation>
 <translation id="7660356333829433649">Provjerite ponovo ovdje za više korisnih savjeta za iskorištavanje svih prednosti Chromea.</translation>
 <translation id="7662994914830945754">Da vidite svoje kartice s bilo kojeg uređaja na kojem koristite Chrome, prijavite se i uključite sinhronizaciju</translation>

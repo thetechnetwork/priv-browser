@@ -6,7 +6,9 @@
 
 #include "base/feature_list.h"
 #include "base/functional/bind.h"
+#include "base/functional/callback_forward.h"
 #include "base/memory/scoped_refptr.h"
+#include "base/metrics/histogram_functions.h"
 #include "base/metrics/user_metrics.h"
 #include "base/metrics/user_metrics_action.h"
 #include "base/version_info/channel.h"
@@ -14,11 +16,12 @@
 #include "chrome/browser/browser_process.h"
 #include "chrome/browser/glic/fre/fre_util.h"
 #include "chrome/browser/glic/fre/glic_fre_dialog_view.h"
-#include "chrome/browser/glic/glic.mojom.h"
 #include "chrome/browser/glic/glic_keyed_service.h"
 #include "chrome/browser/glic/glic_keyed_service_factory.h"
 #include "chrome/browser/glic/glic_pref_names.h"
+#include "chrome/browser/glic/glic_profile_manager.h"
 #include "chrome/browser/glic/host/auth_controller.h"
+#include "chrome/browser/glic/host/glic.mojom.h"
 #include "chrome/browser/predictors/loading_predictor.h"
 #include "chrome/browser/predictors/loading_predictor_factory.h"
 #include "chrome/browser/shell_integration.h"
@@ -26,11 +29,12 @@
 #include "chrome/browser/ui/browser_finder.h"
 #include "chrome/browser/ui/tabs/public/tab_dialog_manager.h"
 #include "chrome/browser/ui/tabs/public/tab_features.h"
-#include "chrome/browser/ui/tabs/public/tab_interface.h"
 #include "chrome/common/channel_info.h"
 #include "chrome/common/chrome_features.h"
 #include "components/google/core/common/google_util.h"
 #include "components/prefs/pref_service.h"
+#include "components/tab_collections/public/tab_interface.h"
+#include "content/public/browser/browser_thread.h"
 #include "content/public/browser/web_contents.h"
 
 namespace glic {
@@ -47,6 +51,8 @@ void GlicFreController::WebUiStateChanged(mojom::FreWebUiState new_state) {
     // UI State has changed
     webui_state_ = new_state;
     webui_state_callback_list_.Notify(webui_state_);
+
+    RecordMetricsIfDialogIsShowingAndReady();
   }
 }
 
@@ -72,13 +78,14 @@ bool GlicFreController::CanShowFreDialog(Browser* browser) {
   if (!browser) {
     return false;
   }
-  // If there is a browser, the FRE can only be shown if no
-  // other modal is currently being shown on the same tab.
+  // If there is a browser, the FRE can only be shown if no other modal is
+  // currently being shown on the same tab.
   tabs::TabInterface* tab = browser->GetActiveTabInterface();
   return tab && tab->CanShowModalUI();
 }
 
 void GlicFreController::ShowFreDialog(Browser* browser) {
+  show_start_time_ = base::TimeTicks::Now();
   auth_controller_.CheckAuthBeforeShow(
       AuthController::FallbackBehavior::kShowReauthPage,
       base::BindOnce(&GlicFreController::ShowFreDialogAfterAuthCheck,
@@ -89,6 +96,7 @@ void GlicFreController::ShowFreDialogAfterAuthCheck(
     base::WeakPtr<Browser> browser,
     AuthController::BeforeShowResult result) {
   if (result != AuthController::BeforeShowResult::kReady) {
+    show_start_time_ = base::TimeTicks();
     return;
   }
 
@@ -102,9 +110,7 @@ void GlicFreController::ShowFreDialogAfterAuthCheck(
   // Close any existing FRE dialog before showing.
   DismissFre();
 
-  fre_view_ = new GlicFreDialogView(
-      profile_, gfx::Size(features::kGlicFreInitialWidth.Get(),
-                          features::kGlicFreInitialHeight.Get()));
+  CreateView();
 
   tabs::TabInterface* tab_interface = browser->GetActiveTabInterface();
   // Note that this call to `CreateShowDialogAndBlockTabInteraction` is
@@ -120,6 +126,9 @@ void GlicFreController::ShowFreDialogAfterAuthCheck(
       base::BindRepeating(&GlicFreController::OnTabShowingModalWillDetach,
                           base::Unretained(this)));
   base::RecordAction(base::UserMetricsAction("Glic.Fre.Shown"));
+
+  // Recording the load latency time when FRE contents were preloaded.
+  RecordMetricsIfDialogIsShowingAndReady();
 }
 
 void GlicFreController::DismissFreIfOpenOnActiveTab(Browser* browser) {
@@ -158,7 +167,7 @@ void GlicFreController::AcceptFre() {
   // profile, which should correspond to the browser used by the FRE.
   if (Browser* new_attached_browser =
           chrome::FindLastActiveWithProfile(profile_)) {
-    glic::GlicKeyedServiceFactory::GetGlicKeyedService(profile_)->ToggleUI(
+    GlicKeyedServiceFactory::GetGlicKeyedService(profile_)->ToggleUI(
         new_attached_browser, /*prevent_close=*/true,
         mojom::InvocationSource::kFre);
   }
@@ -170,7 +179,13 @@ void GlicFreController::DismissFre() {
     fre_widget_.reset();
     tab_showing_modal_ = nullptr;
     will_detach_subscription_ = {};
+    show_start_time_ = base::TimeTicks();
   }
+}
+
+void GlicFreController::PrepareForClient(
+    base::OnceCallback<void(bool)> callback) {
+  auth_controller_.CheckAuthBeforeLoad(std::move(callback));
 }
 
 void GlicFreController::OnLinkClicked(const GURL& url) {
@@ -329,7 +344,26 @@ void GlicFreController::OnTabShowingModalWillDetach(
   DismissFre();
 }
 
-bool GlicFreController::IsShowingDialogForTesting() const {
+void GlicFreController::CreateView() {
+  fre_view_ = new GlicFreDialogView(
+      profile_, gfx::Size(features::kGlicFreInitialWidth.Get(),
+                          features::kGlicFreInitialHeight.Get()));
+  auto* service = GlicKeyedServiceFactory::GetGlicKeyedService(profile_);
+  GlicProfileManager::GetInstance()->OnLoadingClientForService(service);
+}
+
+void GlicFreController::RecordMetricsIfDialogIsShowingAndReady() {
+  DCHECK_CURRENTLY_ON(content::BrowserThread::UI);
+  if (!!fre_widget_ && webui_state_ == mojom::FreWebUiState::kReady &&
+      !show_start_time_.is_null()) {
+    base::UmaHistogramMediumTimes("Glic.FrePresentationTime",
+                                  (base::TimeTicks::Now() - show_start_time_));
+    show_start_time_ = base::TimeTicks();
+  }
+}
+
+bool GlicFreController::IsShowingDialog() const {
   return !!fre_widget_;
 }
+
 }  // namespace glic

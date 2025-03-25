@@ -58,6 +58,10 @@ class MockSaveOrUpdateAutofillAiDataController
               (),
               (const override));
   MOCK_METHOD(bool, IsSavePrompt, (), (const override));
+  MOCK_METHOD((std::pair<int, int>),
+              GetTitleImagesResourceId,
+              (),
+              (const override));
   MOCK_METHOD(void, OnBubbleClosed, (AutofillAiBubbleClosedReason), (override));
   base::WeakPtr<SaveOrUpdateAutofillAiDataController> GetWeakPtr() override {
     return weak_ptr_factory_.GetWeakPtr();
@@ -163,21 +167,6 @@ TEST_F(SaveOrUpdateAutofillAiDataBubbleViewTest, CancelInvokesTheController) {
   CreateViewAndShow();
   EXPECT_CALL(mock_controller(), OnBubbleClosed);
   view().CancelDialog();
-}
-
-TEST_F(SaveOrUpdateAutofillAiDataBubbleViewTest, ViewHasExpectedSections) {
-  CreateViewAndShow();
-  views::View* new_entity_added_or_updated_attributes_container =
-      view().GetViewByID(SaveOrUpdateAutofillAiDataBubbleView::
-                             kNewEntityAddedOrUpdatedAttributesContainer);
-  EXPECT_EQ(new_entity_added_or_updated_attributes_container->children().size(),
-            2u);
-
-  // Test that there 2 row in the container that stores unchanged values.
-  views::View* new_entity_unchanged_attributes_container =
-      view().GetViewByID(SaveOrUpdateAutofillAiDataBubbleView::
-                             kNewEntityUnchagedAttributesContainer);
-  EXPECT_EQ(new_entity_unchanged_attributes_container->children().size(), 2u);
 }
 
 }  // namespace

@@ -150,6 +150,18 @@ export declare interface GlicBrowserHost {
   resizeWindow(width: number, height: number, options?: ResizeWindowOptions):
       Promise<void>;
 
+  /** Sets the state of the panel's user drag-to-resize capability. */
+  enableDragResize?(enabled: boolean): Promise<void>;
+
+  /**
+   * Returns true if the web client should resize its content to fit the
+   * window.
+   *
+   * @todo This should be the default sizing mode. Remove after the manual
+   * resizing is landed. crbug.com/402795394.
+   */
+  shouldFitWindow?(): Promise<boolean>;
+
   /**
    * Set the areas of the glic window from which it should be draggable. If
    * `areas` is empty, a default draggable area will be created.
@@ -173,7 +185,7 @@ export declare interface GlicBrowserHost {
    * Fetches page context for the currently focused tab, optionally including
    * more expensive-to-generate data.
    *
-   * @throws {GetTabContextError} on failure.
+   * @throws {Error} on failure.
    */
   getContextFromFocusedTab?
       (options: TabContextOptions): Promise<TabContextResult>;
@@ -270,6 +282,14 @@ export declare interface GlicBrowserHost {
   canAttachPanel?(): ObservableValue<boolean>;
 
   /**
+   * Whether any browser windows are open for this profile. This exists to allow
+   * the web client to signal the user that they need to open a browser window
+   * before sharing context. A browser window being open does not guarantee
+   * there is a focused tab or a panel can attach to the browser.
+   */
+  isBrowserOpen?(): ObservableValue<boolean>;
+
+  /**
    * Returns the observable state of the currently focused tab. Updates are sent
    * whenever the focus changes due to the user switching tabs or navigating the
    * current focused tab.
@@ -303,6 +323,12 @@ export declare interface GlicBrowserHost {
 
   /** Returns the state of the tab context permission. */
   getTabContextPermissionState?(): ObservableValue<boolean>;
+
+  /** Returns the state of the OS granted location permission. */
+  getOsLocationPermissionState?(): ObservableValue<boolean>;
+
+  /** Returns the state of the OS hotkey. */
+  getOsHotkeyState?(): ObservableValue<{hotkey: string}>;
 
   /**
    * Set the state of the microphone permission in settings. Returns a promise
@@ -381,9 +407,21 @@ export declare interface GlicBrowserHost {
 
   /**
    * Opens the OS permission settings menu for the given permission type.
-   * Supports `media` for microphone ad `geolocation` for location.
+   * Supports `media` for microphone ad `geolocation` for location. This
+   * function is available when running on Mac.
    */
   openOsPermissionSettingsMenu?(permission: string): void;
+
+  /**
+   * Get the status of the OS Microphone permission currently granted to Chrome.
+   */
+  getOsMicrophonePermissionStatus?(): Promise<boolean>;
+
+  /**
+   * Returns an observable that signals true when the user starts resizing the
+   * panel and false when the user stops.
+   */
+  isManuallyResizing?(): ObservableValue<boolean>;
 }
 
 /** Holds optional parameters for `GlicBrowserHost#resizeWindow`. */
@@ -523,6 +561,8 @@ export enum InvocationSource {
   THREE_DOTS_MENU = 7,
   /** An unsupported/unknown source. */
   UNSUPPORTED = 8,
+  /** From the What's New page. */
+  WHATS_NEW = 9,
 }
 
 /** The default value of TabContextOptions.pdfSizeLimit. */
@@ -553,6 +593,11 @@ export declare interface TabContextOptions {
   viewportScreenshot?: boolean;
   /** If true, returns the serialized annotatedPageContent proto. */
   annotatedPageContent?: boolean;
+  /**
+   * Maximum number of meta tags (per Document/Frame) to include in the
+   * response. Defaults to 0 if not provided.
+   */
+  maxMetaTags?: number;
   /**
    * If true, and the focused tab contains a PDF as the top level document,
    * returns PdfDocumentData.
@@ -627,6 +672,31 @@ export declare interface DocumentData {
 export declare interface AnnotatedPageData {
   /** Serialized annotatedPageContent proto. */
   annotatedPageContent?: ReadableStream<Uint8Array>;
+  /**
+   * Metadata about the annotated page content. Present when
+   * annotatedPageContent has been requested.
+   */
+  metadata?: PageMetadata;
+}
+
+/** Meta tag name and content taken from the <head> element of a frame. */
+export declare interface MetaTag {
+  name: string;
+  content: string;
+}
+
+/**
+ * Metadata about a frame.  Number of MetaTags is limited by the
+ * maxMetaTags option.
+ */
+export declare interface FrameMetadata {
+  url: string;
+  metaTags: MetaTag[];
+}
+
+/** Metadata about the page.  Includes URL and meta tags for each frame. */
+export declare interface PageMetadata {
+  frameMetadata: FrameMetadata[];
 }
 
 /**
@@ -661,27 +731,29 @@ export declare interface TabData {
 
 /** Data class holding information about the focused tab state. */
 export declare interface FocusedTabData {
-  /** Stores the focused tab data if one exists. */
-  focusedTab?: TabData;
-  /**
-   * If a focus candidate exists but cannot be focused then
-   * `focusedTabCandidate` will hold its `TabData` and an
-   * `InvalidCandidateError` specifying why it is not focusable.
-   */
-  focusedTabCandidate?: FocusedTabCandidate;
-  /** If no candidate exists than the noCandidateTabError will indicate why. */
-  noCandidateTabError?: NoCandidateTabError;
+  // This is a union. Exactly one field is present.
+
+  /** Present if a tab has focus. */
+  hasFocus?: FocusedTabDataHasFocus;
+  /** Present if no tab has focus. */
+  hasNoFocus?: FocusedTabDataHasNoFocus;
 }
 
-/** Data class holding information about the focused tab candidate. */
-export declare interface FocusedTabCandidate {
+/** FocusedTabData variant with focus. */
+export declare interface FocusedTabDataHasFocus {
+  /** Information about the focused tab. */
+  tabData: TabData;
+}
+
+/** FocusedTabData variant without focus. */
+export declare interface FocusedTabDataHasNoFocus {
   /**
-   * Stores the focused tab candidate data if the browser has valid TabData
-   * which cannot be used for context extraction.
+   * Information about the active tab, which cannot be focused. Present only
+   * if there is an active tab.
    */
-  focusedTabCandidateData?: TabData;
-  /** Specifies why the candidate was invalid for focus. */
-  invalidCandidateError?: InvalidCandidateError;
+  tabFocusCandidateData?: TabData;
+  /** A human-readable message explaining why there is no focused tab. */
+  noFocusReason: string;
 }
 
 /**
@@ -716,7 +788,6 @@ export declare interface Screenshot {
 
 /** Maps the ErrorWithReason.reasonType to the type of reason. */
 export declare interface ErrorReasonTypes {
-  tabContext: GetTabContextErrorReason;
   captureScreenshot: CaptureScreenshotErrorReason;
   scrollTo: ScrollToErrorReason;
   webClientInitialize: WebClientInitializeErrorReason;
@@ -744,19 +815,6 @@ export declare interface ErrorWithReason<
   reason: ErrorReasonTypes[T];
 }
 
-/** Reason for failure while extracting tab context. */
-export enum GetTabContextErrorReason {
-  UNKNOWN = 0,
-  /** The web contents was navigated or closed during context gathering. */
-  WEB_CONTENTS_CHANGED = 1,
-  /** Permission to capture page context is denied. */
-  PERMISSION_DENIED = 2,
-  /** The URL in the tab data is not supported. */
-  UNSUPPORTED_URL = 3,
-  /** There are no Chrome tabs available to be focused. */
-  NO_FOCUSABLE_TABS = 4,
-}
-
 /** Reason for failure while acting in the focused tab. */
 export enum ActInFocusedTabErrorReason {
   UNKNOWN = 0,
@@ -766,29 +824,6 @@ export enum ActInFocusedTabErrorReason {
   INVALID_ACTION_PROTO = 2,
   /** Action target is not found. */
   TARGET_NOT_FOUND = 3,
-}
-
-/**
- * Reason why a focused tab candidate is not valid for focus. NOTE: This may be
- * extended in the future so avoid using complete switches on the currently used
- * enum values.
- */
-export enum InvalidCandidateError {
-  /** Candidate invalid for an unknown reason. */
-  UNKNOWN = 0,
-  /** The URL in the tab data is not supported. */
-  UNSUPPORTED_URL = 1,
-}
-
-/**
- * Reason why a focused tab is not available. NOTE: This may be extended in the
- * future so avoid using complete switches on the currently used enum values.
- */
-export enum NoCandidateTabError {
-  /** An unknown error occurred while getting the tab data. */
-  UNKNOWN = 0,
-  /** There are no Chrome tabs available to be focused. */
-  NO_FOCUSABLE_TABS = 1,
 }
 
 /**
@@ -821,9 +856,6 @@ export declare interface ActInFocusedTabParams {
   // Tab context options to gather context after acting.
   tabContextOptions: TabContextOptions;
 }
-
-/** Error type used for tab context extraction errors. */
-export type GetTabContextError = ErrorWithReason<'tabContext'>;
 
 /** Error type used for screenshot capture errors. */
 export type CaptureScreenshotError = ErrorWithReason<'captureScreenshot'>;
@@ -982,43 +1014,38 @@ export declare interface GlicApiBootMessage {
 // Types used in presubmit check.
 //
 
-// Types consumed by the client. These are subject to stricter checks than
-// those in TypesConsumedByHost.
-export interface TypesConsumedByClient {
-  hostRegistry: GlicHostRegistry;
-  browserHost: GlicBrowserHost;
-  tabContextResult: TabContextResult;
-  tabData: TabData;
-  imageOriginAnnotations: ImageOriginAnnotations;
-  screenshot: Screenshot;
-  userProfileInfo: UserProfileInfo;
-  chromeVersion: ChromeVersion;
-  focusedTabData: FocusedTabData;
-  focusedTabCandidate: FocusedTabCandidate;
-  pdfDocumentData: PdfDocumentData;
-  webPageData: WebPageData;
-  documentData: DocumentData;
-  panelState: PanelState;
-  annotatedPageData: AnnotatedPageData;
-  panelOpeningData: PanelOpeningData;
+// Types to be checked for backwards compatibility on presubmit, excluding
+// enums.
+export interface BackwardsCompatibleTypes {
+  actInFocusedTabParams: ActInFocusedTabParams;
   actInFocusedTabResult: ActInFocusedTabResult;
-}
-
-// Types consumed by the host.
-export interface TypesConsumedByHost {
-  webClient: GlicWebClient;
-  resizeWindowOptions: ResizeWindowOptions;
+  annotatedPageData: AnnotatedPageData;
+  browserHost: GlicBrowserHost;
+  chromeVersion: ChromeVersion;
   createTabOptions: CreateTabOptions;
-  glicBrowserHostMetrics: GlicBrowserHostMetrics;
-  openPanelInfo: OpenPanelInfo;
-  tabContextOptions: TabContextOptions;
+  documentData: DocumentData;
   draggableArea: DraggableArea;
-  subscriber: Subscriber;
+  focusedTabData: FocusedTabData;
+  glicBrowserHostMetrics: GlicBrowserHostMetrics;
+  hostRegistry: GlicHostRegistry;
+  imageOriginAnnotations: ImageOriginAnnotations;
+  openPanelInfo: OpenPanelInfo;
+  panelOpeningData: PanelOpeningData;
+  panelState: PanelState;
+  pdfDocumentData: PdfDocumentData;
+  resizeWindowOptions: ResizeWindowOptions;
+  screenshot: Screenshot;
   scrollToParams: ScrollToParams;
   scrollToSelector: ScrollToSelector;
-  scrollToTextSelector: ScrollToTextSelector;
   scrollToTextFragmentSelector: ScrollToTextFragmentSelector;
-  actInFocusedTabParams: ActInFocusedTabParams;
+  scrollToTextSelector: ScrollToTextSelector;
+  subscriber: Subscriber;
+  tabContextOptions: TabContextOptions;
+  tabContextResult: TabContextResult;
+  tabData: TabData;
+  userProfileInfo: UserProfileInfo;
+  webClient: GlicWebClient;
+  webPageData: WebPageData;
 }
 
 // Enums that should not be changed.
@@ -1029,11 +1056,8 @@ export interface ClosedEnums {
 
 // Enums that can be extended.
 export interface ExtensibleEnums {
-  getTabContextErrorReason: typeof GetTabContextErrorReason;
   captureScreenshotErrorReason: typeof CaptureScreenshotErrorReason;
   scrollToErrorReason: typeof ScrollToErrorReason;
-  invalidCandidateError: typeof InvalidCandidateError;
-  noCandidateTabError: typeof NoCandidateTabError;
   webClientInitializeErrorReason: typeof WebClientInitializeErrorReason;
   invocationSource: typeof InvocationSource;
   actInFocusedTabErrorReason: typeof ActInFocusedTabErrorReason;

@@ -22,12 +22,19 @@ class TabEventTrackerImpl : public TabEventTracker {
   TabEventTrackerImpl& operator=(const TabEventTrackerImpl&) = delete;
 
   // TabEventTracker impl:
-  void DidAddTab(int tab_id) override;
-  void DidSelectTab(int tab_id, TabSelectionType tab_selection_type) override;
+  void DidAddTab(int tab_id, int tab_launch_type) override;
+  void DidSelectTab(int tab_id,
+                    TabSelectionType tab_selection_type,
+                    int last_tab_id) override;
   void DidMoveTab(int tab_id, int new_index, int current_index) override;
+  void DidEnterTabSwitcher() override;
+
+  int GetSelectedCount(int tab_id) const;
 
  private:
   OnNewEventCallback on_new_event_callback_;
+
+  std::map<int, int> tab_id_to_selected_count_;
 };
 
 }  // namespace visited_url_ranking

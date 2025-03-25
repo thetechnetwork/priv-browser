@@ -78,6 +78,17 @@ builtin_modules("_Builtin_stdalign") {
 builtin_modules("_Builtin_stdarg") {
 }
 
+builtin_modules("_Builtin_stdatomic") {
+  deps = [
+    ":_Builtin_stddef",
+    ":_Builtin_stdint",
+    ":std_config",
+  ]
+}
+
+builtin_modules("_Builtin_stdbool") {
+}
+
 builtin_modules("_Builtin_stddef") {
 }
 
@@ -88,6 +99,12 @@ builtin_modules("_Builtin_stdint") {
       ":_Builtin_stddef",
     ]
   }
+}
+
+builtin_modules("_Builtin_unwind") {
+  deps = [
+    ":_Builtin_stdint",
+  ]
 }
 
 configs_to_add = [
@@ -198,8 +215,23 @@ libcxx_modules("std_math_h") {
 libcxx_modules("std_private_mbstate_t") {
   deps = [
     ":std_config",
- ]
+  ]
 }
+
+libcxx_modules("std_stdatomic_h") {
+  deps = [
+    ":_Builtin_stdatomic",
+    ":std_config",
+  ]
+}
+
+libcxx_modules("std_stdbool_h") {
+  deps = [
+    ":std_config",
+    ":_Builtin_stdbool",
+  ]
+}
+
 
 libcxx_modules("std_stddef_h") {
 }

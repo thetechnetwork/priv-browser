@@ -67,7 +67,7 @@ Path SVGCircleElement::AsPath() const {
   if (r > 0) {
     gfx::PointF center =
         PointForLengthPair(style.Cx(), style.Cy(), viewport_resolver, style);
-    path.AddEllipse(center, r, r);
+    path = Path::MakeEllipse(center, r, r);
   }
   return path;
 }
@@ -77,7 +77,6 @@ void SVGCircleElement::SvgAttributeChanged(
   const QualifiedName& attr_name = params.name;
   if (attr_name == svg_names::kRAttr || attr_name == svg_names::kCxAttr ||
       attr_name == svg_names::kCyAttr) {
-    UpdateRelativeLengthsInformation();
     GeometryPresentationAttributeChanged(params.property);
     return;
   }

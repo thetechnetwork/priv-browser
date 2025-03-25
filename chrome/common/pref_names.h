@@ -1911,6 +1911,11 @@ inline constexpr char kDataUrlInSvgUseEnabled[] =
 inline constexpr char kPartitionedBlobUrlUsage[] =
     "profile.content_settings.partitioned_blob_url_usage";
 
+// Boolean value indicating if the Reduce Accept-Language feature should be
+// enabled. Defaults to network::features::kReduceAcceptLanguage field trial.
+inline constexpr char kReduceAcceptLanguageEnabled[] =
+    "profile.reduce_accept_language_enabled";
+
 // Boolean indicating if JS dialogs triggered from a different origin iframe
 // should be blocked. Has no effect if
 // "SuppressDifferentOriginSubframeJSDialogs" feature is disabled.
@@ -4088,6 +4093,10 @@ inline constexpr char kCompressionDictionaryTransportEnabled[] =
 // Boolean that specifies whether Zstd Content-Encoding is enabled.
 inline constexpr char kZstdContentEncodingEnabled[] =
     "net.zstd_content_encoding_enabled";
+
+// Boolean that specifies whether Happy Eyeballs V3 is enabled.
+inline constexpr char kHappyEyeballsV3Enabled[] =
+    "net.happy_eyeballs_v3_enabled";
 
 // Boolean that specifies whether IPv6 reachability check override is enabled.
 inline constexpr char kIPv6ReachabilityOverrideEnabled[] =

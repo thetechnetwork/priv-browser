@@ -166,6 +166,7 @@ Para comezar, podes probar o seguinte.</translation>
 <translation id="1505542291183484463">Colocar ventá de cambio de tamaño de mosaico cara abaixo</translation>
 <translation id="1510238584712386396">Menú de aplicacións</translation>
 <translation id="1520303207432623762">{NUM_APPS,plural, =1{Mostrar a configuración de notificacións. Están desactivadas para unha aplicación}other{Mostrar a configuración de notificacións. Están desactivadas para # aplicacións}}</translation>
+<translation id="1521655867290435174">Follas de cálculo de Google</translation>
 <translation id="1523032696246003">Batería: <ph name="BATTERY_PERCENTAGE" /> % | <ph name="TIME" /> para completar a carga</translation>
 <translation id="1525508553941733066">IGNORAR</translation>
 <translation id="1526448108126799339">Abrir pestana nova nunha ventá nova</translation>
@@ -214,6 +215,7 @@ Para comezar, podes probar o seguinte.</translation>
 <translation id="1679841710523778799">Aumenta o brillo</translation>
 <translation id="1680659827022803830">Controis de videochamada</translation>
 <translation id="169515659049020177">Maiús</translation>
+<translation id="1696984622403682083">Podes desactivar esta función en calquera momento en Configuración. <ph name="LINK_TO_LEARN_MORE" /></translation>
 <translation id="1698080062160024910">Temporizador de <ph name="TOTAL_TIME" /> · <ph name="LABEL" /></translation>
 <translation id="1698760176351776263">Enderezo IPv6: <ph name="ADDRESS" /></translation>
 <translation id="1703117532528082099">Ventá activa fixada á esquerda.</translation>
@@ -240,6 +242,8 @@ Para comezar, podes probar o seguinte.</translation>
 <translation id="1755556344721611131">Aplicación Diagnósticos</translation>
 <translation id="1756833229520115364">Non se puido gardar o modelo. Hai demasiadas ventás ou pestanas.</translation>
 <translation id="1757857692711134412">Función desactivada ata o solpor</translation>
+<translation id="1763084151787818322">Outras accións</translation>
+<translation id="1768138163688567246">Pechar a opción de facer buscas na miña pantalla</translation>
 <translation id="1768366657309696705">Cambiouse o atallo de teclado <ph name="LAUNCHER_KEY_NAME" /> + Punto. Para utilizar a tecla Inserir, preme <ph name="LAUNCHER_KEY_NAME" /> + Maiúsculas + Retroceso.</translation>
 <translation id="1770726142253415363">Moveuse á fila <ph name="ROW_NUMBER" />, columna <ph name="COLUMN_NUMBER" />.</translation>
 <translation id="1771761307086386028">Desprazarse á dereita</translation>
@@ -345,7 +349,6 @@ Para comezar, podes probar o seguinte.</translation>
 <translation id="2201071101391734388">Foto recente <ph name="INDEX" /> de <ph name="TOTAL_COUNT" />.</translation>
 <translation id="2201687081523799384">Contraer Tarefas de Google</translation>
 <translation id="2208323208084708176">Modo de escritorio unificado</translation>
-<translation id="2220572644011485463">PIN ou contrasinal</translation>
 <translation id="2222841058024245321">Escritorio 7</translation>
 <translation id="2223384056430485343">Nunha pantalla dividida</translation>
 <translation id="2224075387478458881">Non se pode gravar a pantalla cando nela se mostra contido protexido</translation>
@@ -966,6 +969,7 @@ Limitáronse algunhas funcións para ampliar a duración da batería.</translati
 <translation id="4221957499226645091"><ph name="APP_NAME" />, aplicación instalada, en pausa</translation>
 <translation id="4228078597006700451">Os controis non están configurados</translation>
 <translation id="4230560241506423345">Novo elemento</translation>
+<translation id="4236726631849783264">Recordatorio sobre accións suxeridas</translation>
 <translation id="4239069858505860023">GPRS</translation>
 <translation id="4240486403425279990">Modo de visión xeral</translation>
 <translation id="4242533952199664413">Abrir configuración</translation>
@@ -982,7 +986,6 @@ Limitáronse algunhas funcións para ampliar a duración da batería.</translati
 <translation id="4275663329226226506">Multimedia</translation>
 <translation id="4279490309300973883">Proxección</translation>
 <translation id="4280601795273309128">Deixaron de recibirse as actualizacións de seguranza. Actualiza o dispositivo.</translation>
-<translation id="4281739221820540368">Crear documento de Google</translation>
 <translation id="4283888303416325161">Escribe o contrasinal como medida de seguranza adicional</translation>
 <translation id="4285498937028063278">Deixar de fixar</translation>
 <translation id="428715201724021596">Conectando co perfil. Esta acción pode tardar uns minutos.</translation>
@@ -1043,6 +1046,7 @@ Limitáronse algunhas funcións para ampliar a duración da batería.</translati
 <translation id="4471354919263203780">Descargando ficheiros de recoñecemento de voz… <ph name="PERCENT" /> %</translation>
 <translation id="4471432286288241507">{0,plural, =0{Actualiza o dispositivo agora}=1{Actualiza o dispositivo en 1 segundo}other{Actualiza o dispositivo en # segundos}}</translation>
 <translation id="4472575034687746823">Comezar</translation>
+<translation id="4473489370276014885">Contactos de Google</translation>
 <translation id="4477350412780666475">Pista seguinte</translation>
 <translation id="4477751544736611934">Pode que se apliquen custos polo uso de datos.
 Hai 1 dispositivo conectado.</translation>
@@ -1069,6 +1073,7 @@ Hai 1 dispositivo conectado.</translation>
 <translation id="4545950850562423083">Gardar páxina actual como marcador</translation>
 <translation id="4548482551627849548">Mover ventá activa ao escritorio da esquerda</translation>
 <translation id="4552748006424994716">Para evitar o eco, podes escoitar o teu micrófono só mediante auriculares con cable.</translation>
+<translation id="4556953949326137018">Cando utilizas accións suxeridas, como "engadir ao calendario" ou "crear un documento de Google", o contido da área seleccionada envíase aos servidores de Google para suxerir accións, todo segundo o establecido no seguinte documento: <ph name="LINK_TO_SERVICE_TERMS" />. Non inclúas información persoal, delicada nin confidencial.</translation>
 <translation id="4560576029703263363">Activado</translation>
 <translation id="4561267230861221837">3G</translation>
 <translation id="4565377596337484307">Ocultar contrasinal</translation>
@@ -1152,6 +1157,7 @@ Hai 1 dispositivo conectado.</translation>
 <translation id="481455355267255546">Próximos eventos</translation>
 <translation id="481749895090480684">Lista de tarefas: <ph name="GLANCEABLES_TASKS_LIST_NAME" /></translation>
 <translation id="4826588772550366629">cámara e micrófono</translation>
+<translation id="4828935196674083554">Engadindo...</translation>
 <translation id="482908187605862807">Aplicacións dispoñibles en Play Store</translation>
 <translation id="4831034276697007977">Seguro que queres desactivar os clics automáticos?</translation>
 <translation id="4835677468087803981">Ocultar o PIN</translation>
@@ -1649,6 +1655,7 @@ Non hai ningún dispositivo conectado.</translation>
 <translation id="641817663353603351">retroceder páxina</translation>
 <translation id="6424520630891723617"><ph name="SECURITY_STATUS" />, intensidade do sinal do <ph name="SIGNAL_STRENGTH" /></translation>
 <translation id="642644398083277086">Eliminar todas as notificacións</translation>
+<translation id="6426905245930183644">Creando...</translation>
 <translation id="6430225033895752525">Mostrar a configuración do modo Sen distraccións</translation>
 <translation id="643147933154517414">Listo</translation>
 <translation id="6431865393913628856">Gravación da pantalla</translation>
@@ -1715,7 +1722,6 @@ Nova instalación</translation>
 <translation id="6612889377159412215">subtarefa</translation>
 <translation id="6613765291890844037">Almacenamento: <ph name="STORAGE_IN_USE_SIZE" /> en uso | Total: <ph name="STORAGE_TOTAL_SIZE" /></translation>
 <translation id="6614169507485700968">A pantalla de privacidade está activada</translation>
-<translation id="6618277154885124991">Crear folla de cálculo de Google</translation>
 <translation id="6622679827379792051">Configurar a visualización das aplicacións do teu teléfono</translation>
 <translation id="662279009180869175">Utiliza as frechas dereita e esquerda para cambiar o tamaño da pantalla dividida</translation>
 <translation id="6624493541160101248">Escritorio actual: <ph name="DESK_NAME" />. Escritorio <ph name="DESK_INDEX" /> de <ph name="DESK_COUNT" />.</translation>
@@ -1830,7 +1836,6 @@ Nova instalación</translation>
 <translation id="7000027735917578303">Configuración de ventás e escritorios</translation>
 <translation id="7004910047186208204">Conéctate aos datos móbiles</translation>
 <translation id="7005239792648594238">Abre unha aplicación para comezar</translation>
-<translation id="7007983414944123363">Non se puido verificar o teu PIN ou contrasinal. Téntao de novo.</translation>
 <translation id="7014684956566476813">Conexión establecida cun dispositivo chamado "<ph name="DEVICE_NAME" />"</translation>
 <translation id="7015766095477679451">Volve á seguinte hora: <ph name="COME_BACK_TIME" />.</translation>
 <translation id="70168403932084660">Escritorio 6</translation>
@@ -1944,6 +1949,7 @@ Nova instalación</translation>
 <translation id="742594950370306541">Estase utilizando a cámara.</translation>
 <translation id="742608627846767349">Bos días!</translation>
 <translation id="743058460480092004">Estanse utilizando a cámara e o micrófono.</translation>
+<translation id="7440404390546433462">Busca de Google</translation>
 <translation id="7441711280402516925">Reproducindo · Cambiar á pestana</translation>
 <translation id="7453330308669753048">Quitouse un resultado do historial de busca</translation>
 <translation id="7459485586006128091">Debido a un erro interno, desactivouse a zona wifi. Proba a conectala de novo dentro duns minutos.</translation>
@@ -2399,6 +2405,7 @@ Para apagar o dispositivo, mantén premido de novo o botón de acendido.</transl
 <translation id="8921624153894383499">O Asistente de Google non fala este idioma.</translation>
 <translation id="8926951137623668982">O estante ocúltase sempre</translation>
 <translation id="8929566928381252430">Estás tentando usar a tecla de bloqueo de maiúsculas? Usar</translation>
+<translation id="8934418770423095813">Crear documento de Google</translation>
 <translation id="8934926665751933910">{NUM_FILES,plural, =1{1 ficheiro}other{# ficheiros}}</translation>
 <translation id="8936501819958976551">desactivou</translation>
 <translation id="8938800817013097409">Dispositivo USB‑C (porto dereito posterior)</translation>
@@ -2467,6 +2474,7 @@ Para apagar o dispositivo, mantén premido de novo o botón de acendido.</transl
 <translation id="9168436347345867845">Configurar máis tarde</translation>
 <translation id="9178475906033259337">Mostrando 1 resultado para "<ph name="QUERY" />"</translation>
 <translation id="9179259655489829027">Con esta función podes acceder rapidamente a calquera usuario que teña a sesión iniciada sen necesidade de introducir un contrasinal. Utiliza esta función só con contas nas que confíes.</translation>
+<translation id="9183302530794969518">Documentos de Google</translation>
 <translation id="9183456764293710005">Lupa de pantalla completa</translation>
 <translation id="9192133205265227850">Usa <ph name="DEVICE_NAME" /></translation>
 <translation id="9193626018745640770">Estase emitindo contido a un receptor descoñecido</translation>

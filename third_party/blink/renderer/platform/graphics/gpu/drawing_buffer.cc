@@ -779,7 +779,8 @@ DrawingBuffer::CreateOrRecycleColorBuffer() {
   return CreateColorBuffer(size_);
 }
 
-scoped_refptr<CanvasResource> DrawingBuffer::ExportLowLatencyCanvasResource(
+scoped_refptr<ExternalCanvasResource>
+DrawingBuffer::ExportLowLatencyCanvasResource(
     base::WeakPtr<CanvasResourceProvider> resource_provider) {
   // Swap chain must be presented before resource is exported.
   ResolveAndPresentSwapChainIfNeeded();
@@ -1178,17 +1179,9 @@ bool DrawingBuffer::CopyToVideoFrame(
       [&](scoped_refptr<gpu::ClientSharedImage> src_shared_image,
           const gpu::SyncToken& produce_sync_token, SkAlphaType src_alpha_type,
           const gfx::Size& src_size) -> std::optional<gpu::SyncToken> {
-    raster_interface->WaitSyncTokenCHROMIUM(produce_sync_token.GetConstData());
-    bool succeeded = frame_pool->CopyRGBATextureToVideoFrame(
-        src_size, src_shared_image, gpu::SyncToken(), dst_color_space,
+    return frame_pool->CopyRGBATextureToVideoFrame(
+        src_size, src_shared_image, produce_sync_token, dst_color_space,
         std::move(callback));
-    if (!succeeded) {
-      return std::nullopt;
-    }
-
-    gpu::SyncToken sync_token;
-    raster_interface->GenUnverifiedSyncTokenCHROMIUM(sync_token.GetData());
-    return sync_token;
   };
   return CopyToPlatformInternal(raster_interface, /*dst_is_unpremul_gl=*/false,
                                 src_buffer, copy_function);
@@ -1196,7 +1189,7 @@ bool DrawingBuffer::CopyToVideoFrame(
 
 cc::Layer* DrawingBuffer::CcLayer() {
   if (!layer_) {
-    layer_ = cc::TextureLayer::CreateForMailbox(this);
+    layer_ = cc::TextureLayer::Create(this);
     if (client_) {
       client_->DrawingBufferClientInitializeLayer(layer_.get());
     }

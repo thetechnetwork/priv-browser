@@ -36,7 +36,8 @@
 #import "ios/chrome/browser/policy/model/browser_policy_connector_ios.h"
 #import "ios/chrome/browser/policy/model/cloud/user_policy_signin_service.h"
 #import "ios/chrome/browser/policy/model/cloud/user_policy_signin_service_factory.h"
-#import "ios/chrome/browser/policy/model/cloud/user_policy_switch.h"
+#import "ios/chrome/browser/policy/model/management_state.h"
+#import "ios/chrome/browser/policy/ui_bundled/management_util.h"
 #import "ios/chrome/browser/shared/coordinator/alert/action_sheet_coordinator.h"
 #import "ios/chrome/browser/shared/coordinator/alert/alert_coordinator.h"
 #import "ios/chrome/browser/shared/coordinator/scene/scene_state.h"
@@ -50,10 +51,12 @@
 #import "ios/chrome/browser/shared/public/commands/snackbar_commands.h"
 #import "ios/chrome/browser/shared/public/features/features.h"
 #import "ios/chrome/browser/shared/public/features/system_flags.h"
+#import "ios/chrome/browser/shared/ui/util/identity_snackbar/identity_snackbar_message.h"
 #import "ios/chrome/browser/shared/ui/util/snackbar_util.h"
 #import "ios/chrome/browser/shared/ui/util/uikit_ui_util.h"
 #import "ios/chrome/browser/signin/model/authentication_service.h"
 #import "ios/chrome/browser/signin/model/authentication_service_factory.h"
+#import "ios/chrome/browser/signin/model/chrome_account_manager_service_factory.h"
 #import "ios/chrome/browser/signin/model/constants.h"
 #import "ios/chrome/browser/signin/model/identity_manager_factory.h"
 #import "ios/chrome/browser/signin/model/system_identity.h"
@@ -220,6 +223,29 @@ void AuthenticationFlowContinuation(OnProfileSwitchCompletion completion,
                          sceneState:(SceneState*)sceneState {
   CHECK(AreSeparateProfilesForManagedAccountsEnabled());
 
+  std::optional<std::string> profileName =
+      GetApplicationContext()
+          ->GetAccountProfileMapper()
+          ->FindProfileNameForGaiaID(GaiaId(identity.gaiaID));
+  if (!profileName.has_value()) {
+    __weak __typeof(_delegate) weakDelegate = _delegate;
+    base::SequencedTaskRunner::GetCurrentDefault()->PostTask(
+        FROM_HERE, base::BindOnce(
+                       [](__typeof(_delegate) delegate) {
+                         [delegate didSwitchToProfileWithSuccess:false
+                                               newProfileBrowser:nullptr];
+                       },
+                       weakDelegate));
+    return;
+  }
+
+  [self switchToProfileWithName:*profileName sceneState:sceneState];
+}
+
+- (void)switchToProfileWithName:(const std::string&)profileName
+                     sceneState:(SceneState*)sceneState {
+  CHECK(AreSeparateProfilesForManagedAccountsEnabled());
+
   __weak __typeof(_delegate) weakDelegate = _delegate;
   OnProfileSwitchCompletion completion = base::BindOnce(
       [](__typeof(_delegate) delegate, bool success,
@@ -229,19 +255,8 @@ void AuthenticationFlowContinuation(OnProfileSwitchCompletion completion,
       },
       weakDelegate);
 
-  std::optional<std::string> profileName =
-      GetApplicationContext()
-          ->GetAccountProfileMapper()
-          ->FindProfileNameForGaiaID(GaiaId(identity.gaiaID));
-  if (!profileName.has_value()) {
-    base::SequencedTaskRunner::GetCurrentDefault()->PostTask(
-        FROM_HERE, base::BindOnce(std::move(completion), /*success=*/false,
-                                  /*new_profile_browser=*/nullptr));
-    return;
-  }
-
   [_changeProfileHandler
-      changeProfile:*profileName
+      changeProfile:profileName
            forScene:sceneState
        continuation:base::BindOnce(&AuthenticationFlowContinuation,
                                    std::move(completion))];
@@ -338,6 +353,12 @@ void AuthenticationFlowContinuation(OnProfileSwitchCompletion completion,
     readingListToggleEnabledWithSigninFlow = YES;
   }
 
+  if (postSignInActions.Has(
+          PostSignInAction::kShowIdentityConfirmationSnackbar)) {
+    [self triggerAccountSwitchSnackbarWithIdentity:identity browser:browser];
+    return;
+  }
+
   if (!postSignInActions.Has(PostSignInAction::kShowSnackbar)) {
     return;
   }
@@ -418,9 +439,6 @@ void AuthenticationFlowContinuation(OnProfileSwitchCompletion completion,
 
 - (void)registerUserPolicy:(ProfileIOS*)profile
                forIdentity:(id<SystemIdentity>)identity {
-  // Should only fetch user policies when the feature is enabled.
-  DCHECK(policy::IsAnyUserPolicyFeatureEnabled());
-
   std::string userEmail = base::SysNSStringToUTF8(identity.userEmail);
   CoreAccountId accountID =
       IdentityManagerFactory::GetForProfile(profile)->PickAccountIdForAccount(
@@ -459,9 +477,6 @@ void AuthenticationFlowContinuation(OnProfileSwitchCompletion completion,
                clientID:(NSString*)clientID
      userAffiliationIDs:(NSArray<NSString*>*)userAffiliationIDs
                identity:(id<SystemIdentity>)identity {
-  // Should only fetch user policies when the feature is enabled.
-  DCHECK(policy::IsAnyUserPolicyFeatureEnabled());
-
   // Need a `dmToken` and a `clientID` to fetch user policies.
   DCHECK([dmToken length] > 0);
   DCHECK([clientID length] > 0);
@@ -520,12 +535,6 @@ void AuthenticationFlowContinuation(OnProfileSwitchCompletion completion,
 }
 
 - (void)updateUserPolicyNotificationStatusIfNeeded:(PrefService*)prefService {
-  if (!policy::IsAnyUserPolicyFeatureEnabled()) {
-    // Don't set the notification pref if the User Policy feature isn't
-    // enabled.
-    return;
-  }
-
   prefService->SetBoolean(policy::policy_prefs::kUserPolicyNotificationWasShown,
                           true);
 }
@@ -671,6 +680,28 @@ void AuthenticationFlowContinuation(OnProfileSwitchCompletion completion,
     [self updateUserPolicyNotificationStatusIfNeeded:prefService];
   }
   [self.delegate didAcceptManagedConfirmation:keepBrowsingDataSeparate];
+}
+
+// Displays the identity confirmation snackbar with `identity`.
+- (void)triggerAccountSwitchSnackbarWithIdentity:(id<SystemIdentity>)identity
+                                         browser:(Browser*)browser {
+  ProfileIOS* profile = browser->GetProfile()->GetOriginalProfile();
+  UIImage* avatar = ChromeAccountManagerServiceFactory::GetForProfile(profile)
+                        ->GetIdentityAvatarWithIdentity(
+                            identity, IdentityAvatarSize::Regular);
+  ManagementState managementState =
+      GetManagementState(IdentityManagerFactory::GetForProfile(profile),
+                         AuthenticationServiceFactory::GetForProfile(profile),
+                         profile->GetPrefs());
+  MDCSnackbarMessage* snackbarTitle = [[IdentitySnackbarMessage alloc]
+      initWithName:identity.userGivenName
+             email:identity.userEmail
+            avatar:avatar
+           managed:managementState.is_profile_managed()];
+  CommandDispatcher* dispatcher = browser->GetCommandDispatcher();
+  id<SnackbarCommands> snackbarCommandsHandler =
+      HandlerForProtocol(dispatcher, SnackbarCommands);
+  [snackbarCommandsHandler showSnackbarMessageOverBrowserToolbar:snackbarTitle];
 }
 
 #pragma mark - ManagedProfileCreationCoordinatorDelegate

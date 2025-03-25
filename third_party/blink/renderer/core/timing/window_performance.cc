@@ -73,6 +73,7 @@
 #include "third_party/blink/renderer/core/page/chrome_client.h"
 #include "third_party/blink/renderer/core/page/page.h"
 #include "third_party/blink/renderer/core/page/page_hidden_state.h"
+#include "third_party/blink/renderer/core/paint/timing/container_timing.h"
 #include "third_party/blink/renderer/core/performance_entry_names.h"
 #include "third_party/blink/renderer/core/timing/animation_frame_timing_info.h"
 #include "third_party/blink/renderer/core/timing/largest_contentful_paint.h"
@@ -1212,10 +1213,12 @@ void WindowPerformance::NotifyAndAddEventTimingBuffer(
     TRACE_EVENT_INSTANT("devtools.timeline", "EventCreation", track_id,
                         entry->GetEventTimingReportingInfo()->creation_time,
                         flow_id);
-    TRACE_EVENT_INSTANT(
-        "devtools.timeline", "EventEnqueuedToMainThread", track_id,
-        entry->GetEventTimingReportingInfo()->enqueued_to_main_thread_time,
-        flow_id);
+    auto enqueued_to_main_thread_time =
+        entry->GetEventTimingReportingInfo()->enqueued_to_main_thread_time;
+    if (!enqueued_to_main_thread_time.is_null()) {
+      TRACE_EVENT_INSTANT("devtools.timeline", "EventEnqueuedToMainThread",
+                          track_id, enqueued_to_main_thread_time, flow_id);
+    }
 
     TRACE_EVENT_BEGIN(
         "devtools.timeline", "EventProcessing", track_id,
@@ -1254,8 +1257,14 @@ void WindowPerformance::PopulateContainerTimingEntries() {
 
   DCHECK(RuntimeEnabledFeatures::ContainerTimingEnabled());
 
-  // TODO(jdapena): emit performance entries from the recorded container timing
-  // information
+  LocalDOMWindow* window = DomWindow();
+  if (!window) {
+    return;
+  }
+
+  ContainerTiming& container_timing = ContainerTiming::From(*window);
+
+  container_timing.EmitPerformanceEntries();
 
   has_container_timing_changes_ = false;
 }

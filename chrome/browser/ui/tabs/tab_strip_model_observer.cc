@@ -5,12 +5,14 @@
 #include "chrome/browser/ui/tabs/tab_strip_model_observer.h"
 
 #include <utility>
+#include <variant>
 
 #include "base/check_op.h"
 #include "base/trace_event/trace_event.h"
-#include "chrome/browser/ui/tabs/public/tab_interface.h"
+#include "chrome/browser/ui/tabs/split_tab_collection.h"
 #include "chrome/browser/ui/tabs/tab_group_tab_collection.h"
 #include "chrome/browser/ui/tabs/tab_strip_model.h"
+#include "components/tab_collections/public/tab_interface.h"
 #include "content/public/browser/web_contents.h"
 #include "third_party/perfetto/include/perfetto/tracing/traced_value.h"
 
@@ -64,22 +66,22 @@ TabStripModelChange::~TabStripModelChange() = default;
 
 const TabStripModelChange::Insert* TabStripModelChange::GetInsert() const {
   CHECK_EQ(type_, Type::kInserted);
-  return &absl::get<Insert>(delta_);
+  return &std::get<Insert>(delta_);
 }
 
 const TabStripModelChange::Remove* TabStripModelChange::GetRemove() const {
   CHECK_EQ(type_, Type::kRemoved);
-  return &absl::get<Remove>(delta_);
+  return &std::get<Remove>(delta_);
 }
 
 const TabStripModelChange::Move* TabStripModelChange::GetMove() const {
   CHECK_EQ(type_, Type::kMoved);
-  return &absl::get<Move>(delta_);
+  return &std::get<Move>(delta_);
 }
 
 const TabStripModelChange::Replace* TabStripModelChange::GetReplace() const {
   CHECK_EQ(type_, Type::kReplaced);
-  return &absl::get<Replace>(delta_);
+  return &std::get<Replace>(delta_);
 }
 
 TabStripModelChange::TabStripModelChange(Type type, Delta delta)
@@ -126,7 +128,7 @@ void TabStripModelChange::Replace::WriteIntoTrace(
 void TabStripModelChange::WriteIntoTrace(perfetto::TracedValue context) const {
   auto dict = std::move(context).WriteDictionary();
   dict.Add("type", type_);
-  absl::visit([&dict](auto&& delta) { dict.Add("delta", delta); }, delta_);
+  std::visit([&dict](auto&& delta) { dict.Add("delta", delta); }, delta_);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -260,7 +262,25 @@ void TabStripModelObserver::OnTabGroupAdded(
 void TabStripModelObserver::OnTabGroupWillBeRemoved(
     const tab_groups::TabGroupId& group_id) {}
 
-void TabStripModelObserver::OnSplitViewAdded(std::vector<int> indices) {}
+void TabStripModelObserver::OnSplitTabCreated(
+    std::vector<std::pair<tabs::TabInterface*, int>> tabs,
+    split_tabs::SplitTabId split_id,
+    TabStripModelObserver::SplitTabAddReason reason,
+    tabs::SplitTabLayout tab_layout) {}
+
+void TabStripModelObserver::OnSplitTabRemoved(
+    std::vector<std::pair<tabs::TabInterface*, int>> tabs,
+    split_tabs::SplitTabId split_id,
+    TabStripModelObserver::SplitTabRemoveReason reason) {}
+
+void TabStripModelObserver::OnSplitTabOrientationChanged(
+    split_tabs::SplitTabId split_id,
+    tabs::SplitTabLayout tab_layout) {}
+
+void TabStripModelObserver::OnSplitTabContentsUpdated(
+    split_tabs::SplitTabId split_id,
+    std::vector<std::pair<tabs::TabInterface*, int>> prev_tabs,
+    std::vector<std::pair<tabs::TabInterface*, int>> new_tabs) {}
 
 void TabStripModelObserver::TabChangedAt(WebContents* contents,
                                          int index,

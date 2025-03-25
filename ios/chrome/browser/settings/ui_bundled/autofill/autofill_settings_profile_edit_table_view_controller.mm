@@ -166,17 +166,7 @@ const CGFloat kSymbolSize = 22;
       [_delegate didEditAutofillProfileFromSettings];
     }
   }
-
-  [self loadModel];
-  [self.handler reconfigureCells];
-  if (_showMigrateToAccountSection &&
-      base::FeatureList::IsEnabled(
-          kAutofillDynamicallyLoadsFieldsForAddressInput)) {
-    [self reconfigureCellsForItems:
-              [self.tableViewModel
-                  itemsInSectionWithIdentifier:
-                      AutofillProfileDetailsSectionIdentifierMigrationButton]];
-  }
+  [self reloadData];
 }
 
 - (BOOL)editButtonEnabled {
@@ -185,7 +175,13 @@ const CGFloat kSymbolSize = 22;
 }
 
 - (BOOL)showCancelDuringEditing {
-  return YES;
+  SettingsNavigationController* navigationController =
+      base::apple::ObjCCast<SettingsNavigationController>(
+          self.navigationController);
+
+  return navigationController &&
+         navigationController.viewControllers.count > 0 &&
+         navigationController.viewControllers.firstObject == self;
 }
 
 #pragma mark - UITableViewDataSource

@@ -134,9 +134,6 @@ class TabStyleViewsImpl : public TabStyleViews {
   // effects and consider only the current tab's state.
   TabStyle::SeparatorOpacities GetSeparatorOpacities(bool for_layout) const;
 
-  // Returns whether we shoould extend the hit test region for Fitts' Law.
-  bool ShouldExtendHitTest() const;
-
   // Returns whether the mouse is currently hovering this tab.
   bool IsHovering() const;
 
@@ -174,8 +171,10 @@ class TabStyleViewsImpl : public TabStyleViews {
                              SkColor stroke_color) const;
   void PaintSeparators(gfx::Canvas* canvas) const;
 
-  bool IsLeftmostSplitTab(const Tab* tab) const;
-  bool IsRightmostSplitTab(const Tab* tab) const;
+  // Returns true if the tab is the first in a set of split tabs.
+  bool IsStartSplitTab(const Tab* tab) const;
+  // Returns true if the tab is the last in a set of split tabs.
+  bool IsEndSplitTab(const Tab* tab) const;
 
   const raw_ptr<const Tab> tab_;
 
@@ -290,10 +289,10 @@ SkPath TabStyleViewsImpl::GetPath(TabStyle::PathType path_type,
     }
 
     if (tab()->split()) {
-      if (IsLeftmostSplitTab(tab())) {
+      if (IsStartSplitTab(tab())) {
         top_right_corner_radius = 0;
         bottom_right_corner_radius = 0;
-      } else if (IsRightmostSplitTab(tab())) {
+      } else if (IsEndSplitTab(tab())) {
         top_left_corner_radius = 0;
         bottom_left_corner_radius = 0;
       }
@@ -302,11 +301,11 @@ SkPath TabStyleViewsImpl::GetPath(TabStyle::PathType path_type,
                                   tab_style()->GetSeparatorSize().width() +
                                   tab_style()->GetSeparatorMargins().right();
 
-      if (!IsLeftmostSplitTab(tab())) {
+      if (!IsStartSplitTab(tab())) {
         left -= separator_width * scale / 2;
       }
 
-      if (!IsRightmostSplitTab(tab())) {
+      if (!IsEndSplitTab(tab())) {
         right += separator_width * scale / 2;
       }
     }
@@ -349,9 +348,9 @@ SkPath TabStyleViewsImpl::GetPath(TabStyle::PathType path_type,
   float tab_right = right - extension;
 
   if (tab()->split()) {
-    if (IsLeftmostSplitTab(tab())) {
+    if (IsStartSplitTab(tab())) {
       tab_right = tab_right + extension;
-    } else if (IsRightmostSplitTab(tab())) {
+    } else if (IsEndSplitTab(tab())) {
       tab_left = tab_left - extension;
     }
   }
@@ -365,7 +364,6 @@ SkPath TabStyleViewsImpl::GetPath(TabStyle::PathType path_type,
 
   // Path-specific adjustments:
   const float stroke_adjustment = stroke_thickness * scale;
-  bool extend_to_top = false;
   if (path_type == TabStyle::PathType::kFill ||
       path_type == TabStyle::PathType::kBorder) {
     tab_left += 0.5f * stroke_adjustment;
@@ -420,37 +418,23 @@ SkPath TabStyleViewsImpl::GetPath(TabStyle::PathType path_type,
                tab_bottom - left_extension_corner_radius);
   }
 
-  // Draw the ascender and top-left curve, if present.
-  if (extend_to_top) {
-    //   ┎─────────╮
-    //   ┃ Content │
-    // ┌─╯         ╰─┐
-    path.lineTo(tab_left, tab_top);
-  } else {
-    //   ╔─────────╮
-    //   ┃ Content │
-    // ┌─╯         ╰─┐
-    path.lineTo(tab_left, tab_top + content_corner_radius);
-    path.arcTo(content_corner_radius, content_corner_radius, 0,
-               SkPath::kSmall_ArcSize, SkPathDirection::kCW,
-               tab_left + content_corner_radius, tab_top);
-  }
+  // Draw the ascender and top-left curve.
+  //   ╔─────────╮
+  //   ┃ Content │
+  // ┌─╯         ╰─┐
+  path.lineTo(tab_left, tab_top + content_corner_radius);
+  path.arcTo(content_corner_radius, content_corner_radius, 0,
+             SkPath::kSmall_ArcSize, SkPathDirection::kCW,
+             tab_left + content_corner_radius, tab_top);
 
-  // Draw the top crossbar and top-right curve, if present.
-  if (extend_to_top) {
-    //   ┌━━━━━━━━━┑
-    //   │ Content │
-    // ┌─╯         ╰─┐
-    path.lineTo(tab_right, tab_top);
-  } else {
-    //   ╭━━━━━━━━━╗
-    //   │ Content │
-    // ┌─╯         ╰─┐
-    path.lineTo(tab_right - content_corner_radius, tab_top);
-    path.arcTo(content_corner_radius, content_corner_radius, 0,
-               SkPath::kSmall_ArcSize, SkPathDirection::kCW, tab_right,
-               tab_top + content_corner_radius);
-  }
+  // Draw the top crossbar and top-right curve.
+  //   ╭━━━━━━━━━╗
+  //   │ Content │
+  // ┌─╯         ╰─┐
+  path.lineTo(tab_right - content_corner_radius, tab_top);
+  path.arcTo(content_corner_radius, content_corner_radius, 0,
+             SkPath::kSmall_ArcSize, SkPathDirection::kCW, tab_right,
+             tab_top + content_corner_radius);
 
   if (tab_right != right) {
     // Draw the descender and bottom-right corner.
@@ -722,12 +706,10 @@ float TabStyleViewsImpl::GetSeparatorOpacity(bool for_layout,
       return true;
     }
 
-    if (tab->split()) {
-      const Tab* const split_tab = tab->controller()->GetAdjacentSplitTab(tab);
-      return split_tab->IsActive() || split_tab->IsSelected();
-    }
-
-    return false;
+    return std::ranges::any_of(
+        tab->controller()->GetTabsInSplit(tab), [](const Tab* split_tab) {
+          return split_tab->IsActive() || split_tab->IsSelected();
+        });
   };
 
   // These tab states all have visible backgrounds. Separators must not
@@ -802,20 +784,15 @@ float TabStyleViewsImpl::GetHoverInterpolatedSeparatorOpacity(
   return 1.0f - std::max(hover_value, adjacent_hover_value(other_tab));
 }
 
-bool TabStyleViewsImpl::ShouldExtendHitTest() const {
-  const views::Widget* widget = tab_->GetWidget();
-  return widget->IsMaximized() || widget->IsFullscreen();
-}
-
 bool TabStyleViewsImpl::IsHovering() const {
   if (tab_->mouse_hovered()) {
     return true;
   }
-  if (tab_->split()) {
-    const Tab* const split_tab = tab()->controller()->GetAdjacentSplitTab(tab_);
-    return split_tab && split_tab->mouse_hovered();
-  }
-  return false;
+
+  return std::ranges::any_of(tab()->controller()->GetTabsInSplit(tab_),
+                             [](const Tab* split_tab) {
+                               return split_tab && split_tab->mouse_hovered();
+                             });
 }
 
 bool TabStyleViewsImpl::IsHoverAnimationActive() const {
@@ -916,11 +893,18 @@ SkColor TabStyleViewsImpl::GetCurrentTabBackgroundColor(
 
 TabStyle::TabSelectionState TabStyleViewsImpl::GetSelectionState() const {
   // Split tabs should share the selection state.
-  const Tab* const split_tab = tab()->controller()->GetAdjacentSplitTab(tab());
-  if (tab_->IsActive() || (split_tab && split_tab->IsActive())) {
+  const std::vector<Tab*> split_tabs =
+      tab()->controller()->GetTabsInSplit(tab());
+
+  const bool is_split_active = std::ranges::any_of(
+      split_tabs, [](const Tab* split_tab) { return split_tab->IsActive(); });
+  if (tab_->IsActive() || is_split_active) {
     return TabStyle::TabSelectionState::kActive;
   }
-  if (tab_->IsSelected() || (split_tab && split_tab->IsSelected())) {
+
+  const bool is_split_selected = std::ranges::any_of(
+      split_tabs, [](const Tab* split_tab) { return split_tab->IsSelected(); });
+  if (tab_->IsSelected() || is_split_selected) {
     return TabStyle::TabSelectionState::kSelected;
   }
 
@@ -1066,14 +1050,20 @@ void TabStyleViewsImpl::PaintSeparators(gfx::Canvas* canvas) const {
                         tab_style()->GetSeparatorCornerRadius() * scale, flags);
 }
 
-bool TabStyleViewsImpl::IsLeftmostSplitTab(const Tab* tab) const {
-  Tab* const split_tab = tab->controller()->GetAdjacentSplitTab(tab);
-  return split_tab == tab->controller()->GetAdjacentTab(tab, 1);
+bool TabStyleViewsImpl::IsStartSplitTab(const Tab* tab) const {
+  const Tab* tab_to_left = tab->controller()->GetAdjacentTab(tab, -1);
+  return std::ranges::none_of(tab->controller()->GetTabsInSplit(tab),
+                              [&tab_to_left](const Tab* split_tab) {
+                                return split_tab == tab_to_left;
+                              });
 }
 
-bool TabStyleViewsImpl::IsRightmostSplitTab(const Tab* tab) const {
-  Tab* const split_tab = tab->controller()->GetAdjacentSplitTab(tab);
-  return split_tab == tab->controller()->GetAdjacentTab(tab, -1);
+bool TabStyleViewsImpl::IsEndSplitTab(const Tab* tab) const {
+  const Tab* tab_to_right = tab->controller()->GetAdjacentTab(tab, 1);
+  return std::ranges::none_of(tab->controller()->GetTabsInSplit(tab),
+                              [&tab_to_right](const Tab* split_tab) {
+                                return split_tab == tab_to_right;
+                              });
 }
 
 float TabStyleViewsImpl::GetTopCornerRadiusForWidth(int width) const {

@@ -40,7 +40,7 @@
 #import "ios/chrome/browser/follow/model/follow_menu_updater.h"
 #import "ios/chrome/browser/follow/model/follow_tab_helper.h"
 #import "ios/chrome/browser/follow/model/follow_util.h"
-#import "ios/chrome/browser/intents/intents_donation_helper.h"
+#import "ios/chrome/browser/intents/model/intents_donation_helper.h"
 #import "ios/chrome/browser/iph_for_new_chrome_user/model/tab_based_iph_browser_agent.h"
 #import "ios/chrome/browser/lens_overlay/coordinator/lens_overlay_availability.h"
 #import "ios/chrome/browser/ntp/shared/metrics/feed_metrics_recorder.h"
@@ -71,7 +71,7 @@
 #import "ios/chrome/browser/shared/public/commands/overflow_menu_customization_commands.h"
 #import "ios/chrome/browser/shared/public/commands/page_info_commands.h"
 #import "ios/chrome/browser/shared/public/commands/popup_menu_commands.h"
-#import "ios/chrome/browser/shared/public/commands/price_notifications_commands.h"
+#import "ios/chrome/browser/shared/public/commands/price_tracked_items_commands.h"
 #import "ios/chrome/browser/shared/public/commands/quick_delete_commands.h"
 #import "ios/chrome/browser/shared/public/commands/reading_list_add_command.h"
 #import "ios/chrome/browser/shared/public/commands/reminder_notifications_commands.h"
@@ -94,9 +94,9 @@
 #import "ios/chrome/browser/ui/popup_menu/overflow_menu/overflow_menu_orderer.h"
 #import "ios/chrome/browser/ui/popup_menu/overflow_menu/overflow_menu_swift.h"
 #import "ios/chrome/browser/ui/popup_menu/popup_menu_constants.h"
-#import "ios/chrome/browser/ui/whats_new/whats_new_util.h"
 #import "ios/chrome/browser/web/model/font_size/font_size_tab_helper.h"
 #import "ios/chrome/browser/web/model/web_navigation_browser_agent.h"
+#import "ios/chrome/browser/whats_new/coordinator/whats_new_util.h"
 #import "ios/chrome/browser/window_activities/model/window_activity_helpers.h"
 #import "ios/chrome/grit/ios_branded_strings.h"
 #import "ios/chrome/grit/ios_strings.h"
@@ -2368,8 +2368,7 @@ OverflowMenuFooter* CreateOverflowMenuManagedFooter(
       password_manager::ManagePasswordsReferrer::kChromeMenuItem);
   [self dismissMenu];
   [self.settingsHandler
-      showSavedPasswordsSettingsFromViewController:self.baseViewController
-                                  showCancelButton:NO];
+      showSavedPasswordsSettingsFromViewController:self.baseViewController];
 }
 
 // Dismisses the menu and opens price notifications list.
@@ -2378,7 +2377,7 @@ OverflowMenuFooter* CreateOverflowMenuManagedFooter(
   _engagementTracker->NotifyEvent(
       feature_engagement::events::kPriceNotificationsUsed);
   [self dismissMenu];
-  [self.priceNotificationHandler showPriceNotificationsWithCurrentPage];
+  [self.priceNotificationHandler showPriceTrackedItemsWithCurrentPage];
 }
 
 // Dismisses the menu and opens downloads.
@@ -2419,6 +2418,11 @@ OverflowMenuFooter* CreateOverflowMenuManagedFooter(
         feature_engagement::events::kBlueDotPromoOverflowMenuDismissed);
     [self.popupMenuHandler updateToolsMenuBlueDotVisibility];
   }
+  if (self.engagementTracker) {
+    self.engagementTracker->NotifyEvent(
+        feature_engagement::events::kSettingsOnOverflowMenuUsed);
+  }
+
   [self dismissMenu];
   profile_metrics::BrowserProfileType type =
       self.isIncognito ? profile_metrics::BrowserProfileType::kIncognito

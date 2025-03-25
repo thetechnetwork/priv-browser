@@ -274,11 +274,6 @@ public class WebViewChromiumFactoryProvider implements WebViewFactoryProvider {
         return false;
     }
 
-    // Overridden in B-specific subclass.
-    public boolean shouldEnableChips() {
-        return false;
-    }
-
     private void deleteContentsOnPackageDowngrade(PackageInfo packageInfo) {
         try (ScopedSysTraceEvent e2 =
                 ScopedSysTraceEvent.scoped(
@@ -595,6 +590,12 @@ public class WebViewChromiumFactoryProvider implements WebViewFactoryProvider {
                     Log.e(TAG, "WebViewSafeMode threw exception: ", t);
                 }
             }
+
+            // TODO(crbug.com/397372092): Set up Finch FeatureFlag and
+            // DisableStartupTasksExperimentSafeModeAction
+            boolean enableStartupTasksExperiment =
+                    CommandLine.getInstance().hasSwitch(AwSwitches.WEBVIEW_USE_STARTUP_TASKS_LOGIC);
+            mAwInit.setStartupTaskExperimentEnabled(enableStartupTasksExperiment);
 
             if (!FastVariationsSeedSafeModeAction.hasRun()) {
                 mAwInit.startVariationsInit();

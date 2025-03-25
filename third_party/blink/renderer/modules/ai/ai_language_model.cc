@@ -19,18 +19,18 @@
 #include "third_party/blink/renderer/bindings/modules/v8/v8_union_ai_language_model_prompt_content.h"
 #include "third_party/blink/renderer/bindings/modules/v8/v8_union_ai_language_model_prompt_input.h"
 #include "third_party/blink/renderer/bindings/modules/v8/v8_union_ailanguagemodelpromptdict_string.h"
-#include "third_party/blink/renderer/bindings/modules/v8/v8_union_blob_htmlcanvaselement_htmlimageelement_htmlvideoelement_imagebitmap_imagedata_offscreencanvas_svgimageelement_videoframe.h"
 #include "third_party/blink/renderer/core/dom/abort_signal.h"
 #include "third_party/blink/renderer/core/dom/events/event.h"
+#include "third_party/blink/renderer/core/fileapi/blob.h"
 #include "third_party/blink/renderer/core/fileapi/file_reader_client.h"
+#include "third_party/blink/renderer/modules/ai/ai_context_observer.h"
 #include "third_party/blink/renderer/modules/ai/ai_language_model_factory.h"
 #include "third_party/blink/renderer/modules/ai/ai_metrics.h"
-#include "third_party/blink/renderer/modules/ai/ai_mojo_client.h"
 #include "third_party/blink/renderer/modules/ai/ai_utils.h"
 #include "third_party/blink/renderer/modules/ai/exception_helpers.h"
 #include "third_party/blink/renderer/modules/ai/model_execution_responder.h"
+#include "third_party/blink/renderer/modules/canvas/imagebitmap/image_bitmap_source_util.h"
 #include "third_party/blink/renderer/modules/event_target_modules_names.h"
-#include "third_party/blink/renderer/modules/shapedetection/shape_detector.h"
 #include "third_party/blink/renderer/modules/webaudio/audio_buffer.h"
 #include "third_party/blink/renderer/platform/audio/audio_bus.h"
 #include "third_party/blink/renderer/platform/bindings/script_state.h"
@@ -50,14 +50,14 @@ using AILanguageModelPromptContentOrError =
 class CloneLanguageModelClient
     : public GarbageCollected<CloneLanguageModelClient>,
       public mojom::blink::AIManagerCreateLanguageModelClient,
-      public AIMojoClient<AILanguageModel> {
+      public AIContextObserver<AILanguageModel> {
  public:
   CloneLanguageModelClient(ScriptState* script_state,
                            AILanguageModel* language_model,
                            ScriptPromiseResolver<AILanguageModel>* resolver,
                            AbortSignal* signal,
                            base::PassKey<AILanguageModel>)
-      : AIMojoClient(script_state, language_model, resolver, signal),
+      : AIContextObserver(script_state, language_model, resolver, signal),
         language_model_(language_model),
         receiver_(this, language_model->GetExecutionContext()) {
     mojo::PendingRemote<mojom::blink::AIManagerCreateLanguageModelClient>
@@ -72,7 +72,7 @@ class CloneLanguageModelClient
   CloneLanguageModelClient& operator=(const CloneLanguageModelClient&) = delete;
 
   void Trace(Visitor* visitor) const override {
-    AIMojoClient::Trace(visitor);
+    AIContextObserver::Trace(visitor);
     visitor->Trace(language_model_);
     visitor->Trace(receiver_);
   }
@@ -115,38 +115,38 @@ class CloneLanguageModelClient
       receiver_;
 };
 
-class CountPromptTokensClient
-    : public GarbageCollected<CountPromptTokensClient>,
-      public mojom::blink::AILanguageModelCountPromptTokensClient,
-      public AIMojoClient<IDLUnsignedLongLong> {
+class MeasureInputUsageClient
+    : public GarbageCollected<MeasureInputUsageClient>,
+      public mojom::blink::AILanguageModelMeasureInputUsageClient,
+      public AIContextObserver<IDLDouble> {
  public:
-  CountPromptTokensClient(ScriptState* script_state,
+  MeasureInputUsageClient(ScriptState* script_state,
                           AILanguageModel* language_model,
-                          ScriptPromiseResolver<IDLUnsignedLongLong>* resolver,
+                          ScriptPromiseResolver<IDLDouble>* resolver,
                           AbortSignal* signal,
                           const WTF::String& input)
-      : AIMojoClient(script_state, language_model, resolver, signal),
+      : AIContextObserver(script_state, language_model, resolver, signal),
         language_model_(language_model),
         receiver_(this, language_model->GetExecutionContext()) {
-    mojo::PendingRemote<mojom::blink::AILanguageModelCountPromptTokensClient>
+    mojo::PendingRemote<mojom::blink::AILanguageModelMeasureInputUsageClient>
         client_remote;
     receiver_.Bind(client_remote.InitWithNewPipeAndPassReceiver(),
                    language_model->GetTaskRunner());
-    language_model_->GetAILanguageModelRemote()->CountPromptTokens(
+    language_model_->GetAILanguageModelRemote()->MeasureInputUsage(
         input, std::move(client_remote));
   }
-  ~CountPromptTokensClient() override = default;
+  ~MeasureInputUsageClient() override = default;
 
-  CountPromptTokensClient(const CountPromptTokensClient&) = delete;
-  CountPromptTokensClient& operator=(const CountPromptTokensClient&) = delete;
+  MeasureInputUsageClient(const MeasureInputUsageClient&) = delete;
+  MeasureInputUsageClient& operator=(const MeasureInputUsageClient&) = delete;
 
   void Trace(Visitor* visitor) const override {
-    AIMojoClient::Trace(visitor);
+    AIContextObserver::Trace(visitor);
     visitor->Trace(language_model_);
     visitor->Trace(receiver_);
   }
 
-  // mojom::blink::AILanguageModelCountPromptTokensClient implementation.
+  // mojom::blink::AILanguageModelMeasureInputUsageClient implementation.
   void OnResult(uint32_t number_of_tokens) override {
     if (!GetResolver()) {
       return;
@@ -161,8 +161,8 @@ class CountPromptTokensClient
 
  private:
   Member<AILanguageModel> language_model_;
-  HeapMojoReceiver<mojom::blink::AILanguageModelCountPromptTokensClient,
-                   CountPromptTokensClient>
+  HeapMojoReceiver<mojom::blink::AILanguageModelMeasureInputUsageClient,
+                   MeasureInputUsageClient>
       receiver_;
 };
 
@@ -250,7 +250,7 @@ ToMojo(V8ImageBitmapSource* bitmap,
        ScriptState* script_state,
        ExceptionState& exception_state) {
   std::optional<SkBitmap> skia_bitmap =
-      ShapeDetector::GetBitmapFromSource(script_state, bitmap, exception_state);
+      GetBitmapFromV8ImageBitmapSource(script_state, bitmap, exception_state);
   if (!skia_bitmap) {
     return base::unexpected(MakeGarbageCollected<DOMException>(
         DOMExceptionCode::kSyntaxError,
@@ -374,14 +374,10 @@ AILanguageModel::AILanguageModel(
       language_model_remote_(execution_context) {
   language_model_remote_.Bind(std::move(pending_remote), task_runner);
   if (info) {
-    max_tokens_ = info->max_tokens;
-    current_tokens_ = info->current_tokens;
+    input_quota_ = info->input_quota;
+    input_usage_ = info->input_usage;
     top_k_ = info->sampling_params->top_k;
     temperature_ = info->sampling_params->temperature;
-    if (info->expected_input_languages.has_value()) {
-      expected_input_languages_ =
-          ToStringLanguageCodes(info->expected_input_languages.value());
-    }
   }
 }
 
@@ -455,7 +451,7 @@ ScriptPromise<IDLString> AILanguageModel::prompt(
       AIMetrics::AISessionType::kLanguageModel,
       WTF::BindOnce(&AILanguageModel::OnResponseComplete,
                     WrapWeakPersistent(this)),
-      WTF::BindRepeating(&AILanguageModel::OnContextOverflow,
+      WTF::BindRepeating(&AILanguageModel::OnQuotaOverflow,
                          WrapWeakPersistent(this)));
   language_model_remote_->Prompt(std::move(prompts).value(),
                                  std::move(pending_remote));
@@ -517,7 +513,7 @@ ReadableStream* AILanguageModel::promptStreaming(
           AIMetrics::AISessionType::kLanguageModel,
           WTF::BindOnce(&AILanguageModel::OnResponseComplete,
                         WrapWeakPersistent(this)),
-          WTF::BindRepeating(&AILanguageModel::OnContextOverflow,
+          WTF::BindRepeating(&AILanguageModel::OnQuotaOverflow,
                              WrapWeakPersistent(this)));
 
   language_model_remote_->Prompt(std::move(prompts).value(),
@@ -560,23 +556,28 @@ ScriptPromise<AILanguageModel> AILanguageModel::clone(
   return promise;
 }
 
-ScriptPromise<IDLUnsignedLongLong> AILanguageModel::countPromptTokens(
+ScriptPromise<IDLDouble> AILanguageModel::measureInputUsage(
     ScriptState* script_state,
-    const WTF::String& input,
+    const V8AILanguageModelPromptInput* input,
     const AILanguageModelPromptOptions* options,
     ExceptionState& exception_state) {
   if (!script_state->ContextIsValid()) {
     ThrowInvalidContextException(exception_state);
-    return ScriptPromise<IDLUnsignedLongLong>();
+    return ScriptPromise<IDLDouble>();
+  }
+
+  // The API impl only accepts a string by default for now, more to come soon!
+  if (!input->IsString()) {
+    exception_state.ThrowTypeError("Input type not supported");
+    return ScriptPromise<IDLDouble>();
   }
 
   base::UmaHistogramEnumeration(AIMetrics::GetAIAPIUsageMetricName(
                                     AIMetrics::AISessionType::kLanguageModel),
                                 AIMetrics::AIAPI::kSessionCountPromptTokens);
 
-  ScriptPromiseResolver<IDLUnsignedLongLong>* resolver =
-      MakeGarbageCollected<ScriptPromiseResolver<IDLUnsignedLongLong>>(
-          script_state);
+  ScriptPromiseResolver<IDLDouble>* resolver =
+      MakeGarbageCollected<ScriptPromiseResolver<IDLDouble>>(script_state);
   auto promise = resolver->Promise();
 
   if (!language_model_remote_) {
@@ -590,8 +591,8 @@ ScriptPromise<IDLUnsignedLongLong> AILanguageModel::countPromptTokens(
     return promise;
   }
 
-  MakeGarbageCollected<CountPromptTokensClient>(script_state, this, resolver,
-                                                signal, input);
+  MakeGarbageCollected<MeasureInputUsageClient>(script_state, this, resolver,
+                                                signal, input->GetAsString());
 
   return promise;
 }
@@ -617,7 +618,7 @@ void AILanguageModel::destroy(ScriptState* script_state,
 void AILanguageModel::OnResponseComplete(
     mojom::blink::ModelExecutionContextInfoPtr context_info) {
   if (context_info) {
-    current_tokens_ = context_info->current_tokens;
+    input_usage_ = context_info->current_tokens;
   }
 }
 
@@ -630,12 +631,8 @@ scoped_refptr<base::SequencedTaskRunner> AILanguageModel::GetTaskRunner() {
   return task_runner_;
 }
 
-uint64_t AILanguageModel::GetCurrentTokens() {
-  return current_tokens_;
-}
-
-void AILanguageModel::OnContextOverflow() {
-  DispatchEvent(*Event::Create(event_type_names::kContextoverflow));
+void AILanguageModel::OnQuotaOverflow() {
+  DispatchEvent(*Event::Create(event_type_names::kQuotaoverflow));
 }
 
 }  // namespace blink

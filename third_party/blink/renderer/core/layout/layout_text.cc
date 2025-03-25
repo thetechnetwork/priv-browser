@@ -536,7 +536,7 @@ bool LayoutText::MapDOMOffsetToTextContentOffset(const OffsetMapping& mapping,
 
   // Adjust |start| to the next non-collapsed offset if |start| is collapsed.
   Position start_position =
-      PositionForCaretOffset(std::min(*start, OriginalTextLength()));
+      PositionForCaretOffset(std::min(*start, NonCollapsedCaretMaxOffset()));
   Position non_collapsed_start_position =
       mapping.StartOfNextNonCollapsedContent(start_position);
 
@@ -555,7 +555,7 @@ bool LayoutText::MapDOMOffsetToTextContentOffset(const OffsetMapping& mapping,
 
   // Adjust |end| to the last non-collapsed offset if |end| is collapsed.
   Position end_position =
-      PositionForCaretOffset(std::min(*end, OriginalTextLength()));
+      PositionForCaretOffset(std::min(*end, NonCollapsedCaretMaxOffset()));
   Position non_collpased_end_position =
       mapping.EndOfLastNonCollapsedContent(end_position);
 
@@ -913,7 +913,13 @@ String LayoutText::TransformAndSecureText(const String& original,
     }
     auto [masked, secure_map] = SecureText(transformed, mask);
     if (!secure_map.IsEmpty()) {
-      offset_map = TextOffsetMap(offset_map, secure_map);
+      if (RuntimeEnabledFeatures::TextOffsetMapCrashFixEnabled()) {
+        offset_map =
+            TextOffsetMap(original.length(), offset_map, transformed.length(),
+                          secure_map, masked.length());
+      } else {
+        offset_map = TextOffsetMap(offset_map, secure_map);
+      }
     }
     return masked;
   }

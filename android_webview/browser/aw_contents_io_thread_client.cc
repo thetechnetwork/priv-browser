@@ -503,6 +503,11 @@ void StartShouldInterceptRequest(
   // keep this here to preserve trace comparisons across different milestones
   // and versions.
   TRACE_EVENT0("android_webview", "RunShouldInterceptRequest");
+  // The app may perform blocking calls as part of synchronous
+  // shouldInterceptRequest, so mark the rest of this scope as possibly
+  // blocking.
+  base::ScopedBlockingCall scoped_blocking_call(FROM_HERE,
+                                                base::BlockingType::MAY_BLOCK);
   JNIEnv* env = AttachCurrentThread();
   base::android::ScopedJavaLocalRef<jobject> obj = ref.get(env);
   if (!obj) {
@@ -585,19 +590,21 @@ void AwContentsIoThreadClient::ShouldInterceptRequestAsync(
     ShouldInterceptRequestResponseCallback callback) {
   DCHECK_CURRENTLY_ON(BrowserThread::IO);
   JNIEnv* env = AttachCurrentThread();
-  if (!bg_thread_client_object_) {
-    bg_thread_client_object_.Reset(
-        Java_AwContentsIoThreadClient_getShouldInterceptRequestMediator(
-            env, java_object_));
-  }
+  ScopedJavaLocalRef<jstring> url = ConvertUTF8ToJavaString(env, request.url);
+  ScopedJavaLocalRef<jobject> mediator =
+      Java_AwContentsIoThreadClient_getShouldInterceptRequestMediator(
+          env, java_object_, url);
 
-  if (bg_thread_client_object_) {
+  UMA_HISTOGRAM_BOOLEAN(
+      "Android.WebView.ShouldInterceptRequest.IsRequestSkipped", !mediator);
+
+  if (mediator) {
     sequenced_task_runner_->PostTask(
-        FROM_HERE,
-        base::BindOnce(&StartShouldInterceptRequest, std::move(request),
-                       std::move(callback),
-                       JavaObjectWeakGlobalRef(env, bg_thread_client_object_)));
+        FROM_HERE, base::BindOnce(&StartShouldInterceptRequest,
+                                  std::move(request), std::move(callback),
+                                  JavaObjectWeakGlobalRef(env, mediator)));
   } else {
+    Java_AwContentsIoThreadClient_onLoadResource(env, java_object_, url);
     // We are already on the IOThread. Just call the callback directly here.
     std::move(callback).Run(NoInterceptRequest());
   }

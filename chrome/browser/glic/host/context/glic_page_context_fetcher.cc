@@ -13,8 +13,8 @@
 #include "base/strings/utf_string_conversions.h"
 #include "base/task/thread_pool.h"
 #include "chrome/browser/content_extraction/inner_text.h"
-#include "chrome/browser/glic/glic.mojom.h"
 #include "chrome/browser/glic/host/context/glic_tab_data.h"
+#include "chrome/browser/glic/host/glic.mojom.h"
 #include "components/favicon/content/content_favicon_driver.h"
 #include "components/optimization_guide/content/browser/page_content_proto_provider.h"
 #include "components/pdf/browser/pdf_document_helper.h"
@@ -112,40 +112,6 @@ void RecordPdfRequestState(bool is_pdf_document, bool pdf_found) {
   UMA_HISTOGRAM_ENUMERATION("Glic.TabContext.PdfContentsRequested", state);
 }
 
-// Checks for no focusable tabs or invalid candidate URLs. Returns nullopt if
-// the tab is valid for context extraction. Otherwise, returns an error reason
-// specifying why it is not valid.
-std::optional<mojom::GetTabContextErrorReason>
-IsFocusedTabValidForContextExtraction(FocusedTabData focused_tab_data) {
-  std::optional<mojom::NoCandidateTabError> no_candidate_tab_error =
-      focused_tab_data.no_candidate_tab_error;
-  if (no_candidate_tab_error.has_value()) {
-    switch (no_candidate_tab_error.value()) {
-      case mojom::NoCandidateTabError::kUnknown:
-        return mojom::GetTabContextErrorReason::kUnknown;
-      case mojom::NoCandidateTabError::kNoFocusableTabs:
-        return mojom::GetTabContextErrorReason::kNoFocusableTabs;
-    }
-  }
-  const std::optional<FocusedTabCandidate>& focused_tab_candidate =
-      focused_tab_data.focused_tab_candidate;
-  if (focused_tab_candidate.has_value()) {
-    glic::mojom::InvalidCandidateError invalid_candidate_error =
-        focused_tab_candidate.value().invalid_candidate_error;
-    switch (invalid_candidate_error) {
-      case mojom::InvalidCandidateError::kUnknown:
-        return mojom::GetTabContextErrorReason::kUnknown;
-      case mojom::InvalidCandidateError::kUnsupportedUrl:
-        return mojom::GetTabContextErrorReason::kUnsupportedUrl;
-    }
-  }
-
-  if (!focused_tab_data.focused_tab_contents) {
-    return mojom::GetTabContextErrorReason::kNoFocusableTabs;
-  }
-  return std::nullopt;
-}
-
 }  // namespace
 
 GlicPageContextFetcher::GlicPageContextFetcher() = default;
@@ -156,16 +122,16 @@ void GlicPageContextFetcher::Fetch(
     FocusedTabData focused_tab_data,
     const mojom::GetTabContextOptions& options,
     glic::mojom::WebClientHandler::GetContextFromFocusedTabCallback callback) {
-  if (std::optional<mojom::GetTabContextErrorReason> error_reason =
-          IsFocusedTabValidForContextExtraction(focused_tab_data)) {
+  base::expected<content::WebContents*, std::string_view> focus =
+      focused_tab_data.GetFocus();
+  if (!focus.has_value()) {
     std::move(callback).Run(
-        mojom::GetContextResult::NewErrorReason(*error_reason));
+        mojom::GetContextResult::NewErrorReason(std::string(focus.error())));
     return;
   }
   options_ = options;
 
-  content::WebContents* aweb_contents =
-      focused_tab_data.focused_tab_contents.get();
+  content::WebContents* aweb_contents = focus.value();
   DCHECK(aweb_contents->GetPrimaryMainFrame());
   CHECK_EQ(web_contents(),
            nullptr);  // Ensure Fetch is called only once per instance.
@@ -218,6 +184,7 @@ void GlicPageContextFetcher::Fetch(
     ai_page_content_options->include_geometry = false;
     ai_page_content_options->on_critical_path = true;
     ai_page_content_options->include_hidden_searchable_content = true;
+    ai_page_content_options->max_meta_elements = options.max_meta_tags;
     optimization_guide::GetAIPageContent(
         web_contents(), std::move(ai_page_content_options),
         base::BindOnce(&GlicPageContextFetcher::ReceivedAnnotatedPageContent,
@@ -365,13 +332,29 @@ void GlicPageContextFetcher::RunCallbackIfComplete() {
       auto annotated_page_data = mojom::AnnotatedPageData::New();
       annotated_page_data->annotated_page_content =
           mojo_base::ProtoWrapper(annotated_page_content_result_->proto);
+
+      auto metadata_mojom = mojom::PageMetadata::New();
+      // TODO(gklassen): Move the definition of AIPageContentMetadata into
+      // a mojom to remove the need for conversion.
+      for (const auto& frame_metadata :
+           annotated_page_content_result_->metadata.frame_metadata) {
+        auto frame_metadata_mojom = mojom::FrameMetadata::New();
+        frame_metadata_mojom->url = frame_metadata.url;
+        for (const auto& meta_tag : frame_metadata.meta_tags) {
+          frame_metadata_mojom->meta_tags.push_back(
+              mojom::MetaTag::New(meta_tag.name, meta_tag.content));
+        }
+        metadata_mojom->frame_metadata.push_back(
+            std::move(frame_metadata_mojom));
+      }
+      annotated_page_data->metadata = std::move(metadata_mojom);
+
       tab_context->annotated_page_data = std::move(annotated_page_data);
     }
 
     result = mojom::GetContextResult::NewTabContext(std::move(tab_context));
   } else {
-    result = mojom::GetContextResult::NewErrorReason(
-        mojom::GetTabContextErrorReason::kWebContentsChanged);
+    result = mojom::GetContextResult::NewErrorReason("web contents changed");
   }
   std::move(callback_).Run(std::move(result));
 }

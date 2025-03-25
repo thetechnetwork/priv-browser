@@ -10,6 +10,7 @@ import("//printing/buildflags/buildflags.gni")
 import("//third_party/closure_compiler/compile_js.gni")
 import("//tools/grit/grit_rule.gni")
 import("//tools/grit/repack.gni")
+import("//ui/webui/webui_features.gni")
 
 assert(!is_ios, "Chromium/iOS shouldn't use anything in //chrome")
 assert(!is_fuchsia, "Fuchsia shouldn't use anything in //chrome")
@@ -55,6 +56,7 @@ group("resources") {
       "side_panel/bookmarks:resources",
       "side_panel/commerce:resources",
       "side_panel/customize_chrome:resources",
+      "side_panel/history:resources",
       "side_panel/history_clusters:resources",
       "side_panel/read_anything:resources",
       "side_panel/reading_list:resources",
@@ -157,6 +159,17 @@ group("resources") {
     public_deps += [
       "glic:resources",
       "glic/fre:resources",
+    ]
+  }
+}
+
+if (enable_webui_generate_code_cache) {
+  group("code_cache_resources") {
+    public_deps = [
+      "side_panel/bookmarks:code_cache_resources",
+      "side_panel/customize_chrome:code_cache_resources",
+      "side_panel/reading_list:code_cache_resources",
+      "side_panel/shared:code_cache_resources",
     ]
   }
 }

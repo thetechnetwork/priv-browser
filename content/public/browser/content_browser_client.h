@@ -3004,6 +3004,11 @@ class CONTENT_EXPORT ContentBrowserClient {
   virtual bool IsBlobUrlPartitioningEnabled(
       content::BrowserContext* browser_context);
 
+  // Checks if the given BrowserContext allows to reduce Accept-Language in HTTP
+  // header and Javascript getter.
+  virtual bool ShouldReduceAcceptLanguage(
+      content::BrowserContext* browser_context);
+
   // Set whether the browser is running in minimal mode (where most subsystems
   // are left uninitialized).
   virtual void SetIsMinimalMode(bool minimal) {}
@@ -3223,6 +3228,13 @@ class CONTENT_EXPORT ContentBrowserClient {
   // Returns true if subframe zoom should be enabled for one or more features in
   // a higher layer.
   virtual bool ShouldEnableSubframeZoom();
+
+  // Returns true if the given `url` should be prioritized for BFCache.
+  // Depending on the corresponding feature flag values, the prioritized page
+  // might be kept in BFCache even when it exceeds the entries limit.
+  virtual bool ShouldPrioritizeForBackForwardCache(
+      BrowserContext* browser_context,
+      const GURL& url);
 };
 
 }  // namespace content

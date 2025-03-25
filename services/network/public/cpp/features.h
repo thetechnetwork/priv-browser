@@ -178,9 +178,9 @@ BASE_DECLARE_FEATURE(kSRIMessageSignatureEnforcement);
 COMPONENT_EXPORT(NETWORK_CPP_FLAGS_AND_SWITCHES)
 BASE_DECLARE_FEATURE(kCreateURLLoaderPipeAsync);
 
-// Should Ad-Auction-Registration-Eligible be sent on requests made with
-// attributionsrc, and should Ad-Auction-Register-Event responses on those
-// requests be processed?
+// Should Sec-Ad-Auction-Event-Recording-Eligible be sent on requests made
+// with attributionsrc, and should Ad-Auction-Register-Event responses on
+// those requests be processed?
 COMPONENT_EXPORT(NETWORK_CPP_FLAGS_AND_SWITCHES)
 BASE_DECLARE_FEATURE(kAdAuctionEventRegistration);
 
@@ -289,6 +289,20 @@ COMPONENT_EXPORT(NETWORK_CPP_FLAGS_AND_SWITCHES)
 BASE_DECLARE_FEATURE_PARAM(int, kInterestGroupStorageMaxNegativeGroupsPerOwner);
 COMPONENT_EXPORT(NETWORK_CPP_FLAGS_AND_SWITCHES)
 BASE_DECLARE_FEATURE_PARAM(int, kInterestGroupStorageMaxOpsBeforeMaintenance);
+
+// When enabled, returns the output of GetCookiesString when calling
+// SetCookiesString, so that it can be cached in the renderer to avoid an IPC
+// on subsequent Get requests.
+COMPONENT_EXPORT(NETWORK_CPP_FLAGS_AND_SWITCHES)
+BASE_DECLARE_FEATURE(kGetCookiesOnSet);
+
+// If enabled, permissions policies relevant to a request are populated on
+// `network:ResourceRequest`.
+//
+// Note: Policies are not guaranteed to be added on every path. If
+// `PermissionsPolicy` on the request is nullopt, you need to set it somewhere.
+COMPONENT_EXPORT(NETWORK_CPP_FLAGS_AND_SWITCHES)
+BASE_DECLARE_FEATURE(kPopulatePermissionsPolicyOnRequest);
 
 }  // namespace network::features
 

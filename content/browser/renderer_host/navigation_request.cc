@@ -2461,11 +2461,16 @@ void NavigationRequest::BeginNavigation() {
 void NavigationRequest::UpdateNavigationStartTime(const base::TimeTicks& time,
                                                   bool for_legacy,
                                                   bool showed_dialog) {
-  // Should be called at most once per NavigationRequest.
-  CHECK(original_navigation_start_.is_null());
-
   // Track the adjustment details for https://crbug.com/385170155.
-  original_navigation_start_ = common_params_->navigation_start;
+  // Note: It is possible to get here more than once for a single request, which
+  // might happen if a beforeunload ack for a different navigation is received
+  // at the wrong time (see https://crbug.com/402545469). In that case, preserve
+  // the existing `original_navigation_start_`.
+  // TODO(crbug.com/404286908): Track which NavigationRequest should be updated
+  // in response to a given beforeunload completion.
+  if (original_navigation_start_.is_null()) {
+    original_navigation_start_ = common_params_->navigation_start;
+  }
   navigation_start_adjustment_for_legacy_ = for_legacy;
   beforeunload_dialog_shown_ = showed_dialog;
 
@@ -6883,6 +6888,14 @@ void NavigationRequest::UpdateNavigationHandleTimingsOnResponseReceived(
       domain_lookup_delay;
   navigation_handle_timing_.final_request_connect_delay = connect_delay;
   navigation_handle_timing_.final_request_ssl_delay = ssl_delay;
+
+  if (response_head_->load_timing_internal_info) {
+    navigation_handle_timing_.initialize_stream_delay =
+        response_head_->load_timing_internal_info->initialize_stream_delay;
+    // Reset `load_timing_internal_info` to make sure that isn't exposed.
+    response_head_->load_timing_internal_info.reset();
+  }
+
   final_receive_headers_end_time_ =
       response_head_->load_timing.receive_headers_end;
 
@@ -8946,6 +8959,10 @@ bool NavigationRequest::IsPrerenderedPageActivation() const {
 
 bool NavigationRequest::IsInFencedFrameTree() const {
   return frame_tree_node()->IsInFencedFrameTree();
+}
+
+bool NavigationRequest::IsGuestViewMainFrame() const {
+  return GetNavigatingFrameType() == content::FrameType::kGuestMainFrame;
 }
 
 FrameType NavigationRequest::GetNavigatingFrameType() const {

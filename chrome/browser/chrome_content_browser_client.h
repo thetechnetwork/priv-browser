@@ -1058,6 +1058,9 @@ class ChromeContentBrowserClient : public content::ContentBrowserClient {
   bool IsBlobUrlPartitioningEnabled(
       content::BrowserContext* browser_context) override;
 
+  bool ShouldReduceAcceptLanguage(
+      content::BrowserContext* browser_context) override;
+
   void SetIsMinimalMode(bool minimal) override;
 
   bool UseOutermostMainFrameOrEmbedderForSubCaptureTargets() const override;
@@ -1171,6 +1174,12 @@ class ChromeContentBrowserClient : public content::ContentBrowserClient {
       std::unique_ptr<ChromeContentBrowserClientParts> part);
 
   bool ShouldEnableSubframeZoom() override;
+
+  // Returns true if the given `url` is the search results page from the current
+  // default search engine for `browser_context`.
+  bool ShouldPrioritizeForBackForwardCache(
+      content::BrowserContext* browser_context,
+      const GURL& url) override;
 
  protected:
   static bool HandleWebUI(GURL* url, content::BrowserContext* browser_context);

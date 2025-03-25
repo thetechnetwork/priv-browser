@@ -9,14 +9,17 @@ import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
+import android.view.View;
+
+import androidx.annotation.DrawableRes;
 
 import org.chromium.base.Callback;
 import org.chromium.build.annotations.NullMarked;
-import org.chromium.build.annotations.Nullable;
 import org.chromium.chrome.browser.theme.ThemeColorProvider;
-import org.chromium.chrome.browser.toolbar.KeyboardNavigationListener;
 import org.chromium.chrome.browser.toolbar.R;
+import org.chromium.chrome.browser.ui.theme.BrandedColorScheme;
 import org.chromium.ui.modelutil.PropertyModel;
+import org.chromium.ui.modelutil.PropertyModelAnimatorFactory;
 
 /**
  * A Mediator for reload button. Glues reload button and external events to the model that relays
@@ -28,6 +31,7 @@ class ReloadButtonMediator implements ThemeColorProvider.TintObserver {
     private final PropertyModel mModel;
     private final Resources mResources;
     private final Callback<String> mShowToastCallback;
+    private final ThemeColorProvider mThemeColorProvider;
     private boolean mIsShiftDownForReload;
     private boolean mIsReloading;
 
@@ -40,11 +44,13 @@ class ReloadButtonMediator implements ThemeColorProvider.TintObserver {
     ReloadButtonMediator(
             PropertyModel model,
             ReloadButtonCoordinator.Delegate delegate,
+            ThemeColorProvider themeColorProvider,
             Callback<String> showToast,
             Resources resources) {
         mModel = model;
         mResources = resources;
         mShowToastCallback = showToast;
+        mThemeColorProvider = themeColorProvider;
 
         Callback<MotionEvent> onTouchListener =
                 (event) ->
@@ -55,6 +61,9 @@ class ReloadButtonMediator implements ThemeColorProvider.TintObserver {
                 ReloadButtonProperties.CLICK_LISTENER,
                 () -> delegate.stopOrReloadCurrentTab(mIsShiftDownForReload));
         mModel.set(ReloadButtonProperties.LONG_CLICK_LISTENER, this::showActionToastOnReloadButton);
+
+        updateBackgroundHighlight(mThemeColorProvider.getBrandedColorScheme());
+        mThemeColorProvider.addTintObserver(this);
     }
 
     private void showActionToastOnReloadButton() {
@@ -67,17 +76,31 @@ class ReloadButtonMediator implements ThemeColorProvider.TintObserver {
 
     @Override
     public void onTintChanged(
-            ColorStateList tint, ColorStateList activityFocusTint, int brandedColorScheme) {}
+            ColorStateList tint,
+            ColorStateList activityFocusTint,
+            @BrandedColorScheme int brandedColorScheme) {
+        mModel.set(ReloadButtonProperties.TINT_LIST, activityFocusTint);
+        updateBackgroundHighlight(brandedColorScheme);
+    }
+
+    private void updateBackgroundHighlight(@BrandedColorScheme int brandedColorScheme) {
+        final @DrawableRes int backgroundRes =
+                brandedColorScheme == BrandedColorScheme.INCOGNITO
+                        ? R.drawable.toolbar_button_ripple_incognito
+                        : R.drawable.toolbar_button_ripple;
+        mModel.set(ReloadButtonProperties.BACKGROUND_HIGHLIGHT_RESOURCE, backgroundRes);
+    }
 
     /**
-     * Creates a show/hide animator that animates view's alpha.
+     * Prepares the view for fade animation and returns an alpha animator.
      *
-     * @param isShowing indicated fade in or out animation type
+     * @param shouldShow indicated fade in or out animation type
      * @return {@link ObjectAnimator} that animates view's alpha
      */
-    // TODO(vkorotkevich): Remove @Nullable
-    public @Nullable ObjectAnimator getFadeAnimator(boolean isShowing) {
-        return null;
+    public ObjectAnimator getFadeAnimator(boolean shouldShow) {
+        mModel.set(ReloadButtonProperties.ALPHA, shouldShow ? 0f : 1f);
+        return PropertyModelAnimatorFactory.ofFloat(
+                mModel, ReloadButtonProperties.ALPHA, shouldShow ? 1f : 0f);
     }
 
     /**
@@ -116,18 +139,25 @@ class ReloadButtonMediator implements ThemeColorProvider.TintObserver {
      *
      * @param isVisible indicated whether view should be visible or gone.
      */
-    public void setVisibility(boolean isVisible) {}
+    public void setVisibility(boolean isVisible) {
+        mModel.set(ReloadButtonProperties.IS_VISIBLE, isVisible);
+    }
 
     /**
-     * Sets a listeners that allows parent to intercept keyboard navigation events.
+     * Sets a listeners that allows parent to intercept key events.
      *
-     * @param listener {@link KeyboardNavigationListener}
+     * @param listener a callback that is invoked when hardware key is pressed.
      */
-    public void setKeyboardNavigationListener(KeyboardNavigationListener listener) {}
+    public void setOnKeyListener(View.OnKeyListener listener) {
+        mModel.set(ReloadButtonProperties.KEY_LISTENER, listener);
+    }
 
     public void destroy() {
         mModel.set(ReloadButtonProperties.TOUCH_LISTENER, null);
         mModel.set(ReloadButtonProperties.CLICK_LISTENER, null);
         mModel.set(ReloadButtonProperties.LONG_CLICK_LISTENER, null);
+        mModel.set(ReloadButtonProperties.KEY_LISTENER, null);
+
+        mThemeColorProvider.removeTintObserver(this);
     }
 }

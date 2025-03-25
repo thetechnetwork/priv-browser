@@ -14,6 +14,7 @@
 #include <tuple>
 #include <unordered_map>
 #include <utility>
+#include <variant>
 #include <vector>
 
 #include "base/check.h"
@@ -155,6 +156,7 @@
 #include "content/browser/site_info.h"
 #include "content/browser/sms/webotp_service.h"
 #include "content/browser/speech/speech_synthesis_impl.h"
+#include "content/browser/storage_access/storage_access_handle.h"
 #include "content/browser/storage_partition_impl.h"
 #include "content/browser/url_loader_factory_params_helper.h"
 #include "content/browser/usb/web_usb_service_impl.h"
@@ -393,20 +395,20 @@ class RenderFrameHostOrProxy {
 
  private:
   RenderFrameProxyHost* GetProxy() {
-    if (auto** proxy = absl::get_if<RenderFrameProxyHost*>(&frame_or_proxy_)) {
+    if (auto** proxy = std::get_if<RenderFrameProxyHost*>(&frame_or_proxy_)) {
       return *proxy;
     }
     return nullptr;
   }
 
   RenderFrameHostImpl* GetFrame() {
-    if (auto** frame = absl::get_if<RenderFrameHostImpl*>(&frame_or_proxy_)) {
+    if (auto** frame = std::get_if<RenderFrameHostImpl*>(&frame_or_proxy_)) {
       return *frame;
     }
     return nullptr;
   }
 
-  absl::variant<absl::monostate, RenderFrameHostImpl*, RenderFrameProxyHost*>
+  std::variant<std::monostate, RenderFrameHostImpl*, RenderFrameProxyHost*>
       frame_or_proxy_;
 };
 
@@ -7275,6 +7277,7 @@ void RenderFrameHostImpl::ShowCreatedWindow(
     blink::mojom::WindowFeaturesPtr window_features,
     bool user_gesture,
     ShowCreatedWindowCallback callback) {
+  CHECK(!base::FeatureList::IsEnabled(blink::features::kCombineNewWindowIPCs));
   // This needs to be sent to the opener frame's delegate since it stores
   // the handle to this class's associated RenderWidgetHostView.
   RenderFrameHostImpl* opener_frame_host =
@@ -9783,7 +9786,16 @@ void RenderFrameHostImpl::CreateNewWindow(
                                    .AsMojom();
   }
 
+  // NOTE: if the call to ShowCreatedWindow() below returns nullptr, then
+  // new_frame_tree, new_main_rfh, and new_main_rwh will all have been destroyed
+  // and point to freed memory! To preserve legacy behavior, we still need to
+  // send a fully-populated reply along with kSuccess, so we construct the reply
+  // here prior to ShowCreatedWindow().
+
   blink::VisualProperties visual_properties;
+  // If we can't get an accurate set of VisualProperties after ShowCreatedWindow
+  // below, we at least want to transmit screen info based on the screen of the
+  // initiating frame, which is what new_rwh is constructed with.
   visual_properties.screen_infos = new_rwh->GetScreenInfos();
   mojom::CreateNewWindowReplyPtr reply = mojom::CreateNewWindowReply::New(
       new_main_rfh->GetFrameToken(), new_main_rfh->GetRoutingID(),
@@ -9795,14 +9807,36 @@ void RenderFrameHostImpl::CreateNewWindow(
           new_main_rfh->GetSiteInstance()->browsing_instance_token(),
           new_main_rfh->GetSiteInstance()->coop_related_group_token()),
       delegate_->GetColorProviderColorMaps(),
-      std::move(partitioned_popin_params));
+      std::move(partitioned_popin_params), /*widget_screen_rect=*/std::nullopt,
+      /*window_screen_rect=*/std::nullopt);
+
+  new_main_rfh->render_view_host()->RenderViewCreated(new_main_rfh);
+
+  if (base::FeatureList::IsEnabled(blink::features::kCombineNewWindowIPCs)) {
+    // ShowCreatedWindow will return nullptr if the new WebContents has been
+    // destroyed, as described above (see NOTE).
+    WebContents* shown_contents = delegate()->ShowCreatedWindow(
+        this, new_rwh->GetRoutingID(), params->disposition, *params->features,
+        params->consumes_user_activation);
+
+    if (!shown_contents) {
+      // These point to freed memory, so null them out to prevent inadvertent
+      // UAF in the feature (see NOTE above).
+      new_frame_tree = nullptr;
+      new_main_rfh = nullptr;
+      new_rwh = nullptr;
+    } else if (new_main_rfh->GetView()) {
+      // Cannot populate window geometry until after ShowCreatedWindow().
+      reply->widget_screen_rect.emplace(
+          new_main_rfh->GetView()->GetViewBounds());
+      reply->window_screen_rect.emplace(
+          new_main_rfh->GetView()->GetBoundsInRootWindow());
+      reply->visual_properties = new_rwh->GetInitialVisualProperties();
+    }
+  }
 
   std::move(callback).Run(mojom::CreateNewWindowStatus::kSuccess,
                           std::move(reply));
-
-  // The mojom reply callback with kSuccess causes the renderer to create the
-  // renderer-side objects.
-  new_main_rfh->render_view_host()->RenderViewCreated(new_main_rfh);
 }
 
 void RenderFrameHostImpl::SendLegacyTechEvent(
@@ -10036,10 +10070,13 @@ void RenderFrameHostImpl::ForwardFencedFrameEventAndUserActivationToEmbedder(
   }
 
   if (!IsActive()) {
+    RecordNotifyEventOutcome(blink::NotifyEventOutcome::kNotActive);
     return;
   }
 
   if (!HasTransientUserActivation()) {
+    RecordNotifyEventOutcome(
+        blink::NotifyEventOutcome::kNoTransientUserActivation);
     return;
   }
 
@@ -10070,6 +10107,7 @@ void RenderFrameHostImpl::ForwardFencedFrameEventAndUserActivationToEmbedder(
   GetProxyToOuterDelegate()
       ->GetAssociatedRemoteFrame()
       ->ForwardFencedFrameEventToEmbedder(event_type);
+  RecordNotifyEventOutcome(blink::NotifyEventOutcome::kSuccess);
 }
 
 // TODO(crbug.com/40250533): Move SendFencedFrameReportingBeacon into a separate
@@ -12629,6 +12667,12 @@ void RenderFrameHostImpl::ReportBlockingCrossPartitionBlobURL(
       std::move(details)));
 }
 
+void RenderFrameHostImpl::DoesDocumentHaveStorageAccess(
+    base::OnceCallback<void(bool)> callback) {
+  std::move(callback).Run(
+      StorageAccessHandle::DoesDocumentHaveStorageAccess(this));
+}
+
 void RenderFrameHostImpl::BindBlobUrlStoreAssociatedReceiver(
     mojo::PendingAssociatedReceiver<blink::mojom::BlobURLStore> receiver) {
   DCHECK_CURRENTLY_ON(BrowserThread::UI);
@@ -12640,6 +12684,8 @@ void RenderFrameHostImpl::BindBlobUrlStoreAssociatedReceiver(
       base::BindRepeating(
           &RenderFrameHostImpl::ReportBlockingCrossPartitionBlobURL,
           weak_ptr_factory_.GetWeakPtr()),
+      base::BindRepeating(&RenderFrameHostImpl::DoesDocumentHaveStorageAccess,
+                          weak_ptr_factory_.GetWeakPtr()),
       !(GetContentClient()->browser()->IsBlobUrlPartitioningEnabled(
           GetBrowserContext())));
 }
@@ -17390,6 +17436,7 @@ void RenderFrameHostImpl::PerformGetAssertionWebAuthSecurityChecks(
     const std::string& relying_party_id,
     const url::Origin& effective_origin,
     bool is_payment_credential_get_assertion,
+    const std::optional<url::Origin>& remote_desktop_client_override_origin,
     base::OnceCallback<void(blink::mojom::AuthenticatorStatus, bool)>
         callback) {
   bool is_cross_origin = true;  // Will be reset in ValidateAncestorOrigins().
@@ -17419,7 +17466,7 @@ void RenderFrameHostImpl::PerformGetAssertionWebAuthSecurityChecks(
       remote_validation =
           GetWebAuthRequestSecurityChecker()->ValidateDomainAndRelyingPartyID(
               effective_origin, relying_party_id, request_type,
-              /*remote_desktop_client_override=*/nullptr,
+              remote_desktop_client_override_origin,
               base::BindOnce(&RenderFrameHostImpl::
                                  OnGetAssertionWebAuthSecurityChecksCompleted,
                              weak_ptr_factory_.GetWeakPtr(),
@@ -17444,6 +17491,7 @@ void RenderFrameHostImpl::PerformMakeCredentialWebAuthSecurityChecks(
     const std::string& relying_party_id,
     const url::Origin& effective_origin,
     bool is_payment_credential_creation,
+    const std::optional<url::Origin>& remote_desktop_client_override_origin,
     base::OnceCallback<void(blink::mojom::AuthenticatorStatus, bool)>
         callback) {
   bool is_cross_origin = true;  // Will be reset in ValidateAncestorOrigins().
@@ -17471,7 +17519,7 @@ void RenderFrameHostImpl::PerformMakeCredentialWebAuthSecurityChecks(
       remote_validation =
           GetWebAuthRequestSecurityChecker()->ValidateDomainAndRelyingPartyID(
               effective_origin, relying_party_id, request_type,
-              /*remote_desktop_client_override=*/nullptr,
+              remote_desktop_client_override_origin,
               base::BindOnce(&RenderFrameHostImpl::
                                  OnMakeCredentialWebAuthSecurityChecksCompleted,
                              weak_ptr_factory_.GetWeakPtr(),

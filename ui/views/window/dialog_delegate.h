@@ -11,9 +11,11 @@
 #include <string>
 #include <string_view>
 #include <utility>
+#include <variant>
 
 #include "base/observer_list.h"
 #include "base/time/time.h"
+#include "base/types/pass_key.h"
 #include "ui/accessibility/ax_enums.mojom-forward.h"
 #include "ui/base/metadata/metadata_header_macros.h"
 #include "ui/base/mojom/dialog_button.mojom.h"
@@ -422,7 +424,7 @@ class VIEWS_EXPORT DialogDelegate : public WidgetDelegate {
   // Runs a close callback, ensuring that at most one close callback is run
   // if `callback` is a OnceClosure or returns true.
   bool RunCloseCallback(
-      absl::variant<base::OnceClosure, base::RepeatingCallback<bool()>>&
+      std::variant<base::OnceClosure, base::RepeatingCallback<bool()>>&
           callback);
 
   // The margins between the content and the inside of the border.
@@ -448,9 +450,9 @@ class VIEWS_EXPORT DialogDelegate : public WidgetDelegate {
       observer_list_;
 
   // Callbacks for the dialog's actions:
-  absl::variant<base::OnceClosure, base::RepeatingCallback<bool()>>
+  std::variant<base::OnceClosure, base::RepeatingCallback<bool()>>
       accept_callback_;
-  absl::variant<base::OnceClosure, base::RepeatingCallback<bool()>>
+  std::variant<base::OnceClosure, base::RepeatingCallback<bool()>>
       cancel_callback_;
   base::OnceClosure close_callback_;
 
@@ -482,10 +484,18 @@ class VIEWS_EXPORT DialogDelegateView : public DialogDelegate, public View {
   METADATA_HEADER(DialogDelegateView, View)
 
  public:
+  // Not named `PassKey` as `View::PassKey` already exists in this hierarchy.
+  using DdvPassKey = base::PassKey<DialogDelegateView>;
+
+  // For use with std::make_unique<>().
+  explicit DialogDelegateView(DdvPassKey) : DialogDelegateView() {}
+
   DialogDelegateView();
   DialogDelegateView(const DialogDelegateView&) = delete;
   DialogDelegateView& operator=(const DialogDelegateView&) = delete;
   ~DialogDelegateView() override;
+
+  static DdvPassKey CreatePassKey() { return DdvPassKey(); }
 
   // DialogDelegate:
   Widget* GetWidget() override;

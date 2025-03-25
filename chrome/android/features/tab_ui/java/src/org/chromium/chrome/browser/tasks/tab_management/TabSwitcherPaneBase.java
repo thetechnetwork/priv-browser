@@ -87,6 +87,8 @@ public abstract class TabSwitcherPaneBase implements Pane, TabSwitcher, TabSwitc
     protected final UserEducationHelper mUserEducationHelper;
     protected final ObservableSupplier<EdgeToEdgeController> mEdgeToEdgeSupplier;
     protected final ObservableSupplier<CompositorViewHolder> mCompositorViewHolderSupplier;
+    protected final ObservableSupplierImpl<Boolean> mHubSearchEnabledStateSupplier =
+            new ObservableSupplierImpl<>();
     private final ObservableSupplierImpl<Boolean> mIsVisibleSupplier =
             new ObservableSupplierImpl<>();
     private final ObservableSupplierImpl<Boolean> mIsAnimatingSupplier =
@@ -308,6 +310,11 @@ public abstract class TabSwitcherPaneBase implements Pane, TabSwitcher, TabSwitc
                 mOnToolbarAlphaChange);
     }
 
+    @Override
+    public @NonNull ObservableSupplier<Boolean> getHubSearchEnabledStateSupplier() {
+        return mHubSearchEnabledStateSupplier;
+    }
+
     private @ColorInt int getAnimationBackgroundColor() {
         if (mIsIncognito) {
             return ChromeColors.getPrimaryBackgroundColor(mRootView.getContext(), mIsIncognito);
@@ -429,22 +436,6 @@ public abstract class TabSwitcherPaneBase implements Pane, TabSwitcher, TabSwitc
     }
 
     @Override
-    public boolean resetWithTabs(@Nullable List<Tab> tabs, boolean quickMode) {
-        assert false : "Not reached.";
-        return true;
-    }
-
-    @Override
-    public void softCleanup() {
-        assert false : "Not reached.";
-    }
-
-    @Override
-    public void hardCleanup() {
-        assert false : "Not reached.";
-    }
-
-    @Override
     public void initWithNative() {
         if (mNativeInitialized) return;
 
@@ -502,13 +493,6 @@ public abstract class TabSwitcherPaneBase implements Pane, TabSwitcher, TabSwitc
     }
 
     @Override
-    public void openInvitationModal(String invitationId) {
-        TabSwitcherPaneCoordinator coordinator = mTabSwitcherPaneCoordinatorSupplier.get();
-        if (coordinator == null) return;
-        coordinator.openInvitationModal(invitationId);
-    }
-
-    @Override
     public boolean requestOpenTabGroupDialog(int tabId) {
         @Nullable
         TabSwitcherPaneCoordinator coordinator = mTabSwitcherPaneCoordinatorSupplier.get();
@@ -522,7 +506,7 @@ public abstract class TabSwitcherPaneBase implements Pane, TabSwitcher, TabSwitc
 
     /**
      * Request to show all the tabs in the pane. Subclasses should override this method to invoke
-     * {@link TabSwitcherResetHandler#resetWithTabList} with their available tabs.
+     * {@link TabSwitcherResetHandler#resetWithListOfTabs} with their available tabs.
      */
     protected abstract void showAllTabs();
 

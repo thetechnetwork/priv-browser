@@ -132,6 +132,13 @@ BASE_FEATURE(kV8MemoryReducer,
 const base::FeatureParam<int> kV8MemoryReducerGCCount{
     &kV8MemoryReducer, "V8MemoryReducerGCCount", 3};
 
+BASE_FEATURE(kV8PreconfigureOldGen,
+             "V8PreconfigureOldGen",
+             kFeatureDefaultStateControlledByV8);
+
+const base::FeatureParam<int> kV8PreconfigureOldGenSize{
+    &kV8PreconfigureOldGen, "V8PreconfigureOldGenSize", 32};
+
 // Enables MinorMC young generation garbage collector.
 BASE_FEATURE(kV8MinorMS, ("V8MinorMS"), kFeatureDefaultStateControlledByV8);
 
@@ -269,16 +276,6 @@ BASE_FEATURE(kV8IntelJCCErratumMitigation,
 
 // JavaScript language features.
 
-// Enables the iterator helpers proposal.
-BASE_FEATURE(kJavaScriptIteratorHelpers,
-             ("kJavaScriptIteratorHelpers"),
-             kFeatureDefaultStateControlledByV8);
-
-// Enables the Promise.withResolvers proposal.
-BASE_FEATURE(kJavaScriptPromiseWithResolvers,
-             ("JavaScriptPromiseWithResolvers"),
-             kFeatureDefaultStateControlledByV8);
-
 // Enables the RegExp modifiers proposal.
 BASE_FEATURE(kJavaScriptRegExpModifiers,
              ("JavaScriptRegExpModifiers"),
@@ -287,11 +284,6 @@ BASE_FEATURE(kJavaScriptRegExpModifiers,
 // Enables the `with` syntax for the Import Attributes proposal.
 BASE_FEATURE(kJavaScriptImportAttributes,
              ("JavaScriptImportAttributes"),
-             kFeatureDefaultStateControlledByV8);
-
-// Enables the set methods proposal.
-BASE_FEATURE(kJavaScriptSetMethods,
-             ("JavaScriptSetMethods"),
              kFeatureDefaultStateControlledByV8);
 
 // Enables the RegExp duplicate named capture groups proposal.

@@ -39,7 +39,6 @@
 #include "content/public/test/test_utils.h"
 #include "testing/gmock/include/gmock/gmock.h"
 #include "testing/gtest/include/gtest/gtest.h"
-#include "third_party/abseil-cpp/absl/types/variant.h"
 #include "third_party/blink/public/common/features.h"
 #include "third_party/blink/public/common/features_generated.h"
 #include "third_party/blink/public/common/metrics/document_update_reason.h"
@@ -1505,9 +1504,10 @@ class AutofillAgentTestCaret
       case FormControlType::kInputText:
       case FormControlType::kTextArea:
         test_api(autofill_agent())
-            .QueryAutofillSuggestions(
+            .ShowSuggestions(
                 GetElement().DynamicTo<blink::WebFormControlElement>(),
-                /*trigger_source=*/{}, /*form_cache=*/{});
+                AutofillSuggestionTriggerSource::kFormControlElementClicked,
+                /*form_cache=*/{});
         break;
       default:
         NOTREACHED();
@@ -1713,21 +1713,27 @@ TEST_P(AutofillAgentTestClick, MAYBE_AskForValuesToFillOnClick) {
         .Times(AtMost(1));
   }
 
+  // Makes sure the next AskForValuesToFill() event is not throttled in
+  // AutofillAgent.
+  auto skip_throttle = [this]() {
+    task_environment_.FastForwardBy(base::Seconds(1));
+  };
+
   WaitForFormsSeen();
 
-  task_environment_.FastForwardBy(base::Seconds(1));
+  skip_throttle();
   checkpoint.Call("click on field");
   Click("f");
 
-  task_environment_.FastForwardBy(base::Seconds(1));
+  skip_throttle();
   checkpoint.Call("click on field");
   Click("f");
 
-  task_environment_.FastForwardBy(base::Seconds(1));
+  skip_throttle();
   checkpoint.Call("click outside of field");
   Click("other");
 
-  task_environment_.FastForwardBy(base::Seconds(1));
+  skip_throttle();
   checkpoint.Call("right click on field");
   RightClick("f");
 }

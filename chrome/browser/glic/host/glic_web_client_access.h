@@ -7,7 +7,7 @@
 
 // Interface to the glic web client, provided by the glic WebUI.
 #include "base/functional/callback_forward.h"
-#include "chrome/browser/glic/glic.mojom.h"
+#include "chrome/browser/glic/host/glic.mojom.h"
 
 namespace glic {
 
@@ -24,6 +24,10 @@ class GlicWebClientAccess {
   // Informs the web client the panel was closed (no longer visible). The web
   // client should not be destroyed until after `done` is called.
   virtual void PanelWasClosed(base::OnceClosure done) = 0;
+
+  // Informs the web client when the user starts and finishes dragging to resize
+  // the panel.
+  virtual void ManualResizeChanged(bool resizing) = 0;
 };
 
 }  // namespace glic

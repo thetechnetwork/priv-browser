@@ -277,6 +277,10 @@ void AddPrivacySandboxStrings(content::WebUIDataSource* html_source,
        IDS_ALL_SITES_RWS_FILTER_VIEW_STORAGE_DESCRIPTION},
       {"allSitesShowRwsButton", IDS_ALL_SITES_SHOW_RWS_BUTTON},
       {"allSitesRwsMembershipLabel", IDS_ALL_SITES_RWS_LABEL},
+      {"allSitesRwsDeleteDataButtonLabel",
+       IDS_ALL_SITES_RWS_DELETE_DATA_BUTTON_LABEL},
+      {"allSitesRwsDeleteDataDialogTitle",
+       IDS_ALL_SITES_RWS_DELETE_DATA_DIALOG_TITLE},
       // Ad Topics Content Parity - Ad Topics Settings
       {"adTopicsPageToggleSubLabel",
        IDS_SETTINGS_AD_TOPICS_PAGE_TOGGLE_SUB_LABEL},
@@ -337,10 +341,6 @@ void AddPrivacySandboxStrings(content::WebUIDataSource* html_source,
            chrome::kChromeUIPrivacySandboxManageTopicsLearnMoreURL,
            l10n_util::GetStringUTF16(IDS_SETTINGS_OPENS_IN_NEW_TAB)},
           nullptr));
-  html_source->AddBoolean(
-      "firstPartySetsUIEnabled",
-      base::FeatureList::IsEnabled(
-          privacy_sandbox::kPrivacySandboxFirstPartySetsUI));
   html_source->AddBoolean(
       "isPrivacySandboxAdsApiUxEnhancementsEnabled",
       base::FeatureList::IsEnabled(

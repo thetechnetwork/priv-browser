@@ -16,6 +16,7 @@
 #include "third_party/blink/public/platform/platform.h"
 #include "third_party/blink/renderer/bindings/core/v8/script_promise_resolver.h"
 #include "third_party/blink/renderer/bindings/core/v8/v8_image_encode_options.h"
+#include "third_party/blink/renderer/core/frame/web_feature.h"
 #include "third_party/blink/renderer/core/html/canvas/canvas_async_blob_creator.h"
 #include "third_party/blink/renderer/core/html/canvas/canvas_rendering_context.h"
 #include "third_party/blink/renderer/core/html/canvas/unique_font_selector.h"
@@ -27,6 +28,7 @@
 #include "third_party/blink/renderer/platform/graphics/static_bitmap_image.h"
 #include "third_party/blink/renderer/platform/graphics/unaccelerated_static_bitmap_image.h"
 #include "third_party/blink/renderer/platform/heap/garbage_collected.h"
+#include "third_party/blink/renderer/platform/instrumentation/use_counter.h"
 #include "third_party/skia/include/core/SkSurface.h"
 #include "ui/gfx/geometry/skia_conversions.h"
 
@@ -194,16 +196,9 @@ void CanvasRenderingContextHost::CreateCanvasResourceProviderWebGL() {
           SharedGpuContext::ContextProviderWrapper(), this);
     }
     if (!provider) {
-      // If PassThrough failed, try a SharedImage with usage display enabled,
-      // and if WebGLImageChromium is enabled, add concurrent read write and
-      // usage scanout (overlay).
+      // If PassThrough failed, try a SharedImage with usage display enabled.
       gpu::SharedImageUsageSet shared_image_usage_flags =
           gpu::SHARED_IMAGE_USAGE_DISPLAY_READ;
-      if (using_webgl_image_chromium) {
-        shared_image_usage_flags |= gpu::SHARED_IMAGE_USAGE_SCANOUT;
-        shared_image_usage_flags |=
-            gpu::SHARED_IMAGE_USAGE_CONCURRENT_READ_WRITE;
-      }
       provider = CanvasResourceProvider::CreateSharedImageProvider(
           Size(), format, alpha_type, color_space, kShouldInitialize,
           SharedGpuContext::ContextProviderWrapper(), RasterMode::kGPU,
@@ -235,9 +230,10 @@ void CanvasRenderingContextHost::CreateCanvasResourceProviderWebGL() {
           : !!dispatcher;
 
   if (!provider && use_software_shared_image_provider) {
-    provider = CanvasResourceProvider::CreateSoftwareSharedImageProvider(
-        Size(), format, alpha_type, color_space, kShouldInitialize,
-        SharedGpuContext::SharedImageInterfaceProvider(), this);
+    provider =
+        CanvasResourceProvider::CreateSharedImageProviderForSoftwareCompositor(
+            Size(), format, alpha_type, color_space, kShouldInitialize,
+            SharedGpuContext::SharedImageInterfaceProvider(), this);
   }
   if (!provider) {
     provider = CanvasResourceProvider::CreateBitmapProvider(
@@ -337,9 +333,10 @@ void CanvasRenderingContextHost::CreateCanvasResourceProvider2D(
     // In this case, we are using CPU raster and CPU compositing. Create a
     // CanvasResourceProvider that uses a SharedImage backed by a shared-memory
     // buffer that can be written by canvas raster and read by the compositor.
-    provider = CanvasResourceProvider::CreateSoftwareSharedImageProvider(
-        Size(), format, alpha_type, color_space, kShouldInitialize,
-        SharedGpuContext::SharedImageInterfaceProvider(), this);
+    provider =
+        CanvasResourceProvider::CreateSharedImageProviderForSoftwareCompositor(
+            Size(), format, alpha_type, color_space, kShouldInitialize,
+            SharedGpuContext::SharedImageInterfaceProvider(), this);
   }
   if (!provider) {
     // The final fallback is to raster into a bitmap that will then either be
@@ -389,10 +386,10 @@ gfx::ColorSpace CanvasRenderingContextHost::GetRenderingContextColorSpace()
 }
 
 PlainTextPainter& CanvasRenderingContextHost::GetPlainTextPainter() {
-  DCHECK(RuntimeEnabledFeatures::CanvasTextNgEnabled());
   if (!plain_text_painter_) {
     plain_text_painter_ =
         MakeGarbageCollected<PlainTextPainter>(PlainTextPainter::kCanvas);
+    UseCounter::Count(GetTopExecutionContext(), WebFeature::kCanvasTextNg);
   }
   return *plain_text_painter_;
 }

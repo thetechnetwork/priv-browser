@@ -178,9 +178,9 @@ OmniboxView::~OmniboxView() = default;
 
 bool OmniboxView::IsEditingOrEmpty() const {
   return model()->user_input_in_progress() || GetOmniboxTextLength() == 0 ||
-         (model()->focus_state() == OMNIBOX_FOCUS_VISIBLE &&
-          OmniboxFieldTrial::IsOnFocusZeroSuggestEnabledInContext(
-              model()->GetPageClassification()));
+         (OmniboxFieldTrial::IsOnFocusZeroSuggestEnabledInContext(
+              model()->GetPageClassification()) &&
+          model()->PopupIsOpen());
 }
 
 // TODO (manukh) OmniboxView::GetIcon is very similar to
@@ -209,6 +209,14 @@ ui::ImageModel OmniboxView::GetIcon(int dip_size,
 
   gfx::Image favicon;
   AutocompleteMatch match = model()->CurrentMatch(nullptr);
+  if (!match.icon_url.is_empty()) {
+    const SkBitmap* bitmap =
+        model()->GetPopupRichSuggestionBitmap(match.icon_url);
+    if (bitmap) {
+      return ui::ImageModel::FromImage(
+          controller_->client()->GetSizedIcon(bitmap));
+    }
+  }
   if (AutocompleteMatch::IsSearchType(match.type)) {
     // For search queries, display default search engine's favicon. If the
     // default search engine is google return the icon instead of favicon for

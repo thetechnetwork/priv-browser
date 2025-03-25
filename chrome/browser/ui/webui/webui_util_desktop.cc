@@ -21,6 +21,11 @@
 #include "ui/webui/buildflags.h"
 
 #if BUILDFLAG(ENABLE_WEBUI_GENERATE_CODE_CACHE)
+#include "chrome/grit/side_panel_bookmarks_code_cache_resources_map.h"
+#include "chrome/grit/side_panel_customize_chrome_code_cache_resources_map.h"
+#include "chrome/grit/side_panel_reading_list_code_cache_resources_map.h"
+#include "chrome/grit/side_panel_shared_code_cache_resources_map.h"
+#include "content/public/common/content_features.h"
 #include "ui/webui/resources/grit/webui_code_cache_resources_map.h"
 #endif  // BUILDFLAG(ENABLE_WEBUI_GENERATE_CODE_CACHE)
 
@@ -164,13 +169,44 @@ base::flat_map<GURL, int> GetWebUIResourceUrlToCodeCacheMap() {
   std::vector<std::pair<GURL, int>> url_to_code_cache_pairs;
 
 #if BUILDFLAG(ENABLE_WEBUI_GENERATE_CODE_CACHE)
-  // Currently only shared resources are supported.
-  AppendWebUIResourceURLToCodeCachePairs(
-      content::kChromeUIScheme, content::kChromeUIResourcesHost,
-      kWebuiCodeCacheResources, url_to_code_cache_pairs);
-  AppendWebUIResourceURLToCodeCachePairs(
-      content::kChromeUIUntrustedScheme, content::kChromeUIResourcesHost,
-      kWebuiCodeCacheResources, url_to_code_cache_pairs);
+  if (features::kWebUIBundledCodeCacheGenerateResourceMap.Get()) {
+    // Shared resources.
+    AppendWebUIResourceURLToCodeCachePairs(
+        content::kChromeUIScheme, content::kChromeUIResourcesHost,
+        kWebuiCodeCacheResources, url_to_code_cache_pairs);
+    AppendWebUIResourceURLToCodeCachePairs(
+        content::kChromeUIUntrustedScheme, content::kChromeUIResourcesHost,
+        kWebuiCodeCacheResources, url_to_code_cache_pairs);
+
+    // TODO(crbug.com/402625343): We can avoid enumerating host-specific WebUI
+    // code cache resources here and instead delegate to registered WebUI
+    // configs or similar. This may also be unnecessary once these mappings are
+    // exposed in renderers at compile-time.
+
+    // chrome://bookmarks-side-panel.top-chrome
+    AppendWebUIResourceURLToCodeCachePairs(
+        content::kChromeUIScheme, chrome::kChromeUIBookmarksSidePanelHost,
+        kSidePanelSharedCodeCacheResources, url_to_code_cache_pairs);
+    AppendWebUIResourceURLToCodeCachePairs(
+        content::kChromeUIScheme, chrome::kChromeUIBookmarksSidePanelHost,
+        kSidePanelBookmarksCodeCacheResources, url_to_code_cache_pairs);
+
+    // chrome://customize-chrome-side-panel.top-chrome
+    AppendWebUIResourceURLToCodeCachePairs(
+        content::kChromeUIScheme, chrome::kChromeUICustomizeChromeSidePanelHost,
+        kSidePanelSharedCodeCacheResources, url_to_code_cache_pairs);
+    AppendWebUIResourceURLToCodeCachePairs(
+        content::kChromeUIScheme, chrome::kChromeUICustomizeChromeSidePanelHost,
+        kSidePanelCustomizeChromeCodeCacheResources, url_to_code_cache_pairs);
+
+    // chrome://read-later.top-chrome
+    AppendWebUIResourceURLToCodeCachePairs(
+        content::kChromeUIScheme, chrome::kChromeUIReadLaterHost,
+        kSidePanelSharedCodeCacheResources, url_to_code_cache_pairs);
+    AppendWebUIResourceURLToCodeCachePairs(
+        content::kChromeUIScheme, chrome::kChromeUIReadLaterHost,
+        kSidePanelReadingListCodeCacheResources, url_to_code_cache_pairs);
+  }
 #endif  // BUILDFLAG(ENABLE_WEBUI_GENERATE_CODE_CACHE)
 
   return {url_to_code_cache_pairs};

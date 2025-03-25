@@ -75,9 +75,6 @@ extern const char kAutofillEnableRankingFormulaAddressProfilesDescription[];
 extern const char kAutofillEnableRankingFormulaCreditCardsName[];
 extern const char kAutofillEnableRankingFormulaCreditCardsDescription[];
 
-extern const char kAutofillEnableCardProductNameName[];
-extern const char kAutofillEnableCardProductNameDescription[];
-
 extern const char kAutofillEnableVerveCardSupportName[];
 extern const char kAutofillEnableVerveCardSupportDescription[];
 
@@ -348,6 +345,9 @@ extern const char kIOSKeyboardAccessoryUpgradeForIPadDescription[];
 extern const char kIOSKeyboardAccessoryUpgradeShortManualFillMenuName[];
 extern const char kIOSKeyboardAccessoryUpgradeShortManualFillMenuDescription[];
 
+extern const char kIOSOneTapMiniMapRemoveSectionBreaksName[];
+extern const char kIOSOneTapMiniMapRemoveSectionBreaksDescription[];
+
 extern const char kIOSOneTapMiniMapRestrictionsName[];
 extern const char kIOSOneTapMiniMapRestrictionsDescription[];
 
@@ -384,6 +384,9 @@ extern const char kNewTabPageFieldTrialDescription[];
 extern const char kNonModalSignInPromoName[];
 extern const char kNonModalSignInPromoDescription[];
 
+extern const char kNotificationCollisionManagementName[];
+extern const char kNotificationCollisionManagementDescription[];
+
 extern const char kIOSSharedHighlightingColorChangeName[];
 extern const char kIOSSharedHighlightingColorChangeDescription[];
 
@@ -404,6 +407,9 @@ extern const char kIOSTipsNotificationsDescription[];
 
 extern const char kIOSReactivationNotificationsName[];
 extern const char kIOSReactivationNotificationsDescription[];
+
+extern const char kIOSProvidesAppNotificationSettingsName[];
+extern const char kIOSProvidesAppNotificationSettingsDescription[];
 
 extern const char kIPHForSafariSwitcherName[];
 extern const char kIPHForSafariSwitcherDescription[];
@@ -512,9 +518,6 @@ extern const char kManualLogUploadsInFREDescription[];
 // reports.
 extern const char kMetrickitNonCrashReportName[];
 extern const char kMetrickitNonCrashReportDescription[];
-
-extern const char kModernTabStripName[];
-extern const char kModernTabStripDescription[];
 
 extern const char kMostVisitedTilesHorizontalRenderGroupName[];
 extern const char kMostVisitedTilesHorizontalRenderGroupDescription[];
@@ -728,6 +731,9 @@ extern const char kShareInWebContextMenuIOSDescription[];
 
 extern const char kShowAutofillTypePredictionsName[];
 extern const char kShowAutofillTypePredictionsDescription[];
+
+extern const char kSignInButtonNoAvatarName[];
+extern const char kSignInButtonNoAvatarDescription[];
 
 extern const char kSpotlightNeverRetainIndexName[];
 extern const char kSpotlightNeverRetainIndexDescription[];

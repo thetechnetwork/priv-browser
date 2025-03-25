@@ -599,7 +599,6 @@ AXObject::AXObject(AXObjectCacheImpl& ax_object_cache)
     : id_(0),
       parent_(nullptr),
       role_(ax::mojom::blink::Role::kUnknown),
-      explicit_container_id_(0),
       cached_live_region_root_(nullptr),
       ax_object_cache_(&ax_object_cache) {
   ++number_of_live_ax_objects_;
@@ -1301,25 +1300,24 @@ void SerializeAriaNotificationAttributes(const AriaNotifications& notifications,
 
   std::vector<std::string> announcements;
   std::vector<int32_t> priority_properties;
-  std::vector<std::string> notification_ids;
   std::vector<int32_t> interrupt_properties;
+  std::vector<std::string> notification_types;
 
   announcements.reserve(size);
   priority_properties.reserve(size);
-  notification_ids.reserve(size);
   interrupt_properties.reserve(size);
+  notification_types.reserve(size);
 
   for (const auto& notification : notifications) {
     announcements.emplace_back(TruncateString(notification.Announcement()));
     priority_properties.emplace_back(
         static_cast<int32_t>(notification.Priority()));
     if (RuntimeEnabledFeatures::AriaNotifyV2Enabled()) {
-      notification_ids.emplace_back(
-          TruncateString(notification.NotificationId()));
+      notification_types.emplace_back(TruncateString(notification.Type()));
       interrupt_properties.emplace_back(
           static_cast<int32_t>(notification.Interrupt()));
     } else {
-      notification_ids.emplace_back();
+      notification_types.emplace_back();
       interrupt_properties.emplace_back(static_cast<int32_t>(
           ax::mojom::blink::AriaNotificationInterrupt::kNone));
     }
@@ -1331,12 +1329,12 @@ void SerializeAriaNotificationAttributes(const AriaNotifications& notifications,
   node_data->AddIntListAttribute(
       ax::mojom::blink::IntListAttribute::kAriaNotificationPriorityProperties,
       priority_properties);
-  node_data->AddStringListAttribute(
-      ax::mojom::blink::StringListAttribute::kAriaNotificationIds,
-      notification_ids);
   node_data->AddIntListAttribute(
       ax::mojom::blink::IntListAttribute::kAriaNotificationInterruptProperties,
       interrupt_properties);
+  node_data->AddStringListAttribute(
+      ax::mojom::blink::StringListAttribute::kAriaNotificationTypes,
+      notification_types);
 }
 
 }  // namespace
@@ -7221,10 +7219,11 @@ void AXObject::GetRelativeBounds(AXObject** out_container,
   // to a canvas path. When explicit coordinates are provided, the ID of the
   // explicit container element that the coordinates are relative to must be
   // provided too.
-  if (!explicit_element_rect_.IsEmpty()) {
-    *out_container = AXObjectCache().ObjectFromAXID(explicit_container_id_);
+  if (auto canvas_bounds =
+          AXObjectCache().GetCanvasElementBounds(this->AXObjectID())) {
+    *out_container = AXObjectCache().ObjectFromAXID(canvas_bounds->second);
     if (*out_container) {
-      out_bounds_in_container = gfx::RectF(explicit_element_rect_);
+      out_bounds_in_container = gfx::RectF(canvas_bounds->first);
       return;
     }
   }

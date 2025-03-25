@@ -10,6 +10,7 @@
       "is_debug": true,
       "symbol_level": 1,
       "target_os": "android",
+      "use_reclient": false,
       "use_remoteexec": true
     }
   },
@@ -24,6 +25,7 @@
       "symbol_level": 1,
       "target_os": "chromeos",
       "use_cups": true,
+      "use_reclient": false,
       "use_remoteexec": true
     }
   },
@@ -34,10 +36,7 @@
       "clang_use_default_sample_profile": false,
       "debuggable_apks": false,
       "default_min_sdk_version": 23,
-      "disable_file_support": true,
-      "enable_base_tracing": false,
       "enable_kythe_annotations": true,
-      "enable_reporting": true,
       "enable_resource_allowlist_generation": false,
       "enable_websockets": false,
       "include_transport_security_state_preload_list": false,
@@ -45,13 +44,13 @@
       "is_component_build": false,
       "is_cronet_build": true,
       "is_debug": true,
-      "media_use_ffmpeg": false,
       "symbol_level": 1,
       "target_cpu": "arm",
       "target_os": "android",
       "use_hashed_jni_names": true,
       "use_partition_alloc": false,
       "use_platform_icu_alternatives": true,
+      "use_reclient": false,
       "use_remoteexec": true,
       "use_thin_lto": false
     }
@@ -66,6 +65,7 @@
       "is_component_build": false,
       "is_debug": false,
       "target_os": "fuchsia",
+      "use_reclient": false,
       "use_remoteexec": true
     }
   },
@@ -80,6 +80,7 @@
       "symbol_level": 1,
       "target_environment": "device",
       "target_os": "ios",
+      "use_reclient": false,
       "use_remoteexec": true
     }
   },
@@ -92,6 +93,7 @@
       "is_component_build": true,
       "is_debug": true,
       "symbol_level": 1,
+      "use_reclient": false,
       "use_remoteexec": true
     }
   },
@@ -105,6 +107,7 @@
       "is_debug": true,
       "symbol_level": 1,
       "target_os": "mac",
+      "use_reclient": false,
       "use_remoteexec": true
     }
   },
@@ -119,6 +122,7 @@
       "is_debug": true,
       "symbol_level": 1,
       "target_os": "android",
+      "use_reclient": false,
       "use_remoteexec": true
     }
   },
@@ -131,6 +135,7 @@
       "is_component_build": true,
       "is_debug": true,
       "symbol_level": 1,
+      "use_reclient": false,
       "use_remoteexec": true
     }
   }

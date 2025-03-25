@@ -106,13 +106,13 @@ static_library("browser") {
     "data_manager/addresses/address_data_manager.h",
     "data_manager/autofill_ai/entity_data_manager.cc",
     "data_manager/autofill_ai/entity_data_manager.h",
-    "data_manager/passes/passes_data_manager.cc",
-    "data_manager/passes/passes_data_manager.h",
     "data_manager/payments/payments_data_manager.cc",
     "data_manager/payments/payments_data_manager.h",
     "data_manager/personal_data_manager.cc",
     "data_manager/personal_data_manager.h",
     "data_manager/personal_data_manager_observer.h",
+    "data_manager/valuables/valuables_data_manager.cc",
+    "data_manager/valuables/valuables_data_manager.h",
     "data_model/addresses/address.cc",
     "data_model/addresses/address.h",
     "data_model/addresses/autofill_feature_guarded_address_component.cc",
@@ -162,8 +162,6 @@ static_library("browser") {
     "data_model/data_model_utils.h",
     "data_model/form_group.cc",
     "data_model/form_group.h",
-    "data_model/passes/loyalty_card.cc",
-    "data_model/passes/loyalty_card.h",
     "data_model/payments/autofill_offer_data.cc",
     "data_model/payments/autofill_offer_data.h",
     "data_model/payments/autofill_wallet_usage_data.cc",
@@ -192,6 +190,9 @@ static_library("browser") {
     "data_model/transliterator.h",
     "data_model/usage_history_information.cc",
     "data_model/usage_history_information.h",
+    "data_model/valuables/loyalty_card.cc",
+    "data_model/valuables/loyalty_card.h",
+    "data_model/valuables/valuable_types.h",
     "data_quality/addresses/address_normalization_manager.cc",
     "data_quality/addresses/address_normalization_manager.h",
     "data_quality/addresses/address_normalizer.h",
@@ -337,6 +338,7 @@ static_library("browser") {
     "integrators/fast_checkout_client.h",
     "integrators/fast_checkout_delegate.h",
     "integrators/fast_checkout_enums.h",
+    "integrators/identity_credential_delegate.h",
     "integrators/password_form_classification.h",
     "integrators/touch_to_fill_delegate.h",
     "logging/log_buffer_submitter.cc",
@@ -398,8 +400,6 @@ static_library("browser") {
     "metrics/payments/filled_card_information_bubble_metrics.h",
     "metrics/payments/iban_metrics.cc",
     "metrics/payments/iban_metrics.h",
-    "metrics/payments/local_card_migration_metrics.cc",
-    "metrics/payments/local_card_migration_metrics.h",
     "metrics/payments/manage_cards_prompt_metrics.cc",
     "metrics/payments/manage_cards_prompt_metrics.h",
     "metrics/payments/mandatory_reauth_metrics.cc",
@@ -693,12 +693,6 @@ static_library("browser") {
     "webdata/autofill_webdata_service.cc",
     "webdata/autofill_webdata_service.h",
     "webdata/autofill_webdata_service_observer.h",
-    "webdata/passes/loyalty_card_sync_bridge.cc",
-    "webdata/passes/loyalty_card_sync_bridge.h",
-    "webdata/passes/loyalty_card_sync_util.cc",
-    "webdata/passes/loyalty_card_sync_util.h",
-    "webdata/passes/passes_table.cc",
-    "webdata/passes/passes_table.h",
     "webdata/payments/autofill_wallet_credential_sync_bridge.cc",
     "webdata/payments/autofill_wallet_credential_sync_bridge.h",
     "webdata/payments/autofill_wallet_metadata_sync_bridge.cc",
@@ -713,6 +707,14 @@ static_library("browser") {
     "webdata/payments/payments_autofill_table.h",
     "webdata/payments/payments_sync_bridge_util.cc",
     "webdata/payments/payments_sync_bridge_util.h",
+    "webdata/valuables/loyalty_card_data_type_controller.cc",
+    "webdata/valuables/loyalty_card_data_type_controller.h",
+    "webdata/valuables/loyalty_card_sync_bridge.cc",
+    "webdata/valuables/loyalty_card_sync_bridge.h",
+    "webdata/valuables/loyalty_card_sync_util.cc",
+    "webdata/valuables/loyalty_card_sync_util.h",
+    "webdata/valuables/valuables_table.cc",
+    "webdata/valuables/valuables_table.h",
   ]
 
   sources += get_target_outputs(":regex_patterns_inl_h")
@@ -729,6 +731,12 @@ static_library("browser") {
     sources += [
       "payments/autofill_save_iban_ui_info.cc",
       "payments/autofill_save_iban_ui_info.h",
+      "ui/addresses/android/autofill_address_editor_ui_info_android.cc",
+      "ui/addresses/android/autofill_address_editor_ui_info_android.h",
+      "ui/addresses/android/autofill_address_ui_component_android.cc",
+      "ui/addresses/android/autofill_address_ui_component_android.h",
+      "ui/addresses/android/dropdown_key_value_android.cc",
+      "ui/addresses/android/dropdown_key_value_android.h",
     ]
   }
 
@@ -845,6 +853,7 @@ static_library("browser") {
     "//components/optimization_guide/core",
     "//components/optimization_guide/proto:optimization_guide_proto",
     "//components/os_crypt/async/common",
+    "//components/payments/core:currency_formatter",
     "//components/policy/core/browser",
     "//components/policy/core/common",
     "//components/pref_registry",
@@ -903,13 +912,6 @@ static_library("browser") {
     sources += [
       "crowdsourcing/server_prediction_overrides.cc",
       "crowdsourcing/server_prediction_overrides.h",
-      "payments/local_card_migration_manager.cc",
-      "payments/local_card_migration_manager.h",
-      "payments/payments_requests/migrate_cards_request.cc",
-      "payments/payments_requests/migrate_cards_request.h",
-      "strike_databases/payments/local_card_migration_strike_database.h",
-      "ui/payments/local_card_migration_bubble_controller.h",
-      "ui/payments/local_card_migration_dialog_controller.h",
     ]
     deps += [
       "//ui/native_theme",
@@ -1087,13 +1089,13 @@ static_library("test_support") {
     "test_utils/autofill_testing_pref_service.cc",
     "test_utils/autofill_testing_pref_service.h",
     "test_utils/field_prediction_test_matchers.h",
-    "test_utils/passes_data_test_utils.cc",
-    "test_utils/passes_data_test_utils.h",
     "test_utils/test_autofill_clock.cc",
     "test_utils/test_autofill_clock.h",
     "test_utils/test_event_waiter.h",
     "test_utils/test_profiles.cc",
     "test_utils/test_profiles.h",
+    "test_utils/valuables_data_test_utils.cc",
+    "test_utils/valuables_data_test_utils.h",
     "test_utils/vote_uploads_test_matchers.h",
     "ui/mock_autofill_suggestion_delegate.cc",
     "ui/mock_autofill_suggestion_delegate.h",
@@ -1173,13 +1175,6 @@ static_library("test_support") {
       "//third_party/blink/public/common",
     ]
   }
-
-  if (!is_ios && !is_android) {
-    sources += [
-      "payments/test_local_card_migration_manager.cc",
-      "payments/test_local_card_migration_manager.h",
-    ]
-  }
 }
 
 bundle_data("unit_tests_bundle_data") {
@@ -1235,10 +1230,10 @@ source_set("unit_tests") {
     "data_manager/addresses/address_data_cleaner_unittest.cc",
     "data_manager/addresses/address_data_manager_unittest.cc",
     "data_manager/autofill_ai/entity_data_manager_unittest.cc",
-    "data_manager/passes/passes_data_manager_unittest.cc",
     "data_manager/payments/payments_data_manager_test_base.cc",
     "data_manager/payments/payments_data_manager_test_base.h",
     "data_manager/payments/payments_data_manager_unittest.cc",
+    "data_manager/valuables/valuables_data_manager_unittest.cc",
     "data_model/addresses/address_unittest.cc",
     "data_model/addresses/autofill_i18n_api_unittest.cc",
     "data_model/addresses/autofill_i18n_parsing_expression_components_unittest.cc",
@@ -1426,9 +1421,6 @@ source_set("unit_tests") {
     "webdata/autocomplete/autocomplete_table_unittest.cc",
     "webdata/autofill_ai/entity_table_unittest.cc",
     "webdata/autofill_sync_metadata_table_unittest.cc",
-    "webdata/passes/loyalty_card_sync_bridge_unittest.cc",
-    "webdata/passes/loyalty_card_sync_util_unittest.cc",
-    "webdata/passes/passes_table_unittest.cc",
     "webdata/payments/autofill_wallet_credential_sync_bridge_unittest.cc",
     "webdata/payments/autofill_wallet_metadata_sync_bridge_unittest.cc",
     "webdata/payments/autofill_wallet_offer_sync_bridge_unittest.cc",
@@ -1436,6 +1428,9 @@ source_set("unit_tests") {
     "webdata/payments/autofill_wallet_usage_data_sync_bridge_unittest.cc",
     "webdata/payments/payments_autofill_table_unittest.cc",
     "webdata/payments/payments_sync_bridge_util_unittest.cc",
+    "webdata/valuables/loyalty_card_sync_bridge_unittest.cc",
+    "webdata/valuables/loyalty_card_sync_util_unittest.cc",
+    "webdata/valuables/valuables_table_unittest.cc",
     "webdata/web_data_service_unittest.cc",
   ]
 
@@ -1484,11 +1479,7 @@ source_set("unit_tests") {
   }
 
   if (!is_ios && !is_android) {
-    sources += [
-      "crowdsourcing/server_prediction_overrides_unittest.cc",
-      "payments/local_card_migration_manager_unittest.cc",
-      "payments/payments_requests/migrate_cards_request_unittest.cc",
-    ]
+    sources += [ "crowdsourcing/server_prediction_overrides_unittest.cc" ]
   }
 
   if (build_with_tflite_lib) {

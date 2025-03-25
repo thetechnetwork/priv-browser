@@ -166,6 +166,7 @@ Eis alguns exemplos do que pode experimentar para começar.</translation>
 <translation id="1505542291183484463">Janela de redimensionamento em mosaico para baixo</translation>
 <translation id="1510238584712386396">Iniciador</translation>
 <translation id="1520303207432623762">{NUM_APPS,plural, =1{Mostrar definições de notificação. As notificações estão desativadas para uma aplicação}other{Mostrar definições de notificação. As notificações estão desativadas para # aplicações}}</translation>
+<translation id="1521655867290435174">Google Sheets</translation>
 <translation id="1523032696246003">Bateria: <ph name="BATTERY_PERCENTAGE" />% | <ph name="TIME" /> até ficar completa</translation>
 <translation id="1525508553941733066">IGNORAR</translation>
 <translation id="1526448108126799339">Abrir um novo separador numa nova janela</translation>
@@ -214,6 +215,7 @@ Eis alguns exemplos do que pode experimentar para começar.</translation>
 <translation id="1679841710523778799">Aumentar o brilho</translation>
 <translation id="1680659827022803830">Controlos de videochamada</translation>
 <translation id="169515659049020177">Shift</translation>
+<translation id="1696984622403682083">Pode desativar esta funcionalidade em qualquer altura nas Definições. <ph name="LINK_TO_LEARN_MORE" /></translation>
 <translation id="1698080062160024910">Temporizador de <ph name="TOTAL_TIME" /> · <ph name="LABEL" /></translation>
 <translation id="1698760176351776263">Endereço IPv6: <ph name="ADDRESS" /></translation>
 <translation id="1703117532528082099">Janela ativa ancorada à esquerda.</translation>
@@ -240,6 +242,8 @@ Eis alguns exemplos do que pode experimentar para começar.</translation>
 <translation id="1755556344721611131">App Diagnósticos</translation>
 <translation id="1756833229520115364">Não foi possível guardar o modelo. Existem demasiadas janelas ou separadores.</translation>
 <translation id="1757857692711134412">Desativada até ao nascer do sol</translation>
+<translation id="1763084151787818322">Outras ações</translation>
+<translation id="1768138163688567246">Fechar Pesquisar no meu ecrã</translation>
 <translation id="1768366657309696705">O atalho de teclado <ph name="LAUNCHER_KEY_NAME" /> + ponto final foi alterado. Para utilizar a tecla Inserir, prima a tecla <ph name="LAUNCHER_KEY_NAME" /> + Shift + retrocesso.</translation>
 <translation id="1770726142253415363">A app foi movida para a linha <ph name="ROW_NUMBER" />, coluna <ph name="COLUMN_NUMBER" />.</translation>
 <translation id="1771761307086386028">Deslocar para a direita</translation>
@@ -345,7 +349,6 @@ Eis alguns exemplos do que pode experimentar para começar.</translation>
 <translation id="2201071101391734388">Foto recente <ph name="INDEX" /> de <ph name="TOTAL_COUNT" />.</translation>
 <translation id="2201687081523799384">Reduzir Google Tasks</translation>
 <translation id="2208323208084708176">Modo de ambiente de trabalho unificado</translation>
-<translation id="2220572644011485463">PIN ou palavra-passe</translation>
 <translation id="2222841058024245321">Espaço de trabalho 7</translation>
 <translation id="2223384056430485343">Num ecrã dividido</translation>
 <translation id="2224075387478458881">A gravação de ecrã não é permitida quando existe conteúdo protegido visível.</translation>
@@ -965,6 +968,7 @@ Algumas funcionalidades são limitadas para aumentar a autonomia da bateria.</tr
 <translation id="4221957499226645091"><ph name="APP_NAME" />, app instalada, em pausa</translation>
 <translation id="4228078597006700451">Controlos não configurados</translation>
 <translation id="4230560241506423345">Novo</translation>
+<translation id="4236726631849783264">Um lembrete sobre ações sugeridas</translation>
 <translation id="4239069858505860023">GPRS</translation>
 <translation id="4240486403425279990">Modo de vista geral</translation>
 <translation id="4242533952199664413">Abrir definições</translation>
@@ -981,7 +985,6 @@ Algumas funcionalidades são limitadas para aumentar a autonomia da bateria.</tr
 <translation id="4275663329226226506">Multimédia</translation>
 <translation id="4279490309300973883">Espelhamento</translation>
 <translation id="4280601795273309128">As atualizações de segurança terminaram. Atualize o dispositivo.</translation>
-<translation id="4281739221820540368">Criar documentos do Google Docs</translation>
 <translation id="4283888303416325161">Introduzir palavra-passe para uma maior segurança</translation>
 <translation id="4285498937028063278">Soltar</translation>
 <translation id="428715201724021596">A estabelecer ligação ao perfil. Esta ação pode demorar alguns minutos.</translation>
@@ -1042,6 +1045,7 @@ Algumas funcionalidades são limitadas para aumentar a autonomia da bateria.</tr
 <translation id="4471354919263203780">A transferir ficheiros de reconhecimento de voz… <ph name="PERCENT" />%</translation>
 <translation id="4471432286288241507">{0,plural, =0{Atualize o dispositivo agora}=1{Atualize o dispositivo dentro de 1 segundo}other{Atualize o dispositivo dentro de # segundos}}</translation>
 <translation id="4472575034687746823">Começar</translation>
+<translation id="4473489370276014885">Contactos do Google</translation>
 <translation id="4477350412780666475">Faixa seguinte</translation>
 <translation id="4477751544736611934">Isto pode significar custos de dados.
 1 dispositivo ligado.</translation>
@@ -1068,6 +1072,7 @@ Algumas funcionalidades são limitadas para aumentar a autonomia da bateria.</tr
 <translation id="4545950850562423083">Guardar a página atual como marcador</translation>
 <translation id="4548482551627849548">Mover janela ativa para o espaço de trabalho à esquerda</translation>
 <translation id="4552748006424994716">Para evitar o eco, pode ouvir o microfone apenas com os auscultadores com fios.</translation>
+<translation id="4556953949326137018">Quando usa ações sugeridas, como "adicionar ao Calendário" ou "criar documento do Google Docs", o conteúdo da área selecionada é enviado para os servidores da Google para sugerir ações, sujeito aos <ph name="LINK_TO_SERVICE_TERMS" />. Não inclua informações pessoais nem confidenciais.</translation>
 <translation id="4560576029703263363">Ativado</translation>
 <translation id="4561267230861221837">3G</translation>
 <translation id="4565377596337484307">Ocultar palavra-passe</translation>
@@ -1151,6 +1156,7 @@ Algumas funcionalidades são limitadas para aumentar a autonomia da bateria.</tr
 <translation id="481455355267255546">A seguir</translation>
 <translation id="481749895090480684">Lista de tarefas: <ph name="GLANCEABLES_TASKS_LIST_NAME" /></translation>
 <translation id="4826588772550366629">câmara e microfone</translation>
+<translation id="4828935196674083554">A adicionar…</translation>
 <translation id="482908187605862807">Apps disponíveis na Play Store</translation>
 <translation id="4831034276697007977">Tem a certeza de que quer desativar os cliques automáticos?</translation>
 <translation id="4835677468087803981">Ocultar PIN</translation>
@@ -1648,6 +1654,7 @@ Nenhum dispositivo ligado.</translation>
 <translation id="641817663353603351">página para cima</translation>
 <translation id="6424520630891723617"><ph name="SECURITY_STATUS" />, intensidade do sinal: <ph name="SIGNAL_STRENGTH" /></translation>
 <translation id="642644398083277086">Limpar todas as notificações</translation>
+<translation id="6426905245930183644">A criar…</translation>
 <translation id="6430225033895752525">Mostrar as definições do Modo sem distrações</translation>
 <translation id="643147933154517414">Tudo concluído</translation>
 <translation id="6431865393913628856">Gravação de ecrã</translation>
@@ -1714,7 +1721,6 @@ Nova instalação</translation>
 <translation id="6612889377159412215">subtarefa</translation>
 <translation id="6613765291890844037">Armazenamento de <ph name="STORAGE_IN_USE_SIZE" /> em utilização | Total de <ph name="STORAGE_TOTAL_SIZE" /></translation>
 <translation id="6614169507485700968">O ecrã de privacidade está ligado</translation>
-<translation id="6618277154885124991">Criar folhas de cálculo do Google Sheets</translation>
 <translation id="6622679827379792051">Configurar visualização das apps do telemóvel</translation>
 <translation id="662279009180869175">Use as setas para a esquerda e para a direita para redimensionar o ecrã dividido</translation>
 <translation id="6624493541160101248">Espaço de trabalho atual: <ph name="DESK_NAME" />. Espaço de trabalho <ph name="DESK_INDEX" /> de <ph name="DESK_COUNT" />.</translation>
@@ -1829,7 +1835,6 @@ Nova instalação</translation>
 <translation id="7000027735917578303">Definições de janelas e espaços de trabalho</translation>
 <translation id="7004910047186208204">Ligue-se aos dados móveis</translation>
 <translation id="7005239792648594238">Abra uma app para começar</translation>
-<translation id="7007983414944123363">Não foi possível validar o seu PIN ou palavra-passe. Tente novamente.</translation>
 <translation id="7014684956566476813">Ligado a um dispositivo denominado <ph name="DEVICE_NAME" /></translation>
 <translation id="7015766095477679451">Volte à(s) <ph name="COME_BACK_TIME" />.</translation>
 <translation id="70168403932084660">Espaço de trabalho 6</translation>
@@ -1943,6 +1948,7 @@ Nova instalação</translation>
 <translation id="742594950370306541">A câmara está a ser utilizada.</translation>
 <translation id="742608627846767349">Bom dia,</translation>
 <translation id="743058460480092004">A câmara e o microfone estão a ser utilizados.</translation>
+<translation id="7440404390546433462">Pesquisa Google</translation>
 <translation id="7441711280402516925">Em reprodução · Mudar para separador</translation>
 <translation id="7453330308669753048">Resultado do histórico de pesquisas removido</translation>
 <translation id="7459485586006128091">Devido a um erro interno, a zona Wi-Fi foi desativada. Tente ligar novamente dentro de alguns minutos.</translation>
@@ -2398,6 +2404,7 @@ Para encerrar o dispositivo, prima sem soltar o botão ligar/desligar novamente 
 <translation id="8921624153894383499">O Assistente Google não fala este idioma.</translation>
 <translation id="8926951137623668982">Prateleira sempre oculta</translation>
 <translation id="8929566928381252430">Está a tentar usar o Caps Lock? Use</translation>
+<translation id="8934418770423095813">Criar Documento do Google Docs</translation>
 <translation id="8934926665751933910">{NUM_FILES,plural, =1{1 ficheiro}other{# ficheiros}}</translation>
 <translation id="8936501819958976551">desativada</translation>
 <translation id="8938800817013097409">Dispositivo USB-C (porta traseira direita)</translation>
@@ -2466,6 +2473,7 @@ Para encerrar o dispositivo, prima sem soltar o botão ligar/desligar novamente 
 <translation id="9168436347345867845">Fazer isto mais tarde</translation>
 <translation id="9178475906033259337">A apresentar 1 resultado para <ph name="QUERY" /></translation>
 <translation id="9179259655489829027">Esta funcionalidade permite-lhe aceder rapidamente a qualquer utilizador com a sessão iniciada sem ser necessária uma palavra-passe. Utilize esta funcionalidade apenas com contas fidedignas.</translation>
+<translation id="9183302530794969518">Google Docs</translation>
 <translation id="9183456764293710005">Lupa de ecrã inteiro</translation>
 <translation id="9192133205265227850">Use "<ph name="DEVICE_NAME" />"</translation>
 <translation id="9193626018745640770">A transmitir para um recetor desconhecido…</translation>

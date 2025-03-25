@@ -4,6 +4,8 @@
 
 package org.chromium.chrome.browser.hub;
 
+import static org.chromium.chrome.browser.hub.HubColorMixer.COLOR_MIXER;
+
 import android.view.View;
 
 import org.chromium.base.Callback;
@@ -24,11 +26,6 @@ class HubToolbarProperties {
             new WritableObjectPropertyKey<>();
     public static final WritableIntPropertyKey PANE_SWITCHER_INDEX = new WritableIntPropertyKey();
 
-    // Holds two values from @HubColorScheme. The first value holds the current color scheme. The
-    // second value holds the previous color scheme.
-    public static final WritableObjectPropertyKey<HubColorSchemeUpdate> COLOR_SCHEME =
-            new WritableObjectPropertyKey<>();
-
     public static final WritableBooleanPropertyKey MENU_BUTTON_VISIBLE =
             new WritableBooleanPropertyKey();
 
@@ -36,6 +33,9 @@ class HubToolbarProperties {
             new WritableBooleanPropertyKey();
 
     public static final WritableBooleanPropertyKey SEARCH_LOUPE_VISIBLE =
+            new WritableBooleanPropertyKey();
+
+    public static final WritableBooleanPropertyKey HUB_SEARCH_ENABLED_STATE =
             new WritableBooleanPropertyKey();
 
     public static final WritableObjectPropertyKey<Runnable> SEARCH_LISTENER =
@@ -54,21 +54,18 @@ class HubToolbarProperties {
     public static final WritableObjectPropertyKey<Callback<PaneButtonLookup>>
             PANE_BUTTON_LOOKUP_CALLBACK = new WritableObjectPropertyKey();
 
-    public static final WritableObjectPropertyKey<Callback<Integer>> TOOLBAR_OVERVIEW_COLOR_SETTER =
-            new WritableObjectPropertyKey<>();
-
     static final PropertyKey[] ALL_KEYS = {
         ACTION_BUTTON_DATA,
         PANE_SWITCHER_BUTTON_DATA,
         PANE_SWITCHER_INDEX,
-        COLOR_SCHEME,
+        COLOR_MIXER,
         MENU_BUTTON_VISIBLE,
         PANE_BUTTON_LOOKUP_CALLBACK,
         SEARCH_BOX_VISIBLE,
         SEARCH_LOUPE_VISIBLE,
         SEARCH_LISTENER,
         IS_INCOGNITO,
-        TOOLBAR_OVERVIEW_COLOR_SETTER,
         APPLY_DELAY_FOR_SEARCH_BOX_ANIMATION,
+        HUB_SEARCH_ENABLED_STATE,
     };
 }

@@ -189,9 +189,6 @@ BASE_DECLARE_FEATURE(kSharedHighlightingIOS);
 // Feature flag to enable Share button in web context menu in iOS.
 BASE_DECLARE_FEATURE(kShareInWebContextMenuIOS);
 
-// Feature flag to enable the modern tabstrip.
-BASE_DECLARE_FEATURE(kModernTabStrip);
-
 // Feature flag to log metrics for the edit menu.
 BASE_DECLARE_FEATURE(kIOSBrowserEditMenuMetrics);
 
@@ -335,6 +332,9 @@ extern const char kLensOverlayOnboardingParamUpdatedStringsAndVisuals[];
 
 // Feature flag to change the onboariding experience of Lens Overlay.
 BASE_DECLARE_FEATURE(kLensOverlayAlternativeOnboarding);
+
+// Feature flag to add lens overlay navigation to history.
+BASE_DECLARE_FEATURE(kLensOverlayNavigationHistory);
 
 // Feature flag to enable UITraitCollection workaround for fixing incorrect
 // trait propagation.
@@ -558,9 +558,6 @@ bool IsNewSyncOptInIllustration();
 
 // Feature flag to disable Lens LVF features.
 BASE_DECLARE_FEATURE(kDisableLensCamera);
-
-// Feature flag that allows clearing data for managed users signing out.
-BASE_DECLARE_FEATURE(kClearDeviceDataOnSignOutForManagedUsers);
 
 // YES when the Downloads Auto Deletion feature is enabled.
 BASE_DECLARE_FEATURE(kDownloadAutoDeletionFeatureEnabled);
@@ -939,6 +936,10 @@ BASE_DECLARE_FEATURE(kIOSReactivationNotifications);
 // notification should trigger.
 extern const char kIOSReactivationNotificationsTriggerTimeParam[];
 
+// Feature param containing a comma separated list of integers that represent
+// cases of the `TipsNotificationType` enum.
+extern const char kIOSReactivationNotificationsOrderParam[];
+
 // Returns whether `kIOSReactivationNotifications` is enabled.
 bool IsIOSReactivationNotificationsEnabled();
 
@@ -1040,6 +1041,9 @@ BASE_DECLARE_FEATURE(kNonModalSignInPromo);
 // Returns whether the non-modal sign-in promo is enabled.
 bool IsNonModalSignInPromoEnabled();
 
+// Feature flag to remove section breaks when detecting addresses.
+BASE_DECLARE_FEATURE(kIOSOneTapMiniMapRemoveSectionsBreaks);
+
 // Feature flags for enhanced One Tap Minimap experiment
 // The main feature that controls of these restrictions. Different parameters
 // control the different available restrictions.
@@ -1069,5 +1073,21 @@ extern const base::FeatureParam<int>
 extern const char kIOSOneTapMiniMapRestrictionMinAlphanumProportionParamName[];
 extern const base::FeatureParam<double>
     kIOSOneTapMiniMapRestrictionMinAlphanumProportionParam;
+
+// Returns whether notification collision management is enabled.
+bool IsNotificationCollisionManagementEnabled();
+
+// Feature flag for enabling notification collision management.
+BASE_DECLARE_FEATURE(kNotificationCollisionManagement);
+
+// Feature flag to enable integration with iOS's
+// providesAppNotificationSettings.
+BASE_DECLARE_FEATURE(kIOSProvidesAppNotificationSettings);
+
+// Feature flag for enabling the sign-in button without avatar.
+BASE_DECLARE_FEATURE(kSignInButtonNoAvatar);
+
+// Returns whether the sign-in button without avatar is enabled.
+bool IsSignInButtonNoAvatarEnabled();
 
 #endif  // IOS_CHROME_BROWSER_SHARED_PUBLIC_FEATURES_FEATURES_H_

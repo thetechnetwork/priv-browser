@@ -9,8 +9,7 @@
 
 namespace features {
 
-#if BUILDFLAG(IS_ANDROID) || BUILDFLAG(IS_CHROMEOS) || \
-    BUILDFLAG(IS_FUCHSIA) || BUILDFLAG(IS_IOS)
+#if BUILDFLAG(IS_ANDROID) || BUILDFLAG(IS_FUCHSIA) || BUILDFLAG(IS_IOS)
 constexpr base::FeatureState kOverlayScrollbarFeatureState =
     base::FEATURE_ENABLED_BY_DEFAULT;
 #else
@@ -31,19 +30,6 @@ BASE_FEATURE(kOverlayScrollbar,
 BASE_FEATURE(kScrollbarAnimations,
              "ScrollbarAnimations",
              base::FEATURE_ENABLED_BY_DEFAULT);
-
-// Enables the os settings of overlay scrollbars for ChromeOS.
-// TODO(crbug.com/392961914): Deprecate the overlay scrollbar related feature
-// flags in M135: `kOverlayScrollbarsOSSetting` and `kOverlayScrollbar`.
-#if BUILDFLAG(IS_CHROMEOS)
-BASE_FEATURE(kOverlayScrollbarsOSSetting,
-             "OverlayScrollbarsOSSetting",
-             base::FEATURE_ENABLED_BY_DEFAULT);
-
-bool IsOverlayScrollbarOSSettingEnabled() {
-  return base::FeatureList::IsEnabled(features::kOverlayScrollbarsOSSetting);
-}
-#endif
 
 // Fluent scrollbars aim to modernize the Chromium scrollbars (both overlay and
 // non-overlay) to fit the Fluent design language. For now, the feature will

@@ -20,7 +20,9 @@
 #include "base/threading/thread_restrictions.h"
 #include "base/time/time.h"
 #include "build/build_config.h"
+#include "chrome/browser/ai/ai_test_utils.h"
 #include "chrome/browser/browser_process.h"
+#include "chrome/browser/component_updater/translate_kit_component_installer.h"
 #include "chrome/browser/on_device_translation/component_manager.h"
 #include "chrome/browser/on_device_translation/constants.h"
 #include "chrome/browser/on_device_translation/language_pack_util.h"
@@ -37,6 +39,7 @@
 #include "chrome/common/chrome_paths.h"
 #include "chrome/test/base/in_process_browser_test.h"
 #include "chrome/test/base/ui_test_utils.h"
+#include "components/crx_file/id_util.h"
 #include "components/language/core/browser/pref_names.h"
 #include "components/prefs/pref_service.h"
 #include "components/services/on_device_translation/public/cpp/features.h"
@@ -169,6 +172,13 @@ std::string_view GetCanCreateTranslatorResultString(
   }
 }
 
+void Sleep(base::TimeDelta delay) {
+  base::RunLoop loop;
+  base::SequencedTaskRunner::GetCurrentDefault()->PostDelayedTask(
+      FROM_HERE, loop.QuitClosure(), delay);
+  loop.Run();
+}
+
 // An implementation of SupportsUserData to be used in tests.
 class TestSupportsUserData : public base::SupportsUserData {
  public:
@@ -196,6 +206,21 @@ class OnDeviceTranslationBrowserTest : public InProcessBrowserTest {
 
  protected:
   const base::FilePath& GetTempDir() { return tmp_dir_.GetPath(); }
+
+  content::BrowserContext* GetBrowserContext() {
+    return browser()
+        ->tab_strip_model()
+        ->GetActiveWebContents()
+        ->GetBrowserContext();
+  }
+
+  const url::Origin GetLastCommittedOrigin() {
+    return browser()
+        ->tab_strip_model()
+        ->GetActiveWebContents()
+        ->GetPrimaryMainFrame()
+        ->GetLastCommittedOrigin();
+  }
 
   // Navigates to an empty page.
   void NavigateToEmptyPage() {
@@ -226,16 +251,8 @@ class OnDeviceTranslationBrowserTest : public InProcessBrowserTest {
     // result.
     mojo::Remote<blink::mojom::TranslationManager> remote;
     TestSupportsUserData fake_user_data;
-    TranslationManagerImpl::Bind(browser()
-                                     ->tab_strip_model()
-                                     ->GetActiveWebContents()
-                                     ->GetBrowserContext(),
-                                 &fake_user_data,
-                                 browser()
-                                     ->tab_strip_model()
-                                     ->GetActiveWebContents()
-                                     ->GetPrimaryMainFrame()
-                                     ->GetLastCommittedOrigin(),
+    TranslationManagerImpl::Bind(GetBrowserContext(), &fake_user_data,
+                                 GetLastCommittedOrigin(),
                                  remote.BindNewPipeAndPassReceiver());
     base::RunLoop run_loop;
     remote->TranslationAvailable(
@@ -257,6 +274,14 @@ class OnDeviceTranslationBrowserTest : public InProcessBrowserTest {
         GetCanCreateTranslatorResultString(expected_result));
   }
 
+  content::EvalJsResult EvalJs(std::string_view script,
+                               Browser* target_browser = nullptr) {
+    return content::EvalJs((target_browser ? target_browser : browser())
+                               ->tab_strip_model()
+                               ->GetActiveWebContents(),
+                           script);
+  }
+
   // Evaluates the given script and returns the result string. If the script
   // throws an error, returns the error message.
   // When `target_browser` is not nullptr, the script is evaluated in the
@@ -264,10 +289,7 @@ class OnDeviceTranslationBrowserTest : public InProcessBrowserTest {
   // context of the default browser.
   std::string EvalJsCatchingError(std::string_view script,
                                   Browser* target_browser = nullptr) {
-    return EvalJs((target_browser ? target_browser : browser())
-                      ->tab_strip_model()
-                      ->GetActiveWebContents(),
-                  base::StringPrintf(R"(
+    return EvalJs(base::StringPrintf(R"(
       (async () => {
         try {
           %s
@@ -276,7 +298,8 @@ class OnDeviceTranslationBrowserTest : public InProcessBrowserTest {
         }
       })();
     )",
-                                     script))
+                                     script),
+                  target_browser)
         .ExtractString();
   }
 
@@ -348,9 +371,7 @@ IN_PROC_BROWSER_TEST_F(OnDeviceTranslationBrowserTest,
   mock_component_manager.InstallMockTranslateKitComponent();
 
   // The promise of create() should not be resolved yet.
-  EXPECT_FALSE(EvalJs(browser()->tab_strip_model()->GetActiveWebContents(),
-                      "window._testPromiseResolved")
-                   .ExtractBool());
+  EXPECT_FALSE(EvalJs("window._testPromiseResolved").ExtractBool());
 
   // Install the mock language pack.
   mock_component_manager.InstallMockLanguagePack(LanguagePackKey::kEn_Ja);
@@ -406,9 +427,7 @@ IN_PROC_BROWSER_TEST_F(OnDeviceTranslationBrowserTest,
   mock_component_manager.InstallMockLanguagePack(LanguagePackKey::kEn_Ja);
 
   // The promise of create() should not be resolved yet.
-  EXPECT_FALSE(EvalJs(browser()->tab_strip_model()->GetActiveWebContents(),
-                      "window._testPromiseResolved")
-                   .ExtractBool());
+  EXPECT_FALSE(EvalJs("window._testPromiseResolved").ExtractBool());
 
   // Install the mock TranslateKit component.
   mock_component_manager.InstallMockTranslateKitComponent();
@@ -493,15 +512,9 @@ IN_PROC_BROWSER_TEST_F(OnDeviceTranslationBrowserTest,
   mock_component_manager.InstallMockTranslateKitComponent();
 
   // All promises should not be resolved yet.
-  EXPECT_FALSE(EvalJs(browser()->tab_strip_model()->GetActiveWebContents(),
-                      "window._testEnJaPromise1Resolved")
-                   .ExtractBool());
-  EXPECT_FALSE(EvalJs(browser()->tab_strip_model()->GetActiveWebContents(),
-                      "window._testEnJaPromise2Resolved")
-                   .ExtractBool());
-  EXPECT_FALSE(EvalJs(browser()->tab_strip_model()->GetActiveWebContents(),
-                      "window._testEnEsPromiseResolved")
-                   .ExtractBool());
+  EXPECT_FALSE(EvalJs("window._testEnJaPromise1Resolved").ExtractBool());
+  EXPECT_FALSE(EvalJs("window._testEnJaPromise2Resolved").ExtractBool());
+  EXPECT_FALSE(EvalJs("window._testEnEsPromiseResolved").ExtractBool());
 
   // Install the mock `en_ja` language pack.
   mock_component_manager.InstallMockLanguagePack(LanguagePackKey::kEn_Ja);
@@ -517,9 +530,7 @@ IN_PROC_BROWSER_TEST_F(OnDeviceTranslationBrowserTest,
       "en to ja: hi");
 
   // The promise of `en_es` should not be resolved yet.
-  EXPECT_FALSE(EvalJs(browser()->tab_strip_model()->GetActiveWebContents(),
-                      "window._testEnEsPromiseResolved")
-                   .ExtractBool());
+  EXPECT_FALSE(EvalJs("window._testEnEsPromiseResolved").ExtractBool());
 
   // Install the mock `en_es` language pack.
   mock_component_manager.InstallMockLanguagePack(LanguagePackKey::kEn_Es);
@@ -580,9 +591,7 @@ IN_PROC_BROWSER_TEST_F(OnDeviceTranslationBrowserTest,
   mock_component_manager.InstallMockTranslateKitComponent();
 
   // Any promise should not be resolved yet.
-  EXPECT_FALSE(EvalJs(browser()->tab_strip_model()->GetActiveWebContents(),
-                      "window._testPromisesResolved")
-                   .ExtractBool());
+  EXPECT_FALSE(EvalJs("window._testPromisesResolved").ExtractBool());
 
   auto console_observer =
       CreateConsoleObserver("Too many Translator API requests are queued.");
@@ -602,9 +611,7 @@ IN_PROC_BROWSER_TEST_F(OnDeviceTranslationBrowserTest,
   WaitForConsoleObserver(*console_observer);
 
   // The all 1024 promises should not be resolved yet.
-  EXPECT_FALSE(EvalJs(browser()->tab_strip_model()->GetActiveWebContents(),
-                      "window._testPromisesResolved")
-                   .ExtractBool());
+  EXPECT_FALSE(EvalJs("window._testPromisesResolved").ExtractBool());
 
   // Install the mock language pack.
   mock_component_manager.InstallMockLanguagePack(LanguagePackKey::kEn_Ja);
@@ -836,6 +843,217 @@ IN_PROC_BROWSER_TEST_F(OnDeviceTranslationBrowserTest,
   WaitForConsoleObserver(*console_observer);
 }
 
+// Tests progress monitor behavior.
+class OnDeviceTranslationProgressMonitorBrowserTest
+    : public OnDeviceTranslationBrowserTest {
+ public:
+  OnDeviceTranslationProgressMonitorBrowserTest() = default;
+  ~OnDeviceTranslationProgressMonitorBrowserTest() override = default;
+
+  void SetUpOnMainThread() override {
+    OnDeviceTranslationBrowserTest::SetUpOnMainThread();
+    NavigateToEmptyPage();
+    translation_manager_ = std::make_unique<MockTranslationManagerImpl>(
+        GetBrowserContext(), GetLastCommittedOrigin());
+
+    // Setup a ComponentUpdateService to be used by the TranslationManager.
+    EXPECT_CALL(*translation_manager_, GetComponentUpdateService())
+        .WillOnce(Invoke([&]() { return &component_update_service_; }));
+
+    // `GetComponentIDs` should be called by the
+    // `AIModelDownloadProgressManager` to filter out existing downloads.
+    EXPECT_CALL(component_update_service_, GetComponentIDs()).Times(1);
+  }
+
+  void TearDownOnMainThread() override {
+    translation_manager_.reset();
+    OnDeviceTranslationBrowserTest::TearDownOnMainThread();
+  }
+
+  void TranslateAndMonitorProgress(std::string& source_language,
+                                   std::string& target_language) {
+    std::set<LanguagePackKey> language_pack_keys =
+        CalculateRequiredLanguagePacks(source_language, target_language);
+
+    base::RunLoop run_loop_translate_kit;
+    EXPECT_CALL(component_manager_, RegisterTranslateKitComponentImpl())
+        .WillOnce(Invoke([&]() { run_loop_translate_kit.Quit(); }));
+
+    base::RunLoop run_loop_language_pack;
+    EXPECT_CALL(component_manager_,
+                RegisterTranslateKitLanguagePackComponent(_))
+        .WillRepeatedly(Invoke([&](LanguagePackKey key) {
+          EXPECT_EQ(language_pack_keys.erase(key), 1u);
+          if (language_pack_keys.empty()) {
+            run_loop_language_pack.Quit();
+          }
+        }));
+
+    EXPECT_EQ(EvalJsCatchingError(base::StringPrintf(R"(
+                  self.progressEvents = [];
+
+                  self.createTranslatorPromise = ai.translator.create({
+                    sourceLanguage: '%s',
+                    targetLanguage: '%s',
+                    monitor(m) {
+                      m.addEventListener(
+                          'downloadprogress', ({loaded, total}) => {
+                            self.progressEvents.push({loaded, total});
+                          });
+                    },
+                  });
+                  return "OK";
+                )",
+                                                     source_language,
+                                                     target_language)),
+              "OK");
+
+    run_loop_translate_kit.Run();
+    run_loop_language_pack.Run();
+  }
+
+  AITestUtils::FakeComponent GetComponentForTranslateKit(uint64_t total_bytes) {
+    return {component_updater::TranslateKitComponentInstallerPolicy::
+                GetExtensionId(),
+            total_bytes};
+  }
+
+  AITestUtils::FakeComponent GetComponentForLanguagePack(
+      LanguagePackKey language_pack_key,
+      uint64_t total_bytes) {
+    const LanguagePackComponentConfig& config =
+        GetLanguagePackComponentConfig(language_pack_key);
+    std::string id =
+        crx_file::id_util::GenerateIdFromHash(config.public_key_sha);
+    return {id, total_bytes};
+  }
+
+  void SendUpdate(AITestUtils::FakeComponent component,
+                  uint64_t downloaded_bytes) {
+    component_update_service_.SendUpdate(component.CreateUpdateItem(
+        update_client::ComponentState::kDownloading, downloaded_bytes));
+  }
+
+  double NormalizedProgress(uint64_t downloaded_bytes, uint64_t total_bytes) {
+    // `AIUtils::NormalizeModelDownloadProgress` normalizes to 0 - 0x10000
+    // range. We divide it by 0x10000 (65536) again to get it in the 0.0 - 1.0
+    // range.
+    return AIUtils::NormalizeModelDownloadProgress(downloaded_bytes,
+                                                   total_bytes) /
+           65536.0;
+  }
+
+  void FinishInstalling(std::string& source_language,
+                        std::string& target_language) {
+    component_manager_.InstallMockTranslateKitComponentLater();
+
+    std::set<LanguagePackKey> language_pack_keys =
+        CalculateRequiredLanguagePacks(source_language, target_language);
+    for (LanguagePackKey language_pack_key : language_pack_keys) {
+      component_manager_.InstallMockLanguagePackLater(language_pack_key);
+    }
+  }
+
+  void ExpectUpdatesAre(const std::vector<double>& expected_updates) {
+    base::Value::List actual_updates = EvalJs(R"((async () => {
+                            await self.createTranslatorPromise;
+                            return self.progressEvents;
+                          })())")
+                                           .ExtractList();
+
+    ASSERT_EQ(actual_updates.size(), expected_updates.size());
+    for (size_t i = 0; i < actual_updates.size(); i++) {
+      auto& actual_update = actual_updates[i].GetDict();
+      std::optional<double> actual_loaded = actual_update.FindDouble("loaded");
+      std::optional<double> actual_total = actual_update.FindDouble("total");
+      ASSERT_TRUE(actual_loaded);
+      ASSERT_TRUE(actual_total);
+
+      double expected_loaded = expected_updates[i];
+      EXPECT_EQ(*actual_loaded, expected_loaded);
+      EXPECT_EQ(*actual_total, 1);
+    }
+  }
+
+ private:
+  MockComponentManager component_manager_{GetTempDir()};
+  AITestUtils::MockComponentUpdateService component_update_service_;
+  std::unique_ptr<MockTranslationManagerImpl> translation_manager_;
+
+  base::test::ScopedFeatureList scoped_feature_list_;
+};
+
+// Tests that progress events are received properly when translation requires
+// one language pack.
+//
+// TODO(crbug.com/403592445): Add another test for when translation requires two
+// language packs. It's not possible currently since the browser tests can't
+// translate between two non-english languages.
+IN_PROC_BROWSER_TEST_F(OnDeviceTranslationProgressMonitorBrowserTest,
+                       ReceivesProgressEventsForOneLanguagePack) {
+  std::string source_language = "en";
+  std::string target_language = "ja";
+  TranslateAndMonitorProgress(source_language, target_language);
+
+  // Components we expect to receive updates for.
+  AITestUtils::FakeComponent translation_kit =
+      GetComponentForTranslateKit(4321);
+  AITestUtils::FakeComponent en_ja_language_pack =
+      GetComponentForLanguagePack(LanguagePackKey::kEn_Ja, 1234);
+
+  // The downloaded bytes and total bytes for all components.
+  uint64_t downloaded_bytes = 0;
+  uint64_t total_bytes =
+      translation_kit.total_bytes() + en_ja_language_pack.total_bytes();
+
+  std::vector<double> expected_updates = {};
+
+  // Receives the zero update.
+  {
+    expected_updates.emplace_back(0);
+
+    SendUpdate(translation_kit, 0);
+    SendUpdate(en_ja_language_pack, 0);
+  }
+
+  // Receives an update for translation kit normalized to the total_bytes.
+  {
+    Sleep(base::Milliseconds(100));
+
+    uint64_t update_bytes = 999;
+    downloaded_bytes += update_bytes;
+    SendUpdate(translation_kit, update_bytes);
+
+    expected_updates.emplace_back(
+        NormalizedProgress(downloaded_bytes, total_bytes));
+  }
+
+  // Receives an update for the en ja language pack normalized to the
+  // total_bytes.
+  {
+    Sleep(base::Milliseconds(100));
+
+    uint64_t update_bytes = 300;
+    downloaded_bytes += update_bytes;
+    SendUpdate(en_ja_language_pack, update_bytes);
+
+    expected_updates.emplace_back(
+        NormalizedProgress(downloaded_bytes, total_bytes));
+  }
+
+  // Receives the final one update when all bytes are loaded.
+  {
+    SendUpdate(translation_kit, translation_kit.total_bytes());
+    SendUpdate(en_ja_language_pack, en_ja_language_pack.total_bytes());
+
+    expected_updates.emplace_back(1);
+  }
+
+  FinishInstalling(source_language, target_language);
+
+  ExpectUpdatesAre(expected_updates);
+}
+
 // Tests V1 behavior.
 class OnDeviceTranslationV1BrowserTest : public OnDeviceTranslationBrowserTest {
  public:
@@ -844,22 +1062,6 @@ class OnDeviceTranslationV1BrowserTest : public OnDeviceTranslationBrowserTest {
         blink::features::kTranslationAPIV1);
   }
   ~OnDeviceTranslationV1BrowserTest() override = default;
-
- protected:
-  content::BrowserContext* GetBrowserContext() {
-    return browser()
-        ->tab_strip_model()
-        ->GetActiveWebContents()
-        ->GetBrowserContext();
-  }
-
-  const url::Origin GetLastCommittedOrigin() {
-    return browser()
-        ->tab_strip_model()
-        ->GetActiveWebContents()
-        ->GetPrimaryMainFrame()
-        ->GetLastCommittedOrigin();
-  }
 
  private:
   base::test::ScopedFeatureList scoped_feature_list_;

@@ -11,6 +11,7 @@
 
 #include <cstddef>
 #include <string>
+#include <utility>
 
 #include "base/check.h"
 #include "base/containers/contains.h"
@@ -27,6 +28,7 @@
 #include "ui/accessibility/ax_node.h"
 #include "ui/accessibility/ax_node_id_forward.h"
 #include "ui/accessibility/ax_role_properties.h"
+#include "ui/accessibility/ax_selection.h"
 #include "ui/accessibility/ax_serializable_tree.h"
 #include "ui/accessibility/ax_text_utils.h"
 #include "ui/accessibility/ax_tree_observer.h"
@@ -42,38 +44,98 @@ base::TimeDelta kTimeElapsedSincePageLoadForDataCollection = base::Seconds(30);
 base::TimeDelta kTimeElapsedSinceTreeChangedForDataCollection =
     base::Seconds(30);
 
-bool GetIsGoogleDocs(const GURL& url) {
-  // A Google Docs URL is in the form of "https://docs.google.com/document*" or
-  // "https://docs.sandbox.google.com/document*".
-  constexpr const char* kDocsURLDomain[] = {"docs.google.com",
-                                            "docs.sandbox.google.com"};
-  if (url.SchemeIsHTTPOrHTTPS()) {
-    for (const std::string& google_docs_url : kDocsURLDomain) {
-      if (url.DomainIs(google_docs_url) && url.has_path() &&
-          url.path().starts_with("/document") &&
-          !url.ExtractFileName().empty()) {
-        return true;
-      }
+const ui::AXNode* GetUnignoredParentForSelection(const ui::AXNode* node) {
+  const ui::AXNode* parent = node;
+  while (const ui::AXNode* ancestor =
+             parent->GetUnignoredParentCrossingTreeBoundary()) {
+    static constexpr auto should_skip = [](const ui::AXNode* node) {
+      // When a link is highlighted, the start node has an "inline" display; the
+      // common parent of all siblings is the first ancestor which has a "block"
+      // display. Also skip over "list-item" so all items in a list are
+      // displayed as siblings, to avoid misnumbering.
+      const std::string_view display =
+          node->GetStringAttribute(ax::mojom::StringAttribute::kDisplay);
+      return base::Contains(display, "inline") ||
+             base::Contains(display, "list-item");
+    };
+    if (!should_skip(ancestor)) {
+      return ancestor;
     }
+    parent = ancestor;
+  }
+  return parent == node ? nullptr : parent;
+}
+
+void SetTreeInfoUrlInformation(ReadAnythingAppModel::AXTreeInfo& tree_info) {
+  // If the url information has already been set for this tree, do nothing.
+  if (tree_info.is_url_information_set) {
+    return;
   }
 
-  return false;
+  // If the tree manager is not the root manager, do nothing.
+  CHECK(tree_info.manager);
+  if (!tree_info.manager->IsRoot()) {
+    return;
+  }
+
+  // If the tree doesn't have a root, or the root doesn't have a url set, do
+  // nothing.
+  const ui::AXNode* const root = tree_info.manager->GetRoot();
+  if (!root || !root->HasStringAttribute(ax::mojom::StringAttribute::kUrl)) {
+    return;
+  }
+
+  // A Google Docs URL is in the form of "https://docs.google.com/document*" or
+  // "https://docs.sandbox.google.com/document*".
+  const GURL url(root->GetStringAttribute(ax::mojom::StringAttribute::kUrl));
+  tree_info.is_docs = url.SchemeIsHTTPOrHTTPS() &&
+                      (url.DomainIs("docs.google.com") ||
+                       url.DomainIs("docs.sandbox.google.com")) &&
+                      url.path().starts_with("/document") &&
+                      !url.ExtractFileName().empty();
+
+  tree_info.is_url_information_set = true;
+}
+
+// These values are persisted to logs. Entries should not be renumbered and
+// numeric values should never be reused.
+// LINT.IfChange(ReadAnythingHeuristics)
+enum class ReadAnythingHeuristics {
+  kNone = 0,
+  kNodeNotFound = 1,
+  kInvisibleOrIgnored = 2,
+  kNotExpanded = 3,
+  kNoDeepsetLastDecendent = 4,
+  kMaxValue = kNoDeepsetLastDecendent
+};
+// LINT.ThenChange(//tools/metrics/histograms/metadata/accessibility/enums.xml:ReadAnythingHeuristics)
+
+void RecordHeuristicMetric(ReadAnythingHeuristics heuristic) {
+  base::UmaHistogramEnumeration("Accessibility.ReadAnything.Heuristics",
+                                heuristic);
 }
 
 }  // namespace
+
+ReadAnythingAppModel::AXTreeInfo::AXTreeInfo(
+    std::unique_ptr<ui::AXTreeManager> manager)
+    : manager(std::move(manager)) {}
+
+ReadAnythingAppModel::AXTreeInfo::~AXTreeInfo() = default;
+
+ReadAnythingAppModel::SelectionEndpoint::SelectionEndpoint(
+    const ui::AXSelection& selection,
+    Source source)
+    : id(source == Source::kAnchor ? selection.anchor_object_id
+                                   : selection.focus_object_id),
+      offset(source == Source::kAnchor ? selection.anchor_offset
+                                       : selection.focus_offset) {}
 
 ReadAnythingAppModel::ReadAnythingAppModel() {
   ResetTextSize();
 }
 
 ReadAnythingAppModel::~ReadAnythingAppModel() = default;
-
-ReadAnythingAppModel::AXTreeInfo::AXTreeInfo(
-    std::unique_ptr<ui::AXTreeManager> other) {
-  manager = std::move(other);
-}
-
-ReadAnythingAppModel::AXTreeInfo::~AXTreeInfo() = default;
 
 void ReadAnythingAppModel::InsertIdIfNotIgnored(
     ui::AXNodeID id,
@@ -117,23 +179,22 @@ void ReadAnythingAppModel::InsertIdIfNotIgnored(
 void ReadAnythingAppModel::OnSettingsRestoredFromPrefs(
     read_anything::mojom::LineSpacing line_spacing,
     read_anything::mojom::LetterSpacing letter_spacing,
-    const std::string& font,
+    std::string font_name,
     double font_size,
     bool links_enabled,
     bool images_enabled,
     read_anything::mojom::Colors color) {
-  line_spacing_ = static_cast<size_t>(line_spacing);
-  letter_spacing_ = static_cast<size_t>(letter_spacing);
-  font_name_ = font;
+  line_spacing_ = line_spacing;
+  letter_spacing_ = letter_spacing;
+  font_name_ = std::move(font_name);
   SetFontSize(font_size);
   links_enabled_ = links_enabled;
   images_enabled_ = images_enabled;
-  color_theme_ = static_cast<size_t>(color);
+  color_theme_ = color;
 }
 
-void ReadAnythingAppModel::Reset(
-    const std::vector<ui::AXNodeID>& content_node_ids) {
-  content_node_ids_ = content_node_ids;
+void ReadAnythingAppModel::Reset(std::vector<ui::AXNodeID> content_node_ids) {
+  content_node_ids_ = std::move(content_node_ids);
   display_node_ids_.clear();
   distillation_in_progress_ = false;
   requires_post_process_selection_ = false;
@@ -143,150 +204,104 @@ void ReadAnythingAppModel::Reset(
 
 void ReadAnythingAppModel::ResetSelection() {
   selection_node_ids_.clear();
-  start_node_id_ = ui::kInvalidAXNodeID;
-  end_node_id_ = ui::kInvalidAXNodeID;
-  start_offset_ = -1;
-  end_offset_ = -1;
-  has_selection_ = false;
+  start_ = SelectionEndpoint();
+  end_ = SelectionEndpoint();
 }
 
 bool ReadAnythingAppModel::PostProcessSelection() {
-  DCHECK_NE(active_tree_id_, ui::AXTreeIDUnknown());
-  DCHECK(ContainsTree(active_tree_id_));
+  CHECK_NE(active_tree_id_, ui::AXTreeIDUnknown());
+  const auto it = tree_infos_.find(active_tree_id_);
+  CHECK(it != tree_infos_.end());
 
-  bool was_empty = is_empty();
   requires_post_process_selection_ = false;
 
-  // If the new selection came from the side panel, we never need to draw
+  // If the new selection came from the side panel, we don't need to draw
   // anything in the side panel, since whatever was being selected had to have
   // been drawn already.
-  // If there is no previous selection, we never need to check whether it was
+  // If there is no previous selection, we don't need to check whether it was
   // inside the distilled content. In this case, we will only draw if the new
-  // selection is outside the distilled content. See [1] below.
+  // selection is outside the distilled content.
   // If there was a previous selection outside the distilled content, we always
   // redraw. This will be either a) the new selected content or b) the original
   // distilled content if the new selection is inside that or was cleared.
-  bool need_to_draw = !selection_from_action_ && has_selection_ &&
-                      !SelectionInsideDisplayNodes();
+  const auto selection_in_distilled_content = [&] {
+    return display_node_ids_.contains(start_.id) &&
+           display_node_ids_.contains(end_.id);
+  };
+  const bool need_to_draw = !selection_from_action_ && has_selection() &&
+                            !selection_in_distilled_content();
+  const bool was_empty = is_empty();
 
-  // Save the current selection
-  UpdateSelection();
+  // Update selection.
+  ResetSelection();
+  if (const ui::AXSelection selection =
+          GetTreeFromId(active_tree_id_)->GetUnignoredSelection();
+      selection.anchor_object_id != ui::kInvalidAXNodeID &&
+      selection.focus_object_id != ui::kInvalidAXNodeID &&
+      !selection.IsCollapsed()) {
+    // Identify the start and end node ids and offsets. The start node comes
+    // earlier than end node in the tree order. We need to send the selection to
+    // JS in forward order. If they are sent as backward selections, JS will
+    // collapse the selection so no selection will be rendered in Read Anything.
+    auto source_start = SelectionEndpoint::Source::kAnchor,
+         source_end = SelectionEndpoint::Source::kFocus;
+    if (selection.is_backward) {
+      std::swap(source_start, source_end);
+    }
+    start_ = SelectionEndpoint(selection, source_start);
+    end_ = SelectionEndpoint(selection, source_end);
+  }
 
-  if (has_selection_ && was_empty) {
+  if (!has_selection()) {
+    return need_to_draw;
+  }
+
+  if (was_empty) {
     base::UmaHistogramEnumeration(kEmptyStateHistogramName,
                                   EmptyState::kShownWithSelectionAfter);
-    tree_infos_.at(active_tree_id_)->num_selections++;
+    ++it->second->num_selections;
   }
 
-  // [1] If the main panel selection contains content outside of the distilled
-  // content, we need to find the selected nodes to display instead of the
-  // distilled content.
-  if (has_selection_ && !SelectionInsideDisplayNodes()) {
-    ComputeSelectionNodeIds();
-    return true;
+  if (selection_in_distilled_content()) {
+    return need_to_draw;
   }
 
-  return need_to_draw;
-}
+  // The main panel selection contains content outside of the distilled content.
+  // Find the selected nodes to display instead of the distilled content.
+  if (const ui::AXNode *node = GetAXNode(start_.id), *end = GetAXNode(end_.id);
+      !node->IsInvisibleOrIgnored() && !end->IsInvisibleOrIgnored()) {
+    // Add all ancestor ids of start node, including the start node itself.
+    for (base::queue<ui::AXNode*> ancestors =
+             node->GetAncestorsCrossingTreeBoundaryAsQueue();
+         !ancestors.empty(); ancestors.pop()) {
+      InsertIdIfNotIgnored(ancestors.front()->id(), selection_node_ids_);
+    }
 
-void ReadAnythingAppModel::UpdateSelection() {
-  ResetSelection();
-  ui::AXSelection selection =
-      GetTreeFromId(active_tree_id_)->GetUnignoredSelection();
-  has_selection_ = selection.anchor_object_id != ui::kInvalidAXNodeID &&
-                   selection.focus_object_id != ui::kInvalidAXNodeID &&
-                   !selection.IsCollapsed();
-
-  if (!has_selection_) {
-    return;
+    // Find the parent of the start and end nodes so we can look at nearby
+    // sibling nodes. Since the start and end nodes might be in different
+    // section of the tree, get the parents for start and end separately.
+    // Otherwise, the end selection might not render.
+    node = GetUnignoredParentForSelection(node);
+    end = GetUnignoredParentForSelection(end);
+    if (end) {
+      end = end->GetDeepestLastUnignoredDescendantCrossingTreeBoundary();
+      if (node && end) {
+        // Traverse the tree from the first sibling node to the last sibling
+        // node, inclusive. This ensures that when select-to-distill is used to
+        // distill non-distillable content (such as Gmail), text outside of the
+        // selected portion but on the same line is still distilled, even if
+        // there's special formatting.
+        // TODO(crbug.com/40802192): Consider using ax_position.h here to better
+        // manage selection.
+        for (node = node->GetFirstUnignoredChildCrossingTreeBoundary();
+             node && node->CompareTo(*end).value_or(1) <= 0;
+             node = node->GetNextUnignoredInTreeOrder()) {
+          InsertIdIfNotIgnored(node->id(), selection_node_ids_);
+        }
+      }
+    }
   }
-
-  // Identify the start and end node ids and offsets. The start node comes
-  // earlier than end node in the tree order. We need to send the selection to
-  // JS in forward order. If they are sent as backward selections, JS will
-  // collapse the selection so no selection will be rendered in Read Anything.
-  start_node_id_ = selection.is_backward ? selection.focus_object_id
-                                         : selection.anchor_object_id;
-  end_node_id_ = selection.is_backward ? selection.anchor_object_id
-                                       : selection.focus_object_id;
-  start_offset_ =
-      selection.is_backward ? selection.focus_offset : selection.anchor_offset;
-  end_offset_ =
-      selection.is_backward ? selection.anchor_offset : selection.focus_offset;
-}
-
-void ReadAnythingAppModel::ComputeSelectionNodeIds() {
-  DCHECK(has_selection_);
-  DCHECK_NE(active_tree_id_, ui::AXTreeIDUnknown());
-  DCHECK(ContainsTree(active_tree_id_));
-
-  ui::AXNode* start_node = GetAXNode(start_node_id_);
-  DCHECK(start_node);
-  ui::AXNode* end_node = GetAXNode(end_node_id_);
-  DCHECK(end_node);
-
-  if (!start_node || !end_node) {
-    return;
-  }
-
-  // If start node or end node is invisible or ignored, the selection was
-  // invalid.
-  if (start_node->IsInvisibleOrIgnored() || end_node->IsInvisibleOrIgnored()) {
-    return;
-  }
-
-  // Selection nodes are the nodes which will be displayed by the rendering
-  // algorithm of Read Anything app.ts if there is a selection that contains
-  // content outside of the distilled content. We wish to create a subtree which
-  // stretches from start node to end node with tree root as the root.
-
-  // Add all ancestor ids of start node, including the start node itself. This
-  // does a first walk down to start node.
-  base::queue<ui::AXNode*> ancestors =
-      start_node->GetAncestorsCrossingTreeBoundaryAsQueue();
-  while (!ancestors.empty()) {
-    ui::AXNodeID ancestor_id = ancestors.front()->id();
-    ancestors.pop();
-    InsertIdIfNotIgnored(ancestor_id, selection_node_ids_);
-  }
-
-  // Find the parent of the start and end nodes so we can look at nearby sibling
-  // nodes. Since the start and end nodes might be in different section of the
-  // tree, get the parents for start and end separately. Otherwise, the end
-  // selection might not render.
-  ui::AXNode* start_parent = a11y::GetParentForSelection(start_node);
-  ui::AXNode* end_parent = a11y::GetParentForSelection(end_node);
-
-  // If either parent is missing, selection is invalid and we should return
-  // early.
-  if (start_parent == nullptr || end_parent == nullptr) {
-    return;
-  }
-
-  ui::AXNode* first_sibling_node =
-      start_parent->GetFirstUnignoredChildCrossingTreeBoundary();
-  ui::AXNode* deepest_last_descendant =
-      end_parent->GetDeepestLastUnignoredDescendantCrossingTreeBoundary();
-
-  // If the last sibling node is null, selection is invalid and we should
-  // return early.
-  if (deepest_last_descendant == nullptr) {
-    return;
-  }
-
-  // TODO(crbug.com/40802192): Consider using ax_position.h here to better
-  // manage selection.
-  // Traverse the tree from and including the first sibling node to the last
-  // last sibling node, inclusive. This ensures that when select-to-distill
-  // is used to distill non-distillable content (such as Gmail), text
-  // outside of the selected portion but on the same line is still
-  // distilled, even if there's special formatting.
-  while (first_sibling_node &&
-         first_sibling_node->CompareTo(*deepest_last_descendant).value_or(1) <=
-             0) {
-    InsertIdIfNotIgnored(first_sibling_node->id(), selection_node_ids_);
-    first_sibling_node = first_sibling_node->GetNextUnignoredInTreeOrder();
-  }
+  return true;
 }
 
 bool ReadAnythingAppModel::ContentNodesOnlyContainHeadings() {
@@ -340,7 +355,13 @@ void ReadAnythingAppModel::ComputeDisplayNodeIdsForDistilledTree() {
     // TODO(abigailbklein) This prevents the crash in crbug.com/1402788, but may
     // not be the correct approach. Do we need a version of
     // GetDeepestLastUnignoredDescendant() that works on ignored nodes?
-    if (!content_node || content_node->IsInvisibleOrIgnored()) {
+    if (!content_node) {
+      RecordHeuristicMetric(ReadAnythingHeuristics::kNodeNotFound);
+      continue;
+    }
+
+    if (content_node->IsInvisibleOrIgnored()) {
+      RecordHeuristicMetric(ReadAnythingHeuristics::kInvisibleOrIgnored);
       continue;
     }
 
@@ -352,6 +373,7 @@ void ReadAnythingAppModel::ComputeDisplayNodeIdsForDistilledTree() {
       // attribute directly for that reason.
       if (!content_node->HasState(ax::mojom::State::kExpanded)) {
         // Don't include collapsed aria-expanded items.
+        RecordHeuristicMetric(ReadAnythingHeuristics::kNotExpanded);
         continue;
       }
     }
@@ -382,25 +404,16 @@ void ReadAnythingAppModel::ComputeDisplayNodeIdsForDistilledTree() {
     ui::AXNode* deepest_last_descendant =
         content_node->GetDeepestLastUnignoredDescendant();
     if (!deepest_last_descendant) {
+      RecordHeuristicMetric(ReadAnythingHeuristics::kNoDeepsetLastDecendent);
       continue;
     }
     while (next_node != deepest_last_descendant) {
       next_node = next_node->GetNextUnignoredInTreeOrder();
       InsertIdIfNotIgnored(next_node->id(), display_node_ids_);
     }
+
+    RecordHeuristicMetric(ReadAnythingHeuristics::kNone);
   }
-}
-
-bool ReadAnythingAppModel::IsCurrentSelectionEmpty() {
-  return (start_node_id_ != ui::kInvalidAXNodeID) &&
-         (end_node_id_ != ui::kInvalidAXNodeID) &&
-         (start_node_id_ == end_node_id_) && (start_offset_ == end_offset_);
-}
-
-bool ReadAnythingAppModel::SelectionInsideDisplayNodes() {
-  return IsCurrentSelectionEmpty() ||
-         (base::Contains(display_node_ids_, start_node_id_) &&
-          base::Contains(display_node_ids_, end_node_id_));
 }
 
 ui::AXSerializableTree* ReadAnythingAppModel::GetTreeFromId(
@@ -415,70 +428,6 @@ bool ReadAnythingAppModel::ContainsTree(const ui::AXTreeID& tree_id) const {
   return base::Contains(tree_infos_, tree_id);
 }
 
-void ReadAnythingAppModel::AddTree(
-    const ui::AXTreeID& tree_id,
-    std::unique_ptr<ui::AXSerializableTree> tree) {
-  DCHECK(!ContainsTree(tree_id));
-
-  for (auto& observer : observers_) {
-    observer.OnTreeAdded(tree.get());
-  }
-
-  std::unique_ptr<ui::AXTreeManager> manager =
-      std::make_unique<ui::AXTreeManager>(std::move(tree));
-  std::unique_ptr<ReadAnythingAppModel::AXTreeInfo> tree_info =
-      std::make_unique<AXTreeInfo>(std::move(manager));
-  tree_infos_[tree_id] = std::move(tree_info);
-}
-
-void ReadAnythingAppModel::EraseTree(const ui::AXTreeID& tree_id) {
-  auto it = tree_infos_.find(tree_id);
-  if (it == tree_infos_.end()) {
-    return;
-  }
-  ui::AXTree* ax_tree = it->second->manager->ax_tree();
-  for (auto& observer : observers_) {
-    observer.OnTreeRemoved(ax_tree);
-  }
-
-  tree_infos_.erase(it);
-
-  // Ensure any pending updates associated with the erased tree are removed.
-  pending_updates_map_.erase(tree_id);
-}
-
-void ReadAnythingAppModel::AddUrlInformationForTreeId(
-    const ui::AXTreeID& tree_id) {
-  // If the tree isn't yet created, do nothing.
-  if (!ContainsTree(tree_id)) {
-    return;
-  }
-  ReadAnythingAppModel::AXTreeInfo* tree_info = tree_infos_.at(tree_id).get();
-  DCHECK(tree_info);
-
-  // If the url information has already been set for this tree, do nothing.
-  if (tree_info->is_url_information_set) {
-    return;
-  }
-
-  DCHECK(tree_info->manager);
-  // If the tree manager is not the root manager, do nothing.
-  if (!tree_info->manager->IsRoot()) {
-    return;
-  }
-
-  // If the tree doesn't have a root, or the root doesn't have a url set, do
-  // nothing.
-  ui::AXNode* root = tree_info->manager->GetRoot();
-  if (!root || !root->HasStringAttribute(ax::mojom::StringAttribute::kUrl)) {
-    return;
-  }
-
-  GURL url = GURL(root->GetStringAttribute(ax::mojom::StringAttribute::kUrl));
-  tree_info->is_url_information_set = true;
-  tree_info->is_docs = GetIsGoogleDocs(url);
-}
-
 bool ReadAnythingAppModel::IsDocs() const {
   // Sometimes during an initial page load, this may be called before the
   // tree has been initialized. If this happens, IsDocs should return false
@@ -490,49 +439,49 @@ bool ReadAnythingAppModel::IsDocs() const {
   return tree_infos_.at(active_tree_id_)->is_docs;
 }
 
-void ReadAnythingAppModel::AddPendingUpdates(
-    const ui::AXTreeID& tree_id,
-    std::vector<ui::AXTreeUpdate>& updates) {
-  std::vector<ui::AXTreeUpdate>& update = pending_updates_map_[tree_id];
+void ReadAnythingAppModel::AddPendingUpdates(const ui::AXTreeID& tree_id,
+                                             Updates& updates) {
+  Updates& update = pending_updates_[tree_id];
   for (auto& item : updates) {
     update.emplace_back(std::move(item));
   }
 }
 
 void ReadAnythingAppModel::ClearPendingUpdates() {
-  pending_updates_map_.clear();
+  pending_updates_.clear();
 }
 
 void ReadAnythingAppModel::UnserializePendingUpdates(
     const ui::AXTreeID& tree_id) {
-  if (!pending_updates_map_.contains(tree_id)) {
+  if (!pending_updates_.contains(tree_id)) {
     return;
   }
   // TODO(crbug.com/40802192): Ensure there are no crashes/unexpected behavior
   // if an accessibility event is received on the same tree after
   // unserialization has begun.
-  std::vector<ui::AXTreeUpdate> update =
-      pending_updates_map_.extract(tree_id).mapped();
+  Updates update = pending_updates_.extract(tree_id).mapped();
   DCHECK(update.empty() || tree_id == active_tree_id_);
   UnserializeUpdates(update, tree_id);
 }
 
-void ReadAnythingAppModel::UnserializeUpdates(
-    std::vector<ui::AXTreeUpdate>& updates,
-    const ui::AXTreeID& tree_id) {
+void ReadAnythingAppModel::UnserializeUpdates(Updates& updates,
+                                              const ui::AXTreeID& tree_id) {
   if (updates.empty()) {
     return;
   }
+
   DCHECK_NE(tree_id, ui::AXTreeIDUnknown());
-  DCHECK(base::Contains(tree_infos_, tree_id));
-  ui::AXSerializableTree* tree = GetTreeFromId(tree_id);
-  size_t prev_tree_size = tree->size();
+  const auto it = tree_infos_.find(tree_id);
+  DCHECK(it != tree_infos_.end());
+  auto* const tree =
+      static_cast<ui::AXSerializableTree*>(it->second->manager->ax_tree());
   CHECK(tree);
+
   // Try to merge updates. If the updates are mergeable, MergeAXTreeUpdates will
   // return true and merge_updates_out will contain the updates. Otherwise, if
   // the updates are not mergeable, merge_updates_out will be empty.
-  const std::vector<ui::AXTreeUpdate>* merged_updates = &updates;
-  std::vector<ui::AXTreeUpdate> merge_updates_out;
+  const Updates* merged_updates = &updates;
+  Updates merge_updates_out;
   if (ui::MergeAXTreeUpdates(updates, &merge_updates_out)) {
     merged_updates = &merge_updates_out;
   }
@@ -541,26 +490,33 @@ void ReadAnythingAppModel::UnserializeUpdates(
   ui::AXEventGenerator event_generator(tree);
 
   // Unserialize the updates.
+  const size_t prev_tree_size = tree->size();
   for (const ui::AXTreeUpdate& update : *merged_updates) {
     tree->Unserialize(update);
   }
 
-  AddUrlInformationForTreeId(tree_id);
+  // Set URL info if it hasn't already been set.
+  SetTreeInfoUrlInformation(*it->second);
+
   ProcessGeneratedEvents(event_generator, prev_tree_size, tree->size());
 }
 
 void ReadAnythingAppModel::AccessibilityEventReceived(
     const ui::AXTreeID& tree_id,
-    std::vector<ui::AXTreeUpdate>& updates,
+    Updates& updates,
     std::vector<ui::AXEvent>& events,
-    const bool speech_playing) {
+    bool speech_playing) {
   DCHECK_NE(tree_id, ui::AXTreeIDUnknown());
   // Create a new tree if an event is received for a tree that is not yet in
   // the tree list.
   if (!ContainsTree(tree_id)) {
-    std::unique_ptr<ui::AXSerializableTree> new_tree =
-        std::make_unique<ui::AXSerializableTree>();
-    AddTree(tree_id, std::move(new_tree));
+    auto new_tree = std::make_unique<ui::AXSerializableTree>();
+    for (auto& observer : observers_) {
+      observer.OnTreeAdded(new_tree.get());
+    }
+    tree_infos_.emplace(
+        tree_id, std::make_unique<AXTreeInfo>(
+                     std::make_unique<ui::AXTreeManager>(std::move(new_tree))));
   }
 
   // If a tree update on the active tree is received while distillation is in
@@ -598,23 +554,33 @@ void ReadAnythingAppModel::AccessibilityEventReceived(
 }
 
 void ReadAnythingAppModel::OnAXTreeDestroyed(const ui::AXTreeID& tree_id) {
-  // OnAXTreeDestroyed is called whenever the AXActionHandler in the browser
-  // learns that an AXTree was destroyed. This could be from any tab, not just
-  // the active one; therefore many tree_ids will not be found in
-  // tree_infos_.
-  if (!ContainsTree(tree_id)) {
+  // `OnAXTreeDestroyed()` is called whenever the `AXActionHandler` in the
+  // browser learns that an `AXTree` was destroyed. This could be from any tab,
+  // not just the active one; therefore many `tree_id`s will not be found in
+  // `tree_infos_`.
+  const auto it = tree_infos_.find(tree_id);
+  if (it == tree_infos_.end()) {
     return;
   }
+
   if (active_tree_id_ == tree_id) {
     // TODO(crbug.com/40802192): If distillation is in progress, cancel the
     // distillation request.
     active_tree_id_ = ui::AXTreeIDUnknown();
-    SetUkmSourceId(ukm::kInvalidSourceId);
   }
-  EraseTree(tree_id);
+
+  for (ui::AXTree* const ax_tree = it->second->manager->ax_tree();
+       auto& observer : observers_) {
+    observer.OnTreeRemoved(ax_tree);
+  }
+
+  tree_infos_.erase(it);
+
+  // Any pending updates associated with the erased tree should also be dropped.
+  pending_updates_.erase(tree_id);
 }
 
-const ukm::SourceId& ReadAnythingAppModel::UkmSourceId() {
+ukm::SourceId ReadAnythingAppModel::GetUkmSourceId() const {
   if (base::Contains(tree_infos_, active_tree_id_)) {
     ReadAnythingAppModel::AXTreeInfo* tree_info =
         tree_infos_.at(active_tree_id_).get();
@@ -625,7 +591,7 @@ const ukm::SourceId& ReadAnythingAppModel::UkmSourceId() {
   return ukm::kInvalidSourceId;
 }
 
-void ReadAnythingAppModel::SetUkmSourceId(const ukm::SourceId ukm_source_id) {
+void ReadAnythingAppModel::SetUkmSourceId(ukm::SourceId ukm_source_id) {
   if (!base::Contains(tree_infos_, active_tree_id_)) {
     return;
   }
@@ -641,7 +607,7 @@ void ReadAnythingAppModel::SetUkmSourceId(const ukm::SourceId ukm_source_id) {
   }
 }
 
-int32_t ReadAnythingAppModel::NumSelections() {
+int ReadAnythingAppModel::GetNumSelections() const {
   if (base::Contains(tree_infos_, active_tree_id_)) {
     ReadAnythingAppModel::AXTreeInfo* tree_info =
         tree_infos_.at(active_tree_id_).get();
@@ -652,7 +618,7 @@ int32_t ReadAnythingAppModel::NumSelections() {
   return 0;
 }
 
-void ReadAnythingAppModel::SetNumSelections(const int32_t& num_selections) {
+void ReadAnythingAppModel::SetNumSelections(int num_selections) {
   if (!base::Contains(tree_infos_, active_tree_id_)) {
     return;
   }
@@ -670,39 +636,8 @@ ui::AXNode* ReadAnythingAppModel::GetAXNode(
   return tree->GetFromId(ax_node_id);
 }
 
-bool ReadAnythingAppModel::NodeIsContentNode(
-    const ui::AXNodeID& ax_node_id) const {
+bool ReadAnythingAppModel::NodeIsContentNode(ui::AXNodeID ax_node_id) const {
   return base::Contains(content_node_ids_, ax_node_id);
-}
-
-double ReadAnythingAppModel::GetLetterSpacingValue(
-    read_anything::mojom::LetterSpacing letter_spacing) const {
-  switch (letter_spacing) {
-    case read_anything::mojom::LetterSpacing::kTightDeprecated:
-      return -0.05;
-    case read_anything::mojom::LetterSpacing::kStandard:
-      return 0;
-    case read_anything::mojom::LetterSpacing::kWide:
-      return 0.05;
-    case read_anything::mojom::LetterSpacing::kVeryWide:
-      return 0.1;
-  }
-}
-
-double ReadAnythingAppModel::GetLineSpacingValue(
-    read_anything::mojom::LineSpacing line_spacing) const {
-  switch (line_spacing) {
-    case read_anything::mojom::LineSpacing::kTightDeprecated:
-      return 1.0;
-    case read_anything::mojom::LineSpacing::kStandard:
-      // This value needs to be at least 1.35 to avoid cutting off descenders
-      // with the highlight with larger fonts such as Poppins.
-      return 1.35;
-    case read_anything::mojom::LineSpacing::kLoose:
-      return 1.5;
-    case read_anything::mojom::LineSpacing::kVeryLoose:
-      return 2.0;
-  }
 }
 
 void ReadAnythingAppModel::AdjustTextSize(int increment) {
@@ -711,20 +646,6 @@ void ReadAnythingAppModel::AdjustTextSize(int increment) {
 
 void ReadAnythingAppModel::ResetTextSize() {
   SetFontSize(1.0f);
-}
-
-std::map<ui::AXTreeID, std::vector<ui::AXTreeUpdate>>&
-ReadAnythingAppModel::GetPendingUpdatesForTesting() {
-  return pending_updates_map_;
-}
-
-std::map<ui::AXTreeID, std::unique_ptr<ReadAnythingAppModel::AXTreeInfo>>*
-ReadAnythingAppModel::GetTreesForTesting() {
-  return &tree_infos_;
-}
-
-void ReadAnythingAppModel::EraseTreeForTesting(const ui::AXTreeID& tree_id) {
-  EraseTree(tree_id);
 }
 
 void ReadAnythingAppModel::OnScroll(bool on_selection,
@@ -775,15 +696,11 @@ void ReadAnythingAppModel::OnSelection(ax::mojom::EventFrom event_from) {
   if (ContainsTree(active_tree_id_)) {
     ui::AXSelection selection =
         GetTreeFromId(active_tree_id_)->GetUnignoredSelection();
-    is_click_and_drag_selection =
-        (selection.anchor_object_id == start_node_id_ &&
-         selection.anchor_offset == start_offset_ &&
-         (selection.focus_object_id != end_node_id_ ||
-          selection.focus_offset != end_offset_)) ||
-        (selection.anchor_object_id == end_node_id_ &&
-         selection.anchor_offset == end_offset_ &&
-         (selection.focus_object_id != start_node_id_ ||
-          selection.focus_offset != start_offset_));
+    const SelectionEndpoint anchor(selection,
+                                   SelectionEndpoint::Source::kAnchor);
+    const SelectionEndpoint focus(selection, SelectionEndpoint::Source::kFocus);
+    is_click_and_drag_selection = (anchor == start_ && focus != end_) ||
+                                  (anchor == end_ && focus != start_);
   }
   if (event_from == ax::mojom::EventFrom::kUser ||
       event_from == ax::mojom::EventFrom::kAction ||
@@ -795,8 +712,8 @@ void ReadAnythingAppModel::OnSelection(ax::mojom::EventFrom event_from) {
   }
 }
 
-void ReadAnythingAppModel::SetActiveTreeId(const ui::AXTreeID& active_tree_id) {
-  active_tree_id_ = active_tree_id;
+void ReadAnythingAppModel::SetActiveTreeId(ui::AXTreeID active_tree_id) {
+  active_tree_id_ = std::move(active_tree_id);
   // If data collection mode for screen2x is enabled, begin
   // `timer_since_page_load_for_data_collection_` from here. This is a
   // one-shot timer which times 30 seconds from when the active AXTree changes.
@@ -898,9 +815,7 @@ void ReadAnythingAppModel::ProcessNonGeneratedEvents(
       case ax::mojom::Event::kTooltipClosed:
       case ax::mojom::Event::kTooltipOpened:
       case ax::mojom::Event::kTreeChanged:
-        break;
       case ax::mojom::Event::kValueChanged:
-        reset_draw_timer_ = true;
         break;
       case ax::mojom::Event::kAriaAttributeChangedDeprecated:
       case ax::mojom::Event::kMenuListValueChangedDeprecated:
@@ -961,6 +876,11 @@ void ReadAnythingAppModel::ProcessGeneratedEvents(
           requires_distillation_ = true;
         }
         break;
+      // After the user finishes typing something we wait for a timer and redraw
+      // to capture the input.
+      case ui::AXEventGenerator::Event::EDITABLE_TEXT_CHANGED:
+        reset_draw_timer_ = true;
+        break;
       // Audit these events e.g. to trigger distillation.
       case ui::AXEventGenerator::Event::NONE:
       case ui::AXEventGenerator::Event::ACCESS_KEY_CHANGED:
@@ -981,7 +901,6 @@ void ReadAnythingAppModel::ProcessGeneratedEvents(
       case ui::AXEventGenerator::Event::DETAILS_CHANGED:
       case ui::AXEventGenerator::Event::DESCRIBED_BY_CHANGED:
       case ui::AXEventGenerator::Event::DESCRIPTION_CHANGED:
-      case ui::AXEventGenerator::Event::EDITABLE_TEXT_CHANGED:
       case ui::AXEventGenerator::Event::ENABLED_CHANGED:
       case ui::AXEventGenerator::Event::EXPANDED:
       case ui::AXEventGenerator::Event::FOCUS_CHANGED:
@@ -1093,17 +1012,9 @@ void ReadAnythingAppModel::MaybeRunDataCollectionForScreen2xCallback() {
   std::move(data_collection_for_screen2x_callback_).Run();
 }
 
-void ReadAnythingAppModel::ToggleLinksEnabled() {
-  links_enabled_ = !links_enabled_;
-}
-
-void ReadAnythingAppModel::ToggleImagesEnabled() {
-  images_enabled_ = !images_enabled_;
-}
-
-void ReadAnythingAppModel::SetBaseLanguageCode(const std::string& code) {
-  DCHECK(!code.empty());
-  base_language_code_ = code;
+void ReadAnythingAppModel::SetBaseLanguageCode(std::string base_language_code) {
+  DCHECK(!base_language_code.empty());
+  base_language_code_ = std::move(base_language_code);
   supported_fonts_ = GetSupportedFonts(base_language_code_);
 }
 

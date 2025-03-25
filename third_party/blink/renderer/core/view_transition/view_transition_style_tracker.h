@@ -86,6 +86,9 @@ class ViewTransitionStyleTracker
       Document& document,
       const blink::ViewTransitionToken& transition_token);
   ViewTransitionStyleTracker(Document& document, ViewTransitionState);
+  ViewTransitionStyleTracker(
+      Element& element,
+      const blink::ViewTransitionToken& transition_token);
   ~ViewTransitionStyleTracker();
 
   void AddTransitionElementsFromCSS();
@@ -332,7 +335,7 @@ class ViewTransitionStyleTracker
       PaintLayer*,
       const TreeScope*,
       Vector<AtomicString>& containing_group_stack,
-      const AtomicString& current_containing_group_name);
+      const AtomicString& nearest_group_with_contain);
 
   void InvalidateHitTestingCache();
 
@@ -361,7 +364,14 @@ class ViewTransitionStyleTracker
   // found in one of the ancestors of the given element.
   AtomicString ComputeContainingGroupName(Element*) const;
 
+  // This is the scope element in the case of a scoped transition, or the
+  // root (html) element in the case of a document transition. It can be null
+  // in the rare case that the root element has been removed from the DOM.
+  Element* OriginatingElement() const;
+
   Member<Document> document_;
+
+  Member<Element> element_;
 
   // Indicates which step during the transition we're currently at.
   State state_ = State::kIdle;

@@ -238,6 +238,7 @@ if (current_toolchain == default_toolchain) {
       "//chrome/browser/ui/android/webid/internal:java_resources",
       "//chrome/browser/ui/android/whats_new:java_resources",
       "//chrome/browser/ui/messages/android:java_resources",
+      "//components/autofill/android:autofill_browser_resources",
       "//components/autofill/android:autofill_java_resources",
       "//components/autofill/android:autofill_payments_java_resources",
       "//components/blocked_content/android:java_resources",
@@ -383,7 +384,6 @@ if (current_toolchain == default_toolchain) {
       "//chrome/browser/collaboration:utils_java",
       "//chrome/browser/data_sharing:data_sharing_public_java",
       "//chrome/browser/data_sharing:internal_library_java",
-      "//chrome/browser/data_sharing:invitation_dialog_java",
       "//chrome/browser/data_sharing:java",
       "//chrome/browser/data_sharing:shared_image_tiles_java",
       "//chrome/browser/device:java",
@@ -749,6 +749,7 @@ if (current_toolchain == default_toolchain) {
       "//third_party/androidx:androidx_vectordrawable_vectordrawable_animated_java",
       "//third_party/androidx:androidx_viewpager2_viewpager2_java",
       "//third_party/androidx:androidx_viewpager_viewpager_java",
+      "//third_party/androidx:androidx_xr_scenecore_scenecore_java",
       "//third_party/blink/public:blink_headers_java",
       "//third_party/blink/public/mojom:android_mojo_bindings_java",
       "//third_party/blink/public/mojom:mojom_core_java",
@@ -1093,6 +1094,7 @@ if (current_toolchain == default_toolchain) {
       "//chrome/browser/supervised_user:junit",
       "//chrome/browser/sync/android:junit",
       "//chrome/browser/tab:junit",
+      "//chrome/browser/tab_group_suggestion:junit",
       "//chrome/browser/tab_group_sync:junit",
       "//chrome/browser/tab_resumption:junit",
       "//chrome/browser/tab_ui/android:junit",
@@ -1631,6 +1633,7 @@ if (current_toolchain == default_toolchain) {
   java_group("chrome_public_non_pak_assets") {
     deps = [
       "//chrome/android/webapk/libs/runtime_library:runtime_library_assets",
+      "//components/privacy_sandbox/privacy_sandbox_attestations/preload:privacy_sandbox_attestations_assets",
     ]
   }
 
@@ -3397,8 +3400,7 @@ template("libmonochrome_apk_or_bundle_tmpl") {
   chrome_common_shared_library(target_name) {
     sources = [ "../browser/android/monochrome_entry_point.cc" ]
     deps = [
-      "//android_webview/lib",
-      "//android_webview/nonembedded",
+      "//android_webview",
       "//components/crash/android:crashpad_main",
     ]
     if (defined(invoker.deps)) {

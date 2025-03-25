@@ -12,6 +12,7 @@
 #include "ui/base/l10n/l10n_util.h"
 #include "ui/base/mojom/ui_base_types.mojom-shared.h"
 #include "ui/gfx/geometry/insets.h"
+#include "ui/gfx/native_widget_types.h"
 #include "ui/views/background.h"
 #include "ui/views/controls/button/md_text_button.h"
 #include "ui/views/controls/label.h"
@@ -69,7 +70,8 @@ LabelButton* WidgetExample::BuildButton(View* container,
 }
 
 void WidgetExample::CreateDialogWidget(View* sender, bool modal) {
-  auto dialog = std::make_unique<DialogDelegateView>();
+  auto dialog =
+      std::make_unique<DialogDelegateView>(DialogDelegateView::CreatePassKey());
   dialog->SetTitle(IDS_WIDGET_WINDOW_TITLE);
   dialog->SetBackground(
       CreateSolidBackground(ExamplesColorIds::kColorWidgetExampleDialogBorder));
@@ -84,7 +86,7 @@ void WidgetExample::CreateDialogWidget(View* sender, bool modal) {
   if (modal) {
     dialog->SetModalType(ui::mojom::ModalType::kWindow);
   }
-  DialogDelegate::CreateDialogWidget(dialog.release(), nullptr,
+  DialogDelegate::CreateDialogWidget(dialog.release(), gfx::NativeWindow(),
                                      sender->GetWidget()->GetNativeView())
       ->Show();
 }

@@ -159,6 +159,7 @@ GetMerchantTrustMetadataWithoutSummary() {
 
 }  // namespace
 
+// TODO(crbug.com/392934324): Add QWAC test cases.
 class PageInfoBubbleViewDialogBrowserTest : public DialogBrowserTest {
  public:
   PageInfoBubbleViewDialogBrowserTest() {
@@ -769,7 +770,7 @@ class PageInfoBubbleViewCookiesSubpageBrowserTest
  public:
   PageInfoBubbleViewCookiesSubpageBrowserTest() {
     feature_list_.InitWithFeatures(
-        {privacy_sandbox::kPrivacySandboxFirstPartySetsUI},
+        {privacy_sandbox::kPrivacySandboxRelatedWebsiteSetsUi},
         {content_settings::features::kTrackingProtection3pcd});
   }
 

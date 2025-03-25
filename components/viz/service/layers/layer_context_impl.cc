@@ -98,12 +98,14 @@ base::expected<void, std::string> UpdatePropertyTreeNode(
     tree.SetElementIdForNodeId(node.id, node.element_id);
   }
   if (node.local != wire.local || node.origin != wire.origin ||
-      node.scroll_offset != wire.scroll_offset) {
+      node.scroll_offset() != wire.scroll_offset) {
     node.needs_local_transform_update = true;
   }
   node.local = wire.local;
   node.origin = wire.origin;
-  node.scroll_offset = wire.scroll_offset;
+  node.post_translation = wire.post_translation;
+  node.set_to_parent(wire.to_parent);
+  node.SetScrollOffset(wire.scroll_offset, cc::DamageReason::kUntracked);
   node.snap_amount = wire.snap_amount;
 
   if (!wire.sticky_position_constraint_id) {
@@ -140,7 +142,11 @@ base::expected<void, std::string> UpdatePropertyTreeNode(
   node.will_change_transform = wire.will_change_transform;
 
   node.visible_frame_element_id = wire.visible_frame_element_id;
-  node.transform_changed = true;
+  node.SetTransformChanged(cc::DamageReason::kUntracked);
+  if (!node.SetDamageReasonsForDeserialization(
+          cc::DamageReasonSet::FromEnumBitmask(wire.damage_reasons_bit_mask))) {
+    return base::unexpected("Invalid damage_reasons_bit_mask");
+  }
   return base::ok();
 }
 
@@ -195,8 +201,10 @@ base::expected<void, std::string> UpdatePropertyTreeNode(
   }
   node.blend_mode = static_cast<SkBlendMode>(wire.blend_mode);
   node.target_id = wire.target_id;
-  node.backdrop_mask_element_id = wire.backdrop_mask_element_id;
   node.backdrop_filters = wire.backdrop_filters;
+  node.backdrop_filter_bounds = wire.backdrop_filter_bounds;
+  node.backdrop_filter_quality = wire.backdrop_filter_quality;
+  node.backdrop_mask_element_id = wire.backdrop_mask_element_id;
 
   return base::ok();
 }
@@ -1185,6 +1193,8 @@ base::expected<void, std::string> LayerContextImpl::DoUpdateDisplayTree(
   }
 
   RETURN_IF_ERROR(UpdateViewportPropertyIds(layers, property_trees, *update));
+
+  host_impl_->SetViewportDamage(update->viewport_damage_rect);
 
   property_trees.UpdateChangeTracking();
   property_trees.transform_tree_mutable().set_needs_update(

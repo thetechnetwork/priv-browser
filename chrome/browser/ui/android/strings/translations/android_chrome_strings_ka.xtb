@@ -11,6 +11,7 @@
 <translation id="103269572468856066">ამ საიტებისა და აპების მონაცემთა გასუფთავებაც გსურთ?</translation>
 <translation id="1034259925032978114">ფანჯარა გახსნილია</translation>
 <translation id="1036348656032585052">გამორთვა</translation>
+<translation id="1045448422538531528">ჯგუფში დამატება</translation>
 <translation id="1045899828449635435">ამ საიტების მონაცემთა გასუფთავებაც გსურთ?</translation>
 <translation id="1049743911850919806">ინკოგნიტო</translation>
 <translation id="1052842760770519282">თქვენი ზოგიერთი პაროლი მიუწვდომელია</translation>
@@ -432,7 +433,6 @@
 <translation id="2981364137500752533">დაშვებულია მაქსიმუმ 5 ფანჯარა.</translation>
 <translation id="2983102365694924129">ეფუძნება თქვენს აქტივობას საიტზე. ეს პარამეტრი გამორთულია.</translation>
 <translation id="2984978667043170458">გარშემო ტექსტის დართვა Google ძიებებში</translation>
-<translation id="2988638966064514052">გააძლიერეთ პაროლები</translation>
 <translation id="2989523299700148168">ახლახან მონახულებული</translation>
 <translation id="2992473221983447149">სურათების აღწერილობები</translation>
 <translation id="2996291259634659425">საიდუმლო ფრაზის შექმნა</translation>
@@ -536,6 +536,7 @@
 <translation id="3513704683820682405">აუგმენტური რეალობა</translation>
 <translation id="3516053221628030540">Google Play-ზე გადასვლა</translation>
 <translation id="3518985090088779359">მიღება და გაგრძელება</translation>
+<translation id="351952459507671940">ახალ ჯგუფში დამატება</translation>
 <translation id="3521388823983121502"><ph name="IDENTITY_PROVIDER_ETLD_PLUS_ONE" />-თან მუშაობის გაგრძელება ვერ ხერხდება</translation>
 <translation id="3522247891732774234">ხელმისაწვდომია განახლება. სხვა ვარიანტები</translation>
 <translation id="3523789730715594198">სინქრონიზაციის ნებისმიერ დროს შეცვლა შეგიძლიათ პარამეტრებიდან. თქვენი ისტორიის მეშვეობით Google შეძლებს Search-ისა და სხვა სერვისების თქვენზე მორგებას.</translation>
@@ -548,7 +549,6 @@
 <translation id="3557336313807607643">კონტაქტებში დამატება</translation>
 <translation id="3563767357928833671">გაცვლის ბუფერის შიგთავსი ნაჩვენებია</translation>
 <translation id="3566639033325271639">პარამეტრების განახლება</translation>
-<translation id="3568945271227339929">გატეხილი პაროლები არ არის</translation>
 <translation id="3575464060651642446">მიმდინარეობს ამ მოწყობილობაში პაროლების შემოწმება…</translation>
 <translation id="3577473026931028326">წარმოიქმნა შეფერხება. ცადეთ ხელახლა.</translation>
 <translation id="3577558748185201054">მართეთ თქვენი ინტერესები და პარამეტრები</translation>
@@ -584,6 +584,7 @@
 <translation id="3721119614952978349">თქვენ და Google</translation>
 <translation id="3737319253362202215">თარგმნის პარამეტრები</translation>
 <translation id="3738139272394829648">შეეხეთ ეკრანს ძიების დასაწყებად</translation>
+<translation id="3739455665973395693">თქვენს Google ანგარიშში გატეხილი პაროლები არ არის</translation>
 <translation id="3739899004075612870">სანიშნე შენახულია „<ph name="PRODUCT_NAME" />“-ში</translation>
 <translation id="3740525748616366977">ამ მოწყობილობაზე ხმოვანი ძიება მიუწვდომელია</translation>
 <translation id="376561056759077985">ზოგიერთი მონაცემი ჯერ არ არის შენახული</translation>
@@ -637,6 +638,7 @@
 <translation id="3985215325736559418">გსურთ, ხელახლა ჩამოტვირთოთ <ph name="FILE_NAME" />?</translation>
 <translation id="3987993985790029246">ბმულის კოპირება</translation>
 <translation id="4000212216660919741">ხაზგარეშე მთავარი გვერდი</translation>
+<translation id="4015643064997321279">{NUM_PASSWORDS,plural, =1{1 გატეხილი პაროლი თქვენს Google ანგარიშში}other{# გატეხილი პაროლი თქვენს Google ანგარიშში}}</translation>
 <translation id="4016425174436051808">თვალის მიდევნება ვერ მოხერხდა. წარმოიქმნა შეფერხება.</translation>
 <translation id="4024768890073681126">თქვენს ბრაუზერს მართავს თქვენი მშობელი</translation>
 <translation id="4034817413553209278">{HOURS,plural, =1{# სთ}other{# სთ}}</translation>
@@ -692,6 +694,7 @@
 <translation id="4270730597186910506">პროდუქტისთვის თვალის დევნება ან თვალის დევნების გაუქმება.</translation>
 <translation id="4277529130885813215">სხვა მოწყობილობის გამოყენება</translation>
 <translation id="4282440837784183472">თქვენი ორგანიზაცია, <ph name="MANAGED_DOMAIN" />, მართავს როგორც ანგარიშს, რომელშიც შედიხართ, ისე Chrome-ის გამოყენების პროცესს. თქვენს ადმინისტრატორს შეუძლია კონკრეტული ფუნქციების დაყენება ან შეზღუდვა.</translation>
+<translation id="4285498937028063278">ჩამაგრების მოხსნა</translation>
 <translation id="4285846616383034558">ქუქი-ჩანაწერები, ქეში და საიტების სხვა მონაცემები</translation>
 <translation id="4291407919474070700"><ph name="BEGIN_LINK" />ჩართეთ ეკრანის დაბლოკვა Android-ის პარამეტრებიდან<ph name="END_LINK" /></translation>
 <translation id="4296252229500326964">ახალი ინკოგნიტო ჩანართი</translation>
@@ -818,6 +821,7 @@
 <translation id="483742037940503070">{TAB_COUNT,plural, =1{ჩანართების ჯგუფის <ph name="COLOR_NAME" /> ფერის <ph name="TAB_COUNT_ONE" /> ჩანართის, როგორც ფონური რეჟიმის ჩანართების ახალი ჯგუფის აღდგენა.}other{ჩანართების ჯგუფის <ph name="COLOR_NAME" /> ფერის <ph name="TAB_COUNT_MANY" /> ჩანართის, როგორც ფონური რეჟიმის ჩანართების ახალი ჯგუფის აღდგენა.}}</translation>
 <translation id="4837753911714442426">გვერდის ბეჭდვის ვარიანტების გახსნა</translation>
 <translation id="4844633725025837809">დამატებითი უსაფრთხოებისთვის, Google-ის პაროლების მმართველში შენახვამდე, დაშიფრეთ პაროლები თქვენს მოწყობილობაზე</translation>
+<translation id="4849731766219625109">თქვენი <ph name="IDENTITY_PROVIDER_ETLD_PLUS_ONE" /> ანგარიშის გამოყენება</translation>
 <translation id="4850886885716139402">გადახედვა</translation>
 <translation id="4852014461738377247">მიმდინარეობს შესვლა…</translation>
 <translation id="4860895144060829044">დარეკვა</translation>
@@ -831,6 +835,7 @@
 <translation id="4881695831933465202">გახსნა</translation>
 <translation id="488187801263602086">ფაილის გადარქმევა</translation>
 <translation id="4885273946141277891">Chrome-ის ეგზემპლარების მხარდაუჭერელი რაოდენობა.</translation>
+<translation id="4890973535105146893">თქვენს Google ანგარიშში შენახული პაროლები არ არის</translation>
 <translation id="4905823827770127520">ამ გვერდის ბმულის დართვა</translation>
 <translation id="4908869848243824489">Discover by Google</translation>
 <translation id="4910889077668685004">გადახდის აპები</translation>
@@ -920,6 +925,7 @@
 <translation id="5317780077021120954">შენახვა</translation>
 <translation id="5319359161174645648">Google გირჩევთ Chrome-ს</translation>
 <translation id="5326246328175179736">ამ ანგარიშით ვერ შეხვალთ</translation>
+<translation id="5327248766486351172">სახელი</translation>
 <translation id="5328542107300944283"><ph name="IDENTITY_PROVIDER_ETLD_PLUS_ONE" />-თან გამოყენება</translation>
 <translation id="5342314432463739672">ნებართვების მოთხოვნები</translation>
 <translation id="534580735623577507"><ph name="TIME_PERIOD" /> საიტები არ ფიქსირდება</translation>
@@ -1055,7 +1061,6 @@
 <translation id="5958275228015807058">თქვენი ფაილები და გვერდები ხელმისაწვდომია „ჩამოტვირთვების“ სექციაში</translation>
 <translation id="5958994127112619898">გვერდის გამარტივება</translation>
 <translation id="5962718611393537961">შეეხეთ ჩასაკეცად</translation>
-<translation id="5964180026566797835">ძველი პაროლების შემოწმება შეუძლებელია</translation>
 <translation id="5964869237734432770">სურათების აღწერის შეწყვეტა</translation>
 <translation id="5977976211062815271">ამ მოწყობილობაზე</translation>
 <translation id="5978661847409534366">{ITEMS_COUNT,plural, =1{1 გვერდი თქვენს საკითხავ სიაში}other{# გვერდი თქვენს საკითხავ სიაში}}</translation>
@@ -1076,6 +1081,7 @@
 <translation id="605721222689873409">წწ</translation>
 <translation id="6059830886158432458">აქ შეგიძლიათ მართოთ ამბები და აქტივობა</translation>
 <translation id="6071995715087444295">გატეხილი პაროლების შესამოწმებლად შედით თქვენს Google ანგარიშში</translation>
+<translation id="6078323886959318429">მალსახმობის დამატება</translation>
 <translation id="6085886413119427067">განსაზღვრავს დაცული კავშირით ვებსაიტებთან დაკავშირების ხერხს</translation>
 <translation id="6087286598828478206">გსურთ დაბლოკვა და ჯგუფიდან გასვლა?</translation>
 <translation id="60923314841986378">დარჩენილია <ph name="HOURS" /> საათი</translation>
@@ -1099,6 +1105,7 @@
 <translation id="6150320133806434356">სანიშნე შეინახა</translation>
 <translation id="6150706324143004339">თქვენს Google ანგარიშში Chrome-ის მონაცემები რომ გამოიყენოთ და შეინახოთ, განაახლეთ Chrome</translation>
 <translation id="6154478581116148741">ამ მოწყობილობიდან პაროლების ექსპორტირებისთვის პარამეტრებიდან გაააქტიურეთ ეკრანის დაბლოკვის მეთოდი</translation>
+<translation id="6156323911414505561">სანიშნეების ზოლის ჩვენება</translation>
 <translation id="6162892189396105610">წინასწარ ჩატვირთავს გვერდებს, რომლებსაც Chrome-ის გათვლებით, სავარაუდოდ, ეწვევით.</translation>
 <translation id="6170675927290506430">შეტყობინების პარამეტრებზე გადასვლა</translation>
 <translation id="6186394685773237175">გატეხილი პაროლები არ მოიძებნა</translation>
@@ -1556,6 +1563,7 @@
 <translation id="8073388330009372546">გამოსახულების გახსნა ახალ ჩანართზე</translation>
 <translation id="8076492880354921740">ჩანართები</translation>
 <translation id="8078096376109663956">მხოლოდ ტექსტის გაზიარება</translation>
+<translation id="8078348702936632821">ამ მალსახმობის ჩამაგრება</translation>
 <translation id="8084114998886531721">შენახული პაროლი</translation>
 <translation id="8084285576995584326">მართეთ თქვენი Google ანგარიშის მონაცემები</translation>
 <translation id="8084864785646838999">თქვენი ისტორიის ნაწილი, შესაძლოა, აქ არ გამოჩნდეს. Chrome-ის მთლიანი ისტორიის სანახავად გახსენით Chrome-ის სრული ისტორია. ასევე, თქვენს Google ანგარიშში შეიძლება ინახებოდეს ვების დათვალიერების სხვა ტიპის ისტორიაც, რომელიც ხელმისაწვდომია მისამართზე <ph name="BEGIN_LINK" />myactivity.google.com<ph name="END_LINK" />.</translation>
@@ -1703,6 +1711,7 @@
 <translation id="869891660844655955">ვადის გასვლის თარიღი</translation>
 <translation id="8699120352855309748">ამ ენების თარგმნის შემოთავაზების აკრძალვა</translation>
 <translation id="8712637175834984815">კარგი</translation>
+<translation id="8715286883001906001">გააძლიერეთ პაროლები თქვენს Google ანგარიშში</translation>
 <translation id="8723453889042591629">სწრაფად თარგმნეთ ეს გვერდი. ამ მალსახმობის რედაქტირებისთვის შეეხეთ ხანგრძლივად.</translation>
 <translation id="8725066075913043281">ხელახლა სცადეთ</translation>
 <translation id="8731268612289859741">უსაფრთხოების კოდი</translation>
@@ -1830,6 +1839,7 @@
 <translation id="970715775301869095">დარჩენილია <ph name="MINUTES" /> წთ</translation>
 <translation id="981121421437150478">ოფლაინი</translation>
 <translation id="983192555821071799">ყველა ჩანართის დახურვა</translation>
+<translation id="984756705737569814">თქვენს Google ანგარიშში პაროლების შემოწმება ვერ ხერხდება</translation>
 <translation id="987264212798334818">ზოგადი</translation>
 <translation id="988091779042748639">თქვენი მოწყობილობიდან ინკოგნიტო რეჟიმში დათვალიერების ისტორია რომ წაშალოთ, დახურეთ ყველა ინკოგნიტო ჩანართი.</translation>
 <translation id="992745192656291733"><ph name="TAB_COUNT" /> ჩანართი</translation>

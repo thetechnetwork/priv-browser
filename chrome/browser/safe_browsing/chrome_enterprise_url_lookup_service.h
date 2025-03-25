@@ -26,6 +26,14 @@ namespace network {
 class SharedURLLoaderFactory;
 }  // namespace network
 
+namespace signin {
+class IdentityManager;
+}
+
+namespace policy {
+class ManagementService;
+}
+
 class PrefService;
 class Profile;
 
@@ -48,7 +56,11 @@ class ChromeEnterpriseRealTimeUrlLookupService
       std::unique_ptr<SafeBrowsingTokenFetcher> token_fetcher,
       enterprise_connectors::ConnectorsService* connectors_service,
       ReferrerChainProvider* referrer_chain_provider,
-      PrefService* pref_service);
+      PrefService* pref_service,
+      signin::IdentityManager* identity_manager,
+      policy::ManagementService* management_service,
+      bool is_off_the_record,
+      bool is_guest_session);
 
   ChromeEnterpriseRealTimeUrlLookupService(
       const ChromeEnterpriseRealTimeUrlLookupService&) = delete;
@@ -110,6 +122,21 @@ class ChromeEnterpriseRealTimeUrlLookupService
 
   // The token fetcher used for getting access token.
   std::unique_ptr<SafeBrowsingTokenFetcher> token_fetcher_;
+
+  // Unowned object used for getting preference settings.
+  raw_ptr<PrefService> pref_service_;
+
+  // Unowned object used for accessing the user's Google identity.
+  raw_ptr<signin::IdentityManager> identity_manager_;
+
+  // Unowned object for accessing the profile's management state.
+  raw_ptr<policy::ManagementService> management_service_;
+
+  // Indicates if the service is bound to an off the record browsing session.
+  bool is_off_the_record_;
+
+  // Indicates if the service is bound to a guest browsing session.
+  bool is_guest_session_;
 
   friend class ChromeEnterpriseRealTimeUrlLookupServiceTest;
 

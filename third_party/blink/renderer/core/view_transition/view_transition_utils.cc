@@ -19,14 +19,9 @@
 namespace blink {
 
 // static
-void ViewTransitionUtils::ForEachTransitionPseudo(Document& document,
+void ViewTransitionUtils::ForEachTransitionPseudo(Element& element,
                                                   PseudoFunctor func) {
-  if (!document.documentElement()) {
-    return;
-  }
-
-  auto* transition_pseudo =
-      document.documentElement()->GetPseudoElement(kPseudoIdViewTransition);
+  auto* transition_pseudo = element.GetPseudoElement(kPseudoIdViewTransition);
   if (!transition_pseudo) {
     return;
   }
@@ -34,7 +29,7 @@ void ViewTransitionUtils::ForEachTransitionPseudo(Document& document,
   func(transition_pseudo);
 
   for (const auto& view_transition_name :
-       document.GetStyleEngine().ViewTransitionTags()) {
+       element.GetDocument().GetStyleEngine().ViewTransitionTags()) {
     auto* container_pseudo =
         To<ViewTransitionTransitionElement>(transition_pseudo)
             ->FindViewTransitionGroupPseudoElement(view_transition_name);
@@ -65,14 +60,9 @@ void ViewTransitionUtils::ForEachTransitionPseudo(Document& document,
 }
 
 // static
-PseudoElement* ViewTransitionUtils::FindPseudoIf(const Document& document,
+PseudoElement* ViewTransitionUtils::FindPseudoIf(const Element& element,
                                                  PseudoPredicate condition) {
-  if (!document.documentElement()) {
-    return nullptr;
-  }
-
-  auto* transition_pseudo =
-      document.documentElement()->GetPseudoElement(kPseudoIdViewTransition);
+  auto* transition_pseudo = element.GetPseudoElement(kPseudoIdViewTransition);
   if (!transition_pseudo) {
     return nullptr;
   }
@@ -81,7 +71,7 @@ PseudoElement* ViewTransitionUtils::FindPseudoIf(const Document& document,
   }
 
   for (const auto& view_transition_name :
-       document.GetStyleEngine().ViewTransitionTags()) {
+       element.GetDocument().GetStyleEngine().ViewTransitionTags()) {
     auto* container_pseudo =
         To<ViewTransitionTransitionElement>(transition_pseudo)
             ->FindViewTransitionGroupPseudoElement(view_transition_name);
@@ -176,6 +166,35 @@ ViewTransition* ViewTransitionUtils::GetTransition(const Document& document) {
     return nullptr;
   }
   return transition;
+}
+
+// static
+ViewTransition* ViewTransitionUtils::GetTransition(const Element& element) {
+  auto* supplement =
+      ViewTransitionSupplement::FromIfExists(element.GetDocument());
+  if (!supplement) {
+    return nullptr;
+  }
+  ViewTransition* transition = supplement->GetTransition(element);
+  if (!transition || transition->IsDone()) {
+    return nullptr;
+  }
+  return transition;
+}
+
+ViewTransition* ViewTransitionUtils::TransitionForTaggedElement(
+    const LayoutObject& layout_object) {
+  ViewTransition* result = nullptr;
+  // Note: an element can't participate in more than one transition at the same
+  // time. There may be skipped transitions still waiting for the DOM callback
+  // to run, but those should return false from NeedsViewTransitionEffectNode.
+  ForEachTransition(
+      layout_object.GetDocument(), [&](ViewTransition& transition) {
+        if (transition.NeedsViewTransitionEffectNode(layout_object)) {
+          result = &transition;
+        }
+      });
+  return result;
 }
 
 // static

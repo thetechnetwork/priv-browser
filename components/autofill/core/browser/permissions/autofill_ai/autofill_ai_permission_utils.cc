@@ -19,7 +19,9 @@
 #include "components/optimization_guide/core/model_execution/model_execution_prefs.h"
 #include "components/prefs/pref_service.h"
 #include "components/signin/public/base/consent_level.h"
+#include "components/signin/public/base/gaia_id_hash.h"
 #include "components/signin/public/identity_manager/identity_manager.h"
+#include "components/sync/base/account_pref_utils.h"
 
 #if !BUILDFLAG(IS_FUCHSIA)
 #include "components/variations/service/google_groups_manager.h"  // nogncheck
@@ -28,6 +30,8 @@
 namespace autofill {
 
 namespace {
+
+using FeatureCheck = base::FunctionRef<bool(const base::Feature&)>;
 
 // Returns whether `action` is relevant for data transparency, i.e. viewing
 // and removing data. These are actions that are generally permitted even if
@@ -41,6 +45,7 @@ namespace {
     case AutofillAiAction::kIphForOptIn:
     case AutofillAiAction::kOptIn:
     case AutofillAiAction::kServerClassificationModel:
+    case AutofillAiAction::kUseCachedServerClassificationModelResults:
       return false;
     case AutofillAiAction::kEditAndDeleteEntityInstanceInSettings:
     case AutofillAiAction::kListEntityInstancesInSettings:
@@ -51,34 +56,26 @@ namespace {
 
 // Checks whether all requirements for `base::Feature` state are satisfied
 // (`kAutofillAiWithDataSchema`, `kAutofillAiServerModel`).
-[[nodiscard]] bool SatisfiesFeatureRequirements(
-    const GoogleGroupsManager* google_groups_manager,
-    AutofillAiAction action) {
-  auto is_enabled = [&](const base::Feature& feature) {
-#if !BUILDFLAG(IS_FUCHSIA)
-    return google_groups_manager
-               ? google_groups_manager->IsFeatureEnabledForProfile(feature)
-               : base::FeatureList::IsEnabled(feature);
-#else
-    return base::FeatureList::IsEnabled(feature);
-#endif
-  };
-
+[[nodiscard]] bool SatisfiesFeatureRequirements(FeatureCheck is_enabled,
+                                                AutofillAiAction action) {
   // Everything requires that `kAutofillAiWithDataSchema` is enabled.
   if (!is_enabled(features::kAutofillAiWithDataSchema)) {
     return false;
   }
 
   switch (action) {
+    case AutofillAiAction::kIphForOptIn:
+      return is_enabled(feature_engagement::kIPHAutofillAiOptInFeature);
     case AutofillAiAction::kServerClassificationModel:
       return is_enabled(features::kAutofillAiServerModel);
+    case AutofillAiAction::kUseCachedServerClassificationModelResults:
+      return is_enabled(features::kAutofillAiServerModel) &&
+             features::kAutofillAiServerModelUseCacheResults.Get();
     case AutofillAiAction::kAddEntityInstanceInSettings:
     case AutofillAiAction::kCrowdsourcingVote:
     case AutofillAiAction::kEditAndDeleteEntityInstanceInSettings:
     case AutofillAiAction::kFilling:
     case AutofillAiAction::kImport:
-    case AutofillAiAction::kIphForOptIn:
-      return is_enabled(feature_engagement::kIPHAutofillAiOptInFeature);
     case AutofillAiAction::kListEntityInstancesInSettings:
     case AutofillAiAction::kOptIn:
       return true;
@@ -86,15 +83,19 @@ namespace {
   NOTREACHED();
 }
 
-// Checks whether all requirements for `PrefService` state are satisfied.
-[[nodiscard]] bool SatisfiesPreferenceRequirements(
-    const PrefService& pref_service,
-    bool has_entity_data_saved,
-    AutofillAiAction action) {
+// Checks whether preference-related requirements are satisfied.
+[[nodiscard]] bool SatisfiesPreferenceRequirements(const AutofillClient& client,
+                                                   bool has_entity_data_saved,
+                                                   AutofillAiAction action) {
   // No pref state can prevent actions that are relevant for data transparency
   // (i.e., showing/updating/removing existing data in settings).
   if (IsRelevantForDataTransparency(action) && has_entity_data_saved) {
     return true;
+  }
+
+  const PrefService* const prefs = client.GetPrefs();
+  if (!prefs) {
+    return false;
   }
 
   // State of the AutofillAI-specific enterprise policy pref.
@@ -102,7 +103,7 @@ namespace {
       base::to_underlying(optimization_guide::model_execution::prefs::
                               ModelExecutionEnterprisePolicyValue::kDisable);
   static_assert(kAutofillPredictionSettingsDisabled == 2);
-  if (pref_service.GetInteger(
+  if (prefs->GetInteger(
           optimization_guide::prefs::
               kAutofillPredictionImprovementsEnterprisePolicyAllowed) ==
       kAutofillPredictionSettingsDisabled) {
@@ -110,30 +111,20 @@ namespace {
   }
 
   // State of the Address-Autofill pref.
-  if (!pref_service.GetBoolean(prefs::kAutofillProfileEnabled)) {
+  if (!prefs->GetBoolean(prefs::kAutofillProfileEnabled)) {
     return false;
   }
 
-  // TODO(crbug.com/397881703): Remove feature guards once the pref is migrated
-  // to a GAIA-keyed dictionary. It makes no sense to extend the scope before
-  // since we want to remove the old pref anyway.
-  // State of the user-set AutofillAI pref.
-  const bool autofill_ai_enabled =
-#if BUILDFLAG(IS_WIN) || BUILDFLAG(IS_MAC) || BUILDFLAG(IS_LINUX) || \
-    BUILDFLAG(IS_CHROMEOS)
-      pref_service.GetBoolean(prefs::kAutofillPredictionImprovementsEnabled);
-#else
-      false;
-#endif  // BUILDFLAG(IS_WIN) || BUILDFLAG(IS_MAC) || BUILDFLAG(IS_LINUX) ||
-        // BUILDFLAG(IS_CHROMEOS)
+  const bool autofill_ai_enabled = GetAutofillAiOptInStatus(client);
   switch (action) {
     case AutofillAiAction::kAddEntityInstanceInSettings:
     case AutofillAiAction::kCrowdsourcingVote:
+    case AutofillAiAction::kEditAndDeleteEntityInstanceInSettings:
     case AutofillAiAction::kFilling:
     case AutofillAiAction::kImport:
-    case AutofillAiAction::kServerClassificationModel:
-    case AutofillAiAction::kEditAndDeleteEntityInstanceInSettings:
     case AutofillAiAction::kListEntityInstancesInSettings:
+    case AutofillAiAction::kServerClassificationModel:
+    case AutofillAiAction::kUseCachedServerClassificationModelResults:
       return autofill_ai_enabled;
     case AutofillAiAction::kIphForOptIn:
       // IPH should only show if the user has not opted in yet.
@@ -177,6 +168,7 @@ namespace {
 // Checks whether miscellaneous "other" requirements (OTR, app-locale, Geo-IP)
 // are satisfied.
 [[nodiscard]] bool SatisfiesMiscellaneousRequirements(
+    FeatureCheck is_enabled,
     bool is_off_the_record,
     bool has_entity_data_saved,
     const GeoIpCountryCode& country_code,
@@ -198,7 +190,8 @@ namespace {
       break;
     }
     case AutofillAiAction::kFilling:
-      // Filling is the only action we permit when OTR.
+    case AutofillAiAction::kUseCachedServerClassificationModelResults:
+      // Filling and cache use are permitted when OTR.
       break;
   }
 
@@ -212,7 +205,7 @@ namespace {
   }
 
   if (country_code != GeoIpCountryCode("US") &&
-      !base::FeatureList::IsEnabled(features::kAutofillAiIgnoreGeoIp)) {
+      !is_enabled(features::kAutofillAiIgnoreGeoIp)) {
     return false;
   }
 
@@ -223,17 +216,30 @@ namespace {
 
 bool MayPerformAutofillAiAction(const AutofillClient& client,
                                 AutofillAiAction action) {
-  if (!SatisfiesFeatureRequirements(client.GetGoogleGroupsManager(), action)) {
+#if !BUILDFLAG(IS_FUCHSIA)
+  const GoogleGroupsManager* const google_groups_manager =
+      client.GetGoogleGroupsManager();
+#endif
+  auto feature_check = [&](const base::Feature& feature) {
+#if !BUILDFLAG(IS_FUCHSIA)
+    return google_groups_manager
+               ? google_groups_manager->IsFeatureEnabledForProfile(feature)
+               : base::FeatureList::IsEnabled(feature);
+#else
+    return base::FeatureList::IsEnabled(feature);
+#endif
+  };
+
+  if (!SatisfiesFeatureRequirements(feature_check, action)) {
     return false;
   }
 
   const EntityDataManager* const edm = client.GetEntityDataManager();
-  const PrefService* const prefs = client.GetPrefs();
-  if (!edm || !prefs) {
+  if (!edm) {
     return false;
   }
   const bool has_entity_data_saved = !edm->GetEntityInstances().empty();
-  if (!SatisfiesPreferenceRequirements(*prefs, has_entity_data_saved, action)) {
+  if (!SatisfiesPreferenceRequirements(client, has_entity_data_saved, action)) {
     return false;
   }
 
@@ -243,8 +249,45 @@ bool MayPerformAutofillAiAction(const AutofillClient& client,
   }
 
   return SatisfiesMiscellaneousRequirements(
-      client.IsOffTheRecord(), has_entity_data_saved,
+      feature_check, client.IsOffTheRecord(), has_entity_data_saved,
       client.GetVariationConfigCountryCode(), client.GetAppLocale(), action);
+}
+
+bool GetAutofillAiOptInStatus(const AutofillClient& client) {
+  const PrefService* const prefs = client.GetPrefs();
+  const signin::IdentityManager* const identity_manager =
+      client.GetIdentityManager();
+  if (!prefs || !identity_manager) {
+    return false;
+  }
+
+  const GaiaId gaia_id =
+      identity_manager->GetPrimaryAccountInfo(signin::ConsentLevel::kSignin)
+          .gaia;
+  if (gaia_id.empty()) {
+    return false;
+  }
+
+  const base::Value* const value =
+      syncer::GetAccountKeyedPrefValue(prefs, prefs::kAutofillAiOptInStatus,
+                                       signin::GaiaIdHash::FromGaiaId(gaia_id));
+  return value && value->GetIfBool().value_or(false);
+}
+
+bool SetAutofillAiOptInStatus(AutofillClient& client, bool opt_in_status) {
+  if (!MayPerformAutofillAiAction(client, AutofillAiAction::kOptIn)) {
+    return false;
+  }
+
+  const GaiaId gaia_id =
+      client.GetIdentityManager()
+          ->GetPrimaryAccountInfo(signin::ConsentLevel::kSignin)
+          .gaia;
+  CHECK(!gaia_id.empty());
+  syncer::SetAccountKeyedPrefValue(
+      client.GetPrefs(), prefs::kAutofillAiOptInStatus,
+      signin::GaiaIdHash::FromGaiaId(gaia_id), base::Value(opt_in_status));
+  return true;
 }
 
 }  // namespace autofill

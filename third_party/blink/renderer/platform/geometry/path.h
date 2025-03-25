@@ -153,6 +153,8 @@ class PLATFORM_EXPORT Path {
   bool HasCurrentPoint() const;
   gfx::PointF CurrentPoint() const;
 
+  // TODO(crbug.com/378688986): convert clients to PathBuilder and remove all
+  // editing (non-const) methods.
   void SetWindRule(const WindRule);
 
   void MoveTo(const gfx::PointF&);
@@ -163,50 +165,37 @@ class PLATFORM_EXPORT Path {
                         const gfx::PointF& control_point2,
                         const gfx::PointF& end_point);
   void AddArcTo(const gfx::PointF&, const gfx::PointF&, float radius);
-  void AddArcTo(const gfx::PointF&,
-                float radius_x,
-                float radius_y,
-                float x_rotate,
-                bool large_arc,
-                bool sweep);
   void CloseSubpath();
 
   void AddArc(const gfx::PointF&,
               float radius,
               float start_angle,
               float end_angle);
-
-  void AddRect(const gfx::RectF&);
-  // Use this form if the rect is defined by locations of a pair of opposite
-  // corners, where |origin| may not be the top-left corner.
-  void AddRect(const gfx::PointF& origin, const gfx::PointF& opposite_point);
-
   void AddEllipse(const gfx::PointF&,
                   float radius_x,
                   float radius_y,
                   float rotation,
                   float start_angle,
                   float end_angle);
-  void AddEllipse(const gfx::PointF& center, float radius_x, float radius_y);
-
-  void AddRoundedRect(const FloatRoundedRect&, bool clockwise = true);
-  void AddContouredRect(const ContouredRect&);
-
   void AddPath(const Path&, const AffineTransform&);
 
   void Translate(const gfx::Vector2dF&);
-
   const SkPath& GetSkPath() const { return path_; }
 
   void Apply(void* info, PathApplierFunction) const;
   Path& Transform(const AffineTransform&);
-  Path& Transform(const gfx::Transform&);
 
-  bool SubtractPath(const Path&);
-
-  // Updates the path to the union (inclusive-or) of itself with the given
-  // argument.
-  bool UnionPath(const Path& other);
+  // Utility factories for simple shapes.
+  static Path MakeRect(const gfx::RectF&);
+  // Use this form if the rect is defined by locations of a pair of opposite
+  // corners, where |origin| may not be the top-left corner.
+  static Path MakeRect(const gfx::PointF& origin,
+                       const gfx::PointF& opposite_point);
+  static Path MakeRoundedRect(const FloatRoundedRect&);
+  static Path MakeContouredRect(const ContouredRect&);
+  static Path MakeEllipse(const gfx::PointF& center,
+                          float radius_x,
+                          float radius_y);
 
  private:
   void AddEllipse(const gfx::PointF&,

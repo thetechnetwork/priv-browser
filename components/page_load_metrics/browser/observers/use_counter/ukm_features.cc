@@ -460,6 +460,10 @@ UseCounterMetricsRecorder::GetAllowedUkmFeatures() {
           WebFeature::kCrossOriginOwnerInterestGroupSubframeCheckFailed,
           WebFeature::kV8Navigator_LeaveAdInterestGroup_Method,
           WebFeature::kV8Navigator_ClearOriginJoinedAdInterestGroups_Method,
+          WebFeature::kTranslator_MeasureInputUsage_Method,
+          WebFeature::kTranslator_InputQuota_AttributeGetter,
+          WebFeature::kLanguageDetector_MeasureInputUsage,
+          WebFeature::kLanguageDetector_InputQuota,
       }));
   return *opt_in_features;
 }

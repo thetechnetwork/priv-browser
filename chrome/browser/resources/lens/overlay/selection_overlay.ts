@@ -24,6 +24,7 @@ import {getFallbackTheme} from './color_utils.js';
 import {type CursorTooltipData, CursorTooltipType} from './cursor_tooltip.js';
 import type {CenterRotatedBox} from './geometry.mojom-webui.js';
 import {UserAction} from './lens.mojom-webui.js';
+import type {OverlayTheme} from './lens.mojom-webui.js';
 import {INVOCATION_SOURCE} from './lens_overlay_app.js';
 import {ContextMenuOption, recordContextMenuOptionShown, recordLensOverlayInteraction} from './metrics_utils.js';
 import type {ObjectLayerElement} from './object_layer.js';
@@ -296,6 +297,8 @@ export class SelectionOverlayElement extends SelectionOverlayElementBase {
   private onPointerMoveRequestId?: number;
   private handleResizeRequestId?: number;
 
+  private theme: OverlayTheme;
+
   // Whether or not translate mode is enabled. If true, only text should
   // be selectable, and it should be selectable from any point in the
   // overlay.
@@ -390,6 +393,17 @@ export class SelectionOverlayElement extends SelectionOverlayElementBase {
               (!this.suppressCopyAndSaveAsImage &&
                (this.enableCopyAsImage || this.enableSaveAsImage)) ||
               this.showDetectedTextContextMenuOptions);
+
+          // If simplified selection is enabled, send an event to the post
+          // selection renderer to darken the scrim if text is found within the
+          // region so that text gleams are visible.
+          if (this.simplifiedSelectionEnabled &&
+              this.showDetectedTextContextMenuOptions) {
+            this.dispatchEvent(new CustomEvent('text-found-in-region', {
+              bubbles: true,
+              composed: true,
+            }));
+          }
         });
     this.eventTracker_.add(
         document, 'restore-selected-region-context-menu', () => {

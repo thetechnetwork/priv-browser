@@ -39,6 +39,7 @@ found in the LICENSE file.
     <dimen name="tab_strip_fading_edge_width_negative">-8dp</dimen>
     <dimen name="tab_strip_button_width">48dp</dimen>
     <dimen name="swipe_to_dismiss_threshold">144dp</dimen>
+    <dimen name="long_press_cancel_threshold">20dp</dimen>
     <dimen name="selection_tab_grid_toggle_button_inset">14dp</dimen>
     <dimen name="selection_tab_list_toggle_button_lateral_inset">18dp</dimen>
     <dimen name="selection_tab_list_toggle_button_vertical_inset">22dp</dimen>
@@ -139,7 +140,6 @@ found in the LICENSE file.
     <dimen name="tab_strip_tooltip_label_horizontal_padding">8dp</dimen>
     <dimen name="tab_strip_tooltip_label_vertical_padding">4dp</dimen>
     <dimen name="tab_strip_tooltip_corner_radius">4dp</dimen>
-    <dimen name="tab_strip_favicon_background_elevation">@dimen/default_elevation_2</dimen>
     <dimen name="tab_strip_shared_image_tiles_size">26dp</dimen>
 
     <!-- Dimens for tab group list bottom sheet. -->

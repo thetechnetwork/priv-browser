@@ -1066,6 +1066,25 @@ _BANNED_CPP_FUNCTIONS: Sequence[BanRule] = (
         ],
     ),
     BanRule(
+        r'/absl::(bad_variant_access|get|holds_alternative|monostate|variant|'
+        r'visit)',
+        ('Abseil\'s variant library is banned, use std.', ),
+        True,
+        [
+            _THIRD_PARTY_EXCEPT_BLINK
+        ],
+    ),
+    BanRule(
+        r'/absl::(apply|exchange|forward|in_place|index_sequence|'
+        r'integer_sequence|make_from_tuple|make_index_sequence|'
+        r'make_integer_sequence|move)',
+        ('Abseil\'s util library is banned, use std.', ),
+        True,
+        [
+            _THIRD_PARTY_EXCEPT_BLINK
+        ],
+    ),
+    BanRule(
         r'/#include <chrono>',
         ('<chrono> is banned. Use base/time instead.', ),
         True,
@@ -5938,6 +5957,7 @@ def ChecksAndroidSpecificOnUpload(input_api, output_api):
     results.extend(_CheckNewImagesWarning(input_api, output_api))
     results.extend(_CheckAndroidNoBannedImports(input_api, output_api))
     results.extend(_CheckAndroidInfoBarDeprecation(input_api, output_api))
+    results.extend(_CheckAndroidNullAwayAnnotatedClasses(input_api, output_api))
     return results
 
 
@@ -6110,6 +6130,9 @@ def ChecksCommon(input_api, output_api):
                 'infra', 'inclusive_language_presubmit_exempt_dirs.txt'
             ],
             non_inclusive_terms=_NON_INCLUSIVE_TERMS))
+    results.extend(
+        input_api.canned_checks.CheckNewDEPSHooksHasRequiredReviewers(
+            input_api, output_api))
 
     presubmit_py_filter = lambda f: input_api.FilterSourceFile(
         f, files_to_check=[r'.*PRESUBMIT\.py$'])
@@ -7498,10 +7521,10 @@ def CheckAndroidTestAnnotations(input_api, output_api):
             if m := robolectric_test.search(line):
                 is_instrumentation_test = False
                 if m.group(1) == '' and not has_base_robolectric_rule:
-                  path = str(f.LocalPath())
-                  # These two spots cannot use it.
-                  if 'webapk' not in path and 'build' not in path:
-                    wrong_robolectric_test_runner_errors.append(path)
+                    path = str(f.LocalPath())
+                    # These two spots cannot use it.
+                    if 'webapk' not in path and 'build' not in path:
+                        wrong_robolectric_test_runner_errors.append(path)
                 break
             if uiautomator_test.search(line):
                 is_instrumentation_test = False
@@ -7552,6 +7575,48 @@ Robolectric tests do not need a @Batch or @DoNotBatch annotations.
 Robolectric tests should use either @RunWith(BaseRobolectricTestRunner.class) (or
 a subclass of it), or use "@Rule BaseRobolectricTestRule".
 """, wrong_robolectric_test_runner_errors))
+
+    return results
+
+
+def _CheckAndroidNullAwayAnnotatedClasses(input_api, output_api):
+    """Checks that Java classes/interfaces/annotations are null-annotated."""
+
+    nullmarked_annotation = input_api.re.compile(r'^\s*@(NullMarked|NullUnmarked)')
+
+    missing_annotation_errors = []
+
+    def _FilterFile(affected_file):
+        return input_api.FilterSourceFile(
+            affected_file,
+        files_to_skip=(_EXCLUDED_PATHS + _TEST_CODE_EXCLUDED_PATHS + input_api.
+                       DEFAULT_FILES_TO_SKIP + (
+                           r'.*Test.*\.java',
+                           r'^android_webview/.*', # Temporary, crbug.com/389129271
+                           r'^build/.*',
+                           r'^chrome/.*', # Temporary, crbug.com/389129271
+                           r'^chromecast/.*',
+                           r'^components/cronet/.*',
+                           r'^tools/.*',
+                       )),
+        files_to_check=[r'.*\.java$'])
+
+    for f in input_api.AffectedSourceFiles(_FilterFile):
+        for line in f.NewContents():
+            if nullmarked_annotation.search(line):
+                break
+        else:
+            missing_annotation_errors.append(str(f.LocalPath()))
+
+    results = []
+
+    if missing_annotation_errors:
+        results.append(
+            output_api.PresubmitPromptWarning(
+                """
+Please add @NullMarked and fix the NullAway warnings in the following files
+(see https://chromium.googlesource.com/chromium/src/+/main/styleguide/java/nullaway.md):
+""", missing_annotation_errors))
 
     return results
 

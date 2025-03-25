@@ -25,7 +25,8 @@ std::unique_ptr<EventMonitor> EventMonitor::CreateApplicationMonitor(
     gfx::NativeWindow context,
     const std::set<ui::EventType>& types) {
   // |context| is not needed on Mac.
-  return std::make_unique<EventMonitorMac>(event_observer, nullptr, types);
+  return std::make_unique<EventMonitorMac>(event_observer, gfx::NativeWindow(),
+                                           types);
 }
 
 // static
@@ -55,8 +56,8 @@ EventMonitorMac::EventMonitorMac(ui::EventObserver* event_observer,
   // `NativeWidgetMacEventMonitor` for remote cocoa. These events are processed
   // through the NativeWidgetMacEventMonitorOnEvent() method defined below,
   // bypassing the NSEvent block-based monitoring approach that follows.
-  auto* host =
-      views::NativeWidgetMacNSWindowHost::GetFromNativeWindow(target_window);
+  auto* host = views::NativeWidgetMacNSWindowHost::GetFromNativeWindow(
+      target_native_window);
   if (host && host->application_host()) {
     event_monitor_ = host->AddEventMonitor(this);
     return;
@@ -94,7 +95,6 @@ void EventMonitorMac::NativeWidgetMacEventMonitorOnEvent(ui::Event* ui_event,
 
   if (types_.find(ui_event->type()) != types_.end()) {
     event_observer_->OnEvent(*ui_event);
-    *was_handled = true;
   }
 }
 

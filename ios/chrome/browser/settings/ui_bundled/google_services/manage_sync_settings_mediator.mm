@@ -238,13 +238,16 @@ constexpr CGFloat kBatchUploadSymbolPointSize = 22.;
   if (!self.accountStateSignedIn) {
     return;
   }
-      [self.consumer
-          updatePrimaryAccountWithAvatarImage:
-              _chromeAccountManagerService->GetIdentityAvatarWithIdentity(
-                  _signedInIdentity, IdentityAvatarSize::Large)
-                                         name:_signedInIdentity.userFullName
-                                        email:_signedInIdentity.userEmail
-                              managementState:self.managementState];
+  UIImage* avatarImage =
+      _chromeAccountManagerService->GetIdentityAvatarWithIdentity(
+          _signedInIdentity, IdentityAvatarSize::Large);
+  NSString* managementDescription =
+      GetManagementDescription([self managementState]);
+  [self.consumer
+      updatePrimaryAccountWithAvatarImage:avatarImage
+                                     name:_signedInIdentity.userFullName
+                                    email:_signedInIdentity.userEmail
+                    managementDescription:managementDescription];
 }
 
 // Updates all the sync data type items, and notify the consumer if
@@ -478,7 +481,7 @@ constexpr CGFloat kBatchUploadSymbolPointSize = 22.;
   // Creates the manage accounts and sign-out section.
   TableViewModel* model = self.consumer.tableViewModel;
   // The AdvancedSettingsSectionIdentifier does not exist when sync is disabled
-  // by administrator for a signed-in not syncing account.
+  // by administrator for a signed-in account.
   NSInteger previousSection =
       [model hasSectionForSectionIdentifier:AdvancedSettingsSectionIdentifier]
           ? [model
@@ -1172,7 +1175,7 @@ constexpr CGFloat kBatchUploadSymbolPointSize = 22.;
 }
 
 // Creates an error action button item to handle the indicated sync error type
-// for signed in not syncing users.
+// for signed in users.
 - (TableViewItem*)createSyncErrorButtonItemWithItemType:(NSInteger)itemType
                                           buttonLabelID:(int)buttonLabelID
                                               messageID:(int)messageID {
@@ -1261,8 +1264,7 @@ constexpr CGFloat kBatchUploadSymbolPointSize = 22.;
   if (type.value() == SyncDisabledByAdministratorErrorItemType) {
     self.syncErrorItem = [self createSyncDisabledByAdministratorErrorItem];
   } else {
-    // For signed in not syncing users, the sync error item will be displayed as
-    // a button.
+    // For signed in users, the sync error item will be displayed as a button.
     self.syncErrorItem =
         [self createSyncErrorButtonItemWithItemType:type.value()
                                       buttonLabelID:GetAccountErrorUIInfo(
@@ -1278,8 +1280,8 @@ constexpr CGFloat kBatchUploadSymbolPointSize = 22.;
     if (type.value() != SyncDisabledByAdministratorErrorItemType) {
       [model insertSectionWithIdentifier:SyncErrorsSectionIdentifier
                                  atIndex:syncErrorSectionIndex];
-      // For signed in not syncing users, the sync error item will be preceded
-      // by a descriptive message item.
+      // For signed in users, the sync error item will be preceded by a
+      // descriptive message item.
       [model addItem:[self createSyncErrorMessageItem:GetAccountErrorUIInfo(
                                                           _syncService)
                                                           .messageID]

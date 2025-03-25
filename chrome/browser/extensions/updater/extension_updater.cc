@@ -25,11 +25,13 @@
 #include "base/strings/string_number_conversions.h"
 #include "base/strings/string_split.h"
 #include "build/chromeos_buildflags.h"
+#include "chrome/browser/extensions/corrupted_extension_reinstaller.h"
 #include "chrome/browser/extensions/crx_installer.h"
+#include "chrome/browser/extensions/delayed_install_manager.h"
 #include "chrome/browser/extensions/extension_management.h"
-#include "chrome/browser/extensions/extension_service.h"
 #include "chrome/browser/extensions/forced_extensions/install_stage_tracker.h"
 #include "chrome/browser/extensions/pending_extension_manager.h"
+#include "chrome/browser/extensions/updater/extension_updater_delegate.h"
 #include "chrome/browser/profiles/keep_alive/profile_keep_alive_types.h"
 #include "chrome/browser/profiles/keep_alive/scoped_profile_keep_alive.h"
 #include "chrome/browser/profiles/profile.h"
@@ -156,14 +158,14 @@ ExtensionUpdater::InProgressCheck::InProgressCheck() = default;
 ExtensionUpdater::InProgressCheck::~InProgressCheck() = default;
 
 ExtensionUpdater::ExtensionUpdater(
-    ExtensionServiceInterface* service,
+    ExtensionUpdaterDelegate* delegate,
     ExtensionPrefs* extension_prefs,
     PrefService* prefs,
     Profile* profile,
     int frequency_seconds,
     ExtensionCache* cache,
     const ExtensionDownloader::Factory& downloader_factory)
-    : service_(service),
+    : delegate_(delegate),
       downloader_factory_(downloader_factory),
       frequency_(base::Seconds(frequency_seconds)),
       extension_prefs_(extension_prefs),
@@ -171,6 +173,7 @@ ExtensionUpdater::ExtensionUpdater(
       profile_(profile),
       registry_(ExtensionRegistry::Get(profile)),
       registrar_(ExtensionRegistrar::Get(profile)),
+      delayed_install_manager_(DelayedInstallManager::Get(profile)),
       extension_cache_(cache) {
   DCHECK_LE(frequency_seconds, kMaxUpdateFrequencySeconds);
 #if defined(NDEBUG)
@@ -198,7 +201,7 @@ void ExtensionUpdater::Start() {
   DCHECK(!alive_);
   // If these are NULL, then that means we've been called after Stop()
   // has been called.
-  DCHECK(service_);
+  DCHECK(delegate_);
   DCHECK(extension_prefs_);
   DCHECK(prefs_);
   DCHECK(profile_);
@@ -218,7 +221,7 @@ void ExtensionUpdater::Start() {
 void ExtensionUpdater::Stop() {
   weak_ptr_factory_.InvalidateWeakPtrs();
   alive_ = false;
-  service_ = nullptr;
+  delegate_ = nullptr;
   extension_prefs_ = nullptr;
   prefs_ = nullptr;
   profile_ = nullptr;
@@ -420,7 +423,7 @@ void ExtensionUpdater::CheckNow(CheckParams params) {
   const PendingExtensionManager* pending_extension_manager =
       PendingExtensionManager::Get(profile_);
   const CorruptedExtensionReinstaller* corrupted_extension_reinstaller =
-      service_->corrupted_extension_reinstaller();
+      CorruptedExtensionReinstaller::Get(profile_);
 
   ExtensionUpdateCheckParams update_check_params;
 
@@ -651,8 +654,11 @@ void ExtensionUpdater::OnExtensionDownloadFailed(
   // check might have queued an update for this extension already. If a
   // current update check has |install_immediately| set the previously
   // queued update should be installed now.
-  if (install_immediately && service_->GetPendingExtensionUpdate(id))
-    service_->FinishDelayedInstallationIfReady(id, install_immediately);
+  if (install_immediately &&
+      delayed_install_manager_->GetPendingExtensionUpdate(id)) {
+    delayed_install_manager_->FinishDelayedInstallationIfReady(
+        id, install_immediately);
+  }
 }
 
 void ExtensionUpdater::OnExtensionDownloadRetry(const ExtensionId& id,
@@ -708,7 +714,8 @@ bool ExtensionUpdater::GetExtensionExistingVersion(const ExtensionId& id,
       registry_->GetExtensionById(id, ExtensionRegistry::EVERYTHING);
   if (!extension)
     return false;
-  const Extension* update = service_->GetPendingExtensionUpdate(id);
+  const Extension* update =
+      delayed_install_manager_->GetPendingExtensionUpdate(id);
   if (update)
     *version = update->VersionString();
   else
@@ -720,7 +727,8 @@ ExtensionUpdateData ExtensionUpdater::GetExtensionUpdateData(
     const ExtensionId& id) {
   ExtensionUpdateData result;
 
-  const Extension* update = service_->GetPendingExtensionUpdate(id);
+  const Extension* update =
+      delayed_install_manager_->GetPendingExtensionUpdate(id);
 
   if (update) {
     result.pending_version = update->VersionString();
@@ -799,9 +807,9 @@ void ExtensionUpdater::InstallCRXFile(FetchedCRXFile crx_file) {
   VLOG(2) << "updating " << crx_file.info.extension_id << " with "
           << crx_file.info.path.value();
 
-  // The ExtensionService is now responsible for cleaning up the temp file
-  // at |crx_file.info.path|.
-  scoped_refptr<CrxInstaller> installer = service_->CreateUpdateInstaller(
+  // The delegate is now responsible for cleaning up the temp file at
+  // `crx_file.info.path`.
+  scoped_refptr<CrxInstaller> installer = delegate_->CreateUpdateInstaller(
       crx_file.info, crx_file.file_ownership_passed);
   if (installer) {
     // If the crx file passes the expectations from the update manifest, this

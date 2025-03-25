@@ -180,6 +180,9 @@ class AutocompleteResult {
   void AttachPedalsToMatches(const AutocompleteInput& input,
                              const AutocompleteProviderClient& client);
 
+  // Sets a takeover action on all matches to issue a contextual search.
+  void AttachContextualSearchFulfillmentActionToMatches();
+
   // Sets |has_tab_match| in matches whose URL matches an open tab's URL.
   // Also, fixes up the description if not using another UI element to
   // annotate (e.g. tab switch button). |input| can be null; if provided,
@@ -497,6 +500,10 @@ class AutocompleteResult {
   // See AutocompleteControllerAndroid for more details.
   mutable base::android::ScopedJavaGlobalRef<jobject> java_result_;
 #endif
+
+  // For LOG debugging.
+  friend std::ostream& operator<<(std::ostream& os,
+                                  const AutocompleteResult& result);
 };
 
 #endif  // COMPONENTS_OMNIBOX_BROWSER_AUTOCOMPLETE_RESULT_H_

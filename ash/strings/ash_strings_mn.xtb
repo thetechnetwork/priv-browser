@@ -149,6 +149,7 @@
 <translation id="1455242230282523554">Хэлний тохиргоог харуулах</translation>
 <translation id="1459693405370120464">Цаг агаар</translation>
 <translation id="1460620680449458626">Дууг хаасан.</translation>
+<translation id="1462439140224375968">Google Док үүсгэсэн</translation>
 <translation id="14648076227129703">Энэ нь <ph name="APP1_NAME" />, <ph name="APP2_NAME" /> болон камерын зөвшөөрөлтэй бүх апп болон вебсайтад камерын хандалтыг зөвшөөрнө</translation>
 <translation id="1467432559032391204">Зүүн</translation>
 <translation id="146902737843070955">Таны администратор энэ өөрчлөлтийг хүссэн</translation>
@@ -166,6 +167,7 @@
 <translation id="1505542291183484463">Хавтан болгосон цонхны хэмжээг доош татаж өөрчлөх</translation>
 <translation id="1510238584712386396">Launcher</translation>
 <translation id="1520303207432623762">{NUM_APPS,plural, =1{Мэдэгдлийн тохиргоог харуулна уу. Аппын мэдэгдлийг унтраасан байна}other{Мэдэгдлийн тохиргоог харуулна уу. # аппын мэдэгдлийг унтраасан байна}}</translation>
+<translation id="1521655867290435174">Google Хүснэгт</translation>
 <translation id="1523032696246003">Батарей <ph name="BATTERY_PERCENTAGE" />% | Бүрэн цэнэглэх хүртэл <ph name="TIME" /></translation>
 <translation id="1525508553941733066">ХЭРЭГСЭХГҮЙ БОЛГОХ</translation>
 <translation id="1526448108126799339">Шинэ табыг шинэ цонхонд нээх</translation>
@@ -214,6 +216,7 @@
 <translation id="1679841710523778799">Гэрэлтүүлэг нэмэх</translation>
 <translation id="1680659827022803830">Видео дуудлагын удирдлага</translation>
 <translation id="169515659049020177">Солих</translation>
+<translation id="1696984622403682083">Та хүссэн үедээ энэ онцлогийг Тохиргооноос унтраах боломжтой. <ph name="LINK_TO_LEARN_MORE" /></translation>
 <translation id="1698080062160024910"><ph name="TOTAL_TIME" /> цаг хэмжигч · <ph name="LABEL" /></translation>
 <translation id="1698760176351776263">IPv6 хаяг: <ph name="ADDRESS" /></translation>
 <translation id="1703117532528082099">Идэвхтэй цонхыг зүүн талд суурилуулсан.</translation>
@@ -240,6 +243,8 @@
 <translation id="1755556344721611131">Оношилгооны апп</translation>
 <translation id="1756833229520115364">Загварыг хадгалж чадсангүй. Хэт олон цонх эсвэл таб байна.</translation>
 <translation id="1757857692711134412">Нар жаргах хүртэл унтраалттай</translation>
+<translation id="1763084151787818322">Бусад үйлдэл</translation>
+<translation id="1768138163688567246">Миний дэлгэцээс хайхыг хаах</translation>
 <translation id="1768366657309696705"><ph name="LAUNCHER_KEY_NAME" /> + Цэг товчлуурын шууд холбоосыг өөрчилсөн байна. Оруулах товчлуурыг ашиглахын тулд <ph name="LAUNCHER_KEY_NAME" /> товчлуур + Shift + Ухраахыг дарна уу.</translation>
 <translation id="1770726142253415363"><ph name="ROW_NUMBER" />-р мөр, <ph name="COLUMN_NUMBER" />-р багана руу зөөсөн.</translation>
 <translation id="1771761307086386028">Баруун тийш гүйлгэх</translation>
@@ -345,7 +350,6 @@
 <translation id="2201071101391734388">Саяхны <ph name="TOTAL_COUNT" />-с <ph name="INDEX" />-р зураг.</translation>
 <translation id="2201687081523799384">Google Tasks-г хураах</translation>
 <translation id="2208323208084708176">Компьютерийн нэгдмэл горим</translation>
-<translation id="2220572644011485463">ПИН, эсвэл нууц үг</translation>
 <translation id="2222841058024245321">Дэлгэц 7</translation>
 <translation id="2223384056430485343">Хуваасан дэлгэцэд</translation>
 <translation id="2224075387478458881">Хамгаалалттай контент харагдаж байх үед дэлгэцийн үйлдэл бичихийг зөвшөөрөхгүй</translation>
@@ -590,6 +594,7 @@
 <translation id="301584155502740476">Сүлжээний цэгийн дэлгэрэнгүйг харуулна уу. Сүлжээний цэг унтраалттай байна.</translation>
 <translation id="3017079585324758401">Арын дэвсгэр</translation>
 <translation id="3018135054368884502">Медиаг хурдан урагшлуулах</translation>
+<translation id="3026897869154397692">Календарьт нэмсэн</translation>
 <translation id="3033545621352269033">Асаалттай</translation>
 <translation id="3033912566804961911"><ph name="DESK_NAME" />-тай нэгтгэнэ үү</translation>
 <translation id="3036649622769666520">Файл нээх</translation>
@@ -966,6 +971,7 @@
 <translation id="4221957499226645091"><ph name="APP_NAME" />, Суулгасан апп, Түр зогсоосон</translation>
 <translation id="4228078597006700451">Тохиргоог тохируулаагүй</translation>
 <translation id="4230560241506423345">Шинэ</translation>
+<translation id="4236726631849783264">Санал болгосон үйлдлийн талаарх сануулагч</translation>
 <translation id="4239069858505860023">GPRS</translation>
 <translation id="4240486403425279990">Тойм горим</translation>
 <translation id="4242533952199664413">Нээлттэй тохиргоо</translation>
@@ -982,7 +988,6 @@
 <translation id="4275663329226226506">Медиа</translation>
 <translation id="4279490309300973883">Толин тусгал үүсгэх</translation>
 <translation id="4280601795273309128">Аюулгүй байдлын шинэчлэлт дууссан. Төхөөрөмжөө сайжруулна уу.</translation>
-<translation id="4281739221820540368">Google Док үүсгэх</translation>
 <translation id="4283888303416325161">Нэмэлт аюулгүй байдлын үүднээс нууц үг оруулна уу</translation>
 <translation id="4285498937028063278">Сонголтоос гаргах</translation>
 <translation id="428715201724021596">Профайлд холбогдож байна. Үүнд хэдэн минут шаардлагатай байж магадгүй.</translation>
@@ -1043,6 +1048,7 @@
 <translation id="4471354919263203780">Яриа таних файлыг татаж байна... <ph name="PERCENT" />%</translation>
 <translation id="4471432286288241507">{0,plural, =0{Төхөөрөмжийг одоо шинэчилнэ үү}=1{Төхөөрөмжийг 1 секундийн дотор шинэчилнэ үү}other{Төхөөрөмжийг # секундийн дотор шинэчилнэ үү}}</translation>
 <translation id="4472575034687746823">Эхлүүлэх</translation>
+<translation id="4473489370276014885">Google Contacts</translation>
 <translation id="4477350412780666475">Дараагийн бичлэг</translation>
 <translation id="4477751544736611934">Энэ нь дата ашиглалтын зардал гаргаж магадгүй.
 1 төхөөрөмж холбогдсон.</translation>
@@ -1069,6 +1075,7 @@
 <translation id="4545950850562423083">Одоогийн хуудсыг хавчуургаар хадгалах</translation>
 <translation id="4548482551627849548">Идэвхтэй цонхыг зүүн талын дэлгэц рүү зөөх</translation>
 <translation id="4552748006424994716">Цуурай үүсэхээс зайлсхийхийн тулд та микрофоноо зөвхөн утастай чихэвчээр сонсох боломжтой.</translation>
+<translation id="4556953949326137018">Таныг “Календарьт нэмэх”, “Google Докс үүсгэх” зэрэг санал болгосон үйлдлүүдийг ашиглахад сонгосон хэсгийн контентыг үйлдэл санал болгохын тулд Google-н сервер лүү илгээдэг бөгөөд <ph name="LINK_TO_SERVICE_TERMS" /> хэрэгжинэ. Ямар нэг хувийн, эмзэг, нууцлалтай мэдээлэл бүү оруулаарай.</translation>
 <translation id="4560576029703263363">Асаалттай</translation>
 <translation id="4561267230861221837">3G</translation>
 <translation id="4565377596337484307">Нууц үгийг нуух</translation>
@@ -1152,6 +1159,7 @@
 <translation id="481455355267255546">Дараагийн</translation>
 <translation id="481749895090480684">Ажлын жагсаалт: <ph name="GLANCEABLES_TASKS_LIST_NAME" /></translation>
 <translation id="4826588772550366629">камер, микрофон</translation>
+<translation id="4828935196674083554">Нэмж байна...</translation>
 <translation id="482908187605862807">Play Store-с авах боломжтой аппууд</translation>
 <translation id="4831034276697007977">Автомат даралтыг унтраахдаа итгэлтэй байна уу?</translation>
 <translation id="4835677468087803981">ПИН-г нуух</translation>
@@ -1649,6 +1657,7 @@
 <translation id="641817663353603351">хуудас дээшлүүлэх</translation>
 <translation id="6424520630891723617"><ph name="SECURITY_STATUS" />, дохионы хүч <ph name="SIGNAL_STRENGTH" /></translation>
 <translation id="642644398083277086">Бүх мэдэгдлийг устгах</translation>
+<translation id="6426905245930183644">Үүсгэж байна...</translation>
 <translation id="6430225033895752525">Төвлөрөх горимын тохиргоог харуулах</translation>
 <translation id="643147933154517414">Бүгд дууссан</translation>
 <translation id="6431865393913628856">Дэлгэцийн үйлдэл бичих</translation>
@@ -1715,7 +1724,6 @@
 <translation id="6612889377159412215">дэд ажил</translation>
 <translation id="6613765291890844037">Нийт <ph name="STORAGE_TOTAL_SIZE" />-н хадгалах сангаас | <ph name="STORAGE_IN_USE_SIZE" />-г ашиглаж байна</translation>
 <translation id="6614169507485700968">Нууцлалын дэлгэц асаалттай байна</translation>
-<translation id="6618277154885124991">Google Хүснэгт үүсгэх</translation>
 <translation id="6622679827379792051">Утасныхаа аппуудыг харахыг тохируулах</translation>
 <translation id="662279009180869175">Хуваасан дэлгэцийн хэмжээг өөрчлөхийн тулд зүүн, баруун сумыг ашиглана уу</translation>
 <translation id="6624493541160101248">Одоогийн дэлгэц: <ph name="DESK_NAME" />. <ph name="DESK_COUNT" />-н <ph name="DESK_INDEX" />-р дэлгэц.</translation>
@@ -1830,7 +1838,6 @@
 <translation id="7000027735917578303">Windows болон дэлгэцийн тохиргоо</translation>
 <translation id="7004910047186208204">Мобайл датад холбогдох</translation>
 <translation id="7005239792648594238">Эхлүүлэхийн тулд аппыг нээнэ үү</translation>
-<translation id="7007983414944123363">Таны ПИН эсвэл нууц үгийг баталгаажуулж чадсангүй. Дахин оролдоно уу.</translation>
 <translation id="7014684956566476813"><ph name="DEVICE_NAME" /> нэртэй төхөөрөмжид холбогдсон</translation>
 <translation id="7015766095477679451"><ph name="COME_BACK_TIME" />-д буцаж ирнэ үү.</translation>
 <translation id="70168403932084660">Дэлгэц 6</translation>
@@ -1890,6 +1897,7 @@
 <translation id="7228968829656641943">Миний дэлгэцээс хайхын тулд сонгоно уу. Гарын навигацыг авах бол tab, дараа нь зай авах товчин дээр дарна уу.</translation>
 <translation id="7229029500464092426">Нийт <ph name="TOTAL_MEMORY" />-н санах ойгоос <ph name="AVAILABLE_MEMORY" /></translation>
 <translation id="7239814253344511868">Хулганын хоёр товч</translation>
+<translation id="7240636904654154599">Google Хүснэгт үүсгэсэн</translation>
 <translation id="7244725679040769470"><ph name="PERCENTAGE" />% батарей үлдсэн. Төхөөрөмжөө тэжээлд залгана уу.</translation>
 <translation id="7246071203293827765"><ph name="UPDATE_TEXT" />. Энэ Chromebook-д шинэчлэлтийг хэрэгжүүлэхийн тулд үүнийг дахин эхлүүлэх шаардлагатай. Үүнд 1 минут хүртэл хугацаа шаардагдаж болно.</translation>
 <translation id="7256057185598509352">Шуурхай түлхүүр 2</translation>
@@ -1944,6 +1952,7 @@
 <translation id="742594950370306541">Камерыг ашиглаж байна.</translation>
 <translation id="742608627846767349">Өглөөний мэнд,</translation>
 <translation id="743058460480092004">Камер болон микрофоныг ашиглаж байна.</translation>
+<translation id="7440404390546433462">Google Хайлт</translation>
 <translation id="7441711280402516925">Тоглуулж байна · Таб руу сэлгэх</translation>
 <translation id="7453330308669753048">Хайлтын түүхийн илэрцийг хассан</translation>
 <translation id="7459485586006128091">Дотоод алдааны улмаас сүлжээний цэгийг унтраасан. Хэдэн минутын дараа дахин холбогдохоор оролдоно уу.</translation>
@@ -2400,6 +2409,8 @@
 <translation id="8921624153894383499">Google туслах энэ хэлээр ярьдаггүй.</translation>
 <translation id="8926951137623668982">Shelf-г тогтмол нууна</translation>
 <translation id="8929566928381252430">Caps Lock-г ашиглахаар оролдож байна уу? Ашиглах</translation>
+<translation id="8929623844713377237">Харилцагч үүсгэсэн</translation>
+<translation id="8934418770423095813">Google Док үүсгэх</translation>
 <translation id="8934926665751933910">{NUM_FILES,plural, =1{1 файл}other{# файл}}</translation>
 <translation id="8936501819958976551">идэвхгүй болгосон</translation>
 <translation id="8938800817013097409">USB-C төхөөрөмж (ард талын баруун порт)</translation>
@@ -2468,6 +2479,7 @@
 <translation id="9168436347345867845">Үүнийг дараа хийх</translation>
 <translation id="9178475906033259337"><ph name="QUERY" />-н 1 илэрцийг үзүүлж байна</translation>
 <translation id="9179259655489829027">Тус онцлог нь танаас нууц үг шаардахгүйгээр таныг түргэн хугацаанд хэрэглэгчид хандах боломжийг олгоно. Энэ онцлогийг зөвхөн итгэдэг бүртгэлд ашиглана уу.</translation>
+<translation id="9183302530794969518">Google Докс</translation>
 <translation id="9183456764293710005">Бүтэн дэлгэц томруулагч</translation>
 <translation id="9192133205265227850">"<ph name="DEVICE_NAME" />"-г ашиглах</translation>
 <translation id="9193626018745640770">Үл мэдэгдэх хүлээн авагчид дамжуулж байна</translation>

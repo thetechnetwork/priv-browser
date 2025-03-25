@@ -109,8 +109,6 @@ bool AndroidStateTransferHandler::OnMotionEvent(
     return true;
   }
 
-  ValidateRootFrameSinkId(root_frame_sink_id);
-
   if (state_for_curr_sequence_.has_value() ||
       CanStartProcessingVizEvents(input_event)) {
     HandleTouchEvent(std::move(input_event));
@@ -228,19 +226,10 @@ void AndroidStateTransferHandler::HandleTouchEvent(
     return;
   }
 
-  const float viz_y_offset_pix =
-      AMotionEvent_getY(input_event.a_input_event(), /*pointer_index=*/0) -
-      AMotionEvent_getRawY(input_event.a_input_event(), /*pointer_index=*/0);
-  // Offset added to points in Android's view coordinate system to convert them
-  // into coordinates relative to web contents. This is used to accommodate for
-  // browser top controls when visible.
-  const float web_contents_y_offset_pix =
-      state_for_curr_sequence_->transfer_state->raw_y_offset - viz_y_offset_pix;
-  CHECK_LE(web_contents_y_offset_pix, 0);
   auto event = ui::MotionEventAndroidNative::Create(
       std::move(input_event),
       1.f / state_for_curr_sequence_->transfer_state->dip_scale,
-      web_contents_y_offset_pix);
+      state_for_curr_sequence_->transfer_state->web_contents_y_offset_pix);
 
   state_for_curr_sequence_->rir_support->OnTouchEvent(
       *event.get(), /* emit_histograms= */ true);
@@ -248,17 +237,6 @@ void AndroidStateTransferHandler::HandleTouchEvent(
   if (event->GetAction() == ui::MotionEvent::Action::UP ||
       event->GetAction() == ui::MotionEvent::Action::CANCEL) {
     state_for_curr_sequence_.reset();
-  }
-}
-
-void AndroidStateTransferHandler::ValidateRootFrameSinkId(
-    const FrameSinkId& root_frame_sink_id) {
-  // TODO(crbug.com/388478270): Relax this CHECK to handle activity restart mid
-  // sequence.
-  CHECK(root_frame_sink_id.is_valid());
-  if (active_root_frame_sink_id_ != root_frame_sink_id) {
-    CHECK(!active_root_frame_sink_id_.is_valid());
-    active_root_frame_sink_id_ = root_frame_sink_id;
   }
 }
 

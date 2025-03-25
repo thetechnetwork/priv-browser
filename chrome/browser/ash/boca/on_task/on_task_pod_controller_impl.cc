@@ -41,7 +41,7 @@ std::unique_ptr<views::Widget> CreateChildWidget(
   params.parent = parent_window;
   params.name = widget_name;
   params.activatable = views::Widget::InitParams::Activatable::kDefault;
-  params.opacity = views::Widget::InitParams::WindowOpacity::kOpaque;
+  params.opacity = views::Widget::InitParams::WindowOpacity::kTranslucent;
   auto widget = std::make_unique<views::Widget>();
   widget->Init(std::move(params));
   widget->SetContentsView(std::move(view));
@@ -58,6 +58,9 @@ OnTaskPodControllerImpl::OnTaskPodControllerImpl(Browser* browser)
   pod_widget_ = CreateChildWidget(browser_window->GetToplevelWindow(),
                                   kOnTaskPodWidgetInternalName,
                                   std::move(on_task_pod_view));
+  // Fetch the header height in unlocked mode, since the value changes when the
+  // window enters locked fullscreen.
+  frame_header_height_ = boca::GetFrameHeaderHeight(pod_widget_->parent());
   pod_widget_->widget_delegate()->SetAccessibleTitle(
       l10n_util::GetStringUTF16(IDS_ON_TASK_POD_ACCESSIBLE_NAME));
   pod_widget_->SetBounds(CalculateWidgetBounds());
@@ -137,6 +140,9 @@ void OnTaskPodControllerImpl::OnWindowBoundsChanged(
   bool is_window_pinned = IsWindowPinned(window);
   if (is_window_pinned_ != is_window_pinned) {
     on_task_pod_view->OnLockedModeUpdate();
+
+    // Resize the widget to fit the contents view.
+    pod_widget_->SetSize(on_task_pod_view->GetPreferredSize());
   }
   is_window_pinned_ = is_window_pinned;
 }
@@ -155,10 +161,16 @@ void OnTaskPodControllerImpl::OnPageNavigationContextChanged() {
 }
 
 bool OnTaskPodControllerImpl::CanNavigateToPreviousPage() {
+  if (!browser_) {
+    return false;
+  }
   return chrome::CanGoBack(browser_.get());
 }
 
 bool OnTaskPodControllerImpl::CanNavigateToNextPage() {
+  if (!browser_) {
+    return false;
+  }
   return chrome::CanGoForward(browser_.get());
 }
 
@@ -171,17 +183,18 @@ const gfx::Rect OnTaskPodControllerImpl::CalculateWidgetBounds() {
       pod_widget_->parent()->GetWindowBoundsInScreen();
   const gfx::Size preferred_size =
       pod_widget_->GetContentsView()->GetPreferredSize();
-  const int frame_header_height =
-      boca::GetFrameHeaderHeight(pod_widget_->parent());
   gfx::Point origin;
   switch (pod_snap_location_) {
     case ash::OnTaskPodSnapLocation::kTopLeft:
-      origin = gfx::Point(parent_window_bounds.x(),
-                          parent_window_bounds.y() + frame_header_height);
+      origin = gfx::Point(parent_window_bounds.x() + kPodVerticalBorder,
+                          parent_window_bounds.y() + frame_header_height_ +
+                              kPodHorizontalBorder);
       break;
     case ash::OnTaskPodSnapLocation::kTopRight:
-      origin = gfx::Point(parent_window_bounds.right() - preferred_size.width(),
-                          parent_window_bounds.y() + frame_header_height);
+      origin = gfx::Point(parent_window_bounds.right() -
+                              preferred_size.width() - kPodVerticalBorder,
+                          parent_window_bounds.y() + frame_header_height_ +
+                              kPodHorizontalBorder);
   }
 
   return gfx::Rect(origin, preferred_size);

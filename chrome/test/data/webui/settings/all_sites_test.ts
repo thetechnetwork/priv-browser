@@ -20,7 +20,7 @@ import {TestMetricsBrowserProxy} from './test_metrics_browser_proxy.js';
 
 // clang-format on
 
-suite('DisableRelatedWebsiteSets', function() {
+suite('WithoutRelatedWebsiteSetsData', function() {
   /**
    * An example eTLD+1 Object with multiple origins grouped under it.
    */
@@ -55,10 +55,6 @@ suite('DisableRelatedWebsiteSets', function() {
 
   suiteSetup(function() {
     CrSettingsPrefs.setInitialized();
-
-    loadTimeData.overrideValues({
-      firstPartySetsUIEnabled: false,
-    });
   });
 
   suiteTeardown(function() {
@@ -1106,10 +1102,6 @@ suite('EnableRelatedWebsiteSets', function() {
 
   suiteSetup(function() {
     CrSettingsPrefs.setInitialized();
-
-    loadTimeData.overrideValues({
-      firstPartySetsUIEnabled: true,
-    });
   });
 
   suiteTeardown(function() {
@@ -1321,7 +1313,7 @@ suite('EnableRelatedWebsiteSets', function() {
       });
 
   test(
-      'show RWS decription, clear button and data usage when filtering by RWS',
+      'show RWS decription, delete button and data usage when filtering by RWS',
       function() {
         TEST_SITE_GROUPS.forEach(siteGroup => {
           testElement.siteGroupMap.set(
@@ -1355,7 +1347,7 @@ suite('EnableRelatedWebsiteSets', function() {
             relatedWebsiteSetsDescription!.innerText.trim());
         assertTrue(sortComponent!.hidden);
         assertEquals(
-            loadTimeData.getString('siteSettingsDeleteAllStorageLabel'),
+            loadTimeData.getString('allSitesRwsDeleteDataButtonLabel'),
             clearAllButton.innerText.trim());
         assertEquals(
             loadTimeData.substituteString(
@@ -1418,7 +1410,7 @@ suite('EnableRelatedWebsiteSets', function() {
                   '#clearAllStorageDialogSignOutLabel')!.innerText.trim();
 
       assertEquals(
-          loadTimeData.getString('siteSettingsDeleteAllStorageDialogTitle'),
+          loadTimeData.getString('allSitesRwsDeleteDataDialogTitle'),
           confirmationTitle);
       const messageId = appInstalled ?
           'siteSettingsDeleteRwsStorageConfirmationInstalled' :

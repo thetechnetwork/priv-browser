@@ -550,6 +550,8 @@ class GAIAInfoUpdateServiceWithGlicEnablingTest
 };
 
 TEST_F(GAIAInfoUpdateServiceWithGlicEnablingTest, LogInLogOut) {
+  signin::WaitForRefreshTokensLoaded(identity_manager());
+
   std::string email = "pat@example.com";
   AccountInfo info = signin::MakePrimaryAccountAvailable(
       identity_manager(), email, signin::ConsentLevel::kSignin);
@@ -585,31 +587,5 @@ TEST_F(GAIAInfoUpdateServiceWithGlicEnablingTest, LogInLogOut) {
   EXPECT_EQ(nullptr, entry->GetGAIAPicture());
   EXPECT_TRUE(entry->GetHostedDomain().empty());
   EXPECT_FALSE(entry->IsGlicEligible());
-}
-
-TEST_F(GAIAInfoUpdateServiceWithGlicEnablingTest,
-       SignInThenEnableGlicThenRestart) {
-  // Sign in without making the Profile Glic eligible.
-  std::string email = "pat@example.com";
-  AccountInfo info = signin::MakePrimaryAccountAvailable(
-      identity_manager(), email, signin::ConsentLevel::kSignin);
-  info = GetValidAccountInfo(info.email, info.gaia, "Pat", "Pat Foo",
-                             kNoHostedDomainFound);
-  signin::UpdateAccountInfoForAccount(identity_manager(), info);
-  base::RunLoop().RunUntilIdle();
-
-  ProfileAttributesEntry* entry = storage()->GetAllProfilesAttributes().front();
-  EXPECT_FALSE(entry->IsGlicEligible());
-
-  // Clear the service before restarting to ensure the update is not part of the
-  // refresh token update.
-  ClearGAIAInfoUpdateService();
-  MakeProfileGlicEligible();
-  // Information is not yet propagated.
-  EXPECT_FALSE(entry->IsGlicEligible());
-
-  // Simulates a restart which would now propagate the new information.
-  RecreateGAIAInfoUpdateService();
-  EXPECT_TRUE(entry->IsGlicEligible());
 }
 #endif

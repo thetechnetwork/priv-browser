@@ -166,6 +166,7 @@ Her er noen ting du kan prøve til å begynne med.</translation>
 <translation id="1505542291183484463">Endre vindusstørrelse feltvis nedover</translation>
 <translation id="1510238584712386396">Appoversikt</translation>
 <translation id="1520303207432623762">{NUM_APPS,plural, =1{Vis innstillinger for varsler. Varsler er slått av for en app}other{Vis innstillinger for varsler. Varsler er slått av for # apper}}</translation>
+<translation id="1521655867290435174">Google Regneark</translation>
 <translation id="1523032696246003">Batteri <ph name="BATTERY_PERCENTAGE" /> % | <ph name="TIME" /> til batteriet er fullt</translation>
 <translation id="1525508553941733066">AVVIS</translation>
 <translation id="1526448108126799339">Åpne ny fane i et nytt vindu</translation>
@@ -214,6 +215,7 @@ Her er noen ting du kan prøve til å begynne med.</translation>
 <translation id="1679841710523778799">Skru opp lysstyrken</translation>
 <translation id="1680659827022803830">Innstillinger for videosamtale</translation>
 <translation id="169515659049020177">Shift</translation>
+<translation id="1696984622403682083">Du kan når som helst slå av denne funksjonen i innstillingene. <ph name="LINK_TO_LEARN_MORE" /></translation>
 <translation id="1698080062160024910">Nedtelling på <ph name="TOTAL_TIME" /> · <ph name="LABEL" /></translation>
 <translation id="1698760176351776263">IPv6-adresse: <ph name="ADDRESS" /></translation>
 <translation id="1703117532528082099">Det aktive vinduet er festet på venstre side.</translation>
@@ -240,6 +242,8 @@ Her er noen ting du kan prøve til å begynne med.</translation>
 <translation id="1755556344721611131">Diagnostikk-appen</translation>
 <translation id="1756833229520115364">Kunne ikke lagre malen. For mange vinduer eller faner.</translation>
 <translation id="1757857692711134412">Avslått til solnedgang</translation>
+<translation id="1763084151787818322">Andre handlinger</translation>
+<translation id="1768138163688567246">Lukk «Søk på skjermen»</translation>
 <translation id="1768366657309696705">Hurtigtasten <ph name="LAUNCHER_KEY_NAME" /> + punktum er endret. For å bruke Insert-tasten, trykk på <ph name="LAUNCHER_KEY_NAME" />-tasten + Shift + tilbaketasten.</translation>
 <translation id="1770726142253415363">Flyttet til rad <ph name="ROW_NUMBER" />, kolonne <ph name="COLUMN_NUMBER" />.</translation>
 <translation id="1771761307086386028">Rull til høyre</translation>
@@ -345,7 +349,6 @@ Her er noen ting du kan prøve til å begynne med.</translation>
 <translation id="2201071101391734388">Nylig bilde <ph name="INDEX" /> av <ph name="TOTAL_COUNT" />.</translation>
 <translation id="2201687081523799384">Skjul Google Huskeliste</translation>
 <translation id="2208323208084708176">Enhetlig skrivebordsmodus</translation>
-<translation id="2220572644011485463">PIN-kode eller passord</translation>
 <translation id="2222841058024245321">Skrivebord 7</translation>
 <translation id="2223384056430485343">På delt skjerm</translation>
 <translation id="2224075387478458881">Skjermopptak tillates ikke når beskyttet innhold er synlig</translation>
@@ -933,7 +936,7 @@ Koble enheten til strøm.</translation>
 <translation id="4146671046252289537">Flytt til slutten av neste ord</translation>
 <translation id="4146833061457621061">Spill av musikk</translation>
 <translation id="4150201353443180367">Skjerm</translation>
-<translation id="4151054805501931758">Retusjer portrettet</translation>
+<translation id="4151054805501931758">Portrettretusjering</translation>
 <translation id="4156293514828496577"><ph name="PERCENTAGE" /> % batteri gjenstår (ca. <ph name="TIME_LEFT" />).
 Noen funksjoner er begrenset for å forlenge batterilevetiden.</translation>
 <translation id="4158003972857765638">Organiser på et nytt skrivebord</translation>
@@ -965,6 +968,7 @@ Noen funksjoner er begrenset for å forlenge batterilevetiden.</translation>
 <translation id="4221957499226645091"><ph name="APP_NAME" />, installert app, satt på pause</translation>
 <translation id="4228078597006700451">Kontrollene er ikke konfigurert</translation>
 <translation id="4230560241506423345">Opprett</translation>
+<translation id="4236726631849783264">En påminnelse om foreslåtte handlinger</translation>
 <translation id="4239069858505860023">GPRS</translation>
 <translation id="4240486403425279990">Oversiktsmodus</translation>
 <translation id="4242533952199664413">Åpne innstillingene</translation>
@@ -981,7 +985,6 @@ Noen funksjoner er begrenset for å forlenge batterilevetiden.</translation>
 <translation id="4275663329226226506">Medier</translation>
 <translation id="4279490309300973883">Speiling</translation>
 <translation id="4280601795273309128">Sikkerhetsoppdateringer er avsluttet. Oppgrader enheten.</translation>
-<translation id="4281739221820540368">Opprett Google-dokumenter</translation>
 <translation id="4283888303416325161">Oppgi passordet for høyere sikkerhet</translation>
 <translation id="4285498937028063278">Løsne</translation>
 <translation id="428715201724021596">Kobler til profilen. Dette kan ta noen minutter.</translation>
@@ -1042,6 +1045,7 @@ Noen funksjoner er begrenset for å forlenge batterilevetiden.</translation>
 <translation id="4471354919263203780">Laster ned filer for talegjenkjenning … <ph name="PERCENT" /> %</translation>
 <translation id="4471432286288241507">{0,plural, =0{Oppdater enheten nå}=1{Oppdater enheten innen 1 sekund}other{Oppdater enheten innen # sekunder}}</translation>
 <translation id="4472575034687746823">Kom i gang</translation>
+<translation id="4473489370276014885">Google-kontakter</translation>
 <translation id="4477350412780666475">Neste spor</translation>
 <translation id="4477751544736611934">Dette kan medføre datakostnader.
 1 enhet er tilkoblet.</translation>
@@ -1068,6 +1072,7 @@ Noen funksjoner er begrenset for å forlenge batterilevetiden.</translation>
 <translation id="4545950850562423083">Lagre denne siden som bokmerke</translation>
 <translation id="4548482551627849548">Flytt det aktive vinduet til skrivebordet til venstre</translation>
 <translation id="4552748006424994716">På grunn av ekko kan du bare lytte til mikrofonen din via hodetelefoner med ledning.</translation>
+<translation id="4556953949326137018">Når du bruker foreslåtte handlinger, for eksempel «legg til i Kalender» eller «lag Google-dokumenter», blir innholdet fra det valgte området sendt til Google-tjenere for å foreslå handlinger, i henhold til <ph name="LINK_TO_SERVICE_TERMS" />. Ikke ta med noe som er personlig, sensitivt eller konfidensielt.</translation>
 <translation id="4560576029703263363">På</translation>
 <translation id="4561267230861221837">3G</translation>
 <translation id="4565377596337484307">Skjul passord</translation>
@@ -1151,6 +1156,7 @@ Noen funksjoner er begrenset for å forlenge batterilevetiden.</translation>
 <translation id="481455355267255546">Neste</translation>
 <translation id="481749895090480684">Huskeliste: <ph name="GLANCEABLES_TASKS_LIST_NAME" /></translation>
 <translation id="4826588772550366629">kamera og mikrofon</translation>
+<translation id="4828935196674083554">Legger til ...</translation>
 <translation id="482908187605862807">Tilgjengelige apper fra Play-butikken</translation>
 <translation id="4831034276697007977">Er du sikker på at du vil slå av automatiske klikk?</translation>
 <translation id="4835677468087803981">Skjul PIN-koden</translation>
@@ -1648,6 +1654,7 @@ Ingen enheter er tilkoblet.</translation>
 <translation id="641817663353603351">page up</translation>
 <translation id="6424520630891723617"><ph name="SECURITY_STATUS" /> – signalstyrke <ph name="SIGNAL_STRENGTH" /></translation>
 <translation id="642644398083277086">Fjern alle varsler</translation>
+<translation id="6426905245930183644">Oppretter ...</translation>
 <translation id="6430225033895752525">Vis innstillinger for fokus</translation>
 <translation id="643147933154517414">Ingen varsler</translation>
 <translation id="6431865393913628856">Skjermopptak</translation>
@@ -1714,7 +1721,6 @@ Nylig installert</translation>
 <translation id="6612889377159412215">underoppgave</translation>
 <translation id="6613765291890844037"><ph name="STORAGE_IN_USE_SIZE" /> lagringsplass er i bruk | <ph name="STORAGE_TOTAL_SIZE" /> totalt</translation>
 <translation id="6614169507485700968">Personvernskjermen er på</translation>
-<translation id="6618277154885124991">Opprett Google-regneark</translation>
 <translation id="6622679827379792051">Konfigurer visning av apper fra telefonen din</translation>
 <translation id="662279009180869175">Bruk venstre- og høyrepilene til å endre størrelsen på den delte skjermen.</translation>
 <translation id="6624493541160101248">Gjeldende skrivebord: <ph name="DESK_NAME" />. Skrivebord <ph name="DESK_INDEX" /> av <ph name="DESK_COUNT" />.</translation>
@@ -1829,7 +1835,6 @@ Nylig installert</translation>
 <translation id="7000027735917578303">Innstillinger for vinduer og skrivebord</translation>
 <translation id="7004910047186208204">Koble til mobildata</translation>
 <translation id="7005239792648594238">Åpne en app for å komme i gang</translation>
-<translation id="7007983414944123363">PIN-koden eller passordet kunne ikke verifiseres. Prøv på nytt.</translation>
 <translation id="7014684956566476813">Koblet til enheten <ph name="DEVICE_NAME" /></translation>
 <translation id="7015766095477679451">Kom tilbake <ph name="COME_BACK_TIME" />.</translation>
 <translation id="70168403932084660">Skrivebord 6</translation>
@@ -1943,6 +1948,7 @@ Nylig installert</translation>
 <translation id="742594950370306541">Kameraet er i bruk.</translation>
 <translation id="742608627846767349">God morgen</translation>
 <translation id="743058460480092004">Kameraet og mikrofonen er i bruk.</translation>
+<translation id="7440404390546433462">Google Søk</translation>
 <translation id="7441711280402516925">Spiller av · Bytt til fane</translation>
 <translation id="7453330308669753048">Resultatet er fjernet fra søkeloggen</translation>
 <translation id="7459485586006128091">Wifi-sonen er slått av på grunn av en intern feil. Prøv å koble til på nytt om noen minutter.</translation>
@@ -2398,12 +2404,13 @@ For å slå av enheten, trykk og hold på av/på-knappen på enheten igjen.</tra
 <translation id="8921624153894383499">Google-assistenten kan ikke dette språket.</translation>
 <translation id="8926951137623668982">Hyllen skjules alltid</translation>
 <translation id="8929566928381252430">Prøver du å bruke Caps Lock-tasten? Bruk</translation>
+<translation id="8934418770423095813">Opprett Google-dokument</translation>
 <translation id="8934926665751933910">{NUM_FILES,plural, =1{1 fil}other{# filer}}</translation>
 <translation id="8936501819958976551">deaktivert</translation>
 <translation id="8938800817013097409">USB-C-enhet (høyre port på baksiden)</translation>
 <translation id="8939855324412367560">Innenheten for lyd er «<ph name="INPUT_DEVICE_NAME" />», og utenheten for lyd er «<ph name="OUTPUT_DEVICE_NAME" />». Gå til innstillingene for å endre dette.</translation>
 <translation id="8940956008527784070">Lavt batterinivå (<ph name="PERCENTAGE" /> %)</translation>
-<translation id="8945508919180478719">Mikrofon i studiostil</translation>
+<translation id="8945508919180478719">Studiomikrofon</translation>
 <translation id="894774083269346314">Det er ikke merket av for <ph name="PROFILE_NAME" /> (<ph name="EMAIL" />).</translation>
 <translation id="8949925099261528566">Tilkoblet – ingen internettilgang</translation>
 <translation id="8951539504029375108">Kun godkjente Thunderbolt-enheter er kompatible med Chromebooken din</translation>
@@ -2466,6 +2473,7 @@ For å slå av enheten, trykk og hold på av/på-knappen på enheten igjen.</tra
 <translation id="9168436347345867845">Gjør det senere</translation>
 <translation id="9178475906033259337">Viser 1 resultat for <ph name="QUERY" /></translation>
 <translation id="9179259655489829027">Med denne funksjonen får du rask tilgang til påloggede brukere uten å måtte skrive inn passord. Du bør bare bruke denne funksjonen med kontoer du stoler på.</translation>
+<translation id="9183302530794969518">Google Dokumenter</translation>
 <translation id="9183456764293710005">Lupe for hele skjermen</translation>
 <translation id="9192133205265227850">Bruk «<ph name="DEVICE_NAME" />»</translation>
 <translation id="9193626018745640770">Caster på en ukjent mottaker</translation>

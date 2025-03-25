@@ -149,6 +149,7 @@
 <translation id="1455242230282523554">顯示語言設定</translation>
 <translation id="1459693405370120464">天氣</translation>
 <translation id="1460620680449458626">音量校咗靜音。</translation>
+<translation id="1462439140224375968">已建立 Google 文件</translation>
 <translation id="14648076227129703">此操作會允許 <ph name="APP1_NAME" />、<ph name="APP2_NAME" /> 以及具備相機權限的所有應用程式和網站存取相機</translation>
 <translation id="1467432559032391204">向左</translation>
 <translation id="146902737843070955">管理員已要求此變更</translation>
@@ -166,6 +167,7 @@
 <translation id="1505542291183484463">向下調整並排視窗大小</translation>
 <translation id="1510238584712386396">啟動器</translation>
 <translation id="1520303207432623762">{NUM_APPS,plural, =1{顯示通知設定。已關閉 1 個應用程式的通知}other{顯示通知設定。已關閉 # 個應用程式的通知}}</translation>
+<translation id="1521655867290435174">Google 試算表</translation>
 <translation id="1523032696246003">電量：<ph name="BATTERY_PERCENTAGE" />% | <ph name="TIME" />後便完成充電</translation>
 <translation id="1525508553941733066">關閉</translation>
 <translation id="1526448108126799339">在新視窗中開啟新分頁</translation>
@@ -214,6 +216,7 @@
 <translation id="1679841710523778799">調高亮度</translation>
 <translation id="1680659827022803830">視像通話控制項</translation>
 <translation id="169515659049020177">Shift</translation>
+<translation id="1696984622403682083">你可隨時在「設定」中關閉此功能。<ph name="LINK_TO_LEARN_MORE" /></translation>
 <translation id="1698080062160024910"><ph name="TOTAL_TIME" /> 計時器 · <ph name="LABEL" /></translation>
 <translation id="1698760176351776263">IPv6 位址：<ph name="ADDRESS" /></translation>
 <translation id="1703117532528082099">用緊嘅視固定咗喺畫面左邊。</translation>
@@ -240,6 +243,8 @@
 <translation id="1755556344721611131">診斷應用程式</translation>
 <translation id="1756833229520115364">無法儲存範本，可能是視窗或分頁過多。</translation>
 <translation id="1757857692711134412">關閉，直到日落</translation>
+<translation id="1763084151787818322">其他操作</translation>
+<translation id="1768138163688567246">閂「搜尋我的畫面」</translation>
 <translation id="1768366657309696705">「<ph name="LAUNCHER_KEY_NAME" />鍵 + 句號鍵」的鍵盤快速鍵已變更。如要使用 Insert 鍵，請按下<ph name="LAUNCHER_KEY_NAME" />鍵 + Shift + Backspace 鍵。</translation>
 <translation id="1770726142253415363">移咗去第 <ph name="ROW_NUMBER" /> 列，第 <ph name="COLUMN_NUMBER" /> 欄。</translation>
 <translation id="1771761307086386028">向右捲動</translation>
@@ -345,7 +350,6 @@
 <translation id="2201071101391734388">第 <ph name="INDEX" /> 張近期相片 (共 <ph name="TOTAL_COUNT" /> 張)。</translation>
 <translation id="2201687081523799384">收合 Google Tasks</translation>
 <translation id="2208323208084708176">統一桌面模式</translation>
-<translation id="2220572644011485463">PIN 或密碼</translation>
 <translation id="2222841058024245321">桌面 7</translation>
 <translation id="2223384056430485343">喺分割螢幕</translation>
 <translation id="2224075387478458881">當畫面上有受保護的內容時，就無法使用螢幕畫面錄影功能</translation>
@@ -590,6 +594,7 @@
 <translation id="301584155502740476">顯示熱點詳情。熱點已關閉。</translation>
 <translation id="3017079585324758401">背景</translation>
 <translation id="3018135054368884502">向前快轉媒體</translation>
+<translation id="3026897869154397692">已新增至日曆</translation>
 <translation id="3033545621352269033">已開啟</translation>
 <translation id="3033912566804961911">與「<ph name="DESK_NAME" />」合併</translation>
 <translation id="3036649622769666520">開啟檔案</translation>
@@ -965,6 +970,7 @@
 <translation id="4221957499226645091"><ph name="APP_NAME" />，已經安裝嘅應用程式，已經暫停</translation>
 <translation id="4228078597006700451">未設定控制項</translation>
 <translation id="4230560241506423345">新增</translation>
+<translation id="4236726631849783264">建議操作提醒事項</translation>
 <translation id="4239069858505860023">GPRS</translation>
 <translation id="4240486403425279990">概覽模式</translation>
 <translation id="4242533952199664413">開啟設定</translation>
@@ -981,7 +987,6 @@
 <translation id="4275663329226226506">媒體</translation>
 <translation id="4279490309300973883">鏡像</translation>
 <translation id="4280601795273309128">安全更新已結束，請升級裝置。</translation>
-<translation id="4281739221820540368">建立「Google 文件」</translation>
 <translation id="4283888303416325161">為安全起見，請輸入密碼</translation>
 <translation id="4285498937028063278">取消固定</translation>
 <translation id="428715201724021596">正在連線至設定檔。這項操作可能需時數分鐘。</translation>
@@ -1009,6 +1014,7 @@
 <translation id="4351244548802238354">關閉對話方塊</translation>
 <translation id="4356872429719185452">顯示熱點詳情。熱點正在開啟。</translation>
 <translation id="4364101114148522660"><ph name="DURATION" />  正在錄製</translation>
+<translation id="4368227575116094370">建立 Google 試算表</translation>
 <translation id="4371348193907997655">投放設定</translation>
 <translation id="4371834685492830207">PIN 只可包含有效字元</translation>
 <translation id="4375482231364171368">在網址列中搜尋</translation>
@@ -1042,6 +1048,7 @@
 <translation id="4471354919263203780">正在下載語音識別檔案… <ph name="PERCENT" />%</translation>
 <translation id="4471432286288241507">{0,plural, =0{請立即更新裝置}=1{請在 1 秒內更新裝置}other{請在 # 秒內更新裝置}}</translation>
 <translation id="4472575034687746823">開始使用</translation>
+<translation id="4473489370276014885">Google 通訊錄</translation>
 <translation id="4477350412780666475">下一首曲目</translation>
 <translation id="4477751544736611934">這種情況可能需要支付數據費用。
 已連接 1 部裝置。</translation>
@@ -1068,6 +1075,7 @@
 <translation id="4545950850562423083">將目前頁面儲存為書籤</translation>
 <translation id="4548482551627849548">將使用中的視窗移至左側桌面</translation>
 <translation id="4552748006424994716">為免有回音，你只可以透過有線耳機聆聽麥克風的音訊。</translation>
+<translation id="4556953949326137018">使用「新增至日曆」或「建立 Google 文件」這類建議操作時，系統會按照 <ph name="LINK_TO_SERVICE_TERMS" />的規定，將所選區域的內容傳送到 Google 伺服器以提供操作建議。請勿加入任何個人、敏感或機密內容。</translation>
 <translation id="4560576029703263363">已開啟</translation>
 <translation id="4561267230861221837">3G</translation>
 <translation id="4565377596337484307">隱藏密碼</translation>
@@ -1151,6 +1159,7 @@
 <translation id="481455355267255546">即將舉行的活動</translation>
 <translation id="481749895090480684">工作清單：<ph name="GLANCEABLES_TASKS_LIST_NAME" /></translation>
 <translation id="4826588772550366629">相機和麥克風</translation>
+<translation id="4828935196674083554">正在加入...</translation>
 <translation id="482908187605862807">「Play 商店」提供的應用程式</translation>
 <translation id="4831034276697007977">確定要關閉自動點擊功能嗎？</translation>
 <translation id="4835677468087803981">隱藏 PIN</translation>
@@ -1647,6 +1656,7 @@
 <translation id="641817663353603351">Page Up 鍵</translation>
 <translation id="6424520630891723617"><ph name="SECURITY_STATUS" />，訊號強度係 <ph name="SIGNAL_STRENGTH" /></translation>
 <translation id="642644398083277086">清除所有通知</translation>
+<translation id="6426905245930183644">正在建立…</translation>
 <translation id="6430225033895752525">顯示「專注模式」設定</translation>
 <translation id="643147933154517414">沒有通知</translation>
 <translation id="6431865393913628856">螢幕錄影</translation>
@@ -1712,7 +1722,6 @@
 <translation id="6612889377159412215">子工作</translation>
 <translation id="6613765291890844037">已使用 <ph name="STORAGE_IN_USE_SIZE" /> 的儲存空間 | 共 <ph name="STORAGE_TOTAL_SIZE" /></translation>
 <translation id="6614169507485700968">已啟用私隱保護畫面</translation>
-<translation id="6618277154885124991">建立「Google 試算表」</translation>
 <translation id="6622679827379792051">設定睇手機嘅應用程式</translation>
 <translation id="662279009180869175">用左同右箭嘴調整分割螢幕大細</translation>
 <translation id="6624493541160101248">目前的桌面：<ph name="DESK_NAME" />。第 <ph name="DESK_INDEX" /> 個桌面，共 <ph name="DESK_COUNT" /> 個。</translation>
@@ -1827,7 +1836,6 @@
 <translation id="7000027735917578303">視窗同桌面設定</translation>
 <translation id="7004910047186208204">連線至流動數據</translation>
 <translation id="7005239792648594238">開啟應用程式即可開始</translation>
-<translation id="7007983414944123363">系統無法驗證您的 PIN 或密碼。請再試一次。</translation>
 <translation id="7014684956566476813">已連接名為「<ph name="DEVICE_NAME" />」的裝置</translation>
 <translation id="7015766095477679451"><ph name="COME_BACK_TIME" /> 後才可使用。</translation>
 <translation id="70168403932084660">桌面 6</translation>
@@ -1887,6 +1895,7 @@
 <translation id="7228968829656641943">揀範圍就可以搵螢幕內容。㩒 Tab 鍵再㩒空白鍵就可以用鍵盤導覽。</translation>
 <translation id="7229029500464092426">記憶體用量：<ph name="AVAILABLE_MEMORY" /> (總記憶體：<ph name="TOTAL_MEMORY" />)</translation>
 <translation id="7239814253344511868">兩個滑鼠按鈕</translation>
+<translation id="7240636904654154599">已建立 Google 試算表</translation>
 <translation id="7244725679040769470">剩餘 <ph name="PERCENTAGE" />% 電量。請將裝置接上電源。</translation>
 <translation id="7246071203293827765"><ph name="UPDATE_TEXT" />。此 Chromebook 需要重新啟動才能套用更新。過程可能需時 1 分鐘。</translation>
 <translation id="7256057185598509352">ExpressKey 2</translation>
@@ -1941,6 +1950,7 @@
 <translation id="742594950370306541">相機正在使用中。</translation>
 <translation id="742608627846767349">早晨，</translation>
 <translation id="743058460480092004">相機和麥克風正在使用中。</translation>
+<translation id="7440404390546433462">Google 搜尋</translation>
 <translation id="7441711280402516925">播放中 · 切換至分頁</translation>
 <translation id="7453330308669753048">移除咗搜尋記錄結果</translation>
 <translation id="7459485586006128091">由於發生內部問題，因此熱點已關閉。請過幾分鐘再重試連線。</translation>
@@ -2396,6 +2406,8 @@
 <translation id="8921624153894383499">Google 助理不支援這種語言。</translation>
 <translation id="8926951137623668982">一律隱藏捷徑列</translation>
 <translation id="8929566928381252430">要使用 Caps Lock 鍵嗎？使用</translation>
+<translation id="8929623844713377237">已建立聯絡人</translation>
+<translation id="8934418770423095813">建立 Google 文件</translation>
 <translation id="8934926665751933910">{NUM_FILES,plural, =1{1 個檔案}other{# 個檔案}}</translation>
 <translation id="8936501819958976551">已停用</translation>
 <translation id="8938800817013097409">USB-C 裝置 (後方右側連接埠)</translation>
@@ -2464,6 +2476,7 @@
 <translation id="9168436347345867845">稍後再說</translation>
 <translation id="9178475906033259337">顯示緊 1 個同「<ph name="QUERY" />」有關嘅結果</translation>
 <translation id="9179259655489829027">這項功能讓您可快速登入任何已登入的使用者帳戶，無需使用密碼。建議您只讓信任的帳戶使用此功能。</translation>
+<translation id="9183302530794969518">Google 文件</translation>
 <translation id="9183456764293710005">全螢幕放大鏡</translation>
 <translation id="9192133205265227850">使用「<ph name="DEVICE_NAME" />」</translation>
 <translation id="9193626018745640770">正在投放到不明接收器</translation>

@@ -9,6 +9,7 @@
 #include <iterator>
 #include <optional>
 #include <ranges>
+#include <variant>
 
 #include "base/containers/contains.h"
 #include "base/containers/fixed_flat_set.h"
@@ -134,7 +135,7 @@ bool IsAutofillAiPrediction(const FieldPrediction& prediction) {
 // `event2` is not supposed to be added.
 bool AreCollapsibleLogEvents(const AutofillField::FieldLogEventType& event1,
                              const AutofillField::FieldLogEventType& event2) {
-  return absl::visit(
+  return std::visit(
       [](const auto& e1, const auto& e2) {
         if constexpr (std::is_same_v<decltype(e1), decltype(e2)>) {
           return AreCollapsible(e1, e2);
@@ -160,8 +161,13 @@ bool PreferHeuristicOverHtml(FieldType heuristic_type,
 // can help the server to "learn" the correct classification for these fields.
 bool PreferHeuristicOverServer(FieldType heuristic_type,
                                FieldType server_type) {
+  // Until we gain confidence in the precision of AutofillAI predictions, they
+  // should not overrule local heuristics. The AutofillAI prediction itself can
+  // always be retrieved via `GetAutofillAiServerTypePredictions`.
   return base::Contains(kAutofillHeuristicsVsServerOverrides,
-                        std::make_pair(heuristic_type, server_type));
+                        std::make_pair(heuristic_type, server_type)) ||
+         (heuristic_type != UNKNOWN_TYPE &&
+          GroupTypeOfFieldType(server_type) == FieldTypeGroup::kAutofillAi);
 }
 
 // Util function for `ComputedType`. Returns the values of HtmlFieldType that
@@ -320,54 +326,59 @@ std::optional<FieldType> AutofillField::GetAutofillAiServerTypePredictions()
 void AutofillField::set_server_predictions(
     std::vector<FieldPrediction> predictions) {
   overall_type_ = std::nullopt;
-  // Ensures that AutofillField::server_type() is a valid enum value.
-  for (auto& prediction : predictions) {
-    prediction.set_type(ToSafeFieldType(prediction.type(), NO_SERVER_DATA));
-  }
-
   server_predictions_.clear();
   experimental_server_predictions_.clear();
 
   for (auto& prediction : predictions) {
-    if (!prediction.has_source()) {
-      // TODO(crbug.com/40243028): captured tests store old autofill api
-      // response recordings without `source` field. We need to maintain the old
-      // behavior until these recordings will be migrated.
-      server_predictions_.push_back(std::move(prediction));
-      continue;
-    }
-
-    if (prediction.source() == FieldPrediction::SOURCE_UNSPECIFIED) {
-      // A prediction with `SOURCE_UNSPECIFIED` is one of two things:
-      //   1. No prediction for default, a.k.a. `NO_SERVER_DATA`. The absence
-      //      of a prediction may not be creditable to a particular prediction
-      //      source.
-      //   2. An experiment that is missing from the `PredictionSource` enum.
-      //      Protobuf corrects unknown values to 0 when parsing.
-      // Neither case is actionable.
-      continue;
-    }
-
-    if (IsDefaultPrediction(prediction)) {
-      server_predictions_.push_back(std::move(prediction));
-    } else if (IsAutofillAiPrediction(prediction)) {
-      if (base::FeatureList::IsEnabled(features::kAutofillAiWithDataSchema)) {
-        server_predictions_.push_back(std::move(prediction));
-      }
-    } else {
-      experimental_server_predictions_.push_back(std::move(prediction));
-    }
+    MaybeAddServerPrediction(std::move(prediction));
   }
 
   if (server_predictions_.empty()) {
     // Equivalent to a `NO_SERVER_DATA` prediction from `SOURCE_UNSPECIFIED`.
     server_predictions_.emplace_back();
   }
+}
 
-  LOG_IF(ERROR, server_predictions_.size() > 2)
-      << "Expected up to 2 default predictions from the Autofill server. "
-         "Actual: "
-      << server_predictions_.size();
+void AutofillField::MaybeAddServerPrediction(
+    AutofillQueryResponse::FormSuggestion::FieldSuggestion::FieldPrediction
+        prediction) {
+  overall_type_ = std::nullopt;
+  if (server_predictions_.size() == 1 && !server_predictions_[0].has_type() &&
+      !server_predictions_[0].has_source()) {
+    // If the only existing "server prediction" is an empty one, remove it.
+    server_predictions_.clear();
+  }
+
+  prediction.set_type(ToSafeFieldType(prediction.type(), NO_SERVER_DATA));
+
+  if (!prediction.has_source()) {
+    // TODO(crbug.com/40243028): captured tests store old autofill api
+    // response recordings without `source` field. We need to maintain the old
+    // behavior until these recordings will be migrated.
+    server_predictions_.push_back(std::move(prediction));
+    return;
+  }
+
+  if (prediction.source() == FieldPrediction::SOURCE_UNSPECIFIED) {
+    // A prediction with `SOURCE_UNSPECIFIED` is one of two things:
+    //   1. No prediction for default, a.k.a. `NO_SERVER_DATA`. The absence
+    //      of a prediction may not be creditable to a particular prediction
+    //      source.
+    //   2. An experiment that is missing from the `PredictionSource` enum.
+    //      Protobuf corrects unknown values to 0 when parsing.
+    // Neither case is actionable.
+    return;
+  }
+
+  if (IsDefaultPrediction(prediction)) {
+    server_predictions_.push_back(std::move(prediction));
+  } else if (IsAutofillAiPrediction(prediction)) {
+    if (base::FeatureList::IsEnabled(features::kAutofillAiWithDataSchema)) {
+      server_predictions_.push_back(std::move(prediction));
+    }
+  } else {
+    experimental_server_predictions_.push_back(std::move(prediction));
+  }
 }
 
 void AutofillField::SetHtmlType(HtmlFieldType type, HtmlFieldMode mode) {
@@ -503,23 +514,6 @@ AutofillField::PredictionResult AutofillField::GetComputedPredictionResult()
     // For international bank account number (IBAN) fields the heuristic
     // predictions get precedence over the server predictions.
     believe_server = believe_server && (heuristic_type_local != IBAN_VALUE);
-
-    // Password Manager ignores the computed type - it looks at server
-    // predictions directly. Since many username fields also admit emails, we
-    // can thus give precedence to the EMAIL_ADDRESS classification. This will
-    // not affect Password Manager suggestions, but allow Autofill to provide
-    // email-related suggestions if Password Manager does not have any username
-    // suggestions to show.
-    // TODO: crbug.com/360791229 - Move into
-    // `kAutofillHeuristicsVsServerOverrides` once the feature is cleaned up.
-    const bool server_type_is_username_type =
-        server_type_local == USERNAME || server_type_local == SINGLE_USERNAME;
-    believe_server =
-        believe_server &&
-        !(heuristic_type_local == EMAIL_ADDRESS &&
-          server_type_is_username_type &&
-          base::FeatureList::IsEnabled(
-              features::kAutofillGivePrecedenceToEmailOverUsername));
 
     if (believe_server) {
       return {AutofillType(server_type_local),

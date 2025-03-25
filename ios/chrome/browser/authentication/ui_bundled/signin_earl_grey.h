@@ -89,20 +89,23 @@ class GURL;
 // entry-point-implemented behavior (e.g. history & tabs sync will be disabled,
 // no check for management status, sign-in related
 // metrics will not be sent)
-// Note that, when sync-the-feature is enabled, this function differs from
-// `[SigninEarlGreyUI signinWithFakeIdentity:identity]`. The
-// UI function enable sync too.
-// TODO(crbug.com/40067025): Remove this last remark when sync is disabled.
 - (void)signinWithFakeIdentity:(FakeSystemIdentity*)identity;
+
+// Signs in with the fake identity and access point Settings.
+// Adds the fake-identity to the identity manager if necessary.
+// Converts the personal profile into a managed one.
+// Only intended for tests requiring sign-in but not covering the sign-in UI
+// behavior to speed up and simplify those tests.
+// Will bypass the usual verifications before signin and other
+// entry-point-implemented behavior (e.g. history & tabs sync will be disabled,
+// no check for management status, sign-in related
+// metrics will not be sent)
+- (void)signinWithFakeManagedIdentityInPersonalProfile:
+    (FakeSystemIdentity*)identity;
 
 // Calls `[self signinWithFakeIdentity:identity]` and then waits for sync
 // transport state to become active.
 - (void)signinAndWaitForSyncTransportStateActive:(FakeSystemIdentity*)identity;
-
-// TODO(crbug.com/40066949): Remove all tests invoking this when deleting the
-// MaybeMigrateSyncingUserToSignedIn() call on //ios (not right after launching
-// kMigrateSyncingUserToSignedIn).
-- (void)signinAndEnableLegacySyncFeature:(FakeSystemIdentity*)identity;
 
 // Signs in with `identity` without history sync consent.
 - (void)signInWithoutHistorySyncWithFakeIdentity:(FakeSystemIdentity*)identity;

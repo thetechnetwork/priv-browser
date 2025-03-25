@@ -334,10 +334,10 @@ class OnDeviceModelServiceControllerTest : public testing::Test {
     return test_controller_->model_adaptation_controllers_;
   }
 
-  std::unique_ptr<OptimizationGuideModelExecutor::Session> CreateSession() {
+  std::unique_ptr<OptimizationGuideModelExecutor::Session> CreateSession(
+      const std::optional<SessionConfigParams>& params = std::nullopt) {
     return test_controller_->CreateSession(kFeature, FailOnRemoteFallback(),
-                                           logger_.GetWeakPtr(),
-                                           /*config_params=*/std::nullopt);
+                                           logger_.GetWeakPtr(), params);
   }
 
   void ExpectFailedSession(OnDeviceModelEligibilityReason reason) {
@@ -764,6 +764,7 @@ TEST_F(OnDeviceModelServiceControllerTest, UpdateSafetyModel) {
 
     std::unique_ptr<optimization_guide::ModelInfo> model_info =
         TestModelInfoBuilder()
+            .SetVersion(10)
             .SetAdditionalFiles(fake_safety_asset.AdditionalFiles())
             .Build();
     test_controller_->MaybeUpdateSafetyModel(*model_info);
@@ -782,6 +783,7 @@ TEST_F(OnDeviceModelServiceControllerTest, UpdateSafetyModel) {
     any.set_type_url("garbagetype");
     std::unique_ptr<optimization_guide::ModelInfo> model_info =
         TestModelInfoBuilder()
+            .SetVersion(20)
             .SetAdditionalFiles(fake_safety_asset.AdditionalFiles())
             .SetModelMetadata(any)
             .Build();
@@ -800,6 +802,7 @@ TEST_F(OnDeviceModelServiceControllerTest, UpdateSafetyModel) {
     proto::TextSafetyModelMetadata model_metadata;
     std::unique_ptr<optimization_guide::ModelInfo> model_info =
         TestModelInfoBuilder()
+            .SetVersion(30)
             .SetAdditionalFiles(fake_safety_asset.AdditionalFiles())
             .SetModelMetadata(AnyWrapProto(model_metadata))
             .Build();
@@ -820,6 +823,7 @@ TEST_F(OnDeviceModelServiceControllerTest, UpdateSafetyModel) {
         ToModelExecutionFeatureProto(kFeature));
     std::unique_ptr<optimization_guide::ModelInfo> model_info =
         TestModelInfoBuilder()
+            .SetVersion(40)
             .SetAdditionalFiles(fake_safety_asset.AdditionalFiles())
             .SetModelMetadata(AnyWrapProto(model_metadata))
             .Build();
@@ -829,6 +833,27 @@ TEST_F(OnDeviceModelServiceControllerTest, UpdateSafetyModel) {
         "OptimizationGuide.ModelExecution."
         "OnDeviceTextSafetyModelMetadataValidity",
         TextSafetyModelMetadataValidity::kValid, 1);
+  }
+
+  // Duplicate model info is ignored.
+  {
+    base::HistogramTester histogram_tester;
+
+    proto::TextSafetyModelMetadata model_metadata;
+    model_metadata.add_feature_text_safety_configurations()->set_feature(
+        ToModelExecutionFeatureProto(kFeature));
+    std::unique_ptr<optimization_guide::ModelInfo> model_info =
+        TestModelInfoBuilder()
+            .SetVersion(40)
+            .SetAdditionalFiles(fake_safety_asset.AdditionalFiles())
+            .SetModelMetadata(AnyWrapProto(model_metadata))
+            .Build();
+    test_controller_->MaybeUpdateSafetyModel(*model_info);
+
+    histogram_tester.ExpectTotalCount(
+        "OptimizationGuide.ModelExecution."
+        "OnDeviceTextSafetyModelMetadataValidity",
+        0);
   }
 }
 
@@ -923,11 +948,14 @@ TEST_F(OnDeviceModelServiceControllerTest, SessionRequiresSafetyModel) {
   {
     base::HistogramTester histogram_tester;
 
-    FakeSafetyModelAsset safety_asset([]() {
-      auto safety_config = ComposeSafetyConfig();
-      safety_config.set_feature(proto::MODEL_EXECUTION_FEATURE_TEST);
-      return safety_config;
-    }());
+    FakeSafetyModelAsset safety_asset(FakeSafetyModelAsset::Content{
+        .metadata = SafetyMetadata({[]() {
+          auto safety_config = ComposeSafetyConfig();
+          safety_config.set_feature(proto::MODEL_EXECUTION_FEATURE_TEST);
+          return safety_config;
+        }()}),
+        .model_info_version = 10,
+    });
     test_controller_->MaybeUpdateSafetyModel(safety_asset.model_info());
     EXPECT_FALSE(CreateSession());
 
@@ -945,8 +973,11 @@ TEST_F(OnDeviceModelServiceControllerTest, SessionRequiresSafetyModel) {
   {
     base::HistogramTester histogram_tester;
 
-    test_controller_->MaybeUpdateSafetyModel(
-        standard_assets_.safety.model_info());
+    FakeSafetyModelAsset safety_asset(FakeSafetyModelAsset::Content{
+        .metadata = SafetyMetadata({ComposeSafetyConfig()}),
+        .model_info_version = 20,
+    });
+    test_controller_->MaybeUpdateSafetyModel(safety_asset.model_info());
     EXPECT_TRUE(CreateSession());
 
     histogram_tester.ExpectUniqueSample(
@@ -1002,11 +1033,14 @@ TEST_F(OnDeviceModelServiceControllerTest, SessionRequiresSafetyModel) {
   {
     base::HistogramTester histogram_tester;
 
-    FakeSafetyModelAsset safety_asset([]() {
-      auto safety_config = ComposeSafetyConfig();
-      safety_config.add_allowed_languages("en");
-      return safety_config;
-    }());
+    FakeSafetyModelAsset safety_asset(FakeSafetyModelAsset::Content{
+        .metadata = SafetyMetadata({[]() {
+          auto safety_config = ComposeSafetyConfig();
+          safety_config.add_allowed_languages("en");
+          return safety_config;
+        }()}),
+        .model_info_version = 30,
+    });
     test_controller_->MaybeUpdateSafetyModel(safety_asset.model_info());
 
     EXPECT_FALSE(CreateSession());
@@ -1026,11 +1060,14 @@ TEST_F(OnDeviceModelServiceControllerTest, SessionRequiresSafetyModel) {
   {
     base::HistogramTester histogram_tester;
 
-    FakeSafetyModelAsset safety_asset([]() {
-      auto safety_config = ComposeSafetyConfig();
-      safety_config.add_allowed_languages("en");
-      return safety_config;
-    }());
+    FakeSafetyModelAsset safety_asset(FakeSafetyModelAsset::Content{
+        .metadata = SafetyMetadata({[]() {
+          auto safety_config = ComposeSafetyConfig();
+          safety_config.add_allowed_languages("en");
+          return safety_config;
+        }()}),
+        .model_info_version = 40,
+    });
     test_controller_->MaybeUpdateSafetyModel(safety_asset.model_info());
     test_controller_->SetLanguageDetectionModel(
         standard_assets_.language.model_info());
@@ -1069,8 +1106,6 @@ TEST_F(OnDeviceModelServiceControllerTest, SucceedsWithPassingSafetyChecks) {
       features::kTextSafetyClassifier,
       {{"on_device_retract_unsafe_content", "true"}});
 
-  Initialize(standard_assets_);
-
   FakeSafetyModelAsset safety_asset([]() {
     auto safety_config = ComposeSafetyConfig();
     safety_config.mutable_safety_category_thresholds()->Add(ForbidUnsafe());
@@ -1086,7 +1121,13 @@ TEST_F(OnDeviceModelServiceControllerTest, SucceedsWithPassingSafetyChecks) {
     }
     return safety_config;
   }());
-  test_controller_->MaybeUpdateSafetyModel(safety_asset.model_info());
+
+  Initialize({
+      .base_model = &standard_assets_.base_model,
+      .safety = &safety_asset,
+      .language = &standard_assets_.language,
+      .adaptations = {&standard_assets_.compose},
+  });
 
   auto session = test_controller_->CreateSession(
       kFeature, FailOnRemoteFallback(), logger_.GetWeakPtr(),
@@ -1115,8 +1156,6 @@ TEST_F(OnDeviceModelServiceControllerTest,
       features::kTextSafetyClassifier,
       {{"on_device_retract_unsafe_content", "true"}});
 
-  Initialize(standard_assets_);
-
   FakeSafetyModelAsset safety_asset([]() {
     auto safety_config = ComposeSafetyConfig();
     safety_config.mutable_safety_category_thresholds()->Add(ForbidUnsafe());
@@ -1132,7 +1171,13 @@ TEST_F(OnDeviceModelServiceControllerTest,
     }
     return safety_config;
   }());
-  test_controller_->MaybeUpdateSafetyModel(safety_asset.model_info());
+
+  Initialize({
+      .base_model = &standard_assets_.base_model,
+      .safety = &safety_asset,
+      .language = &standard_assets_.language,
+      .adaptations = {&standard_assets_.compose},
+  });
 
   auto session = test_controller_->CreateSession(
       kFeature, FailOnRemoteFallback(), logger_.GetWeakPtr(),
@@ -1165,8 +1210,6 @@ TEST_F(OnDeviceModelServiceControllerTest,
       features::kTextSafetyClassifier,
       {{"on_device_retract_unsafe_content", "true"}});
 
-  Initialize(standard_assets_);
-
   FakeSafetyModelAsset safety_asset([]() {
     auto safety_config = ComposeSafetyConfig();
     safety_config.mutable_safety_category_thresholds()->Add(ForbidUnsafe());
@@ -1182,7 +1225,13 @@ TEST_F(OnDeviceModelServiceControllerTest,
     }
     return safety_config;
   }());
-  test_controller_->MaybeUpdateSafetyModel(safety_asset.model_info());
+
+  Initialize({
+      .base_model = &standard_assets_.base_model,
+      .safety = &safety_asset,
+      .language = &standard_assets_.language,
+      .adaptations = {&standard_assets_.compose},
+  });
 
   ExpectedRemoteFallback fallback;
   auto session = test_controller_->CreateSession(
@@ -1218,8 +1267,6 @@ TEST_F(OnDeviceModelServiceControllerTest,
       features::kTextSafetyClassifier,
       {{"on_device_retract_unsafe_content", "true"}});
 
-  Initialize(standard_assets_);
-
   FakeSafetyModelAsset safety_asset([]() {
     auto safety_config = ComposeSafetyConfig();
     safety_config.mutable_safety_category_thresholds()->Add(ForbidUnsafe());
@@ -1235,7 +1282,13 @@ TEST_F(OnDeviceModelServiceControllerTest,
     }
     return safety_config;
   }());
-  test_controller_->MaybeUpdateSafetyModel(safety_asset.model_info());
+
+  Initialize({
+      .base_model = &standard_assets_.base_model,
+      .safety = &safety_asset,
+      .language = &standard_assets_.language,
+      .adaptations = {&standard_assets_.compose},
+  });
 
   auto session = test_controller_->CreateSession(
       kFeature, FailOnRemoteFallback(), logger_.GetWeakPtr(),
@@ -1267,8 +1320,6 @@ TEST_F(OnDeviceModelServiceControllerTest, FallbackWithInvalidRawOutputChecks) {
       features::kTextSafetyClassifier,
       {{"on_device_retract_unsafe_content", "true"}});
 
-  Initialize(standard_assets_);
-
   FakeSafetyModelAsset safety_asset([]() {
     auto safety_config = ComposeSafetyConfig();
     safety_config.mutable_safety_category_thresholds()->Add(ForbidUnsafe());
@@ -1284,7 +1335,13 @@ TEST_F(OnDeviceModelServiceControllerTest, FallbackWithInvalidRawOutputChecks) {
     }
     return safety_config;
   }());
-  test_controller_->MaybeUpdateSafetyModel(safety_asset.model_info());
+
+  Initialize({
+      .base_model = &standard_assets_.base_model,
+      .safety = &safety_asset,
+      .language = &standard_assets_.language,
+      .adaptations = {&standard_assets_.compose},
+  });
 
   ExpectedRemoteFallback fallback;
   auto session = test_controller_->CreateSession(
@@ -1321,8 +1378,6 @@ TEST_F(OnDeviceModelServiceControllerTest,
       features::kTextSafetyClassifier,
       {{"on_device_retract_unsafe_content", "true"}});
 
-  Initialize(standard_assets_);
-
   FakeSafetyModelAsset safety_asset([]() {
     auto safety_config = ComposeSafetyConfig();
     {
@@ -1339,7 +1394,13 @@ TEST_F(OnDeviceModelServiceControllerTest,
     }
     return safety_config;
   }());
-  test_controller_->MaybeUpdateSafetyModel(safety_asset.model_info());
+
+  Initialize({
+      .base_model = &standard_assets_.base_model,
+      .safety = &safety_asset,
+      .language = &standard_assets_.language,
+      .adaptations = {&standard_assets_.compose},
+  });
 
   auto session = test_controller_->CreateSession(
       kFeature, FailOnRemoteFallback(), logger_.GetWeakPtr(),
@@ -1366,8 +1427,6 @@ TEST_F(OnDeviceModelServiceControllerTest,
       features::kTextSafetyClassifier,
       {{"on_device_retract_unsafe_content", "true"}});
 
-  Initialize(standard_assets_);
-
   FakeSafetyModelAsset safety_asset([]() {
     auto safety_config = ComposeSafetyConfig();
     {
@@ -1384,7 +1443,13 @@ TEST_F(OnDeviceModelServiceControllerTest,
     }
     return safety_config;
   }());
-  test_controller_->MaybeUpdateSafetyModel(safety_asset.model_info());
+
+  Initialize({
+      .base_model = &standard_assets_.base_model,
+      .safety = &safety_asset,
+      .language = &standard_assets_.language,
+      .adaptations = {&standard_assets_.compose},
+  });
 
   auto session = test_controller_->CreateSession(
       kFeature, FailOnRemoteFallback(), logger_.GetWeakPtr(),
@@ -1414,8 +1479,6 @@ TEST_F(OnDeviceModelServiceControllerTest,
       features::kTextSafetyClassifier,
       {{"on_device_retract_unsafe_content", "true"}});
 
-  Initialize(standard_assets_);
-
   FakeSafetyModelAsset safety_asset([]() {
     auto safety_config = ComposeSafetyConfig();
     {
@@ -1432,7 +1495,13 @@ TEST_F(OnDeviceModelServiceControllerTest,
     }
     return safety_config;
   }());
-  test_controller_->MaybeUpdateSafetyModel(safety_asset.model_info());
+
+  Initialize({
+      .base_model = &standard_assets_.base_model,
+      .safety = &safety_asset,
+      .language = &standard_assets_.language,
+      .adaptations = {&standard_assets_.compose},
+  });
 
   ExpectedRemoteFallback fallback;
   auto session = test_controller_->CreateSession(
@@ -1467,8 +1536,6 @@ TEST_F(OnDeviceModelServiceControllerTest, NoRetractUnsafeContent) {
       features::kTextSafetyClassifier,
       {{"on_device_retract_unsafe_content", "false"}});
 
-  Initialize(standard_assets_);
-
   FakeSafetyModelAsset safety_asset([]() {
     auto safety_config = ComposeSafetyConfig();
     safety_config.mutable_safety_category_thresholds()->Add(ForbidUnsafe());
@@ -1484,7 +1551,13 @@ TEST_F(OnDeviceModelServiceControllerTest, NoRetractUnsafeContent) {
     }
     return safety_config;
   }());
-  test_controller_->MaybeUpdateSafetyModel(safety_asset.model_info());
+
+  Initialize({
+      .base_model = &standard_assets_.base_model,
+      .safety = &safety_asset,
+      .language = &standard_assets_.language,
+      .adaptations = {&standard_assets_.compose},
+  });
 
   auto session = CreateSession();
   EXPECT_TRUE(session);
@@ -2349,33 +2422,6 @@ TEST_F(OnDeviceModelServiceControllerTest,
   test_controller_->Init();
 }
 
-TEST_F(OnDeviceModelServiceControllerTest, UsesAdapterTopKAndTemperature) {
-  auto config = SimpleComposeConfig();
-  config.mutable_sampling_params()->set_top_k(4);
-  config.mutable_sampling_params()->set_temperature(1.5);
-  FakeAdaptationAsset compose_asset({.config = config});
-  Initialize({
-      .base_model = &standard_assets_.base_model,
-      .safety = &standard_assets_.safety,
-      .language = &standard_assets_.language,
-      .adaptations = {&compose_asset},
-  });
-
-  auto session = test_controller_->CreateSession(
-      kFeature, base::DoNothing(), logger_.GetWeakPtr(), SessionConfigParams{});
-  EXPECT_TRUE(session);
-  session->ExecuteModel(PageUrlRequest("foo"),
-                        response_.GetStreamingCallback());
-  task_environment_.RunUntilIdle();
-  EXPECT_TRUE(response_.value());
-  const std::vector<std::string> partial_responses = ConcatResponses({
-      "Context: execute:foo off:0 max:1024\n",
-      "TopK: 4, Temp: 1.5\n",
-  });
-  EXPECT_EQ(*response_.value(), partial_responses.back());
-  EXPECT_THAT(response_.partials(), ElementsAreArray(partial_responses));
-}
-
 TEST_F(OnDeviceModelServiceControllerTest, UsesSessionTopKAndTemperature) {
   // Session sampling params should have precedence over feature ones.
   auto config = SimpleComposeConfig();
@@ -2389,20 +2435,27 @@ TEST_F(OnDeviceModelServiceControllerTest, UsesSessionTopKAndTemperature) {
       .adaptations = {&compose_asset},
   });
 
+  const SamplingParams expected_sampling_params{
+      .top_k = 3,
+      .temperature = 2,
+  };
+
   auto session = test_controller_->CreateSession(
       kFeature, base::DoNothing(), logger_.GetWeakPtr(),
-      SessionConfigParams{.sampling_params = SamplingParams{
-                              .top_k = 3,
-                              .temperature = 2,
-                          }});
+      SessionConfigParams{.sampling_params = expected_sampling_params});
   EXPECT_TRUE(session);
+
+  const auto session_sampling_params = session->GetSamplingParams();
+  EXPECT_EQ(session_sampling_params.top_k, expected_sampling_params.top_k);
+  EXPECT_EQ(session_sampling_params.temperature,
+            expected_sampling_params.temperature);
+
   session->ExecuteModel(PageUrlRequest("foo"),
                         response_.GetStreamingCallback());
   task_environment_.RunUntilIdle();
   EXPECT_TRUE(response_.value());
   const std::vector<std::string> partial_responses = ConcatResponses({
       "Context: execute:foo off:0 max:1024\n",
-      "TopK: 3, Temp: 2\n",
   });
   EXPECT_EQ(*response_.value(), partial_responses.back());
   EXPECT_THAT(response_.partials(), ElementsAreArray(partial_responses));
@@ -2882,6 +2935,33 @@ TEST_F(OnDeviceModelServiceControllerTest,
   EXPECT_FALSE(CreateSession());
 }
 
+TEST_F(OnDeviceModelServiceControllerTest, GetCapabilities) {
+  FakeBaseModelAsset base_model({
+      .config = ExecutionConfigWithCapabilities(
+          {proto::OnDeviceModelCapability::
+               ON_DEVICE_MODEL_CAPABILITY_IMAGE_INPUT}),
+  });
+  Initialize({.base_model = &base_model});
+  task_environment_.RunUntilIdle();
+
+  EXPECT_EQ(test_controller_->GetCapabilities(),
+            on_device_model::Capabilities(
+                {on_device_model::CapabilityFlags::kImageInput}));
+
+  FakeBaseModelAsset next_model({
+      .config = ExecutionConfigWithCapabilities(
+          {proto::OnDeviceModelCapability::
+               ON_DEVICE_MODEL_CAPABILITY_AUDIO_INPUT}),
+  });
+  on_device_component_state_manager_.SetReady(next_model.path(),
+                                              next_model.version());
+  task_environment_.RunUntilIdle();
+
+  EXPECT_EQ(test_controller_->GetCapabilities(),
+            on_device_model::Capabilities(
+                {on_device_model::CapabilityFlags::kAudioInput}));
+}
+
 TEST_F(OnDeviceModelServiceControllerTest,
        ModelValidationNewModelVersionCancelsPreviousValidation) {
   base::test::ScopedFeatureList feature_list;
@@ -3282,8 +3362,6 @@ TEST_F(OnDeviceModelServiceControllerTest, ImageExecutionSuccess) {
       .language = &standard_assets_.language,
       .adaptations = {&compose_asset},
   });
-  auto session = CreateSession();
-  ASSERT_TRUE(session);
   MultimodalMessage request((proto::ExampleForTestingRequest()));
   request.edit()
       .GetMutableMessage(RequestProto::kNested1FieldNumber)
@@ -3291,12 +3369,34 @@ TEST_F(OnDeviceModelServiceControllerTest, ImageExecutionSuccess) {
   request.edit()
       .GetMutableMessage(RequestProto::kNested2FieldNumber)
       .Set(NestedProto::kMediaFieldNumber, CreateBlackSkBitmap(1, 1));
-  session->SetInput(std::move(request));
-  session->ExecuteModel(proto::ExampleForTestingRequest(),
-                        response_.GetStreamingCallback());
-  ASSERT_TRUE(response_.GetFinalStatus());
-  EXPECT_EQ(*response_.value(),
-            "Context: <image> off:0 max:22\nContext: <image> off:0 max:1024\n");
+  {
+    ResponseHolder response;
+    auto session = CreateSession(SessionConfigParams{
+        .capabilities = {on_device_model::CapabilityFlags::kImageInput},
+    });
+    ASSERT_TRUE(session);
+    session->SetInput(request.Clone());
+    session->ExecuteModel(proto::ExampleForTestingRequest(),
+                          response.GetStreamingCallback());
+    ASSERT_TRUE(response.GetFinalStatus());
+    EXPECT_EQ(
+        *response.value(),
+        "Context: <image> off:0 max:22\nContext: <image> off:0 max:1024\n");
+  }
+
+  // Session without capabilities should not allow images.
+  {
+    ResponseHolder response;
+    auto session = CreateSession();
+    ASSERT_TRUE(session);
+    session->SetInput(std::move(request));
+    session->ExecuteModel(proto::ExampleForTestingRequest(),
+                          response.GetStreamingCallback());
+    ASSERT_TRUE(response.GetFinalStatus());
+    EXPECT_EQ(*response.value(),
+              "Context: <unsupported> off:0 max:22\nContext: <unsupported> "
+              "off:0 max:1024\n");
+  }
 }
 
 proto::SubstitutedString EmptySubstitution() {
@@ -3346,7 +3446,7 @@ TEST_F(OnDeviceModelServiceControllerTest, OmitEmptyInputs) {
   EXPECT_EQ(*response_.value(), "");
 }
 
-TEST_F(OnDeviceModelServiceControllerTest, CloneUsesAdapterTopKAndTemperature) {
+TEST_F(OnDeviceModelServiceControllerTest, CloneUsesSessionTopKAndTemperature) {
   auto config = SimpleComposeConfig();
   config.mutable_sampling_params()->set_top_k(4);
   config.mutable_sampling_params()->set_temperature(1.5);
@@ -3358,18 +3458,28 @@ TEST_F(OnDeviceModelServiceControllerTest, CloneUsesAdapterTopKAndTemperature) {
       .adaptations = {&compose_asset},
   });
 
+  const SamplingParams expected_sampling_params{
+      .top_k = 3,
+      .temperature = 2,
+  };
+
   auto session = test_controller_->CreateSession(
-      kFeature, base::DoNothing(), logger_.GetWeakPtr(), SessionConfigParams{});
+      kFeature, base::DoNothing(), logger_.GetWeakPtr(),
+      SessionConfigParams{.sampling_params = expected_sampling_params});
   EXPECT_TRUE(session);
   auto clone = session->Clone();
   EXPECT_TRUE(clone);
+
+  const auto clone_sampling_params = clone->GetSamplingParams();
+  EXPECT_EQ(clone_sampling_params.top_k, expected_sampling_params.top_k);
+  EXPECT_EQ(clone_sampling_params.temperature,
+            expected_sampling_params.temperature);
 
   clone->ExecuteModel(PageUrlRequest("foo"), response_.GetStreamingCallback());
   task_environment_.RunUntilIdle();
   EXPECT_TRUE(response_.value());
   const std::vector<std::string> partial_responses = ConcatResponses({
       "Context: execute:foo off:0 max:1024\n",
-      "TopK: 4, Temp: 1.5\n",
   });
   EXPECT_EQ(*response_.value(), partial_responses.back());
   EXPECT_THAT(response_.partials(), ElementsAreArray(partial_responses));
@@ -3381,8 +3491,6 @@ TEST_F(OnDeviceModelServiceControllerTest,
   feature_list.InitAndEnableFeatureWithParameters(
       features::kTextSafetyClassifier,
       {{"on_device_retract_unsafe_content", "true"}});
-
-  Initialize(standard_assets_);
 
   FakeSafetyModelAsset safety_asset([]() {
     auto safety_config = ComposeSafetyConfig();
@@ -3399,7 +3507,13 @@ TEST_F(OnDeviceModelServiceControllerTest,
     }
     return safety_config;
   }());
-  test_controller_->MaybeUpdateSafetyModel(safety_asset.model_info());
+
+  Initialize({
+      .base_model = &standard_assets_.base_model,
+      .safety = &safety_asset,
+      .language = &standard_assets_.language,
+      .adaptations = {&standard_assets_.compose},
+  });
 
   auto session = test_controller_->CreateSession(
       kFeature, FailOnRemoteFallback(), logger_.GetWeakPtr(),

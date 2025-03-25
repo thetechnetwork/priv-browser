@@ -582,12 +582,16 @@ AccessibilityManager::AccessibilityManager() {
       base::BindRepeating(&AccessibilityManager::PostUnloadSelectToSpeak,
                           weak_ptr_factory_.GetWeakPtr())));
 
+  const bool enable_switch_access_v3_manifest =
+      ::features::IsAccessibilityManifestV3EnabledForSwitchAccess();
   const base::FilePath::CharType* switch_access_manifest_filename =
-      enable_v3_manifest ? extension_misc::kSwitchAccessManifestV3Filename
-                         : extension_misc::kSwitchAccessManifestFilename;
+      enable_v3_manifest || enable_switch_access_v3_manifest
+          ? extension_misc::kSwitchAccessManifestV3Filename
+          : extension_misc::kSwitchAccessManifestFilename;
   const base::FilePath::CharType* switch_access_guest_manifest_filename =
-      enable_v3_manifest ? extension_misc::kSwitchAccessGuestManifestV3Filename
-                         : extension_misc::kSwitchAccessGuestManifestFilename;
+      enable_v3_manifest || enable_switch_access_v3_manifest
+          ? extension_misc::kSwitchAccessGuestManifestV3Filename
+          : extension_misc::kSwitchAccessGuestManifestFilename;
 
   switch_access_loader_ = base::WrapUnique(new AccessibilityExtensionLoader(
       extension_misc::kSwitchAccessExtensionId,
@@ -784,7 +788,7 @@ void AccessibilityManager::OnSpokenFeedbackChanged() {
 
   content::BrowserAccessibilityState* browser_ax_state =
       content::BrowserAccessibilityState::GetInstance();
-  browser_ax_state->SetKnownScreenReaderAppActive(enabled);
+  browser_ax_state->SetScreenReaderAppActive(enabled);
 
   if (IsUserBrowserContext(profile_)) {
     user_manager::KnownUser known_user(g_browser_process->local_state());
@@ -962,7 +966,7 @@ bool AccessibilityManager::IsReducedAnimationsEnabled() const {
 }
 
 void AccessibilityManager::EnableAlwaysShowScrollbars(bool enabled) {
-  if (!::features::IsOverlayScrollbarOSSettingEnabled() || !profile_) {
+  if (!profile_) {
     return;
   }
 
@@ -973,9 +977,8 @@ void AccessibilityManager::EnableAlwaysShowScrollbars(bool enabled) {
 }
 
 bool AccessibilityManager::IsAlwaysShowScrollbarsEnabled() const {
-  return ::features::IsOverlayScrollbarOSSettingEnabled() && profile_ &&
-         profile_->GetPrefs()->GetBoolean(
-             prefs::kAccessibilityAlwaysShowScrollbarsEnabled);
+  return profile_ && profile_->GetPrefs()->GetBoolean(
+                         prefs::kAccessibilityAlwaysShowScrollbarsEnabled);
 }
 
 void AccessibilityManager::OnReducedAnimationsChanged() const {
@@ -2022,10 +2025,8 @@ void AccessibilityManager::UpdateChromeOSAccessibilityHistograms() {
     base::UmaHistogramBoolean("Accessibility.CrosFaceGaze",
                               IsFaceGazeEnabled());
   }
-  if (::features::IsOverlayScrollbarOSSettingEnabled()) {
-    base::UmaHistogramBoolean("Accessibility.CrosAlwaysShowScrollbar",
-                              IsAlwaysShowScrollbarsEnabled());
-  }
+  base::UmaHistogramBoolean("Accessibility.CrosAlwaysShowScrollbar",
+                            IsAlwaysShowScrollbarsEnabled());
 }
 
 void AccessibilityManager::PlayVolumeAdjustSound() {

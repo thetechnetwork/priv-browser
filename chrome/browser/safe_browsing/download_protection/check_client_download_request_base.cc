@@ -396,6 +396,10 @@ void CheckClientDownloadRequestBase::SendRequest() {
   client_download_request_->set_skipped_certificate_allowlist(
       skipped_certificate_allowlist_);
 
+  CHECK(service_);
+
+  service_->delegate()->PreSerializeRequest(item(), *client_download_request_);
+
   if (!client_download_request_->SerializeToString(
           &client_download_request_data_)) {
     FinishRequest(DownloadCheckResult::UNKNOWN, REASON_INVALID_REQUEST_PROTO);
@@ -411,8 +415,6 @@ void CheckClientDownloadRequestBase::SendRequest() {
     FinishRequest(DownloadCheckResult::DANGEROUS, REASON_MANUAL_BLOCKLIST);
     return;
   }
-
-  CHECK(service_);
 
   NotifySendRequest(client_download_request_.get());
 
@@ -516,15 +518,6 @@ void CheckClientDownloadRequestBase::OnURLLoaderComplete(
            << ": success=" << success << " response_code=" << response_code;
   RecordHttpResponseOrErrorCode("SBClientDownload.DownloadRequestNetworkResult",
                                 loader_->NetError(), response_code);
-  // TODO: crbug.com/383994656 - Remove these metrics once
-  // SBClientDownload.DownloadRequestNetworkResult available on Stable. Alert
-  // monitoring should also be modified.
-  if (success) {
-    base::UmaHistogramSparse("SBClientDownload.DownloadRequestResponseCode",
-                             response_code);
-  }
-  base::UmaHistogramSparse("SBClientDownload.DownloadRequestNetError",
-                           -loader_->NetError());
 
   DownloadCheckResultReason reason = REASON_SERVER_PING_FAILED;
   DownloadCheckResult result = DownloadCheckResult::UNKNOWN;
@@ -538,6 +531,13 @@ void CheckClientDownloadRequestBase::OnURLLoaderComplete(
       // Ignore the verdict because we were just reporting a sampled file.
       reason = REASON_SAMPLED_UNSUPPORTED_FILE;
       result = DownloadCheckResult::UNKNOWN;
+#if BUILDFLAG(IS_ANDROID)
+    } else if (kMaliciousApkDownloadCheckTelemetryOnly.Get()) {
+      // If Android download protection is in telemetry-only mode, ignore the
+      // verdict.
+      reason = REASON_IGNORED_VERDICT;
+      result = DownloadCheckResult::UNKNOWN;
+#endif
     } else {
       switch (response.verdict()) {
         case ClientDownloadResponse::SAFE:

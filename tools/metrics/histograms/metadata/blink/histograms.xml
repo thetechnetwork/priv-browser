@@ -274,7 +274,7 @@ chromium-metrics-reviews@google.com.
 </histogram>
 
 <histogram name="Blink.Canvas.2DLayerBridge.Compression.DecompressionTime"
-    units="ms" expires_after="2025-07-13">
+    units="ms" expires_after="2025-09-14">
   <owner>lizeb@chromium.org</owner>
   <owner>jpgravel@chromium.org</owner>
   <summary>
@@ -284,7 +284,7 @@ chromium-metrics-reviews@google.com.
 </histogram>
 
 <histogram name="Blink.Canvas.2DLayerBridge.Compression.Ratio" units="%"
-    expires_after="2025-07-13">
+    expires_after="2025-09-14">
   <owner>lizeb@chromium.org</owner>
   <owner>jpgravel@chromium.org</owner>
   <summary>
@@ -304,7 +304,7 @@ chromium-metrics-reviews@google.com.
 </histogram>
 
 <histogram name="Blink.Canvas.2DLayerBridge.Compression.ThreadTime" units="ms"
-    expires_after="2025-07-13">
+    expires_after="2025-09-14">
   <owner>lizeb@chromium.org</owner>
   <owner>jpgravel@chromium.org</owner>
   <summary>
@@ -865,7 +865,7 @@ chromium-metrics-reviews@google.com.
 </histogram>
 
 <histogram name="Blink.DecodedImage.AvifDensity.Count.{ImageArea}"
-    units="0.01 bits per pixel" expires_after="2025-07-13">
+    units="0.01 bits per pixel" expires_after="2025-09-14">
   <owner>wtc@google.com</owner>
   <owner>jzern@google.com</owner>
   <owner>
@@ -905,7 +905,7 @@ chromium-metrics-reviews@google.com.
 </histogram>
 
 <histogram name="Blink.DecodedImage.AvifDensity.KiBWeighted2"
-    units="0.01 bits per pixel" expires_after="2025-07-13">
+    units="0.01 bits per pixel" expires_after="2025-09-14">
   <owner>wtc@google.com</owner>
   <owner>jzern@google.com</owner>
   <owner>
@@ -921,7 +921,7 @@ chromium-metrics-reviews@google.com.
 </histogram>
 
 <histogram name="Blink.DecodedImage.JpegDensity.Count.{ImageArea}"
-    units="0.01 bits per pixel" expires_after="2025-07-13">
+    units="0.01 bits per pixel" expires_after="2025-09-14">
   <owner>wtc@google.com</owner>
   <owner>jzern@google.com</owner>
   <owner>src/third_party/blink/renderer/platform/image-decoders/OWNERS</owner>
@@ -971,7 +971,7 @@ chromium-metrics-reviews@google.com.
 </histogram>
 
 <histogram name="Blink.DecodedImage.WebPDensity.Count.{ImageArea}"
-    units="0.01 bits per pixel" expires_after="2025-07-13">
+    units="0.01 bits per pixel" expires_after="2025-09-14">
   <owner>wtc@google.com</owner>
   <owner>jzern@google.com</owner>
   <owner>src/third_party/blink/renderer/platform/image-decoders/OWNERS</owner>
@@ -1023,7 +1023,7 @@ chromium-metrics-reviews@google.com.
 </histogram>
 
 <histogram name="Blink.DecodedImage.WebPFileFormat" enum="WebPFileFormat"
-    expires_after="2025-07-13">
+    expires_after="2025-09-14">
   <owner>mcasas@chromium.org</owner>
   <owner>andrescj@chromium.org</owner>
   <summary>
@@ -1414,17 +1414,6 @@ chromium-metrics-reviews@google.com.
     user selecting an account. This includes instances where the close action is
     less intentional such as the virtual keyboard showing trigerring the dialog
     close.
-  </summary>
-</histogram>
-
-<histogram name="Blink.FedCm.ChooseAnAccountSelected.Desktop" enum="BooleanHit"
-    expires_after="2025-08-12">
-  <owner>npm@chromium.org</owner>
-  <owner>web-identity-eng@google.com</owner>
-  <summary>
-    Records a 1 each time the &quot;Choose an account&quot; FedCM desktop button
-    is clicked. This button is only shown in the FedCM UI showing multiple
-    identity providers.
   </summary>
 </histogram>
 
@@ -2252,6 +2241,20 @@ chromium-metrics-reviews@google.com.
   </summary>
 </histogram>
 
+<histogram name="Blink.FencedFrame.DisableUntrustedNetworkOutcome"
+    enum="FencedFrameDisableUntrustedNetworkOutcome" expires_after="2025-09-12">
+  <owner>lbrady@google.com</owner>
+  <owner>shivanisha@chromium.org</owner>
+  <summary>
+    Records the outcome from calling disableUntrustedNetwork() in a fenced
+    frame. This is called either when the promise resolves, or when some error
+    is encountered that prevents network from being disabled. Note that this
+    histogram is not logged when the promise remains unresolved throughout the
+    lifetime of the fenced frame (i.e. it gets stuck waiting for a child fenced
+    frame to have its network disabled).
+  </summary>
+</histogram>
+
 <histogram name="Blink.FencedFrame.FailedSandboxLoadInTopLevelFrame"
     enum="BooleanYesNo" expires_after="2025-08-04">
   <owner>shivanisha@chromium.org</owner>
@@ -2306,6 +2309,30 @@ chromium-metrics-reviews@google.com.
     creation fails due to sandbox flags not being permissive enough. If multiple
     sandbox flags are incorrectly set, it will log every sandbox flag that was
     not set correctly for each failed load.
+  </summary>
+</histogram>
+
+<histogram name="Blink.FencedFrame.NotifyEventOutcome"
+    enum="FencedFrameNotifyEventOutcome" expires_after="2025-09-12">
+  <owner>lbrady@google.com</owner>
+  <owner>shivanisha@chromium.org</owner>
+  <summary>
+    Records the outcome from calling window.fence.notifyEvent() in a fenced
+    frame, whether successful or not. Note that this only logs for notifyEvent()
+    calls from within a fenced frame; calls outside of fenced frames (which will
+    fail) are not logged.
+  </summary>
+</histogram>
+
+<histogram name="Blink.FencedFrame.SharedStorageGetInFencedFrameOutcome"
+    enum="SharedStorageGetInFencedFrameOutcome" expires_after="2025-09-12">
+  <owner>lbrady@google.com</owner>
+  <owner>shivanisha@chromium.org</owner>
+  <summary>
+    Records the outcome from calling sharedStorage.get() in a fenced frame,
+    whether successful or not. Note that this only logs for get() calls from
+    within a fenced frame; calls outside of fenced frames (which will fail) are
+    not logged.
   </summary>
 </histogram>
 
@@ -2670,7 +2697,7 @@ chromium-metrics-reviews@google.com.
 </histogram>
 
 <histogram name="Blink.HTMLParsing.InputCharacterCount4" units="characters"
-    expires_after="2025-07-13">
+    expires_after="2025-09-14">
   <owner>masonf@chromium.org</owner>
   <owner>dom-dev@google.com</owner>
   <summary>
@@ -2685,7 +2712,7 @@ chromium-metrics-reviews@google.com.
 </histogram>
 
 <histogram name="Blink.HTMLParsing.ParsingTimeMax4" units="microseconds"
-    expires_after="2025-07-13">
+    expires_after="2025-09-14">
   <owner>masonf@chromium.org</owner>
   <owner>dom-dev@google.com</owner>
   <summary>
@@ -2700,7 +2727,7 @@ chromium-metrics-reviews@google.com.
 </histogram>
 
 <histogram name="Blink.HTMLParsing.ParsingTimeMin4" units="microseconds"
-    expires_after="2025-07-13">
+    expires_after="2025-09-14">
   <owner>masonf@chromium.org</owner>
   <owner>dom-dev@google.com</owner>
   <summary>
@@ -2759,7 +2786,7 @@ chromium-metrics-reviews@google.com.
 </histogram>
 
 <histogram name="Blink.HTMLParsing.TokensParsedAverage4" units="tokens"
-    expires_after="2025-07-13">
+    expires_after="2025-09-14">
   <owner>masonf@chromium.org</owner>
   <owner>dom-dev@google.com</owner>
   <summary>
@@ -3203,7 +3230,7 @@ chromium-metrics-reviews@google.com.
 </histogram>
 
 <histogram name="Blink.LCPP.DeferUnusedPreload.PredictionFailed{Trigger}"
-    enum="ResourceType" expires_after="2025-07-13">
+    enum="ResourceType" expires_after="2025-09-14">
   <owner>sisidovski@chromium.org</owner>
   <owner>
     src/third_party/blink/renderer/core/lcp_critical_path_predictor/OWNERS
@@ -3938,7 +3965,7 @@ chromium-metrics-reviews@google.com.
 </histogram>
 
 <histogram name="Blink.Network.ParseDataURLTime{Type}{CharacterCount}"
-    units="microseconds" expires_after="2025-07-13">
+    units="microseconds" expires_after="2025-09-14">
   <owner>nidhijaju@chromium.org</owner>
   <owner>chrome-loading@google.com</owner>
   <summary>
@@ -4067,6 +4094,17 @@ chromium-metrics-reviews@google.com.
   </summary>
 </histogram>
 
+<histogram name="Blink.PermissionElement.UserInteractionAccepted"
+    enum="Boolean" expires_after="2025-08-24">
+  <owner>tungnh@chromium.org</owner>
+  <owner>src/components/permissions/PERMISSIONS_OWNERS</owner>
+  <summary>
+    Records whether a user interaction (e.g., user click on the permission
+    element) is accepted. This metric is emitted once for every user interaction
+    that has been handled.
+  </summary>
+</histogram>
+
 <histogram name="Blink.PermissionElement.UserInteractionDeniedReason"
     enum="PermissionElementUserInteractionDeniedReason"
     expires_after="2025-08-24">
@@ -4123,7 +4161,7 @@ chromium-metrics-reviews@google.com.
 </histogram>
 
 <histogram name="Blink.PreloadRequestStartDuration" units="microseconds"
-    expires_after="2025-03-30">
+    expires_after="2025-09-30">
   <owner>sisidovski@chromium.org</owner>
   <owner>chrome-loading@google.com</owner>
   <summary>
@@ -4189,7 +4227,7 @@ chromium-metrics-reviews@google.com.
 </histogram>
 
 <histogram name="Blink.ResourceRequest.BackgroundResourceFetchSupportStatus"
-    enum="BackgroundResourceFetchSupportStatus" expires_after="2025-07-13">
+    enum="BackgroundResourceFetchSupportStatus" expires_after="2025-09-14">
   <owner>horo@chromium.org</owner>
   <owner>net-dev@chromium.org</owner>
   <summary>
@@ -4211,7 +4249,7 @@ chromium-metrics-reviews@google.com.
 </histogram>
 
 <histogram name="Blink.ResourceRequest.CompletionDelay2" units="ms"
-    expires_after="2025-07-13">
+    expires_after="2025-09-14">
   <owner>horo@chromium.org</owner>
   <owner>net-dev@chromium.org</owner>
   <summary>
@@ -4235,7 +4273,7 @@ chromium-metrics-reviews@google.com.
 </histogram>
 
 <histogram name="Blink.ResourceRequest.RedirectDelay2" units="ms"
-    expires_after="2025-07-13">
+    expires_after="2025-09-14">
   <owner>horo@chromium.org</owner>
   <owner>net-dev@chromium.org</owner>
   <summary>
@@ -4246,7 +4284,7 @@ chromium-metrics-reviews@google.com.
 </histogram>
 
 <histogram name="Blink.ResourceRequest.ResponseDelay2" units="ms"
-    expires_after="2025-07-13">
+    expires_after="2025-09-14">
   <owner>horo@chromium.org</owner>
   <owner>net-dev@chromium.org</owner>
   <summary>
@@ -4257,7 +4295,7 @@ chromium-metrics-reviews@google.com.
 </histogram>
 
 <histogram name="Blink.ResourceRequest.StartDelay2" units="ms"
-    expires_after="2025-07-13">
+    expires_after="2025-09-14">
   <owner>horo@chromium.org</owner>
   <owner>net-dev@chromium.org</owner>
   <summary>
@@ -4314,6 +4352,8 @@ chromium-metrics-reviews@google.com.
 
     The metric is reported for {PerAnimationFrameInteractionType}.
   </summary>
+  <token key="PerAnimationFrameInteractionType"
+      variants="PerAnimationFrameInteractionType"/>
 </histogram>
 
 <histogram
@@ -4335,6 +4375,8 @@ chromium-metrics-reviews@google.com.
 
     The metric is reported for {PerAnimationFrameInteractionType}.
   </summary>
+  <token key="PerAnimationFrameInteractionType"
+      variants="PerAnimationFrameInteractionType"/>
 </histogram>
 
 <histogram
@@ -4357,6 +4399,8 @@ chromium-metrics-reviews@google.com.
 
     The metric is reported for {PerAnimationFrameInteractionType}.
   </summary>
+  <token key="PerAnimationFrameInteractionType"
+      variants="PerAnimationFrameInteractionType"/>
 </histogram>
 
 <histogram
@@ -4380,6 +4424,8 @@ chromium-metrics-reviews@google.com.
 
     The metric is reported for {PerAnimationFrameInteractionType}.
   </summary>
+  <token key="PerAnimationFrameInteractionType"
+      variants="PerAnimationFrameInteractionType"/>
 </histogram>
 
 <histogram
@@ -4401,6 +4447,8 @@ chromium-metrics-reviews@google.com.
 
     The metric is reported for {PerAnimationFrameInteractionType}.
   </summary>
+  <token key="PerAnimationFrameInteractionType"
+      variants="PerAnimationFrameInteractionType"/>
 </histogram>
 
 <histogram
@@ -4422,6 +4470,8 @@ chromium-metrics-reviews@google.com.
 
     The metric is reported for {PerAnimationFrameInteractionType}.
   </summary>
+  <token key="PerAnimationFrameInteractionType"
+      variants="PerAnimationFrameInteractionType"/>
 </histogram>
 
 <histogram
@@ -4443,6 +4493,8 @@ chromium-metrics-reviews@google.com.
 
     The metric is reported for {PerAnimationFrameInteractionType}.
   </summary>
+  <token key="PerAnimationFrameInteractionType"
+      variants="PerAnimationFrameInteractionType"/>
 </histogram>
 
 <histogram
@@ -4465,6 +4517,8 @@ chromium-metrics-reviews@google.com.
 
     The metric is reported for {PerAnimationFrameInteractionType}.
   </summary>
+  <token key="PerAnimationFrameInteractionType"
+      variants="PerAnimationFrameInteractionType"/>
 </histogram>
 
 <histogram
@@ -4488,6 +4542,8 @@ chromium-metrics-reviews@google.com.
 
     The metric is reported for {PerAnimationFrameInteractionType}.
   </summary>
+  <token key="PerAnimationFrameInteractionType"
+      variants="PerAnimationFrameInteractionType"/>
 </histogram>
 
 <histogram
@@ -4509,6 +4565,8 @@ chromium-metrics-reviews@google.com.
 
     The metric is reported for {PerAnimationFrameInteractionType}.
   </summary>
+  <token key="PerAnimationFrameInteractionType"
+      variants="PerAnimationFrameInteractionType"/>
 </histogram>
 
 <histogram
@@ -4530,6 +4588,8 @@ chromium-metrics-reviews@google.com.
 
     The metric is reported for {PerAnimationFrameInteractionType}.
   </summary>
+  <token key="PerAnimationFrameInteractionType"
+      variants="PerAnimationFrameInteractionType"/>
 </histogram>
 
 <histogram
@@ -4552,6 +4612,8 @@ chromium-metrics-reviews@google.com.
 
     The metric is reported for {PerAnimationFrameInteractionType}.
   </summary>
+  <token key="PerAnimationFrameInteractionType"
+      variants="PerAnimationFrameInteractionType"/>
 </histogram>
 
 <histogram
@@ -4650,7 +4712,7 @@ chromium-metrics-reviews@google.com.
 </histogram>
 
 <histogram name="Blink.Script.AsyncScript.FromReadyToStartExecution.Time"
-    units="ms" expires_after="2025-04-13">
+    units="ms" expires_after="2026-02-01">
   <owner>chikamune@chromium.org</owner>
   <owner>yyanagisawa@chromium.org</owner>
   <owner>kouhei@chromium.org</owner>
@@ -4673,7 +4735,7 @@ chromium-metrics-reviews@google.com.
 
 <histogram
     name="Blink.Script.PostTaskWithLowPriorityUntilTimeout.RaceTaskPriority"
-    enum="RaceTaskPriority" expires_after="2025-08-24">
+    enum="RaceTaskPriority" expires_after="2026-02-01">
   <owner>chikamune@chromium.org</owner>
   <owner>yyanagisawa@chromium.org</owner>
   <owner>kouhei@chromium.org</owner>
@@ -4686,7 +4748,7 @@ chromium-metrics-reviews@google.com.
 </histogram>
 
 <histogram name="Blink.Script.PostTaskWithLowPriorityUntilTimeout.Time"
-    units="ms" expires_after="2025-08-24">
+    units="ms" expires_after="2026-02-01">
   <owner>chikamune@chromium.org</owner>
   <owner>yyanagisawa@chromium.org</owner>
   <owner>kouhei@chromium.org</owner>
@@ -4699,7 +4761,7 @@ chromium-metrics-reviews@google.com.
 
 <histogram
     name="Blink.Script.PostTaskWithLowPriorityUntilTimeout.Time.{RaceTaskPriority}"
-    units="ms" expires_after="2025-08-24">
+    units="ms" expires_after="2026-02-01">
   <owner>chikamune@chromium.org</owner>
   <owner>yyanagisawa@chromium.org</owner>
   <owner>kouhei@chromium.org</owner>
@@ -4716,7 +4778,7 @@ chromium-metrics-reviews@google.com.
 </histogram>
 
 <histogram name="Blink.Script.SchedulingType" enum="ScriptSchedulingType"
-    expires_after="2025-04-13">
+    expires_after="2026-02-01">
   <owner>kouhei@chromium.org</owner>
   <owner>hiroshige@chromium.org</owner>
   <owner>chikamune@chromium.org</owner>
@@ -5128,7 +5190,7 @@ chromium-metrics-reviews@google.com.
 </histogram>
 
 <histogram name="Blink.UseCounter.FeaturePolicy.Header"
-    enum="FeaturePolicyFeature" expires_after="2025-07-13">
+    enum="FeaturePolicyFeature" expires_after="2025-09-14">
   <owner>iclelland@chromium.org</owner>
   <owner>feature-control@chromium.org</owner>
   <summary>

@@ -11,6 +11,7 @@
 #include <set>
 #include <string>
 #include <string_view>
+#include <variant>
 #include <vector>
 
 #include "base/memory/raw_ptr.h"
@@ -75,7 +76,6 @@
 #include "net/third_party/quiche/src/quiche/quic/core/quic_versions.h"
 #include "net/traffic_annotation/network_traffic_annotation_test_helper.h"
 #include "testing/gmock/include/gmock/gmock.h"
-#include "third_party/abseil-cpp/absl/types/variant.h"
 #include "url/scheme_host_port.h"
 #include "url/url_constants.h"
 
@@ -2366,6 +2366,9 @@ TEST_F(HttpStreamPoolAttemptManagerTest,
                 Optional(IsOk()));
     limit_respecting_requesters.pop_front();
   }
+
+  // Ensure that the total connecting stream count is decremented appropriately.
+  ASSERT_EQ(pool().TotalConnectingStreamCount(), 0u);
 }
 
 // Regression test for crbug.com/397535403.
@@ -4776,6 +4779,45 @@ TEST_F(HttpStreamPoolAttemptManagerTest, QuicOkDnsAlpn) {
                   .GetAttemptManagerForTesting()
                   ->GetQuicTaskResultForTesting(),
               Optional(IsOk()));
+}
+
+// Regression test for crbug.com/403341337. QuicTask should not be started when
+// the corresponding AttemptManager is failing.
+TEST_F(HttpStreamPoolAttemptManagerTest, DontStartQuicAfterFailure) {
+  AddQuicData();
+
+  FakeServiceEndpointRequest* endpoint_request = resolver()->AddFakeRequest();
+
+  // Request a stream to create an AttemptManager.
+  StreamRequester requester;
+  requester.set_destination(kDefaultDestination)
+      .set_quic_version(quic_version())
+      .RequestStream(pool());
+  ASSERT_FALSE(requester.result().has_value());
+
+  // Simulate a network change event to fail the AttemptManager.
+  NetworkChangeNotifier::NotifyObserversOfIPAddressChangeForTests();
+  FastForwardUntilNoTasksRemain();
+
+  // Complete the service endpoint resolution. QuicTask should not start.
+  endpoint_request
+      ->add_endpoint(ServiceEndpointBuilder().add_v4("192.0.2.1").endpoint())
+      .CallOnServiceEndpointRequestFinished(OK);
+  requester.WaitForResult();
+  EXPECT_THAT(requester.result(), Optional(IsError(ERR_NETWORK_CHANGED)));
+  ASSERT_TRUE(pool()
+                  .GetGroupForTesting(requester.GetStreamKey())
+                  ->GetAttemptManagerForTesting()
+                  ->is_failing());
+  ASSERT_FALSE(pool()
+                   .GetGroupForTesting(requester.GetStreamKey())
+                   ->GetAttemptManagerForTesting()
+                   ->GetQuicTaskResultForTesting());
+
+  // Ensure that the attempt manager completes after the request is destroyed.
+  requester.ResetRequest();
+  WaitForAttemptManagerComplete(
+      *pool().GetGroupForTesting(requester.GetStreamKey()));
 }
 
 // Tests that QUIC is not attempted when marked broken.

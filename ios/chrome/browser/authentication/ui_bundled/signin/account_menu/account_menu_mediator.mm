@@ -68,16 +68,11 @@
   // identities section
   NSMutableArray<id<SystemIdentity>>* _identities;
 
-  // The type of account error that is being displayed in the error section for
-  // signed in accounts. Is set to kNone when there is no error section.
-  syncer::SyncService::UserActionableError _diplayedAccountErrorType;
-
   // Records the displayed primary account info by the view. Used to limit the
   // view updates to only when one of these values is updated.
   NSString* _primaryAccountDisplayedEmail;
   NSString* _primaryAccountDisplayedUserFullName;
   UIImage* _primaryAccountDisplayedAvatar;
-  BOOL _primaryAccountDisplayedManaged;
 }
 
 - (instancetype)initWithSyncService:(syncer::SyncService*)syncService
@@ -109,7 +104,6 @@
         signin::ConsentLevel::kSignin);
     _syncService = syncService;
     _syncObserver = std::make_unique<SyncObserverBridge>(self, _syncService);
-    _diplayedAccountErrorType = syncer::SyncService::UserActionableError::kNone;
     [self updateIdentitiesIfAllowed];
     _error = GetAccountErrorUIInfo(_syncService);
   }
@@ -182,8 +176,9 @@
       _primaryIdentity, IdentityAvatarSize::Large);
 }
 
-- (ManagementState)managementState {
-  return GetManagementState(_identityManager, _authenticationService, _prefs);
+- (NSString*)managementDescription {
+  return GetManagementDescription(
+      GetManagementState(_identityManager, _authenticationService, _prefs));
 }
 
 - (AccountErrorUIInfo*)accountErrorUIInfo {
@@ -443,7 +438,6 @@
   BOOL success =
       result == SigninCoordinatorResult::SigninCoordinatorResultSuccess;
   if (success) {
-    [_delegate triggerAccountSwitchSnackbarWithIdentity:newIdentity];
     [_delegate mediatorWantsToBeDismissed:self
                                withResult:result
                            signedIdentity:newIdentity
@@ -558,9 +552,7 @@
 - (BOOL)primaryAccountInfoChanged {
   if (_primaryAccountDisplayedAvatar != self.primaryAccountAvatar ||
       _primaryAccountDisplayedUserFullName != self.primaryAccountUserFullName ||
-      _primaryAccountDisplayedEmail != self.primaryAccountEmail ||
-      _primaryAccountDisplayedManaged !=
-          self.managementState.is_profile_managed()) {
+      _primaryAccountDisplayedEmail != self.primaryAccountEmail) {
     [self recordPrimaryAccountDisplayedInfo];
     return YES;
   }
@@ -572,7 +564,6 @@
   _primaryAccountDisplayedEmail = self.primaryAccountEmail;
   _primaryAccountDisplayedUserFullName = self.primaryAccountUserFullName;
   _primaryAccountDisplayedAvatar = self.primaryAccountAvatar;
-  _primaryAccountDisplayedManaged = self.managementState.is_profile_managed();
 }
 
 // Returns whether this mediator is disconnected

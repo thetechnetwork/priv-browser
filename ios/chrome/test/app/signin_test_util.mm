@@ -154,13 +154,14 @@ void ResetSigninPromoPreferences() {
   prefs->SetBoolean(prefs::kSigninShouldPromptForSigninAgain, false);
 }
 
-void SignInWithoutSync(id<SystemIdentity> identity) {
+void SignIn(id<SystemIdentity> identity) {
   Browser* browser = GetMainBrowser();
   UIViewController* viewController = GetActiveViewController();
   __block AuthenticationFlow* authenticationFlow = [[AuthenticationFlow alloc]
                initWithBrowser:browser
                       identity:identity
                    accessPoint:signin_metrics::AccessPoint::kUnknown
+          precedingHistorySync:NO
              postSignInActions:PostSignInActionSet()
       presentingViewController:viewController
                     anchorView:nil

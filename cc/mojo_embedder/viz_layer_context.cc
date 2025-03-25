@@ -52,12 +52,14 @@ void ComputePropertyTreeNodeUpdate(
       old_node->element_id == new_node.element_id &&
       old_node->local == new_node.local &&
       old_node->origin == new_node.origin &&
+      old_node->post_translation == new_node.post_translation &&
+      old_node->to_parent == new_node.to_parent &&
       old_node->sticky_position_constraint_id ==
           new_node.sticky_position_constraint_id &&
       old_node->anchor_position_scroll_data_id ==
           new_node.anchor_position_scroll_data_id &&
       old_node->sorting_context_id == new_node.sorting_context_id &&
-      old_node->scroll_offset == new_node.scroll_offset &&
+      old_node->scroll_offset() == new_node.scroll_offset() &&
       old_node->snap_amount == new_node.snap_amount &&
       old_node->has_potential_animation == new_node.has_potential_animation &&
       old_node->is_currently_animating == new_node.is_currently_animating &&
@@ -84,6 +86,8 @@ void ComputePropertyTreeNodeUpdate(
   wire->element_id = new_node.element_id;
   wire->local = new_node.local;
   wire->origin = new_node.origin;
+  wire->post_translation = new_node.post_translation;
+  wire->to_parent = new_node.to_parent;
   if (new_node.sticky_position_constraint_id >= 0) {
     wire->sticky_position_constraint_id =
         base::checked_cast<uint32_t>(new_node.sticky_position_constraint_id);
@@ -93,7 +97,7 @@ void ComputePropertyTreeNodeUpdate(
         base::checked_cast<uint32_t>(new_node.anchor_position_scroll_data_id);
   }
   wire->sorting_context_id = new_node.sorting_context_id;
-  wire->scroll_offset = new_node.scroll_offset;
+  wire->scroll_offset = new_node.scroll_offset();
   wire->snap_amount = new_node.snap_amount;
   wire->has_potential_animation = new_node.has_potential_animation;
   wire->is_currently_animating = new_node.is_currently_animating;
@@ -109,6 +113,7 @@ void ComputePropertyTreeNodeUpdate(
       new_node.delegates_to_parent_for_backface;
   wire->will_change_transform = new_node.will_change_transform;
   wire->visible_frame_element_id = new_node.visible_frame_element_id;
+  wire->damage_reasons_bit_mask = new_node.damage_reasons().ToEnumBitmask();
   container.push_back(std::move(wire));
 }
 
@@ -148,9 +153,11 @@ void ComputePropertyTreeNodeUpdate(
       old_node->surface_contents_scale == new_node.surface_contents_scale &&
       old_node->blend_mode == new_node.blend_mode &&
       old_node->target_id == new_node.target_id &&
-      old_node->backdrop_mask_element_id == new_node.backdrop_mask_element_id &&
       old_node->has_copy_request == new_node.has_copy_request &&
       old_node->backdrop_filters == new_node.backdrop_filters &&
+      old_node->backdrop_filter_bounds == new_node.backdrop_filter_bounds &&
+      old_node->backdrop_filter_quality == new_node.backdrop_filter_quality &&
+      old_node->backdrop_mask_element_id == new_node.backdrop_mask_element_id &&
       copy_requests.empty()) {
     return;
   }
@@ -167,9 +174,11 @@ void ComputePropertyTreeNodeUpdate(
   wire->surface_contents_scale = new_node.surface_contents_scale;
   wire->blend_mode = base::checked_cast<uint32_t>(new_node.blend_mode);
   wire->target_id = new_node.target_id;
-  wire->backdrop_mask_element_id = new_node.backdrop_mask_element_id;
   wire->copy_output_requests = std::move(copy_requests);
   wire->backdrop_filters = new_node.backdrop_filters;
+  wire->backdrop_filter_bounds = new_node.backdrop_filter_bounds;
+  wire->backdrop_filter_quality = new_node.backdrop_filter_quality;
+  wire->backdrop_mask_element_id = new_node.backdrop_mask_element_id;
   container.push_back(std::move(wire));
 }
 
@@ -742,7 +751,8 @@ void VizLayerContext::SetVisible(bool visible) {
 void VizLayerContext::UpdateDisplayTreeFrom(
     LayerTreeImpl& tree,
     viz::ClientResourceProvider& resource_provider,
-    viz::RasterContextProvider& context_provider) {
+    viz::RasterContextProvider& context_provider,
+    const gfx::Rect& viewport_damage_rect) {
   auto& property_trees = *tree.property_trees();
   auto update = viz::mojom::LayerTreeUpdate::New();
   update->begin_frame_args = tree.CurrentBeginFrameArgs();
@@ -763,6 +773,8 @@ void VizLayerContext::UpdateDisplayTreeFrom(
   update->inner_scroll = property_ids.inner_scroll;
   update->outer_clip = property_ids.outer_clip;
   update->outer_scroll = property_ids.outer_scroll;
+
+  update->viewport_damage_rect = viewport_damage_rect;
 
   // This flag will be set if and only if a new layer list was pushed to the
   // active tree during activation, implying that at least one layer addition or

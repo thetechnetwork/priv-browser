@@ -8,12 +8,14 @@
 
 #include "base/command_line.h"
 #include "base/debug/dump_without_crashing.h"
+#include "base/feature_list.h"
 #include "base/logging.h"
 #include "base/metrics/histogram_macros.h"
 #include "base/task/single_thread_task_runner.h"
 #include "build/build_config.h"
 #include "cc/animation/animation_host.h"
 #include "cc/animation/animation_id_provider.h"
+#include "cc/base/features.h"
 #include "cc/mojo_embedder/async_layer_tree_frame_sink.h"
 #include "cc/raster/categorized_worker_pool.h"
 #include "cc/trees/layer_tree_host.h"
@@ -375,8 +377,7 @@ void WidgetBase::DisconnectLayerTreeView(WidgetBase* new_widget,
 }
 
 cc::LayerTreeHost* WidgetBase::LayerTreeHost() const {
-  CHECK(layer_tree_view_);
-  return layer_tree_view_->layer_tree_host();
+  return layer_tree_view_ ? layer_tree_view_->layer_tree_host() : nullptr;
 }
 
 cc::AnimationHost* WidgetBase::AnimationHost() const {
@@ -752,6 +753,24 @@ void WidgetBase::RequestNewLayerTreeFrameSink(
         base::FeatureList::IsEnabled(
             features::kUseBeginFramePresentationFeedback);
     params->synthetic_begin_frame_source = CreateSyntheticBeginFrameSource();
+  }
+
+  // Don't enable the cc side internal begin frame source if using headless,
+  // since cc won't receive ExternalBeginFrame issued by headless tests when
+  // internal begin frame source is started.
+  const base::CommandLine& command_line =
+      *base::CommandLine::ForCurrentProcess();
+  if (base::FeatureList::IsEnabled(
+          ::features::kInternalBeginFrameSourceOnManyDidNotProduceFrame) &&
+      !params->synthetic_begin_frame_source &&
+      !settings.single_thread_proxy_scheduler &&
+      !settings.using_synchronous_renderer_compositor &&
+      !command_line.HasSwitch(switches::kAllowPreCommitInput)) {
+    static const uint64_t num_did_not_produce_frame = static_cast<uint64_t>(
+        ::features::kNumDidNotProduceFrameBeforeInternalBeginFrameSource.Get());
+    params->num_did_not_produce_frame_before_internal_begin_frame_source =
+        num_did_not_produce_frame;
+    params->auto_needs_begin_frame = true;
   }
 
   mojo::PendingReceiver<viz::mojom::blink::CompositorFrameSink>
@@ -1629,9 +1648,13 @@ void WidgetBase::OnImeEventGuardFinish(ImeEventGuard* guard) {
 #endif
 }
 
-void WidgetBase::RequestAnimationAfterDelay(const base::TimeDelta& delay) {
+void WidgetBase::RequestAnimationAfterDelay(const base::TimeDelta& delay,
+                                            bool urgent) {
   if (delay.is_zero()) {
-    client_->ScheduleAnimation();
+    bool urgent_for_input =
+        input_handler_.handling_input_event() &&
+        base::FeatureList::IsEnabled(features::kUrgentMainFrameForInput);
+    client_->ScheduleAnimation(urgent || urgent_for_input);
     return;
   }
 
@@ -1647,7 +1670,10 @@ void WidgetBase::RequestAnimationAfterDelay(const base::TimeDelta& delay) {
 }
 
 void WidgetBase::RequestAnimationAfterDelayTimerFired(TimerBase*) {
-  client_->ScheduleAnimation();
+  bool urgent_for_input =
+      input_handler_.handling_input_event() &&
+      base::FeatureList::IsEnabled(features::kUrgentMainFrameForInput);
+  client_->ScheduleAnimation(/*urgent=*/urgent_for_input);
 }
 
 float WidgetBase::GetOriginalDeviceScaleFactor() const {

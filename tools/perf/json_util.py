@@ -62,10 +62,8 @@ def gcs_buckets_from_builder_name(
   for _, value in json_constants.REPOSITORY_PROPERTY_MAP.items():
     if master_name in value["masters"]:
       if is_public:
-        return [value["public_bucket_name"]]
-      if value["internal_bucket_name"]:
         return [value["public_bucket_name"], value["internal_bucket_name"]]
-      return [value["public_bucket_name"]]
+      return [value["internal_bucket_name"]]
   return []
 
 
@@ -213,6 +211,14 @@ def key_from_builder_details(builder_details: PerfBuilderDetails,
   key[json_constants.BENCHMARK] = ""
   key[json_constants.BENCHMARK] = benchmark_key if benchmark_key else ""
   return key
+
+
+def is_empty(data: Optional[Dict[Any, Any]]) -> bool:
+  if not data:
+    return True
+  if json_constants.RESULTS not in data or not data[json_constants.RESULTS]:
+    return True
+  return False
 
 
 def _get_improvement_direction(unit: str) -> str:

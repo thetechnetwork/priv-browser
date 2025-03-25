@@ -39,6 +39,14 @@ BASE_DECLARE_FEATURE(kFewerUpdateConfirmations);
 BASE_DECLARE_FEATURE(kLightweightExtensionOverrideConfirmations);
 #endif
 
+#if BUILDFLAG(IS_WIN)
+BASE_DECLARE_FEATURE(kOfferPinToTaskbarWhenSettingToDefault);
+#endif
+
+#if BUILDFLAG(IS_WIN) || BUILDFLAG(IS_MAC)
+BASE_DECLARE_FEATURE(kPdfInfoBar);
+#endif
+
 BASE_DECLARE_FEATURE(kPreloadTopChromeWebUI);
 // This enum entry values must be in sync with
 // WebUIContentsPreloadManager::PreloadMode.
@@ -174,7 +182,6 @@ BASE_DECLARE_FEATURE(kTearOffWebAppTabOpensWebAppWindow);
 bool IsToolbarPinningEnabled();
 
 BASE_DECLARE_FEATURE(kPinnedCastButton);
-BASE_DECLARE_FEATURE(kPinnableDownloadsButton);
 
 BASE_DECLARE_FEATURE(kEnterpriseProfileBadgingForAvatar);
 BASE_DECLARE_FEATURE(kEnterpriseProfileBadgingForMenu);
@@ -218,6 +225,14 @@ BASE_DECLARE_FEATURE(kInlineFullscreenPerfExperiment);
 // Controls whether the new page actions framework should be displaying page
 // actions.
 BASE_DECLARE_FEATURE(kPageActionsMigration);
+// The following feature params indicate whether individual features should
+// have their page actions controlled using the new framework.
+extern const base::FeatureParam<bool> kPageActionsMigrationLensOverlay;
+extern const base::FeatureParam<bool> kPageActionsMigrationMemorySaver;
+extern const base::FeatureParam<bool> kPageActionsMigrationTranslate;
+extern const base::FeatureParam<bool> kPageActionsMigrationIntentPicker;
+extern const base::FeatureParam<bool> kPageActionsMigrationZoom;
+extern const base::FeatureParam<bool> kPageActionsMigrationOfferNotification;
 
 // Controls whether browser tab loading animations are driven by the compositor
 // vs. a repeating timer.

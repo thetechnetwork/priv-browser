@@ -166,6 +166,7 @@
 <translation id="1505542291183484463">Преоразмеряване на фиксиран прозорец надолу</translation>
 <translation id="1510238584712386396">Стартов панел</translation>
 <translation id="1520303207432623762">{NUM_APPS,plural, =1{Показване на настройките за известия. Известията са изключени за едно приложение}other{Показване на настройките за известия. Известията са изключени за # приложения}}</translation>
+<translation id="1521655867290435174">Google Таблици</translation>
 <translation id="1523032696246003">Батерия: <ph name="BATTERY_PERCENTAGE" />% | <ph name="TIME" /> до пълно зареждане</translation>
 <translation id="1525508553941733066">ОТХВЪРЛЯНЕ</translation>
 <translation id="1526448108126799339">Отваряне на нов раздел в нов прозорец</translation>
@@ -214,6 +215,7 @@
 <translation id="1679841710523778799">Увеличаване на яркостта</translation>
 <translation id="1680659827022803830">Контроли за видеообаждания</translation>
 <translation id="169515659049020177">Shift</translation>
+<translation id="1696984622403682083">Можете да изключите тази функция по всяко време от настройките. <ph name="LINK_TO_LEARN_MORE" /></translation>
 <translation id="1698080062160024910">Таймер за <ph name="TOTAL_TIME" /> · <ph name="LABEL" /></translation>
 <translation id="1698760176351776263">IPv6 адрес: <ph name="ADDRESS" /></translation>
 <translation id="1703117532528082099">Активният прозорец е прикрепен отляво.</translation>
@@ -240,6 +242,8 @@
 <translation id="1755556344721611131">Приложение за диагностика</translation>
 <translation id="1756833229520115364">Шаблонът не бе запазен. Твърде много прозорци или раздели.</translation>
 <translation id="1757857692711134412">Изключено до залез</translation>
+<translation id="1763084151787818322">Други действия</translation>
+<translation id="1768138163688567246">Затваряне на „Търсене на екрана ми“</translation>
 <translation id="1768366657309696705">Клавишната комбинация <ph name="LAUNCHER_KEY_NAME" /> + точка се промени. За да използвате клавиша Insert, натиснете клавиша <ph name="LAUNCHER_KEY_NAME" /> + Shift + Backspace.</translation>
 <translation id="1770726142253415363">Преместено на ред <ph name="ROW_NUMBER" />, колона <ph name="COLUMN_NUMBER" />.</translation>
 <translation id="1771761307086386028">Превъртане надясно</translation>
@@ -345,7 +349,6 @@
 <translation id="2201071101391734388">Скорошна снимка <ph name="INDEX" /> от <ph name="TOTAL_COUNT" />.</translation>
 <translation id="2201687081523799384">Свиване на Google Tasks</translation>
 <translation id="2208323208084708176">Режим на обединен работен плот</translation>
-<translation id="2220572644011485463">ПИН код или парола</translation>
 <translation id="2222841058024245321">Работен кът 7</translation>
 <translation id="2223384056430485343">При разделен екран</translation>
 <translation id="2224075387478458881">Записването на екрана не е разрешено, когато се вижда защитено съдържание</translation>
@@ -965,6 +968,7 @@
 <translation id="4221957499226645091"><ph name="APP_NAME" />, инсталирано приложение, поставено на пауза</translation>
 <translation id="4228078597006700451">Контролите не са настроени</translation>
 <translation id="4230560241506423345">Ново</translation>
+<translation id="4236726631849783264">Напомняне за предложените действия</translation>
 <translation id="4239069858505860023">GPRS</translation>
 <translation id="4240486403425279990">Режим за общ преглед</translation>
 <translation id="4242533952199664413">Отваряне на настройките</translation>
@@ -981,7 +985,6 @@
 <translation id="4275663329226226506">Медия</translation>
 <translation id="4279490309300973883">Дублиране</translation>
 <translation id="4280601795273309128">Актуализациите за сигурност приключиха. Надстройте устройството си.</translation>
-<translation id="4281739221820540368">Създаване на документ в Google Документи</translation>
 <translation id="4283888303416325161">За по-голяма сигурност въведете парола</translation>
 <translation id="4285498937028063278">Освобождаване</translation>
 <translation id="428715201724021596">Установява се връзка с профил за мобилна мрежа. Това може да отнеме няколко минути.</translation>
@@ -1042,6 +1045,7 @@
 <translation id="4471354919263203780">Файловете за разпознаване на говор се изтеглят... <ph name="PERCENT" />%</translation>
 <translation id="4471432286288241507">{0,plural, =0{Актуализирайте устройството сега}=1{Актуализирайте устройството в рамките на 1 секунда}other{Актуализирайте устройството в рамките на # секунди}}</translation>
 <translation id="4472575034687746823">Първи стъпки</translation>
+<translation id="4473489370276014885">Google Контакти</translation>
 <translation id="4477350412780666475">Следващ запис</translation>
 <translation id="4477751544736611934">Това може да доведе до разходи за данни.
 1 устройство е свързано.</translation>
@@ -1068,6 +1072,7 @@
 <translation id="4545950850562423083">Запазване на текущата страница като отметка</translation>
 <translation id="4548482551627849548">Преместване на активния прозорец към работния кът отляво</translation>
 <translation id="4552748006424994716">За да избегнете ехо, можете да слушате микрофона си само със слушалки с кабел.</translation>
+<translation id="4556953949326137018">Когато използвате предложени действия, като например „добавяне към Календар“ или „създаване на документ в Google Документи“, съдържанието от избраната област се изпраща до сървърите на Google с цел предлагане на действия, предмет на <ph name="LINK_TO_SERVICE_TERMS" />. Не включвайте лично, чувствително или поверително съдържание.</translation>
 <translation id="4560576029703263363">Включено</translation>
 <translation id="4561267230861221837">3G</translation>
 <translation id="4565377596337484307">Скриване на паролата</translation>
@@ -1151,6 +1156,7 @@
 <translation id="481455355267255546">Предстоящи събития</translation>
 <translation id="481749895090480684">Списък със задачи: <ph name="GLANCEABLES_TASKS_LIST_NAME" /></translation>
 <translation id="4826588772550366629">камерата и микрофона ви</translation>
+<translation id="4828935196674083554">Добавя се...</translation>
 <translation id="482908187605862807">Приложения, налични в Google Play Магазин</translation>
 <translation id="4831034276697007977">Наистина ли искате да изключите автоматичните кликвания?</translation>
 <translation id="4835677468087803981">Скриване на ПИН кода</translation>
@@ -1648,6 +1654,7 @@
 <translation id="641817663353603351">page up</translation>
 <translation id="6424520630891723617"><ph name="SECURITY_STATUS" />, сила на сигнала <ph name="SIGNAL_STRENGTH" /></translation>
 <translation id="642644398083277086">Изчистване на всички известия</translation>
+<translation id="6426905245930183644">Създава се...</translation>
 <translation id="6430225033895752525">Показване на настройките за режима за концентрация</translation>
 <translation id="643147933154517414">Всичко е готово</translation>
 <translation id="6431865393913628856">Записване на екрана</translation>
@@ -1714,7 +1721,6 @@
 <translation id="6612889377159412215">подзадача</translation>
 <translation id="6613765291890844037">Използвано място от хранилището: <ph name="STORAGE_IN_USE_SIZE" /> | Общо: <ph name="STORAGE_TOTAL_SIZE" /></translation>
 <translation id="6614169507485700968">Екранът за поверителност е включен</translation>
-<translation id="6618277154885124991">Създаване на таблица в Google Таблици</translation>
 <translation id="6622679827379792051">Настройване на прегледа на приложенията на телефона ви</translation>
 <translation id="662279009180869175">Използвайте стрелките за наляво и надясно, за да преоразмерите разделения екран</translation>
 <translation id="6624493541160101248">Текущ работен кът: <ph name="DESK_NAME" />. Работен кът <ph name="DESK_INDEX" /> от <ph name="DESK_COUNT" />.</translation>
@@ -1829,7 +1835,6 @@
 <translation id="7000027735917578303">Настройки за прозорците и работните кътове</translation>
 <translation id="7004910047186208204">Свързване с мрежа за мобилни данни</translation>
 <translation id="7005239792648594238">Отворете приложение, за да започнете</translation>
-<translation id="7007983414944123363">ПИН кодът или паролата ви не бяха потвърдени. Опитайте отново.</translation>
 <translation id="7014684956566476813">Установена е връзка с устройство на име <ph name="DEVICE_NAME" /></translation>
 <translation id="7015766095477679451">Ще бъда отново на ваше разположение в <ph name="COME_BACK_TIME" />.</translation>
 <translation id="70168403932084660">Работен кът 6</translation>
@@ -1943,6 +1948,7 @@
 <translation id="742594950370306541">Камерата се използва.</translation>
 <translation id="742608627846767349">Добро утро,</translation>
 <translation id="743058460480092004">Камерата и микрофонът се използват.</translation>
+<translation id="7440404390546433462">Google Търсене</translation>
 <translation id="7441711280402516925">Възпроизвежда се · Превключване към раздел</translation>
 <translation id="7453330308669753048">Резултатът от историята на търсенията бе премахнат</translation>
 <translation id="7459485586006128091">Точката за достъп бе изключена поради вътрешна грешка. Опитайте да се свържете отново след няколко минути.</translation>
@@ -2398,6 +2404,7 @@
 <translation id="8921624153894383499">Google Асистент не поддържа този език.</translation>
 <translation id="8926951137623668982">Лавицата е винаги скрита</translation>
 <translation id="8929566928381252430">Опитвате се да използвате клавиша Caps Lock? Натиснете</translation>
+<translation id="8934418770423095813">Създаване на документ в Google Документи</translation>
 <translation id="8934926665751933910">{NUM_FILES,plural, =1{1 файл}other{# файла}}</translation>
 <translation id="8936501819958976551">деактивирана</translation>
 <translation id="8938800817013097409">Устройство с USB-C (десният порт на гърба)</translation>
@@ -2466,6 +2473,7 @@
 <translation id="9168436347345867845">По-късно</translation>
 <translation id="9178475906033259337">Показан е 1 резултат за „<ph name="QUERY" />“</translation>
 <translation id="9179259655489829027">С тази функция получавате бърз достъп без парола до всеки влязъл потребител. Използвайте я само с надеждни профили.</translation>
+<translation id="9183302530794969518">Google Документи</translation>
 <translation id="9183456764293710005">Лупа за увеличаване на целия екран</translation>
 <translation id="9192133205265227850">Използване на <ph name="DEVICE_NAME" /></translation>
 <translation id="9193626018745640770">Предава се към неизвестен приемник</translation>

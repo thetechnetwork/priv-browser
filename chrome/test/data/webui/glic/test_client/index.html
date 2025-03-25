@@ -79,22 +79,75 @@ found in the LICENSE file.
     font-size: smaller;
   }
   #successUI, #localDenialUI, #osDenialUI {
-  padding: 10px;
-  border: 1px solid #ccc;
-  margin-top: 10px;
-}
+    padding: 10px;
+    border: 1px solid #ccc;
+    margin-top: 10px;
+  }
 
-#localDenialUI {
-  border-color: orange;
-}
+  #localDenialUI {
+    border-color: orange;
+  }
 
-#osDenialUI {
-  border-color: red;
-}
+  #osDenialUI {
+    border-color: red;
+  }
 
-#successUI {
-    border-color: green;
-}
+  #successUI {
+      border-color: green;
+  }
+
+  .fitWindow html {
+    height: unset;
+  }
+
+  .fitWindow body {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .fitWindow #contentSizingTest {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    flex-grow: 1;
+  }
+
+  .fitWindow #contentSizingTest .section {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .fitWindow #dump {
+    overflow-y: scroll;
+    flex-grow: 1;
+  }
+
+  /* Dark Mode Styles */
+  @media (prefers-color-scheme: dark) {
+    body {
+      background-color: #121212;
+      color: #eee;
+    }
+
+    .section {
+      background-color: #2a2a2a;
+      box-shadow: 0 0 0.5em rgba(0, 0, 0, 0.5);
+      border: 1px solid #444;
+    }
+
+    a {
+      color: #99ccff;
+    }
+
+    a:hover {
+      color: #66b3ff;
+    }
+
+    a:visited{
+      color: #c8a2c8;
+    }
+  }
 </style>
 <div id="pageHeader">
   <h1>Test Web Client</h1>
@@ -124,8 +177,16 @@ found in the LICENSE file.
       <label for="tabContextSwitch">Tab Context:</label>
       <input type="checkbox" id="tabContextSwitch" disabled />
     </div>
+    <div class="permission-switch">
+      <label for="osGeolocationPermissionSwitch">OS Geolocation:</label>
+      <input type="checkbox" id="osGeolocationPermissionSwitch" disabled />
+    </div>
   </div>
   <div>
+      <button id="getOsMicrophonePermissionButton">Get OS Microphone Permission</button>
+      <span id="osMicrophonePermissionResult"></span>
+      </div>
+      <div>
     <select id="permissionSelect">
       <option value="geolocation">Geolocation</option>
       <option value="microphone">Microphone</option>
@@ -138,11 +199,19 @@ found in the LICENSE file.
     <button id="testPermissionSwitch">Simulate External Permission
       Update</button>
     <button id="openSettings">Open Glic Settings</button>
+    <button id="openOsLocationSettings">Open OS Location Settings</button>
+    <button id="openOsMicrophoneSettings">Open OS Microphone Settings</button>
   </div>
 </div>
 <div class="section">
+  <h1>OS Glic Hotkey</h1>
+  <label for="osGlicHotkey">Hotkey:</label>
+  <input type="text" id="osGlicHotkey" name="osGlicHotkey" readonly>
+  </div>
+  <div class="section">
   <h1>Sizing</h1>
   <button id="enableTestSizingMode">Test Sizing</button>
+  <input id="enableDragResize" type="checkbox">Enable drag resizing</input>
 </div>
 <div class="section">
   <h1>State</h1>
@@ -226,8 +295,11 @@ found in the LICENSE file.
   <button id="getlocation">Get Location</button> <br />
   <div id="location"></div>
   <div id="locationStatus"></div>
-  <div id="locationErrorUI" style="display: none;">
+  <div id="locationOsErrorUI" style="display: none;">
     <button id="openOsLocationSettingsButton">Open OS Settings</button>
+  </div>
+  <div id="locationGlicErrorUI" style="display: none;">
+    <button id="openGlicLocationSettingsButton">Open Glic Settings</button>
   </div>
 </div>
 <div class="section">
@@ -357,12 +429,12 @@ found in the LICENSE file.
     <fieldset>
       <legend>Sizing mode:</legend>
       <div>
-        <input type="radio" id="fitWindow" name="resizeOption" value="fitWindow" checked>
+        <input type="radio" id="fitWindow" name="resizeOption" value="fitWindow" checked disabled>
         <label for="fitWindow">Content fits window</label>
       </div>
       <div>
-        <input type="radio" id="fitContent" name="resizeOption" value="fitContent">
-        <label for="fitContent">Window fits content</label>
+        <input type="radio" id="naturalSizing" name="resizeOption" value="naturalSizing" disabled>
+        <label for="naturalSize">Content uses natural size</label>
       </div>
     </fieldset>
   </form>

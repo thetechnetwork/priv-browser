@@ -10,6 +10,7 @@
 #include "gpu/command_buffer/service/dawn_caching_interface.h"
 
 #include <cstring>
+#include <variant>
 
 #include "base/memory/ptr_util.h"
 #include "base/strings/stringprintf.h"
@@ -52,8 +53,7 @@ void DawnCachingInterface::StoreData(const void* key,
   // Send the cache entry to be stored on the host-side if applicable.
   if (cache_blob_callback_) {
     std::string value_str(static_cast<const char*>(value), value_size);
-    cache_blob_callback_.Run(gpu::GpuDiskCacheType::kDawnWebGPU, key_str,
-                             value_str);
+    cache_blob_callback_.Run(key_str, value_str);
   }
 }
 
@@ -114,11 +114,11 @@ bool DawnCachingInterfaceFactory::OnMemoryDump(
       args.level_of_detail ==
       base::trace_event::MemoryDumpLevelOfDetail::kBackground;
   for (auto& [key, backend] : backends_) {
-    if (absl::holds_alternative<GpuDiskCacheDawnGraphiteHandle>(key)) {
+    if (std::holds_alternative<GpuDiskCacheDawnGraphiteHandle>(key)) {
       // There should only be a single graphite cache.
       backend->OnMemoryDump("gpu/shader_cache/graphite_cache", pmd);
     } else if (!is_background &&
-               absl::holds_alternative<GpuDiskCacheDawnWebGPUHandle>(key)) {
+               std::holds_alternative<GpuDiskCacheDawnWebGPUHandle>(key)) {
       // Note that in memory only webgpu caches aren't stored in `backends_` so
       // they won't produce memory dumps.
       std::string dump_name = base::StringPrintf(

@@ -49,14 +49,64 @@ BASE_FEATURE(kPerformanceControlsBatterySaverOptOutSurvey,
              "PerformanceControlsBatterySaverOptOutSurvey",
              base::FEATURE_DISABLED_BY_DEFAULT);
 
+BASE_FEATURE(kPerformanceControlsPPMSurvey,
+             "PerformanceControlsPPMSurvey",
+             base::FEATURE_DISABLED_BY_DEFAULT);
+
 const base::FeatureParam<base::TimeDelta>
     kPerformanceControlsBatterySurveyLookback{
         &kPerformanceControlsBatteryPerformanceSurvey, "battery_lookback",
         base::Days(8)};
 
+BASE_FEATURE_PARAM(base::TimeDelta,
+                   kPerformanceControlsPPMSurveyMinDelay,
+                   &kPerformanceControlsPPMSurvey,
+                   "ppm_survey_min_delay",
+                   base::Minutes(2));
+
+BASE_FEATURE_PARAM(base::TimeDelta,
+                   kPerformanceControlsPPMSurveyMaxDelay,
+                   &kPerformanceControlsPPMSurvey,
+                   "ppm_survey_max_delay",
+                   base::Minutes(60));
+
 BASE_FEATURE(kPerformanceInterventionDemoMode,
              "PerformanceInterventionDemoMode",
              base::FEATURE_DISABLED_BY_DEFAULT);
+
+BASE_FEATURE(kPerformanceInterventionNotificationImprovements,
+             "PerformanceInterventionNotificationImprovements",
+             base::FEATURE_DISABLED_BY_DEFAULT);
+
+BASE_FEATURE_PARAM(base::TimeDelta,
+                   kMinimumTimeBetweenReshow,
+                   &kPerformanceInterventionNotificationImprovements,
+                   "minimum_time_reshow",
+                   base::Hours(1));
+
+BASE_FEATURE_PARAM(int,
+                   kAcceptanceRateWindowSize,
+                   &kPerformanceInterventionNotificationImprovements,
+                   "window_size",
+                   10);
+
+BASE_FEATURE_PARAM(int,
+                   kScaleMaxTimesPerDay,
+                   &kPerformanceInterventionNotificationImprovements,
+                   "scale_max_times_per_day",
+                   5);
+
+BASE_FEATURE_PARAM(int,
+                   kScaleMaxTimesPerWeek,
+                   &kPerformanceInterventionNotificationImprovements,
+                   "scale_max_times_per_week",
+                   25);
+
+BASE_FEATURE_PARAM(base::TimeDelta,
+                   kNoAcceptanceBackOff,
+                   &kPerformanceInterventionNotificationImprovements,
+                   "no_acceptance_back_off",
+                   base::Days(30));
 
 #if BUILDFLAG(IS_CHROMEOS)
 BASE_FEATURE(kUnthrottledTabProcessReporting,
@@ -144,7 +194,7 @@ BASE_FEATURE(kFreezingFollowsDiscardOptOut,
 
 BASE_FEATURE(kRecordFreezingEligibilityUKM,
              "RecordFreezingEligibilityUKM",
-             base::FEATURE_DISABLED_BY_DEFAULT);
+             base::FEATURE_ENABLED_BY_DEFAULT);
 
 BASE_FEATURE(kResourceAttributionIncludeOrigins,
              "ResourceAttributionIncludeOrigins",

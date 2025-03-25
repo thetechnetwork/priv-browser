@@ -80,9 +80,34 @@ const base::FeatureParam<base::TimeDelta>
         &kAutofillAiServerModel, "autofill_ai_model_execution_timeout",
         base::Seconds(10)};
 
+// Whether AnnotatedPageContent is included in the request to the AutofillAI
+// model.
+const base::FeatureParam<bool> kAutofillAiServerModelSendPageContent{
+    &kAutofillAiServerModel, "autofill_ai_model_send_apc", false};
+
 // Whether the page's full URL is included in the data sent to the model.
 const base::FeatureParam<bool> kAutofillAiServerModelSendPageUrl{
     &kAutofillAiServerModel, "autofill_ai_model_send_page_url", false};
+
+// Whether the user may use the locally cached results from the server model
+// to provide AutofillAI predictions for filling and importing.
+const base::FeatureParam<bool> kAutofillAiServerModelUseCacheResults{
+    &kAutofillAiServerModel, "autofill_ai_model_use_cache_results", false};
+
+// If enabled, votes for date format strings from individual fields are
+// uploaded. For example, <input type=text value=31/12/2025> leads to the format
+// strings DD/MM/YYYY and D/M/YYYY.
+BASE_FEATURE(kAutofillAiVoteForFormatStringsFromSingleFields,
+             "AutofillAiVoteForFormatStringsFromSingleFields",
+             base::FEATURE_DISABLED_BY_DEFAULT);
+
+// If enabled, votes for date format strings from multiple fields are uploaded.
+// For example, <input type=text value=31> <input type=text value=12> <input
+// type=text value=2025> leads to the format strings DD and D, MM and M, YYYY,
+// respectively.
+BASE_FEATURE(kAutofillAiVoteForFormatStringsFromMultipleFields,
+             "AutofillAiVoteForFormatStringsFromMultipleFields",
+             base::FEATURE_DISABLED_BY_DEFAULT);
 
 // Enables the second iteration AutofillAI.
 // This feature is independent of `autofill_ai::kAutofillAi`.
@@ -309,26 +334,6 @@ BASE_FEATURE(kAutofillEnableSupportForHomeAndWork,
              "AutofillEnableSupportForHomeAndWork",
              base::FEATURE_DISABLED_BY_DEFAULT);
 
-// Gives precedence to local heuristics if they indicate that a field is an
-// EMAIL_ADDRESS field and the server believes that it is a USERNAME or
-// SINGLE_USERNAME field.
-//
-// Imagine that  a web page has a field that admits both email address
-// and username, but the server prediction only captures the username
-// aspect.
-// With this feature disabled, we predict the overall type to be USERNAME. If
-// Password Manager has not results, it defaults to Autofill, which, in turn,
-// defaults to Autocomplete because it cannot handle the USERNAME prediction.
-// With this feature enabled, Password Manager is still given  precedence for
-// showing username suggestions if it has any. However, if it does not, Autofill
-// can now show email-related suggestions. Only if it does not have any will it
-// fall back to Autocomplete.
-//
-// TODO: crbug.com/360791229 - clean up.
-BASE_FEATURE(kAutofillGivePrecedenceToEmailOverUsername,
-             "AutofillGivePrecedenceToEmailOverUsername",
-             base::FEATURE_DISABLED_BY_DEFAULT);
-
 // When enabled, the autofill suggestion labels are more descriptive and
 // relevant.
 // TODO(crbug.com/380273791): Cleanup when launched.
@@ -352,17 +357,17 @@ const base::FeatureParam<bool>
         "autofill_improved_labels_with_differentiating_labels_in_front", false};
 
 // If enabled, we include a `FormFieldData`'s maxlength in crowdsourcing votes.
-// TODO(crbug.com/393995180): Clean up when launched.
+// TODO(crbug.com/393995180): Clean up in M137.
 BASE_FEATURE(kAutofillIncludeMaxLengthInCrowdsourcing,
              "AutofillIncludeMaxLengthInCrowdsourcing",
-             base::FEATURE_DISABLED_BY_DEFAULT);
+             base::FEATURE_ENABLED_BY_DEFAULT);
 
 // If enabled, we include a <select>'s first, second, and last <option> in
 // crowdsourcing votes.
-// TODO(crbug.com/393999140): Clean up when launched.
+// TODO(crbug.com/393999140): Clean up in M137.
 BASE_FEATURE(kAutofillIncludeSelectOptionsInCrowdsourcing,
              "AutofillIncludeSelectOptionsInCrowdsourcing",
-             base::FEATURE_DISABLED_BY_DEFAULT);
+             base::FEATURE_ENABLED_BY_DEFAULT);
 
 // If enabled, we include a `FormData`'s URL in crowdsourcing votes.
 // TODO(crbug.com/385043924): Clean up in M137.

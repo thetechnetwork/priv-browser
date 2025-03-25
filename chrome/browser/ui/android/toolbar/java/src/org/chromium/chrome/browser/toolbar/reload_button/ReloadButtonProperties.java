@@ -4,6 +4,7 @@
 
 package org.chromium.chrome.browser.toolbar.reload_button;
 
+import android.content.res.ColorStateList;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -29,7 +30,11 @@ class ReloadButtonProperties {
             new WritableObjectPropertyKey<>();
     public static final WritableBooleanPropertyKey IS_ENABLED = new WritableBooleanPropertyKey();
     public static final WritableBooleanPropertyKey IS_VISIBLE = new WritableBooleanPropertyKey();
-    public static final WritableObjectPropertyKey<String> CONTENT_DESCRIPTION =
+    public static final WritableObjectPropertyKey<CharSequence> CONTENT_DESCRIPTION =
+            new WritableObjectPropertyKey<>();
+    public static final WritableIntPropertyKey BACKGROUND_HIGHLIGHT_RESOURCE =
+            new WritableIntPropertyKey();
+    public static final WritableObjectPropertyKey<ColorStateList> TINT_LIST =
             new WritableObjectPropertyKey<>();
 
     public static final PropertyKey[] ALL_KEYS =
@@ -43,6 +48,8 @@ class ReloadButtonProperties {
                 IS_ENABLED,
                 IS_VISIBLE,
                 CONTENT_DESCRIPTION,
+                TINT_LIST,
+                BACKGROUND_HIGHLIGHT_RESOURCE
             };
 
     private ReloadButtonProperties() {}

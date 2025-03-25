@@ -496,9 +496,6 @@ namespace autofillPrivate {
     static void isValidIban(
         DOMString ibanValue, IsValidIbanCallback callback);
 
-    // Triggers local credit cards migration.
-    static void migrateCreditCards();
-
     // Logs that the server cards edit link was clicked.
     static void logServerCardLinkClicked();
 
@@ -579,6 +576,11 @@ namespace autofillPrivate {
     static void getAllAttributeTypesForEntityTypeName(
         long entityTypeName,
         GetAllAttributeTypesForEntityTypeNameCallback callback);
+
+    // Sets the AutofillAI opt-in status for the current user.
+    static void setAutofillAiOptInStatus(
+      boolean optedIn,
+      optional VoidCallback callback);
   };
 
   interface Events {

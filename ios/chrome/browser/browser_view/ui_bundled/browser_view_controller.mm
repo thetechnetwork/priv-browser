@@ -37,7 +37,7 @@
 #import "ios/chrome/browser/incognito_reauth/ui_bundled/incognito_reauth_constants.h"
 #import "ios/chrome/browser/incognito_reauth/ui_bundled/incognito_reauth_scene_agent.h"
 #import "ios/chrome/browser/incognito_reauth/ui_bundled/incognito_reauth_view.h"
-#import "ios/chrome/browser/intents/intents_donation_helper.h"
+#import "ios/chrome/browser/intents/model/intents_donation_helper.h"
 #import "ios/chrome/browser/main_content/ui_bundled/main_content_ui.h"
 #import "ios/chrome/browser/main_content/ui_bundled/main_content_ui_broadcasting_util.h"
 #import "ios/chrome/browser/main_content/ui_bundled/main_content_ui_state.h"
@@ -60,7 +60,6 @@
 #import "ios/chrome/browser/shared/public/commands/settings_commands.h"
 #import "ios/chrome/browser/shared/public/commands/text_zoom_commands.h"
 #import "ios/chrome/browser/shared/public/features/features.h"
-#import "ios/chrome/browser/shared/public/features/features_utils.h"
 #import "ios/chrome/browser/shared/ui/util/named_guide.h"
 #import "ios/chrome/browser/shared/ui/util/uikit_ui_util.h"
 #import "ios/chrome/browser/shared/ui/util/url_with_title.h"
@@ -72,13 +71,11 @@
 #import "ios/chrome/browser/signin/model/identity_manager_factory.h"
 #import "ios/chrome/browser/snapshots/model/snapshot_tab_helper.h"
 #import "ios/chrome/browser/tab_switcher/ui_bundled/tab_strip/coordinator/tab_strip_coordinator.h"
+#import "ios/chrome/browser/tab_switcher/ui_bundled/tab_strip/ui/swift_constants_for_objective_c.h"
 #import "ios/chrome/browser/tab_switcher/ui_bundled/tab_strip/ui/tab_strip_utils.h"
 #import "ios/chrome/browser/tabs/ui_bundled/background_tab_animation_view.h"
 #import "ios/chrome/browser/tabs/ui_bundled/foreground_tab_animation_view.h"
-#import "ios/chrome/browser/tabs/ui_bundled/requirements/tab_strip_presentation.h"
 #import "ios/chrome/browser/tabs/ui_bundled/switch_to_tab_animation_view.h"
-#import "ios/chrome/browser/tabs/ui_bundled/tab_strip_constants.h"
-#import "ios/chrome/browser/tabs/ui_bundled/tab_strip_legacy_coordinator.h"
 #import "ios/chrome/browser/toolbar/ui_bundled/accessory/toolbar_accessory_presenter.h"
 #import "ios/chrome/browser/toolbar/ui_bundled/buttons/toolbar_configuration.h"
 #import "ios/chrome/browser/toolbar/ui_bundled/fullscreen/toolbars_size.h"
@@ -111,10 +108,6 @@
 #import "ui/base/l10n/l10n_util.h"
 
 namespace {
-
-// When the tab strip moves beyond this origin offset, switch the status bar
-// appearance from light to dark.
-const CGFloat kTabStripAppearanceOffset = -29;
 
 enum HeaderBehaviour {
   // The header moves completely out of the screen.
@@ -170,7 +163,6 @@ enum HeaderBehaviour {
                                      FullscreenUIElement,
                                      MainContentUI,
                                      SideSwipeUIControllerDelegate,
-                                     TabStripPresentation,
                                      UIGestureRecognizerDelegate> {
   // Identifier for each animation of an NTP opening.
   NSInteger _NTPAnimationIdentifier;
@@ -272,10 +264,7 @@ enum HeaderBehaviour {
 // for the presentation of a new tab. Can be used to record performance metrics.
 @property(nonatomic, strong, nullable)
     ProceduralBlock foregroundTabWasAddedCompletionBlock;
-// Coordinator for tablet tab strip.
-@property(nonatomic, strong)
-    TabStripLegacyCoordinator* legacyTabStripCoordinator;
-// Coordinator for the new tablet tab strip.
+// Coordinator for the tablet tab strip.
 @property(nonatomic, strong) TabStripCoordinator* tabStripCoordinator;
 // A weak reference to the view of the tab strip on tablet.
 @property(nonatomic, weak) UIView* tabStripView;
@@ -286,8 +275,6 @@ enum HeaderBehaviour {
 
 // Coordinator for the popup menus.
 @property(nonatomic, strong) PopupMenuCoordinator* popupMenuCoordinator;
-
-@property(nonatomic, strong) BubblePresenter* bubblePresenter;
 
 // Presenter used to display accessories over the toolbar (e.g. Find In Page).
 @property(nonatomic, strong)
@@ -367,7 +354,6 @@ enum HeaderBehaviour {
     self.popupMenuCoordinator = dependencies.popupMenuCoordinator;
     self.toolbarCoordinator = dependencies.toolbarCoordinator;
     self.tabStripCoordinator = dependencies.tabStripCoordinator;
-    self.legacyTabStripCoordinator = dependencies.legacyTabStripCoordinator;
 
     self.textZoomHandler = dependencies.textZoomHandler;
     self.helpHandler = dependencies.helpHandler;
@@ -799,16 +785,9 @@ enum HeaderBehaviour {
   _isShutdown = YES;
 
   // Disconnect child coordinators.
-  if (IsModernTabStripOrRaccoonEnabled()) {
     [self.tabStripCoordinator stop];
     self.tabStripCoordinator = nil;
-  } else {
-    [self.legacyTabStripCoordinator stop];
-    self.legacyTabStripCoordinator = nil;
-  }
   self.tabStripView = nil;
-
-  _bubblePresenter = nil;
 
   [self.contentArea removeGestureRecognizer:self.contentAreaGestureRecognizer];
 
@@ -1030,13 +1009,8 @@ enum HeaderBehaviour {
     [self.toolbarCoordinator stop];
     self.toolbarCoordinator = nil;
     _toolbarsSize = nil;
-    if (IsModernTabStripOrRaccoonEnabled()) {
-      [self.tabStripCoordinator stop];
-      self.tabStripCoordinator = nil;
-    } else {
-      [self.legacyTabStripCoordinator stop];
-      self.legacyTabStripCoordinator = nil;
-    }
+    [self.tabStripCoordinator stop];
+    self.tabStripCoordinator = nil;
     self.tabStripView = nil;
     [_sideSwipeCoordinator stop];
     _sideSwipeCoordinator = nil;
@@ -1077,9 +1051,7 @@ enum HeaderBehaviour {
           id<UIViewControllerTransitionCoordinatorContext>) {
         [weakSelf animateTransition];
       }
-      completion:^(id<UIViewControllerTransitionCoordinatorContext>) {
-        [weakSelf completedTransition];
-      }];
+                      completion:nil];
 
   crash_keys::SetCurrentOrientation(GetInterfaceOrientation(),
                                     [[UIDevice currentDevice] orientation]);
@@ -1095,14 +1067,6 @@ enum HeaderBehaviour {
   }
 
   [self.popupMenuCommandsHandler adjustPopupSize];
-}
-
-- (void)completedTransition {
-  if (!IsModernTabStripOrRaccoonEnabled()) {
-    if (self.tabStripView) {
-      [self.legacyTabStripCoordinator tabStripSizeDidChange];
-    }
-  }
 }
 
 - (void)dismissViewControllerAnimated:(BOOL)flag
@@ -1239,12 +1203,6 @@ enum HeaderBehaviour {
 }
 
 - (UIStatusBarStyle)preferredStatusBarStyle {
-  if (IsRegularXRegularSizeClass(self) && !_isOffTheRecord &&
-      !IsModernTabStripOrRaccoonEnabled()) {
-    return self.tabStripView.frame.origin.y < kTabStripAppearanceOffset
-               ? UIStatusBarStyleDefault
-               : UIStatusBarStyleLightContent;
-  }
   return _isOffTheRecord ? UIStatusBarStyleLightContent
                          : UIStatusBarStyleDefault;
 }
@@ -1264,17 +1222,13 @@ enum HeaderBehaviour {
   _fakeStatusBarView = [[UIView alloc] initWithFrame:statusBarFrame];
   [_fakeStatusBarView setAutoresizingMask:UIViewAutoresizingFlexibleWidth];
   if (ui::GetDeviceFormFactor() == ui::DEVICE_FORM_FACTOR_TABLET) {
-    if (IsModernTabStripOrRaccoonEnabled()) {
-      _fakeStatusBarView.backgroundColor = TabStripHelper.backgroundColor;
-      // Force the UserInterfaceStyle update in incognito.
-      _fakeStatusBarView.overrideUserInterfaceStyle =
-          _isOffTheRecord ? UIUserInterfaceStyleDark
-                          : UIUserInterfaceStyleUnspecified;
-      const bool canShowTabStrip = IsRegularXRegularSizeClass(self);
-      _fakeStatusBarView.hidden = !canShowTabStrip;
-    } else {
-      _fakeStatusBarView.backgroundColor = UIColor.blackColor;
-    }
+    _fakeStatusBarView.backgroundColor = TabStripHelper.backgroundColor;
+    // Force the UserInterfaceStyle update in incognito.
+    _fakeStatusBarView.overrideUserInterfaceStyle =
+        _isOffTheRecord ? UIUserInterfaceStyleDark
+                        : UIUserInterfaceStyleUnspecified;
+    const bool canShowTabStrip = IsRegularXRegularSizeClass(self);
+    _fakeStatusBarView.hidden = !canShowTabStrip;
     _fakeStatusBarView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
     DCHECK(self.contentArea);
     [self.view insertSubview:_fakeStatusBarView aboveSubview:self.contentArea];
@@ -1298,14 +1252,8 @@ enum HeaderBehaviour {
 
   if (ui::GetDeviceFormFactor() == ui::DEVICE_FORM_FACTOR_TABLET) {
     const bool canShowTabStrip = IsRegularXRegularSizeClass(self);
-    if (IsModernTabStripOrRaccoonEnabled()) {
       [self.tabStripCoordinator start];
       [self.tabStripCoordinator hideTabStrip:!canShowTabStrip];
-    } else {
-      self.legacyTabStripCoordinator.presentationProvider = self;
-      [self.legacyTabStripCoordinator start];
-      [self.legacyTabStripCoordinator hideTabStrip:!canShowTabStrip];
-    }
   }
 }
 
@@ -1442,7 +1390,7 @@ enum HeaderBehaviour {
     UIView* primaryToolbarView =
         self.toolbarCoordinator.primaryToolbarViewController.view;
     if (ui::GetDeviceFormFactor() == ui::DEVICE_FORM_FACTOR_TABLET) {
-      if (IsModernTabStripOrRaccoonEnabled() && self.tabStripCoordinator) {
+      if (self.tabStripCoordinator) {
         UIViewController* tabStripViewController =
             self.tabStripCoordinator.viewController;
         [self addChildViewController:tabStripViewController];
@@ -1451,20 +1399,14 @@ enum HeaderBehaviour {
         [tabStripViewController didMoveToParentViewController:self];
         CGRect tabStripFrame =
             CGRectMake(0, self.headerOffset, self.view.bounds.size.width,
-                       kModernTabStripHeight);
+                       TabStripCollectionViewConstants.height);
         self.tabStripView.frame = tabStripFrame;
         self.tabStripView.autoresizingMask =
             (UIViewAutoresizingFlexibleWidth |
              UIViewAutoresizingFlexibleBottomMargin);
       }
-      if (IsModernTabStripOrRaccoonEnabled()) {
-        [self.view insertSubview:primaryToolbarView
-                    aboveSubview:self.tabStripView];
-      } else {
-        [self.view insertSubview:primaryToolbarView
-                    belowSubview:self.tabStripView];
-      }
-
+      [self.view insertSubview:primaryToolbarView
+                  aboveSubview:self.tabStripView];
     } else {
       [self.view addSubview:primaryToolbarView];
     }
@@ -1725,12 +1667,14 @@ enum HeaderBehaviour {
 
   self.fullscreenController->BrowserTraitCollectionChangedBegin();
 
+#if !defined(__IPHONE_17_0) || __IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_17_0
   // TODO(crbug.com/41198852): - traitCollectionDidChange: is not always
   // forwarded because in some cases the presented view controller isn't a child
   // of the BVC in the view controller hierarchy (some intervening object isn't
   // a view controller).
   [self.presentedViewController
       traitCollectionDidChange:previousTraitCollection];
+#endif
 
   if (self.currentWebState) {
     UIEdgeInsets contentPadding =
@@ -1772,11 +1716,7 @@ enum HeaderBehaviour {
     [self showTabStripView:self.tabStripView];
     [self.tabStripView layoutSubviews];
     const bool canShowTabStrip = IsRegularXRegularSizeClass(self);
-    if (IsModernTabStripOrRaccoonEnabled()) {
       [self.tabStripCoordinator hideTabStrip:!canShowTabStrip];
-    } else {
-      [self.legacyTabStripCoordinator hideTabStrip:!canShowTabStrip];
-    }
     _fakeStatusBarView.hidden = !canShowTabStrip;
     [self addConstraintsToPrimaryToolbar];
     // If tabstrip is leaving or coming back due to a window resize or screen
@@ -1792,6 +1732,25 @@ enum HeaderBehaviour {
   [self setNeedsStatusBarAppearanceUpdate];
 
   self.fullscreenController->BrowserTraitCollectionChangedEnd();
+}
+
+// Shows the `tabStripView`.
+- (void)showTabStripView:(UIView*)tabStripView {
+  DCHECK([self isViewLoaded]);
+  DCHECK(tabStripView);
+  self.tabStripView = tabStripView;
+  CGRect tabStripFrame = [self.tabStripView frame];
+  tabStripFrame.origin = CGPointZero;
+  // TODO(crbug.com/41023322): Move the origin.y below to -setUpViewLayout.
+  // because the CGPointZero above will break reset the offset, but it's not
+  // clear what removing that will do.
+  tabStripFrame.origin.y = self.headerOffset;
+  tabStripFrame.size.width = CGRectGetWidth([self view].bounds);
+  [self.tabStripView setFrame:tabStripFrame];
+
+  UIView* primaryToolbar =
+      self.toolbarCoordinator.primaryToolbarViewController.view;
+  [self.view insertSubview:tabStripView belowSubview:primaryToolbar];
 }
 
 #pragma mark - Private Methods: Tap handling
@@ -2677,34 +2636,6 @@ enum HeaderBehaviour {
 
 - (id<LogoAnimationControllerOwner>)logoAnimationControllerOwner {
   return nil;
-}
-
-#pragma mark - TabStripPresentation
-
-- (BOOL)isTabStripFullyVisible {
-  return ([self currentHeaderOffset] == 0.0f);
-}
-
-- (void)showTabStripView:(UIView*)tabStripView {
-  DCHECK([self isViewLoaded]);
-  DCHECK(tabStripView);
-  self.tabStripView = tabStripView;
-  CGRect tabStripFrame = [self.tabStripView frame];
-  tabStripFrame.origin = CGPointZero;
-  // TODO(crbug.com/41023322): Move the origin.y below to -setUpViewLayout.
-  // because the CGPointZero above will break reset the offset, but it's not
-  // clear what removing that will do.
-  tabStripFrame.origin.y = self.headerOffset;
-  tabStripFrame.size.width = CGRectGetWidth([self view].bounds);
-  [self.tabStripView setFrame:tabStripFrame];
-
-  if (IsModernTabStripOrRaccoonEnabled()) {
-    UIView* primaryToolbar =
-        self.toolbarCoordinator.primaryToolbarViewController.view;
-    [self.view insertSubview:tabStripView belowSubview:primaryToolbar];
-  } else {
-    [self.view addSubview:tabStripView];
-  }
 }
 
 #pragma mark - FindBarPresentationDelegate

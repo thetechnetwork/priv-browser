@@ -115,6 +115,9 @@ public class AccessibilityNodeInfoUtils {
                 && !node.getStateDescription().toString().isEmpty()) {
             builder.append(" stateDescription:\"").append(node.getStateDescription()).append("\"");
         }
+        if (node.getContainerTitle() != null && !node.getContainerTitle().toString().isEmpty()) {
+            builder.append(" containerTitle:\"").append(node.getContainerTitle()).append("\"");
+        }
 
         // Boolean properties - Only print when set to true except for enabled and visibleToUser,
         // which are both mostly true, so only print when they are false.
@@ -377,6 +380,12 @@ public class AccessibilityNodeInfoUtils {
             return "SET_PROGRESS";
         } else if (action == ACTION_LONG_CLICK.getId()) {
             return "LONG_CLICK";
+        } else if (action == ACTION_NEXT_HTML_ELEMENT.getId()) {
+            return "NEXT_HTML_ELEMENT";
+        } else if (action == ACTION_PREVIOUS_HTML_ELEMENT.getId()) {
+            return "PREVIOUS_HTML_ELEMENT";
+        } else if (action == ACTION_SHOW_ON_SCREEN.getId()) {
+            return "SHOW_ON_SCREEN";
         } else {
             return "NOT_IMPLEMENTED";
         }

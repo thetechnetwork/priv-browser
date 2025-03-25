@@ -20,6 +20,8 @@ source_set("public") {
     "fetch_result.h",
     "fetcher_config.cc",
     "fetcher_config.h",
+    "tab_metadata.cc",
+    "tab_metadata.h",
     "url_grouping/group_suggestions.cc",
     "url_grouping/group_suggestions.h",
     "url_grouping/group_suggestions_delegate.h",
@@ -91,11 +93,32 @@ source_set("test_support") {
 
 if (is_android) {
   android_library("public_java") {
-    sources = [ "url_grouping/android/java/src/org/chromium/components/visited_url_ranking/url_grouping/GroupSuggestionsService.java" ]
+    srcjar_deps = [ ":group_suggestions_generated_enums" ]
+
+    sources = [
+      "url_grouping/android/java/src/org/chromium/components/visited_url_ranking/url_grouping/GroupSuggestion.java",
+      "url_grouping/android/java/src/org/chromium/components/visited_url_ranking/url_grouping/GroupSuggestions.java",
+      "url_grouping/android/java/src/org/chromium/components/visited_url_ranking/url_grouping/GroupSuggestionsService.java",
+      "url_grouping/android/java/src/org/chromium/components/visited_url_ranking/url_grouping/UserResponseMetadata.java",
+    ]
 
     deps = [
-      "//chrome/browser/tab:java",
+      "//base:base_java",
+      "//base:callback_java",
+      "//third_party/androidx:androidx_annotation_annotation_java",
       "//third_party/jni_zero:jni_zero_java",
     ]
+  }
+
+  generate_jni("jni_headers") {
+    sources = [
+      "url_grouping/android/java/src/org/chromium/components/visited_url_ranking/url_grouping/GroupSuggestion.java",
+      "url_grouping/android/java/src/org/chromium/components/visited_url_ranking/url_grouping/GroupSuggestions.java",
+      "url_grouping/android/java/src/org/chromium/components/visited_url_ranking/url_grouping/UserResponseMetadata.java",
+    ]
+  }
+
+  java_cpp_enum("group_suggestions_generated_enums") {
+    sources = [ "url_grouping/group_suggestions_delegate.h" ]
   }
 }

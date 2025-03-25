@@ -139,7 +139,8 @@ public class AccessibilityNodeInfoBuilder {
     public static final String EXTRAS_KEY_IMAGE_DATA = "AccessibilityNodeInfo.imageData";
 
     public static final String ACCESSIBILITY_SPANNABLE_CREATION_TIME =
-            "Accessibility.Android.Performance.SpannableCreationTime";
+            "Accessibility.Android.Performance.SpannableCreationTime2";
+    private static final int MAX_TIME_BUCKET = 5 * 1000; // 5,000 microseconds = 5ms.
 
     // Static instances of the three types of extra data keys that can be added to nodes.
     private static final List<String> sTextCharacterLocation =
@@ -405,6 +406,7 @@ public class AccessibilityNodeInfoBuilder {
             String display,
             String brailleLabel,
             String brailleRoleDescription) {
+        node.setUniqueId(String.valueOf(virtualViewId));
         node.setClassName(className);
 
         Bundle bundle = node.getExtras();
@@ -470,8 +472,9 @@ public class AccessibilityNodeInfoBuilder {
             int[] suggestionStarts,
             int[] suggestionEnds,
             String[] suggestions,
-            String stateDescription) {
-        long now = SystemClock.elapsedRealtime();
+            String stateDescription,
+            String containerTitle) {
+        long now = SystemClock.elapsedRealtimeNanos() / 1000;
 
         CharSequence computedText =
                 computeText(
@@ -486,6 +489,11 @@ public class AccessibilityNodeInfoBuilder {
         // We add the stateDescription attribute when it is non-null and not empty.
         if (stateDescription != null && !stateDescription.isEmpty()) {
             node.setStateDescription(stateDescription);
+        }
+
+        // We add the containerTitle attribute when it is non-null and not empty.
+        if (containerTitle != null && !containerTitle.isEmpty()) {
+            node.setContainerTitle(containerTitle);
         }
 
         // We expose the nested structure of links, which results in the roles of all nested nodes
@@ -511,6 +519,7 @@ public class AccessibilityNodeInfoBuilder {
             int[] suggestionEnds,
             String[] suggestions,
             String stateDescription,
+            String containerTitle,
             float textSize,
             int textStyle,
             int textColor,
@@ -523,7 +532,7 @@ public class AccessibilityNodeInfoBuilder {
                 : "setAccessibilityNodeInfoText with text styling information was called when"
                         + " feature was not enabled.";
 
-        long now = SystemClock.elapsedRealtime();
+        long now = SystemClock.elapsedRealtimeNanos() / 1000;
 
         CharSequence computedText =
                 computeText(
@@ -547,6 +556,11 @@ public class AccessibilityNodeInfoBuilder {
             node.setStateDescription(stateDescription);
         }
 
+        // We add the containerTitle attribute when it is non-null and not empty.
+        if (containerTitle != null && !containerTitle.isEmpty()) {
+            node.setContainerTitle(containerTitle);
+        }
+
         // We expose the nested structure of links, which results in the roles of all nested nodes
         // being read. Use content description in the case of links to prevent verbose TalkBack
         if (annotateAsLink) {
@@ -559,9 +573,12 @@ public class AccessibilityNodeInfoBuilder {
     }
 
     private void recordTimeToCreateSpannables(long startTime) {
-        // TODO(mschillaci): Check initial data and change time range/buckets if needed.
-        RecordHistogram.recordTimesHistogram(
-                ACCESSIBILITY_SPANNABLE_CREATION_TIME, SystemClock.elapsedRealtime() - startTime);
+        RecordHistogram.recordCustomTimesHistogram(
+                ACCESSIBILITY_SPANNABLE_CREATION_TIME,
+                (SystemClock.elapsedRealtimeNanos() / 1000) - startTime,
+                1,
+                MAX_TIME_BUCKET,
+                100);
     }
 
     @CalledByNative

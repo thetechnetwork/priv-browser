@@ -115,6 +115,7 @@ enum class RequestTypeForUma {
   MULTIPLE_KEYBOARD_AND_POINTER_LOCK = 39,
   PERMISSION_HAND_TRACKING = 40,
   PERMISSION_WEB_APP_INSTALLATION = 41,
+  PERMISSION_LOCAL_NETWORK_ACCESS = 42,
   // NUM must be the last value in the enum.
   NUM,
 };
@@ -263,8 +264,7 @@ enum class PermissionPromptDisposition {
   // automatically shows a bubble.
   LOCATION_BAR_LEFT_CHIP_AUTO_BUBBLE = 12,
 
-  // Only used on desktop, a bubble shown near the embedded permission element,
-  // after the user clicks on the element.
+  // A prompt shown as a result of the user clicking the permission element.
   ELEMENT_ANCHORED_BUBBLE = 13,
 
   // Only used on macOS, a native OS provided permission prompt.

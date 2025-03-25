@@ -21,6 +21,7 @@
 #include "ui/base/mojom/menu_source_type.mojom.h"
 #include "ui/events/event_utils.h"
 #include "ui/events/keycodes/dom/dom_code.h"
+#include "ui/gfx/native_widget_types.h"
 #include "ui/views/accessibility/view_accessibility.h"
 #include "ui/views/context_menu_controller.h"
 #include "ui/views/test/ax_event_counter.h"
@@ -649,7 +650,7 @@ TEST_F(RootViewTest, RemoveViewOnMouseEnterDispatch) {
   // to prevent test memory leak.
   RemoveViewOnEvent child(ui::EventType::kMouseEntered);
 
-  content->AddChildView(&child);
+  content->AddChildViewRaw(&child);
 
   // Make |child| smaller than the containing Widget and RootView.
   child.SetBounds(100, 100, 100, 100);
@@ -865,7 +866,6 @@ TEST_F(RootViewTest, DeleteWidgetOnMouseExitDispatchFromChild) {
   EXPECT_FALSE(widget_deletion_observer.IsWidgetAlive());
 }
 
-namespace {
 class RootViewTestDialogDelegate : public DialogDelegateView {
  public:
   RootViewTestDialogDelegate() {
@@ -898,14 +898,13 @@ class RootViewTestDialogDelegate : public DialogDelegateView {
 
   int layout_count_ = 0;
 };
-}  // namespace
 
 // Ensure only one layout happens during Widget initialization, and ensure it
 // happens at the ContentView's preferred size.
 TEST_F(RootViewTest, SingleLayoutDuringInit) {
   RootViewTestDialogDelegate* delegate = new RootViewTestDialogDelegate();
-  Widget* widget =
-      DialogDelegate::CreateDialogWidget(delegate, GetContext(), nullptr);
+  Widget* widget = DialogDelegate::CreateDialogWidget(delegate, GetContext(),
+                                                      gfx::NativeView());
   EXPECT_EQ(1, delegate->layout_count());
   widget->CloseNow();
 }
@@ -915,8 +914,8 @@ using RootViewDesktopNativeWidgetTest = ViewsTestWithDesktopNativeWidget;
 // Also test Aura desktop Widget codepaths.
 TEST_F(RootViewDesktopNativeWidgetTest, SingleLayoutDuringInit) {
   RootViewTestDialogDelegate* delegate = new RootViewTestDialogDelegate();
-  Widget* widget =
-      DialogDelegate::CreateDialogWidget(delegate, GetContext(), nullptr);
+  Widget* widget = DialogDelegate::CreateDialogWidget(delegate, GetContext(),
+                                                      gfx::NativeView());
   EXPECT_EQ(1, delegate->layout_count());
   widget->CloseNow();
 }

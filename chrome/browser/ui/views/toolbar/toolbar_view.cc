@@ -41,6 +41,7 @@
 #include "chrome/browser/ui/global_error/global_error_service_factory.h"
 #include "chrome/browser/ui/intent_picker_tab_helper.h"
 #include "chrome/browser/ui/layout_constants.h"
+#include "chrome/browser/ui/tabs/public/tab_features.h"
 #include "chrome/browser/ui/tabs/tab_strip_model.h"
 #include "chrome/browser/ui/toolbar/chrome_labs/chrome_labs_model.h"
 #include "chrome/browser/ui/toolbar/chrome_labs/chrome_labs_prefs.h"
@@ -48,7 +49,6 @@
 #include "chrome/browser/ui/ui_features.h"
 #include "chrome/browser/ui/view_ids.h"
 #include "chrome/browser/ui/views/bookmarks/bookmark_bubble_view.h"
-#include "chrome/browser/ui/views/download/bubble/download_toolbar_button_view.h"
 #include "chrome/browser/ui/views/extensions/extension_popup.h"
 #include "chrome/browser/ui/views/extensions/extensions_toolbar_button.h"
 #include "chrome/browser/ui/views/extensions/extensions_toolbar_container.h"
@@ -74,9 +74,10 @@
 #include "chrome/browser/ui/views/toolbar/home_button.h"
 #include "chrome/browser/ui/views/toolbar/pinned_toolbar_actions_container.h"
 #include "chrome/browser/ui/views/toolbar/reload_button.h"
-#include "chrome/browser/ui/views/toolbar/side_by_side_button.h"
+#include "chrome/browser/ui/views/toolbar/split_tabs_button.h"
 #include "chrome/browser/ui/views/toolbar/toolbar_button.h"
 #include "chrome/browser/ui/views/toolbar/toolbar_controller.h"
+#include "chrome/browser/ui/views/zoom/zoom_view_controller.h"
 #include "chrome/browser/ui/web_applications/app_browser_controller.h"
 #include "chrome/browser/web_applications/link_capturing_features.h"
 #include "chrome/common/chrome_features.h"
@@ -284,13 +285,6 @@ void ToolbarView::Init() {
   // Make sure the toolbar shows by default.
   size_animation_.Reset(1);
 
-  std::unique_ptr<DownloadToolbarButtonView> download_button;
-  if (download::IsDownloadBubbleEnabled() &&
-      !base::FeatureList::IsEnabled(features::kPinnableDownloadsButton)) {
-    download_button =
-        std::make_unique<DownloadToolbarButtonView>(browser_view_);
-  }
-
   if (display_mode_ != DisplayMode::NORMAL) {
     location_bar_ = container_view_->AddChildView(std::move(location_bar));
     location_bar_->Init();
@@ -303,17 +297,6 @@ void ToolbarView::Init() {
     initialized_ = true;
     return;
   } else if (display_mode_ == DisplayMode::LOCATION) {
-    // Add the download button for popups.
-    if (download_button) {
-      download_button_ =
-          container_view_->AddChildView(std::move(download_button));
-      download_button_->SetPreferredSize(
-          gfx::Size(location_bar_->GetPreferredSize().height(),
-                    location_bar_->GetPreferredSize().height()));
-      download_button_->SetFocusBehavior(FocusBehavior::ALWAYS);
-      // Hide the icon by default; it will show up when there's a download.
-      download_button_->Hide();
-    }
     container_view_->SetBackground(
         views::CreateSolidBackground(kColorLocationBarBackground));
     container_view_->SetLayoutManager(std::make_unique<views::FlexLayout>())
@@ -385,9 +368,9 @@ void ToolbarView::Init() {
   reload_ = container_view_->AddChildView(std::move(reload));
   home_ = container_view_->AddChildView(std::move(home));
   if (base::FeatureList::IsEnabled(features::kSideBySide)) {
-    std::unique_ptr<SideBySideToolbarButton> split =
-        std::make_unique<SideBySideToolbarButton>(browser_);
-    side_by_side_ = container_view_->AddChildView(std::move(split));
+    std::unique_ptr<SplitTabsToolbarButton> split =
+        std::make_unique<SplitTabsToolbarButton>(browser_);
+    split_tabs_ = container_view_->AddChildView(std::move(split));
   }
 
   location_bar_ = container_view_->AddChildView(std::move(location_bar));
@@ -448,11 +431,6 @@ void ToolbarView::Init() {
 
   if (media_button) {
     media_button_ = container_view_->AddChildView(std::move(media_button));
-  }
-
-  if (download_button) {
-    download_button_ =
-        container_view_->AddChildView(std::move(download_button));
   }
 
   avatar_ = container_view_->AddChildView(
@@ -866,42 +844,29 @@ void ToolbarView::OnThemeChanged() {
   SchedulePaint();
 }
 
-// The implementation of this method is subtle.
-// The goal is to create rounded corners in the top-left and top-right corners,
-// allowing background_view_left_ and background_view_right_ to peek through. In
-// order for the corners to look good, we must use antialiasing on the clip
-// paths. When there are fractional device scale factors (e.g. 1.5), it's easy
-// (common even) to have straight edges of the clip path end up on non-integral
-// boundaries (e.g. y=68.5). This is unavoidable. Antialiasing turns these
-// non-integral boundary clip paths into 2-pixel "fuzzy" boundaries, which in
-// turn causes misalignment with other views::Views which assume the boundaries
-// are exact. Solving this problem completely will require a rethink of how we
-// implement fractional device scale factors in Chrome. In the meanwhile, the
-// implementation of this method minimizes the length of straight edges of the
-// clip path to minimize issues. To do this we carve out the two corners, and
-// then take the inverse as our clip path.
 void ToolbarView::UpdateClipPath() {
   const int corner_radius = GetLayoutConstant(TOOLBAR_CORNER_RADIUS);
-  SkPath path;
   const gfx::Rect local_bounds = GetLocalBounds();
-
-  // Carve out top-left.
-  path.moveTo(0, 0);
+  SkPath path;
+  // The bottom of the toolbar may be clipped more than necessary in
+  // certain scale factor so adds extra 2dp so that even if the origin
+  // and the height are rounded down, we still can paint til the
+  // bottom of the toolbar. The similar logic is applied to
+  // BookmarkBarView which can be the bottom component within the
+  // TopContainerView, and TopContainerView which is the parent and
+  // can also clip the paint region for child views.
+  // TODO(crbug.com/41344902): Remove this hack once the pixel canvas is
+  // enabled on all aura platforms.
+  const int extended_height = local_bounds.height() + 2;
+  path.moveTo(0, local_bounds.height());
   path.lineTo(0, corner_radius);
   path.arcTo(corner_radius, corner_radius, 0, SkPath::kSmall_ArcSize,
              SkPathDirection::kCW, corner_radius, 0);
-  path.lineTo(0, 0);
-
-  // Carve out top-right.
-  path.moveTo(local_bounds.width() - corner_radius, 0);
+  path.lineTo(local_bounds.width() - corner_radius, 0);
   path.arcTo(corner_radius, corner_radius, 0, SkPath::kSmall_ArcSize,
              SkPathDirection::kCW, local_bounds.width(), corner_radius);
-  path.lineTo(local_bounds.width(), 0);
-  path.lineTo(local_bounds.width() - corner_radius, 0);
-
-  // Take the inverse so we keep everything else. Artifacts are confined to the
-  // corners.
-  path.setFillType(SkPathFillType::kInverseWinding);
+  path.lineTo(local_bounds.width(), extended_height);
+  path.lineTo(0, extended_height);
   container_view_->SetClipPath(path);
 }
 
@@ -1155,12 +1120,21 @@ views::View* ToolbarView::GetAnchorView(
           action_id.value())) {
     return pinned_toolbar_actions_container_->GetButtonFor(action_id.value());
   }
-  // TODO(crbug.com/386362832): Consider whether we should try anchoring to
-  // the corresponding PageActionView, if any, instead of the location bar.
+
   return location_bar_;
 }
 
 void ToolbarView::ZoomChangedForActiveTab(bool can_show_bubble) {
+  if (IsPageActionMigrated(PageActionIconType::kZoom)) {
+    auto* zoom_view_controller = browser_->GetActiveTabInterface()
+                                     ->GetTabFeatures()
+                                     ->zoom_view_controller();
+    CHECK(zoom_view_controller);
+    zoom_view_controller->UpdatePageActionIconAndBubbleVisibility(
+        /*prefer_to_show_bubble=*/can_show_bubble, /*from_user_gesture=*/false);
+    return;
+  }
+
   location_bar_->page_action_icon_controller()->ZoomChangedForActiveTab(
       can_show_bubble);
 }
@@ -1182,13 +1156,10 @@ IntentChipButton* ToolbarView::GetIntentChipButton() {
 }
 
 ToolbarButton* ToolbarView::GetDownloadButton() {
-  if (base::FeatureList::IsEnabled(features::kPinnableDownloadsButton)) {
     return pinned_toolbar_actions_container_
                ? pinned_toolbar_actions_container_->GetButtonFor(
                      kActionShowDownloads)
                : nullptr;
-  }
-  return download_button();
 }
 
 std::optional<BrowserRootView::DropIndex> ToolbarView::GetDropIndex(

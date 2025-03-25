@@ -31,9 +31,19 @@ public class BinaryStatePermissionPreference extends Preference
     private @Nullable ManagedPreferenceDelegate mManagedPrefDelegate;
     private @ContentSettingValues int mSetting = ContentSettingValues.DEFAULT;
     private final boolean mHasCustomLayout;
+
+    /**
+     * An array of 4 resource IDs for primary texts for enabled and disabled states and description
+     * texts for enabled and disabled states, in that order.
+     */
     private int @Nullable [] mDescriptionIds;
+
+    /** An array of 2 resource IDs for icons for enabled and disabled states, in that order. */
+    private int @Nullable [] mIconIds;
+
     private @ContentSettingValues int mDefaultEnabledValue;
     private @ContentSettingValues int mDefaultDisabledValue;
+    private int mIconMarginEnd;
 
     public BinaryStatePermissionPreference(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -50,12 +60,16 @@ public class BinaryStatePermissionPreference extends Preference
     public void initialize(
             @ContentSettingValues int setting,
             int[] descriptionIds,
+            int[] iconIds,
             @ContentSettingValues int defaultEnabledValue,
-            @ContentSettingValues int defaultDisabledValue) {
+            @ContentSettingValues int defaultDisabledValue,
+            int iconMarginEnd) {
         mSetting = setting;
         mDescriptionIds = descriptionIds;
+        mIconIds = iconIds;
         mDefaultEnabledValue = defaultEnabledValue;
         mDefaultDisabledValue = defaultDisabledValue;
+        mIconMarginEnd = iconMarginEnd;
     }
 
     public @ContentSettingValues int getCheckedSetting() {
@@ -67,24 +81,35 @@ public class BinaryStatePermissionPreference extends Preference
         super.onBindViewHolder(holder);
 
         mPositive = (RadioButtonWithDescription) holder.findViewById(R.id.positive);
-        assumeNonNull(mPositive);
         mNegative = (RadioButtonWithDescription) holder.findViewById(R.id.negative);
-        assumeNonNull(mNegative);
         mRadioGroup = (RadioGroup) holder.findViewById(R.id.radio_button_layout);
-        assumeNonNull(mRadioGroup);
         mRadioGroup.setOnCheckedChangeListener(this);
 
         if (mDescriptionIds != null) {
             mPositive.setPrimaryText(getContext().getText(mDescriptionIds[0]));
             mNegative.setPrimaryText(getContext().getText(mDescriptionIds[1]));
-            if (mDescriptionIds[2] != 0 && mDescriptionIds[3] != 0) {
-                mPositive.setIcon(mDescriptionIds[2]);
-                mNegative.setIcon(mDescriptionIds[3]);
+            if (mDescriptionIds[2] != 0) {
+                mPositive.setDescriptionText(getContext().getText(mDescriptionIds[2]));
             }
+            if (mDescriptionIds[3] != 0) {
+                mNegative.setDescriptionText(getContext().getText(mDescriptionIds[3]));
+            }
+        }
+
+        if (mIconIds != null) {
+            mPositive.setIcon(mIconIds[0]);
+            mNegative.setIcon(mIconIds[1]);
+            mPositive.setIconMarginEnd(mIconMarginEnd);
+            mNegative.setIconMarginEnd(mIconMarginEnd);
         }
 
         RadioButtonWithDescription selectedRadioButton = findRadioButton(mSetting);
         if (selectedRadioButton != null) selectedRadioButton.setChecked(true);
+    }
+
+    public void setIconMarginEnd(int marginEnd) {
+        assumeNonNull(mPositive).setIconMarginEnd(marginEnd);
+        assumeNonNull(mNegative).setIconMarginEnd(marginEnd);
     }
 
     @Override

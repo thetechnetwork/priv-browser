@@ -162,17 +162,22 @@ std::vector<mojom::IdentifiedActivityPtr> SessionActivityProtoToMojom(
     const std::map<std::string, ::boca::StudentStatus>& activities) {
   std::vector<mojom::IdentifiedActivityPtr> result;
   for (auto item : activities) {
-    for (auto device : item.second.devices()) {
-      // Only update state and active tab now.
+    if (auto const device = item.second.devices().begin();
+        device != item.second.devices().end()) {
+      // Only update state and active tab for the first device now.
+      // TODO - crbug.com/403655119: Ideally we should support multi-device. But
+      // since now UI only supports single device, always parse the first one to
+      // make the behavior deterministic.
       auto identity_ptr = mojom::IdentifiedActivity::New(
-          item.first, mojom::StudentActivity::New(
-                          item.second.state() == ::boca::StudentStatus::ACTIVE,
-                          device.second.activity().active_tab().title(),
-                          /*is_caption_enabled=*/false,
-                          /*is_hand_raised=*/false, mojom::JoinMethod::kRoster,
-                          device.second.view_screen_config()
-                              .connection_param()
-                              .connection_code()));
+          item.first,
+          mojom::StudentActivity::New(
+              device->second.state() == ::boca::StudentDevice::ACTIVE,
+              device->second.activity().active_tab().title(),
+              /*is_caption_enabled=*/false,
+              /*is_hand_raised=*/false, mojom::JoinMethod::kRoster,
+              device->second.view_screen_config()
+                  .connection_param()
+                  .connection_code()));
       result.push_back(std::move(identity_ptr));
     }
   }
@@ -283,10 +288,9 @@ void BocaAppHandler::CreateSession(mojom::ConfigPtr config,
                 }
               },
               std::move(callback)));
-  if (!config->students.empty()) {
     auto roster = std::make_unique<::boca::Roster>();
+    // Always create student group even if start session with no students.
     auto* student_groups = roster->mutable_student_groups()->Add();
-    std::vector<::boca::UserIdentity> identities;
     for (auto& item : config->students) {
       auto* student = student_groups->mutable_students()->Add();
       student->set_gaia_id(item->id);
@@ -295,7 +299,6 @@ void BocaAppHandler::CreateSession(mojom::ConfigPtr config,
       student->set_photo_url(item->photo_url.value_or(GURL()).spec());
     }
     request->set_roster(std::move(roster));
-  }
   if (config->caption_config) {
     request->set_captions_config(
         CaptionConfigMojomToProto(config->caption_config->Clone()));
@@ -713,10 +716,10 @@ void BocaAppHandler::SetSpotlightService(SpotlightService* spotlight_service) {
 }
 
 void BocaAppHandler::SetFloatModeAndBoundsForWindow(
-    bool isFloatMode,
+    bool is_float_mode,
     aura::Window* window,
     SetFloatModeCallback callback) {
-  if (!isFloatMode) {
+  if (!is_float_mode) {
     // We don't unset float mode, do nothing here.
     std::move(callback).Run(false);
     return;

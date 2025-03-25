@@ -196,6 +196,13 @@ OnDeviceModelServiceController::CreateSession(
   opts.adapter = adaptation_metadata->adapter();
 
   opts.logger = optimization_guide_logger;
+  if (config_params) {
+    opts.capabilities = config_params->capabilities;
+    // TODO: can this be required?
+    if (config_params->sampling_params) {
+      opts.sampling_params = *config_params->sampling_params;
+    }
+  }
 
   return std::make_unique<SessionImpl>(
       feature, std::move(opts), std::move(execute_remote_fn), config_params);
@@ -458,10 +465,11 @@ bool OnDeviceModelServiceController::OnDeviceModelClient::ShouldUse() {
 }
 
 void OnDeviceModelServiceController::OnDeviceModelClient::StartSession(
-    mojo::PendingReceiver<on_device_model::mojom::Session> pending) {
+    mojo::PendingReceiver<on_device_model::mojom::Session> pending,
+    on_device_model::mojom::SessionParamsPtr params) {
   controller_
       ->GetOrCreateModelRemote(feature_, model_paths_, adaptation_assets_)
-      ->StartSession(std::move(pending), nullptr);
+      ->StartSession(std::move(pending), std::move(params));
 }
 
 void OnDeviceModelServiceController::OnDeviceModelClient::
@@ -494,6 +502,14 @@ void OnDeviceModelServiceController::
         OnDeviceModelAvailabilityObserver* observer) {
   DCHECK(features::internal::GetOptimizationTargetForCapability(feature));
   model_availability_change_observers_[feature].RemoveObserver(observer);
+}
+
+on_device_model::Capabilities
+OnDeviceModelServiceController::GetCapabilities() {
+  if (!model_metadata_) {
+    return {};
+  }
+  return model_metadata_->capabilities();
 }
 
 void OnDeviceModelServiceController::NotifyModelAvailabilityChanges() {

@@ -786,11 +786,12 @@ class CONTENT_EXPORT WebContentsImpl
       bool is_new_browsing_instance,
       bool has_user_gesture,
       SessionStorageNamespace* session_storage_namespace) override;
-  void ShowCreatedWindow(RenderFrameHostImpl* opener,
-                         int main_frame_widget_route_id,
-                         WindowOpenDisposition disposition,
-                         const blink::mojom::WindowFeatures& window_features,
-                         bool user_gesture) override;
+  WebContents* ShowCreatedWindow(
+      RenderFrameHostImpl* opener,
+      int main_frame_widget_route_id,
+      WindowOpenDisposition disposition,
+      const blink::mojom::WindowFeatures& window_features,
+      bool user_gesture) override;
   void PrimaryMainDocumentElementAvailable() override;
   void PassiveInsecureContentFound(const GURL& resource_url) override;
   bool ShouldAllowRunningInsecureContent(bool allowed_per_prefs,
@@ -1188,6 +1189,9 @@ class CONTENT_EXPORT WebContentsImpl
   void OnInputIgnored(const blink::WebInputEvent& event) override;
   input::mojom::RenderInputRouterDelegate* GetRenderInputRouterDelegateRemote()
       override;
+#if BUILDFLAG(IS_ANDROID)
+  float GetCurrentTouchSequenceYOffset() override;
+#endif
 
   // RenderFrameHostManager::Delegate ------------------------------------------
 

@@ -391,13 +391,13 @@ CSSValue* ConsumeCubicBezier(CSSParserTokenStream& stream,
     stream.ConsumeWhitespace();
 
     double x1, y1, x2, y2;
-    if (ConsumeNumberRaw(stream, context, x1) && x1 >= 0 && x1 <= 1 &&
+    if (ConsumeNumberRaw_DO_NOT_USE(stream, context, x1) && x1 >= 0 &&
+        x1 <= 1 && ConsumeCommaIncludingWhitespace(stream) &&
+        ConsumeNumberRaw_DO_NOT_USE(stream, context, y1) &&
         ConsumeCommaIncludingWhitespace(stream) &&
-        ConsumeNumberRaw(stream, context, y1) &&
-        ConsumeCommaIncludingWhitespace(stream) &&
-        ConsumeNumberRaw(stream, context, x2) && x2 >= 0 && x2 <= 1 &&
-        ConsumeCommaIncludingWhitespace(stream) &&
-        ConsumeNumberRaw(stream, context, y2) && stream.AtEnd()) {
+        ConsumeNumberRaw_DO_NOT_USE(stream, context, x2) && x2 >= 0 &&
+        x2 <= 1 && ConsumeCommaIncludingWhitespace(stream) &&
+        ConsumeNumberRaw_DO_NOT_USE(stream, context, y2) && stream.AtEnd()) {
       guard.Release();
       result =
           MakeGarbageCollected<cssvalue::CSSCubicBezierTimingFunctionValue>(
@@ -684,7 +684,8 @@ bool ConsumePerspective(CSSParserTokenStream& stream,
   }
   if (!parsed_value && use_legacy_parsing) {
     double perspective;
-    if (!ConsumeNumberRaw(stream, context, perspective) || perspective < 0) {
+    if (!ConsumeNumberRaw_DO_NOT_USE(stream, context, perspective) ||
+        perspective < 0) {
       return false;
     }
     context.Count(WebFeature::kUnitlessPerspectiveInTransformProperty);
@@ -1008,8 +1009,10 @@ class MathFunctionParser {
     return result;
   }
 
+  // TODO: Remove this method once ConsumeNumberRaw_DO_NOT_USE is removed.
   bool ConsumeNumberRaw(double& result) {
-    if (!calc_value_ || calc_value_->Category() != kCalcNumber) {
+    if (!calc_value_ || calc_value_->Category() != kCalcNumber ||
+        !calc_value_->ExpressionNode()->IsNumericLiteral()) {
       return false;
     }
     DCHECK(!has_consumed_);  // Cannot consume twice.
@@ -1127,9 +1130,9 @@ CSSPrimitiveValue* ConsumePositiveInteger(CSSParserTokenStream& stream,
   return ConsumeInteger(stream, context, 1);
 }
 
-bool ConsumeNumberRaw(CSSParserTokenStream& stream,
-                      const CSSParserContext& context,
-                      double& result) {
+bool ConsumeNumberRaw_DO_NOT_USE(CSSParserTokenStream& stream,
+                                 const CSSParserContext& context,
+                                 double& result) {
   if (stream.Peek().GetType() == kNumberToken) {
     result = stream.ConsumeIncludingWhitespace().NumericValue();
     return true;
@@ -2075,7 +2078,8 @@ CSSValue* ConsumeColorContrast(CSSParserTokenStream& stream,
         target_contrast = 7;
       } else if (ConsumeIdent<CSSValueID::kAAALarge>(stream)) {
         target_contrast = 4.5;
-      } else if (ConsumeNumberRaw(stream, context, target_contrast_temp)) {
+      } else if (ConsumeNumberRaw_DO_NOT_USE(stream, context,
+                                             target_contrast_temp)) {
         target_contrast = target_contrast_temp;
       } else {
         return nullptr;
@@ -5420,20 +5424,20 @@ CSSValue* ConsumeColumnCount(CSSParserTokenStream& stream,
   return ConsumePositiveInteger(stream, context);
 }
 
-CSSValue* ConsumeColumnWidth(CSSParserTokenStream& stream,
-                             const CSSParserContext& context) {
+CSSValue* ConsumeColumnLength(CSSParserTokenStream& stream,
+                              const CSSParserContext& context) {
   if (stream.Peek().Id() == CSSValueID::kAuto) {
     return ConsumeIdent(stream);
   }
   // Always parse lengths in strict mode here, since it would be ambiguous
   // otherwise when used in the 'columns' shorthand property.
   CSSParserContext::ParserModeOverridingScope scope(context, kHTMLStandardMode);
-  CSSPrimitiveValue* column_width = ConsumeLength(
+  CSSPrimitiveValue* column_length = ConsumeLength(
       stream, context, CSSPrimitiveValue::ValueRange::kNonNegative);
-  if (!column_width) {
+  if (!column_length) {
     return nullptr;
   }
-  return column_width;
+  return column_length;
 }
 
 bool ConsumeColumnWidthOrCount(CSSParserTokenStream& stream,
@@ -5445,7 +5449,7 @@ bool ConsumeColumnWidthOrCount(CSSParserTokenStream& stream,
     return true;
   }
   if (!column_width) {
-    column_width = ConsumeColumnWidth(stream, context);
+    column_width = ConsumeColumnLength(stream, context);
     if (column_width) {
       return true;
     }
@@ -8627,6 +8631,73 @@ CSSValue* ConsumeProgressType(CSSParserTokenStream& stream,
 
   return MakeGarbageCollected<cssvalue::CSSProgressValue>(*progress,
                                                           easing_function);
+}
+
+bool ContainsSafeAreaInsetBottom(CSSParserTokenStream& stream) {
+  while (!stream.AtEnd()) {
+    if (stream.Peek().GetBlockType() == CSSParserToken::kBlockStart) {
+      // Check env("safe-area-inset-bottom")
+      if (stream.Peek().FunctionId() == CSSValueID::kEnv) {
+        CSSParserTokenStream::RestoringBlockGuard guard(stream);
+        stream.ConsumeWhitespace();
+        if (stream.Peek().GetType() == kIdentToken &&
+            stream.Peek().Value() == "safe-area-inset-bottom") {
+          return true;
+        }
+      }
+
+      CSSParserTokenStream::BlockGuard guard(stream);
+      if (ContainsSafeAreaInsetBottom(stream)) {
+        return true;
+      }
+      continue;
+    }
+    stream.Consume();
+  }
+
+  return false;
+}
+
+bool ContainsSafeAreaInsetBottom(StringView string) {
+  CSSParserTokenStream stream(string);
+  return ContainsSafeAreaInsetBottom(stream);
+}
+
+bool IsSimpleSum(CSSParserTokenStream& stream) {
+  while (!stream.AtEnd()) {
+    CSSParserTokenType type = stream.Peek().GetType();
+    if (type == kDelimiterToken) {
+      UChar delimiter = stream.Peek().Delimiter();
+      if (delimiter != '+' && delimiter != '-') {
+        break;
+      }
+      // Consume' '+' or '-'.
+      stream.ConsumeIncludingWhitespace();
+    } else if (type == kDimensionToken) {
+      // Consume literals.
+      stream.ConsumeIncludingWhitespace();
+    } else {
+      break;
+    }
+  }
+
+  return stream.AtEnd();
+}
+
+bool IsSimpleSum(StringView string) {
+  CSSParserTokenStream stream(string);
+  if (stream.Peek().GetBlockType() == CSSParserToken::kBlockStart) {
+    // Handle e.g. calc(1px + 2em - 3ch ... etc)
+    if (stream.Peek().FunctionId() != CSSValueID::kCalc) {
+      return false;
+    }
+    CSSParserTokenStream::BlockGuard guard(stream);
+    stream.ConsumeWhitespace();
+    return IsSimpleSum(stream);
+  } else {
+    // Handle 1px + 2em - 3ch ... etc
+    return IsSimpleSum(stream);
+  }
 }
 
 }  // namespace css_parsing_utils

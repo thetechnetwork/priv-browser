@@ -144,7 +144,7 @@ using DismissViewCallback = SystemIdentityManager::DismissViewCallback;
 }
 
 - (void)start {
-  ProfileIOS* profile = self.browser->GetProfile();
+  ProfileIOS* profile = self.profile;
 
   self.mediator = [[ManageSyncSettingsMediator alloc]
         initWithSyncService:self.syncService
@@ -160,8 +160,7 @@ using DismissViewCallback = SystemIdentityManager::DismissViewCallback;
       AuthenticationService::ServiceStatus::SigninForcedByPolicy;
   if (IsLinkedServicesSettingIosEnabled()) {
     self.mediator.isEEAAccount =
-        ios::RegionalCapabilitiesServiceFactory::GetForProfile(
-            self.browser->GetProfile())
+        ios::RegionalCapabilitiesServiceFactory::GetForProfile(self.profile)
             ->IsInEeaCountry();
   }
 
@@ -226,12 +225,11 @@ using DismissViewCallback = SystemIdentityManager::DismissViewCallback;
 }
 
 - (syncer::SyncService*)syncService {
-  return SyncServiceFactory::GetForProfile(self.browser->GetProfile());
+  return SyncServiceFactory::GetForProfile(self.profile);
 }
 
 - (AuthenticationService*)authService {
-  return AuthenticationServiceFactory::GetForProfile(
-      self.browser->GetProfile());
+  return AuthenticationServiceFactory::GetForProfile(self.profile);
 }
 
 #pragma mark - Private
@@ -257,8 +255,7 @@ using DismissViewCallback = SystemIdentityManager::DismissViewCallback;
   _personalizeGoogleServicesCoordinator = nil;
 }
 
-- (void)stopAccountMenuCoordinatorWithResult:(SigninCoordinatorResult)result
-                                    identity:(id<SystemIdentity>)identity {
+- (void)stopAccountMenuCoordinator {
   [_accountMenuCoordinator stop];
   _accountMenuCoordinator = nil;
 }
@@ -501,10 +498,10 @@ using DismissViewCallback = SystemIdentityManager::DismissViewCallback;
                                         anchorView:_viewController.view];
 
   __weak __typeof(self) weakself = self;
-  _accountMenuCoordinator.signinCompletion = ^(SigninCoordinatorResult result,
-                                               id<SystemIdentity> identity) {
-    [weakself stopAccountMenuCoordinatorWithResult:result identity:identity];
-  };
+  _accountMenuCoordinator.signinCompletion =
+      ^(SigninCoordinatorResult result, id<SystemIdentity> identity) {
+        [weakself stopAccountMenuCoordinator];
+      };
 
   [_accountMenuCoordinator start];
 }

@@ -11,19 +11,31 @@ TabEventTrackerImpl::TabEventTrackerImpl(
     : on_new_event_callback_(on_new_event_callback) {}
 TabEventTrackerImpl::~TabEventTrackerImpl() = default;
 
-void TabEventTrackerImpl::DidAddTab(int tab_id) {
+void TabEventTrackerImpl::DidAddTab(int tab_id, int tab_launch_type) {
+  // TODO(ssid): Observe tab closures to reset the counters.
+  tab_id_to_selected_count_[tab_id]++;
   on_new_event_callback_.Run();
 }
 
 void TabEventTrackerImpl::DidSelectTab(int tab_id,
-                                       TabSelectionType tab_selection_type) {
+                                       TabSelectionType tab_selection_type,
+                                       int last_tab_id) {
+  // TODO(ssid): Only increment for user triggered selection.
+  tab_id_to_selected_count_[tab_id]++;
   on_new_event_callback_.Run();
 }
 
 void TabEventTrackerImpl::DidMoveTab(int tab_id,
                                      int new_index,
-                                     int current_index) {
-  on_new_event_callback_.Run();
+                                     int current_index) {}
+
+void TabEventTrackerImpl::DidEnterTabSwitcher() {}
+
+int TabEventTrackerImpl::GetSelectedCount(int tab_id) const {
+  if (tab_id_to_selected_count_.contains(tab_id)) {
+    return tab_id_to_selected_count_.at(tab_id);
+  }
+  return 0;
 }
 
 }  // namespace visited_url_ranking

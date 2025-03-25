@@ -132,6 +132,8 @@ static_library("vector_icons") {
 
 static_library("browser") {
   sources = [
+    "actions/contextual_search_action.cc",
+    "actions/contextual_search_action.h",
     "actions/omnibox_action.cc",
     "actions/omnibox_action.h",
     "actions/omnibox_action_concepts.h",
@@ -191,6 +193,8 @@ static_library("browser") {
     "calculator_provider.h",
     "clipboard_provider.cc",
     "clipboard_provider.h",
+    "contextual_search_provider.cc",
+    "contextual_search_provider.h",
     "document_provider.cc",
     "document_provider.h",
     "document_suggestions_service.cc",
@@ -720,6 +724,8 @@ static_library("test_support") {
     "test_omnibox_client.h",
     "test_omnibox_edit_model.cc",
     "test_omnibox_edit_model.h",
+    "test_omnibox_popup_view.cc",
+    "test_omnibox_popup_view.h",
     "test_omnibox_view.cc",
     "test_omnibox_view.h",
     "test_scheme_classifier.cc",

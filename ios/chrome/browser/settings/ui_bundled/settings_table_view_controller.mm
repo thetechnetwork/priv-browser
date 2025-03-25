@@ -640,8 +640,7 @@ struct EnhancedSafeBrowsingActivePromoData
       _hasRecordedSigninImpression = YES;
     }
 
-    // The user is signed-in and syncing, exit early since the promo is not
-    // required.
+    // The user is signed-in, exit early since the promo is not required.
     return;
   }
 
@@ -1725,8 +1724,7 @@ struct EnhancedSafeBrowsingActivePromoData
 
   __weak __typeof(self) weakSelf = self;
   CallbackWithIPHDismissalReasonType dismissalCallback =
-      ^(IPHDismissalReasonType dismissReason,
-        feature_engagement::Tracker::SnoozeAction snoozeAction) {
+      ^(IPHDismissalReasonType dismissReason) {
         [weakSelf signinIPHDismissed];
       };
   _bubblePresenter = [[BubbleViewControllerPresenter alloc]
@@ -1947,7 +1945,7 @@ struct EnhancedSafeBrowsingActivePromoData
   //   5.) Not have their Safe Browsing preferences enterprise-managed.
   AuthenticationService* authService =
       AuthenticationServiceFactory::GetForProfile(_profile);
-  bool isSignedInAndSynced =
+  bool isSignedIn =
       authService->HasPrimaryIdentity(signin::ConsentLevel::kSignin);
   bool isDefaultBrowser = IsChromeLikelyDefaultBrowser();
   bool isStandardProtectionEnabled =
@@ -1958,9 +1956,8 @@ struct EnhancedSafeBrowsingActivePromoData
   bool isEnterpriseManaged =
       safe_browsing::IsSafeBrowsingPolicyManaged(*_profile->GetPrefs());
 
-  if (!isSignedInAndSynced || !isDefaultBrowser ||
-      !isStandardProtectionEnabled || !triggerCriteriaMet ||
-      isEnterpriseManaged) {
+  if (!isSignedIn || !isDefaultBrowser || !isStandardProtectionEnabled ||
+      !triggerCriteriaMet || isEnterpriseManaged) {
     return NO;
   }
 

@@ -182,6 +182,13 @@ const String& StaticUAStyles() {
   return kStaticUAStyles;
 }
 
+const String& StaticUAStylesScoped() {
+  DEFINE_STATIC_LOCAL(
+      String, kStaticUAStylesScoped,
+      (UncompressResourceAsASCIIString(IDR_UASTYLE_TRANSITION_SCOPED_CSS)));
+  return kStaticUAStylesScoped;
+}
+
 const String& AnimationUAStyles() {
   DEFINE_STATIC_LOCAL(
       String, kAnimationUAStyles,
@@ -512,6 +519,15 @@ ViewTransitionStyleTracker::ViewTransitionStyleTracker(
       device_pixel_ratio_(DevicePixelRatioFromDocument(document)) {}
 
 ViewTransitionStyleTracker::ViewTransitionStyleTracker(
+    Element& element,
+    const blink::ViewTransitionToken& transition_token)
+    : document_(element.GetDocument()),
+      element_(element),
+      transition_token_(transition_token),
+      device_pixel_ratio_(DevicePixelRatioFromDocument(element.GetDocument())) {
+}
+
+ViewTransitionStyleTracker::ViewTransitionStyleTracker(
     Document& document,
     ViewTransitionState transition_state)
     : document_(document),
@@ -701,9 +717,26 @@ void ViewTransitionStyleTracker::AddTransitionElementsFromCSS() {
 
   Vector<AtomicString> containing_group_stack;
 
+  PaintLayer* paint_layer = nullptr;
+  if (RuntimeEnabledFeatures::ScopedViewTransitionsEnabled()) {
+    if (element_ && element_->parentElement()) {
+      // Element is not detached and not the root document element.
+      paint_layer = element_->GetLayoutObject()->EnclosingLayer();
+    } else if (!element_ || element_ == document_->documentElement()) {
+      paint_layer = document_->GetLayoutView()->PaintingLayer();
+    }
+    if (!paint_layer) {
+      return;
+    }
+  } else {
+    paint_layer = document_->GetLayoutView()->PaintingLayer();
+  }
+
+  // PaintLayer* paint_layer = document_->GetLayoutView()->PaintingLayer();
+
   AddTransitionElementsFromCSSRecursive(
-      document_->GetLayoutView()->PaintingLayer(), document_.Get(),
-      containing_group_stack, /*nearest_group_with_contain=*/g_null_atom);
+      paint_layer, document_.Get(), containing_group_stack,
+      /*nearest_group_with_contain=*/g_null_atom);
 }
 
 AtomicString ViewTransitionStyleTracker::GenerateAutoName(
@@ -1628,6 +1661,11 @@ void ViewTransitionStyleTracker::ComputeLiveElementGeometry(
 }
 
 bool ViewTransitionStyleTracker::HasActiveAnimations() const {
+  auto* originating_element = OriginatingElement();
+  if (!originating_element) {
+    return false;
+  }
+
   auto pseudo_has_animation = [](PseudoElement* pseudo_element) {
     auto* animations = pseudo_element->GetElementAnimations();
     if (!animations) {
@@ -1644,7 +1682,8 @@ bool ViewTransitionStyleTracker::HasActiveAnimations() const {
     }
     return false;
   };
-  return !!ViewTransitionUtils::FindPseudoIf(*document_, pseudo_has_animation);
+  return !!ViewTransitionUtils::FindPseudoIf(*originating_element,
+                                             pseudo_has_animation);
 }
 
 PaintPropertyChangeType ViewTransitionStyleTracker::UpdateCaptureClip(
@@ -1934,19 +1973,22 @@ bool ViewTransitionStyleTracker::SnapshotRootDidChangeSize() const {
 
 void ViewTransitionStyleTracker::InvalidateStyle() {
   ua_style_sheet_ = nullptr;
-
-  if (auto* originating_element = document_->documentElement()) {
-    originating_element->SetNeedsStyleRecalc(
-        kLocalStyleChange, StyleChangeReasonForTracing::Create(
-                               style_change_reason::kViewTransition));
+  auto* originating_element = OriginatingElement();
+  if (!originating_element) {
+    return;
   }
+
+  originating_element->SetNeedsStyleRecalc(
+      kLocalStyleChange, StyleChangeReasonForTracing::Create(
+                             style_change_reason::kViewTransition));
 
   auto invalidate_style = [](PseudoElement* pseudo_element) {
     pseudo_element->SetNeedsStyleRecalc(
         kLocalStyleChange, StyleChangeReasonForTracing::Create(
                                style_change_reason::kViewTransition));
   };
-  ViewTransitionUtils::ForEachTransitionPseudo(*document_, invalidate_style);
+  ViewTransitionUtils::ForEachTransitionPseudo(*originating_element,
+                                               invalidate_style);
 
   // Invalidate layout view compositing properties.
   if (auto* layout_view = document_->GetLayoutView()) {
@@ -1998,7 +2040,9 @@ CSSStyleSheet& ViewTransitionStyleTracker::UAStyleSheet() {
   const bool add_animations = state_ == State::kStarted;
 
   ViewTransitionStyleBuilder builder;
-  builder.AddUAStyle(StaticUAStyles());
+  builder.AddUAStyle(RuntimeEnabledFeatures::ScopedViewTransitionsEnabled()
+                         ? StaticUAStylesScoped()
+                         : StaticUAStyles());
   if (add_animations)
     builder.AddUAStyle(AnimationUAStyles());
 
@@ -2083,6 +2127,7 @@ bool ViewTransitionStyleTracker::HasLiveNewContent() const {
 
 void ViewTransitionStyleTracker::Trace(Visitor* visitor) const {
   visitor->Trace(document_);
+  visitor->Trace(element_);
   visitor->Trace(element_data_map_);
   visitor->Trace(pending_transition_element_names_);
   visitor->Trace(ua_style_sheet_);
@@ -2256,6 +2301,10 @@ void ViewTransitionStyleTracker::SnapBrowserControlsToFullyShown() {
   } else {
     controls.SetShownRatio(1, 1);
   }
+}
+
+Element* ViewTransitionStyleTracker::OriginatingElement() const {
+  return element_ ? element_.Get() : document_->documentElement();
 }
 
 }  // namespace blink

@@ -188,10 +188,10 @@ public class AccountSelectionViewTest extends AccountSelectionJUnitTestBase {
     public void testAccountsChangedByModel() {
         mSheetAccountItems.addAll(
                 asList(
-                        buildAccountItem(mAnaAccount),
-                        buildAccountItem(mNoOneAccount),
-                        buildAccountItem(mBobAccount),
-                        buildAccountItem(mNicolasAccount)));
+                        buildAccountItem(mAnaAccount, /* showIdp= */ false),
+                        buildAccountItem(mNoOneAccount, /* showIdp= */ false),
+                        buildAccountItem(mBobAccount, /* showIdp= */ false),
+                        buildAccountItem(mNicolasAccount, /* showIdp= */ false)));
         ShadowLooper.shadowMainLooper().idle();
 
         assertEquals(View.VISIBLE, mContentView.getVisibility());
@@ -229,8 +229,50 @@ public class AccountSelectionViewTest extends AccountSelectionJUnitTestBase {
     }
 
     @Test
+    public void testSecondaryDescriptionsWithMultipleIdpAccounts() {
+        mSheetAccountItems.addAll(
+                asList(
+                        buildAccountItem(mAnaAccount, /* showIdp= */ true),
+                        buildAccountItem(mAnaAccountWithoutBrandIcons, /* showIdp= */ true),
+                        buildAccountItem(mNewUserAccount, /* showIdp= */ true)));
+        ShadowLooper.shadowMainLooper().idle();
+
+        assertEquals(View.VISIBLE, mContentView.getVisibility());
+        assertEquals("Incorrect account count", 3, getAccounts().getChildCount());
+
+        TextView secondaryDescription = getAccountSecondaryDescriptionAt(0);
+        assertEquals(
+                "Secondary description not visible",
+                View.VISIBLE,
+                secondaryDescription.getVisibility());
+        assertEquals(
+                mAnaAccount.getSecondaryDescription() + " • You used on this site",
+                secondaryDescription.getText().toString());
+
+        secondaryDescription = getAccountSecondaryDescriptionAt(1);
+        assertEquals(
+                "Secondary description not visible",
+                View.VISIBLE,
+                secondaryDescription.getVisibility());
+        assertEquals(
+                mAnaAccountWithoutBrandIcons.getSecondaryDescription() + " • You used on this site",
+                secondaryDescription.getText().toString());
+
+        secondaryDescription = getAccountSecondaryDescriptionAt(2);
+        assertEquals(
+                "Secondary description not visible",
+                View.VISIBLE,
+                secondaryDescription.getVisibility());
+        // This is a new account, so should not include "You used on this site".
+        assertEquals(
+                mNewUserAccount.getSecondaryDescription(),
+                secondaryDescription.getText().toString());
+    }
+
+    @Test
     public void testAccountsAreClickable() {
-        mSheetAccountItems.addAll(Collections.singletonList(buildAccountItem(mAnaAccount)));
+        mSheetAccountItems.addAll(
+                Collections.singletonList(buildAccountItem(mAnaAccount, /* showIdp= */ false)));
         ShadowLooper.shadowMainLooper().idle();
 
         assertEquals(View.VISIBLE, mContentView.getVisibility());

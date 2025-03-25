@@ -60,7 +60,9 @@ chromium-metrics-reviews@google.com.
     <variant name="ClosePanel"/>
     <variant name="CreateTab"/>
     <variant name="DetachPanel"/>
+    <variant name="EnableDragResize"/>
     <variant name="GetContextFromFocusedTab"/>
+    <variant name="GetOsMicrophonePermissionStatus"/>
     <variant name="GetUserProfileInfo"/>
     <variant name="OnResponseRated"/>
     <variant name="OnResponseStarted"/>
@@ -88,6 +90,16 @@ chromium-metrics-reviews@google.com.
 
 </histogram>
 
+<histogram name="Glic.AttachToBrowser" enum="GlicAttachChangeReason"
+    expires_after="2026-01-15">
+  <owner>dullweber@chromium.org</owner>
+  <owner>erikchen@chromium.org</owner>
+  <summary>
+    Record the reason for attaching the panel to a browser when the panel is
+    attached.
+  </summary>
+</histogram>
+
 <histogram name="Glic.ChromeClient.MultiProfileSyntheticTrialConflictDetected"
     enum="BooleanEnabled" expires_after="2026-01-15">
   <owner>birnie@chromium.org</owner>
@@ -102,6 +114,16 @@ chromium-metrics-reviews@google.com.
   </summary>
 </histogram>
 
+<histogram name="Glic.DetachedFromBrowser" enum="GlicAttachChangeReason"
+    expires_after="2026-01-15">
+  <owner>dullweber@chromium.org</owner>
+  <owner>erikchen@chromium.org</owner>
+  <summary>
+    Record the reason for detaching the panel from a browser when the panel is
+    detached.
+  </summary>
+</histogram>
+
 <histogram name="Glic.EntryPoint.Impression" enum="GlicEntryPointImpression"
     expires_after="2026-01-15">
   <owner>erikchen@chromium.org</owner>
@@ -113,6 +135,16 @@ chromium-metrics-reviews@google.com.
     fre has been completed and glic is enabled and pinned to the tabstrip. The
     entry point is not shown if fre is completed and glic is either disabled or
     unpinned from the tabstrip.
+  </summary>
+</histogram>
+
+<histogram name="Glic.FrePresentationTime" units="ms"
+    expires_after="2026-01-15">
+  <owner>dewittj@google.com</owner>
+  <owner>vollick@google.com</owner>
+  <owner>baranerf@google.com</owner>
+  <summary>
+    Records the time taken for content to load after the FRE window appears.
   </summary>
 </histogram>
 
@@ -389,6 +421,16 @@ chromium-metrics-reviews@google.com.
   </summary>
 </histogram>
 
+<histogram name="Glic.Session.AttachStateChanges" units="count"
+    expires_after="2026-01-15">
+  <owner>dullweber@chromium.org</owner>
+  <owner>erikchen@chromium.org</owner>
+  <summary>
+    Recorded when a session ends. The number of times the panel was attached or
+    detached.
+  </summary>
+</histogram>
+
 <histogram name="Glic.Session.Duration" units="ms" expires_after="2026-01-15">
   <owner>carlosk@chromium.org</owner>
   <owner>harringtond@chromium.org</owner>
@@ -445,6 +487,16 @@ chromium-metrics-reviews@google.com.
     the focused tab. Records an enum sample that answers a) is the main document
     a PDF (based on its MIME type) and b) were PDF contents actually found
     within the web page (only if Chrome's PDF plugin is actually active).
+  </summary>
+</histogram>
+
+<histogram name="Glic.Usage.Hotkey" enum="GlicHotkeyUsage"
+    expires_after="2026-01-15">
+  <owner>erikchen@chromium.org</owner>
+  <owner>alimariam@google.com</owner>
+  <summary>
+    Records whether the user is using the default or custom hotkey. Recorded
+    when the user presses the hotkey.
   </summary>
 </histogram>
 

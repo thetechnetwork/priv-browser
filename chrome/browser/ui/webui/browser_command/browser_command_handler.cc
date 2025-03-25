@@ -26,6 +26,7 @@
 #include "chrome/browser/user_education/tutorial_identifiers.h"
 #include "chrome/browser/user_education/user_education_service.h"
 #include "chrome/browser/user_education/user_education_service_factory.h"
+#include "chrome/common/buildflags.h"
 #include "chrome/common/chrome_features.h"
 #include "chrome/common/webui_url_constants.h"
 #include "components/password_manager/core/common/password_manager_features.h"
@@ -43,6 +44,13 @@
 #include "ui/base/window_open_disposition.h"
 #include "ui/base/window_open_disposition_utils.h"
 
+#if BUILDFLAG(ENABLE_GLIC)
+#include "chrome/browser/glic/glic_enabling.h"
+#include "chrome/browser/glic/glic_keyed_service.h"
+#include "chrome/browser/glic/glic_keyed_service_factory.h"
+#include "chrome/browser/ui/webui/webui_embedding_context.h"
+#endif  // BUILDFLAG(ENABLE_GLIC)
+
 using browser_command::mojom::ClickInfoPtr;
 using browser_command::mojom::Command;
 using browser_command::mojom::CommandHandler;
@@ -54,11 +62,13 @@ const char BrowserCommandHandler::kPromoBrowserCommandHistogramName[] =
 BrowserCommandHandler::BrowserCommandHandler(
     mojo::PendingReceiver<CommandHandler> pending_page_handler,
     Profile* profile,
-    std::vector<browser_command::mojom::Command> supported_commands)
+    std::vector<browser_command::mojom::Command> supported_commands,
+    content::WebContents* web_contents)
     : profile_(profile),
       supported_commands_(supported_commands),
       command_updater_(std::make_unique<CommandUpdaterImpl>(this)),
-      page_handler_(this, std::move(pending_page_handler)) {
+      page_handler_(this, std::move(pending_page_handler)),
+      web_contents_(web_contents) {
   if (supported_commands_.empty()) {
     return;
   }
@@ -126,6 +136,9 @@ void BrowserCommandHandler::CanExecuteCommand(
       can_execute = true;
       break;
     case Command::kOpenPaymentsSettings:
+      can_execute = true;
+      break;
+    case Command::kOpenGlic:
       can_execute = true;
       break;
   }
@@ -210,6 +223,10 @@ void BrowserCommandHandler::ExecuteCommandWithDisposition(
       NavigateToURL(GURL(chrome::GetSettingsUrl(chrome::kPaymentsSubPage)),
                     disposition);
       break;
+    case Command::kOpenGlic: {
+      OpenGlic();
+      break;
+    }
     default:
       NOTREACHED() << "Unspecified behavior for command " << id;
   }
@@ -310,6 +327,26 @@ void BrowserCommandHandler::StartSavedTabGroupTutorial() {
   params.callback = base::BindOnce(&BrowserCommandHandler::OnTutorialStarted,
                                    base::Unretained(this), tutorial_id);
   StartTutorial(std::move(params));
+}
+
+void BrowserCommandHandler::OpenGlic() {
+#if BUILDFLAG(ENABLE_GLIC)
+  if (!glic::GlicEnabling::IsEnabledForProfile(profile_)) {
+    return;
+  }
+
+  glic::GlicKeyedService* glic_service = glic::GlicKeyedService::Get(profile_);
+
+  if (!glic_service) {
+    return;
+  }
+
+  auto* browser_window = webui::GetBrowserWindowInterface(web_contents_);
+
+  glic_service->window_controller().Toggle(
+      browser_window, /*prevent_close=*/false,
+      glic::mojom::InvocationSource::kWhatsNew);
+#endif  // BUILDFLAG(ENABLE_GLIC)
 }
 
 void BrowserCommandHandler::OpenFeedbackForm() {

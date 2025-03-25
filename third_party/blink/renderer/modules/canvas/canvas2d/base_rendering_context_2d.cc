@@ -38,6 +38,7 @@
 #include "third_party/blink/renderer/bindings/modules/v8/v8_canvas_font_variant_caps.h"
 #include "third_party/blink/renderer/bindings/modules/v8/v8_canvas_text_rendering.h"
 #include "third_party/blink/renderer/bindings/modules/v8/v8_gpu_texture_format.h"
+#include "third_party/blink/renderer/core/canvas_interventions/canvas_interventions_helper.h"
 #include "third_party/blink/renderer/core/css/properties/computed_style_utils.h"
 #include "third_party/blink/renderer/core/css/style_change_reason.h"
 #include "third_party/blink/renderer/core/dom/events/event.h"
@@ -427,6 +428,15 @@ ImageData* BaseRenderingContext2D::getImageDataInternal(
   scoped_refptr<StaticBitmapImage> snapshot =
       GetImage(FlushReason::kGetImageData);
 
+  bool noised = false;
+  if (auto* host = GetCanvasRenderingContextHost()) {
+    if (snapshot) {
+      noised = CanvasInterventionsHelper::MaybeNoiseSnapshot(
+          host->RenderingContext(), GetTopExecutionContext(), snapshot,
+          host->GetRasterMode());
+    }
+  }
+
   TRACE_EVENT_INSTANT(
       TRACE_DISABLED_BY_DEFAULT("identifiability.high_entropy_api"),
       "CanvasReadback", perfetto::Flow::FromPointer(this),
@@ -441,6 +451,7 @@ ImageData* BaseRenderingContext2D::getImageDataInternal(
           }
         }
         ctx.AddDebugAnnotation("data_url", data.Utf8());
+        ctx.AddDebugAnnotation("noised", noised);
       });
 
   // Determine if the array should be zero initialized, or if it will be
@@ -1005,16 +1016,17 @@ void BaseRenderingContext2D::DrawTextInternal(
   const CanvasRenderingContext2DState& state = GetState();
   const ComputedStyle* computed_style =
       canvas ? canvas->EnsureComputedStyle() : nullptr;
-  TextDirection direction = ToTextDirection(
-      state.GetDirection(), GetCanvasRenderingContextHost(), computed_style);
+  CanvasRenderingContextHost* host = GetCanvasRenderingContextHost();
+  TextDirection direction =
+      ToTextDirection(state.GetDirection(), host, computed_style);
   bool is_rtl = direction == TextDirection::kRtl;
   bool bidi_override =
       computed_style ? IsOverride(computed_style->GetUnicodeBidi()) : false;
 
-  PlainTextPainter* text_painter =
-      RuntimeEnabledFeatures::CanvasTextNgEnabled()
-          ? &GetCanvasRenderingContextHost()->GetPlainTextPainter()
-          : nullptr;
+  PlainTextPainter* text_painter = RuntimeEnabledFeatures::CanvasTextNgEnabled(
+                                       host->GetTopExecutionContext())
+                                       ? &host->GetPlainTextPainter()
+                                       : nullptr;
   TextRun text_run(text, direction, bidi_override, /* normalize_space */ true);
   // Draw the item text at the correct point.
   gfx::PointF location(ClampTo<float>(x), ClampTo<float>(y));
@@ -1075,6 +1087,7 @@ void BaseRenderingContext2D::DrawTextInternal(
     location.set_x(location.x() / ClampTo<float>(width / font_width));
   }
 
+  SetTriggerForCanvasIntervention();
   Draw<OverdrawOp::kNone>(
       [font, text = std::move(text), direction, bidi_override, location,
        run_start, run_end, canvas, text_painter](
@@ -1144,14 +1157,16 @@ TextMetrics* BaseRenderingContext2D::measureText(const String& text) {
   const CanvasRenderingContext2DState& state = GetState();
   const ComputedStyle* computed_style =
       canvas ? canvas->EnsureComputedStyle() : nullptr;
-  TextDirection direction = ToTextDirection(
-      state.GetDirection(), GetCanvasRenderingContextHost(), computed_style);
+  CanvasRenderingContextHost* host = GetCanvasRenderingContextHost();
+  TextDirection direction =
+      ToTextDirection(state.GetDirection(), host, computed_style);
 
   return MakeGarbageCollected<TextMetrics>(
       font, direction, state.GetTextBaseline().AsEnum(),
       state.GetTextAlign().AsEnum(), text,
-      RuntimeEnabledFeatures::CanvasTextNgEnabled()
-          ? &GetCanvasRenderingContextHost()->GetPlainTextPainter()
+      RuntimeEnabledFeatures::CanvasTextNgEnabled(
+          host->GetTopExecutionContext())
+          ? &host->GetPlainTextPainter()
           : nullptr);
 }
 
@@ -1404,8 +1419,7 @@ GPUTexture* BaseRenderingContext2D::transferToGPUTexture(
   // A texture needs to exist on the GPU. If we aren't able to enable
   // acceleration, the canvas pixels live on the CPU and we weren't able to
   // transfer them; in that case, WebGPU access is not possible.
-  CanvasResourceProvider* provider =
-      host->GetOrCreateCanvasResourceProvider(RasterModeHint::kPreferGPU);
+  CanvasResourceProvider* provider = GetOrCreateCanvas2DResourceProvider();
   if (!host_is_accelerated || !provider || !provider->IsAccelerated()) {
     exception_state.ThrowDOMException(DOMExceptionCode::kInvalidStateError,
                                       "Unable to transfer canvas to GPU.");

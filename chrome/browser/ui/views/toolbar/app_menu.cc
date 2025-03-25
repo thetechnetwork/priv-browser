@@ -69,7 +69,6 @@
 #include "content/public/browser/host_zoom_map.h"
 #include "content/public/browser/web_contents.h"
 #include "extensions/common/feature_switch.h"
-#include "third_party/abseil-cpp/absl/types/variant.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkPaint.h"
 #include "ui/accessibility/ax_node_data.h"
@@ -1300,10 +1299,13 @@ void AppMenu::WillShowMenu(MenuItemView* menu) {
     UMA_HISTOGRAM_ENUMERATION("WrenchMenu.MenuAction",
                               MENU_ACTION_SHOW_SAVED_TAB_GROUPS,
                               LIMIT_MENU_ACTION);
-    stg_everything_menu_ =
-        std::make_unique<tab_groups::STGEverythingMenu>(nullptr, browser_);
-    stg_everything_menu_->SetShowSubmenu(true);
-    stg_everything_menu_->PopulateMenu(menu);
+    if (!stg_everything_menu_) {
+      // Only recreate the menu if we have to.
+      stg_everything_menu_ =
+          std::make_unique<tab_groups::STGEverythingMenu>(nullptr, browser_);
+      stg_everything_menu_->SetShowSubmenu(true);
+      stg_everything_menu_->PopulateMenu(menu);
+    }
   } else if (IsTabGroupsCommand(menu->GetCommand())) {
     stg_everything_menu_->PopulateTabGroupSubMenu(menu);
   } else if (menu == bookmark_menu_) {

@@ -128,9 +128,6 @@ namespace {
 const char kCacheKey[] = "key";
 const char kCacheValue[] = "cached value";
 
-const blink::mojom::StorageType kTemporary =
-    blink::mojom::StorageType::kTemporary;
-
 const storage::QuotaClientType kClientFile =
     storage::QuotaClientType::kFileSystem;
 
@@ -895,7 +892,7 @@ storage::BucketInfo AddQuotaManagedBucket(
     const std::string& bucket_name,
     base::Time modified = base::Time::Now()) {
   storage::BucketInfo bucket =
-      manager->CreateBucket({storage_key, bucket_name}, kTemporary);
+      manager->CreateBucket({storage_key, bucket_name});
   manager->AddBucket(bucket, {kClientFile}, modified);
   EXPECT_TRUE(manager->BucketHasData(bucket, kClientFile));
   return bucket;
@@ -2462,6 +2459,23 @@ TEST_F(StoragePartitionImplTest, PrivateNetworkAccessPermission) {
   base::test::TestFuture<bool> grant_permission;
   observer->OnPrivateNetworkAccessPermissionRequired(
       GURL(), net::IPAddress(192, 163, 1, 1), "test-id", "test-name",
+      base::BindOnce(grant_permission.GetCallback()));
+  EXPECT_FALSE(grant_permission.Get());
+}
+
+TEST_F(StoragePartitionImplTest, LocalNetworkAccessPermission) {
+  base::test::ScopedFeatureList features(
+      network::features::kLocalNetworkAccessChecks);
+
+  StoragePartitionImpl* partition = static_cast<StoragePartitionImpl*>(
+      browser_context()->GetDefaultStoragePartition());
+
+  mojo::Remote<network::mojom::URLLoaderNetworkServiceObserver> observer(
+      partition->CreateAuthCertObserverForServiceWorker(
+          network::mojom::kBrowserProcessId));
+
+  base::test::TestFuture<bool> grant_permission;
+  observer->OnLocalNetworkAccessPermissionRequired(
       base::BindOnce(grant_permission.GetCallback()));
   EXPECT_FALSE(grant_permission.Get());
 }

@@ -24,13 +24,13 @@ struct TextWithLink {
 struct BnplTosModel {
   BnplTosModel();
 
+  BnplTosModel(const BnplTosModel& other);
   BnplTosModel(BnplTosModel&& other);
+  BnplTosModel& operator=(const BnplTosModel& other);
   BnplTosModel& operator=(BnplTosModel&& other);
 
   ~BnplTosModel();
 
-  // Used to show the user's email and profile image.
-  AccountInfo account_info;
   // Used to show the BNPL Issuer logo and name.
   BnplIssuer issuer;
   // Used to show the legal message.
@@ -40,10 +40,9 @@ struct BnplTosModel {
 // Interface that exposes controller functionality to BnplTosView.
 class BnplTosController {
  public:
-  // Callback received when the BNPL ToS view is to be closed.
-  // `user_accepted` is a boolean that is true if the user accepts the dialog,
-  // and false if the user cancels the dialog.
-  virtual void OnViewClosing(bool user_accepted) = 0;
+  // Callbacks used for when the user accepts and cancels the BNPL ToS dialog.
+  virtual void OnUserAccepted() = 0;
+  virtual void OnUserCancelled() = 0;
 
   // Strings used for the view.
   virtual std::u16string GetOkButtonLabel() const = 0;
@@ -54,7 +53,7 @@ class BnplTosController {
   virtual TextWithLink GetLinkText() const = 0;
   virtual const LegalMessageLines& GetLegalMessageLines() const = 0;
   // Returns the account info of the signed-in user.
-  virtual const AccountInfo& GetAccountInfo() const = 0;
+  virtual AccountInfo GetAccountInfo() const = 0;
   // Return the BNPL issuer id.
   virtual const std::string& GetIssuerId() const = 0;
 

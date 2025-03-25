@@ -213,7 +213,9 @@ void PopulateConsumerItems(id<TabCollectionConsumer> consumer,
   if (preferenceName == prefs::kInactiveTabsTimeThreshold) {
     NSInteger daysThreshold =
         _prefService->GetInteger(prefs::kInactiveTabsTimeThreshold);
-    [_consumer updateInactiveTabsDaysThreshold:daysThreshold];
+    if (daysThreshold >= 0) {
+      [_consumer updateInactiveTabsDaysThreshold:daysThreshold];
+    }
   }
 }
 
@@ -314,7 +316,12 @@ void PopulateConsumerItems(id<TabCollectionConsumer> consumer,
   DCHECK_EQ(_webStateList, webStateList);
 
   AddWebStateObservations(_scopedWebStateObservation.get(), _webStateList);
-  PopulateConsumerItems(_consumer, _webStateList);
+
+  if (_webStateList->count() == 0) {
+    [_delegate inactiveTabsMediatorEmpty:self];
+  } else {
+    PopulateConsumerItems(_consumer, _webStateList);
+  }
 }
 
 - (void)webStateListDestroyed:(WebStateList*)webStateList {

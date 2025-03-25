@@ -156,7 +156,7 @@ public class SemanticColorUtils {
 
     /** Returns the surface color value of the conceptual sheet_bg_color. */
     public static @ColorInt int getSheetBgColor(Context context) {
-        return resolveSurfaceColorElev(R.dimen.sheet_bg_color_elev, context);
+        return resolve(R.attr.colorSurface, context);
     }
 
     /** Returns the surface color value of the conceptual snackbar_background_color. */
@@ -180,7 +180,7 @@ public class SemanticColorUtils {
         return resolve(R.attr.colorPrimaryContainer, context);
     }
 
-    /** Returns the semantic color values that corresponds to colorOnSurfaceInverse. */
+    /** Returns the semantic color values that correspond to colorOnSurfaceInverse. */
     public static @ColorInt int getColorOnSurfaceInverse(Context context) {
         return resolve(R.attr.colorOnSurfaceInverse, context);
     }
@@ -194,8 +194,23 @@ public class SemanticColorUtils {
         return resolve(R.attr.colorOnSecondaryContainer, context);
     }
 
+    /** Returns the semantic color values that correspond to colorSurface. */
+    public static @ColorInt int getColorSurface(Context context) {
+        return resolve(R.attr.colorSurface, context);
+    }
+
     /** Returns the semantic color values that correspond to colorSurfaceContainerLow. */
     public static @ColorInt int getColorSurfaceContainerLow(Context context) {
         return resolve(R.attr.colorSurfaceContainerLow, context);
+    }
+
+    /** Returns the semantic color values that correspond to colorSurfaceContainer. */
+    public static @ColorInt int getColorSurfaceContainer(Context context) {
+        return resolve(R.attr.colorSurfaceContainer, context);
+    }
+
+    /** Returns the semantic color values that correspond to colorSurfaceContainerHighest. */
+    public static @ColorInt int getColorSurfaceContainerHighest(Context context) {
+        return resolve(R.attr.colorSurfaceContainerHighest, context);
     }
 }

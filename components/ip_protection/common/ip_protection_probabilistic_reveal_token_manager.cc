@@ -11,21 +11,80 @@
 #include <string>
 #include <utility>
 
+#include "base/files/file_path.h"
 #include "base/functional/bind.h"
 #include "base/logging.h"
 #include "base/rand_util.h"
+#include "base/task/thread_pool.h"
 #include "base/time/time.h"
 #include "components/ip_protection/common/ip_protection_data_types.h"
 #include "components/ip_protection/common/ip_protection_probabilistic_reveal_token_crypter.h"
+#include "components/ip_protection/common/ip_protection_probabilistic_reveal_token_data_storage.h"
 #include "components/ip_protection/common/ip_protection_probabilistic_reveal_token_fetcher.h"
 #include "components/ip_protection/common/ip_protection_telemetry.h"
+#include "net/base/features.h"
+
+namespace {
+
+base::TimeDelta GetNextTokenRequestDelta(base::Time next_epoch_start_time,
+                                         base::Time expiration_time) {
+  if (next_epoch_start_time < base::Time::Now()) {
+    // Either client time is wrong or PRT issuer server returned wrong
+    // next_epoch_start, most likely client time. Schedule next request
+    // in three hours.
+    return base::Hours(3);
+  }
+
+  // Schedule next request at a random time between next_epoch_start_time and
+  // expiration_time - 10 minutes.
+  base::Time now = base::Time::Now();
+  base::TimeDelta delta_to_next_epoch = next_epoch_start_time - now;
+  base::TimeDelta delta_to_expiration =
+      expiration_time - base::Minutes(10) - now;
+  if (delta_to_expiration <= delta_to_next_epoch) {
+    // If expiration_time (minus 10 minutes) is before next_epoch_start_time,
+    // base::RandTimeDelta will fail. This should not normally happen as the PRT
+    // issuer server should set a larger time gap between next_epoch_start_time
+    // and expiration_time. But if it does, fallback to scheduling the next
+    // request at next_epoch_start_time.
+    return delta_to_next_epoch;
+  }
+  return base::RandTimeDelta(delta_to_next_epoch, delta_to_expiration);
+}
+
+}  // namespace
 
 namespace ip_protection {
 
+namespace {
+
+const base::FilePath::CharType kDatabaseName[] =
+    FILE_PATH_LITERAL("ProbabilisticRevealTokens");
+
+std::optional<base::FilePath> GetDBPath(
+    std::optional<base::FilePath> data_directory) {
+  if (!data_directory.has_value()) {
+    // The data directory will be nullopt if the
+    // `IpPrivacyStoreProbabilisticRevealTokens` feature is disabled. In this
+    // case, we pass nullopt to the storage class. This will prevent tokens from
+    // being written to disk even if StoreTokenOutcome() is called.
+    return std::nullopt;
+  }
+  return data_directory->Append(kDatabaseName);
+}
+
+}  // namespace
+
 IpProtectionProbabilisticRevealTokenManager::
     IpProtectionProbabilisticRevealTokenManager(
-        std::unique_ptr<IpProtectionProbabilisticRevealTokenFetcher> fetcher)
-    : fetcher_(std::move(fetcher)), expiration_(base::Time::UnixEpoch()) {
+        std::unique_ptr<IpProtectionProbabilisticRevealTokenFetcher> fetcher,
+        std::optional<base::FilePath> data_directory)
+    : fetcher_(std::move(fetcher)),
+      expiration_(base::Time::UnixEpoch()),
+      storage_(base::ThreadPool::CreateSequencedTaskRunner(
+                   {base::MayBlock(), base::TaskPriority::USER_VISIBLE,
+                    base::TaskShutdownBehavior::BLOCK_SHUTDOWN}),
+               GetDBPath(data_directory)) {
   DCHECK(fetcher_);
 }
 
@@ -88,17 +147,13 @@ void IpProtectionProbabilisticRevealTokenManager::OnTryGetTokens(
       base::Seconds(outcome.value().expiration_time_seconds).InMilliseconds());
   num_tokens_with_signal_ = outcome.value().num_tokens_with_signal;
 
-  auto next_request_delta =
-      base::Time::FromMillisecondsSinceUnixEpoch(
-          base::Seconds(outcome.value().next_epoch_start_time_seconds)
-              .InMilliseconds()) -
-      base::Time::Now();
-  if (next_request_delta.is_negative()) {
-    // Either client time is wrong or PRT issuer server returned wrong
-    // next_epoch_start, most likely client time. Schedule next request
-    // in three hours.
-    next_request_delta = base::Hours(3);
-  }
+  StoreTokenOutcomeIfEnabled(*outcome);
+
+  base::Time next_epoch_start_time = base::Time::FromMillisecondsSinceUnixEpoch(
+      base::Seconds(outcome.value().next_epoch_start_time_seconds)
+          .InMilliseconds());
+  base::TimeDelta next_request_delta =
+      GetNextTokenRequestDelta(next_epoch_start_time, expiration_);
   refetch_timer_.Start(
       FROM_HERE, next_request_delta, this,
       &IpProtectionProbabilisticRevealTokenManager::RequestTokens);
@@ -175,6 +230,16 @@ IpProtectionProbabilisticRevealTokenManager::GetToken(
   token_map_[top_level] = {token_selected,
                            {{third_party, maybe_randomized_token.value()}}};
   return std::move(maybe_randomized_token.value());
+}
+
+void IpProtectionProbabilisticRevealTokenManager::StoreTokenOutcomeIfEnabled(
+    TryGetProbabilisticRevealTokensOutcome outcome) {
+  if (net::features::kIpPrivacyStoreProbabilisticRevealTokens.Get()) {
+    storage_
+        .AsyncCall(
+            &IpProtectionProbabilisticRevealTokenDataStorage::StoreTokenOutcome)
+        .WithArgs(outcome);
+  }
 }
 
 }  // namespace ip_protection

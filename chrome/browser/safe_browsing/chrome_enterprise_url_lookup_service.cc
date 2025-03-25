@@ -9,7 +9,6 @@
 #include "base/task/sequenced_task_runner.h"
 #include "build/build_config.h"
 #include "chrome/browser/browser_process.h"
-#include "chrome/browser/enterprise/browser_management/management_service_factory.h"
 #include "chrome/browser/enterprise/connectors/common.h"
 #include "chrome/browser/enterprise/connectors/connectors_service.h"
 #include "chrome/browser/enterprise/util/affiliation.h"
@@ -17,7 +16,6 @@
 #include "chrome/browser/policy/dm_token_utils.h"
 #include "chrome/browser/profiles/profile.h"
 #include "chrome/browser/safe_browsing/cloud_content_scanning/deep_scanning_utils.h"
-#include "chrome/browser/signin/identity_manager_factory.h"
 #include "components/enterprise/common/proto/connectors.pb.h"
 #include "components/enterprise/connectors/core/common.h"
 #include "components/policy/core/common/cloud/dm_token.h"
@@ -35,6 +33,7 @@
 #include "components/safe_browsing/core/common/proto/realtimeapi.pb.h"
 #include "components/safe_browsing/core/common/safebrowsing_switches.h"
 #include "components/safe_browsing/core/common/utils.h"
+#include "components/signin/public/identity_manager/identity_manager.h"
 #include "net/traffic_annotation/network_traffic_annotation.h"
 #include "services/network/public/cpp/shared_url_loader_factory.h"
 #include "url/gurl.h"
@@ -77,7 +76,11 @@ ChromeEnterpriseRealTimeUrlLookupService::
         std::unique_ptr<SafeBrowsingTokenFetcher> token_fetcher,
         enterprise_connectors::ConnectorsService* connectors_service,
         ReferrerChainProvider* referrer_chain_provider,
-        PrefService* pref_service)
+        PrefService* pref_service,
+        signin::IdentityManager* identity_manager,
+        policy::ManagementService* management_service,
+        bool is_off_the_record,
+        bool is_guest_session)
     : RealTimeUrlLookupServiceBase(
           url_loader_factory,
           cache_manager,
@@ -87,16 +90,21 @@ ChromeEnterpriseRealTimeUrlLookupService::
           /*webui_delegate=*/WebUIInfoSingleton::GetInstance()),
       profile_(profile),
       connectors_service_(connectors_service),
-      token_fetcher_(std::move(token_fetcher)) {}
+      token_fetcher_(std::move(token_fetcher)),
+      pref_service_(pref_service),
+      identity_manager_(identity_manager),
+      management_service_(management_service),
+      is_off_the_record_(is_off_the_record),
+      is_guest_session_(is_guest_session) {}
 
 ChromeEnterpriseRealTimeUrlLookupService::
     ~ChromeEnterpriseRealTimeUrlLookupService() = default;
 
 bool ChromeEnterpriseRealTimeUrlLookupService::CanPerformFullURLLookup() const {
   return RealTimePolicyEngine::CanPerformEnterpriseFullURLLookup(
-      profile_->GetPrefs(),
+      pref_service_,
       connectors_service_->GetDMTokenForRealTimeUrlCheck().has_value(),
-      profile_->IsOffTheRecord(), profile_->IsGuestSession());
+      is_off_the_record_, is_guest_session_);
 }
 
 bool ChromeEnterpriseRealTimeUrlLookupService::
@@ -105,15 +113,13 @@ bool ChromeEnterpriseRealTimeUrlLookupService::
 
   // Don't allow using the access token if the managed profile doesn't match the
   // managed device.
-  if (policy::ManagementServiceFactory::GetForProfile(profile_)
-          ->HasManagementAuthority(
-              policy::EnterpriseManagementAuthority::CLOUD_DOMAIN) &&
+  if (management_service_->HasManagementAuthority(
+          policy::EnterpriseManagementAuthority::CLOUD_DOMAIN) &&
       !enterprise_util::IsProfileAffiliated(profile_)) {
     return false;
   }
 
-  return safe_browsing::SyncUtils::IsPrimaryAccountSignedIn(
-      IdentityManagerFactory::GetForProfile(profile_));
+  return safe_browsing::SyncUtils::IsPrimaryAccountSignedIn(identity_manager_);
 }
 
 int ChromeEnterpriseRealTimeUrlLookupService::GetReferrerUserGestureLimit()
@@ -133,7 +139,7 @@ bool ChromeEnterpriseRealTimeUrlLookupService::
 
 bool ChromeEnterpriseRealTimeUrlLookupService::CanCheckSafeBrowsingDb() const {
   // Check database if safe browsing is enabled.
-  return safe_browsing::IsSafeBrowsingEnabled(*profile_->GetPrefs());
+  return safe_browsing::IsSafeBrowsingEnabled(*pref_service_);
 }
 
 bool ChromeEnterpriseRealTimeUrlLookupService::

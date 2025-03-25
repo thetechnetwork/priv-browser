@@ -10,6 +10,9 @@
 #include "ash/boca/on_task/on_task_pod_controller.h"
 #include "ash/resources/vector_icons/vector_icons.h"
 #include "ash/style/icon_button.h"
+#include "ash/style/tab_slider.h"
+#include "ash/style/tab_slider_button.h"
+#include "ash/style/typography.h"
 #include "base/functional/bind.h"
 #include "base/functional/callback_forward.h"
 #include "chromeos/strings/grit/chromeos_strings.h"
@@ -24,26 +27,6 @@
 namespace ash {
 namespace {
 
-// Parameters for the OnTask pod.
-constexpr int kPodBorderRadius = 26;
-constexpr int kPodVerticalPadding = 10;
-constexpr int kPodHorizontalPadding = 12;
-constexpr int kPodElementSpace = 8;
-
-// Parameters for the separator in the OnTask pod.
-constexpr int kSeparatorVerticalPadding = 0;
-constexpr int kSeparatorHorizontalPadding = 4;
-
-// Parameters for the label button in the OnTask pod.
-constexpr int kLabelButtonRadius = 16;
-constexpr int kLabelButtonTopPadding = 0;
-constexpr int kLabelButtonLeftPadding = 12;
-constexpr int kLabelButtonButtomPadding = 0;
-constexpr int kLabelButtonRightPadding = 16;
-constexpr int kLabelButtonHeight = 32;
-constexpr int kLabelButtonWidth = 120;
-constexpr int kLabelButtonIconTextSpace = 8;
-
 std::unique_ptr<IconButton> CreateIconButton(base::RepeatingClosure callback,
                                              const gfx::VectorIcon* icon,
                                              int accessible_name_id,
@@ -56,22 +39,38 @@ std::unique_ptr<IconButton> CreateIconButton(base::RepeatingClosure callback,
   return button;
 }
 
-std::unique_ptr<views::LabelButton> CreateLabelButton(
-    base::RepeatingClosure callback,
-    const std::u16string& text,
-    const gfx::VectorIcon* icon) {
-  auto button = std::make_unique<views::LabelButton>(std::move(callback), text);
-  button->SetImageModel(views::Button::STATE_NORMAL,
-                        ui::ImageModel::FromVectorIcon(*icon, ui::kColorIcon));
-  button->SetBorder(views::CreateEmptyBorder(
-      gfx::Insets::TLBR(kLabelButtonTopPadding, kLabelButtonLeftPadding,
-                        kLabelButtonButtomPadding, kLabelButtonRightPadding)));
-  button->SetHorizontalAlignment(gfx::ALIGN_CENTER);
-  button->SetImageLabelSpacing(kLabelButtonIconTextSpace);
-  button->SetBackground(views::CreateRoundedRectBackground(
-      cros_tokens::kCrosSysSystemOnBaseOpaque, kLabelButtonRadius));
-  return button;
-}
+class PinTabStripButton : public views::LabelButton {
+  METADATA_HEADER(PinTabStripButton, views::LabelButton)
+ public:
+  // This class subclasses views::LabelButton to allow access to the protected
+  // label() method.
+  PinTabStripButton(views::Button::PressedCallback callback,
+                    std::u16string_view text)
+      : views::LabelButton(std::move(callback), text) {
+    SetImageModel(views::Button::STATE_NORMAL,
+                  ui::ImageModel::FromVectorIcon(
+                      kOnTaskPodTabsIcon, cros_tokens::kCrosSysOnSurface));
+    // Accessing protected member label() to set the font list.
+    label()->SetFontList(TypographyProvider::Get()->ResolveTypographyToken(
+        TypographyToken::kCrosButton2));
+    SetEnabledTextColors(cros_tokens::kCrosSysOnSurface);
+    SetBorder(views::CreateEmptyBorder(gfx::Insets::TLBR(
+        kLabelButtonTopPadding, kLabelButtonLeftPadding,
+        kLabelButtonButtomPadding, kLabelButtonRightPadding)));
+    SetHorizontalAlignment(gfx::ALIGN_CENTER);
+    SetImageLabelSpacing(kLabelButtonIconTextSpace);
+    SetPreferredSize(gfx::Size(kLabelButtonWidth, kLabelButtonHeight));
+    SetBackground(views::CreateRoundedRectBackground(
+        cros_tokens::kCrosSysSystemOnBase, kLabelButtonRadius));
+  }
+
+  PinTabStripButton(const PinTabStripButton&) = delete;
+  PinTabStripButton& operator=(const PinTabStripButton&) = delete;
+  ~PinTabStripButton() override = default;
+};
+
+BEGIN_METADATA(PinTabStripButton)
+END_METADATA
 
 }  // namespace
 
@@ -81,7 +80,7 @@ OnTaskPodView::OnTaskPodView(OnTaskPodController* pod_controller)
   SetMainAxisAlignment(views::BoxLayout::MainAxisAlignment::kStart);
   SetCrossAxisAlignment(views::BoxLayout::CrossAxisAlignment::kStart);
   SetBackground(views::CreateRoundedRectBackground(
-      cros_tokens::kCrosSysSystemBaseElevated, kPodBorderRadius));
+      cros_tokens::kCrosSysSystemBaseElevatedOpaque, kPodBorderRadius));
   SetInsideBorderInsets(
       gfx::Insets::VH(kPodVerticalPadding, kPodHorizontalPadding));
   SetBetweenChildSpacing(kPodElementSpace);
@@ -92,16 +91,27 @@ OnTaskPodView::OnTaskPodView(OnTaskPodController* pod_controller)
 OnTaskPodView::~OnTaskPodView() = default;
 
 void OnTaskPodView::AddShortcutButtons() {
-  snap_pod_button_ = AddChildView(CreateIconButton(
-      base::BindRepeating(&OnTaskPodView::ToggleSnapLocation,
-                          weak_ptr_factory_.GetWeakPtr()),
-      &kKsvArrowRightIcon, IDS_ON_TASK_POD_TOGGLE_SNAP_LOCATION_ACCESSIBLE_NAME,
-      /*is_togglable=*/true));
-  snap_pod_button_->SetToggledVectorIcon(kKsvArrowLeftIcon);
-  snap_pod_button_->SetIconToggledColor(
-      cros_tokens::kCrosSysSystemOnPrimaryContainer);
-  snap_pod_button_->SetBackgroundToggledColor(
-      cros_tokens::kCrosSysSystemPrimaryContainer);
+  pod_position_slider_ = AddChildView(std::make_unique<TabSlider>(
+      /*max_tab_num=*/2,
+      TabSlider::InitParams{/*internal_border_padding=*/0,
+                            /*between_child_spacing=*/0,
+                            /*has_background=*/true,
+                            /*has_selector_animation=*/true,
+                            /*distribute_space_evenly=*/true}));
+  dock_left_button_ = pod_position_slider_->AddButton<IconSliderButton>(
+      base::BindRepeating(&OnTaskPodController::SetSnapLocation,
+                          base::Unretained(pod_controller_),
+                          OnTaskPodSnapLocation::kTopLeft),
+      &kOnTaskPodPositionTopLeftIcon,
+      l10n_util::GetStringUTF16(IDS_ON_TASK_MOVE_POD_TOP_LEFT_ACCESSIBLE_NAME));
+  dock_right_button_ = pod_position_slider_->AddButton<IconSliderButton>(
+      base::BindRepeating(&OnTaskPodController::SetSnapLocation,
+                          base::Unretained(pod_controller_),
+                          OnTaskPodSnapLocation::kTopRight),
+      &kOnTaskPodPositionTopRightIcon,
+      l10n_util::GetStringUTF16(
+          IDS_ON_TASK_MOVE_POD_TOP_RIGHT_ACCESSIBLE_NAME));
+  dock_left_button_->SetSelected(true);
 
   left_separator_ = AddChildView(std::make_unique<views::Separator>());
   left_separator_->SetBorder(views::CreateEmptyBorder(
@@ -130,15 +140,14 @@ void OnTaskPodView::AddShortcutButtons() {
       gfx::Insets::VH(kSeparatorVerticalPadding, kSeparatorHorizontalPadding)));
   right_separator_->SetColorId(cros_tokens::kCrosSysSeparator);
   right_separator_->SetPreferredLength(kLabelButtonHeight);
+  right_separator_->SetVisible(pod_controller_->CanToggleTabStripVisibility());
 
-  pin_tab_strip_button_ = AddChildView(CreateLabelButton(
+  pin_tab_strip_button_ = AddChildView(std::make_unique<PinTabStripButton>(
       base::BindRepeating(&OnTaskPodView::UpdatePinTabStripButton,
                           base::Unretained(this)),
-      l10n_util::GetStringUTF16(IDS_ON_TASK_POD_PIN_TAP_STRIP_ACCESSIBLE_NAME),
-      &kUnpinnedIcon));
-  pin_tab_strip_button_->SetPreferredSize(
-      gfx::Size(kLabelButtonWidth, kLabelButtonHeight));
-  pin_tab_strip_button_->SetEnabled(
+      l10n_util::GetStringUTF16(
+          IDS_ON_TASK_POD_PIN_TAP_STRIP_ACCESSIBLE_NAME)));
+  pin_tab_strip_button_->SetVisible(
       pod_controller_->CanToggleTabStripVisibility());
 }
 
@@ -154,22 +163,21 @@ void OnTaskPodView::UpdatePinTabStripButton() {
         cros_tokens::kCrosSysSystemPrimaryContainer, kLabelButtonRadius));
     pin_tab_strip_button_->SetEnabledTextColors(
         cros_tokens::kCrosSysSystemOnPrimaryContainer);
+    pin_tab_strip_button_->SetImageModel(
+        views::Button::STATE_NORMAL,
+        ui::ImageModel::FromVectorIcon(
+            kOnTaskPodTabsIcon, cros_tokens::kCrosSysSystemOnPrimaryContainer));
   } else {
     // Otherwise, button is "Show tabs" when the tab strip is already hidden.
     pin_tab_strip_button_->SetText(l10n_util::GetStringUTF16(
         IDS_ON_TASK_POD_PIN_TAP_STRIP_ACCESSIBLE_NAME));
     pin_tab_strip_button_->SetBackground(views::CreateRoundedRectBackground(
-        cros_tokens::kCrosSysSystemOnBaseOpaque, kLabelButtonRadius));
+        cros_tokens::kCrosSysSystemOnBase, kLabelButtonRadius));
     pin_tab_strip_button_->SetEnabledTextColors(cros_tokens::kCrosSysOnSurface);
-  }
-}
-
-void OnTaskPodView::ToggleSnapLocation() {
-  snap_pod_button_->SetToggled(!snap_pod_button_->toggled());
-  if (snap_pod_button_->toggled()) {
-    pod_controller_->SetSnapLocation(OnTaskPodSnapLocation::kTopRight);
-  } else {
-    pod_controller_->SetSnapLocation(OnTaskPodSnapLocation::kTopLeft);
+    pin_tab_strip_button_->SetImageModel(
+        views::Button::STATE_NORMAL,
+        ui::ImageModel::FromVectorIcon(kOnTaskPodTabsIcon,
+                                       cros_tokens::kCrosSysOnSurface));
   }
 }
 
@@ -185,8 +193,16 @@ void OnTaskPodView::OnPageNavigationContextUpdate() {
 }
 
 void OnTaskPodView::OnLockedModeUpdate() {
-  pin_tab_strip_button_->SetEnabled(
-      pod_controller_->CanToggleTabStripVisibility());
+  const bool can_toggle = pod_controller_->CanToggleTabStripVisibility();
+  right_separator_->SetVisible(can_toggle);
+  pin_tab_strip_button_->SetVisible(can_toggle);
+  if (can_toggle) {
+    // `should_show_tab_strip_` is set to true to ensure it is toggled in
+    // `UpdatePinTabStripButton()` to by default hide the tab strip when
+    // entering locked mode.
+    should_show_tab_strip_ = true;
+    UpdatePinTabStripButton();
+  }
 }
 
 BEGIN_METADATA(OnTaskPodView)

@@ -34,7 +34,6 @@
 #include "chrome/browser/ui/lens/lens_overlay_query_controller.h"
 #include "chrome/browser/ui/lens/lens_preselection_bubble.h"
 #include "chrome/browser/ui/omnibox/omnibox_tab_helper.h"
-#include "chrome/browser/ui/tabs/public/tab_interface.h"
 #include "chrome/browser/ui/views/frame/immersive_mode_controller.h"
 #include "chrome/browser/ui/views/side_panel/side_panel_coordinator.h"
 #include "chrome/browser/ui/webui/searchbox/lens_searchbox_client.h"
@@ -51,6 +50,7 @@
 #include "components/omnibox/browser/autocomplete_match_type.h"
 #include "components/optimization_guide/proto/features/common_quality_data.pb.h"
 #include "components/sessions/core/session_id.h"
+#include "components/tab_collections/public/tab_interface.h"
 #include "components/url_matcher/url_matcher.h"
 #include "components/url_matcher/url_util.h"
 #include "components/viz/common/frame_timing_details.h"
@@ -190,6 +190,26 @@ class LensOverlayController : public LensSearchboxClient,
   static LensOverlayController* GetController(
       content::WebContents* webui_contents);
 
+  // Issues a contextual search request for Lens to fulfill.
+  // No-op if the Lens Overlay is off or closing. If the Lens Overlay is in the
+  // process of opening, the request will be queued until the overlay is fully
+  // opened.
+  // TODO(crbug.com/403629222): Revisit if it makes sense to pass the
+  // destination URL instead of the query text directly.
+  void IssueContextualSearchRequest(const GURL& destination_url,
+                                    AutocompleteMatchType::Type match_type,
+                                    bool is_zero_prefix_suggestion);
+
+  // Starts the contextualization flow without the overlay being shown to the
+  // user.
+  // TODO(crbug.com/404941800): This still goes through the entire
+  // initialization flow for the overlay. This is not efficeient, but is being
+  // done to unblock the contextual searchbox prototype. This should be
+  // refactored to be done in the LensSearchController to not go through the
+  // overlay controller.
+  void StartContextualizationWithoutOverlay(
+      lens::LensOverlayInvocationSource invocation_source);
+
   // Sets a region to search after the overlay loads, then calls ShowUI().
   // All units are in device pixels. region_bitmap contains the high definition
   // image bytes to use for the search instead of cropping the region from the
@@ -212,13 +232,7 @@ class LensOverlayController : public LensSearchboxClient,
   // is not kOff. This has no effect if the tab is not in the foreground. If the
   // overlay is successfully invoked, then the value of `invocation_source` will
   // be recorded in the relevant metrics.
-  // TODO(402931381): `should_start_focused` was added to support opening the
-  // Lens Overlay while the user is typing in the omnibox. To make this easy,
-  // the param was giving a default to avoid changing all callsites. If this
-  // functionality is kept, revisit if the default should be changed in favor
-  // of an explicit param at each callsite.
-  void ShowUI(lens::LensOverlayInvocationSource invocation_source,
-              bool should_start_focused = true);
+  void ShowUI(lens::LensOverlayInvocationSource invocation_source);
 
   // Starts the closing process of the overlay. This is an asynchronous process
   // with the following sequence:
@@ -398,6 +412,9 @@ class LensOverlayController : public LensSearchboxClient,
 
   // Returns true if the overlay is showing or is in live page mode.
   bool IsOverlayActive();
+
+  // Returns true if the overlay is in the process of initializing.
+  bool IsOverlayInitializing();
 
   // Returns true if the overlay is currently in the process of closing.
   bool IsOverlayClosing();
@@ -1167,7 +1184,7 @@ class LensOverlayController : public LensSearchboxClient,
   // points since the state of the overlay has changed.
   void UpdateEntryPointsState();
 
-  // Owns this class.
+  // Owns the LensSearchController which owns this class
   raw_ptr<tabs::TabInterface> tab_;
 
   // A monotonically increasing id. This is used to differentiate between
@@ -1192,8 +1209,10 @@ class LensOverlayController : public LensSearchboxClient,
   lens::LensOverlayInvocationSource invocation_source_ =
       lens::LensOverlayInvocationSource::kAppMenu;
 
-  // Whether the overlay should request focus when it is shown.
-  bool should_start_focused_ = false;
+  // Whether the overlay should be visible when it is opened. This is a hacky
+  // approach to start contextual searchbox flow without the overlay UI being
+  // shown. See StartContextualizationWithoutOverlay todo for more details.
+  bool should_show_overlay_ = true;
 
   // A pending url to be loaded in the side panel. Needed when the side
   // panel is not bound at the time of a text request.
@@ -1206,6 +1225,9 @@ class LensOverlayController : public LensSearchboxClient,
   // A pending thumbnail URI to be loaded in the side panel. Needed when the
   // side panel is not bound at the time of a region request.
   std::optional<std::string> pending_thumbnail_uri_ = std::nullopt;
+
+  // A contextual search request to be issued once the overlay is initialized.
+  base::OnceClosure pending_contextual_search_request_;
 
   // URL to load when command to open side panel in a new tab is executed.
   GURL side_panel_new_tab_url_;

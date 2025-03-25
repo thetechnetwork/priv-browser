@@ -247,6 +247,10 @@ class MODULES_EXPORT CanvasRenderingContext2D final
 
   int LayerCount() const override;
 
+  bool ShouldTriggerIntervention() const override {
+    return HasTriggerForIntervention();
+  }
+
  protected:
   HTMLCanvasElement* HostAsHTMLCanvasElement() const final;
   UniqueFontSelector* GetFontSelector() const final;
@@ -301,6 +305,8 @@ class MODULES_EXPORT CanvasRenderingContext2D final
   bool IsCanvas2DBufferValid() const override;
 
   void ColorSchemeMayHaveChanged() override;
+
+  CanvasResourceProvider* GetOrCreateCanvas2DResourceProvider() override;
 
   FilterOperations filter_operations_;
   HashMap<String, FontDescription> fonts_resolved_using_current_style_;

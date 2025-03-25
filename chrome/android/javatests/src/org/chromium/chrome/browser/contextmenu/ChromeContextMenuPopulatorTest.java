@@ -5,7 +5,6 @@
 package org.chromium.chrome.browser.contextmenu;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.eq;
@@ -30,7 +29,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 
 import org.chromium.base.ActivityState;
 import org.chromium.base.ApplicationStatus;
@@ -79,6 +79,8 @@ public class ChromeContextMenuPopulatorTest {
     private static final String IMAGE_TITLE_TEXT = "IMAGE!";
     private static final String RETRIEVED_IMAGE_URL = "http://www.blah.com/retrieved_image.jpg";
 
+    @Rule public final MockitoRule mMockitoRule = MockitoJUnit.rule();
+
     @Rule
     public AutomotiveContextWrapperTestRule mAutomotiveRule =
             new AutomotiveContextWrapperTestRule();
@@ -97,7 +99,6 @@ public class ChromeContextMenuPopulatorTest {
 
     @Before
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
         mAutomotiveRule.setIsAutomotive(false);
         DownloadUtils.setIsDownloadRestrictedByPolicyForTesting(false);
         NativeLibraryTestUtils.loadNativeLibraryNoBrowserProcess();
@@ -144,6 +145,12 @@ public class ChromeContextMenuPopulatorTest {
         doReturn(false).when(mPopulator).shouldTriggerEphemeralTabHelpUi();
         doReturn(false).when(mPopulator).shouldTriggerReadLaterHelpUi();
         doReturn(true).when(mExternalAuthUtils).isGoogleSigned(IntentHandler.PACKAGE_GSA);
+        doReturn(false).when(mPopulator).shouldShowEmptySpaceContextMenu();
+    }
+
+    private void initializePopulatorOnDesktop(@ContextMenuMode int mode, ContextMenuParams params) {
+        initializePopulator(mode, params);
+        doReturn(true).when(mPopulator).shouldShowEmptySpaceContextMenu();
     }
 
     private void checkMenuOptions(List<Integer> disabled, int[]... groups) {
@@ -158,11 +165,10 @@ public class ChromeContextMenuPopulatorTest {
             int[] availableInTab = new int[contextMenuState.get(i).second.size()];
             for (int j = 0; j < contextMenuState.get(i).second.size(); j++) {
                 PropertyModel model = contextMenuState.get(i).second.get(j).model;
-                if (disabled.contains(model.get(MENU_ID))) {
-                    assertFalse(model.get(ENABLED));
-                } else {
-                    assertTrue(model.get(ENABLED));
-                }
+                assertEquals(
+                        "'" + model.get(TEXT) + "' has different enablement setting than expected",
+                        !disabled.contains(model.get(MENU_ID)),
+                        model.get(ENABLED));
                 availableInTab[j] = model.get(MENU_ID);
             }
 
@@ -185,13 +191,25 @@ public class ChromeContextMenuPopulatorTest {
             }
 
             if (!Arrays.equals(expectedItemsInGroup, availableInTab)) {
-                StringBuilder info = new StringBuilder();
+                StringBuilder generated_info = new StringBuilder();
                 for (int j = 0; j < contextMenuState.get(i).second.size(); j++) {
-                    info.append("'");
-                    info.append(contextMenuState.get(i).second.get(j).model.get(TEXT));
-                    info.append("' ");
+                    generated_info.append("'");
+                    generated_info.append(contextMenuState.get(i).second.get(j).model.get(TEXT));
+                    generated_info.append("' ");
                 }
-                fail("Items in group " + i + " don't match, generated: " + info.toString());
+                StringBuilder expected_info = new StringBuilder();
+                for (int j = 0; j < expectedItemsInGroup.length; j++) {
+                    expected_info.append("'");
+                    expected_info.append(expectedItemsInGroup[j]);
+                    expected_info.append("' ");
+                }
+                fail(
+                        "Items in group "
+                                + i
+                                + " don't match, expecting: "
+                                + expected_info.toString()
+                                + ", generated: "
+                                + generated_info.toString());
             }
         }
     }
@@ -221,6 +239,7 @@ public class ChromeContextMenuPopulatorTest {
                         0,
                         MenuSourceType.TOUCH,
                         false,
+                        /* openedFromInterestTarget= */ false,
                         /* additionalNavigationParams= */ null);
 
         int[] expected = {R.id.contextmenu_copy_link_address, R.id.contextmenu_copy_link_text};
@@ -309,6 +328,7 @@ public class ChromeContextMenuPopulatorTest {
                         0,
                         MenuSourceType.TOUCH,
                         false,
+                        /* openedFromInterestTarget= */ false,
                         /* additionalNavigationParams= */ null);
 
         initializePopulator(ChromeContextMenuPopulator.ContextMenuMode.NORMAL, params);
@@ -379,6 +399,7 @@ public class ChromeContextMenuPopulatorTest {
                         0,
                         MenuSourceType.TOUCH,
                         false,
+                        /* openedFromInterestTarget= */ false,
                         /* additionalNavigationParams= */ null);
 
         FirstRunStatus.setFirstRunFlowComplete(true);
@@ -454,6 +475,7 @@ public class ChromeContextMenuPopulatorTest {
                         0,
                         MenuSourceType.TOUCH,
                         false,
+                        /* openedFromInterestTarget= */ false,
                         /* additionalNavigationParams= */ null);
 
         int[] expected = {R.id.contextmenu_copy};
@@ -531,6 +553,7 @@ public class ChromeContextMenuPopulatorTest {
                         0,
                         MenuSourceType.TOUCH,
                         false,
+                        /* openedFromInterestTarget= */ false,
                         /* additionalNavigationParams= */ null);
 
         int[] expected = {R.id.contextmenu_copy};
@@ -613,6 +636,7 @@ public class ChromeContextMenuPopulatorTest {
                         0,
                         MenuSourceType.TOUCH,
                         false,
+                        /* openedFromInterestTarget= */ false,
                         /* additionalNavigationParams= */ null);
 
         int[] expectedTab1 = {R.id.contextmenu_copy_link_address, R.id.contextmenu_copy_link_text};
@@ -704,6 +728,7 @@ public class ChromeContextMenuPopulatorTest {
                         0,
                         MenuSourceType.TOUCH,
                         false,
+                        /* openedFromInterestTarget= */ false,
                         /* additionalNavigationParams= */ null);
 
         initializePopulator(ChromeContextMenuPopulator.ContextMenuMode.NORMAL, params);
@@ -788,6 +813,7 @@ public class ChromeContextMenuPopulatorTest {
                         0,
                         MenuSourceType.TOUCH,
                         false,
+                        /* openedFromInterestTarget= */ false,
                         /* additionalNavigationParams= */ null);
 
         int[] expected = null;
@@ -860,6 +886,7 @@ public class ChromeContextMenuPopulatorTest {
                         0,
                         MenuSourceType.TOUCH,
                         false,
+                        /* openedFromInterestTarget= */ false,
                         /* additionalNavigationParams= */ null);
 
         int[] expected = {R.id.contextmenu_copy_link_address};
@@ -965,6 +992,7 @@ public class ChromeContextMenuPopulatorTest {
                         0,
                         MenuSourceType.TOUCH,
                         false,
+                        /* openedFromInterestTarget= */ false,
                         /* additionalNavigationParams= */ null);
 
         initializePopulator(ChromeContextMenuPopulator.ContextMenuMode.NORMAL, params);
@@ -1029,6 +1057,7 @@ public class ChromeContextMenuPopulatorTest {
                         0,
                         MenuSourceType.TOUCH,
                         false,
+                        /* openedFromInterestTarget= */ false,
                         /* additionalNavigationParams= */ null);
 
         // HTTP scheme should include read later context menu item.
@@ -1098,6 +1127,7 @@ public class ChromeContextMenuPopulatorTest {
                         0,
                         MenuSourceType.TOUCH,
                         false,
+                        /* openedFromInterestTarget= */ false,
                         /* additionalNavigationParams= */ null);
         initializePopulator(ChromeContextMenuPopulator.ContextMenuMode.NORMAL, params);
         int[] expected5 = {
@@ -1134,6 +1164,7 @@ public class ChromeContextMenuPopulatorTest {
                         0,
                         MenuSourceType.TOUCH,
                         false,
+                        /* openedFromInterestTarget= */ false,
                         /* additionalNavigationParams= */ null);
 
         when(mItemDelegate.isIncognito()).thenReturn(true);
@@ -1181,6 +1212,7 @@ public class ChromeContextMenuPopulatorTest {
                         0,
                         MenuSourceType.TOUCH,
                         false,
+                        /* openedFromInterestTarget= */ false,
                         /* additionalNavigationParams= */ null);
 
         when(mItemDelegate.isOpenInOtherWindowSupported()).thenReturn(true);
@@ -1232,6 +1264,7 @@ public class ChromeContextMenuPopulatorTest {
                         0,
                         MenuSourceType.TOUCH,
                         false,
+                        /* openedFromInterestTarget= */ false,
                         /* additionalNavigationParams= */ null);
 
         when(mItemDelegate.canEnterMultiWindowMode()).thenReturn(true);
@@ -1273,6 +1306,7 @@ public class ChromeContextMenuPopulatorTest {
                         0,
                         MenuSourceType.TOUCH,
                         false,
+                        /* openedFromInterestTarget= */ false,
                         /* additionalNavigationParams= */ null);
         initializePopulator(ChromeContextMenuPopulator.ContextMenuMode.NORMAL, params);
 
@@ -1324,6 +1358,7 @@ public class ChromeContextMenuPopulatorTest {
                         /* triggeringTouchYDp= */ 0,
                         MenuSourceType.TOUCH,
                         /* openedFromHighlight= */ true,
+                        /* openedFromInterestTarget= */ false,
                         /* additionalNavigationParams= */ null);
 
         // In normal mode, there should be three options: share, remove and learn more.
@@ -1369,6 +1404,7 @@ public class ChromeContextMenuPopulatorTest {
                         0,
                         MenuSourceType.TOUCH,
                         false,
+                        /* openedFromInterestTarget= */ false,
                         /* additionalNavigationParams= */ null);
         initializePopulator(ChromeContextMenuPopulator.ContextMenuMode.CUSTOM_TAB, linkParams);
         int[] linkExpected = {
@@ -1407,6 +1443,7 @@ public class ChromeContextMenuPopulatorTest {
                         0,
                         MenuSourceType.TOUCH,
                         false,
+                        /* openedFromInterestTarget= */ false,
                         /* additionalNavigationParams= */ null);
         initializePopulator(ChromeContextMenuPopulator.ContextMenuMode.CUSTOM_TAB, imageParams);
         int[] imageExpected = {
@@ -1426,5 +1463,126 @@ public class ChromeContextMenuPopulatorTest {
             R.id.contextmenu_save_image
         };
         checkMenuOptions(image2Expected);
+    }
+
+    @Test
+    @SmallTest
+    @UiThreadTest
+    public void testPage() {
+        FirstRunStatus.setFirstRunFlowComplete(true);
+        ContextMenuParams params =
+                new ContextMenuParams(
+                        0,
+                        ContextMenuDataMediaType.NONE,
+                        new GURL(PAGE_URL),
+                        GURL.emptyGURL(),
+                        "",
+                        GURL.emptyGURL(),
+                        GURL.emptyGURL(),
+                        "",
+                        null,
+                        false,
+                        0,
+                        0,
+                        MenuSourceType.TOUCH,
+                        false,
+                        false,
+                        /* additionalNavigationParams= */ null);
+
+        int[] expected = {R.id.contextmenu_save_page};
+
+        initializePopulatorOnDesktop(ChromeContextMenuPopulator.ContextMenuMode.NORMAL, params);
+        checkMenuOptions(expected);
+
+        initializePopulatorOnDesktop(ChromeContextMenuPopulator.ContextMenuMode.CUSTOM_TAB, params);
+        checkMenuOptions(expected);
+
+        initializePopulatorOnDesktop(ChromeContextMenuPopulator.ContextMenuMode.WEB_APP, params);
+        checkMenuOptions(expected);
+
+        initializePopulatorOnDesktop(
+                ChromeContextMenuPopulator.ContextMenuMode.NETWORK_BOUND_TAB, params);
+        checkMenuOptions(expected);
+    }
+
+    @Test
+    @SmallTest
+    @UiThreadTest
+    public void testPageNotOnDesktop() {
+        FirstRunStatus.setFirstRunFlowComplete(true);
+        ContextMenuParams params =
+                new ContextMenuParams(
+                        0,
+                        ContextMenuDataMediaType.NONE,
+                        new GURL(PAGE_URL),
+                        GURL.emptyGURL(),
+                        "",
+                        GURL.emptyGURL(),
+                        GURL.emptyGURL(),
+                        "",
+                        null,
+                        false,
+                        0,
+                        0,
+                        MenuSourceType.TOUCH,
+                        false,
+                        false,
+                        /* additionalNavigationParams= */ null);
+
+        int[] expected = null;
+
+        initializePopulator(ChromeContextMenuPopulator.ContextMenuMode.NORMAL, params);
+        checkMenuOptions(expected);
+
+        initializePopulator(ChromeContextMenuPopulator.ContextMenuMode.CUSTOM_TAB, params);
+        checkMenuOptions(expected);
+
+        initializePopulator(ChromeContextMenuPopulator.ContextMenuMode.WEB_APP, params);
+        checkMenuOptions(expected);
+
+        initializePopulator(ChromeContextMenuPopulator.ContextMenuMode.NETWORK_BOUND_TAB, params);
+        checkMenuOptions(expected);
+    }
+
+    @Test
+    @SmallTest
+    @UiThreadTest
+    public void testPageDownloadRestricted() {
+        FirstRunStatus.setFirstRunFlowComplete(true);
+        ContextMenuParams params =
+                new ContextMenuParams(
+                        0,
+                        ContextMenuDataMediaType.NONE,
+                        new GURL(PAGE_URL),
+                        GURL.emptyGURL(),
+                        "",
+                        GURL.emptyGURL(),
+                        GURL.emptyGURL(),
+                        "",
+                        null,
+                        false,
+                        0,
+                        0,
+                        MenuSourceType.TOUCH,
+                        false,
+                        false,
+                        /* additionalNavigationParams= */ null);
+        DownloadUtils.setIsDownloadRestrictedByPolicyForTesting(true);
+
+        int[] expected = {R.id.contextmenu_save_page};
+        List<Integer> expected_disabled = Arrays.asList(R.id.contextmenu_save_page);
+
+        initializePopulatorOnDesktop(ChromeContextMenuPopulator.ContextMenuMode.NORMAL, params);
+        checkMenuOptions(expected_disabled, expected);
+
+        initializePopulatorOnDesktop(ChromeContextMenuPopulator.ContextMenuMode.CUSTOM_TAB, params);
+        checkMenuOptions(expected_disabled, expected);
+
+        initializePopulatorOnDesktop(ChromeContextMenuPopulator.ContextMenuMode.WEB_APP, params);
+        checkMenuOptions(expected_disabled, expected);
+
+        initializePopulatorOnDesktop(
+                ChromeContextMenuPopulator.ContextMenuMode.NETWORK_BOUND_TAB, params);
+        checkMenuOptions(expected_disabled, expected);
     }
 }

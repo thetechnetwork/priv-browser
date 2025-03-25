@@ -4,6 +4,10 @@
 
 #include "components/autofill/core/browser/foundations/autofill_client.h"
 
+#include <optional>
+#include <utility>
+
+#include "base/functional/callback.h"
 #include "base/memory/raw_ptr.h"
 #include "base/no_destructor.h"
 #include "build/build_config.h"
@@ -11,10 +15,12 @@
 #include "components/autofill/core/browser/integrators/autofill_ai_delegate.h"
 #include "components/autofill/core/browser/integrators/autofill_compose_delegate.h"
 #include "components/autofill/core/browser/integrators/autofill_plus_address_delegate.h"
+#include "components/autofill/core/browser/integrators/identity_credential_delegate.h"
 #include "components/autofill/core/browser/payments/credit_card_access_manager.h"
 #include "components/autofill/core/browser/studies/autofill_ablation_study.h"
 #include "components/autofill/core/browser/suggestions/suggestion.h"
 #include "components/autofill/core/browser/ui/popup_open_enums.h"
+#include "components/optimization_guide/proto/features/common_quality_data.pb.h"
 #include "components/version_info/channel.h"
 
 namespace autofill {
@@ -82,6 +88,10 @@ AutofillPlusAddressDelegate* AutofillClient::GetPlusAddressDelegate() {
   return nullptr;
 }
 
+void AutofillClient::GetAiPageContent(GetAiPageContentCallback callback) {
+  std::move(callback).Run(std::nullopt);
+}
+
 AutofillAiDelegate* AutofillClient::GetAutofillAiDelegate() {
   return nullptr;
 }
@@ -91,6 +101,10 @@ AutofillAiModelCache* AutofillClient::GetAutofillAiModelCache() {
 }
 
 AutofillAiModelExecutor* AutofillClient::GetAutofillAiModelExecutor() {
+  return nullptr;
+}
+
+IdentityCredentialDelegate* AutofillClient::GetIdentityCredentialDelegate() {
   return nullptr;
 }
 

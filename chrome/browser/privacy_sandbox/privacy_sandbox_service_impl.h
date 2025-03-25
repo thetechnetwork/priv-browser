@@ -91,8 +91,6 @@ class PrivacySandboxServiceImpl : public PrivacySandboxService,
   void SetRelatedWebsiteSetsDataAccessEnabled(bool enabled) override;
   bool IsRelatedWebsiteSetsDataAccessEnabled() const override;
   bool IsRelatedWebsiteSetsDataAccessManaged() const override;
-  base::flat_map<net::SchemefulSite, net::SchemefulSite>
-  GetSampleRelatedWebsiteSets() const override;
   std::optional<net::SchemefulSite> GetRelatedWebsiteSetOwner(
       const GURL& site_url) const override;
   std::optional<std::u16string> GetRelatedWebsiteSetOwnerForDisplay(
@@ -198,6 +196,8 @@ class PrivacySandboxServiceImpl : public PrivacySandboxService,
   FRIEND_TEST_ALL_PREFIXES(
       PrivacySandboxServiceTest,
       RecordPrivacySandbox4StartupMetrics_PromptNotSuppressed_ROW);
+  FRIEND_TEST_ALL_PREFIXES(PrivacySandbox4StartupMetricsNonRegularProfilesTest,
+                           APIs);
   FRIEND_TEST_ALL_PREFIXES(PrivacySandboxServiceTest,
                            RecordPrivacySandbox4StartupMetrics_APIs);
   FRIEND_TEST_ALL_PREFIXES(PrivacySandboxPrivacyGuideShouldShowAdTopicsTest,
@@ -374,7 +374,8 @@ class PrivacySandboxServiceImpl : public PrivacySandboxService,
   // Record user action metrics based on the |action|.
   void RecordPromptActionMetrics(PrivacySandboxService::PromptAction action);
 
-  // Record user startup state metrics on both client and profile level.
+  // Record user startup state metrics based on the |state| on both client and
+  // profile level.
   void RecordPromptStartupStateHistograms(
       PrivacySandboxService::PromptStartupState state);
 

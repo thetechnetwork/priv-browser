@@ -94,7 +94,6 @@ const base::Feature* const kFeaturesExposedToJava[] = {
     &autofill::features::kAutofillEnableRankingFormulaCreditCards,
     &autofill::features::kAutofillEnableCardBenefitsForAmericanExpress,
     &autofill::features::kAutofillEnableCardBenefitsForBmo,
-    &autofill::features::kAutofillEnableCardProductName,
     &autofill::features::kAutofillEnablePaymentSettingsCardPromoAndScanCard,
     &autofill::features::kAutofillEnablePaymentSettingsCardPromoAndScanCard,
     &autofill::features::kAutofillThirdPartyModeContentProvider,
@@ -196,6 +195,7 @@ const base::Feature* const kFeaturesExposedToJava[] = {
     &kAndroidTabDeclutterDedupeTabIdsKillSwitch,
     &kAndroidTabDeclutterRescueKillswitch,
     &kAndroidTabSkipSaveTabsKillswitch,
+    &kAndroidThemeModule,
     &kAndroidToolbarScrollAblation,
     &kAndroidWindowPopupLargeScreen,
     &kAnimatedImageDragShadow,
@@ -218,7 +218,6 @@ const base::Feature* const kFeaturesExposedToJava[] = {
     &kCCTAuthTab,
     &kCCTAuthTabDisableAllExternalIntents,
     &kCCTAuthTabEnableHttpsRedirects,
-    &kCCTBeforeUnload,
     &kCCTBlockTouchesDuringEnterAnimation,
     &kCCTClientDataHeader,
     &kCCTEarlyNav,
@@ -242,6 +241,7 @@ const base::Feature* const kFeaturesExposedToJava[] = {
     &kCCTResizableForThirdParties,
     &kCCTRevampedBranding,
     &kCCTTabModalDialog,
+    &kCCTToolbarRefactor,
     &kChangeUnfocusedPriority,
     &kDefaultBrowserPromoAndroid2,
     &kDisableInstanceLimit,
@@ -347,9 +347,6 @@ const base::Feature* const kFeaturesExposedToJava[] = {
     &kTabSwitcherColorBlendAnimate,
     &kTabSwitcherContextMenuAndroid,
     &kTabSwitcherForeignFaviconSupport,
-    &kTabWindowManagerIndexReassignmentActivityFinishing,
-    &kTabWindowManagerIndexReassignmentActivityInSameTask,
-    &kTabWindowManagerIndexReassignmentActivityNotInAppTasks,
     &kTabWindowManagerReportIndicesMismatch,
     &kTestDefaultDisabled,
     &kTestDefaultEnabled,
@@ -391,7 +388,6 @@ const base::Feature* const kFeaturesExposedToJava[] = {
     &privacy_sandbox::kPrivacySandboxAdsApiUxEnhancements,
     &privacy_sandbox::kPrivacySandboxAdsNoticeCCT,
     &privacy_sandbox::kPrivacySandboxEqualizedPromptButtons,
-    &privacy_sandbox::kPrivacySandboxFirstPartySetsUI,
     &privacy_sandbox::kPrivacySandboxRelatedWebsiteSetsUi,
     &privacy_sandbox::kPrivacySandboxSettings4,
     &privacy_sandbox::kPrivacySandboxAdTopicsContentParity,
@@ -428,8 +424,8 @@ const base::Feature* const kFeaturesExposedToJava[] = {
     &tab_groups::kTabGroupPaneAndroid,
     &tab_groups::kTabGroupSyncAutoOpenKillSwitch,
     &tab_groups::kUseAlternateHistorySyncIllustration,
+    &visited_url_ranking::features::kGroupSuggestionService,
     &visited_url_ranking::features::kVisitedURLRankingService,
-    &webapps::features::kInstallMessageThrottle,
     &webapps::features::kWebApkInstallFailureNotification,
     &webapps::features::kAndroidMinimalUiLargeScreen,
     &base::features::kPostGetMyMemoryStateToBackground,
@@ -563,6 +559,10 @@ BASE_FEATURE(kAndroidTabSkipSaveTabsKillswitch,
              "AndroidTabSkipSaveTabsTaskKillswitch",
              base::FEATURE_ENABLED_BY_DEFAULT);
 
+BASE_FEATURE(kAndroidThemeModule,
+             "AndroidThemeModule",
+             base::FEATURE_DISABLED_BY_DEFAULT);
+
 BASE_FEATURE(kAndroidToolbarScrollAblation,
              "AndroidToolbarScrollAblation",
              base::FEATURE_DISABLED_BY_DEFAULT);
@@ -642,10 +642,6 @@ BASE_FEATURE(kCCTAuthTabDisableAllExternalIntents,
              base::FEATURE_DISABLED_BY_DEFAULT);
 BASE_FEATURE(kCCTAuthTabEnableHttpsRedirects,
              "CCTAuthTabEnableHttpsRedirects",
-             base::FEATURE_ENABLED_BY_DEFAULT);
-
-BASE_FEATURE(kCCTBeforeUnload,
-             "CCTBeforeUnload",
              base::FEATURE_ENABLED_BY_DEFAULT);
 
 BASE_FEATURE(kCCTBlockTouchesDuringEnterAnimation,
@@ -737,6 +733,10 @@ BASE_FEATURE(kCCTRevampedBranding,
 BASE_FEATURE(kCCTTabModalDialog,
              "CCTTabModalDialog",
              base::FEATURE_ENABLED_BY_DEFAULT);
+
+BASE_FEATURE(kCCTToolbarRefactor,
+             "CCTToolbarRefactor",
+             base::FEATURE_DISABLED_BY_DEFAULT);
 
 // If enabled, render processes associated only with tabs in unfocused windows
 // will be downgraded to "vis" priority, rather than remaining at "fg". This
@@ -974,7 +974,7 @@ BASE_FEATURE(kPageContentProvider,
 
 BASE_FEATURE(kPowerSavingModeBroadcastReceiverInBackground,
              "PowerSavingModeBroadcastReceiverInBackground",
-             base::FEATURE_DISABLED_BY_DEFAULT);
+             base::FEATURE_ENABLED_BY_DEFAULT);
 
 BASE_FEATURE(kPreconnectOnTabCreation,
              "PreconnectOnTabCreation",
@@ -1151,18 +1151,6 @@ BASE_FEATURE(kTabSwitcherContextMenuAndroid,
 BASE_FEATURE(kTabSwitcherForeignFaviconSupport,
              "TabSwitcherForeignFaviconSupport",
              base::FEATURE_DISABLED_BY_DEFAULT);
-
-BASE_FEATURE(kTabWindowManagerIndexReassignmentActivityFinishing,
-             "TabWindowManagerIndexReassignmentActivityFinishing",
-             base::FEATURE_ENABLED_BY_DEFAULT);
-
-BASE_FEATURE(kTabWindowManagerIndexReassignmentActivityInSameTask,
-             "TabWindowManagerIndexReassignmentActivityInSameTask",
-             base::FEATURE_ENABLED_BY_DEFAULT);
-
-BASE_FEATURE(kTabWindowManagerIndexReassignmentActivityNotInAppTasks,
-             "TabWindowManagerIndexReassignmentActivityNotInAppTasks",
-             base::FEATURE_ENABLED_BY_DEFAULT);
 
 BASE_FEATURE(kTabWindowManagerReportIndicesMismatch,
              "TabWindowManagerReportIndicesMismatch",

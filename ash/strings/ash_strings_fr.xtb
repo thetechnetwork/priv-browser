@@ -166,6 +166,7 @@ Pour commencer, voici des exemples de ce que vous pouvez me demander.</translati
 <translation id="1505542291183484463">Redimensionner la fenêtre en mosaïque vers le bas</translation>
 <translation id="1510238584712386396">Lanceur d'applications</translation>
 <translation id="1520303207432623762">{NUM_APPS,plural, =1{Afficher les paramètres de notification. Les notifications sont désactivées pour une application}one{Afficher les paramètres de notification. Les notifications sont désactivées pour # application}other{Afficher les paramètres de notification. Les notifications sont désactivées pour # applications}}</translation>
+<translation id="1521655867290435174">Google Sheets</translation>
 <translation id="1523032696246003"><ph name="BATTERY_PERCENTAGE" /> % de batterie | <ph name="TIME" /> avant la charge complète</translation>
 <translation id="1525508553941733066">IGNORER</translation>
 <translation id="1526448108126799339">Ouvrir un nouvel onglet dans une nouvelle fenêtre</translation>
@@ -214,6 +215,7 @@ Pour commencer, voici des exemples de ce que vous pouvez me demander.</translati
 <translation id="1679841710523778799">Augmenter la luminosité</translation>
 <translation id="1680659827022803830">Commandes pour les appels vidéo</translation>
 <translation id="169515659049020177">Maj</translation>
+<translation id="1696984622403682083">Vous pouvez désactiver cette fonctionnalité à tout moment dans les paramètres. <ph name="LINK_TO_LEARN_MORE" /></translation>
 <translation id="1698080062160024910">Minuteur de <ph name="TOTAL_TIME" /> – <ph name="LABEL" /></translation>
 <translation id="1698760176351776263">Adresse IPv6 : <ph name="ADDRESS" /></translation>
 <translation id="1703117532528082099">Fenêtre active épinglée à gauche.</translation>
@@ -240,6 +242,8 @@ Pour commencer, voici des exemples de ce que vous pouvez me demander.</translati
 <translation id="1755556344721611131">Appli de diagnostic</translation>
 <translation id="1756833229520115364">Impossible d'enregistrer le modèle. Il y a trop de fenêtres ou d'onglets.</translation>
 <translation id="1757857692711134412">Désactivé jusqu'au coucher du soleil</translation>
+<translation id="1763084151787818322">Autres actions</translation>
+<translation id="1768138163688567246">Fermer la recherche à l'écran</translation>
 <translation id="1768366657309696705">Le raccourci clavier <ph name="LAUNCHER_KEY_NAME" />+. (point) a été modifié. Pour utiliser la touche Entrée, appuyez sur la touche <ph name="LAUNCHER_KEY_NAME" />+Maj+Retour arrière.</translation>
 <translation id="1770726142253415363">Déplacée vers la ligne <ph name="ROW_NUMBER" />, colonne <ph name="COLUMN_NUMBER" />.</translation>
 <translation id="1771761307086386028">Vers la droite</translation>
@@ -345,7 +349,6 @@ Pour commencer, voici des exemples de ce que vous pouvez me demander.</translati
 <translation id="2201071101391734388">Photo récente <ph name="INDEX" /> sur <ph name="TOTAL_COUNT" />.</translation>
 <translation id="2201687081523799384">Réduire Google Tasks</translation>
 <translation id="2208323208084708176">Mode bureau unifié</translation>
-<translation id="2220572644011485463">Code ou mot de passe</translation>
 <translation id="2222841058024245321">Bureau 7</translation>
 <translation id="2223384056430485343">Sur un écran partagé</translation>
 <translation id="2224075387478458881">L'enregistrement d'écran n'est pas autorisé lorsqu'un contenu protégé est affiché</translation>
@@ -965,6 +968,7 @@ Certaines fonctionnalités sont limitées afin d'augmenter l'autonomie de la bat
 <translation id="4221957499226645091"><ph name="APP_NAME" />, appli installée, en pause</translation>
 <translation id="4228078597006700451">Commandes non configurées</translation>
 <translation id="4230560241506423345">Nouveau</translation>
+<translation id="4236726631849783264">Rappel concernant les actions suggérées</translation>
 <translation id="4239069858505860023">GPRS</translation>
 <translation id="4240486403425279990">Mode Aperçu</translation>
 <translation id="4242533952199664413">Ouvrir les paramètres</translation>
@@ -981,7 +985,6 @@ Certaines fonctionnalités sont limitées afin d'augmenter l'autonomie de la bat
 <translation id="4275663329226226506">Médias</translation>
 <translation id="4279490309300973883">Mise en miroir</translation>
 <translation id="4280601795273309128">Mises à jour de sécurité terminées. Mettez à niveau votre appareil.</translation>
-<translation id="4281739221820540368">Créer un document Google Docs</translation>
 <translation id="4283888303416325161">Veuillez saisir votre mot de passe pour renforcer la sécurité</translation>
 <translation id="4285498937028063278">Retirer</translation>
 <translation id="428715201724021596">Connexion au profil… Cela peut prendre quelques minutes.</translation>
@@ -1042,6 +1045,7 @@ Certaines fonctionnalités sont limitées afin d'augmenter l'autonomie de la bat
 <translation id="4471354919263203780">Téléchargement des fichiers de reconnaissance vocale… <ph name="PERCENT" /> %</translation>
 <translation id="4471432286288241507">{0,plural, =0{Mettre à jour l'appareil maintenant}=1{Mettre à jour l'appareil d'ici 1 seconde}one{Mettre à jour l'appareil d'ici # seconde}other{Mettre à jour l'appareil d'ici # secondes}}</translation>
 <translation id="4472575034687746823">Premiers pas</translation>
+<translation id="4473489370276014885">Google Contacts</translation>
 <translation id="4477350412780666475">Titre suivant</translation>
 <translation id="4477751544736611934">La consommation de données peut entraîner des frais.
 1 appareil connecté.</translation>
@@ -1068,6 +1072,7 @@ Certaines fonctionnalités sont limitées afin d'augmenter l'autonomie de la bat
 <translation id="4545950850562423083">Enregistrer la page active dans les favoris</translation>
 <translation id="4548482551627849548">Déplacer la fenêtre active vers le bureau à gauche</translation>
 <translation id="4552748006424994716">Pour éviter l'écho, vous pouvez n'écouter votre micro qu'avec un casque filaire.</translation>
+<translation id="4556953949326137018">Lorsque vous utilisez des actions suggérées comme "Ajouter à Agenda" ou "Créer un document Google Docs", le contenu de la zone sélectionnée est envoyé aux serveurs Google pour suggérer des actions, conformément aux <ph name="LINK_TO_SERVICE_TERMS" />. N'incluez aucun élément personnel, sensible ou confidentiel.</translation>
 <translation id="4560576029703263363">Activé</translation>
 <translation id="4561267230861221837">3G</translation>
 <translation id="4565377596337484307">Masquer le mot de passe</translation>
@@ -1151,6 +1156,7 @@ Certaines fonctionnalités sont limitées afin d'augmenter l'autonomie de la bat
 <translation id="481455355267255546">Événement suivant</translation>
 <translation id="481749895090480684">Liste de tâches : <ph name="GLANCEABLES_TASKS_LIST_NAME" /></translation>
 <translation id="4826588772550366629">votre caméra et votre micro</translation>
+<translation id="4828935196674083554">Ajout...</translation>
 <translation id="482908187605862807">Applis disponibles sur le Play Store</translation>
 <translation id="4831034276697007977">Voulez-vous vraiment désactiver les clics automatiques ?</translation>
 <translation id="4835677468087803981">Masquer le code</translation>
@@ -1648,6 +1654,7 @@ Aucun appareil connecté.</translation>
 <translation id="641817663353603351">Page précédente</translation>
 <translation id="6424520630891723617"><ph name="SECURITY_STATUS" />, force du signal : <ph name="SIGNAL_STRENGTH" /></translation>
 <translation id="642644398083277086">Effacer toutes les notifications</translation>
+<translation id="6426905245930183644">Création...</translation>
 <translation id="6430225033895752525">Afficher les paramètres du mode Sans distractions</translation>
 <translation id="643147933154517414">Terminé</translation>
 <translation id="6431865393913628856">Enregistrer l'écran</translation>
@@ -1714,7 +1721,6 @@ Nouvelle installation</translation>
 <translation id="6612889377159412215">tâche secondaire</translation>
 <translation id="6613765291890844037">Espace de stockage : <ph name="STORAGE_IN_USE_SIZE" /> utilisés | <ph name="STORAGE_TOTAL_SIZE" /> au total</translation>
 <translation id="6614169507485700968">L'écran de confidentialité est activé</translation>
-<translation id="6618277154885124991">Créer un document Google Sheets</translation>
 <translation id="6622679827379792051">Configurer l'affichage des applis de votre téléphone</translation>
 <translation id="662279009180869175">Utilisez les flèches vers la gauche et vers la droite pour redimensionner l'écran partagé</translation>
 <translation id="6624493541160101248">Bureau actuel : <ph name="DESK_NAME" />. Bureau <ph name="DESK_INDEX" /> sur <ph name="DESK_COUNT" />.</translation>
@@ -1829,7 +1835,6 @@ Nouvelle installation</translation>
 <translation id="7000027735917578303">Paramètres des fenêtres et des bureaux</translation>
 <translation id="7004910047186208204">Connecter aux données mobiles</translation>
 <translation id="7005239792648594238">Ouvrez une appli pour commencer</translation>
-<translation id="7007983414944123363">Impossible de valider votre code ou votre mot de passe. Réessayez.</translation>
 <translation id="7014684956566476813">Connecté à un appareil nommé "<ph name="DEVICE_NAME" />"</translation>
 <translation id="7015766095477679451">Revenez à <ph name="COME_BACK_TIME" />.</translation>
 <translation id="70168403932084660">Bureau 6</translation>
@@ -1944,6 +1949,7 @@ Branchez votre appareil sur une source d'alimentation.</translation>
 <translation id="742594950370306541">La caméra est en cours d'utilisation.</translation>
 <translation id="742608627846767349">Bonjour,</translation>
 <translation id="743058460480092004">La caméra et le micro sont en cours d'utilisation.</translation>
+<translation id="7440404390546433462">Recherche Google</translation>
 <translation id="7441711280402516925">En cours de lecture · Passer à l'onglet</translation>
 <translation id="7453330308669753048">Résultat de l'historique des recherches supprimé</translation>
 <translation id="7459485586006128091">Le point d'accès a été désactivé en raison d'une erreur interne. Essayez de vous reconnecter dans quelques minutes.</translation>
@@ -2398,6 +2404,7 @@ Pour éteindre l'appareil, appuyez à nouveau de manière prolongée sur le bout
 <translation id="8921624153894383499">L'Assistant Google ne parle pas cette langue.</translation>
 <translation id="8926951137623668982">Étagère toujours masquée</translation>
 <translation id="8929566928381252430">Vous essayez d'utiliser Verr Maj ? Utilisez</translation>
+<translation id="8934418770423095813">Créer un document Google Docs</translation>
 <translation id="8934926665751933910">{NUM_FILES,plural, =1{1 fichier}one{# fichier}other{# fichiers}}</translation>
 <translation id="8936501819958976551">a désactivé</translation>
 <translation id="8938800817013097409">Appareil USB de type C (port situé sur l'arrière de l'appareil, à droite)</translation>
@@ -2466,6 +2473,7 @@ Pour éteindre l'appareil, appuyez à nouveau de manière prolongée sur le bout
 <translation id="9168436347345867845">Plus tard</translation>
 <translation id="9178475906033259337">1 résultat pour <ph name="QUERY" /></translation>
 <translation id="9179259655489829027">Cette fonctionnalité vous permet d'accéder rapidement à tout compte connecté sans avoir à indiquer le mot de passe. N'utilisez cette fonctionnalité que pour les comptes auxquels vous pouvez faire confiance.</translation>
+<translation id="9183302530794969518">Google Docs</translation>
 <translation id="9183456764293710005">Loupe plein écran</translation>
 <translation id="9192133205265227850">Utiliser "<ph name="DEVICE_NAME" />"</translation>
 <translation id="9193626018745640770">Destinataire de la diffusion inconnu</translation>

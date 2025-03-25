@@ -7,6 +7,7 @@
 #include <memory>
 #include <string>
 #include <utility>
+#include <variant>
 #include <vector>
 
 #include "base/command_line.h"
@@ -30,7 +31,6 @@
 #include "components/signin/public/identity_manager/account_info.h"
 #include "google_apis/gaia/core_account_id.h"
 #include "google_apis/gaia/gaia_id.h"
-#include "third_party/abseil-cpp/absl/types/variant.h"
 
 using signin::PrimaryAccountChangeEvent;
 
@@ -747,7 +747,7 @@ void PrimaryAccountManager::ComputeExplicitBrowserSignin(
     ScopedPrefCommit& scoped_pref_commit) {
   switch (event_details.GetEventTypeFor(signin::ConsentLevel::kSignin)) {
     case PrimaryAccountChangeEvent::Type::kNone:
-      return;
+      break;
     case PrimaryAccountChangeEvent::Type::kCleared:
       scoped_pref_commit.ClearPref(kExplicitBrowserSigninWithoutFeatureEnabled);
 #if BUILDFLAG(ENABLE_DICE_SUPPORT)
@@ -799,11 +799,23 @@ void PrimaryAccountManager::ComputeExplicitBrowserSignin(
         }
       }
   }
+
+#if BUILDFLAG(ENABLE_DICE_SUPPORT)
+  // If the user turns on sync, disable account storage for bookmarks. This
+  // way the user does not get duplicate data if they turn off sync (and
+  // choose to preserve their data locally) and then sign in again.
+  if (event_details.GetEventTypeFor(signin::ConsentLevel::kSync) ==
+      signin::PrimaryAccountChangeEvent::Type::kSet) {
+    auto current_gaia_id = event_details.GetCurrentState().primary_account.gaia;
+    SigninPrefs(*client_->GetPrefs())
+        .SetBookmarksExplicitBrowserSignin(current_gaia_id, false);
+  }
+#endif
 }
 
 void PrimaryAccountManager::FirePrimaryAccountChanged(
     const PrimaryAccountChangeEvent::State& previous_state,
-    absl::variant<signin_metrics::AccessPoint, signin_metrics::ProfileSignout>
+    std::variant<signin_metrics::AccessPoint, signin_metrics::ProfileSignout>
         event_source,
     ScopedPrefCommit& scoped_pref_commit) {
   PrimaryAccountChangeEvent::State current_state = GetPrimaryAccountState();

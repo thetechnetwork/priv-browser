@@ -8,7 +8,7 @@
 #include "base/test/metrics/histogram_tester.h"
 #include "base/test/scoped_feature_list.h"
 #include "chrome/browser/contextual_cueing/contextual_cueing_features.h"
-#include "chrome/browser/glic/glic_test_environment.h"
+#include "chrome/browser/glic/test_support/glic_test_environment.h"
 #include "chrome/browser/optimization_guide/browser_test_util.h"
 #include "chrome/browser/profiles/profile.h"
 #include "chrome/browser/signin/identity_manager_factory.h"
@@ -36,7 +36,7 @@
 
 #if BUILDFLAG(ENABLE_GLIC)
 #include "chrome/browser/glic/glic_keyed_service_factory.h"
-#include "chrome/browser/glic/glic_test_util.h"
+#include "chrome/browser/glic/test_support/glic_test_util.h"
 #endif  // BUILDFLAG(ENABLE_GLIC)
 
 class TabStripActionContainerBrowserTest : public InProcessBrowserTest {
@@ -206,6 +206,12 @@ IN_PROC_BROWSER_TEST_F(TabStripActionContainerBrowserTest,
 
   ShowTabStripNudgeButton(TabDeclutterButton());
 
+  // Finish showing declutter chip.
+  tab_strip_action_container()
+      ->animation_session_for_testing()
+      ->ResetAnimationForTesting(1);
+  tab_strip_action_container()->GetWidget()->LayoutRootViewIfNecessary();
+
   OnButtonClicked(TabDeclutterButton());
 
   histogram_tester.ExpectUniqueSample(
@@ -224,6 +230,12 @@ IN_PROC_BROWSER_TEST_F(TabStripActionContainerBrowserTest,
 
   ShowTabStripNudgeButton(TabDeclutterButton());
 
+  // Finish showing declutter chip.
+  tab_strip_action_container()
+      ->animation_session_for_testing()
+      ->ResetAnimationForTesting(1);
+  tab_strip_action_container()->GetWidget()->LayoutRootViewIfNecessary();
+
   OnButtonDismissed(TabDeclutterButton());
 
   histogram_tester.ExpectUniqueSample(
@@ -235,6 +247,12 @@ IN_PROC_BROWSER_TEST_F(TabStripActionContainerBrowserTest,
   base::HistogramTester histogram_tester;
 
   ShowTabStripNudgeButton(TabDeclutterButton());
+
+  // Finish showing declutter chip.
+  tab_strip_action_container()
+      ->animation_session_for_testing()
+      ->ResetAnimationForTesting(1);
+  tab_strip_action_container()->GetWidget()->LayoutRootViewIfNecessary();
 
   OnTabStripNudgeButtonTimeout(TabDeclutterButton());
 
@@ -393,6 +411,11 @@ IN_PROC_BROWSER_TEST_F(TabStripActionContainerBrowserTest,
 IN_PROC_BROWSER_TEST_F(TabStripActionContainerBrowserTest,
                        LogsWhenGlicNudgeButtonClicked) {
   ShowTabStripNudgeButton(GlicNudgeButton());
+
+  tab_strip_action_container()
+      ->animation_session_for_testing()
+      ->ResetAnimationForTesting(1);
+  tab_strip_action_container()->GetWidget()->LayoutRootViewIfNecessary();
 
   OnButtonClicked(GlicNudgeButton());
   auto* const glic_keyed_service =

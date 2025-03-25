@@ -80,7 +80,8 @@ Path SVGEllipseElement::AsPath() const {
 
   gfx::PointF center =
       PointForLengthPair(style.Cx(), style.Cy(), viewport_resolver, style);
-  path.AddEllipse(center, radii.x(), radii.y());
+  path = Path::MakeEllipse(center, radii.x(), radii.y());
+
   return path;
 }
 
@@ -89,7 +90,6 @@ void SVGEllipseElement::SvgAttributeChanged(
   const QualifiedName& attr_name = params.name;
   if (attr_name == svg_names::kCxAttr || attr_name == svg_names::kCyAttr ||
       attr_name == svg_names::kRxAttr || attr_name == svg_names::kRyAttr) {
-    UpdateRelativeLengthsInformation();
     GeometryPresentationAttributeChanged(params.property);
     return;
   }

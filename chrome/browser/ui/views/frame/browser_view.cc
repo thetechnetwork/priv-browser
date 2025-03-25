@@ -12,6 +12,7 @@
 #include <utility>
 
 #include "base/check.h"
+#include "base/check_deref.h"
 #include "base/check_op.h"
 #include "base/command_line.h"
 #include "base/containers/contains.h"
@@ -105,7 +106,6 @@
 #include "chrome/browser/ui/views/bookmarks/bookmark_bar_view.h"
 #include "chrome/browser/ui/views/bookmarks/bookmark_bubble_view.h"
 #include "chrome/browser/ui/views/color_provider_browser_helper.h"
-#include "chrome/browser/ui/views/download/bubble/download_toolbar_button_view.h"
 #include "chrome/browser/ui/views/download/bubble/download_toolbar_ui_controller.h"
 #include "chrome/browser/ui/views/download/download_in_progress_dialog_view.h"
 #include "chrome/browser/ui/views/download/download_shelf_view.h"
@@ -243,6 +243,8 @@
 #include "third_party/blink/public/common/permissions/permission_utils.h"
 #include "ui/accessibility/ax_enums.mojom.h"
 #include "ui/accessibility/ax_node_data.h"
+#include "ui/accessibility/platform/assistive_tech.h"
+#include "ui/accessibility/platform/ax_mode_observer.h"
 #include "ui/accessibility/platform/ax_platform.h"
 #include "ui/base/accelerators/accelerator.h"
 #include "ui/base/dragdrop/os_exchange_data.h"
@@ -904,11 +906,42 @@ class BrowserViewLayoutDelegateImpl : public BrowserViewLayoutDelegate {
   raw_ptr<BrowserView> browser_view_;
 };
 
+class BrowserView::AccessibilityModeObserver : public ui::AXModeObserver {
+ public:
+  explicit AccessibilityModeObserver(BrowserView* browser_view)
+      : browser_view_(browser_view) {
+    ax_mode_observation_.Observe(&ui::AXPlatform::GetInstance());
+  }
+
+ private:
+  // ui::AXModeObserver:
+  void OnAssistiveTechChanged(ui::AssistiveTech assistive_tech) override {
+    // The WebUI tablet/"touchable" tabstrip is not used when a screen reader is
+    // active - see `WebUITabStripContainerView::UseTouchableTabStrip()`.
+    // However, updating the assistive tech state in order to read it is slow,
+    // so instead of trying to it synchronously at startup, respond to updates
+    // here, then pass them to the browser via post so the tabstrip state can
+    // be properly updated on a fresh call stack.
+    if (ui::IsScreenReader(assistive_tech)) {
+      base::SingleThreadTaskRunner::GetCurrentDefault()->PostTask(
+          FROM_HERE, base::BindOnce(&BrowserView::MaybeInitializeWebUITabStrip,
+                                    browser_view_->GetAsWeakPtr()));
+    }
+  }
+
+  const raw_ptr<BrowserView> browser_view_;
+  base::ScopedObservation<ui::AXPlatform, ui::AXModeObserver>
+      ax_mode_observation_{this};
+};
+
 ///////////////////////////////////////////////////////////////////////////////
 // BrowserView, public:
 
 BrowserView::BrowserView(std::unique_ptr<Browser> browser)
-    : views::ClientView(nullptr, nullptr), browser_(std::move(browser)) {
+    : views::ClientView(nullptr, nullptr),
+      browser_(std::move(browser)),
+      accessibility_mode_observer_(
+          std::make_unique<AccessibilityModeObserver>(this)) {
   SetShowIcon(::ShouldShowWindowIcon(
       browser_.get(), AppUsesWindowControlsOverlay(), AppUsesTabbed()));
 
@@ -1001,9 +1034,8 @@ BrowserView::BrowserView(std::unique_ptr<Browser> browser)
   views::View* contents_view;
   if (base::FeatureList::IsEnabled(features::kSideBySide)) {
     auto multi_contents_view = std::make_unique<MultiContentsView>(
-        browser_->profile(),
-        base::BindRepeating(&BrowserView::ActivateWebContents,
-                            base::Unretained(this)));
+        this, base::BindRepeating(&BrowserView::ActivateWebContents,
+                                  base::Unretained(this)));
     multi_contents_view_ =
         contents_container->AddChildView(std::move(multi_contents_view));
     multi_contents_view_->SetID(VIEW_ID_TAB_CONTAINER);
@@ -1592,7 +1624,7 @@ void BrowserView::SetZOrderLevel(ui::ZOrderLevel level) {
 gfx::NativeWindow BrowserView::GetNativeWindow() const {
   // While the browser destruction is going on, the widget can already be gone,
   // but utility functions like FindBrowserWithWindow will still call this.
-  return GetWidget() ? GetWidget()->GetNativeWindow() : nullptr;
+  return GetWidget() ? GetWidget()->GetNativeWindow() : gfx::NativeWindow();
 }
 
 bool BrowserView::IsOnCurrentWorkspace() const {
@@ -2002,14 +2034,8 @@ void BrowserView::OnActiveTabChanged(content::WebContents* old_contents,
   // Update all the UI bits.
   UpdateTitleBar();
 
-  if (old_contents) {
-    TranslateBubbleController* translate_bubble_controller =
-        TranslateBubbleController::FromWebContents(old_contents);
-
-    if (translate_bubble_controller) {
-      translate_bubble_controller->CloseBubble();
-    }
-  }
+  CHECK_DEREF(browser_->GetFeatures().translate_bubble_controller())
+      .CloseBubble();
 
   // This is only done once when the app is first opened so that there is only
   // one subscriber per web contents.
@@ -3377,7 +3403,7 @@ ShowTranslateBubbleResult BrowserView::ShowTranslateBubble(
   }
 
   views::Button* translate_icon;
-  if (base::FeatureList::IsEnabled(features::kPageActionsMigration)) {
+  if (IsPageActionMigrated(PageActionIconType::kTranslate)) {
     translate_icon =
         toolbar_button_provider()->GetPageActionView(kActionShowTranslate);
   } else {
@@ -3390,11 +3416,11 @@ ShowTranslateBubbleResult BrowserView::ShowTranslateBubble(
   if (views::Button::AsButton(anchor_view)) {
     translate_icon = views::Button::AsButton(anchor_view);
   }
-  TranslateBubbleController::GetOrCreate(web_contents)
-      ->ShowTranslateBubble(anchor_view, translate_icon, step, source_language,
-                            target_language, error_type,
-                            is_user_gesture ? TranslateBubbleView::USER_GESTURE
-                                            : TranslateBubbleView::AUTOMATIC);
+  CHECK_DEREF(browser_->GetFeatures().translate_bubble_controller())
+      .ShowTranslateBubble(web_contents, anchor_view, translate_icon, step,
+                           source_language, target_language, error_type,
+                           is_user_gesture ? TranslateBubbleView::USER_GESTURE
+                                           : TranslateBubbleView::AUTOMATIC);
 
   return ShowTranslateBubbleResult::SUCCESS;
 }
@@ -3410,7 +3436,7 @@ void BrowserView::StartPartialTranslate(const std::string& source_language,
       ->SetTranslateEnabled(true);
 
   views::Button* translate_icon;
-  if (base::FeatureList::IsEnabled(features::kPageActionsMigration)) {
+  if (IsPageActionMigrated(PageActionIconType::kTranslate)) {
     translate_icon =
         toolbar_button_provider()->GetPageActionView(kActionShowTranslate);
   } else {
@@ -3418,8 +3444,9 @@ void BrowserView::StartPartialTranslate(const std::string& source_language,
         PageActionIconType::kTranslate);
   }
 
-  TranslateBubbleController::GetOrCreate(GetActiveWebContents())
-      ->StartPartialTranslate(
+  CHECK_DEREF(browser_->GetFeatures().translate_bubble_controller())
+      .StartPartialTranslate(
+          GetActiveWebContents(),
           toolbar_button_provider()->GetAnchorView(kActionShowTranslate),
           translate_icon, source_language, target_language, text_selection);
 }
@@ -3472,19 +3499,11 @@ views::View* BrowserView::GetLensOverlayView() {
 }
 
 DownloadBubbleUIController* BrowserView::GetDownloadBubbleUIController() {
-  if (base::FeatureList::IsEnabled(features::kPinnableDownloadsButton)) {
     if (auto* download_controller =
             browser_->GetFeatures().download_toolbar_ui_controller()) {
       return download_controller->bubble_controller();
     }
     return nullptr;
-  }
-  DCHECK(toolbar_button_provider_);
-  if (auto* download_button = toolbar_button_provider_->GetDownloadButton()) {
-    return static_cast<DownloadToolbarButtonView*>(download_button)
-        ->bubble_controller();
-  }
-  return nullptr;
 }
 
 void BrowserView::ConfirmBrowserCloseWithPendingDownloads(
@@ -3749,7 +3768,11 @@ void BrowserView::TabChangedAt(content::WebContents* contents,
   UpdateAccessibleURLForRootView(contents->GetURL());
 }
 
-void BrowserView::OnSplitViewAdded(std::vector<int> indices) {
+void BrowserView::OnSplitTabCreated(
+    std::vector<std::pair<tabs::TabInterface*, int>> tabs,
+    split_tabs::SplitTabId split_id,
+    SplitTabAddReason reason,
+    tabs::SplitTabLayout tab_layout) {
   const tabs::TabInterface* active_tab =
       browser_->tab_strip_model()->GetActiveTab();
   if (active_tab->IsSplit()) {
@@ -5050,8 +5073,7 @@ void BrowserView::AddedToWidget() {
     SetToolbarButtonProvider(toolbar_);
   }
 
-  if (download::IsDownloadBubbleEnabled() &&
-      base::FeatureList::IsEnabled(features::kPinnableDownloadsButton)) {
+  if (download::IsDownloadBubbleEnabled()) {
     browser_->GetFeatures().download_toolbar_ui_controller()->Init();
   }
 

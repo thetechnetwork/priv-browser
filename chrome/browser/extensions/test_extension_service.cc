@@ -13,19 +13,6 @@ TestExtensionService::TestExtensionService() = default;
 
 TestExtensionService::~TestExtensionService() = default;
 
-extensions::CorruptedExtensionReinstaller*
-TestExtensionService::corrupted_extension_reinstaller() {
-  ADD_FAILURE();
-  return nullptr;
-}
-
-scoped_refptr<extensions::CrxInstaller>
-TestExtensionService::CreateUpdateInstaller(const extensions::CRXFileInfo& file,
-                                            bool file_ownership_passed) {
-  ADD_FAILURE();
-  return nullptr;
-}
-
 const Extension* TestExtensionService::GetPendingExtensionUpdate(
     const std::string& id) const {
   ADD_FAILURE();
@@ -70,10 +57,6 @@ bool TestExtensionService::UserCanDisableInstalledExtension(
     const std::string& extension_id) {
   ADD_FAILURE();
   return false;
-}
-
-void TestExtensionService::ReinstallProviderExtensions() {
-  ADD_FAILURE();
 }
 
 base::WeakPtr<extensions::ExtensionServiceInterface>

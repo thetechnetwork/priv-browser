@@ -20,9 +20,9 @@ import {getCss} from './app.css.js';
 import {getHtml} from './app.html.js';
 import {AppStyleUpdater} from './app_style_updater.js';
 import type {SettingsPrefs} from './common.js';
-import {getCurrentSpeechRate, isWhitespace, minOverflowLengthToScroll, playFromSelectionTimeout} from './common.js';
+import {getCurrentSpeechRate, isHtmlElementVisible, isWhitespace, minOverflowLengthToScroll, playFromSelectionTimeout} from './common.js';
 import type {LanguageToastElement} from './language_toast.js';
-import {ReadAnythingLogger, TimeFrom, TimeTo} from './read_anything_logger.js';
+import {ReadAnythingLogger, TimeFrom} from './read_anything_logger.js';
 import type {ReadAnythingToolbarElement} from './read_anything_toolbar.js';
 import type {SpeechBrowserProxy} from './speech_browser_proxy.js';
 import {SpeechBrowserProxyImpl} from './speech_browser_proxy.js';
@@ -219,6 +219,7 @@ export class AppElement extends AppElementBase {
   private hiddenImageNodesIds_: Set<number> = new Set();
   private imageNodeIdsToFetch_: Set<number> = new Set();
 
+  private allowAutoScroll_ = true;
   private scrollingOnSelection_ = false;
   protected hasContent_ = false;
   protected emptyStateImagePath_?: string;
@@ -356,8 +357,8 @@ export class AppElement extends AppElementBase {
   constructor() {
     super();
     this.constructorTime = Date.now();
-    this.logger_.logTimeBetween(
-        TimeFrom.APP, TimeTo.CONSTRUCTOR, this.startTime, this.constructorTime);
+    this.logger_.logTimeFrom(
+        TimeFrom.APP, this.startTime, this.constructorTime);
     this.isReadAloudEnabled_ = chrome.readingMode.isReadAloudEnabled;
     this.speechSynthesisLanguage = chrome.readingMode.baseLanguageForSpeech;
     this.styleUpdater_ = new AppStyleUpdater(this);
@@ -381,13 +382,6 @@ export class AppElement extends AppElementBase {
     // we're not blocking onConnected on anything else during WebUI setup.
     if (chrome.readingMode) {
       chrome.readingMode.onConnected();
-      const connectedCallbackTime = Date.now();
-      this.logger_.logTimeBetween(
-          TimeFrom.APP, TimeTo.CONNNECTED_CALLBACK, this.startTime,
-          connectedCallbackTime);
-      this.logger_.logTimeBetween(
-          TimeFrom.APP_CONSTRUCTOR, TimeTo.CONNNECTED_CALLBACK,
-          this.constructorTime, connectedCallbackTime);
     }
 
     // Push ShowUI() callback to the event queue to allow deferred rendering
@@ -477,6 +471,14 @@ export class AppElement extends AppElementBase {
     this.$.containerParent.onscroll = () => {
       chrome.readingMode.onScroll(this.scrollingOnSelection_);
       this.scrollingOnSelection_ = false;
+
+      // If the reading mode panel was scrolled while read aloud is speaking,
+      // we should disable autoscroll if the highlights are no longer visible,
+      // and we should re-enable autoscroll if the highlights are now
+      // visible.
+      if (this.speechPlayingState.isSpeechActive) {
+        this.allowAutoScroll_ = this.areHighlightsOnScreen();
+      }
     };
 
     // Pass copy commands to main page. Copy commands will not work if they are
@@ -723,9 +725,9 @@ export class AppElement extends AppElementBase {
     // Construct a dom subtree starting with the display root and append it to
     // the container. The display root may be invalid if there are no content
     // nodes and no selection.
-    // This does not use polymer's templating abstraction, which
-    // would create a shadow node element representing each AXNode, because
-    // experimentation found the shadow node creation to be ~8-10x slower than
+    // This does not use Lit's templating abstraction, which would create a
+    // shadow node element representing each AXNode, because experimentation
+    // (with Polymer) found the shadow node creation to be ~8-10x slower than
     // constructing and appending nodes directly to the container element.
     const rootId = chrome.readingMode.rootId;
     if (!rootId) {
@@ -2213,6 +2215,16 @@ export class AppElement extends AppElementBase {
   }
 
   private scrollHighlightIntoView() {
+    if (!this.allowAutoScroll_) {
+      if (!this.areHighlightsOnScreen()) {
+        return;
+      }
+
+      // If we scrolled away from the current highlights but speech has
+      // caught up with the new scrolled position, resume autoscrolling.
+      this.allowAutoScroll_ = true;
+    }
+
     // Ensure all the current highlights are in view.
     // TODO: crbug.com/40927698 - Handle if the highlight is longer than the
     // full height of the window (e.g. when font size is very large). Possibly
@@ -2239,6 +2251,20 @@ export class AppElement extends AppElementBase {
       // off.
       firstHighlight.scrollIntoView({block: 'center'});
     }
+  }
+
+  private areHighlightsOnScreen(): boolean {
+    assert(this.shadowRoot);
+    const currentHighlights = this.shadowRoot.querySelectorAll<HTMLElement>(
+        '.' + currentReadHighlightClass);
+    if (!currentHighlights || !currentHighlights.length) {
+      return false;
+    }
+
+    const firstHighlight = currentHighlights.item(0);
+    const lastHighlight = currentHighlights.item(currentHighlights.length - 1);
+    return isHtmlElementVisible(firstHighlight) ||
+        isHtmlElementVisible(lastHighlight);
   }
 
   private defaultUtteranceSettings(): UtteranceSettings {

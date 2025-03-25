@@ -1780,6 +1780,11 @@ bool ContentBrowserClient::IsBlobUrlPartitioningEnabled(
   return true;
 }
 
+bool ContentBrowserClient::ShouldReduceAcceptLanguage(
+    content::BrowserContext* browser_context) {
+  return true;
+}
+
 bool ContentBrowserClient::UseOutermostMainFrameOrEmbedderForSubCaptureTargets()
     const {
   return false;
@@ -1941,6 +1946,12 @@ ContentBrowserClient::MaybeOverrideLocalURLCrossOriginEmbedderPolicy(
 }
 
 bool ContentBrowserClient::ShouldEnableSubframeZoom() {
+  return false;
+}
+
+bool ContentBrowserClient::ShouldPrioritizeForBackForwardCache(
+    BrowserContext* browser_context,
+    const GURL& url) {
   return false;
 }
 

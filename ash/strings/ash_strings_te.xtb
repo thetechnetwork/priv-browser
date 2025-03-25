@@ -149,6 +149,7 @@
 <translation id="1455242230282523554">భాష సెట్టింగ్‌లను చూపుతుంది</translation>
 <translation id="1459693405370120464">వాతావరణం</translation>
 <translation id="1460620680449458626">వాల్యూమ్ మ్యూట్ చేయబడింది.</translation>
+<translation id="1462439140224375968">Google Doc క్రియేట్ చేయబడింది</translation>
 <translation id="14648076227129703">ఇది కెమెరా అనుమతితో <ph name="APP1_NAME" />, <ph name="APP2_NAME" /> అన్ని యాప్‌లు, వెబ్‌సైట్‌ల కోసం కెమెరా యాక్సెస్‌ను అనుమతిస్తుంది</translation>
 <translation id="1467432559032391204">ఎడమ</translation>
 <translation id="146902737843070955">మీ అడ్మినిస్ట్రేటర్ ఈ మార్పును రిక్వెస్ట్ చేశారు</translation>
@@ -166,6 +167,7 @@
 <translation id="1505542291183484463">కింది వైపు నుండి విండో టైల్ సైజ్ మార్చండి</translation>
 <translation id="1510238584712386396">లాంచర్</translation>
 <translation id="1520303207432623762">{NUM_APPS,plural, =1{ నోటిఫికేషన్ సెట్టింగ్‌లను చూపుతుంది. యాప్ కోసం నోటిఫికేషన్‌లు ఆఫ్ చేయబడి ఉన్నాయి}other{ నోటిఫికేషన్ సెట్టింగ్‌లను చూపుతుంది. # యాప్‌ల కోసం నోటిఫికేషన్‌లు ఆఫ్ చేయబడి ఉన్నాయి}}</translation>
+<translation id="1521655867290435174">Google Sheets</translation>
 <translation id="1523032696246003">బ్యాటరీ <ph name="BATTERY_PERCENTAGE" />% | పూర్తిగా ఛార్జ్ అవ్వడానికి <ph name="TIME" /> సమయం మిగిలి ఉంది</translation>
 <translation id="1525508553941733066">తీసివేయండి</translation>
 <translation id="1526448108126799339">కొత్త విండోలో కొత్త ట్యాబ్‌ను తెరవండి</translation>
@@ -214,6 +216,7 @@
 <translation id="1679841710523778799">ప్రకాశాన్ని పెంచండి</translation>
 <translation id="1680659827022803830">వీడియో కాల్ కంట్రోల్స్</translation>
 <translation id="169515659049020177">Shift</translation>
+<translation id="1696984622403682083">మీరు సెట్టింగ్‌ల్లో ఈ ఫీచర్‌ను ఎప్పుడైనా ఆఫ్ చేయవచ్చు. <ph name="LINK_TO_LEARN_MORE" /></translation>
 <translation id="1698080062160024910"><ph name="TOTAL_TIME" /> టైమర్ · <ph name="LABEL" /></translation>
 <translation id="1698760176351776263">IPv6 అడ్రస్‌: <ph name="ADDRESS" /></translation>
 <translation id="1703117532528082099">ఎడమ వైపున డాక్ చేసి ఉన్న విండోను యాక్టివేట్ చేయండి.</translation>
@@ -240,6 +243,8 @@
 <translation id="1755556344721611131">సమస్య విశ్లేషణలకు సంబంధించిన యాప్</translation>
 <translation id="1756833229520115364">టెంప్లేట్‌ను సేవ్ చేయడం సాధ్యపడలేదు. చాలా ఎక్కువ విండోలు లేదా ట్యాబ్‌లు ఉన్నాయి.</translation>
 <translation id="1757857692711134412">సూర్యాస్తమయం వరకు ఆఫ్‌లో ఉంటుంది</translation>
+<translation id="1763084151787818322">ఇతర చర్యలు</translation>
+<translation id="1768138163688567246">'నా స్క్రీన్‌ను సెర్చ్ చేయండి'ని మూసివేయండి</translation>
 <translation id="1768366657309696705"><ph name="LAUNCHER_KEY_NAME" /> + పీరియడ్ కీబోర్డ్ షార్ట్‌కట్ మార్చబడింది. ఇన్‌సర్ట్ కీని ఉపయోగించడానికి, <ph name="LAUNCHER_KEY_NAME" /> కీ + షిఫ్ట్ + బ్యాక్‌స్పేస్ కీలను నొక్కండి.</translation>
 <translation id="1770726142253415363"><ph name="ROW_NUMBER" />వ అడ్డు వరుస, <ph name="COLUMN_NUMBER" />వ నిలువు వరుసకు తరలించబడింది.</translation>
 <translation id="1771761307086386028">కుడికి స్క్రోల్ చేయి</translation>
@@ -345,7 +350,6 @@
 <translation id="2201071101391734388">తాజా ఫోటోలలో <ph name="TOTAL_COUNT" />లో <ph name="INDEX" />వది.</translation>
 <translation id="2201687081523799384">Google Tasksను కుదించండి</translation>
 <translation id="2208323208084708176">ఏకీకృత డెస్క్‌టాప్ మోడ్</translation>
-<translation id="2220572644011485463">PIN లేదా పాస్‌వర్డ్</translation>
 <translation id="2222841058024245321">డెస్క్ 7</translation>
 <translation id="2223384056430485343">స్ప్లిట్ స్క్రీన్‌లో</translation>
 <translation id="2224075387478458881">గోప్యమైన కంటెంట్ కనిపించినప్పుడు స్క్రీన్ రికార్డింగ్ అనుమతించబడదు</translation>
@@ -590,6 +594,7 @@
 <translation id="301584155502740476">హాట్‌స్పాట్ వివరాలను చూడండి. హాట్‌స్పాట్ ఆఫ్‌లో ఉంది.</translation>
 <translation id="3017079585324758401">నేపథ్యం</translation>
 <translation id="3018135054368884502">ఫాస్ట్ ఫార్వర్డ్ మీడియా</translation>
+<translation id="3026897869154397692">క్యాలెండర్‌కు జోడించబడింది</translation>
 <translation id="3033545621352269033">ఆన్</translation>
 <translation id="3033912566804961911"><ph name="DESK_NAME" />‌తో కలపండి</translation>
 <translation id="3036649622769666520">ఫైళ్ళను తెరువు</translation>
@@ -966,6 +971,7 @@
 <translation id="4221957499226645091"><ph name="APP_NAME" />, ఇన్‌స్టాల్ చేయబడిన యాప్, పాజ్ చేయబడింది</translation>
 <translation id="4228078597006700451">కంట్రోల్స్ సెటప్ చేయబడలేదు</translation>
 <translation id="4230560241506423345">కొత్తది</translation>
+<translation id="4236726631849783264">సూచించిన చర్యల గురించి రిమైండర్</translation>
 <translation id="4239069858505860023">GPRS</translation>
 <translation id="4240486403425279990">స్థూలదృష్టి మోడ్</translation>
 <translation id="4242533952199664413">సెట్టింగ్‌లను తెరువు</translation>
@@ -982,7 +988,6 @@
 <translation id="4275663329226226506">మీడియా</translation>
 <translation id="4279490309300973883">మిర్రరింగ్</translation>
 <translation id="4280601795273309128">సెక్యూరిటీ అప్‌డేట్‌లు ముగిశాయి. మీ పరికరాన్ని అప్‌గ్రేడ్ చేయండి.</translation>
-<translation id="4281739221820540368">Google Docsను క్రియేట్ చేయండి</translation>
 <translation id="4283888303416325161">మరింత సెక్యూరిటీ కోసం పాస్‌వర్డ్‌ను ఎంటర్ చేయండి</translation>
 <translation id="4285498937028063278">అన్‌పిన్ చేయి</translation>
 <translation id="428715201724021596">ప్రొఫైల్‌కు కనెక్ట్ చేస్తోంది. దీనికి కొన్ని నిమిషాలు పట్టవచ్చు.</translation>
@@ -1010,6 +1015,7 @@
 <translation id="4351244548802238354">డైలాగ్‌ను మూసివేయండి</translation>
 <translation id="4356872429719185452">హాట్‌స్పాట్ వివరాలను చూడండి. హాట్‌స్పాట్ ఆన్ చేయబడుతోంది.</translation>
 <translation id="4364101114148522660"><ph name="DURATION" />  రికార్డింగ్</translation>
+<translation id="4368227575116094370">Google షీట్‌ను క్రియేట్ చేయండి</translation>
 <translation id="4371348193907997655">ప్రసార సెట్టింగ్‌లు</translation>
 <translation id="4371834685492830207">PIN తప్పనిసరిగా చెల్లుబాటు అయ్యే క్యారెక్టర్‌లను మాత్రమే కలిగి ఉండాలి</translation>
 <translation id="4375482231364171368">అడ్రస్ బార్‌లో సెర్చ్ చేయండి</translation>
@@ -1043,6 +1049,7 @@
 <translation id="4471354919263203780">స్పీచ్ రికగ్నిషన్ ఫైళ్లు డౌన్‌లోడ్ అవుతున్నాయి... <ph name="PERCENT" />%</translation>
 <translation id="4471432286288241507">{0,plural, =0{ఇప్పుడే పరికరాన్ని అప్‌డేట్ చేయండి}=1{1 సెకను లోపు పరికరాన్ని అప్‌డేట్ చేయండి}other{# సెకన్ల లోపు పరికరాన్ని అప్‌డేట్ చేయండి}}</translation>
 <translation id="4472575034687746823">ప్రారంభించండి</translation>
+<translation id="4473489370276014885">Google Contacts</translation>
 <translation id="4477350412780666475">తర్వాతి ట్రాక్</translation>
 <translation id="4477751544736611934">దీనికి డేటా ఖర్చు అవ్వచ్చు.
 1 పరికరం కనెక్ట్ అయింది.</translation>
@@ -1069,6 +1076,7 @@
 <translation id="4545950850562423083">ప్రస్తుత పేజీని బుక్‌మార్క్‌గా సేవ్ చేయండి</translation>
 <translation id="4548482551627849548">యాక్టివ్ విండోను ఎడమ వైపున ఉన్న డెస్క్‌కు తరలించండి</translation>
 <translation id="4552748006424994716">ప్రతిధ్వనిని నివారించడానికి, మీరు వైర్ ఉన్న హెడ్‌ఫోన్‌తో మాత్రమే మీ మైక్‌ను వినగలరు.</translation>
+<translation id="4556953949326137018">మీరు “క్యాలెండర్‌కు జోడించు” లేదా “Google Docsను క్రియేట్ చేయి” వంటి సూచించబడిన చర్యలను ఉపయోగించినప్పుడు, ఎంచుకున్న ప్రాంతం నుండి కంటెంట్ చర్యలను సూచించడానికి Google సర్వర్‌లకు పంపబడుతుంది, <ph name="LINK_TO_SERVICE_TERMS" />కు లోబడి ఉంటుంది. అందులో వ్యక్తిగతమైన వాటిని, సున్నితమైన, లేదా గోప్యమైన అంశాలను చేర్చకండి.</translation>
 <translation id="4560576029703263363">ఆన్</translation>
 <translation id="4561267230861221837">3G</translation>
 <translation id="4565377596337484307">పాస్‌వర్డ్‌ను దాచిపెట్టు</translation>
@@ -1152,6 +1160,7 @@
 <translation id="481455355267255546">తదుపరిది</translation>
 <translation id="481749895090480684">టాస్క్ లిస్ట్: <ph name="GLANCEABLES_TASKS_LIST_NAME" /></translation>
 <translation id="4826588772550366629">కెమెరా, మైక్రోఫోన్</translation>
+<translation id="4828935196674083554">జోడిస్తోంది...</translation>
 <translation id="482908187605862807">Play Storeలో అందుబాటులో ఉన్న యాప్‌లు</translation>
 <translation id="4831034276697007977">ఆటోమేటిక్ క్లిక్‌లను మీరు ఖచ్చితంగా ఆఫ్ చేయాలనుకుంటున్నారా?</translation>
 <translation id="4835677468087803981">PINను దాచండి</translation>
@@ -1649,6 +1658,7 @@
 <translation id="641817663353603351">పేజీ పై వైపు కీ</translation>
 <translation id="6424520630891723617"><ph name="SECURITY_STATUS" />, సిగ్నల్ సామర్థ్యం <ph name="SIGNAL_STRENGTH" /></translation>
 <translation id="642644398083277086">అన్ని నోటిఫికేషన్‌లను క్లియర్ చేయండి</translation>
+<translation id="6426905245930183644">క్రియేట్ అవుతోంది...</translation>
 <translation id="6430225033895752525">ఫోకస్ సెట్టింగ్‌లను చూపించండి</translation>
 <translation id="643147933154517414">పూర్తయింది</translation>
 <translation id="6431865393913628856">స్క్రీన్ రికార్డ్</translation>
@@ -1715,7 +1725,6 @@
 <translation id="6612889377159412215">సబ్‌టాస్క్</translation>
 <translation id="6613765291890844037"><ph name="STORAGE_IN_USE_SIZE" /> స్టోరేజ్ వినియోగంలో ఉంది | మొత్తం <ph name="STORAGE_TOTAL_SIZE" /></translation>
 <translation id="6614169507485700968">గోప్యతా స్క్రీన్ ఆన్‌లో ఉంది</translation>
-<translation id="6618277154885124991">Google Sheetsను క్రియేట్ చేయండి</translation>
 <translation id="6622679827379792051">మీ ఫోన్‌లోని యాప్‌లను చూసే సదుపాయాన్ని సెటప్ చేయండి</translation>
 <translation id="662279009180869175">స్ప్లిట్ స్క్రీన్ సైజ్‌ను మార్చడానికి ఎడమ, కుడి బాణాలను ఉపయోగించండి</translation>
 <translation id="6624493541160101248">ప్రస్తుత డెస్క్: <ph name="DESK_NAME" />. <ph name="DESK_COUNT" /> డెస్క్‌లలో <ph name="DESK_INDEX" />‌వది.</translation>
@@ -1830,7 +1839,6 @@
 <translation id="7000027735917578303">విండోలు, డెస్క్‌ల సెట్టింగ్‌లు</translation>
 <translation id="7004910047186208204">మొబైల్ డేటాకు కనెక్ట్ చేయండి</translation>
 <translation id="7005239792648594238">యాప్‌ను తెరిచి ప్రారంభించండి</translation>
-<translation id="7007983414944123363">మీ పిన్ లేదా పాస్‌వర్డ్‌ను వెరిఫై చేయడం సాధ్యం కాలేదు. మళ్లీ ట్రై చేయండి.</translation>
 <translation id="7014684956566476813"><ph name="DEVICE_NAME" /> అనే పేరుతో ఉన్న పరికరానికి కనెక్ట్ చేయబడింది</translation>
 <translation id="7015766095477679451">తిరిగి <ph name="COME_BACK_TIME" />కి రండి.</translation>
 <translation id="70168403932084660">డెస్క్ 6</translation>
@@ -1890,6 +1898,7 @@
 <translation id="7228968829656641943">నా స్క్రీన్‌ను సెర్చ్ చేయడానికి ఎంచుకోండి. కీబోర్డ్ నావిగేషన్ కోసం tab నొక్కి, ఆపై space నొక్కండి.</translation>
 <translation id="7229029500464092426">మెమరీ <ph name="AVAILABLE_MEMORY" /> | మొత్తం <ph name="TOTAL_MEMORY" /></translation>
 <translation id="7239814253344511868">రెండు మౌస్ బటన్లు</translation>
+<translation id="7240636904654154599">Google Sheet క్రియేట్ చేయబడింది</translation>
 <translation id="7244725679040769470"><ph name="PERCENTAGE" />% బ్యాటరీ మిగిలి ఉంది. మీ పరికరాన్ని పవర్‌కు కనెక్ట్ చేయండి.</translation>
 <translation id="7246071203293827765"><ph name="UPDATE_TEXT" />. ఒక అప్‌డేట్‌ను వర్తింపజేయడానికి ఈ Chromebookను రీస్టార్ట్ చేయాలి. దీనికి 1 నిమిషం వరకు పట్టవచ్చు.</translation>
 <translation id="7256057185598509352">ExpressKey 2</translation>
@@ -2400,6 +2409,8 @@
 <translation id="8921624153894383499">Google సహాయకం ఈ భాషను మాట్లాడదు.</translation>
 <translation id="8926951137623668982">అర ఎల్లప్పుడూ దాచబడుతుంది</translation>
 <translation id="8929566928381252430">Caps Lockను ట్రై చేయాలనుకుంటున్నారా? దీన్ని ఉపయోగించండి</translation>
+<translation id="8929623844713377237">కాంటాక్ట్ క్రియేట్ చేయబడింది</translation>
+<translation id="8934418770423095813">Google డాక్‌ను క్రియేట్ చేయండి</translation>
 <translation id="8934926665751933910">{NUM_FILES,plural, =1{1 ఫైల్}other{# ఫైళ్లు}}</translation>
 <translation id="8936501819958976551">డీయాక్టివేట్ చేయబడింది</translation>
 <translation id="8938800817013097409">USB-C పరికరం (వెనుక భాగంలో కుడి పోర్ట్)</translation>
@@ -2468,6 +2479,7 @@
 <translation id="9168436347345867845">తర్వాత చేయండి</translation>
 <translation id="9178475906033259337"><ph name="QUERY" /> కోసం 1 ఫలితాన్ని ప్రదర్శిస్తోంది</translation>
 <translation id="9179259655489829027">ఈ ఫీచర్ ద్వారా పాస్‌వర్డ్ అవసరం లేకుండానే మీరు సైన్ ఇన్ చేసిన ఏ వినియోగదారునైనా త్వరగా యాక్సెస్ చేయగలుగుతారు. ఈ ఫీచర్‌ను మీరు విశ్వసించే ఖాతాలతో మాత్రమే ఉపయోగించండి.</translation>
+<translation id="9183302530794969518">Google Docs</translation>
 <translation id="9183456764293710005">పూర్తి-స్క్రీన్‌ మ్యాగ్నిఫైయర్</translation>
 <translation id="9192133205265227850">"<ph name="DEVICE_NAME" />"‌ను ఉపయోగించండి</translation>
 <translation id="9193626018745640770">తెలియని రిసీవర్‌లో ప్రసారం చేస్తోంది</translation>

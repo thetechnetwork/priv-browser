@@ -67,10 +67,12 @@
 #include "chrome/browser/extensions/external_policy_loader.h"
 #include "chrome/browser/extensions/external_pref_loader.h"
 #include "chrome/browser/extensions/external_provider_impl.h"
+#include "chrome/browser/extensions/external_provider_manager.h"
 #include "chrome/browser/extensions/external_testing_loader.h"
 #include "chrome/browser/extensions/fake_safe_browsing_database_manager.h"
 #include "chrome/browser/extensions/installed_loader.h"
 #include "chrome/browser/extensions/load_error_reporter.h"
+#include "chrome/browser/extensions/managed_installation_mode.h"
 #include "chrome/browser/extensions/pack_extension_job.h"
 #include "chrome/browser/extensions/pending_extension_manager.h"
 #include "chrome/browser/extensions/permissions/permissions_test_util.h"
@@ -256,20 +258,20 @@ base::FilePath GetTemporaryFile() {
   return temp_file;
 }
 
-bool HasExternalInstallErrors(ExtensionService* service) {
-  return !service->external_install_manager()->GetErrorsForTesting().empty();
+bool HasExternalInstallErrors(Profile* profile) {
+  return !ExternalInstallManager::Get(profile)->GetErrorsForTesting().empty();
 }
 
-bool HasExternalInstallBubble(ExtensionService* service) {
+bool HasExternalInstallBubble(Profile* profile) {
   return base::Contains(
-      service->external_install_manager()->GetErrorsForTesting(),
+      ExternalInstallManager::Get(profile)->GetErrorsForTesting(),
       ExternalInstallError::BUBBLE_ALERT, &ExternalInstallError::alert_type);
 }
 
-size_t GetExternalInstallBubbleCount(ExtensionService* service) {
+size_t GetExternalInstallBubbleCount(Profile* profile) {
   size_t bubble_count = 0u;
   std::vector<ExternalInstallError*> errors =
-      service->external_install_manager()->GetErrorsForTesting();
+      ExternalInstallManager::Get(profile)->GetErrorsForTesting();
   for (auto* error : errors)
     bubble_count += error->alert_type() == ExternalInstallError::BUBBLE_ALERT;
   return bubble_count;
@@ -677,9 +679,10 @@ class ExtensionServiceTest : public ExtensionServiceTestWithInstall {
   ExtensionServiceTest() = default;
 
   MockExternalProvider* AddMockExternalProvider(ManifestLocation location) {
-    auto provider = std::make_unique<MockExternalProvider>(service(), location);
+    auto provider = std::make_unique<MockExternalProvider>(
+        external_provider_manager(), location);
     MockExternalProvider* provider_ptr = provider.get();
-    service()->AddProviderForTesting(std::move(provider));
+    external_provider_manager()->AddProviderForTesting(std::move(provider));
     return provider_ptr;
   }
 
@@ -687,14 +690,14 @@ class ExtensionServiceTest : public ExtensionServiceTestWithInstall {
   // successfully complete installing.
   void WaitForExternalExtensionInstalled(const std::string& id) {
     ExtensionLoadedObserver observer(registry(), id);
-    service()->CheckForExternalUpdates();
+    external_provider_manager()->CheckForExternalUpdates();
     observer.Wait();
   }
 
   // Waits for an installation attempt of the extension with the given id
   // to complete (successfully or not).
   void WaitForInstallationAttemptToComplete(const std::string& id) {
-    service()->CheckForExternalUpdates();
+    external_provider_manager()->CheckForExternalUpdates();
     PendingRemovalObserver observer(PendingExtensionManager::Get(profile()),
                                     id);
     observer.WaitForRemoval();
@@ -772,9 +775,9 @@ class ExtensionServiceTest : public ExtensionServiceTestWithInstall {
                                 nonuser_expected_total_count);
     histograms.ExpectTotalCount("Extensions.InstallType.User",
                                 user_expected_total_count);
-    histograms.ExpectTotalCount("Extensions.InstallSource.NonUser",
+    histograms.ExpectTotalCount("Extensions.InstallSource.NonUser2",
                                 nonuser_expected_total_count);
-    histograms.ExpectTotalCount("Extensions.InstallSource.User",
+    histograms.ExpectTotalCount("Extensions.InstallSource.User2",
                                 user_expected_total_count);
   }
 
@@ -894,7 +897,7 @@ class ExtensionServiceTest : public ExtensionServiceTestWithInstall {
 
   ExternalInstallError* GetError(const std::string& extension_id) {
     std::vector<ExternalInstallError*> errors =
-        service_->external_install_manager()->GetErrorsForTesting();
+        external_install_manager()->GetErrorsForTesting();
     auto found = std::ranges::find(errors, extension_id,
                                    &ExternalInstallError::extension_id);
     return found == errors.end() ? nullptr : *found;
@@ -916,6 +919,14 @@ class ExtensionServiceTest : public ExtensionServiceTestWithInstall {
 
   PendingExtensionManager* pending_extension_manager() {
     return PendingExtensionManager::Get(profile());
+  }
+
+  ExternalProviderManager* external_provider_manager() {
+    return ExternalProviderManager::Get(profile());
+  }
+
+  ExternalInstallManager* external_install_manager() {
+    return ExternalInstallManager::Get(profile());
   }
 
   typedef ExtensionManagementPrefUpdater<
@@ -1540,7 +1551,7 @@ TEST_F(ExtensionServiceTest, UninstallingNotLoadedExtension) {
   // in CheckExternalUninstall, a crash will happen here because we will get or
   // dereference a NULL pointer (extension) inside UninstallExtension.
   MockExternalProvider provider(nullptr, ManifestLocation::kExternalRegistry);
-  service()->OnExternalProviderReady(&provider);
+  external_provider_manager()->OnExternalProviderReady(&provider);
 }
 
 // Test that external extensions with incorrect IDs are not installed.
@@ -4198,7 +4209,7 @@ TEST_F(ExtensionServiceTest, ComponentExtensionAllowlisted) {
   EXPECT_TRUE(registry()->enabled_extensions().GetByID(good0));
 
   // Poke external providers and make sure the extension is still present.
-  service()->CheckForExternalUpdates();
+  external_provider_manager()->CheckForExternalUpdates();
   ASSERT_EQ(1u, registry()->enabled_extensions().size());
   EXPECT_TRUE(registry()->enabled_extensions().GetByID(good0));
 
@@ -4764,7 +4775,7 @@ TEST_F(ExtensionServiceTest, MAYBE_ExternalExtensionAutoAcknowledgement) {
   {
     ExtensionLoadedObserver good_crx_loaded(registry(), good_crx);
     ExtensionLoadedObserver page_action_loaded(registry(), page_action);
-    service()->CheckForExternalUpdates();
+    external_provider_manager()->CheckForExternalUpdates();
     good_crx_loaded.Wait();
     page_action_loaded.Wait();
   }
@@ -4880,12 +4891,9 @@ TEST_F(ExtensionServiceTest, ExternalExtensionRemainsDisabledIfIgnored) {
               testing::UnorderedElementsAre(
                   disable_reason::DISABLE_EXTERNAL_EXTENSION));
 
-  ExternalInstallManager* external_install_manager =
-      service()->external_install_manager();
-
   for (int i = 0; i < 3; ++i) {
     std::vector<ExternalInstallError*> errors =
-        external_install_manager->GetErrorsForTesting();
+        external_install_manager()->GetErrorsForTesting();
     ASSERT_EQ(1u, errors.size());
     errors[0]->OnInstallPromptDone(ExtensionInstallPrompt::DoneCallbackPayload(
         ExtensionInstallPrompt::Result::ABORTED));
@@ -4893,14 +4901,14 @@ TEST_F(ExtensionServiceTest, ExternalExtensionRemainsDisabledIfIgnored) {
     // Note: Calling OnInstallPromptDone() can result in the removal of the
     // error by the manager (which owns the object), so the contents |errors|
     // are invalidated now!
-    EXPECT_TRUE(external_install_manager->GetErrorsForTesting().empty());
-    external_install_manager->ClearShownIdsForTesting();
-    external_install_manager->UpdateExternalExtensionAlert();
+    EXPECT_TRUE(external_install_manager()->GetErrorsForTesting().empty());
+    external_install_manager()->ClearShownIdsForTesting();
+    external_install_manager()->UpdateExternalExtensionAlert();
   }
 
   // We should have stopped prompting, since the user was shown the warning
   // three times.
-  EXPECT_TRUE(external_install_manager->GetErrorsForTesting().empty());
+  EXPECT_TRUE(external_install_manager()->GetErrorsForTesting().empty());
   EXPECT_TRUE(prefs()->IsExternalExtensionAcknowledged(good_crx));
   EXPECT_TRUE(registry()->disabled_extensions().Contains(good_crx));
   EXPECT_THAT(prefs()->GetDisableReasons(good_crx),
@@ -4981,11 +4989,13 @@ TEST_F(ExtensionServiceTest, PreinstalledAppsInstall) {
         "  }"
         "}";
     preinstalled_apps::Provider* provider = new preinstalled_apps::Provider(
-        profile(), service(), new ExternalTestingLoader(json_data, data_dir()),
+        profile(), external_provider_manager(),
+        new ExternalTestingLoader(json_data, data_dir()),
         ManifestLocation::kInternal, ManifestLocation::kInvalidLocation,
         Extension::FROM_WEBSTORE | Extension::WAS_INSTALLED_BY_DEFAULT);
 
-    service()->AddProviderForTesting(base::WrapUnique(provider));
+    external_provider_manager()->AddProviderForTesting(
+        base::WrapUnique(provider));
   }
 
   ASSERT_EQ(0u, registry()->enabled_extensions().size());
@@ -5388,8 +5398,8 @@ class ExtensionServiceZipUninstallProfileFeatureTest
  public:
   void SetUp() override {
     ExtensionServiceWithEmptyServiceTest::SetUp();
-      expected_extension_install_directory_ =
-          service()->unpacked_install_directory();
+    expected_extension_install_directory_ =
+        registrar()->unpacked_install_directory();
   }
 
  protected:
@@ -5413,11 +5423,11 @@ TEST_F(ExtensionServiceZipUninstallProfileFeatureTest,
 
   registry()->AddObserver(&observer);
 
-    base::SingleThreadTaskRunner::GetCurrentDefault()->PostTask(
-        FROM_HERE,
-        base::BindOnce(&ZipFileInstaller::InstallZipFileToUnpackedExtensionsDir,
-                       zipfile_installer, original_path,
-                       service()->unpacked_install_directory()));
+  base::SingleThreadTaskRunner::GetCurrentDefault()->PostTask(
+      FROM_HERE,
+      base::BindOnce(&ZipFileInstaller::InstallZipFileToUnpackedExtensionsDir,
+                     zipfile_installer, original_path,
+                     registrar()->unpacked_install_directory()));
   task_environment()->RunUntilIdle();
 
   std::string extension_id = std::string(observer.last_extension_installed);
@@ -6097,7 +6107,7 @@ void ExtensionServiceTest::TestExternalProvider(MockExternalProvider* provider,
   } else {
     // The extension should also be gone from the install directory.
     ASSERT_FALSE(base::PathExists(install_path));
-    service()->CheckForExternalUpdates();
+    external_provider_manager()->CheckForExternalUpdates();
     task_environment()->RunUntilIdle();
     ASSERT_EQ(0u, loaded_extensions().size());
     EXPECT_TRUE(prefs()->IsExternalExtensionUninstalled(good_crx));
@@ -6121,7 +6131,7 @@ void ExtensionServiceTest::TestExternalProvider(MockExternalProvider* provider,
     // Now test an externally triggered uninstall (deleting the registry key or
     // the pref entry).
     provider->RemoveExtension(good_crx);
-    service()->OnExternalProviderReady(provider);
+    external_provider_manager()->OnExternalProviderReady(provider);
     task_environment()->RunUntilIdle();
     ASSERT_EQ(0u, loaded_extensions().size());
     EXPECT_FALSE(prefs()->IsExternalExtensionUninstalled(good_crx));
@@ -6277,8 +6287,8 @@ TEST_F(ExtensionServiceTest, MultipleExternalUpdateCheck) {
 
   // Start two checks for updates.
   provider->set_visit_count(0);
-  service()->CheckForExternalUpdates();
-  service()->CheckForExternalUpdates();
+  external_provider_manager()->CheckForExternalUpdates();
+  external_provider_manager()->CheckForExternalUpdates();
   task_environment()->RunUntilIdle();
 
   // Two calls should cause two checks for external extensions.
@@ -6295,8 +6305,8 @@ TEST_F(ExtensionServiceTest, MultipleExternalUpdateCheck) {
   provider->set_visit_count(0);
   {
     ExtensionLoadedObserver good_crx_loaded(registry(), good_crx);
-    service()->CheckForExternalUpdates();
-    service()->CheckForExternalUpdates();
+    external_provider_manager()->CheckForExternalUpdates();
+    external_provider_manager()->CheckForExternalUpdates();
     good_crx_loaded.Wait();
   }
   EXPECT_EQ(2, provider->visit_count());
@@ -6312,8 +6322,8 @@ TEST_F(ExtensionServiceTest, MultipleExternalUpdateCheck) {
 
   provider->RemoveExtension(good_crx);
   provider->set_visit_count(0);
-  service()->CheckForExternalUpdates();
-  service()->CheckForExternalUpdates();
+  external_provider_manager()->CheckForExternalUpdates();
+  external_provider_manager()->CheckForExternalUpdates();
   task_environment()->RunUntilIdle();
 
   // Two calls should cause two checks for external extensions.
@@ -6947,18 +6957,21 @@ TEST_F(ExtensionServiceTest, InstallPriorityExternalUpdateUrl) {
   ExternalInstallInfoUpdateUrl info(
       kGoodId, std::string(), std::move(good_update_url),
       ManifestLocation::kInternal, Extension::NO_FLAGS, false);
-  EXPECT_FALSE(service()->OnExternalExtensionUpdateUrlFound(info, true));
+  EXPECT_FALSE(external_provider_manager()->OnExternalExtensionUpdateUrlFound(
+      info, true));
   EXPECT_FALSE(pending->IsIdPending(kGoodId));
 
   // Update the download location when install is requested from higher priority
   // location.
   info.download_location = ManifestLocation::kExternalPolicyDownload;
-  EXPECT_FALSE(service()->OnExternalExtensionUpdateUrlFound(info, true));
+  EXPECT_FALSE(external_provider_manager()->OnExternalExtensionUpdateUrlFound(
+      info, true));
   EXPECT_FALSE(pending->IsIdPending(kGoodId));
 
   // Try the low priority again.  Should be rejected.
   info.download_location = ManifestLocation::kExternalPrefDownload;
-  EXPECT_FALSE(service()->OnExternalExtensionUpdateUrlFound(info, true));
+  EXPECT_FALSE(external_provider_manager()->OnExternalExtensionUpdateUrlFound(
+      info, true));
   // The existing record should still be present in the pending extension
   // manager.
   EXPECT_FALSE(pending->IsIdPending(kGoodId));
@@ -6966,7 +6979,8 @@ TEST_F(ExtensionServiceTest, InstallPriorityExternalUpdateUrl) {
   // Skip install when the location has the same priority as the installed
   // location.
   info.download_location = ManifestLocation::kExternalPolicyDownload;
-  EXPECT_FALSE(service()->OnExternalExtensionUpdateUrlFound(info, true));
+  EXPECT_FALSE(external_provider_manager()->OnExternalExtensionUpdateUrlFound(
+      info, true));
 
   EXPECT_FALSE(pending->IsIdPending(kGoodId));
 }
@@ -6994,7 +7008,8 @@ TEST_F(ExtensionServiceTest, FailedLocalFileInstallIsNotPending) {
     PendingRemovalObserver observer(pending, kGoodId);
 
     // Simulate an external source adding the extension.
-    EXPECT_TRUE(service()->OnExternalExtensionFileFound(info));
+    EXPECT_TRUE(
+        external_provider_manager()->OnExternalExtensionFileFound(info));
     EXPECT_TRUE(pending->IsIdPending(kGoodId));
     observer.WaitForRemoval();
     EXPECT_FALSE(pending->IsIdPending(kGoodId));
@@ -7041,7 +7056,8 @@ TEST_F(ExtensionServiceTest, InstallPriorityExternalLocalFile) {
   {
     // Simulate an external source adding the extension as kInternal.
     PendingRemovalObserver observer(pending, kGoodId);
-    EXPECT_TRUE(service()->OnExternalExtensionFileFound(info));
+    EXPECT_TRUE(
+        external_provider_manager()->OnExternalExtensionFileFound(info));
     EXPECT_TRUE(pending->IsIdPending(kGoodId));
     observer.WaitForRemoval();
     VerifyCrxInstall(kInvalidPathToCrx, INSTALL_FAILED);
@@ -7051,18 +7067,21 @@ TEST_F(ExtensionServiceTest, InstallPriorityExternalLocalFile) {
     // Simulate an external source adding the extension as kExternalPref.
     PendingRemovalObserver observer(pending, kGoodId);
     info.crx_location = ManifestLocation::kExternalPref;
-    EXPECT_TRUE(service()->OnExternalExtensionFileFound(info));
+    EXPECT_TRUE(
+        external_provider_manager()->OnExternalExtensionFileFound(info));
     EXPECT_TRUE(pending->IsIdPending(kGoodId));
 
     // Simulate an external source adding as EXTERNAL_PREF again.
     // This is rejected because the version and the location are the same as
     // the previous installation, which is still pending.
-    EXPECT_FALSE(service()->OnExternalExtensionFileFound(info));
+    EXPECT_FALSE(
+        external_provider_manager()->OnExternalExtensionFileFound(info));
     EXPECT_TRUE(pending->IsIdPending(kGoodId));
 
     // Try INTERNAL again.  Should fail.
     info.crx_location = ManifestLocation::kInternal;
-    EXPECT_FALSE(service()->OnExternalExtensionFileFound(info));
+    EXPECT_FALSE(
+        external_provider_manager()->OnExternalExtensionFileFound(info));
     EXPECT_TRUE(pending->IsIdPending(kGoodId));
 
     observer.WaitForRemoval();
@@ -7073,16 +7092,20 @@ TEST_F(ExtensionServiceTest, InstallPriorityExternalLocalFile) {
     // Now the registry adds the extension.
     PendingRemovalObserver observer(pending, kGoodId);
     info.crx_location = ManifestLocation::kExternalRegistry;
-    EXPECT_TRUE(service()->OnExternalExtensionFileFound(info));
+
+    EXPECT_TRUE(
+        external_provider_manager()->OnExternalExtensionFileFound(info));
     EXPECT_TRUE(pending->IsIdPending(kGoodId));
 
     // Registry outranks both external pref and internal, so both fail.
     info.crx_location = ManifestLocation::kExternalPref;
-    EXPECT_FALSE(service()->OnExternalExtensionFileFound(info));
+    EXPECT_FALSE(
+        external_provider_manager()->OnExternalExtensionFileFound(info));
     EXPECT_TRUE(pending->IsIdPending(kGoodId));
 
     info.crx_location = ManifestLocation::kInternal;
-    EXPECT_FALSE(service()->OnExternalExtensionFileFound(info));
+    EXPECT_FALSE(
+        external_provider_manager()->OnExternalExtensionFileFound(info));
     EXPECT_TRUE(pending->IsIdPending(kGoodId));
 
     observer.WaitForRemoval();
@@ -7110,41 +7133,41 @@ TEST_F(ExtensionServiceTest, InstallPriorityExternalLocalFile) {
 
   // Older than the installed version...
   info.version = older_version;
-  EXPECT_FALSE(service()->OnExternalExtensionFileFound(info));
+  EXPECT_FALSE(external_provider_manager()->OnExternalExtensionFileFound(info));
   EXPECT_FALSE(pending->IsIdPending(kGoodId));
 
   // Same version as the installed version...
   info.version = ext->version();
-  EXPECT_FALSE(service()->OnExternalExtensionFileFound(info));
+  EXPECT_FALSE(external_provider_manager()->OnExternalExtensionFileFound(info));
   EXPECT_FALSE(pending->IsIdPending(kGoodId));
 
   // Newer than the installed version...
   info.version = newer_version;
-  EXPECT_TRUE(service()->OnExternalExtensionFileFound(info));
+  EXPECT_TRUE(external_provider_manager()->OnExternalExtensionFileFound(info));
   EXPECT_TRUE(pending->IsIdPending(kGoodId));
 
   // An external install for a higher priority install source should succeed
   // if the version is greater.  |older_version| is not...
   info.version = older_version;
   info.crx_location = ManifestLocation::kExternalPref;
-  EXPECT_FALSE(service()->OnExternalExtensionFileFound(info));
+  EXPECT_FALSE(external_provider_manager()->OnExternalExtensionFileFound(info));
   EXPECT_TRUE(pending->IsIdPending(kGoodId));
 
   // |newer_version| is newer.
   info.version = newer_version;
-  EXPECT_TRUE(service()->OnExternalExtensionFileFound(info));
+  EXPECT_TRUE(external_provider_manager()->OnExternalExtensionFileFound(info));
   EXPECT_TRUE(pending->IsIdPending(kGoodId));
 
   // An external install for an even higher priority install source should
   // succeed if the version is greater.
   info.crx_location = ManifestLocation::kExternalRegistry;
-  EXPECT_TRUE(service()->OnExternalExtensionFileFound(info));
+  EXPECT_TRUE(external_provider_manager()->OnExternalExtensionFileFound(info));
   EXPECT_TRUE(pending->IsIdPending(kGoodId));
 
   // Because kExternalPref is a lower priority source than kExternalRegistry,
   // adding from external pref will now fail.
   info.crx_location = ManifestLocation::kExternalPref;
-  EXPECT_FALSE(service()->OnExternalExtensionFileFound(info));
+  EXPECT_FALSE(external_provider_manager()->OnExternalExtensionFileFound(info));
   EXPECT_TRUE(pending->IsIdPending(kGoodId));
 }
 
@@ -7166,7 +7189,7 @@ TEST_F(ExtensionServiceTest, ConcurrentExternalLocalFile) {
   ExternalInstallInfoFile info(kGoodId, kVersion123, kInvalidPathToCrx,
                                ManifestLocation::kExternalPref, kCreationFlags,
                                kDontMarkAcknowledged, kDontInstallImmediately);
-  EXPECT_TRUE(service()->OnExternalExtensionFileFound(info));
+  EXPECT_TRUE(external_provider_manager()->OnExternalExtensionFileFound(info));
 
   const PendingExtensionInfo* pending_info;
   EXPECT_TRUE((pending_info = pending->GetById(kGoodId)));
@@ -7175,14 +7198,14 @@ TEST_F(ExtensionServiceTest, ConcurrentExternalLocalFile) {
 
   // Adding a newer version overrides the currently pending version.
   info.version = base::Version(kVersion124);
-  EXPECT_TRUE(service()->OnExternalExtensionFileFound(info));
+  EXPECT_TRUE(external_provider_manager()->OnExternalExtensionFileFound(info));
   EXPECT_TRUE((pending_info = pending->GetById(kGoodId)));
   EXPECT_TRUE(pending_info->version().IsValid());
   EXPECT_EQ(pending_info->version(), kVersion124);
 
   // Adding an older version fails.
   info.version = kVersion123;
-  EXPECT_FALSE(service()->OnExternalExtensionFileFound(info));
+  EXPECT_FALSE(external_provider_manager()->OnExternalExtensionFileFound(info));
   EXPECT_TRUE((pending_info = pending->GetById(kGoodId)));
   EXPECT_TRUE(pending_info->version().IsValid());
   EXPECT_EQ(pending_info->version(), kVersion124);
@@ -7190,7 +7213,7 @@ TEST_F(ExtensionServiceTest, ConcurrentExternalLocalFile) {
   // Adding an older version fails even when coming from a higher-priority
   // location.
   info.crx_location = ManifestLocation::kExternalRegistry;
-  EXPECT_FALSE(service()->OnExternalExtensionFileFound(info));
+  EXPECT_FALSE(external_provider_manager()->OnExternalExtensionFileFound(info));
   EXPECT_TRUE((pending_info = pending->GetById(kGoodId)));
   EXPECT_TRUE(pending_info->version().IsValid());
   EXPECT_EQ(pending_info->version(), kVersion124);
@@ -7200,7 +7223,8 @@ TEST_F(ExtensionServiceTest, ConcurrentExternalLocalFile) {
   ExternalInstallInfoUpdateUrl update_info(
       kGoodId, std::string(), kUpdateUrl,
       ManifestLocation::kExternalPolicyDownload, Extension::NO_FLAGS, false);
-  EXPECT_TRUE(service()->OnExternalExtensionUpdateUrlFound(update_info, true));
+  EXPECT_TRUE(external_provider_manager()->OnExternalExtensionUpdateUrlFound(
+      update_info, true));
   EXPECT_TRUE((pending_info = pending->GetById(kGoodId)));
   EXPECT_FALSE(pending_info->version().IsValid());
 }
@@ -7250,7 +7274,7 @@ class ExtensionSourcePriorityTest : public ExtensionServiceTest {
     ExternalInstallInfoFile info(crx_id_, base::Version("1.0.0.0"), crx_path_,
                                  ManifestLocation::kExternalPref,
                                  Extension::NO_FLAGS, false, false);
-    return service()->OnExternalExtensionFileFound(info);
+    return external_provider_manager()->OnExternalExtensionFileFound(info);
   }
 
   // Fake a request from sync to install an extension.
@@ -7269,7 +7293,8 @@ class ExtensionSourcePriorityTest : public ExtensionServiceTest {
     ExternalInstallInfoUpdateUrl info(crx_id_, std::string(), GURL(),
                                       ManifestLocation::kExternalPolicyDownload,
                                       Extension::NO_FLAGS, false);
-    return service()->OnExternalExtensionUpdateUrlFound(info, true);
+    return external_provider_manager()->OnExternalExtensionUpdateUrlFound(info,
+                                                                          true);
   }
 
   // Get the install source of a pending extension.
@@ -7393,8 +7418,8 @@ TEST_F(ExtensionServiceTest, BlockedExternalExtension) {
   MockExternalProvider* provider =
       AddMockExternalProvider(ManifestLocation::kExternalPref);
 
-  service()->external_install_manager()->UpdateExternalExtensionAlert();
-  EXPECT_FALSE(HasExternalInstallErrors(service()));
+  external_install_manager()->UpdateExternalExtensionAlert();
+  EXPECT_FALSE(HasExternalInstallErrors(profile()));
 
   service()->BlockAllExtensions();
 
@@ -7402,10 +7427,10 @@ TEST_F(ExtensionServiceTest, BlockedExternalExtension) {
                                  data_dir().AppendASCII("page_action.crx"));
 
   WaitForInstallationAttemptToComplete(page_action);
-  EXPECT_FALSE(HasExternalInstallErrors(service()));
+  EXPECT_FALSE(HasExternalInstallErrors(profile()));
 
   service()->UnblockAllExtensions();
-  EXPECT_TRUE(HasExternalInstallErrors(service()));
+  EXPECT_TRUE(HasExternalInstallErrors(profile()));
 }
 
 // Test that installing an external extension displays a GlobalError.
@@ -7417,19 +7442,19 @@ TEST_F(ExtensionServiceTest, ExternalInstallGlobalError) {
   MockExternalProvider* provider =
       AddMockExternalProvider(ManifestLocation::kExternalPref);
 
-  service()->external_install_manager()->UpdateExternalExtensionAlert();
+  external_install_manager()->UpdateExternalExtensionAlert();
   // Should return false, meaning there aren't any extensions that the user
   // needs to know about.
-  EXPECT_FALSE(HasExternalInstallErrors(service()));
+  EXPECT_FALSE(HasExternalInstallErrors(profile()));
 
   // This is a normal extension, installed normally.
   // This should NOT trigger an alert.
   base::FilePath path = data_dir().AppendASCII("good.crx");
   InstallCRX(path, INSTALL_NEW);
 
-  service()->CheckForExternalUpdates();
+  external_provider_manager()->CheckForExternalUpdates();
   task_environment()->RunUntilIdle();
-  EXPECT_FALSE(HasExternalInstallErrors(service()));
+  EXPECT_FALSE(HasExternalInstallErrors(profile()));
 
   // A hosted app, installed externally.
   // This should NOT trigger an alert.
@@ -7437,7 +7462,7 @@ TEST_F(ExtensionServiceTest, ExternalInstallGlobalError) {
       hosted_app, "1.0.0.0", data_dir().AppendASCII("hosted_app.crx"));
 
   WaitForExternalExtensionInstalled(hosted_app);
-  EXPECT_FALSE(HasExternalInstallErrors(service()));
+  EXPECT_FALSE(HasExternalInstallErrors(profile()));
 
   // Another normal extension, but installed externally.
   // This SHOULD trigger an alert.
@@ -7445,7 +7470,7 @@ TEST_F(ExtensionServiceTest, ExternalInstallGlobalError) {
       page_action, "1.0.0.0", data_dir().AppendASCII("page_action.crx"));
 
   WaitForInstallationAttemptToComplete(page_action);
-  EXPECT_TRUE(HasExternalInstallErrors(service()));
+  EXPECT_TRUE(HasExternalInstallErrors(profile()));
 }
 
 // Test that external extensions are initially disabled, and that enabling
@@ -7462,7 +7487,7 @@ TEST_F(ExtensionServiceTest, ExternalInstallInitiallyDisabled) {
       page_action, "1.0.0.0", data_dir().AppendASCII("page_action.crx"));
   WaitForInstallationAttemptToComplete(page_action);
 
-  EXPECT_TRUE(HasExternalInstallErrors(service()));
+  EXPECT_TRUE(HasExternalInstallErrors(profile()));
   EXPECT_FALSE(registrar()->IsExtensionEnabled(page_action));
 
   const Extension* extension =
@@ -7471,7 +7496,7 @@ TEST_F(ExtensionServiceTest, ExternalInstallInitiallyDisabled) {
   EXPECT_EQ(page_action, extension->id());
 
   service()->EnableExtension(page_action);
-  EXPECT_FALSE(HasExternalInstallErrors(service()));
+  EXPECT_FALSE(HasExternalInstallErrors(profile()));
   EXPECT_TRUE(registrar()->IsExtensionEnabled(page_action));
 }
 
@@ -7535,13 +7560,13 @@ TEST_F(ExtensionServiceTest, MAYBE_ExternalInstallMultiple) {
     PendingRemovalObserver good_crx_observer(pending, good_crx);
     PendingRemovalObserver theme_crx_observer(pending, theme_crx);
 
-    service()->CheckForExternalUpdates();
+    external_provider_manager()->CheckForExternalUpdates();
 
     page_action_observer.WaitForRemoval();
     good_crx_observer.WaitForRemoval();
     theme_crx_observer.WaitForRemoval();
 
-    EXPECT_TRUE(HasExternalInstallErrors(service()));
+    EXPECT_TRUE(HasExternalInstallErrors(profile()));
     EXPECT_FALSE(registrar()->IsExtensionEnabled(page_action));
     EXPECT_FALSE(registrar()->IsExtensionEnabled(good_crx));
     EXPECT_FALSE(registrar()->IsExtensionEnabled(theme_crx));
@@ -7551,22 +7576,22 @@ TEST_F(ExtensionServiceTest, MAYBE_ExternalInstallMultiple) {
   EXPECT_FALSE(GetError(page_action));
   EXPECT_TRUE(GetError(good_crx));
   EXPECT_TRUE(GetError(theme_crx));
-  EXPECT_TRUE(HasExternalInstallErrors(service()));
-  EXPECT_FALSE(HasExternalInstallBubble(service()));
+  EXPECT_TRUE(HasExternalInstallErrors(profile()));
+  EXPECT_FALSE(HasExternalInstallBubble(profile()));
 
   service()->EnableExtension(theme_crx);
   EXPECT_FALSE(GetError(page_action));
   EXPECT_FALSE(GetError(theme_crx));
   EXPECT_TRUE(GetError(good_crx));
-  EXPECT_TRUE(HasExternalInstallErrors(service()));
-  EXPECT_FALSE(HasExternalInstallBubble(service()));
+  EXPECT_TRUE(HasExternalInstallErrors(profile()));
+  EXPECT_FALSE(HasExternalInstallBubble(profile()));
 
   service()->EnableExtension(good_crx);
   EXPECT_FALSE(GetError(page_action));
   EXPECT_FALSE(GetError(good_crx));
   EXPECT_FALSE(GetError(theme_crx));
-  EXPECT_FALSE(HasExternalInstallErrors(service()));
-  EXPECT_FALSE(HasExternalInstallBubble(service()));
+  EXPECT_FALSE(HasExternalInstallErrors(profile()));
+  EXPECT_FALSE(HasExternalInstallBubble(profile()));
 }
 
 TEST_F(ExtensionServiceTest, MultipleExternalInstallErrors) {
@@ -7590,9 +7615,8 @@ TEST_F(ExtensionServiceTest, MultipleExternalInstallErrors) {
         data_dir().AppendASCII(extension_info[i][2]));
     WaitForInstallationAttemptToComplete(extension_info[i][0]);
     const size_t expected_error_count = i + 1u;
-    EXPECT_EQ(
-        expected_error_count,
-        service()->external_install_manager()->GetErrorsForTesting().size());
+    EXPECT_EQ(expected_error_count,
+              external_install_manager()->GetErrorsForTesting().size());
     EXPECT_FALSE(registrar()->IsExtensionEnabled(extension_info[i][0]));
   }
 
@@ -7630,7 +7654,7 @@ TEST_F(ExtensionServiceTest, MultipleExternalInstallErrors) {
   EXPECT_FALSE(GetError(extension_ids[1]));
   EXPECT_FALSE(GetError(extension_ids[2]));
 
-  EXPECT_FALSE(HasExternalInstallErrors(service_));
+  EXPECT_FALSE(HasExternalInstallErrors(profile()));
 }
 
 // Regression test for crbug.com/739142. Verifies that no UAF occurs when
@@ -7646,8 +7670,7 @@ TEST_F(ExtensionServiceTest, InstallPromptAborted) {
   reg_provider->UpdateOrAddExtension(good_crx, "1.0.0.0",
                                      data_dir().AppendASCII("good.crx"));
   WaitForInstallationAttemptToComplete(good_crx);
-  EXPECT_EQ(
-      1u, service()->external_install_manager()->GetErrorsForTesting().size());
+  EXPECT_EQ(1u, external_install_manager()->GetErrorsForTesting().size());
   EXPECT_FALSE(registrar()->IsExtensionEnabled(good_crx));
   EXPECT_TRUE(GetError(good_crx));
 
@@ -7660,7 +7683,7 @@ TEST_F(ExtensionServiceTest, InstallPromptAborted) {
   base::RunLoop().RunUntilIdle();
   EXPECT_FALSE(GetError(good_crx));
 
-  EXPECT_FALSE(HasExternalInstallErrors(service_));
+  EXPECT_FALSE(HasExternalInstallErrors(profile()));
 }
 
 TEST_F(ExtensionServiceTest, MultipleExternalInstallBubbleErrors) {
@@ -7704,16 +7727,14 @@ TEST_F(ExtensionServiceTest, MultipleExternalInstallBubbleErrors) {
 
     const size_t expected_error_count = i + 1u;
     std::vector<ExternalInstallError*> errors =
-        service_->external_install_manager()->GetErrorsForTesting();
+        external_install_manager()->GetErrorsForTesting();
     EXPECT_EQ(expected_error_count, errors.size());
     EXPECT_EQ(data[i].expected_bubble_error_count,
-              GetExternalInstallBubbleCount(service()));
-    EXPECT_TRUE(service()
-                    ->external_install_manager()
-                    ->has_currently_visible_install_alert());
+              GetExternalInstallBubbleCount(profile()));
+    EXPECT_TRUE(
+        external_install_manager()->has_currently_visible_install_alert());
     // Make sure that the first error is only being shown.
-    EXPECT_EQ(errors[0], service()
-                             ->external_install_manager()
+    EXPECT_EQ(errors[0], external_install_manager()
                              ->currently_visible_install_alert_for_testing());
     EXPECT_FALSE(registrar()->IsExtensionEnabled(data[i].id));
   }
@@ -7727,11 +7748,10 @@ TEST_F(ExtensionServiceTest, MultipleExternalInstallBubbleErrors) {
             ExtensionInstallPrompt::Result::USER_CANCELED));
     EXPECT_FALSE(GetError(extension_id));
   }
-  EXPECT_FALSE(service()
-                   ->external_install_manager()
-                   ->has_currently_visible_install_alert());
-  EXPECT_EQ(0u, GetExternalInstallBubbleCount(service()));
-  EXPECT_FALSE(HasExternalInstallErrors(service()));
+  EXPECT_FALSE(
+      external_install_manager()->has_currently_visible_install_alert());
+  EXPECT_EQ(0u, GetExternalInstallBubbleCount(profile()));
+  EXPECT_FALSE(HasExternalInstallErrors(profile()));
 
   // Add a new webstore install. Verify that this shows an error bubble since
   // there are no error bubbles pending at this point. Also verify that the
@@ -7752,15 +7772,13 @@ TEST_F(ExtensionServiceTest, MultipleExternalInstallBubbleErrors) {
     error_waiter.Wait();
 
     std::vector<ExternalInstallError*> errors =
-        service_->external_install_manager()->GetErrorsForTesting();
+        external_install_manager()->GetErrorsForTesting();
     EXPECT_EQ(1u, errors.size());
-    EXPECT_EQ(1u, GetExternalInstallBubbleCount(service()));
-    EXPECT_TRUE(service()
-                    ->external_install_manager()
-                    ->has_currently_visible_install_alert());
+    EXPECT_EQ(1u, GetExternalInstallBubbleCount(profile()));
+    EXPECT_TRUE(
+        external_install_manager()->has_currently_visible_install_alert());
     // Verify that the visible alert is for the current error.
-    EXPECT_EQ(errors[0], service()
-                             ->external_install_manager()
+    EXPECT_EQ(errors[0], external_install_manager()
                              ->currently_visible_install_alert_for_testing());
     EXPECT_FALSE(registrar()->IsExtensionEnabled(updates_from_webstore3));
   }
@@ -7800,15 +7818,13 @@ TEST_F(ExtensionServiceTest, BubbleAlertDoesNotHideAnotherAlertFromMenu) {
     error_waiter.Wait();
 
     std::vector<ExternalInstallError*> errors =
-        service_->external_install_manager()->GetErrorsForTesting();
+        external_install_manager()->GetErrorsForTesting();
     EXPECT_EQ(1u, errors.size());
-    EXPECT_EQ(1u, GetExternalInstallBubbleCount(service()));
-    EXPECT_TRUE(service()
-                    ->external_install_manager()
-                    ->has_currently_visible_install_alert());
+    EXPECT_EQ(1u, GetExternalInstallBubbleCount(profile()));
+    EXPECT_TRUE(
+        external_install_manager()->has_currently_visible_install_alert());
     // Verify that the visible alert is for the current error.
-    EXPECT_EQ(errors[0], service()
-                             ->external_install_manager()
+    EXPECT_EQ(errors[0], external_install_manager()
                              ->currently_visible_install_alert_for_testing());
   }
 
@@ -7835,16 +7851,14 @@ TEST_F(ExtensionServiceTest, BubbleAlertDoesNotHideAnotherAlertFromMenu) {
     error_waiter.Wait();
 
     std::vector<ExternalInstallError*> errors =
-        service_->external_install_manager()->GetErrorsForTesting();
+        external_install_manager()->GetErrorsForTesting();
     EXPECT_EQ(2u, errors.size());
-    EXPECT_EQ(2u, GetExternalInstallBubbleCount(service()));
-    EXPECT_TRUE(service()
-                    ->external_install_manager()
-                    ->has_currently_visible_install_alert());
+    EXPECT_EQ(2u, GetExternalInstallBubbleCount(profile()));
+    EXPECT_TRUE(
+        external_install_manager()->has_currently_visible_install_alert());
     // Verify that the old bubble alert was *not* replaced by the new alert.
     EXPECT_EQ(first_extension_error,
-              service()
-                  ->external_install_manager()
+              external_install_manager()
                   ->currently_visible_install_alert_for_testing());
   }
 }
@@ -7871,7 +7885,7 @@ TEST_F(ExtensionServiceTest, ExternalInstallUpdatesFromWebstoreOldProfile) {
   provider->UpdateOrAddExtension(updates_from_webstore, "1", crx_path);
   WaitForInstallationAttemptToComplete(updates_from_webstore);
 
-  EXPECT_TRUE(HasExternalInstallErrors(service()));
+  EXPECT_TRUE(HasExternalInstallErrors(profile()));
   ASSERT_TRUE(GetError(updates_from_webstore));
   EXPECT_EQ(ExternalInstallError::BUBBLE_ALERT,
             GetError(updates_from_webstore)->alert_type());
@@ -7895,7 +7909,7 @@ TEST_F(ExtensionServiceTest, ExternalInstallUpdatesFromWebstoreNewProfile) {
   provider->UpdateOrAddExtension(updates_from_webstore, "1", crx_path);
   WaitForInstallationAttemptToComplete(updates_from_webstore);
 
-  EXPECT_TRUE(HasExternalInstallErrors(service()));
+  EXPECT_TRUE(HasExternalInstallErrors(profile()));
   ASSERT_TRUE(GetError(updates_from_webstore));
   EXPECT_NE(ExternalInstallError::BUBBLE_ALERT,
             GetError(updates_from_webstore)->alert_type());
@@ -7922,7 +7936,7 @@ TEST_F(ExtensionServiceTest, ExternalInstallClickToRemove) {
   provider->UpdateOrAddExtension(updates_from_webstore, "1", crx_path);
   WaitForInstallationAttemptToComplete(updates_from_webstore);
 
-  EXPECT_TRUE(HasExternalInstallErrors(service_));
+  EXPECT_TRUE(HasExternalInstallErrors(profile()));
 
   // We check both enabled and disabled, since these are "eventually exclusive"
   // sets.
@@ -7930,15 +7944,14 @@ TEST_F(ExtensionServiceTest, ExternalInstallClickToRemove) {
   EXPECT_FALSE(registry()->enabled_extensions().GetByID(updates_from_webstore));
 
   // Click the negative response.
-  service_->external_install_manager()
-      ->GetErrorsForTesting()[0]
-      ->OnInstallPromptDone(ExtensionInstallPrompt::DoneCallbackPayload(
+  external_install_manager()->GetErrorsForTesting()[0]->OnInstallPromptDone(
+      ExtensionInstallPrompt::DoneCallbackPayload(
           ExtensionInstallPrompt::Result::USER_CANCELED));
   // The Extension should be uninstalled.
   EXPECT_FALSE(registry()->GetExtensionById(updates_from_webstore,
                                             ExtensionRegistry::EVERYTHING));
   // The error should be removed.
-  EXPECT_FALSE(HasExternalInstallErrors(service_));
+  EXPECT_FALSE(HasExternalInstallErrors(profile()));
 }
 
 // Test that clicking to keep the extension on an external install warning
@@ -7961,7 +7974,7 @@ TEST_F(ExtensionServiceTest, ExternalInstallClickToKeep) {
   provider->UpdateOrAddExtension(updates_from_webstore, "1", crx_path);
   WaitForInstallationAttemptToComplete(updates_from_webstore);
 
-  EXPECT_TRUE(HasExternalInstallErrors(service_));
+  EXPECT_TRUE(HasExternalInstallErrors(profile()));
 
   // We check both enabled and disabled, since these are "eventually exclusive"
   // sets.
@@ -7969,9 +7982,8 @@ TEST_F(ExtensionServiceTest, ExternalInstallClickToKeep) {
   EXPECT_FALSE(registry()->enabled_extensions().GetByID(updates_from_webstore));
 
   // Accept the extension.
-  service_->external_install_manager()
-      ->GetErrorsForTesting()[0]
-      ->OnInstallPromptDone(ExtensionInstallPrompt::DoneCallbackPayload(
+  external_install_manager()->GetErrorsForTesting()[0]->OnInstallPromptDone(
+      ExtensionInstallPrompt::DoneCallbackPayload(
           ExtensionInstallPrompt::Result::ACCEPTED));
 
   // It should be enabled again.
@@ -7980,7 +7992,7 @@ TEST_F(ExtensionServiceTest, ExternalInstallClickToKeep) {
       registry()->disabled_extensions().GetByID(updates_from_webstore));
 
   // The error should be removed.
-  EXPECT_FALSE(HasExternalInstallErrors(service_));
+  EXPECT_FALSE(HasExternalInstallErrors(profile()));
 }
 
 // Test that the external install bubble only takes disabled extensions into
@@ -8014,20 +8026,20 @@ TEST_F(ExtensionServiceTest,
   external_prompt_override = std::make_unique<FeatureSwitch::ScopedOverride>(
       FeatureSwitch::prompt_for_external_extensions(), true);
 
-  ExternalInstallManager* external_manager =
-      service()->external_install_manager();
-  external_manager->UpdateExternalExtensionAlert();
-  EXPECT_FALSE(external_manager->has_currently_visible_install_alert());
-  EXPECT_TRUE(external_manager->GetErrorsForTesting().empty());
+  external_install_manager()->UpdateExternalExtensionAlert();
+  EXPECT_FALSE(
+      external_install_manager()->has_currently_visible_install_alert());
+  EXPECT_TRUE(external_install_manager()->GetErrorsForTesting().empty());
 
   provider->UpdateOrAddExtension(good_crx, "1.0.0.1",
                                  data_dir().AppendASCII("good2.crx"));
 
   WaitForExternalExtensionInstalled(good_crx);
 
-  external_manager->UpdateExternalExtensionAlert();
-  EXPECT_FALSE(external_manager->has_currently_visible_install_alert());
-  EXPECT_TRUE(external_manager->GetErrorsForTesting().empty());
+  external_install_manager()->UpdateExternalExtensionAlert();
+  EXPECT_FALSE(
+      external_install_manager()->has_currently_visible_install_alert());
+  EXPECT_TRUE(external_install_manager()->GetErrorsForTesting().empty());
 }
 
 TEST_F(ExtensionServiceTest, InstallBlocklistedExtension) {
@@ -8309,13 +8321,13 @@ TEST_F(ExtensionServiceTest, UserInstalledExtensionThenRequiredByPolicy) {
   // versions?
   provider->UpdateOrAddExtension(good_crx, kVersionStr,
                                  data_dir().AppendASCII("good.crx"));
-  service()->CheckForExternalUpdates();
+  external_provider_manager()->CheckForExternalUpdates();
 
   ExtensionManagement* management =
       ExtensionManagementFactory::GetForBrowserContext(profile());
-  ExtensionManagement::InstallationMode installation_mode =
+  ManagedInstallationMode installation_mode =
       management->GetInstallationMode(extension);
-  EXPECT_EQ(ExtensionManagement::INSTALLATION_FORCED, installation_mode);
+  EXPECT_EQ(ManagedInstallationMode::kForced, installation_mode);
 
   // Reload all extensions.
   service()->ReloadExtensionsForTest();
@@ -8364,15 +8376,15 @@ TEST_F(ExtensionServiceTest,
 
   ExtensionManagement* management =
       ExtensionManagementFactory::GetForBrowserContext(profile());
-  ExtensionManagement::InstallationMode installation_mode =
+  ManagedInstallationMode installation_mode =
       management->GetInstallationMode(extension);
-  EXPECT_EQ(ExtensionManagement::INSTALLATION_FORCED, installation_mode);
+  EXPECT_EQ(ManagedInstallationMode::kForced, installation_mode);
 
   GURL good_update_url(kGoodUpdateURL);
   ExternalInstallInfoUpdateUrl info(
       good_crx, std::string(), std::move(good_update_url),
       ManifestLocation::kExternalPolicyDownload, Extension::NO_FLAGS, false);
-  service()->OnExternalExtensionUpdateUrlFound(info, true);
+  external_provider_manager()->OnExternalExtensionUpdateUrlFound(info, true);
   base::RunLoop().RunUntilIdle();
 
   extension = registry()->GetInstalledExtension(good_crx);
@@ -8429,11 +8441,11 @@ TEST_F(ExtensionServiceTest, InstallingUnacknowledgedExternalExtension) {
   EXPECT_EQ(ManifestLocation::kExternalPrefDownload, extension->location());
   EXPECT_EQ(version_str, extension->VersionString());
 
-  ExtensionManagement::InstallationMode installation_mode =
+  ManagedInstallationMode installation_mode =
       ExtensionManagementFactory::GetForBrowserContext(profile())
           ->GetInstallationMode(extension);
 
-  EXPECT_EQ(ExtensionManagement::INSTALLATION_RECOMMENDED, installation_mode);
+  EXPECT_EQ(ManagedInstallationMode::kRecommended, installation_mode);
   EXPECT_TRUE(registry()->enabled_extensions().Contains(good_crx));
   EXPECT_TRUE(prefs()->IsExternalExtensionAcknowledged(extension->id()));
   EXPECT_TRUE(prefs()->GetDisableReasons(good_crx).empty());
@@ -8534,7 +8546,7 @@ TEST_P(ExternalExtensionPriorityTest, PolicyForegroundFetch) {
   service()->updater()->Start();
 
   GURL update_url(extension_urls::kChromeWebstoreUpdateURL);
-  service()->OnExternalExtensionUpdateUrlFound(
+  external_provider_manager()->OnExternalExtensionUpdateUrlFound(
       ExternalInstallInfoUpdateUrl(all_zero /* extension_id */,
                                    "" /* install_parameter */, update_url,
                                    GetParam() /* download_location */,
@@ -8544,7 +8556,7 @@ TEST_P(ExternalExtensionPriorityTest, PolicyForegroundFetch) {
 
   MockExternalProvider provider(nullptr,
                                 ManifestLocation::kExternalPolicyDownload);
-  service()->OnExternalProviderReady(&provider);
+  external_provider_manager()->OnExternalProviderReady(&provider);
 
   task_environment()->RunUntilIdle();
 

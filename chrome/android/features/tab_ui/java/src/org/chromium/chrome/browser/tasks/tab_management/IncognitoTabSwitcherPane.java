@@ -34,16 +34,17 @@ import org.chromium.chrome.browser.tab.Tab;
 import org.chromium.chrome.browser.tabmodel.IncognitoTabModel;
 import org.chromium.chrome.browser.tabmodel.IncognitoTabModelObserver;
 import org.chromium.chrome.browser.tabmodel.TabGroupModelFilter;
-import org.chromium.chrome.browser.tabmodel.TabList;
 import org.chromium.chrome.browser.tabmodel.TabModelObserver;
 import org.chromium.chrome.browser.tabmodel.TabModelUtils;
 import org.chromium.chrome.browser.ui.edge_to_edge.EdgeToEdgeController;
 import org.chromium.chrome.browser.user_education.UserEducationHelper;
 import org.chromium.chrome.tab_ui.R;
+import org.chromium.components.omnibox.OmniboxFeatures;
 import org.chromium.components.sensitive_content.SensitiveContentFeatures;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.List;
 import java.util.function.DoubleConsumer;
 
 /** A {@link Pane} representing the incognito tab switcher. */
@@ -93,11 +94,16 @@ public class IncognitoTabSwitcherPane extends TabSwitcherPaneBase {
                         return;
                     }
 
-                    coordinator.resetWithTabList(incognitoTabGroupModelFilter);
+                    coordinator.resetWithListOfTabs(
+                            incognitoTabGroupModelFilter.getRepresentativeTabList());
                     coordinator.setInitialScrollIndexOffset();
                     coordinator.requestAccessibilityFocusOnCurrentTab();
 
                     setNewTabButtonEnabledState(/* enabled= */ true);
+
+                    if (OmniboxFeatures.sAndroidHubSearch.isEnabled()) {
+                        mHubSearchEnabledStateSupplier.set(true);
+                    }
                 }
 
                 @Override
@@ -234,7 +240,7 @@ public class IncognitoTabSwitcherPane extends TabSwitcherPaneBase {
 
     @Override
     public void showAllTabs() {
-        resetWithTabList(mIncognitoTabGroupModelFilterSupplier.get(), false);
+        resetWithListOfTabs(mIncognitoTabGroupModelFilterSupplier.get().getRepresentativeTabList());
     }
 
     @Override
@@ -249,9 +255,9 @@ public class IncognitoTabSwitcherPane extends TabSwitcherPaneBase {
     }
 
     @Override
-    public boolean resetWithTabList(@Nullable TabList tabList, boolean quickMode) {
+    public void resetWithListOfTabs(@Nullable List<Tab> tabs) {
         @Nullable TabSwitcherPaneCoordinator coordinator = getTabSwitcherPaneCoordinator();
-        if (coordinator == null) return false;
+        if (coordinator == null) return;
 
         @Nullable TabGroupModelFilter filter = mIncognitoTabGroupModelFilterSupplier.get();
         if (filter == null || !filter.isTabModelRestored()) {
@@ -264,7 +270,7 @@ public class IncognitoTabSwitcherPane extends TabSwitcherPaneBase {
             // invisible in TabSwitcherPaneBase#notifyLoadHint, or 2) the filter becomes ready and
             // nothing gets shown.
             startWaitForTabStateInitializedTimer();
-            return false;
+            return;
         }
 
         boolean isNotVisibleOrSelected =
@@ -274,8 +280,12 @@ public class IncognitoTabSwitcherPane extends TabSwitcherPaneBase {
                         && mIncognitoReauthController.isIncognitoReauthPending();
 
         if (isNotVisibleOrSelected || incognitoReauthShowing) {
-            coordinator.resetWithTabList(null);
+            coordinator.resetWithListOfTabs(null);
             cancelWaitForTabStateInitializedTimer();
+
+            if (OmniboxFeatures.sAndroidHubSearch.isEnabled() && incognitoReauthShowing) {
+                mHubSearchEnabledStateSupplier.set(false);
+            }
         } else {
             // TODO(crbug.com/373850469): Add unit tests when robolectric supports Android V.
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM
@@ -287,12 +297,11 @@ public class IncognitoTabSwitcherPane extends TabSwitcherPaneBase {
                         coordinator::setTabSwitcherContentSensitivity,
                         "SensitiveContent.TabSwitching.IncognitoTabSwitcherPane.Sensitivity");
             }
-            coordinator.resetWithTabList(tabList);
+            coordinator.resetWithListOfTabs(tabs);
             finishWaitForTabStateInitializedTimer();
         }
 
         setNewTabButtonEnabledState(/* enabled= */ !incognitoReauthShowing);
-        return true;
     }
 
     @Override
@@ -312,11 +321,6 @@ public class IncognitoTabSwitcherPane extends TabSwitcherPaneBase {
 
     @Override
     protected void tryToTriggerOnShownIphs() {}
-
-    @Override
-    public void openInvitationModal(String invitationId) {
-        assert false : "Not reached.";
-    }
 
     @Override
     public boolean requestOpenTabGroupDialog(int tabId) {

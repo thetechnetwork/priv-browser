@@ -82,11 +82,6 @@ BASE_FEATURE(kWebAuthnUseInsecureSoftwareUnexportableKeys,
              "WebAuthenticationUseInsecureSoftwareUnexportableKeys",
              base::FEATURE_DISABLED_BY_DEFAULT);
 
-// Default enabled in M126. Remove in or after M129.
-BASE_FEATURE(kWebAuthnCredProtectWin10BugWorkaround,
-             "WebAuthenticationCredProtectWin10BugWorkaround",
-             base::FEATURE_ENABLED_BY_DEFAULT);
-
 // Development flag. Must not be enabled by default.
 BASE_FEATURE(kWebAuthnEnclaveAuthenticatorDelay,
              "WebAuthnEnclaveAuthenticatorDelay",
@@ -96,11 +91,6 @@ BASE_FEATURE(kWebAuthnEnclaveAuthenticatorDelay,
 BASE_FEATURE(kWebAuthnAmbientSignin,
              "WebAuthenticationAmbientSignin",
              base::FEATURE_DISABLED_BY_DEFAULT);
-
-// Not yet enabled by default.
-BASE_FEATURE(kWebAuthniCloudKeychainPrf,
-             "WebAuthenticationiCloudKeychainPrf",
-             base::FEATURE_ENABLED_BY_DEFAULT);
 
 // This is a deprecation flag. Disabled in M136. Remove in or after M139.
 BASE_FEATURE(kWebAuthnHybridLinking,
@@ -115,11 +105,6 @@ BASE_FEATURE(kWebAuthnPublishPrelinkingInfo,
              "WebAuthenticationPublishPrelinkingInfo",
              base::FEATURE_ENABLED_BY_DEFAULT);
 #endif  // BUILDFLAG(IS_ANDROID)
-
-// Update the "last used" timestamp for GPM passkeys when asserted.
-BASE_FEATURE(kWebAuthnUpdateLastUsed,
-             "WebAuthenticationUpdateLastUsed",
-             base::FEATURE_ENABLED_BY_DEFAULT);
 
 // Disabled by default.
 BASE_FEATURE(kWebAuthnHelloSignal,
@@ -136,11 +121,10 @@ BASE_FEATURE(kDigitalCredentialsHybridLinking,
              "DigitalCredentialsHybridLinking",
              base::FEATURE_DISABLED_BY_DEFAULT);
 
-// Temporarily disabled by default. Will be default enabled in M136. Remove in
-// or after M139.
+// Default enabled in M136. Remove in or after M139.
 BASE_FEATURE(kWebAuthnPasskeyUpgrade,
              "WebAuthenticationPasskeyUpgrade",
-             base::FEATURE_DISABLED_BY_DEFAULT);
+             base::FEATURE_ENABLED_BY_DEFAULT);
 
 // Disabled by default.
 BASE_FEATURE(kWebAuthnEnclaveAttestation,

@@ -14,6 +14,7 @@ AskGoogleForSuggestionsDialogTest.*
 BatchUploadDialogViewPixelTest.*
 BookmarkBubbleViewBrowserTest.*
 BookmarkEditorViewBrowserTest.*
+BookmarkEditorViewBrowserTestWithAccountBookmarks.*
 BrowserViewScrimPixelTest.*
 BubbleFrameViewBrowserTest.*
 BubbleSignInPromoInteractiveUITest.*
@@ -109,6 +110,7 @@ PlusAddressCreationDialogWithNoticeTest.ShowNoticeAndCancel
 *PopupViewViewsPlusAddressSuggestionBrowsertest*
 PrivacySandboxDialogViewBrowserTest.*
 PrivacySandboxDialogViewAdsApiUxEnhancementBrowserTest.*
+PrivacySandboxDialogViewAdsApiUxEnhancementsLearnMoreBrowserTest.*
 PrivacySandboxDialogViewPrivacyPolicyBrowserTest.*
 PrivacySandboxDialogViewAdsApiUxEnhancementPrivacyPolicyBrowserTest.*
 PrivacySandboxNoticeBubbleBrowserTest.*

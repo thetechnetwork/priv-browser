@@ -550,6 +550,8 @@ TEST_F(HistoryServiceTest, SetTitle) {
 }
 
 TEST_F(HistoryServiceTest, MostVisitedURLs) {
+  base::HistogramTester histogram_tester;
+
   ASSERT_TRUE(history_service_.get());
 
   const GURL url0("http://www.google.com/url0/");
@@ -569,6 +571,7 @@ TEST_F(HistoryServiceTest, MostVisitedURLs) {
                             history::SOURCE_BROWSED, false);
 
   QueryMostVisitedURLs();
+  histogram_tester.ExpectTotalCount("History.QueryMostVisitedURLsTime", 1);
 
   EXPECT_EQ(2U, most_visited_urls_.size());
   EXPECT_EQ(url0, most_visited_urls_[0].url);
@@ -580,6 +583,7 @@ TEST_F(HistoryServiceTest, MostVisitedURLs) {
                             history::SOURCE_BROWSED, false);
 
   QueryMostVisitedURLs();
+  histogram_tester.ExpectTotalCount("History.QueryMostVisitedURLsTime", 2);
 
   EXPECT_EQ(3U, most_visited_urls_.size());
   EXPECT_EQ(url0, most_visited_urls_[0].url);
@@ -592,6 +596,7 @@ TEST_F(HistoryServiceTest, MostVisitedURLs) {
                             history::SOURCE_BROWSED, false);
 
   QueryMostVisitedURLs();
+  histogram_tester.ExpectTotalCount("History.QueryMostVisitedURLsTime", 3);
 
   EXPECT_EQ(3U, most_visited_urls_.size());
   EXPECT_EQ(url2, most_visited_urls_[0].url);
@@ -604,6 +609,7 @@ TEST_F(HistoryServiceTest, MostVisitedURLs) {
                             history::SOURCE_BROWSED, false);
 
   QueryMostVisitedURLs();
+  histogram_tester.ExpectTotalCount("History.QueryMostVisitedURLsTime", 4);
 
   EXPECT_EQ(3U, most_visited_urls_.size());
   EXPECT_EQ(url1, most_visited_urls_[0].url);
@@ -617,6 +623,7 @@ TEST_F(HistoryServiceTest, MostVisitedURLs) {
                             history::SOURCE_BROWSED, false);
 
   QueryMostVisitedURLs();
+  histogram_tester.ExpectTotalCount("History.QueryMostVisitedURLsTime", 5);
 
   EXPECT_EQ(4U, most_visited_urls_.size());
   EXPECT_EQ(url1, most_visited_urls_[0].url);
@@ -1518,6 +1525,33 @@ TEST_F(OrderingHistoryServiceTest, EnsureCorrectOrder) {
   std::vector<VisitedLink> expected_links = {expected_link};
 
   // Ensure that we have notified out visit delegate of the added link.
+  ASSERT_TRUE(weak_visit_delegate_);
+  EXPECT_TRUE(weak_visit_delegate_->visit_delegate_was_called());
+  EXPECT_EQ(weak_visit_delegate_->get_added_links(), expected_links);
+}
+
+TEST_F(OrderingHistoryServiceTest, EnsureAddPageConstructsSelfLink) {
+  // HistoryAPI calls to chrome.history.addUrl() only provide a URL value.
+  const GURL link_url("http://google.com");
+
+  // Simulate an extension call to chrome.history.addUrl().
+  history_service_->AddPage(link_url, base::Time::Now(),
+                            history::SOURCE_EXTENSION);
+
+  // Check that the visit delegate is not called immediately.
+  ASSERT_TRUE(weak_visit_delegate_);
+  EXPECT_FALSE(weak_visit_delegate_->visit_delegate_was_called());
+
+  // Wait for the visit delegate to resolve.
+  run_loop_.Run();
+
+  // Construct a self-link: <link_url, link_url, link_url>.
+  VisitedLink self_link = {link_url, net::SchemefulSite(link_url),
+                           url::Origin::Create(link_url)};
+  std::vector<VisitedLink> expected_links = {self_link};
+
+  // Ensure that our VisitedLink has been added to the mock hashtable AND that
+  // link is a self-link.
   ASSERT_TRUE(weak_visit_delegate_);
   EXPECT_TRUE(weak_visit_delegate_->visit_delegate_was_called());
   EXPECT_EQ(weak_visit_delegate_->get_added_links(), expected_links);

@@ -11,7 +11,6 @@
 #include "components/variations/net/variations_url_loader_throttle.h"
 #include "content/browser/client_hints/client_hints.h"
 #include "content/browser/client_hints/critical_client_hints_throttle.h"
-#include "content/browser/loader/keep_alive_tracker_throttle.h"
 #include "content/browser/origin_trials/critical_origin_trials_throttle.h"
 #include "content/browser/preloading/prerender/prerender_url_loader_throttle.h"
 #include "content/browser/reduce_accept_language/reduce_accept_language_throttle.h"
@@ -70,18 +69,13 @@ CreateContentBrowserURLLoaderThrottles(
   // Creating a throttle only for outermost main frames to persist the reduced
   // accept language for an origin and to restart requests if needed, due to
   // language negotiation.
-  if (base::FeatureList::IsEnabled(network::features::kReduceAcceptLanguage) ||
-      base::FeatureList::IsEnabled(
-          network::features::kReduceAcceptLanguageHTTP)) {
-    ReduceAcceptLanguageControllerDelegate* reduce_accept_lang_delegate =
-        browser_context->GetReduceAcceptLanguageControllerDelegate();
-    OriginTrialsControllerDelegate* origin_trials_delegate =
-        browser_context->GetOriginTrialsControllerDelegate();
-    if (request.is_outermost_main_frame && reduce_accept_lang_delegate) {
-      throttles.push_back(std::make_unique<ReduceAcceptLanguageThrottle>(
-          *reduce_accept_lang_delegate, origin_trials_delegate,
-          frame_tree_node_id));
-    }
+  if (auto reduce_accept_lang_utils =
+          ReduceAcceptLanguageUtils::Create(browser_context);
+      reduce_accept_lang_utils && request.is_outermost_main_frame) {
+    throttles.push_back(std::make_unique<ReduceAcceptLanguageThrottle>(
+        std::move(reduce_accept_lang_utils.value()),
+        browser_context->GetOriginTrialsControllerDelegate(),
+        frame_tree_node_id));
   }
 
   // frame_tree_node_id may be invalid if we are loading the first frame
@@ -141,7 +135,6 @@ CreateContentBrowserURLLoaderThrottlesForKeepAlive(
     BrowserContext* browser_context,
     const base::RepeatingCallback<WebContents*()>& wc_getter,
     FrameTreeNodeId frame_tree_node_id) {
-  // Adds content embedder-specific throttles.
   std::vector<std::unique_ptr<blink::URLLoaderThrottle>> throttles =
       GetContentClient()->browser()->CreateURLLoaderThrottlesForKeepAlive(
           request, browser_context, wc_getter, frame_tree_node_id);
@@ -151,19 +144,10 @@ CreateContentBrowserURLLoaderThrottlesForKeepAlive(
   variations::VariationsURLLoaderThrottle::AppendThrottleIfNeeded(
       browser_context->GetVariationsClient(), &throttles);
 
-  if (auto throttle = MaybeCreateIdentityUrlLoaderThrottle(base::BindRepeating(
-          webid::SetIdpSigninStatus, browser_context, frame_tree_node_id));
-      throttle) {
-    throttles.emplace_back(std::move(throttle));
-  }
-
-  // Adds content-specific throttle. Unlike throttles added above, the following
-  // does not have equivalent in renderer side.
-  if (auto throttle =
-          KeepAliveTrackerThrottle::MaybeCreateKeepAliveTrackerThrottle(
-              request);
-      throttle) {
-    throttles.emplace_back(std::move(throttle));
+  auto throttle = MaybeCreateIdentityUrlLoaderThrottle(base::BindRepeating(
+      webid::SetIdpSigninStatus, browser_context, frame_tree_node_id));
+  if (throttle) {
+    throttles.push_back(std::move(throttle));
   }
 
   return throttles;

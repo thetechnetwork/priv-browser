@@ -19,6 +19,7 @@
 #include "chrome/browser/media/router/media_router_feature.h"
 #include "chrome/browser/profiles/profile.h"
 #include "chrome/browser/ui/browser.h"
+#include "chrome/browser/ui/browser_actions.h"
 #include "chrome/browser/ui/browser_command_controller.h"
 #include "chrome/browser/ui/browser_window/public/browser_window_interface.h"
 #include "chrome/browser/ui/commerce/product_specifications_entry_point_controller.h"
@@ -49,6 +50,7 @@
 #include "chrome/browser/ui/views/side_panel/side_panel_coordinator.h"
 #include "chrome/browser/ui/views/tabs/glic_button.h"
 #include "chrome/browser/ui/views/toolbar/chrome_labs/chrome_labs_coordinator.h"
+#include "chrome/browser/ui/views/translate/translate_bubble_controller.h"
 #include "chrome/common/chrome_features.h"
 #include "components/collaboration/public/collaboration_service.h"
 #include "components/commerce/core/commerce_feature_list.h"
@@ -139,7 +141,7 @@ void BrowserWindowFeatures::Init(BrowserWindowInterface* browser) {
 
 #if BUILDFLAG(ENABLE_GLIC)
     if (glic::GlicEnabling::IsProfileEligible(browser->GetProfile())) {
-      DCHECK(features::IsTabstripComboButtonEnabled());
+      DCHECK(features::IsTabSearchMoving());
       glic_nudge_controller_ =
           std::make_unique<tabs::GlicNudgeController>(browser);
       glic_iph_controller_ = std::make_unique<glic::GlicIphController>(browser);
@@ -159,6 +161,9 @@ void BrowserWindowFeatures::Init(BrowserWindowInterface* browser) {
 
   memory_saver_bubble_controller_ =
       std::make_unique<memory_saver::MemorySaverBubbleController>(browser);
+
+  translate_bubble_controller_ = std::make_unique<TranslateBubbleController>(
+      browser->GetActions()->root_action_item());
 }
 
 void BrowserWindowFeatures::InitPostWindowConstruction(Browser* browser) {
@@ -271,8 +276,7 @@ void BrowserWindowFeatures::InitPostBrowserViewConstruction(
     }
   }
 
-  if (download::IsDownloadBubbleEnabled() &&
-      base::FeatureList::IsEnabled(features::kPinnableDownloadsButton)) {
+  if (download::IsDownloadBubbleEnabled()) {
     download_toolbar_ui_controller_ =
         std::make_unique<DownloadToolbarUIController>(browser_view);
   }

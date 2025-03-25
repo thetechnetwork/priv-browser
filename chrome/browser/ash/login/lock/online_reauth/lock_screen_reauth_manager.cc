@@ -40,6 +40,10 @@ namespace ash {
 namespace {
 constexpr char kLockScreenReauthHistogram[] =
     "ChromeOS.LockScreenReauth.LockScreenReauthReason";
+
+bool IsScreenLocked() {
+  return session_manager::SessionManager::Get()->IsScreenLocked();
+}
 }  // namespace
 
 LockScreenReauthManager::LockScreenReauthManager(Profile* primary_profile)
@@ -48,7 +52,7 @@ LockScreenReauthManager::LockScreenReauthManager(Profile* primary_profile)
       clock_(base::DefaultClock::GetInstance()),
       in_session_password_sync_manager_(
           InSessionPasswordSyncManager(primary_profile_)) {
-  DCHECK(primary_user_);
+  CHECK(primary_user_);
   auto* session_manager = session_manager::SessionManager::Get();
   // Extra check as SessionManager may be not initialized in some unit
   // tests
@@ -57,7 +61,7 @@ LockScreenReauthManager::LockScreenReauthManager(Profile* primary_profile)
   }
 
   screenlock_bridge_ = proximity_auth::ScreenlockBridge::Get();
-  DCHECK(screenlock_bridge_);
+  CHECK(screenlock_bridge_);
 }
 
 LockScreenReauthManager::~LockScreenReauthManager() {
@@ -92,7 +96,7 @@ void LockScreenReauthManager::MaybeForceReauthOnLockScreen(
     is_reauth_required_by_gaia_time_limit_policy_ = true;
   }
 
-  if (screenlock_bridge_->IsLocked()) {
+  if (IsScreenLocked()) {
     // On the lock screen: need to update the UI.
     ForceOnlineReauth();
   }
@@ -106,7 +110,7 @@ void LockScreenReauthManager::Shutdown() {}
 
 void LockScreenReauthManager::OnSessionStateChanged() {
   TRACE_EVENT0("login", "LockScreenReauthManager::OnSessionStateChanged");
-  if (!session_manager::SessionManager::Get()->IsScreenLocked()) {
+  if (!IsScreenLocked()) {
     // We are unlocking the session, no further action required.
     return;
   }
@@ -261,7 +265,7 @@ void LockScreenReauthManager::SendLockscreenReauthReason() {
 
 void LockScreenReauthManager::OnPasswordUpdateSuccess(
     std::unique_ptr<UserContext> user_context) {
-  DCHECK(user_context);
+  CHECK(user_context);
   OnAuthSuccess(*user_context);
 }
 

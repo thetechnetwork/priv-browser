@@ -18,13 +18,13 @@
 #include <utility>
 #include <vector>
 
+#include "base/containers/contains.h"
 #include "base/containers/fixed_flat_map.h"
 #include "base/json/json_reader.h"
 #include "base/strings/utf_string_conversions.h"
 #include "base/time/time.h"
 #include "base/types/expected.h"
 #include "base/values.h"
-#include "components/bookmarks/browser/bookmark_utils.h"
 #include "components/omnibox/browser/autocomplete_input.h"
 #include "components/omnibox/browser/autocomplete_match.h"
 #include "components/omnibox/browser/autocomplete_match_classification.h"
@@ -34,6 +34,7 @@
 #include "components/omnibox/browser/remote_suggestions_service.h"
 #include "components/omnibox/browser/search_suggestion_parser.h"
 #include "components/omnibox/common/omnibox_feature_configs.h"
+#include "components/omnibox/common/string_cleaning.h"
 #include "components/search/search.h"
 #include "components/search_engines/template_url.h"
 #include "components/search_engines/template_url_data.h"
@@ -213,40 +214,22 @@ std::string_view MimeToDescription(const std::string_view& mime_type) {
 // For time within the current day, return the time of day. (Ex. '12:45 PM')
 // For time within the current year, return the abbreviated date. (Ex. 'Jan 02')
 // Otherwise, return the full date. (Ex. '10/7/24')
-// TODO(crbug.com/402549325): Use `GenerateLastModifiedString()` from
-//   `DocumentProvider` instead.
-std::string UpdateTimeToString(std::optional<int> time) {
+const std::u16string UpdateTimeToString(std::optional<int> time) {
   if (!time) {
-    return "";
+    return u"";
   }
 
   std::time_t unix_time = static_cast<std::time_t>(time.value());
   std::tm* local_time = std::localtime(&unix_time);
   if (!local_time) {
-    return "";
+    return u"";
   }
 
   // Get current time to check if `unix_time` is in the current day or year.
   base::Time check_time = base::Time::FromTimeT(unix_time);
   base::Time now = base::Time::Now();
-  base::Time::Exploded check_time_exploded;
-  base::Time::Exploded now_exploded;
-  check_time.UTCExplode(&check_time_exploded);
-  now.UTCExplode(&now_exploded);
 
-  bool is_current_year = check_time_exploded.year == now_exploded.year;
-  bool is_current_day =
-      is_current_year && check_time_exploded.month == now_exploded.month &&
-      check_time_exploded.day_of_month == now_exploded.day_of_month;
-
-  const std::string& format_string = is_current_day    ? "%I:%M%p"
-                                     : is_current_year ? "%b %d"
-                                                       : "%m/%d/%Y";
-
-  std::stringstream ss;
-  ss << std::put_time(local_time, format_string.c_str());
-
-  return ss.fail() ? "" : ss.str();
+  return AutocompleteProvider::LocalizedLastModifiedString(now, check_time);
 }
 
 // Helper for getting the correct `TemplateURL` based on the input.
@@ -264,7 +247,7 @@ std::set<std::u16string> GetWords(std::vector<std::u16string> strings) {
   std::set<std::u16string> words = {};
   for (const auto& string : strings) {
     auto string_words = String16VectorFromString16(
-        bookmarks::CleanUpTitleForMatching(string), nullptr);
+        string_cleaning::CleanUpTitleForMatching(string), nullptr);
     std::move(string_words.begin(), string_words.end(),
               std::inserter(words, words.begin()));
   }
@@ -662,6 +645,12 @@ void EnterpriseSearchAggregatorProvider::ParseResultList(
     if (suggestion_type == SuggestionType::PEOPLE) {
       image_url = ptr_to_string(result.FindStringByDottedPath(
           "document.derivedStructData.displayPhoto.url"));
+      // Ensure that image URLs from lh3.googleusercontent.com include an image
+      // size parameter.
+      if (base::StartsWith(image_url, "https://lh3.googleusercontent.com") &&
+          !base::Contains(image_url, "=s")) {
+        image_url += "=s64";
+      }
     } else if (suggestion_type == SuggestionType::CONTENT) {
       icon_url = ptr_to_string(result.FindStringByDottedPath("iconUri"));
     }
@@ -764,7 +753,8 @@ std::string EnterpriseSearchAggregatorProvider::GetMatchContents(
         result.FindIntByDottedPath("document.derivedStructData.updated_time");
     // TODO (crbug.com/402436108): Localize the `last_updated` time below
     //   similar to how it is done in `DocumentProvider::GetMatchDescription()`.
-    const std::string last_updated = UpdateTimeToString(response_time);
+    const std::string last_updated =
+        base::UTF16ToUTF8(UpdateTimeToString(response_time));
     const std::string owner = ptr_to_string(
         result.FindStringByDottedPath("document.derivedStructData.owner"));
     const std::string mime_description = std::string(

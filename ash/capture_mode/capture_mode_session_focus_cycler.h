@@ -15,10 +15,12 @@
 #include "base/memory/weak_ptr.h"
 #include "base/scoped_multi_source_observation.h"
 #include "ui/aura/window_observer.h"
+#include "ui/views/widget/unique_widget_ptr.h"
 #include "ui/views/widget/widget.h"
 #include "ui/views/widget/widget_observer.h"
 
 namespace views {
+class AXVirtualView;
 class FocusRing;
 class HighlightPathGenerator;
 class View;
@@ -33,10 +35,6 @@ class ScopedA11yOverrideWindowSetter;
 // CaptureModeSessionFocusCycler handles the special focus transitions which
 // happen between the capture session UI items. These include the capture bar
 // buttons, the selection region UI and the capture button.
-// TODO(crbug.com/40170806): The selection region UI are drawn directly on a
-// layer. We simulate focus by drawing focus rings on the same layer, but this
-// is not compatible with accessibility. Investigate using AxVirtualView or
-// making the dots actual Views.
 class ASH_EXPORT CaptureModeSessionFocusCycler : public views::WidgetObserver {
  public:
   // The different groups which can receive focus during a capture mode session.
@@ -74,6 +72,8 @@ class ASH_EXPORT CaptureModeSessionFocusCycler : public views::WidgetObserver {
     kActionButtons,
     // The search results panel that can appear when Sunfish is enabled.
     kSearchResultsPanel,
+    // The web contents inside the search results panel.
+    kSearchResultsPanelWebContents,
   };
 
   // If a focusable capture session item is part of a views hierarchy, it needs
@@ -245,6 +245,13 @@ class ASH_EXPORT CaptureModeSessionFocusCycler : public views::WidgetObserver {
   // group.
   FineTunePosition GetFocusedFineTunePosition() const;
 
+  // Called when the fine tune position is updated, to update the focus ring of
+  // the focused fine tune position if needed. (Note that this will not create a
+  // focus ring if one doesn't exist.) If `notify_selection_event` is true, this
+  // will also trigger an a11y announcement that the fine tune position has been
+  // selected.
+  void OnFineTunePositionUpdated(bool notify_selection_event);
+
   // Called when the capture label widget is made visible or hidden, or changes
   // states. If the label button is visible, it should be on the a11y annotation
   // cycle, otherwise it should be removed from the a11y annotation cycle.
@@ -276,6 +283,10 @@ class ASH_EXPORT CaptureModeSessionFocusCycler : public views::WidgetObserver {
   // Called when the disclaimer widget is closed, to pass focus back to the
   // focus cycler if needed.
   void OnDisclaimerWidgetClosed();
+
+  // Advances focus to the next item, assuming the last focusable element inside
+  // the search results panel web contents has been reached.
+  void AdvanceFocusAfterSearchResultsPanel(bool reverse);
 
   // views::WidgetObserver:
   void OnWidgetClosing(views::Widget* widget) override;
@@ -353,6 +364,14 @@ class ASH_EXPORT CaptureModeSessionFocusCycler : public views::WidgetObserver {
   // after the session starts will not be included.
   std::map<aura::Window*, std::unique_ptr<HighlightableWindow>>
       highlightable_windows_;
+
+  // Virtual a11y views for the affordance circles, since this UI is drawn
+  // directly on the layer and has no associated view. These are raw pointers
+  // that are owned by the views hierarchy, and are lazily created. The virtual
+  // views are attached to a fullscreen widget backed by a not drawn layer which
+  // is also lazily created.
+  views::UniqueWidgetPtr ax_widget_;
+  std::map<FineTunePosition, raw_ptr<views::AXVirtualView>> ax_virtual_views_;
 
   // The session that owns |this|. Guaranteed to be non null for the lifetime of
   // |this|.

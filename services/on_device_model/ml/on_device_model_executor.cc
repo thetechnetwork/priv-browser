@@ -95,16 +95,6 @@ int CalculateTokensPerSecond(int num_tokens, base::TimeDelta duration) {
          base::Time::kMicrosecondsPerSecond;
 }
 
-float GetTemperature(std::optional<float> temperature) {
-  return std::max(0.0f, temperature.value_or(0.0f));
-}
-
-uint32_t GetTopK(std::optional<uint32_t> top_k) {
-  return std::min(static_cast<uint32_t>(
-                      optimization_guide::features::GetOnDeviceModelMaxTopK()),
-                  std::max(1u, top_k.value_or(1)));
-}
-
 }  // namespace
 
 // Handles sending and canceling responses.
@@ -316,8 +306,6 @@ void SessionImpl::Generate(
   responder_ = std::make_unique<Responder>(
       std::move(response), std::move(on_complete), std::move(cloned));
   ChromeMLExecutionOutputFn output_fn = responder_->CreateOutputFn();
-  options->top_k = GetTopK(options->top_k);
-  options->temperature = GetTemperature(options->temperature);
   *responder_->GetCancelFn() =
       cloned_raw->Generate(std::move(options), output_fn);
 }

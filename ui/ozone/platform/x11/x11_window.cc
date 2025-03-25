@@ -314,10 +314,9 @@ void X11Window::Initialize(PlatformWindowInitProperties properties) {
   // The changes to |window_properties_| here will be sent to the X server just
   // before the window is mapped.
 
-  // Remove popup windows from taskbar unless overridden.
+  // Remove popup windows from taskbar.
   if ((properties.type == PlatformWindowType::kPopup ||
-       properties.type == PlatformWindowType::kBubble) &&
-      !properties.force_show_in_taskbar) {
+       properties.type == PlatformWindowType::kBubble)) {
     window_properties_.insert(x11::GetAtom("_NET_WM_STATE_SKIP_TASKBAR"));
   }
 
@@ -1196,7 +1195,15 @@ void X11Window::SetWorkspaceExtensionDelegate(
 }
 
 bool X11Window::IsSyncExtensionAvailable() const {
+#if BUILDFLAG(IS_CHROMEOS)
+  // Chrome for ChromeOS can be run with X11 on a Linux desktop. In this case,
+  // NotifySwapAfterResize is never called as the compositor does not notify
+  // about swaps after resize. Thus, simply disable usage of XSyncCounter on
+  // ChromeOS builds.
+  return false;
+#else
   return connection_->sync_version() > std::pair<uint32_t, uint32_t>{0, 0};
+#endif
 }
 
 bool X11Window::IsWmTiling() const {

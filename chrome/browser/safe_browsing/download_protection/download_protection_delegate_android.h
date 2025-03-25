@@ -21,6 +21,8 @@ class DownloadItem;
 
 namespace safe_browsing {
 
+class ClientDownloadRequest;
+
 class DownloadProtectionDelegateAndroid : public DownloadProtectionDelegate {
  public:
   DownloadProtectionDelegateAndroid();
@@ -31,6 +33,8 @@ class DownloadProtectionDelegateAndroid : public DownloadProtectionDelegate {
   bool ShouldCheckClientDownload(download::DownloadItem* item) const override;
   bool IsSupportedDownload(download::DownloadItem& item,
                            const base::FilePath& target_path) const override;
+  void PreSerializeRequest(const download::DownloadItem* item,
+                           ClientDownloadRequest& request_proto) override;
   const GURL& GetDownloadRequestUrl() const override;
   net::NetworkTrafficAnnotationTag
   CompleteClientDownloadRequestTrafficAnnotation(
@@ -40,8 +44,17 @@ class DownloadProtectionDelegateAndroid : public DownloadProtectionDelegate {
   float GetUnsupportedFileSampleRate(
       const base::FilePath& filename) const override;
 
+  // Used only for tests. Set the outcome of the next call to ShouldSample()
+  // within IsSupportedDownload(), for convenience in tests to bypass the random
+  // number generator.
+  void SetNextShouldSampleForTesting(bool should_sample);
+
  private:
   const GURL download_request_url_;
+
+  // Overrides the next call to ShouldSample() within IsSupportedDownload(), for
+  // convenience in tests to bypass the random number generator.
+  mutable std::optional<bool> should_sample_override_;
 };
 
 }  // namespace safe_browsing

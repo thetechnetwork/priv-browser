@@ -1277,7 +1277,7 @@ void HttpStreamPool::AttemptManager::MaybeNotifySSLConfigReady() {
 
 void HttpStreamPool::AttemptManager::MaybeAttemptQuic() {
   CHECK(service_endpoint_request_);
-  if (!CanUseQuic() || quic_task_result_.has_value() ||
+  if (is_failing_ || !CanUseQuic() || quic_task_result_.has_value() ||
       !service_endpoint_request_->EndpointsCryptoReady()) {
     return;
   }
@@ -1337,7 +1337,9 @@ void HttpStreamPool::AttemptManager::MaybeAttemptConnection(
 
     auto in_flight_attempt = std::make_unique<InFlightAttempt>(this);
     InFlightAttempt* raw_attempt = in_flight_attempt.get();
-    in_flight_attempts_.emplace(std::move(in_flight_attempt));
+    auto [_, inserted] =
+        in_flight_attempts_.emplace(std::move(in_flight_attempt));
+    CHECK(inserted);
     pool()->IncrementTotalConnectingStreamCount();
 
     std::unique_ptr<StreamAttempt> attempt;
@@ -1889,6 +1891,7 @@ raw_ptr<HttpStreamPool::Job> HttpStreamPool::AttemptManager::RemoveJobFromQueue(
       if (attempt->is_slow()) {
         --slow_attempt_count_;
       }
+      pool()->DecrementTotalConnectingStreamCount();
       attempt.reset();
     }
   }

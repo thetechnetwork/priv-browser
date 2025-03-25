@@ -41,7 +41,7 @@
 #include "third_party/blink/renderer/bindings/core/v8/v8_offscreen_canvas.h"
 #include "third_party/blink/renderer/bindings/core/v8/v8_readable_stream.h"
 #include "third_party/blink/renderer/bindings/core/v8/v8_string_resource.h"
-#include "third_party/blink/renderer/bindings/core/v8/v8_union_float32array_uint16array_uint8clampedarray.h"
+#include "third_party/blink/renderer/bindings/core/v8/v8_union_float16array_float32array_uint8clampedarray.h"
 #include "third_party/blink/renderer/core/context_features/context_feature_settings.h"
 #include "third_party/blink/renderer/core/dom/dom_exception.h"
 #include "third_party/blink/renderer/core/fileapi/blob.h"
@@ -108,13 +108,14 @@ v8::Local<v8::Value> RoundTrip(v8::Local<v8::Value> value,
   if (!serialized_script_value)
     return v8::Local<v8::Value>();
   // If there are message ports, make new ones and entangle them.
-  MessagePortArray* transferred_message_ports = MessagePort::EntanglePorts(
+  GCedMessagePortArray* transferred_message_ports = MessagePort::EntanglePorts(
       *scope.GetExecutionContext(), std::move(channels));
+  MessagePortArray message_ports(*transferred_message_ports);
 
   UnpackedSerializedScriptValue* unpacked =
       SerializedScriptValue::Unpack(std::move(serialized_script_value));
   V8ScriptValueDeserializer::Options deserialize_options;
-  deserialize_options.message_ports = transferred_message_ports;
+  deserialize_options.message_ports = &message_ports;
   deserialize_options.blob_info = blob_info;
   V8ScriptValueDeserializer deserializer(script_state, unpacked,
                                          deserialize_options);
@@ -1035,20 +1036,23 @@ TEST(V8ScriptValueSerializerTest, OutOfRangeMessagePortIndex) {
   }
   {
     V8ScriptValueDeserializer::Options options;
-    options.message_ports = MakeGarbageCollected<MessagePortArray>();
+    MessagePortArray message_ports;
+    options.message_ports = &message_ports;
     V8ScriptValueDeserializer deserializer(script_state, input, options);
     ASSERT_TRUE(deserializer.Deserialize()->IsNull());
   }
   {
     V8ScriptValueDeserializer::Options options;
-    options.message_ports = MakeGarbageCollected<MessagePortArray>();
+    MessagePortArray message_ports;
+    options.message_ports = &message_ports;
     options.message_ports->push_back(port1);
     V8ScriptValueDeserializer deserializer(script_state, input, options);
     ASSERT_TRUE(deserializer.Deserialize()->IsNull());
   }
   {
     V8ScriptValueDeserializer::Options options;
-    options.message_ports = MakeGarbageCollected<MessagePortArray>();
+    MessagePortArray message_ports;
+    options.message_ports = &message_ports;
     options.message_ports->push_back(port1);
     options.message_ports->push_back(port2);
     V8ScriptValueDeserializer deserializer(script_state, input, options);
@@ -2145,13 +2149,14 @@ TEST(V8ScriptValueSerializerTest, TransformStreamIntegerOverflow) {
       std::move(serialized_script_value->GetStreams());
 
   // Entangle the message ports.
-  MessagePortArray* transferred_message_ports = MessagePort::EntanglePorts(
+  GCedMessagePortArray* transferred_message_ports = MessagePort::EntanglePorts(
       *scope.GetExecutionContext(), std::move(channels));
+  MessagePortArray message_ports(*transferred_message_ports);
 
   UnpackedSerializedScriptValue* unpacked = SerializedScriptValue::Unpack(
       std::move(corrupted_serialized_script_value));
   V8ScriptValueDeserializer::Options deserialize_options;
-  deserialize_options.message_ports = transferred_message_ports;
+  deserialize_options.message_ports = &message_ports;
   V8ScriptValueDeserializer deserializer(script_state, unpacked,
                                          deserialize_options);
   // If this doesn't crash then the test succeeded.

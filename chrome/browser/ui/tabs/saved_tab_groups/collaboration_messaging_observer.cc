@@ -191,6 +191,7 @@ void CollaborationMessagingObserver::DispatchMessage(
       HandleChip(message, display);
       break;
     case PersistentNotificationType::TOMBSTONED:
+    case PersistentNotificationType::INSTANT_MESSAGE:
     case PersistentNotificationType::UNDEFINED:
       // These notifications have no associated UI on Desktop.
       // Ignore gracefully.
@@ -238,11 +239,9 @@ void CollaborationMessagingObserver::DispatchMessageForTests(
 }
 
 void CollaborationMessagingObserver::DisplayInstantaneousMessage(
-    const std::vector<InstantMessage>& messages,
+    InstantMessage message,
     InstantMessageSuccessCallback success_callback) {
-  // TODO(b/400794347): Handle message batch.
-  CHECK_EQ(1u, messages.size());
-  instant_message_queue_processor_.Enqueue(messages[0],
+  instant_message_queue_processor_.Enqueue(message,
                                            std::move(success_callback));
 }
 
@@ -251,8 +250,9 @@ void CollaborationMessagingObserver::ReopenTabForCurrentInstantMessage() {
 
   const InstantMessage& message =
       instant_message_queue_processor_.GetCurrentMessage();
-  auto tab_metadata = message.attribution.tab_metadata;
-  auto tab_group_metadata = message.attribution.tab_group_metadata;
+  const auto& attribution = message.attributions[0];
+  auto tab_metadata = attribution.tab_metadata;
+  auto tab_group_metadata = attribution.tab_group_metadata;
   if (!tab_metadata || !tab_group_metadata) {
     return;
   }
@@ -280,7 +280,7 @@ void CollaborationMessagingObserver::ManageSharingForCurrentInstantMessage(
 
   const InstantMessage& message =
       instant_message_queue_processor_.GetCurrentMessage();
-  auto tab_group_metadata = message.attribution.tab_group_metadata;
+  auto tab_group_metadata = message.attributions[0].tab_group_metadata;
   if (!tab_group_metadata) {
     return;
   }

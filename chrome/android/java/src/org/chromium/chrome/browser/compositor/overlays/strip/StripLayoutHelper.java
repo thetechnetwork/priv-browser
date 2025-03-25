@@ -31,7 +31,6 @@ import android.os.Message;
 import android.os.SystemClock;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
-import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -380,7 +379,7 @@ public class StripLayoutHelper
     // Delegates that manage different functions for the tab strip.
     private final ActionConfirmationManager mActionConfirmationManager;
     private final StripStacker mStripStacker = new ScrollingStripStacker();
-    private final ScrollDelegate mScrollDelegate = new ScrollDelegate();
+    private final ScrollDelegate mScrollDelegate;
     private ReorderDelegate mReorderDelegate = new ReorderDelegate();
 
     // Common state used for animations on the strip triggered by independent actions including and
@@ -394,7 +393,7 @@ public class StripLayoutHelper
 
     // Layout Constants
     private final float mNewTabButtonWidth;
-    private final ListPopupWindow mTabMenu;
+    private final ListPopupWindow mCloseButtonMenu;
 
     // All views are overlapped by TAB_OVERLAP_WIDTH_DP. Group titles do not need to be overlapped
     // by this much, so we offset the drawX.
@@ -575,6 +574,7 @@ public class StripLayoutHelper
         mModalDialogManager = modalDialogManager;
         mBottomSheetController = bottomSheetController;
         mShareDelegateSupplier = shareDelegateSupplier;
+        mScrollDelegate = new ScrollDelegate(context);
 
         // Use toolbar menu button padding to align NTB with menu button.
         mFixedEndPadding =
@@ -675,8 +675,8 @@ public class StripLayoutHelper
         mIncognito = incognito;
 
         // Create tab menu
-        mTabMenu = new ListPopupWindow(mContext);
-        mTabMenu.setAdapter(
+        mCloseButtonMenu = new ListPopupWindow(mContext);
+        mCloseButtonMenu.setAdapter(
                 new ArrayAdapter<String>(
                         mContext,
                         R.layout.one_line_list_item,
@@ -686,12 +686,12 @@ public class StripLayoutHelper
                                             ? R.string.menu_close_all_tabs
                                             : R.string.menu_close_all_incognito_tabs)
                         }));
-        mTabMenu.setOnItemClickListener(
+        mCloseButtonMenu.setOnItemClickListener(
                 new OnItemClickListener() {
                     @Override
                     public void onItemClick(
                             AdapterView<?> parent, View view, int position, long id) {
-                        mTabMenu.dismiss();
+                        mCloseButtonMenu.dismiss();
                         if (position == ID_CLOSE_ALL_TABS) {
                             mTabGroupModelFilter
                                     .getTabModel()
@@ -707,8 +707,8 @@ public class StripLayoutHelper
                 });
 
         int menuWidth = mContext.getResources().getDimensionPixelSize(R.dimen.menu_width);
-        mTabMenu.setWidth(menuWidth);
-        mTabMenu.setModal(true);
+        mCloseButtonMenu.setWidth(menuWidth);
+        mCloseButtonMenu.setModal(true);
 
         mActionConfirmationManager = actionConfirmationManager;
         mGroupIdToHideSupplier.addObserver((newIdToHide) -> rebuildStripViews());
@@ -980,7 +980,7 @@ public class StripLayoutHelper
         if (mStripViews.length > 0) mUpdateHost.requestUpdate();
 
         // Dismiss tab menu, similar to how the app menu is dismissed on orientation change
-        mTabMenu.dismiss();
+        mCloseButtonMenu.dismiss();
 
         // Dismiss iph on orientation change, as its position might become incorrect.
         dismissTabStripSyncIph();
@@ -988,18 +988,6 @@ public class StripLayoutHelper
         if ((orientationChanged && wasSelectedTabVisible) || !mTabStateInitialized) {
             bringSelectedTabToVisibleArea(time, mTabStateInitialized);
         }
-    }
-
-    /**
-     * Updates all internal resources and dimensions.
-     *
-     * @param context The current Android {@link Context}.
-     */
-    public void onContextChanged(Context context) {
-        // TODO(crbug.com/360206998): Clean up this method as the Context doesn't change.
-        mContext = context;
-
-        mScrollDelegate.onContextChanged(context);
     }
 
     /**
@@ -1340,7 +1328,7 @@ public class StripLayoutHelper
             bringSelectedTabToVisibleArea(0, false);
         } else {
             clearLastHoveredTab();
-            mTabMenu.dismiss();
+            mCloseButtonMenu.dismiss();
         }
     }
 
@@ -1986,13 +1974,12 @@ public class StripLayoutHelper
      *
      * @param x The x position of the event.
      * @param y The y position of the event.
-     * @param fromMouse Whether the event originates from a mouse.
      * @param buttons State of all buttons that are pressed.
      */
-    public void onDown(float x, float y, boolean fromMouse, int buttons) {
+    public void onDown(float x, float y, int buttons) {
         resetResizeTimeout(false);
 
-        if (mNewTabButton.onDown(x, y, fromMouse, buttons)) {
+        if (mNewTabButton.onDown(x, y, buttons)) {
             mRenderHost.requestRender();
             return;
         }
@@ -2000,7 +1987,7 @@ public class StripLayoutHelper
         StripLayoutView clickedView = getViewAtPositionX(x, /* includeGroupTitles= */ true);
         if (clickedView instanceof StripLayoutTab clickedTab
                 && clickedTab.checkCloseHitTest(x, y)) {
-            clickedTab.setClosePressed(/* closePressed= */ true, fromMouse);
+            clickedTab.setClosePressed(/* closePressed= */ true, buttons);
             mRenderHost.requestRender();
         } else if (MotionEventUtils.isPrimaryButton(buttons)) {
             mDelayedReorderView = clickedView;
@@ -2013,36 +2000,27 @@ public class StripLayoutHelper
     /**
      * Called on long press touch event.
      *
-     * @param time The current time of the app in ms.
      * @param x The x coordinate of the position of the press event.
      * @param y The y coordinate of the position of the press event.
      */
-    public void onLongPress(long time, float x, float y) {
-        StripLayoutView stripView = getViewAtPositionX(x, true);
-        if (stripView == null || stripView instanceof StripLayoutTab) {
-            StripLayoutTab clickedTab = stripView != null ? (StripLayoutTab) stripView : null;
-            if (clickedTab != null && clickedTab.checkCloseHitTest(x, y)) {
-                clickedTab.setClosePressed(false, false);
-                mRenderHost.requestRender();
-                showTabMenu(clickedTab);
-            } else {
-                resetResizeTimeout(false);
-
-                if (clickedTab != null
-                        && ChromeFeatureList.isEnabled(ChromeFeatureList.TAB_STRIP_CONTEXT_MENU)) {
-                    showTabContextMenu(clickedTab);
-                    mDelayedReorderView = clickedTab;
-                    mDelayedReorderInitialX = x;
-                } else {
-                    startReorderMode(x, y, clickedTab, ReorderType.START_DRAG_DROP);
-                }
-            }
-        } else {
-            StripLayoutGroupTitle groupTitle = (StripLayoutGroupTitle) stripView;
-            showTabGroupContextMenu(groupTitle, /* shouldWaitForUpdate= */ false);
-            mDelayedReorderView = groupTitle;
+    public void onLongPress(float x, float y) {
+        resetResizeTimeout(false);
+        StripLayoutView stripView = determineClickedView(x, y, /* buttons= */ 0);
+        // If long-pressed on tab (not on close button) or group, mark for delayed reorder during
+        // drag.
+        if ((stripView instanceof StripLayoutTab clickedTab
+                        && !clickedTab.checkCloseHitTest(x, y)
+                        && ChromeFeatureList.isEnabled(ChromeFeatureList.TAB_STRIP_CONTEXT_MENU))
+                || stripView instanceof StripLayoutGroupTitle) {
+            mDelayedReorderView = stripView;
             mDelayedReorderInitialX = x;
+        } else if (stripView == null
+                || (stripView instanceof StripLayoutTab
+                        && !ChromeFeatureList.isEnabled(
+                                ChromeFeatureList.TAB_STRIP_CONTEXT_MENU))) {
+            startReorderMode(x, y, stripView, ReorderType.START_DRAG_DROP);
         }
+        showContextMenu(stripView);
     }
 
     /**
@@ -2656,14 +2634,17 @@ public class StripLayoutHelper
      * @param time The current time of the app in ms.
      * @param x The x coordinate of the position of the click.
      * @param y The y coordinate of the position of the click.
-     * @param fromMouse Whether the event originates from a mouse.
      * @param buttons State of all buttons that were pressed when onDown was invoked.
      */
-    public void click(long time, float x, float y, boolean fromMouse, int buttons) {
+    public void click(long time, float x, float y, int buttons) {
         resetResizeTimeout(false);
-        StripLayoutView clickedView = determineClickedView(x, y, fromMouse, buttons);
+        StripLayoutView clickedView = determineClickedView(x, y, buttons);
         if (clickedView == null) return;
-        clickedView.handleClick(time);
+        if (MotionEventUtils.isSecondaryClick(buttons)) {
+            showContextMenu(clickedView);
+        } else {
+            clickedView.handleClick(time);
+        }
     }
 
     /**
@@ -2699,6 +2680,18 @@ public class StripLayoutHelper
             } else if (button.getType() == ButtonType.TAB_CLOSE) {
                 handleCloseButtonClick((StripLayoutTab) button.getParentView(), time);
             }
+        }
+    }
+
+    private void showContextMenu(StripLayoutView clickedView) {
+        if (clickedView instanceof StripLayoutTab clickedTab
+                && ChromeFeatureList.isEnabled(ChromeFeatureList.TAB_STRIP_CONTEXT_MENU)) {
+            showTabContextMenu(clickedTab);
+        } else if (clickedView instanceof CompositorButton button
+                && button.getType() == ButtonType.TAB_CLOSE) {
+            showCloseButtonMenu((StripLayoutTab) button.getParentView());
+        } else if (clickedView instanceof StripLayoutGroupTitle groupTitle) {
+            showTabGroupContextMenu(groupTitle, /* shouldWaitForUpdate= */ false);
         }
     }
 
@@ -2764,12 +2757,11 @@ public class StripLayoutHelper
                 .prepareCloseTabs(params, /* allowDialog= */ true, listener, onPreparedCallback);
     }
 
-    private StripLayoutView determineClickedView(float x, float y, boolean fromMouse, int buttons) {
-        if (mNewTabButton.click(x, y, fromMouse, buttons)) return mNewTabButton;
+    private StripLayoutView determineClickedView(float x, float y, int buttons) {
+        if (mNewTabButton.click(x, y, buttons)) return mNewTabButton;
         StripLayoutView view = getViewAtPositionX(x, true);
         if (view instanceof StripLayoutTab clickedTab) {
-            if ((clickedTab.checkCloseHitTest(x, y)
-                    || (fromMouse && (buttons & MotionEvent.BUTTON_TERTIARY) != 0))) {
+            if (clickedTab.checkCloseHitTest(x, y) || MotionEventUtils.isTertiaryButton(buttons)) {
                 return clickedTab.getCloseButton();
             }
             return clickedTab;
@@ -2971,8 +2963,7 @@ public class StripLayoutHelper
         builder.append(groupDescription);
 
         // 2. Retrieve the grouped tabs and append the tab titles.
-        List<Tab> relatedTabs =
-                mTabGroupModelFilter.getRelatedTabListForRootId(groupTitle.getRootId());
+        List<Tab> relatedTabs = mTabGroupModelFilter.getTabsInGroup(groupTitle.getTabGroupId());
         int relatedTabsCount = relatedTabs.size();
         if (relatedTabsCount > 0) {
             final String contentDescriptionSeparator = " - ";
@@ -3194,13 +3185,13 @@ public class StripLayoutHelper
     }
 
     /**
-     * @param rootId The root ID of the relevant tab group.
+     * @param tabGroupId The tab group ID of the relevant tab group.
      * @param titleText The tab group's title text, if any. Null otherwise.
      * @return The provided title text if it isn't empty. Otherwise, returns the default title.
      */
-    private String getDefaultGroupTitleTextIfEmpty(int rootId, @Nullable String titleText) {
+    private String getDefaultGroupTitleTextIfEmpty(Token tabGroupId, @Nullable String titleText) {
         if (TextUtils.isEmpty(titleText)) {
-            int numTabs = mTabGroupModelFilter.getRelatedTabCountForRootId(rootId);
+            int numTabs = mTabGroupModelFilter.getTabCountForGroup(tabGroupId);
             titleText = TabGroupTitleUtils.getDefaultTitle(mContext, numTabs);
         }
         return titleText;
@@ -3229,7 +3220,7 @@ public class StripLayoutHelper
         assert groupTitle != null;
 
         // 1. Update indicator text and width.
-        titleText = getDefaultGroupTitleTextIfEmpty(groupTitle.getRootId(), titleText);
+        titleText = getDefaultGroupTitleTextIfEmpty(groupTitle.getTabGroupId(), titleText);
         int widthPx = mLayerTitleCache.getGroupTitleWidth(mIncognito, titleText);
         float widthDp = widthPx / mContext.getResources().getDisplayMetrics().density;
         float oldWidth = groupTitle.getWidth();
@@ -4201,31 +4192,32 @@ public class StripLayoutHelper
      * @param anchorTab The tab the menu will be anchored to
      */
     @VisibleForTesting
-    void showTabMenu(StripLayoutTab anchorTab) {
+    void showCloseButtonMenu(StripLayoutTab anchorTab) {
         // 1. Bring the anchor tab to the foreground.
         int tabIndex = TabModelUtils.getTabIndexById(mModel, anchorTab.getTabId());
         TabModelUtils.setIndex(mModel, tabIndex);
 
         // 2. Anchor the popupMenu to the view associated with the tab
         View tabView = TabModelUtils.getCurrentTab(mModel).getView();
-        mTabMenu.setAnchorView(tabView);
-        // 3. Set the vertical offset to align the tab menu with bottom of the tab strip
+        mCloseButtonMenu.setAnchorView(tabView);
+        // 3. Set the vertical offset to align the close button menu with bottom of the tab strip
         int tabHeight = mManagerHost.getHeight();
         int verticalOffset =
                 -(tabHeight - (int) mContext.getResources().getDimension(R.dimen.tab_strip_height));
-        mTabMenu.setVerticalOffset(verticalOffset);
+        mCloseButtonMenu.setVerticalOffset(verticalOffset);
 
-        // 4. Set the horizontal offset to align the tab menu with the right side of the tab
+        // 4. Set the horizontal offset to align the close button menu with the right side of the
+        // tab
         int horizontalOffset =
                 Math.round(
                                 (anchorTab.getDrawX() + anchorTab.getWidth())
                                         * mContext.getResources().getDisplayMetrics().density)
-                        - mTabMenu.getWidth();
-        // Cap the horizontal offset so that the tab menu doesn't get drawn off screen.
+                        - mCloseButtonMenu.getWidth();
+        // Cap the horizontal offset so that the close button menu doesn't get drawn off screen.
         horizontalOffset = Math.max(horizontalOffset, 0);
-        mTabMenu.setHorizontalOffset(horizontalOffset);
+        mCloseButtonMenu.setHorizontalOffset(horizontalOffset);
 
-        mTabMenu.show();
+        mCloseButtonMenu.show();
     }
 
     private void setScrollForScrollingTabStacker(float delta, boolean shouldAnimate, long time) {
@@ -4312,17 +4304,17 @@ public class StripLayoutHelper
     }
 
     /**
-     * @return true if the tab menu is showing
+     * @return true if the close button menu is showing
      */
-    public boolean isTabMenuShowingForTesting() {
-        return mTabMenu.isShowing();
+    public boolean isCloseButtonMenuShowingForTesting() {
+        return mCloseButtonMenu.isShowing();
     }
 
     /**
      * @param menuItemId The id of the menu item to click
      */
-    public void clickTabMenuItemForTesting(int menuItemId) {
-        mTabMenu.performItemClick(menuItemId);
+    public void clickCloseButtonMenuItemForTesting(int menuItemId) {
+        mCloseButtonMenu.performItemClick(menuItemId);
     }
 
     /**

@@ -4595,7 +4595,8 @@ domain Emulation
       experimental optional Page.Viewport viewport
       # If set, the display feature of a multi-segment screen. If not set, multi-segment support
       # is turned-off.
-      experimental optional DisplayFeature displayFeature
+      # Deprecated, use Emulation.setDisplayFeaturesOverride.
+      experimental deprecated optional DisplayFeature displayFeature
       # If set, the posture of a foldable device. If not set the posture is set
       # to continuous.
       # Deprecated, use Emulation.setDevicePostureOverride.
@@ -4612,6 +4613,18 @@ domain Emulation
   # platform again.
   # Does nothing if no override is set.
   experimental command clearDevicePostureOverride
+
+  # Start using the given display features to pupulate the Viewport Segments API.
+  # This override can also be set in setDeviceMetricsOverride().
+  experimental command setDisplayFeaturesOverride
+    parameters
+      array of DisplayFeature features
+
+  # Clears the display features override set with either setDeviceMetricsOverride()
+  # or setDisplayFeaturesOverride() and starts using display features from the
+  # platform again.
+  # Does nothing if no override is set.
+  experimental command clearDisplayFeaturesOverride
 
   experimental command setScrollbarsHidden
     parameters
@@ -8451,6 +8464,7 @@ domain Page
       interest-cohort
       join-ad-interest-group
       keyboard-map
+      language-detector
       local-fonts
       magnetometer
       media-playback-while-not-visible
@@ -8465,6 +8479,7 @@ domain Page
       private-state-token-redemption
       publickey-credentials-create
       publickey-credentials-get
+      rewriter
       run-ad-auction
       screen-wake-lock
       serial
@@ -8475,7 +8490,9 @@ domain Page
       speaker-selection
       storage-access
       sub-apps
+      summarizer
       sync-xhr
+      translator
       unload
       usb
       usb-unrestricted
@@ -8484,6 +8501,7 @@ domain Page
       web-printing
       web-share
       window-management
+      writer
       xr-spatial-tracking
 
   # Reason for a permissions policy feature to be disabled.
@@ -12904,6 +12922,7 @@ experimental domain Preload
       PrefetchFailedMIMENotSupported
       PrefetchFailedNetError
       PrefetchFailedNon2XX
+      PrefetchEvictedAfterBrowsingDataRemoved
       PrefetchEvictedAfterCandidateRemoved
       PrefetchEvictedForNewerPrefetch
       PrefetchHeldback
@@ -13201,6 +13220,12 @@ experimental domain BluetoothEmulation
       powered-off
       powered-on
 
+  # Indicates the various types of GATT event.
+  type GATTOperationType extends string
+    enum
+      connection
+      discovery
+
   # Stores the manufacturer data
   type ManufacturerData extends object
     properties
@@ -13262,3 +13287,19 @@ experimental domain BluetoothEmulation
   command simulateAdvertisement
     parameters
       ScanEntry entry
+
+  # Simulates the response code from the peripheral with |address| for a
+  # GATT operation of |type|. The |code| value follows the HCI Error Codes from
+  # Bluetooth Core Specification Vol 2 Part D 1.3 List Of Error Codes.
+  command simulateGATTOperationResponse
+    parameters
+      string address
+      GATTOperationType type
+      integer code
+
+  # Event for when a GATT operation of |type| to the peripheral with |address|
+  # happened.
+  event gattOperationReceived
+    parameters
+      string address
+      GATTOperationType type

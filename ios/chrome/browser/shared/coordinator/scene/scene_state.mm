@@ -10,9 +10,12 @@
 #import "base/logging.h"
 #import "base/notreached.h"
 #import "base/strings/sys_string_conversions.h"
+#import "base/types/cxx23_to_underlying.h"
 #import "ios/chrome/app/application_delegate/app_state.h"
 #import "ios/chrome/app/chrome_overlay_window.h"
+#import "ios/chrome/app/profile/profile_init_stage.h"
 #import "ios/chrome/app/profile/profile_state.h"
+#import "ios/chrome/app/profile/profile_state_observer.h"
 #import "ios/chrome/browser/shared/coordinator/scene/scene_controller.h"
 #import "ios/chrome/browser/shared/coordinator/scene/scene_util.h"
 
@@ -46,31 +49,54 @@ ContentVisibility ContentVisibilityForIncognito(BOOL isIncognito) {
 
 #pragma mark - SceneState
 
-@interface SceneState ()
-
-// Container for this object's observers.
-@property(nonatomic, strong) SceneStateObserverList* observers;
-
-// Agents attached to this scene.
-@property(nonatomic, strong) NSMutableArray<id<SceneAgent>>* agents;
+@interface SceneState () <ProfileStateObserver>
 
 @end
 
 @implementation SceneState {
-  ContentVisibility _contentVisibility;
-  NSString* _sceneSessionID;
+  // Cache the session identifier.
+  std::string _sceneSessionID;
+
+  // The AppState passed to the initializer.
   AppState* _appState;
+
+  // Container for this object's observers.
+  SceneStateObserverList* _observers;
+
+  // Agents attached to this scene.
+  NSMutableArray<id<SceneAgent>>* _agents;
+
+  // The state of the -incognitoContentVisible property.
+  ContentVisibility _contentVisibility;
+
+  // The propagation policy for -activationLevel.
+  ActivationLevelPolicy _propagationPolicy;
+
+  // The current value of -activationLevel (may be hidden if the profile
+  // is not yet loaded depending on the propagation policy).
+  SceneActivationLevel _currentActivationLevel;
+
+  // The current visible value of -activationLevel.
+  SceneActivationLevel _visibleActivationLevel;
 }
 
 - (instancetype)initWithAppState:(AppState*)appState {
+  return [self initWithAppState:appState
+              propagationPolicy:ActivationLevelPolicy::kImmediate];
+}
+
+- (instancetype)initWithAppState:(AppState*)appState
+               propagationPolicy:(ActivationLevelPolicy)policy {
   self = [super init];
   if (self) {
     _appState = appState;
     _observers = [SceneStateObserverList
         observersWithProtocol:@protocol(SceneStateObserver)];
+    _currentActivationLevel = SceneActivationLevelUnattached;
+    _visibleActivationLevel = SceneActivationLevelUnattached;
     _contentVisibility = ContentVisibility::kUnknown;
     _agents = [[NSMutableArray alloc] init];
-    _sceneSessionID = @"";
+    _propagationPolicy = policy;
 
     // AppState might be nil in tests.
     if (appState) {
@@ -83,21 +109,21 @@ ContentVisibility ContentVisibilityForIncognito(BOOL isIncognito) {
 #pragma mark - public
 
 - (void)addObserver:(id<SceneStateObserver>)observer {
-  [self.observers addObserver:observer];
+  [_observers addObserver:observer];
 }
 
 - (void)removeObserver:(id<SceneStateObserver>)observer {
-  [self.observers removeObserver:observer];
+  [_observers removeObserver:observer];
 }
 
 - (void)addAgent:(id<SceneAgent>)agent {
   DCHECK(agent);
-  [self.agents addObject:agent];
+  [_agents addObject:agent];
   [agent setSceneState:self];
 }
 
 - (NSArray*)connectedAgents {
-  return self.agents;
+  return _agents;
 }
 
 - (void)setRootViewController:(UIViewController*)rootViewController
@@ -141,22 +167,45 @@ ContentVisibility ContentVisibilityForIncognito(BOOL isIncognito) {
   return self.rootViewController.view;
 }
 
+- (const std::string&)sceneSessionID {
+  return _sceneSessionID;
+}
+
 - (void)setScene:(UIWindowScene*)scene {
   _scene = scene;
   if (_scene) {
     _sceneSessionID = SessionIdentifierForScene(_scene);
   } else {
-    _sceneSessionID = @"";
+    _sceneSessionID.clear();
   }
 }
 
+- (SceneActivationLevel)activationLevel {
+  return _visibleActivationLevel;
+}
+
 - (void)setActivationLevel:(SceneActivationLevel)newLevel {
-  if (_activationLevel == newLevel) {
+  if (_currentActivationLevel == newLevel) {
     return;
   }
-  _activationLevel = newLevel;
 
-  [self.observers sceneState:self transitionedToActivationLevel:newLevel];
+  _currentActivationLevel = newLevel;
+
+  // Check whether the observers must be notified of the change in activation
+  // level or not. If the propagation request to delay the propagation while
+  // the profile is loaded, do not propagate unless the profile has reached
+  // the kPrepareUI state (i.e. is done loading) or the activation level is
+  // SceneActivationLevelDisconnected (i.e. we always propagate this event
+  // to properly destroy the scene).
+  if (_propagationPolicy == ActivationLevelPolicy::kDelayedIfProfileLoading) {
+    if (_profileState.initStage < ProfileInitStage::kPrepareUI) {
+      if (_currentActivationLevel != SceneActivationLevelDisconnected) {
+        return;
+      }
+    }
+  }
+
+  [self transitionToActivationLevel];
 }
 
 - (void)setUIEnabled:(BOOL)UIEnabled {
@@ -166,9 +215,9 @@ ContentVisibility ContentVisibilityForIncognito(BOOL isIncognito) {
 
   _UIEnabled = UIEnabled;
   if (UIEnabled) {
-    [self.observers sceneStateDidEnableUI:self];
+    [_observers sceneStateDidEnableUI:self];
   } else {
-    [self.observers sceneStateDidDisableUI:self];
+    [_observers sceneStateDidDisableUI:self];
   }
 }
 
@@ -181,15 +230,15 @@ ContentVisibility ContentVisibilityForIncognito(BOOL isIncognito) {
     return;
   }
   if (presentingModalOverlay) {
-    [self.observers sceneStateWillShowModalOverlay:self];
+    [_observers sceneStateWillShowModalOverlay:self];
   } else {
-    [self.observers sceneStateWillHideModalOverlay:self];
+    [_observers sceneStateWillHideModalOverlay:self];
   }
 
   _presentingModalOverlay = presentingModalOverlay;
 
   if (!presentingModalOverlay) {
-    [self.observers sceneStateDidHideModalOverlay:self];
+    [_observers sceneStateDidHideModalOverlay:self];
   }
 }
 
@@ -201,7 +250,7 @@ ContentVisibility ContentVisibilityForIncognito(BOOL isIncognito) {
         [_URLContextsToOpen setByAddingObjectsFromSet:URLContextsToOpen];
   }
   if (_URLContextsToOpen) {
-    [self.observers sceneState:self hasPendingURLs:_URLContextsToOpen];
+    [_observers sceneState:self hasPendingURLs:_URLContextsToOpen];
   }
 }
 
@@ -238,13 +287,13 @@ ContentVisibility ContentVisibilityForIncognito(BOOL isIncognito) {
   [self setSessionObject:@(incognitoContentVisible)
                   forKey:kIncognitoCurrentKey];
 
-  [self.observers sceneState:self
+  [_observers sceneState:self
       isDisplayingIncognitoContent:incognitoContentVisible];
 }
 
 - (void)setPendingUserActivity:(NSUserActivity*)pendingUserActivity {
   _pendingUserActivity = pendingUserActivity;
-  [self.observers sceneState:self receivedUserActivity:pendingUserActivity];
+  [_observers sceneState:self receivedUserActivity:pendingUserActivity];
 }
 
 - (void)setSigninInProgress:(BOOL)signinInProgress {
@@ -252,15 +301,32 @@ ContentVisibility ContentVisibilityForIncognito(BOOL isIncognito) {
 
   _signinInProgress = signinInProgress;
   if (signinInProgress) {
-    [self.observers signinDidStart:self];
+    [_observers signinDidStart:self];
   } else {
-    [self.observers signinDidEnd:self];
+    [_observers signinDidEnd:self];
   }
 }
 
 - (void)setProfileState:(ProfileState*)profileState {
   _profileState = profileState;
-  [self.observers sceneState:self profileStateConnected:_profileState];
+  [_observers sceneState:self profileStateConnected:_profileState];
+  if (_propagationPolicy == ActivationLevelPolicy::kDelayedIfProfileLoading) {
+    [_profileState addObserver:self];
+  }
+}
+
+#pragma mark - ProfileStateObserver
+
+- (void)profileState:(ProfileState*)profileState
+    didTransitionToInitStage:(ProfileInitStage)nextInitStage
+               fromInitStage:(ProfileInitStage)fromInitStage {
+  if (nextInitStage < ProfileInitStage::kPrepareUI) {
+    return;
+  }
+
+  [profileState removeObserver:self];
+
+  [self transitionToActivationLevel];
 }
 
 #pragma mark - UIBlockerTarget
@@ -301,7 +367,7 @@ ContentVisibility ContentVisibilityForIncognito(BOOL isIncognito) {
 
 - (NSString*)description {
   NSString* activityString = nil;
-  switch (self.activationLevel) {
+  switch (_visibleActivationLevel) {
     case SceneActivationLevelUnattached: {
       activityString = @"Unattached";
       break;
@@ -387,6 +453,33 @@ ContentVisibility ContentVisibilityForIncognito(BOOL isIncognito) {
   NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
   [userDefaults setObject:object forKey:key];
   [userDefaults synchronize];
+}
+
+#pragma mark - Delayed activation level
+
+// Notifies the observers of the changes to the activation level. As the
+// client code expects the transition to go through stages sequentially,
+// step through the stages if they are not adjacent.
+- (void)transitionToActivationLevel {
+  if (_visibleActivationLevel == _currentActivationLevel) {
+    return;
+  }
+
+  NSInteger delta = _visibleActivationLevel < _currentActivationLevel ? +1 : -1;
+  if (_currentActivationLevel == SceneActivationLevelDisconnected) {
+    // Transition to SceneActivationLevelDisconnected do not have to go
+    // through intermediate activation levels.
+    delta = base::to_underlying(_currentActivationLevel) -
+            base::to_underlying(_visibleActivationLevel);
+  }
+
+  while (_visibleActivationLevel != _currentActivationLevel) {
+    _visibleActivationLevel = static_cast<SceneActivationLevel>(
+        base::to_underlying(_visibleActivationLevel) + delta);
+
+    [_observers sceneState:self
+        transitionedToActivationLevel:_visibleActivationLevel];
+  }
 }
 
 @end

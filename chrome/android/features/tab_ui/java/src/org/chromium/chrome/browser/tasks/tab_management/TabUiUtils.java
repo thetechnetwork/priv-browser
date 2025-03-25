@@ -73,9 +73,8 @@ public class TabUiUtils {
             Callback.runNullSafe(didCloseCallback, false);
             return;
         }
-        int rootId = tab.getRootId();
         TabClosureParams closureParams =
-                TabClosureParams.forCloseTabGroup(filter, rootId)
+                TabClosureParams.forCloseTabGroup(filter, tab.getTabGroupId())
                         .hideTabGroups(hideTabGroups)
                         .allowUndo(true)
                         .build();
@@ -116,14 +115,13 @@ public class TabUiUtils {
      * Ungroups a tab group and maybe shows a confirmation dialog.
      *
      * @param filter The {@link TabGroupModelFilter} to act on.
-     * @param tabId The ID of one of the tabs in the tab group.
+     * @param tabGroupId The id of the tab group.
      */
-    public static void ungroupTabGroup(TabGroupModelFilter filter, int tabId) {
-        TabModel tabModel = filter.getTabModel();
-        int rootId = tabModel.getTabById(tabId).getRootId();
-        if (rootId == Tab.INVALID_TAB_ID) return;
+    public static void ungroupTabGroup(TabGroupModelFilter filter, Token tabGroupId) {
+        if (!filter.tabGroupExists(tabGroupId)) return;
 
-        filter.getTabUngrouper().ungroupTabs(rootId, /* trailing= */ true, /* allowDialog= */ true);
+        filter.getTabUngrouper()
+                .ungroupTabs(tabGroupId, /* trailing= */ true, /* allowDialog= */ true);
     }
 
     /**

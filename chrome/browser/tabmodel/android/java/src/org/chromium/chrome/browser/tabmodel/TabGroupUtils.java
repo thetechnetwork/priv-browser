@@ -21,7 +21,7 @@ public class TabGroupUtils {
      * @return The selected tab of the group which contains the {@code tab}
      */
     public static Tab getSelectedTabInGroupForTab(TabGroupModelFilter filter, Tab tab) {
-        return filter.getTabAt(filter.indexOf(tab));
+        return filter.getRepresentativeTabAt(filter.representativeIndexOf(tab));
     }
 
     /**
@@ -90,15 +90,20 @@ public class TabGroupUtils {
         boolean tabGroupCollapsed = tabGroupMetadata.tabGroupCollapsed;
         int tabGroupColor = tabGroupMetadata.tabGroupColor;
 
-        // 2. Merge tabs to recreate tab group with the original rootId and tabGroupId.
+        // 2. Set rootId and TabGroupId for all tabs before merging to guarantee they are treated as
+        // part of the same group.
         for (Tab tab : tabs) {
-            int tabId = tab.getId();
             tab.setRootId(rootId);
             tab.setTabGroupId(tabGroupId);
+        }
+
+        // 3. Merge tabs to recreate tab group
+        for (Tab tab : tabs) {
+            int tabId = tab.getId();
             tabGroupModelFilter.mergeTabsToGroup(tabId, rootId, /* skipUpdateTabModel= */ true);
         }
 
-        // 3. Apply the tab group attributes (color, collapsed state, and title).
+        // 4. Apply the tab group attributes (color, collapsed state, and title).
         tabGroupModelFilter.setTabGroupColor(rootId, tabGroupColor);
         tabGroupModelFilter.setTabGroupCollapsed(rootId, tabGroupCollapsed);
         tabGroupModelFilter.setTabGroupTitle(rootId, tabGroupTitle);

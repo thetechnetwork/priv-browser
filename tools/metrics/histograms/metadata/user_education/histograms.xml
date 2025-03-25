@@ -80,6 +80,8 @@ chromium-metrics-reviews@google.com.
   <variant name="HelpMeWrite" summary="the module for Help Me Write"/>
   <variant name="HistoryEmbeddings"
       summary="the module for History Embeddings Search"/>
+  <variant name="iOSLensSWYS"
+      summary="the module for iOS Lens Search What You See"/>
   <variant name="LensOverlayTranslateButton"
       summary="the module for Lens Overlay Full Page Translate"/>
   <variant name="Mobilepasswords"
@@ -204,7 +206,7 @@ chromium-metrics-reviews@google.com.
 </histogram>
 
 <histogram name="UserEducation.MessageNotShown.TimeInQueue" units="ms"
-    expires_after="2025-06-29">
+    expires_after="2025-09-21">
   <owner>dfried@chromium.org</owner>
   <owner>frizzle-team@google.com</owner>
   <summary>
@@ -216,7 +218,7 @@ chromium-metrics-reviews@google.com.
 </histogram>
 
 <histogram name="UserEducation.MessageShown.RotatingPromoIndex" units="Index"
-    expires_after="2025-04-30">
+    expires_after="2025-08-31">
   <expired_intentionally>
     Deprecated. Replaced by UserEducation.RotatingPromoIndex.{IPHFeature}.
   </expired_intentionally>
@@ -407,7 +409,7 @@ chromium-metrics-reviews@google.com.
 </histogram>
 
 <histogram name="UserEducation.Session.RecentSuperActiveWeeks" units="count"
-    expires_after="2025-04-30">
+    expires_after="2025-08-31">
   <owner>dfried@chromium.org</owner>
   <owner>frizzle-team@google.com</owner>
   <summary>

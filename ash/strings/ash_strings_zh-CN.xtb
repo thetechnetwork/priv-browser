@@ -149,6 +149,7 @@
 <translation id="1455242230282523554">显示语言设置</translation>
 <translation id="1459693405370120464">天气</translation>
 <translation id="1460620680449458626">当前处于静音状态。</translation>
+<translation id="1462439140224375968">已创建 Google 文档</translation>
 <translation id="14648076227129703">如果您开启摄像头，即意味着允许“<ph name="APP1_NAME" />”“<ph name="APP2_NAME" />”以及所有具有摄像头使用权限的应用和网站使用摄像头</translation>
 <translation id="1467432559032391204">向左</translation>
 <translation id="146902737843070955">您的管理员要求进行此项更改</translation>
@@ -166,6 +167,7 @@
 <translation id="1505542291183484463">将平铺窗口向下调整大小</translation>
 <translation id="1510238584712386396">启动器</translation>
 <translation id="1520303207432623762">{NUM_APPS,plural, =1{显示通知设置。针对 1 个应用关闭通知}other{显示通知设置。针对 # 个应用关闭通知}}</translation>
+<translation id="1521655867290435174">Google 表格</translation>
 <translation id="1523032696246003">电池电量为 <ph name="BATTERY_PERCENTAGE" />% | 还需 <ph name="TIME" />才能充满</translation>
 <translation id="1525508553941733066">关闭</translation>
 <translation id="1526448108126799339">在新窗口中打开标签页</translation>
@@ -214,6 +216,7 @@
 <translation id="1679841710523778799">调高亮度</translation>
 <translation id="1680659827022803830">视频通话控件</translation>
 <translation id="169515659049020177">Shift</translation>
+<translation id="1696984622403682083">您随时可以在“设置”中停用此功能。<ph name="LINK_TO_LEARN_MORE" /></translation>
 <translation id="1698080062160024910"><ph name="TOTAL_TIME" />定时器   <ph name="LABEL" /></translation>
 <translation id="1698760176351776263">IPv6 地址：<ph name="ADDRESS" /></translation>
 <translation id="1703117532528082099">将活动窗口停靠在左侧。</translation>
@@ -240,6 +243,8 @@
 <translation id="1755556344721611131">“诊断”应用</translation>
 <translation id="1756833229520115364">无法保存模板。窗口或标签页过多。</translation>
 <translation id="1757857692711134412">保持关闭状态，直到日落</translation>
+<translation id="1763084151787818322">其他操作</translation>
+<translation id="1768138163688567246">关闭“搜索我的屏幕”</translation>
 <translation id="1768366657309696705">键盘快捷键“<ph name="LAUNCHER_KEY_NAME" /> + 句点键”已更改。若要使用 Insert 键，请按<ph name="LAUNCHER_KEY_NAME" />键 + Shift + 退格键。</translation>
 <translation id="1770726142253415363">已移至第 <ph name="ROW_NUMBER" /> 行与第 <ph name="COLUMN_NUMBER" /> 列的相交处。</translation>
 <translation id="1771761307086386028">向右滚动</translation>
@@ -345,7 +350,6 @@
 <translation id="2201071101391734388">近期照片中的第 <ph name="INDEX" /> 张，共 <ph name="TOTAL_COUNT" /> 张。</translation>
 <translation id="2201687081523799384">收起 Google Tasks</translation>
 <translation id="2208323208084708176">统一桌面模式</translation>
-<translation id="2220572644011485463">PIN 码或密码</translation>
 <translation id="2222841058024245321">桌面 7</translation>
 <translation id="2223384056430485343">在分屏模式下</translation>
 <translation id="2224075387478458881">禁止在屏幕显示受保护内容时录制屏幕</translation>
@@ -590,6 +594,7 @@
 <translation id="301584155502740476">显示热点详情。热点已关闭。</translation>
 <translation id="3017079585324758401">背景</translation>
 <translation id="3018135054368884502">让媒体快进</translation>
+<translation id="3026897869154397692">已添加至日历</translation>
 <translation id="3033545621352269033">已开启</translation>
 <translation id="3033912566804961911">与“<ph name="DESK_NAME" />”合并</translation>
 <translation id="3036649622769666520">打开文件</translation>
@@ -964,6 +969,7 @@
 <translation id="4221957499226645091"><ph name="APP_NAME" />，已安装的应用，已暂停</translation>
 <translation id="4228078597006700451">尚未设置控件</translation>
 <translation id="4230560241506423345">新建</translation>
+<translation id="4236726631849783264">建议的操作注意事项</translation>
 <translation id="4239069858505860023">GPRS</translation>
 <translation id="4240486403425279990">概览模式</translation>
 <translation id="4242533952199664413">打开“设置”</translation>
@@ -980,7 +986,6 @@
 <translation id="4275663329226226506">媒体</translation>
 <translation id="4279490309300973883">正在镜像</translation>
 <translation id="4280601795273309128">安全更新已终止。请升级您的设备。</translation>
-<translation id="4281739221820540368">创建 Google 文档</translation>
 <translation id="4283888303416325161">请输入密码以增强安全性</translation>
 <translation id="4285498937028063278">取消固定</translation>
 <translation id="428715201724021596">正在连接到配置文件。这可能需要几分钟的时间。</translation>
@@ -1041,6 +1046,7 @@
 <translation id="4471354919263203780">正在下载语音识别文件... <ph name="PERCENT" />%</translation>
 <translation id="4471432286288241507">{0,plural, =0{立即更新此设备}=1{请在 1 秒内更新此设备}other{请在 # 秒内更新此设备}}</translation>
 <translation id="4472575034687746823">开始使用</translation>
+<translation id="4473489370276014885">Google 通讯录</translation>
 <translation id="4477350412780666475">下一曲</translation>
 <translation id="4477751544736611934">这可能会产生流量费用。
 已连接 1 部设备。</translation>
@@ -1067,6 +1073,7 @@
 <translation id="4545950850562423083">将当前网页保存为书签</translation>
 <translation id="4548482551627849548">将活动窗口移至左侧桌面</translation>
 <translation id="4552748006424994716">为避免回声，您只能使用有线耳机收听麦克风的声音。</translation>
+<translation id="4556953949326137018">当您使用“添加到日历”或“创建 Google 文档”等建议的操作时，系统会将所选区域的内容发送到 Google 服务器以执行建议的操作，并遵守 <ph name="LINK_TO_SERVICE_TERMS" />。请勿包含任何个人、敏感或机密信息。</translation>
 <translation id="4560576029703263363">已开启</translation>
 <translation id="4561267230861221837">3G</translation>
 <translation id="4565377596337484307">隐藏密码</translation>
@@ -1150,6 +1157,7 @@
 <translation id="481455355267255546">即将到来的活动</translation>
 <translation id="481749895090480684">任务列表：<ph name="GLANCEABLES_TASKS_LIST_NAME" /></translation>
 <translation id="4826588772550366629">摄像头和麦克风</translation>
+<translation id="4828935196674083554">正在添加…</translation>
 <translation id="482908187605862807">Play 商店提供的应用</translation>
 <translation id="4831034276697007977">确定要关闭自动点击吗？</translation>
 <translation id="4835677468087803981">隐藏 PIN 码</translation>
@@ -1646,6 +1654,7 @@
 <translation id="641817663353603351">向上翻页</translation>
 <translation id="6424520630891723617"><ph name="SECURITY_STATUS" />，信号强度为 <ph name="SIGNAL_STRENGTH" /></translation>
 <translation id="642644398083277086">清除所有通知</translation>
+<translation id="6426905245930183644">正在创建…</translation>
 <translation id="6430225033895752525">显示专注模式设置</translation>
 <translation id="643147933154517414">大功告成</translation>
 <translation id="6431865393913628856">屏幕录制</translation>
@@ -1712,7 +1721,6 @@
 <translation id="6612889377159412215">子任务</translation>
 <translation id="6613765291890844037">存储空间：已用 <ph name="STORAGE_IN_USE_SIZE" /> | 总共 <ph name="STORAGE_TOTAL_SIZE" /></translation>
 <translation id="6614169507485700968">已开启隐私保护屏</translation>
-<translation id="6618277154885124991">创建 Google 表格</translation>
 <translation id="6622679827379792051">设置查看手机中的应用</translation>
 <translation id="662279009180869175">使用向左键和向右键可调整分屏大小</translation>
 <translation id="6624493541160101248">当前桌面：<ph name="DESK_NAME" />。第 <ph name="DESK_INDEX" /> 个桌面（共 <ph name="DESK_COUNT" /> 个）。</translation>
@@ -1827,7 +1835,6 @@
 <translation id="7000027735917578303">窗口和桌面设置</translation>
 <translation id="7004910047186208204">连接到移动数据网络</translation>
 <translation id="7005239792648594238">打开一款应用即可开始使用</translation>
-<translation id="7007983414944123363">无法验证您的 PIN 码或密码。请重试。</translation>
 <translation id="7014684956566476813">已连接到一部名为“<ph name="DEVICE_NAME" />”的设备</translation>
 <translation id="7015766095477679451">您需要等到<ph name="COME_BACK_TIME" /> 才能再次使用此设备。</translation>
 <translation id="70168403932084660">桌面 6</translation>
@@ -1887,6 +1894,7 @@
 <translation id="7228968829656641943">选择即可搜索我的屏幕内容。按 Tab 键然后按空格键即可使用键盘进行导航。</translation>
 <translation id="7229029500464092426">可用内存为 <ph name="AVAILABLE_MEMORY" /> | 共 <ph name="TOTAL_MEMORY" /></translation>
 <translation id="7239814253344511868">鼠标的两个按钮</translation>
+<translation id="7240636904654154599">已创建 Google 表格</translation>
 <translation id="7244725679040769470">电量剩余 <ph name="PERCENTAGE" />%。请为设备接通电源。</translation>
 <translation id="7246071203293827765"><ph name="UPDATE_TEXT" />。此 Chromebook 需要重新启动才能让更新生效。此过程最多可能需要 1 分钟的时间。</translation>
 <translation id="7256057185598509352">ExpressKey 2</translation>
@@ -1941,6 +1949,7 @@
 <translation id="742594950370306541">摄像头处于使用状态。</translation>
 <translation id="742608627846767349">上午好！</translation>
 <translation id="743058460480092004">摄像头和麦克风处于使用状态。</translation>
+<translation id="7440404390546433462">Google 搜索</translation>
 <translation id="7441711280402516925">正在播放 · 切换到标签页</translation>
 <translation id="7453330308669753048">已移除搜索记录结果</translation>
 <translation id="7459485586006128091">由于内部错误，热点已关闭。请过几分钟后尝试重新连接。</translation>
@@ -2396,6 +2405,8 @@
 <translation id="8921624153894383499">Google 助理不支持此语言。</translation>
 <translation id="8926951137623668982">任务栏始终处于隐藏状态</translation>
 <translation id="8929566928381252430">要使用 Caps Lock 键吗？请使用</translation>
+<translation id="8929623844713377237">已创建联系人</translation>
+<translation id="8934418770423095813">创建 Google 文档</translation>
 <translation id="8934926665751933910">{NUM_FILES,plural, =1{1 个文件}other{# 个文件}}</translation>
 <translation id="8936501819958976551">已停用</translation>
 <translation id="8938800817013097409">USB-C 设备（背面右侧端口）</translation>
@@ -2464,6 +2475,7 @@
 <translation id="9168436347345867845">以后再说</translation>
 <translation id="9178475906033259337">显示了 1 条与“<ph name="QUERY" />”相符的结果</translation>
 <translation id="9179259655489829027">借助此功能，您无需使用密码即可快速访问任何已登录的用户。请仅对您信任的账号使用此功能。</translation>
+<translation id="9183302530794969518">Google 文档</translation>
 <translation id="9183456764293710005">全屏放大镜</translation>
 <translation id="9192133205265227850">使用“<ph name="DEVICE_NAME" />”</translation>
 <translation id="9193626018745640770">正在投放至不明接收器</translation>

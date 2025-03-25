@@ -12,7 +12,6 @@
 #include "base/memory/raw_ptr.h"
 #include "base/memory/weak_ptr.h"
 #include "chrome/app/vector_icons/vector_icons.h"
-#include "chrome/browser/accessibility/accessibility_state_utils.h"
 #include "chrome/browser/image_fetcher/image_decoder_impl.h"
 #include "chrome/browser/ui/browser_finder.h"
 #include "chrome/browser/ui/monogram_utils.h"
@@ -66,6 +65,7 @@ namespace {
 
 constexpr int kMultiIdpUseOtherAccountButtonIconMargin = 9;
 constexpr int kSingleIdpUseOtherAccountButtonIconMargin = 5;
+constexpr int kMaxExpandableAccountsScrollViewHeight = 350;
 
 // views::MdTextButton which:
 // - Uses the passed-in `brand_background_color` based on whether the button
@@ -140,31 +140,6 @@ class ContinueButton : public views::MdTextButton {
 BEGIN_METADATA(ContinueButton)
 END_METADATA
 
-std::u16string BuildStringFromIDPs(
-    const std::vector<std::u16string>& mismatch_idps,
-    const std::vector<std::u16string>& non_mismatch_idps) {
-  constexpr int kMaxIdpsToShow = 3;
-  size_t num_idps = 0;
-  std::u16string result;
-  auto AddToResult = [&](const std::vector<std::u16string>& idp_vector) {
-    if (num_idps == kMaxIdpsToShow) {
-      return;
-    }
-    for (const auto& idp : idp_vector) {
-      if (num_idps > 0) {
-        result += u", ";
-      }
-      result += idp;
-      if (++num_idps == kMaxIdpsToShow) {
-        break;
-      }
-    }
-  };
-  AddToResult(mismatch_idps);
-  AddToResult(non_mismatch_idps);
-  return result;
-}
-
 }  // namespace
 
 AccountSelectionBubbleView::AccountSelectionBubbleView(
@@ -222,23 +197,18 @@ AccountSelectionBubbleView::~AccountSelectionBubbleView() = default;
 void AccountSelectionBubbleView::ShowMultiAccountPicker(
     const std::vector<IdentityRequestAccountPtr>& accounts,
     const std::vector<IdentityProviderDataPtr>& idp_list,
-    bool show_back_button,
-    bool is_choose_an_account) {
+    bool show_back_button) {
   // If there are multiple IDPs, then the content::IdentityProviderMetadata
   // passed will be unused since there will be no `header_icon_view_`.
   // Therefore, it is fine to pass the first one into UpdateHeader().
   DCHECK(idp_list.size() == 1u || !header_icon_view_);
-  DCHECK(!is_choose_an_account || show_back_button);
   std::u16string title =
-      is_choose_an_account
-          ? l10n_util::GetStringFUTF16(IDS_MULTI_IDP_CHOOSE_AN_ACCOUNT_TITLE,
-                                       rp_for_display_)
-          : GetTitle(rp_for_display_,
-                     idp_list.size() > 1u
-                         ? std::nullopt
-                         : std::make_optional<std::u16string>(
-                               base::UTF8ToUTF16(idp_list[0]->idp_for_display)),
-                     rp_context_);
+      GetTitle(rp_for_display_,
+               idp_list.size() > 1u
+                   ? std::nullopt
+                   : std::make_optional<std::u16string>(
+                         base::UTF8ToUTF16(idp_list[0]->idp_for_display)),
+               rp_context_);
   UpdateHeader(idp_list[0]->idp_metadata.brand_decoded_icon, title,
                show_back_button);
 
@@ -414,24 +384,6 @@ void AccountSelectionBubbleView::ShowRequestPermissionDialog(
                   "AccountSelectionModalView";
 }
 
-void AccountSelectionBubbleView::ShowSingleReturningAccountDialog(
-    const std::vector<IdentityRequestAccountPtr>& accounts,
-    const std::vector<IdentityProviderDataPtr>& idp_list) {
-  // We currently only invoke this method in the multi IDP case.
-  DCHECK_GT(idp_list.size(), 1u);
-  // Since there are multiple IDPs, then the gfx::Image passed will be unused
-  // since there will be no `header_icon_view_`.
-  UpdateHeader(gfx::Image(),
-               GetTitle(rp_for_display_, std::nullopt, rp_context_),
-               /*show_back_button=*/false);
-
-  RemoveNonHeaderChildViews();
-  AddChildView(std::make_unique<views::Separator>());
-  AddChildView(CreateSingleReturningAccountChooser(accounts, idp_list));
-
-  PreferredSizeChanged();
-}
-
 std::string AccountSelectionBubbleView::GetDialogTitle() const {
   return base::UTF16ToUTF8(title_);
 }
@@ -592,29 +544,28 @@ AccountSelectionBubbleView::CreateSingleAccountChooser(
 void AccountSelectionBubbleView::AddSeparatorAndMultipleAccountChooser(
     const std::vector<IdentityRequestAccountPtr>& accounts,
     const std::vector<IdentityProviderDataPtr>& idp_list) {
-  // We use a separate scroller for accounts vs for mismatches. This allows us
-  // to show accounts at the top while still always showing mismatches in the UI
-  // before any scrolling occurs.
-  auto account_scroll_view = std::make_unique<views::ScrollView>();
-  account_scroll_view->SetHorizontalScrollBarMode(
+  auto scroll_view = std::make_unique<views::ScrollView>();
+
+  scroll_view->SetHorizontalScrollBarMode(
       views::ScrollView::ScrollBarMode::kDisabled);
-  views::View* const accounts_content =
-      account_scroll_view->SetContents(std::make_unique<views::View>());
-  accounts_content->SetLayoutManager(std::make_unique<views::BoxLayout>(
+  views::View* const scroller_content =
+      scroll_view->SetContents(std::make_unique<views::View>());
+  scroller_content->SetLayoutManager(std::make_unique<views::BoxLayout>(
       views::BoxLayout::Orientation::kVertical));
   bool is_multi_idp = idp_list.size() > 1u;
-  AddAccounts(accounts, accounts_content, is_multi_idp);
-  size_t num_account_rows = accounts.size();
+  AddAccounts(accounts, scroller_content, is_multi_idp);
+  size_t num_rows = accounts.size();
   std::optional<int> separator_size;
-  std::optional<int> use_other_account_button_size;
+  // The size of the first button that prompts the user to login to IDP. This
+  // may be either a "use a different account" due to filtered out accounts or a
+  // mismatch login button.
+  std::optional<int> first_login_button_size;
+
+  // Add use other accounts due to filtered accounts.
   for (const auto& idp_data : idp_list) {
-    const content::IdentityProviderMetadata& idp_metadata =
-        idp_data->idp_metadata;
-    if (!idp_data->has_login_status_mismatch &&
-        (idp_metadata.supports_add_account ||
-         idp_metadata.has_filtered_out_account)) {
+    if (idp_data->idp_metadata.has_filtered_out_account) {
       auto use_other_account_button = CreateUseOtherAccountButton(
-          idp_metadata,
+          idp_data->idp_metadata,
           is_multi_idp ? l10n_util::GetStringFUTF16(
                              IDS_ACCOUNT_SELECTION_USE_OTHER_ACCOUNT_MULTI_IDP,
                              base::UTF8ToUTF16(idp_data->idp_for_display))
@@ -622,23 +573,42 @@ void AccountSelectionBubbleView::AddSeparatorAndMultipleAccountChooser(
                              IDS_ACCOUNT_SELECTION_USE_OTHER_ACCOUNT),
           is_multi_idp ? kMultiIdpUseOtherAccountButtonIconMargin
                        : kSingleIdpUseOtherAccountButtonIconMargin);
-      if (!use_other_account_button_size) {
-        // Add a separator the first time that a use other account button is
-        // used.
+      if (accounts.size() > 0 && !first_login_button_size) {
         auto separator = std::make_unique<views::Separator>();
         separator->SetBorder(views::CreateEmptyBorder(
             gfx::Insets::TLBR(kVerticalSpacing + kTopBottomPadding, 0,
                               kTopBottomPadding + kVerticalSpacing, 0)));
         separator_size = separator->GetPreferredSize().height();
-        accounts_content->AddChildView(std::move(separator));
-        // GetPreferredSize() can be expensive so only compute the first time.
-        use_other_account_button_size =
+        scroller_content->AddChildView(std::move(separator));
+        first_login_button_size =
             use_other_account_button->GetPreferredSize().height();
       }
-      accounts_content->AddChildView(std::move(use_other_account_button));
+      scroller_content->AddChildView(std::move(use_other_account_button));
+      ++num_rows;
     }
   }
 
+  // Add mismatch rows.
+  for (const auto& idp_data : idp_list) {
+    if (idp_data->has_login_status_mismatch) {
+      auto mismatch_button = CreateIdpLoginRow(
+          base::UTF8ToUTF16(idp_data->idp_for_display), idp_data);
+      if (accounts.size() > 0 && !first_login_button_size) {
+        auto separator = std::make_unique<views::Separator>();
+        separator->SetBorder(views::CreateEmptyBorder(
+            gfx::Insets::TLBR(kVerticalSpacing + kTopBottomPadding, 0,
+                              kTopBottomPadding + kVerticalSpacing, 0)));
+        separator_size = separator->GetPreferredSize().height();
+        scroller_content->AddChildView(std::move(separator));
+        // GetPreferredSize() can be expensive so only compute the first time.
+        first_login_button_size = mismatch_button->GetPreferredSize().height();
+      }
+      scroller_content->AddChildView(std::move(mismatch_button));
+      ++num_rows;
+    }
+  }
+
+  CHECK(num_rows > 0);
   bool starts_with_scroller = false;
   // The maximum height that the multi-account-picker can have. This value was
   // chosen so that if there are more than two accounts, the picker will show up
@@ -648,63 +618,35 @@ void AccountSelectionBubbleView::AddSeparatorAndMultipleAccountChooser(
   // ok with this estimate. And in this case, we prefer to use 3.5 as there will
   // be at least one IDP row at the beginning. Note that `num_account_rows` can
   // be 0 if everything is an IDP mismatch.
-  if (num_account_rows > 0) {
-    float num_visible_rows = is_multi_idp ? 3.5f : 2.5f;
-    const int per_account_size =
-        accounts_content->children()[0]->GetPreferredSize().height();
-    int clipped_size = static_cast<int>(per_account_size * num_visible_rows);
-    if (num_account_rows < num_visible_rows && use_other_account_button_size) {
-      clipped_size += *separator_size + *use_other_account_button_size;
-    }
-    account_scroll_view->ClipHeightTo(0, clipped_size);
-    if (num_account_rows > num_visible_rows) {
-      starts_with_scroller = true;
-    } else {
-      // We will have some spacing between the scroller and the separator at the
-      // top but we need some additional spacing to match the bottom margin,
-      // which is slightly larger in single IDP case.
-      account_scroll_view->SetBorder(views::CreateEmptyBorder(
-          gfx::Insets::TLBR(is_multi_idp ? kVerticalSpacing - kTopBottomPadding
-                                         : kVerticalSpacing,
-                            0, 0, 0)));
-    }
+  float num_visible_rows = is_multi_idp ? 1.5f : 2.5f;
+  const int first_row_size =
+      scroller_content->children()[0]->GetPreferredSize().height();
+  int clipped_size = static_cast<int>(first_row_size * num_visible_rows);
+  // When there are account rows but not enough to cover the visible rows, add
+  // the mismatch size so that the scroller does not end awkwardly.
+  if (0 < accounts.size() && accounts.size() < num_visible_rows &&
+      first_login_button_size) {
+    clipped_size += *separator_size + *first_login_button_size;
+    ++num_visible_rows;
   }
-
-  auto mismatch_scroll_view = std::make_unique<views::ScrollView>();
-  mismatch_scroll_view->SetHorizontalScrollBarMode(
-      views::ScrollView::ScrollBarMode::kDisabled);
-  views::View* const mismatch_content =
-      mismatch_scroll_view->SetContents(std::make_unique<views::View>());
-  mismatch_content->SetLayoutManager(std::make_unique<views::BoxLayout>(
-      views::BoxLayout::Orientation::kVertical));
-
-  // Add mismatch rows.
-  size_t num_mismatch_rows = 0;
-  for (const auto& idp_data : idp_list) {
-    if (idp_data->has_login_status_mismatch) {
-      mismatch_content->AddChildView(CreateIdpLoginRow(
-          base::UTF8ToUTF16(idp_data->idp_for_display), idp_data));
-      num_mismatch_rows += 1;
-    }
+  scroll_view->ClipHeightTo(0, clipped_size);
+  if (num_rows > num_visible_rows) {
+    starts_with_scroller = true;
+  } else {
+    // We will have some spacing between the scroller and the separator at the
+    // top but we need some additional spacing to match the bottom margin,
+    // which is slightly larger in single IDP case.
+    scroll_view->SetBorder(views::CreateEmptyBorder(gfx::Insets::TLBR(
+        is_multi_idp ? kVerticalSpacing - kTopBottomPadding : kVerticalSpacing,
+        0, 0, 0)));
   }
-  if (num_mismatch_rows > 0) {
-    // Similar to accounts scroller, clip the height of the mismatch dialog to
-    // show at most 2.
-    const int per_mismatch_size =
-        mismatch_content->GetPreferredSize().height() / num_mismatch_rows;
-    mismatch_scroll_view->ClipHeightTo(
-        0, static_cast<int>(per_mismatch_size * 2.5f));
-    if (num_account_rows == 0) {
-      if (num_mismatch_rows > 2) {
-        starts_with_scroller = true;
-      } else {
-        // We will have some spacing between the scroller and the separator at
-        // the top but we need some additional spacing to match the bottom
-        // margin. Note that this can only happen when there are multiple IDPs.
-        mismatch_scroll_view->SetBorder(views::CreateEmptyBorder(
-            gfx::Insets::TLBR(kVerticalSpacing - kTopBottomPadding, 0, 0, 0)));
-      }
-    }
+  if (is_multi_idp) {
+    expandable_account_scroll_view_ = scroll_view.get();
+    on_contents_scrolled_subscription_ =
+        expandable_account_scroll_view_->AddContentsScrolledCallback(
+            base::BindRepeating(
+                &AccountSelectionBubbleView::OnExpandableAccountsScrolled,
+                base::Unretained(this)));
   }
 
   // We use a container for most of the contents here. If there is a scroller at
@@ -720,12 +662,7 @@ void AccountSelectionBubbleView::AddSeparatorAndMultipleAccountChooser(
         gfx::Insets::TLBR(0, 0, kTopBottomPadding, 0)));
   }
   container->AddChildView(std::move(separator));
-  container->AddChildView(std::move(account_scroll_view));
-  // If there are both accounts and mismatches, add a separator.
-  if (num_account_rows > 0 && num_mismatch_rows > 0) {
-    container->AddChildView(std::make_unique<views::Separator>());
-  }
-  container->AddChildView(std::move(mismatch_scroll_view));
+  container->AddChildView(std::move(scroll_view));
   AddChildView(std::move(container));
 }
 
@@ -758,45 +695,17 @@ void AccountSelectionBubbleView::AddAccounts(
   }
 }
 
-std::unique_ptr<views::View>
-AccountSelectionBubbleView::CreateSingleReturningAccountChooser(
-    const std::vector<IdentityRequestAccountPtr>& accounts,
-    const std::vector<IdentityProviderDataPtr>& idp_list) {
-  std::vector<std::u16string> mismatch_idps;
-  std::vector<std::u16string> non_mismatch_idps;
-  for (const auto& idp : idp_list) {
-    if (idp->has_login_status_mismatch) {
-      mismatch_idps.push_back(base::UTF8ToUTF16(idp->idp_for_display));
-    } else {
-      non_mismatch_idps.push_back(base::UTF8ToUTF16(idp->idp_for_display));
-    }
+void AccountSelectionBubbleView::OnExpandableAccountsScrolled() {
+  float current_offset = expandable_account_scroll_view_->CurrentOffset().y();
+  if (current_offset > max_offset_) {
+    int current_height =
+        expandable_account_scroll_view_->GetVisibleRect().height();
+    expandable_account_scroll_view_->ClipHeightTo(
+        0, std::min(kMaxExpandableAccountsScrollViewHeight,
+                    current_height +
+                        static_cast<int>(current_offset - max_offset_)));
+    max_offset_ = current_offset;
   }
-  CHECK(!accounts.empty() &&
-        accounts[0]->login_state == Account::LoginState::kSignIn);
-  auto content = std::make_unique<views::View>();
-  // Add spacing at the top to make the total spacing between it and the
-  // separator be kVertical spacing, and also add kVertical spacing between
-  // children since there is a separator between them.1
-  content->SetLayoutManager(std::make_unique<views::BoxLayout>(
-      views::BoxLayout::Orientation::kVertical,
-      gfx::Insets::TLBR(kVerticalSpacing - kTopBottomPadding, 0, 0, 0),
-      kVerticalSpacing));
-  std::optional<std::u16string> last_used_string =
-      accounts[0]->login_state == Account::LoginState::kSignIn
-          ? std::make_optional<std::u16string>(
-                l10n_util::GetStringUTF16(IDS_USED_ON_THIS_SITE))
-          : std::nullopt;
-  CHECK(!accounts[0]->is_filtered_out);
-  content->AddChildView(CreateAccountRow(accounts[0],
-                                         /*clickable_position=*/0,
-                                         /*should_include_idp=*/true,
-                                         /*is_modal_dialog=*/false,
-                                         /*additional_vertical_padding=*/0,
-                                         last_used_string));
-  content->AddChildView(std::make_unique<views::Separator>());
-  content->AddChildView(
-      CreateChooseAnAccountButton(mismatch_idps, non_mismatch_idps));
-  return content;
 }
 
 std::unique_ptr<views::View> AccountSelectionBubbleView::CreateIdpLoginRow(
@@ -871,6 +780,9 @@ void AccountSelectionBubbleView::UpdateHeader(const gfx::Image& idp_image,
 }
 
 void AccountSelectionBubbleView::RemoveNonHeaderChildViews() {
+  expandable_account_scroll_view_ = nullptr;
+  on_contents_scrolled_subscription_ = base::CallbackListSubscription();
+  max_offset_ = 0.f;
   const std::vector<raw_ptr<views::View, VectorExperimental>> child_views =
       children();
   for (views::View* child_view : child_views) {
@@ -878,35 +790,6 @@ void AccountSelectionBubbleView::RemoveNonHeaderChildViews() {
       RemoveChildViewT(child_view);
     }
   }
-}
-
-std::unique_ptr<views::View>
-AccountSelectionBubbleView::CreateChooseAnAccountButton(
-    const std::vector<std::u16string>& mismatch_idps,
-    const std::vector<std::u16string>& non_mismatch_idps) {
-  // TODO(crbug.com/325503352): `icon_view` should probably be smaller while
-  // still taking the same amount of space.
-  auto icon_view =
-      std::make_unique<views::ImageView>(ui::ImageModel::FromVectorIcon(
-          kPersonIcon, ui::kColorMenuIcon, kMultiIdpIconSize));
-  auto button = std::make_unique<HoverButton>(
-      base::BindOnce(&FedCmAccountSelectionView::OnChooseAnAccountClicked,
-                     base::Unretained(owner_)),
-      std::move(icon_view),
-      /*title=*/
-      l10n_util::GetStringUTF16(IDS_ACCOUNT_SELECTION_CHOOSE_AN_ACCOUNT_BUTTON),
-      /*subtitle=*/BuildStringFromIDPs(mismatch_idps, non_mismatch_idps),
-      /*secondary_view=*/
-      std::make_unique<views::ImageView>(ui::ImageModel::FromVectorIcon(
-          kKeyboardArrowRightIcon, ui::kColorMenuIcon, kMultiIdpIconSize)));
-  button->SetSubtitleTextStyle(views::style::CONTEXT_LABEL,
-                               views::style::STYLE_SECONDARY);
-  button->SetBorder(views::CreateEmptyBorder(gfx::Insets::VH(
-      /*vertical=*/kMultiIdpVerticalSpacing,
-      /*horizontal=*/kLeftRightPadding)));
-  button->SetIconHorizontalMargins(kMultiIdpIconLeftMargin,
-                                   kMultiIdpIconRightMargin);
-  return button;
 }
 
 BEGIN_METADATA(AccountSelectionBubbleView)

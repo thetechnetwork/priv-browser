@@ -14,8 +14,10 @@
 #include "base/observer_list.h"
 #include "base/observer_list_types.h"
 #include "base/scoped_observation.h"
-#include "chrome/browser/glic/glic.mojom.h"
+#include "base/scoped_observation_traits.h"
+#include "chrome/browser/glic/glic_enabling.h"
 #include "chrome/browser/glic/host/auth_controller.h"
+#include "chrome/browser/glic/host/glic.mojom.h"
 #include "chrome/browser/glic/host/glic_web_client_access.h"
 #include "chrome/browser/profiles/profile.h"
 #include "chrome/browser/ui/browser_window/public/browser_window_interface.h"
@@ -33,6 +35,10 @@ class Point;
 
 namespace glic {
 
+// Distance the detached window should be from the top and the right of the
+// display when opened unassociated to a browser.
+inline constexpr static int kDefaultDetachedTopRightDistance = 48;
+
 DECLARE_CUSTOM_ELEMENT_EVENT_TYPE(kGlicWidgetAttached);
 
 class GlicEnabling;
@@ -44,6 +50,7 @@ class GlicWindowAnimator;
 class ScopedGlicButtonIndicator;
 class GlicFreController;
 class GlicButton;
+enum class AttachChangeReason;
 
 // This class owns and manages the glic window. This class has the same lifetime
 // as the GlicKeyedService, so it exists if and only if the profile exists.
@@ -74,6 +81,37 @@ class GlicWindowController : public views::WidgetObserver,
     virtual void WebUiStateChanged(mojom::WebUiState state) = 0;
   };
 
+  // Logs in to the account and then re-opens the glic widget after reauth.
+  class LogInAndOpen {
+   public:
+    LogInAndOpen() = default;
+    ~LogInAndOpen() = default;
+
+    enum class State {
+      // Indicates that the user needs to log in.
+      kLogIn,
+      // The user is logged in.
+      kPostLogIn,
+    };
+
+    void set_state(State state) { state_ = state; }
+
+    State state() { return state_; }
+
+    void set_attached_browser(Browser* browser) { attached_browser_ = browser; }
+
+    Browser* attached_browser() { return attached_browser_; }
+
+   private:
+    // The current login status. Defaulted to logged in.
+    State state_ = State::kPostLogIn;
+
+    // The browser to invoke the widget from (if the glic button was clicked).
+    // Browser destruction will result in this class getting destroyed, so this
+    // cannot result in a UaF.
+    raw_ptr<Browser> attached_browser_ = nullptr;
+  };
+
   GlicWindowController(const GlicWindowController&) = delete;
   GlicWindowController& operator=(const GlicWindowController&) = delete;
 
@@ -88,6 +126,11 @@ class GlicWindowController : public views::WidgetObserver,
   void Toggle(BrowserWindowInterface* browser,
               bool prevent_close,
               mojom::InvocationSource source);
+
+  // Handle Toggle when AlwaysDetached is true.
+  void ToggleWhenNotAlwaysDetached(Browser* new_attached_browser,
+                                   bool prevent_close,
+                                   mojom::InvocationSource source);
 
   // Attaches glic to the last focused Chrome window.
   void Attach();
@@ -106,6 +149,9 @@ class GlicWindowController : public views::WidgetObserver,
   void Resize(const gfx::Size& size,
               base::TimeDelta duration,
               base::OnceClosure callback);
+
+  // Allows the user to manually resize the widget by dragging.
+  void ShouldEnableDragResize(bool enabled);
 
   // Returns the current size of the glic window.
   gfx::Size GetSize();
@@ -194,6 +240,8 @@ class GlicWindowController : public views::WidgetObserver,
   void OnWidgetDestroyed(views::Widget* widget) override;
   void OnWidgetBoundsChanged(views::Widget* widget,
                              const gfx::Rect& new_bounds) override;
+  void OnWidgetUserResizeStarted() override;
+  void OnWidgetUserResizeEnded() override;
 
   GlicView* GetGlicView();
 
@@ -234,6 +282,10 @@ class GlicWindowController : public views::WidgetObserver,
 
   GlicWindowAnimator* window_animator() { return glic_window_animator_.get(); }
 
+  LogInAndOpen* log_in_and_open() const { return log_in_and_open_.get(); }
+
+  Profile* profile() { return profile_; }
+
   // Helper function to get the always detached flag.
   static bool AlwaysDetached();
 
@@ -246,12 +298,18 @@ class GlicWindowController : public views::WidgetObserver,
 
   gfx::Rect GetInitialDetachedBounds();
 
+  // Get the default detached bounds relative to browser.
+  gfx::Rect GetInitialDetachedBoundsFromBrowser(Browser* browser);
+
   // Performs initialization for the attached/detached opening flows. Important
   // difference: currently attached has an animation, so we immediately show the
   // widget. Detached does not have an animation, and we wait until glic is
   // ready to show anything.
   void OpenAttached(Browser& browser);
-  void OpenDetached();
+
+  // Open detached relative to the browser or in the default detached position
+  // if browser is a nullptr.
+  void OpenDetached(Browser* browser);
 
   // Creates the glic view, waits for the web client to initialize, and then
   // shows the glic window. If `browser` is non-nullptr then glic will be
@@ -298,7 +356,7 @@ class GlicWindowController : public views::WidgetObserver,
 
   // Reparents the glic widget under 'browser' and runs an animation to move it
   // to its target position.
-  void AttachToBrowser(Browser& browser);
+  void AttachToBrowser(Browser& browser, AttachChangeReason reason);
 
   // Clamp the mouse drag offsets to keep glic within the visible region.
   gfx::Vector2d GetClampedMouseDragOffset(const gfx::Vector2d& mouse_offset);
@@ -320,7 +378,7 @@ class GlicWindowController : public views::WidgetObserver,
 
   // Reparents the glic window to an empty holder Widget when in a detached
   // state. Initializes the holder widget if it hasn't been created yet.
-  void MaybeCreateHolderWindowAndReparent();
+  void MaybeCreateHolderWindowAndReparent(AttachChangeReason reason);
 
   // Updates the position of the glic window to that of the glic button of
   // `browser`'s window. This position change is animated if `animate` is true.
@@ -355,6 +413,12 @@ class GlicWindowController : public views::WidgetObserver,
   // Possibly adjusts the size of the window appropriate for the current
   // display workspace, but only if it's different than the current target size.
   void MaybeAdjustSizeForDisplay(bool animate);
+
+  // Create a GlicWidget.
+  std::unique_ptr<GlicWidget> CreateGlicWidget(const gfx::Rect& bounds);
+
+  // Warms the web client and sets `contents_`.
+  void CreateContents();
 
   // Observes the glic widget.
   base::ScopedObservation<views::Widget, views::WidgetObserver>
@@ -397,6 +461,10 @@ class GlicWindowController : public views::WidgetObserver,
   // window to the desired position.
   class AnchorObserver;
   std::unique_ptr<AnchorObserver> anchor_observer_;
+
+  // This class tracks when the user needs to login and opens the glic widget
+  // after logging back in from a paused profile.
+  std::unique_ptr<LogInAndOpen> log_in_and_open_;
 
   // True while RunMoveLoop() has been called on a widget.
   bool in_move_loop_ = false;
@@ -448,5 +516,23 @@ class GlicWindowController : public views::WidgetObserver,
 };
 
 }  // namespace glic
+
+namespace base {
+
+template <>
+struct ScopedObservationTraits<glic::GlicWindowController,
+                               glic::GlicWindowController::StateObserver> {
+  static void AddObserver(glic::GlicWindowController* source,
+                          glic::GlicWindowController::StateObserver* observer) {
+    source->AddStateObserver(observer);
+  }
+  static void RemoveObserver(
+      glic::GlicWindowController* source,
+      glic::GlicWindowController::StateObserver* observer) {
+    source->RemoveStateObserver(observer);
+  }
+};
+
+}  // namespace base
 
 #endif  // CHROME_BROWSER_GLIC_WIDGET_GLIC_WINDOW_CONTROLLER_H_

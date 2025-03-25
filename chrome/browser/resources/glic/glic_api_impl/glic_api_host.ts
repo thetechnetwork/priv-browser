@@ -16,15 +16,15 @@ import type {Url} from '//resources/mojo/url/mojom/url.mojom-webui.js';
 
 import type {BrowserProxy} from '../browser_proxy.js';
 import {ContentSettingsType} from '../content_settings_types.mojom-webui.js';
-import type {FocusedTabCandidate as FocusedTabCandidateMojo, FocusedTabData as FocusedTabDataMojo, GetTabContextOptionsMojoType as TabContextOptionsMojo, InvalidCandidateError as MojoInvalidCandidateError, NoCandidateTabError as MojoNoCandidateTabError, OpenPanelInfo as OpenPanelInfoMojo, PanelOpeningData as PanelOpeningDataMojo, PanelState as PanelStateMojo, ScrollToSelector as ScrollToSelectorMojo, TabContextMojoType as TabContextMojo, TabData as TabDataMojo, WebClientHandlerInterface, WebClientInterface} from '../glic.mojom-webui.js';
-import {WebClientHandlerRemote, WebClientMode, WebClientReceiver} from '../glic.mojom-webui.js';
-import type {ActInFocusedTabParams, DraggableArea, PanelOpeningData, PanelState, Screenshot, ScrollToParams, TabContextOptions, WebPageData} from '../glic_api/glic_api.js';
-import {ActInFocusedTabErrorReason, CaptureScreenshotErrorReason, DEFAULT_INNER_TEXT_BYTES_LIMIT, DEFAULT_PDF_SIZE_LIMIT, GetTabContextErrorReason, InvalidCandidateError, NoCandidateTabError, ScrollToErrorReason} from '../glic_api/glic_api.js';
+import type {FocusedTabData as FocusedTabDataMojo, GetTabContextOptionsMojoType as TabContextOptionsMojo, OpenPanelInfo as OpenPanelInfoMojo, PanelOpeningData as PanelOpeningDataMojo, PanelState as PanelStateMojo, ScrollToSelector as ScrollToSelectorMojo, TabContextMojoType as TabContextMojo, TabData as TabDataMojo, WebClientHandlerInterface, WebClientInterface} from '../glic.mojom-webui.js';
+import {WebClientHandlerRemote, WebClientMode, WebClientReceiver, WebClientSizingMode} from '../glic.mojom-webui.js';
+import type {ActInFocusedTabParams, DraggableArea, PageMetadata, PanelOpeningData, PanelState, Screenshot, ScrollToParams, TabContextOptions, WebPageData} from '../glic_api/glic_api.js';
+import {ActInFocusedTabErrorReason, CaptureScreenshotErrorReason, DEFAULT_INNER_TEXT_BYTES_LIMIT, DEFAULT_PDF_SIZE_LIMIT, ScrollToErrorReason} from '../glic_api/glic_api.js';
 
 import {replaceProperties} from './conversions.js';
 import type {PostMessageRequestHandler} from './post_message_transport.js';
 import {newSenderId, PostMessageRequestReceiver, PostMessageRequestSender, ResponseExtras} from './post_message_transport.js';
-import type {ActInFocusedTabResultPrivate, AnnotatedPageDataPrivate, FocusedTabCandidatePrivate, FocusedTabDataPrivate, HostRequestTypes, PdfDocumentDataPrivate, RequestRequestType, RequestResponseType, RgbaImage, TabContextResultPrivate, TabDataPrivate, TransferableException, WebClientInitialStatePrivate} from './request_types.js';
+import type {ActInFocusedTabResultPrivate, AnnotatedPageDataPrivate, FocusedTabDataPrivate, HostRequestTypes, PdfDocumentDataPrivate, RequestRequestType, RequestResponseType, RgbaImage, TabContextResultPrivate, TabDataPrivate, TransferableException, WebClientInitialStatePrivate} from './request_types.js';
 import {ErrorWithReasonImpl, ImageAlphaType, ImageColorType, requestTypeToHistogramSuffix} from './request_types.js';
 
 export enum WebClientState {
@@ -145,6 +145,13 @@ class WebClientImpl implements WebClientInterface {
         });
   }
 
+  notifyOsLocationPermissionStateChanged(enabled: boolean): void {
+    this.sender.requestNoResponse(
+        'glicWebClientNotifyOsLocationPermissionStateChanged', {
+          enabled: enabled,
+        });
+  }
+
   notifyFocusedTabChanged(focusedTabData: (FocusedTabDataMojo)): void {
     const extras = new ResponseExtras();
     this.sender.requestNoResponse(
@@ -156,6 +163,21 @@ class WebClientImpl implements WebClientInterface {
   notifyPanelActiveChange(panelActive: boolean): void {
     this.sender.requestNoResponse(
         'glicWebClientNotifyPanelActiveChanged', {panelActive});
+  }
+
+  notifyManualResizeChanged(resizing: boolean): void {
+    this.sender.requestNoResponse(
+        'glicWebClientNotifyManualResizeChanged', {resizing});
+  }
+
+  notifyBrowserIsOpenChanged(browserIsOpen: boolean): void {
+    this.sender.requestNoResponse(
+        'glicWebClientBrowserIsOpenChanged', {browserIsOpen});
+  }
+
+  notifyOsHotkeyStateChanged(hotkey: string): void {
+    this.sender.requestNoResponse(
+        'glicWebClientNotifyOsHotkeyStateChanged', {hotkey});
   }
 }
 
@@ -196,8 +218,11 @@ class HostMessageHandler implements HostMessageHandlerInterface {
           patch: chromeVersion[3] || 0,
         },
         scrollToEnabled: loadTimeData.getBoolean('enableScrollTo'),
-        actInFocusedTabEnabled: loadTimeData.getBoolean('enableActInFocusedTab'),
+        actInFocusedTabEnabled:
+            loadTimeData.getBoolean('enableActInFocusedTab'),
         loggingEnabled: loadTimeData.getBoolean('loggingEnabled'),
+        fitWindow: initialState.sizingMode === WebClientSizingMode.kFitWindow,
+        dragResizeEnabled: loadTimeData.getBoolean('enableDragToResizePanel'),
       }),
     };
   }
@@ -264,16 +289,11 @@ class HostMessageHandler implements HostMessageHandlerInterface {
   async glicBrowserGetContextFromFocusedTab(
       request: {options: TabContextOptions}, extras: ResponseExtras):
       Promise<{tabContextResult: TabContextResultPrivate}> {
-    const {
-      result: {errorReason, tabContext},
-    } =
+    const {result: {errorReason, tabContext}} =
         await this.handler.getContextFromFocusedTab(
             tabContextOptionsFromClient(request.options));
     if (!tabContext) {
-      throw new ErrorWithReasonImpl(
-          'tabContext',
-          (errorReason as GetTabContextErrorReason | undefined) ??
-              GetTabContextErrorReason.UNKNOWN);
+      throw new Error(`tabContext failed: ${errorReason}`);
     }
     const tabContextResult = tabContextToClient(tabContext, extras);
 
@@ -316,6 +336,10 @@ class HostMessageHandler implements HostMessageHandlerInterface {
     this.embedder.onGuestResizeRequest(request.size);
     return await this.handler.resizeWidget(
         request.size, timeDeltaFromClient(request.options?.durationMs));
+  }
+
+  glicBrowserEnableDragResize(request: {enabled: boolean}) {
+    return this.handler.enableDragResize(request.enabled);
   }
 
   async glicBrowserCaptureScreenshot(_request: void, extras: ResponseExtras):
@@ -457,6 +481,9 @@ class HostMessageHandler implements HostMessageHandlerInterface {
   }
 
   glicBrowserOpenOsPermissionSettingsMenu(request: {permission: string}) {
+    // Warning: calling openOsPermissionSettingsMenu with unsupported content
+    // setting type will terminate the render process (bad mojo message). Update
+    // GlicWebClientHandler:OpenOsPermissionSettingsMenu with any new types.
     switch (request.permission) {
       case 'media':
         return this.handler.openOsPermissionSettingsMenu(
@@ -466,6 +493,10 @@ class HostMessageHandler implements HostMessageHandlerInterface {
             ContentSettingsType.GEOLOCATION);
     }
     return Promise.resolve();
+  }
+
+  glicBrowserGetOsMicrophonePermissionStatus(): Promise<{enabled: boolean}> {
+    return this.handler.getOsMicrophonePermissionStatus();
   }
 }
 
@@ -490,7 +521,10 @@ class OneShotTimer {
   // Cancels any running timer, starts a new one. Callback is only
   // run if the timer is not reset first.
   start(callback: () => void): void {
-    this.startPromise().then(callback);
+    this.startPromise().then(callback).catch(
+        () => {
+            // Catch and ignore timer reset.
+        });
   }
 
   // Cancels any running timer, starts a new one. Resolves when
@@ -612,7 +646,7 @@ export class GlicApiHost implements PostMessageRequestHandler {
           const timeoutPromise = new Promise((_, reject) => {
             timeoutId = setTimeout(
                 () => reject(
-                    new Error('No response received within the timeout.')),
+                    new Error('No response received from Glic web client.')),
                 timeoutMs);
           });
 
@@ -642,11 +676,12 @@ export class GlicApiHost implements PostMessageRequestHandler {
     }
   }
 
-  async startUnresponsiveUiTimer() {
-    await this.webClientUnresponsiveUiTimer.startPromise();
-    this.webClientState = WebClientState.ERROR;
-    this.embedder?.webClientStateChanged(WebClientState.ERROR);
-    this.stopWebClientResponsivenessCheck();
+  startUnresponsiveUiTimer() {
+    this.webClientUnresponsiveUiTimer.start(() => {
+      this.webClientState = WebClientState.ERROR;
+      this.embedder?.webClientStateChanged(WebClientState.ERROR);
+      this.stopWebClientResponsivenessCheck();
+    });
   }
 
   stopUnresponsiveUiTimer() {
@@ -779,6 +814,10 @@ function originToClient(origin: Origin): string {
   return originBase;
 }
 
+function tabDataToClient(
+    tabData: TabDataMojo, extras: ResponseExtras): TabDataPrivate;
+function tabDataToClient(tabData: TabDataMojo|null, extras: ResponseExtras):
+    TabDataPrivate|undefined;
 function tabDataToClient(tabData: TabDataMojo|null, extras: ResponseExtras):
     TabDataPrivate|undefined {
   if (!tabData) {
@@ -803,59 +842,25 @@ function tabDataToClient(tabData: TabDataMojo|null, extras: ResponseExtras):
   };
 }
 
-function focusedTabCandidateToClient(
-    focusedTabCandidate: FocusedTabCandidateMojo,
-    extras: ResponseExtras): FocusedTabCandidatePrivate {
-  const focusedTabCandidateData =
-      tabDataToClient(focusedTabCandidate.focusedTabCandidateData, extras);
-  const invalidCandidateError =
-      invalidCandidateErrorToClient(focusedTabCandidate.invalidCandidateError);
-  return {
-    focusedTabCandidateData,
-    invalidCandidateError,
-  };
-}
-
 function focusedTabDataToClient(
     focusedTabData: FocusedTabDataMojo,
     extras: ResponseExtras): FocusedTabDataPrivate {
   if (focusedTabData.focusedTab) {
     return {
-      focusedTab: tabDataToClient(focusedTabData.focusedTab, extras),
+      hasFocus: {tabData: tabDataToClient(focusedTabData.focusedTab, extras)},
     };
   }
-  if (focusedTabData.focusedTabCandidate) {
+  if (focusedTabData.noFocusedTabData) {
     return {
-      focusedTabCandidate: focusedTabCandidateToClient(
-          focusedTabData.focusedTabCandidate, extras),
+      hasNoFocus: {
+        tabFocusCandidateData: tabDataToClient(
+            focusedTabData.noFocusedTabData.activeTabData, extras),
+        noFocusReason: focusedTabData.noFocusedTabData.noFocusReason,
+      },
     };
   }
-  if (focusedTabData.noCandidateTabError) {
-    return {
-      noCandidateTabError:
-          noCandidateTabErrorToClient(focusedTabData.noCandidateTabError),
-    };
-  }
-  return {noCandidateTabError: NoCandidateTabError.UNKNOWN};
-}
-
-function invalidCandidateErrorToClient(
-    mojoReason: MojoInvalidCandidateError|null): InvalidCandidateError|
-    undefined {
-  if (!mojoReason) {
-    return undefined;
-  }
-  return (mojoReason.valueOf() as InvalidCandidateError | undefined) ??
-      InvalidCandidateError.UNKNOWN;
-}
-
-function noCandidateTabErrorToClient(mojoReason: MojoNoCandidateTabError|null):
-    NoCandidateTabError|undefined {
-  if (!mojoReason) {
-    return undefined;
-  }
-  return (mojoReason.valueOf() as NoCandidateTabError) ??
-      NoCandidateTabError.UNKNOWN;
+  console.error('Invalid FocusedTabDataMojo');
+  return {};
 }
 
 function getArrayBufferFromBigBuffer(bigBuffer: BigBuffer): ArrayBuffer|
@@ -979,7 +984,14 @@ function tabContextToClient(
     if (annotatedPageContent) {
       extras.addTransfer(annotatedPageContent);
     }
-    annotatedPageData = {annotatedPageContent};
+    let metadata: PageMetadata|undefined = undefined;
+    if (tabContext.annotatedPageData.metadata) {
+      metadata = {
+        frameMetadata: tabContext.annotatedPageData.metadata.frameMetadata.map(
+          m => replaceProperties(m, {url: urlToClient(m.url)})),
+      };
+    }
+    annotatedPageData = {annotatedPageContent, metadata};
   }
 
   return {
@@ -1000,6 +1012,7 @@ function tabContextOptionsFromClient(options: TabContextOptions):
     includeViewportScreenshot: options.viewportScreenshot ?? false,
     includePdf: options.pdfData ?? false,
     includeAnnotatedPageContent: options.annotatedPageContent ?? false,
+    maxMetaTags: options.maxMetaTags ?? 0,
     pdfSizeLimit: options.pdfSizeLimit === undefined ?
         DEFAULT_PDF_SIZE_LIMIT :
         Math.min(Number.MAX_SAFE_INTEGER, options.pdfSizeLimit),

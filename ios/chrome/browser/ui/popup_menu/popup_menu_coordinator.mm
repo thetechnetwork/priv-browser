@@ -49,7 +49,7 @@
 #import "ios/chrome/browser/shared/public/commands/overflow_menu_customization_commands.h"
 #import "ios/chrome/browser/shared/public/commands/page_info_commands.h"
 #import "ios/chrome/browser/shared/public/commands/popup_menu_commands.h"
-#import "ios/chrome/browser/shared/public/commands/price_notifications_commands.h"
+#import "ios/chrome/browser/shared/public/commands/price_tracked_items_commands.h"
 #import "ios/chrome/browser/shared/public/commands/qr_scanner_commands.h"
 #import "ios/chrome/browser/shared/public/commands/quick_delete_commands.h"
 #import "ios/chrome/browser/shared/public/commands/reminder_notifications_commands.h"
@@ -244,8 +244,7 @@ using base::UserMetricsAction;
       webContentAreaOverlayPresenter:overlayPresenter];
 
   feature_engagement::Tracker* tracker =
-      feature_engagement::TrackerFactory::GetForProfile(
-          self.browser->GetProfile());
+      feature_engagement::TrackerFactory::GetForProfile(self.profile);
 
   // Create the overflow menu mediator first so the popup mediator isn't created
   // if not needed.
@@ -305,7 +304,7 @@ using base::UserMetricsAction;
     mediator.popupMenuHandler =
         HandlerForProtocol(dispatcher, PopupMenuCommands);
     mediator.priceNotificationHandler =
-        HandlerForProtocol(dispatcher, PriceNotificationsCommands);
+        HandlerForProtocol(dispatcher, PriceTrackedItemsCommands);
     mediator.reminderNotificationsHandler =
         HandlerForProtocol(dispatcher, ReminderNotificationsCommands);
     mediator.textZoomHandler = HandlerForProtocol(dispatcher, TextZoomCommands);
@@ -419,9 +418,9 @@ using base::UserMetricsAction;
   }
 
   self.mediator = [[PopupMenuMediator alloc]
-         initWithIsIncognito:self.browser->GetProfile()->IsOffTheRecord()
+         initWithIsIncognito:self.profile->IsOffTheRecord()
             readingListModel:ReadingListModelFactory::GetForProfile(
-                                 self.browser->GetProfile())
+                                 self.profile)
       browserPolicyConnector:GetApplicationContext()
                                  ->GetBrowserPolicyConnector()];
   self.mediator.engagementTracker = tracker;
@@ -431,10 +430,10 @@ using base::UserMetricsAction;
   self.mediator.lensCommandsHandler =
       HandlerForProtocol(self.browser->GetCommandDispatcher(), LensCommands);
   self.mediator.bookmarkModel =
-      ios::BookmarkModelFactory::GetForProfile(self.browser->GetProfile());
-  self.mediator.prefService = self.browser->GetProfile()->GetPrefs();
+      ios::BookmarkModelFactory::GetForProfile(self.profile);
+  self.mediator.prefService = self.profile->GetPrefs();
   self.mediator.templateURLService =
-      ios::TemplateURLServiceFactory::GetForProfile(self.browser->GetProfile());
+      ios::TemplateURLServiceFactory::GetForProfile(self.profile);
   self.mediator.popupMenu = tableViewController;
   self.mediator.webContentAreaOverlayPresenter = overlayPresenter;
   self.mediator.URLLoadingBrowserAgent =
@@ -450,7 +449,7 @@ using base::UserMetricsAction;
   self.actionHandler.baseViewController = self.baseViewController;
   self.actionHandler.dispatcher = static_cast<
       id<ApplicationCommands, BrowserCommands, FindInPageCommands,
-         LoadQueryCommands, PriceNotificationsCommands, TextZoomCommands>>(
+         LoadQueryCommands, PriceTrackedItemsCommands, TextZoomCommands>>(
       self.browser->GetCommandDispatcher());
   self.actionHandler.bookmarksCommandsHandler = HandlerForProtocol(
       self.browser->GetCommandDispatcher(), BookmarksCommands);
@@ -739,12 +738,11 @@ using base::UserMetricsAction;
 #pragma mark - Private
 
 - (void)trackToolsMenuNoHorizontalScrollOrAction {
-  ProfileIOS* profile = self.browser->GetProfile();
-  if (!profile) {
+  if (!self.profile) {
     return;
   }
   feature_engagement::Tracker* tracker =
-      feature_engagement::TrackerFactory::GetForProfile(profile);
+      feature_engagement::TrackerFactory::GetForProfile(self.profile);
   if (!tracker) {
     return;
   }
@@ -754,13 +752,12 @@ using base::UserMetricsAction;
 }
 
 - (void)logFeatureEngagementCustomizationStarted {
-  ProfileIOS* profile = self.browser->GetProfile();
-  if (!profile) {
+  if (!self.profile) {
     return;
   }
 
   feature_engagement::Tracker* tracker =
-      feature_engagement::TrackerFactory::GetForProfile(profile);
+      feature_engagement::TrackerFactory::GetForProfile(self.profile);
   if (!tracker) {
     return;
   }

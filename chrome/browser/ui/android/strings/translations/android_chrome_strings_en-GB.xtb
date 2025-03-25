@@ -11,6 +11,7 @@
 <translation id="103269572468856066">Also clear data from these sites &amp; apps?</translation>
 <translation id="1034259925032978114">Window is open</translation>
 <translation id="1036348656032585052">Turn off</translation>
+<translation id="1045448422538531528">Add to group</translation>
 <translation id="1045899828449635435">Also clear data from these sites?</translation>
 <translation id="1049743911850919806">Incognito</translation>
 <translation id="1052842760770519282">Some of your passwords aren't accessible</translation>
@@ -432,7 +433,6 @@ Only someone with your passphrase can read your encrypted data. The passphrase i
 <translation id="2981364137500752533">You can have up to 5 windows.</translation>
 <translation id="2983102365694924129">Based on your activity on a site. This setting is off.</translation>
 <translation id="2984978667043170458">Include surrounding text in Google searches</translation>
-<translation id="2988638966064514052">Strengthen your passwords</translation>
 <translation id="2989523299700148168">Recently Visited</translation>
 <translation id="2992473221983447149">Image descriptions</translation>
 <translation id="2996291259634659425">Create passphrase</translation>
@@ -536,6 +536,7 @@ Only someone with your passphrase can read your encrypted data. The passphrase i
 <translation id="3513704683820682405">Augmented Reality</translation>
 <translation id="3516053221628030540">Go to Google Play</translation>
 <translation id="3518985090088779359">Accept &amp; continue</translation>
+<translation id="351952459507671940">Add to new group</translation>
 <translation id="3521388823983121502">Can't continue with <ph name="IDENTITY_PROVIDER_ETLD_PLUS_ONE" />.</translation>
 <translation id="3522247891732774234">Update available. More options</translation>
 <translation id="3523789730715594198">You can stop syncing at any time in Settings. Google may personalise Search and other services based on your history.</translation>
@@ -548,7 +549,6 @@ Only someone with your passphrase can read your encrypted data. The passphrase i
 <translation id="3557336313807607643">Add to contacts</translation>
 <translation id="3563767357928833671">Clipboard contents shown</translation>
 <translation id="3566639033325271639">Update settings</translation>
-<translation id="3568945271227339929">No compromised passwords</translation>
 <translation id="3575464060651642446">Checking passwords on this device…</translation>
 <translation id="3577473026931028326">Something went wrong. Try again.</translation>
 <translation id="3577558748185201054">Manage your interests and preferences</translation>
@@ -584,6 +584,7 @@ Only someone with your passphrase can read your encrypted data. The passphrase i
 <translation id="3721119614952978349">You and Google</translation>
 <translation id="3737319253362202215">Translation settings</translation>
 <translation id="3738139272394829648">Touch to Search</translation>
+<translation id="3739455665973395693">No compromised passwords in your Google Account</translation>
 <translation id="3739899004075612870">Bookmarked in <ph name="PRODUCT_NAME" /></translation>
 <translation id="3740525748616366977">Voice search is not available on this device</translation>
 <translation id="376561056759077985">Some data isn't saved yet</translation>
@@ -637,6 +638,7 @@ Only someone with your passphrase can read your encrypted data. The passphrase i
 <translation id="3985215325736559418">Do you want to download <ph name="FILE_NAME" /> again?</translation>
 <translation id="3987993985790029246">Copy link</translation>
 <translation id="4000212216660919741">Offline Home</translation>
+<translation id="4015643064997321279">{NUM_PASSWORDS,plural, =1{1 compromised password in your Google Account}other{# compromised passwords in your Google Account}}</translation>
 <translation id="4016425174436051808">Can’t follow. Something went wrong.</translation>
 <translation id="4024768890073681126">Your browser is managed by your parent</translation>
 <translation id="4034817413553209278">{HOURS,plural, =1{# hr}other{# hrs}}</translation>
@@ -692,6 +694,7 @@ Only someone with your passphrase can read your encrypted data. The passphrase i
 <translation id="4270730597186910506">Track or untrack a product.</translation>
 <translation id="4277529130885813215">Use another device</translation>
 <translation id="4282440837784183472">Your organisation, <ph name="MANAGED_DOMAIN" />, manages the account that you're signing in to and how Chrome can be used. Your administrator can set up or restrict certain features.</translation>
+<translation id="4285498937028063278">Unpin</translation>
 <translation id="4285846616383034558">Cookies, cache and other site data</translation>
 <translation id="4291407919474070700"><ph name="BEGIN_LINK" />Turn on screen lock in Android settings<ph name="END_LINK" /></translation>
 <translation id="4296252229500326964">New Incognito tab</translation>
@@ -831,6 +834,7 @@ Your Google Account may have other forms of browsing history such as searches an
 <translation id="4881695831933465202">Open</translation>
 <translation id="488187801263602086">Rename file</translation>
 <translation id="4885273946141277891">Unsupported number of Chrome instances.</translation>
+<translation id="4890973535105146893">No saved passwords in your Google Account</translation>
 <translation id="4905823827770127520">Include a link to the page</translation>
 <translation id="4908869848243824489">Discover by Google</translation>
 <translation id="4910889077668685004">Payment apps</translation>
@@ -920,6 +924,7 @@ Your Google Account may have other forms of browsing history such as searches an
 <translation id="5317780077021120954">Save</translation>
 <translation id="5319359161174645648">Google recommends Chrome</translation>
 <translation id="5326246328175179736">You can't sign in using this account</translation>
+<translation id="5327248766486351172">Name</translation>
 <translation id="5328542107300944283">Use with <ph name="IDENTITY_PROVIDER_ETLD_PLUS_ONE" /></translation>
 <translation id="5342314432463739672">Permission requests</translation>
 <translation id="534580735623577507">No sites from the <ph name="TIME_PERIOD" /></translation>
@@ -1055,7 +1060,6 @@ Your Google Account may have other forms of browsing history such as searches an
 <translation id="5958275228015807058">Find your files and pages in Downloads</translation>
 <translation id="5958994127112619898">Simplify page</translation>
 <translation id="5962718611393537961">Tap to collapse</translation>
-<translation id="5964180026566797835">Can't check passwords</translation>
 <translation id="5964869237734432770">Stop image descriptions</translation>
 <translation id="5977976211062815271">On this device</translation>
 <translation id="5978661847409534366">{ITEMS_COUNT,plural, =1{1 page on your reading list}other{# pages on your reading list}}</translation>
@@ -1076,6 +1080,7 @@ Your Google Account may have other forms of browsing history such as searches an
 <translation id="605721222689873409">YY</translation>
 <translation id="6059830886158432458">Control your stories and activity here</translation>
 <translation id="6071995715087444295">To check for compromised passwords, sign in to your Google Account</translation>
+<translation id="6078323886959318429">Add shortcut</translation>
 <translation id="6085886413119427067">Determines how to connect to websites over a secure connection</translation>
 <translation id="6087286598828478206">Block and leave group?</translation>
 <translation id="60923314841986378"><ph name="HOURS" /> hours left</translation>
@@ -1099,6 +1104,7 @@ Your Google Account may have other forms of browsing history such as searches an
 <translation id="6150320133806434356">Bookmark saved</translation>
 <translation id="6150706324143004339">To use and save Chrome data in your Google Account, update Chrome</translation>
 <translation id="6154478581116148741">Turn on screen lock in Settings to export your passwords from this device</translation>
+<translation id="6156323911414505561">Show bookmarks bar</translation>
 <translation id="6162892189396105610">Preloads pages that Chrome thinks that you are likely to visit.</translation>
 <translation id="6170675927290506430">Go to notification settings</translation>
 <translation id="6186394685773237175">No compromised passwords found</translation>
@@ -1703,6 +1709,7 @@ To change this setting, <ph name="BEGIN_LINK" />delete the Chrome data in your a
 <translation id="869891660844655955">Expiry date</translation>
 <translation id="8699120352855309748">Don’t offer to translate these languages</translation>
 <translation id="8712637175834984815">Got it</translation>
+<translation id="8715286883001906001">Strengthen your passwords in your Google Account</translation>
 <translation id="8723453889042591629">Quickly translate this page. To edit this shortcut, touch and hold.</translation>
 <translation id="8725066075913043281">Try again</translation>
 <translation id="8731268612289859741">Security code</translation>
@@ -1830,6 +1837,7 @@ To change this setting, <ph name="BEGIN_LINK" />delete the Chrome data in your a
 <translation id="970715775301869095"><ph name="MINUTES" /> mins left</translation>
 <translation id="981121421437150478">Offline</translation>
 <translation id="983192555821071799">Close all tabs</translation>
+<translation id="984756705737569814">Can't check passwords in your Google Account</translation>
 <translation id="987264212798334818">General</translation>
 <translation id="988091779042748639">To delete Incognito browsing history from your device, close all Incognito tabs.</translation>
 <translation id="992745192656291733"><ph name="TAB_COUNT" /> tabs</translation>

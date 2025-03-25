@@ -320,6 +320,7 @@
       name: "AIPromptAPIForExtension",
       public: true,
       origin_trial_feature_name: "AIPromptAPIForExtension",
+      origin_trial_allows_third_party: true,
       status: "test",
       base_feature_status: "enabled",
       copied_from_base_feature_if: "overridden",
@@ -344,6 +345,7 @@
       public: true,
       status: "test",
       origin_trial_feature_name: "AISummarizationAPI",
+      origin_trial_allows_third_party: true,
       base_feature_status: "enabled",
       copied_from_base_feature_if: "overridden",
     },
@@ -433,16 +435,21 @@
     },
     {
       name: "AriaNotify",
-      status: "test",
+      status: {"Android": "test", "Win": "test", "Mac": "test", "Linux": "test"},
       implied_by: ["AriaNotifyV2"],
     },
     {
       name: "AriaNotifyV2",
-      status: "test",
+      status: {"Android": "test", "Win": "test", "Mac": "test", "Linux": "test"},
     },
     {
       name: "AriaRowColIndexText",
       status: "stable",
+    },
+    {
+      // When enabled, perform async IPCs from CookieJar::SetCookie to the
+      // network service.
+      name: "AsyncSetCookie",
     },
     // This flag specifically guards live Range (and by extension, selection)
     // preservation for atomic move (`moveBefore()`). This is not part of the
@@ -568,11 +575,6 @@
         "Mac": "stable",
         "default": "test",
       },
-    },
-    {
-      // https://docs.google.com/document/d/1FY3AINZW_h2GU81U-XPQz8bKT6wgt0u7Z9GF4o7_Llk/edit?resourcekey=0-lQnRY9BK0iclRRV62LgVDQ
-      name: "BeaconLeakageLogging",
-      public: true,
     },
     {
       name: "BidiCaretAffinity",
@@ -707,9 +709,19 @@
       status: "experimental",
     },
     {
-      // https://crbug.com/377325952
+      // No status because this blink runtime feature doesn't work by itself.
+      // It's controlled by the corresponding Chromium feature,
+      // fingerprinting_protection_interventions::features::kCanvasNoise through
+      // modified_runtime_features and setting its status in the browser
+      // process.
       name: "CanvasInterventions",
       browser_process_read_write_access: true,
+    },
+    {
+      // This allows testing the canvas noise interventions in tests (which in
+      // most cases don't have a CPU). In practice the interventions are only
+      // enabled for GPU-rendered canvases.
+      name: "CanvasInterventionsOnCpuForTesting",
     },
     {
       // https://github.com/Igalia/explainers/blob/main/canvas-formatted-text/html-in-canvas.md
@@ -719,11 +731,12 @@
     {
       // https://chromestatus.com/feature/5066778773028864
       name: "CanvasTextLang",
-      status: "experimental",
+      status: "stable",
     },
     {
       // crbug.com/389726691.
       name: "CanvasTextNg",
+      origin_trial_feature_name: "CanvasTextNg",
       status: "experimental",
     },
     {
@@ -860,6 +873,9 @@
       public: true,
       status: {"Android": "stable"},
       base_feature: "none",
+    },
+    {
+      name: "CompositingDecisionAtAnimationPhaseBoundaries"
     },
     {
       name: "CompositionForegroundMarkers",
@@ -1023,7 +1039,7 @@
       // Replaces `string` type in CSS attr() function syntax with `raw-string`.
       // https://github.com/w3c/csswg-drafts/issues/11645#issuecomment-2701601350
       name: "CSSAttrRawString",
-      status: "experimental",
+      status: "stable",
     },
     {
       // https://chromestatus.com/feature/5125388091260928
@@ -1060,6 +1076,12 @@
       name: "CSSComputedStyleFullPseudoElementParser",
       status: "stable",
     },
+    // https://drafts.csswg.org/css-values-5/#progress
+    // container-progress()
+    {
+      name: "CSSContainerProgressNotation",
+      status: "experimental",
+    },
     {
       // https://drafts.csswg.org/css-borders-4/#corner-shaping
       name: "CSSCornerShape",
@@ -1078,7 +1100,7 @@
     },
     {
       name: "CSSDynamicRangeLimit",
-      status: "experimental",
+      status: "stable",
     },
     {
       // Include custom properties in CSSComputedStyleDeclaration::item/length.
@@ -1165,6 +1187,12 @@
       name: "CSSMasonryLayout",
       status: "test",
     },
+    // https://drafts.csswg.org/css-values-5/#progress
+    // media-progress()
+    {
+      name: "CSSMediaProgressNotation",
+      status: "experimental",
+    },
     {
       name: "CSSMixins",
       status: "test",
@@ -1191,10 +1219,10 @@
       status: "experimental",
     },
     // https://drafts.csswg.org/css-values-5/#progress
-    // progress(), media-progress(), container-progress()
+    // progress()
     {
       name: "CSSProgressNotation",
-      status: "stable",
+      status: "experimental",
     },
     {
       // For ::column pseudo element for fragment styling.
@@ -1353,7 +1381,7 @@
     },
     {
       name: "CSSSignRelatedFunctions",
-      status: "stable",
+      status: "experimental",
     },
     {
       name: "CSSSnapContainerQueries",
@@ -1404,6 +1432,12 @@
       // [1] https://drafts.csswg.org/css-scoping-1/#shadow-names
       name: "CSSTreeScopedTimelines",
     },
+    {
+      // The var() fallback does not validate against the type
+      // of the custom property being referenced.
+      name: "CSSTypeAgnosticVarFallback",
+      status: "stable",
+    },
     // Support for `user-select:contain`.
     {
       name: "CSSUserSelectContain",
@@ -1443,6 +1477,13 @@
     {
       // https://chromestatus.com/feature/5134293578285056
       name: "Database",
+    },
+    {
+      // Fix HandleMouseFocus selection for delegated focus text control.
+      // See https://crbug.com/400317114
+      // This feature was shipped in M136, so this flag can be removed in M138.
+      name: "DelegatesFocusTextControlFix",
+      status: "stable",
     },
     // This allows pages to opt out of the unload deprecation. Enabling this
     // allows unload event handers to be used in the frame regardless of any
@@ -1551,11 +1592,6 @@
       name: "DirectSocketsInSharedWorkers",
       status: "test",
       depends_on: ["DirectSockets"],
-    },
-    {
-      // Disables anti-aliasing for the Ahem font. Anti-aliasing this font breaks a
-      // significant amount of WPT test expectations.
-      name: "DisableAhemAntialias",
     },
     {
       name: "DisableDifferentOriginSubframeDialogSuppression",
@@ -1894,6 +1930,7 @@
     {
       name: "FedCmMultipleIdentityProviders",
       depends_on: ["FedCm"],
+      status: "experimental",
       base_feature: "none",
       public: true,
       origin_trial_feature_name: "FedCmMultipleIdentityProviders",
@@ -1967,8 +2004,9 @@
       status: "stable",
     },
     {
+      // Killswitch M136.
       name: "FewerSubsequences",
-      status: "experimental",
+      status: "stable",
     },
     {
       // Also enabled when blink::features::kFileHandlingAPI is overridden
@@ -2121,8 +2159,13 @@
       status: "test",
     },
     {
-      name: "FledgeTrustedSignalsKVv2Support",
+      name: "FledgeTrustedSignalsKVv2ContextualData",
+      depends_on: ["FledgeTrustedSignalsKVv2Support"],
       status: "test",
+    },
+    {
+      name: "FledgeTrustedSignalsKVv2Support",
+      status: "stable",
     },
     {
       name: "FluentOverlayScrollbars",
@@ -2362,6 +2405,7 @@
       name: "HTMLInterestTargetAttribute",
       status: "experimental",
       origin_trial_feature_name: "HTMLInterestTargetAttribute",
+      origin_trial_allows_third_party: true,
     },
     {
       // A flag, just for local testing to make the
@@ -2568,6 +2612,7 @@
       name: "LanguageDetectionAPI",
       status: "experimental",
       origin_trial_feature_name: "LanguageDetectionAPI",
+      origin_trial_allows_third_party: true,
       base_feature_status: "enabled",
       copied_from_base_feature_if: "overridden",
     },
@@ -2589,6 +2634,10 @@
       status: "stable",
     },
     {
+      name: "LayoutMinSizeIndefinite",
+      status: "stable",
+    },
+    {
       name: "LayoutNGShapeCache",
       status: "test",
       base_feature: "LayoutNGShapeCache",
@@ -2596,6 +2645,10 @@
     {
       name: "LayoutStretch",
       status: "experimental",
+    },
+    {
+      name: "LayoutWebkitBoxTreeFix",
+      status: "stable",
     },
     {
       name: "LazyInitializeMediaControls",
@@ -2750,7 +2803,7 @@
       // This uses media::VideoEncoder implementation in MediaRecorder API
       // instead of using MediaRecorder own video encoder implementation.
       name: "MediaRecorderUseMediaVideoEncoder",
-      status: {"Android": "", "default": "stable"},
+      status: "stable",
     },
     {
       name: "MediaSession",
@@ -2832,14 +2885,6 @@
       base_feature: "none",
       is_protected_feature: true,
     },
-    {
-      // Fix HandleMouseFocus and FrameSelection to use FlatTree parent so
-      // correct fallback element receives focus.
-      // See https://crbug.com/41420461
-      // This feature was shipped in M133, so this flag can be removed in M135.
-      name: "MouseFocusFlatTreeParent",
-      status: "stable",
-    },
     // Move the selection to the last position in the list item. See
     // https://crbug.com/331841851
     {
@@ -2849,6 +2894,10 @@
     {
       name: "MoveToParagraphStartOrEndSkipsNonEditable",
       status: "stable",
+    },
+    {
+      name: "MulticolColumnWrapping",
+      status: "experimental",
     },
     {
       name: "MultipleImportMaps",
@@ -2936,13 +2985,7 @@
       // "virtual/text-antialias/" virtual test suite.
       // crbug.com/339041663
       name: "NoFontAntialiasing",
-      status: {
-        "Win": "test",
-        "Mac": "test",
-        "Linux": "test",
-        "Android": "test",
-        "default": ""
-      }
+      status: "test",
     },
     {
       name: "NoIdleEncodingForWebTests",
@@ -3016,17 +3059,14 @@
       status: "test"
     },
     {
-      name: "OnDeviceChange",
-      status: "stable"
-    },
-    {
       name: "OnDeviceWebSpeechAvailable",
       status: "experimental",
     },
     {
       // This flag makes the <option> element's label attribute render the
       // contents of the label attribute even if it is only whitespace in order
-      // to match the spec and firefox.
+      // to match the spec and firefox. It also stops stripping/simplifying
+      // whitespace when using the label attribute for rendering.
       // https://github.com/whatwg/html/issues/10955
       name: "OptionLabelAttributeWhitespace",
       status: "stable",
@@ -3339,7 +3379,7 @@
     },
     {
       name: "PotentialPermissionsPolicyReporting",
-      status: "experimental",
+      status: "stable",
     },
     {
       name: "PreciseMemoryInfo",
@@ -3517,18 +3557,26 @@
      status: "stable",
     },
     {
+      name: "RangeBasedTextFind",
+      status: "stable",
+    },
+    {
       name: "RasterInducingScroll",
-      status: "test",
+      status: {
+        "Linux": "stable",
+        "Win": "stable",
+        "default": "test",
+      }
     },
     {
       name: "ReadableStreamAsyncIterable",
       status: "stable",
     },
-    // If enabled, the Accept-Language header will be reduced.
+    // If enabled, both Accept-Language HTTP header and JavaScript getter will
+    // be reduced.
     {
       name: "ReduceAcceptLanguage",
       base_feature: "none",
-      origin_trial_feature_name: "ReduceAcceptLanguage"
     },
     {
       // If enabled, the deviceModel will be reduced to "K" and the
@@ -3551,6 +3599,11 @@
       name: "ReduceUserAgentPlatformOsCpu",
       depends_on: ["ReduceUserAgentMinorVersion"],
       status: {"Android": "", "default": "stable"},
+    },
+    {
+      // Killswitch M136.
+      name: "ReferenceFilterOutputBounds",
+      status: "stable",
     },
     {
       name: "RegionCapture",
@@ -3873,9 +3926,12 @@
       name: "ScrollTopLeftInterop",
       status: "stable",
     },
+    // Allows CSS styling of browser search results.
+    // https://issues.chromium.org/issues/339298411
+    // https://chromestatus.com/feature/5195073796177920
     {
       name: "SearchTextHighlightPseudo",
-      status: "test",
+      status: "experimental",
     },
     // SecurePaymentConfirmation has shipped on some platforms, but its
     // availability is controlled by the browser process (via the
@@ -3940,11 +3996,8 @@
       status: "experimental",
     },
     {
-      // Update HandleMousePressEvent to continue handling event, even after a
-      // focus slided from shadow host with delegatesFocus.
-      // See https://crbug.com/40622041
-      // This feature was shipped in M133, so this flag can be removed in M135.
-      name: "SelectionOnShadowDOMWithDelegatesFocus",
+      // See https://crbug.com/395544401
+      name: "SelectionUpdateToInitialSelectionInListify",
       status: "stable",
     },
     {
@@ -4102,10 +4155,6 @@
       origin_trial_allows_third_party: true,
     },
     {
-      name: "SiteInitiatedMirroring",
-      status: "experimental",
-    },
-    {
       name: "SkipAd",
       depends_on: ["MediaSession"],
       status: "stable",
@@ -4193,6 +4242,10 @@
       name: "SpeculationRulesPrefetchWithSubresources",
     },
     {
+      name: "SpeculationRulesTag",
+      status: "experimental",
+    },
+    {
       // Enables to run prerendering for new tabs (e.g., target="_blank").
       // See https://crbug.com/1350676.
       name: "SpeculationRulesTargetHint",
@@ -4234,12 +4287,8 @@
     },
     {
       name: "StandardizedTimerClamping",
-      status: "experimental",
-      public: true,
-    },
-    {
-      name: "StaticAnimationOptimization",
       status: "stable",
+      public: true,
     },
     {
       name: "StorageBuckets",
@@ -4297,10 +4346,6 @@
     },
     {
       name: "SvgNoPixelSnappingScaleAdjustment",
-      status: "stable",
-    },
-    {
-      name: "SvgViewportOptimization",
       status: "stable",
     },
     {
@@ -4378,6 +4423,10 @@
       status: "stable",
     },
     {
+      name: "TextAutoSizingDisabledOnFlexbox",
+      status: "stable",
+    },
+    {
       // crbug.com/389726691
       name: "TextCombineEmphasisNG",
       status: "stable",
@@ -4413,6 +4462,11 @@
     },
     {
       name: "TextMetricsBaselines",
+      status: "stable",
+    },
+    {
+      // crbug.com/396666438
+      name: "TextOffsetMapCrashFix",
       status: "stable",
     },
     {
@@ -4517,6 +4571,7 @@
       name: "TranslationAPI",
       status: "test",
       origin_trial_feature_name: "TranslationAPI",
+      origin_trial_allows_third_party: true,
       base_feature_status: "enabled",
       copied_from_base_feature_if: "overridden",
       implied_by: ["TranslationAPIV1"],
@@ -4876,10 +4931,6 @@
       status: "stable",
     },
     {
-      name: "WebAuthenticationLargeBlobExtension",
-      status: "stable",
-    },
-    {
       name: "WebAuthenticationNewBfCacheHandlingBlink",
       // No status because this blink runtime feature doesn't work by itself.
       // It's controlled by the corresponding Chromium feature which needs to
@@ -5106,7 +5157,6 @@
       // on a worker thread.
       name: "WebUIBundledCodeCacheAsyncFetch",
       status: "experimental",
-      base_feature: "none",
     },
     {
       name: "WebUSB",

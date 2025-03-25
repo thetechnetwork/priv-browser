@@ -74,17 +74,6 @@ constexpr base::TimeDelta kSyncOperationTimeout = base::Seconds(10);
 - (AppLaunchConfiguration)appConfigurationForTestCase {
   AppLaunchConfiguration config = [super appConfigurationForTestCase];
 
-  // TODO(b/298795580): Remove this once the User Policy field trial config is
-  // merged.
-  config.features_enabled.push_back(
-      policy::kUserPolicyForSigninAndNoSyncConsentLevel);
-  if ([self isRunningTest:@selector
-            (testSignOutWithManagedAccountFromNoneSyncingAccount)]) {
-    // Disable `kClearDeviceDataOnSignOutForManagedUsers` because the feature
-    // shows a different dialog
-    config.features_disabled.push_back(
-        kClearDeviceDataOnSignOutForManagedUsers);
-  }
   config.features_disabled.push_back(kIdentityDiscAccountMenu);
 
   return config;
@@ -475,8 +464,8 @@ constexpr base::TimeDelta kSyncOperationTimeout = base::Seconds(10);
   [SigninEarlGrey verifySignedOut];
 }
 
-// Tests to sign out with a non managed account without syncing.
-- (void)testSignOutWithNonManagedAccountFromNoneSyncingAccount {
+// Tests to sign out with a non managed account.
+- (void)testSignOutWithNonManagedAccount {
   FakeSystemIdentity* fakeIdentity = [FakeSystemIdentity fakeIdentity1];
 
   [SigninEarlGrey signinWithFakeIdentity:fakeIdentity];
@@ -495,8 +484,8 @@ constexpr base::TimeDelta kSyncOperationTimeout = base::Seconds(10);
   [BookmarkEarlGreyUI verifyEmptyBackgroundIsAbsent];
 }
 
-// Tests to sign out with a managed account without syncing.
-- (void)testSignOutWithManagedAccountFromNoneSyncingAccount {
+// Tests to sign out with a managed account.
+- (void)testSignOutWithManagedAccount {
   // Sign In `fakeManagedIdentity`.
   FakeSystemIdentity* fakeIdentity = [FakeSystemIdentity fakeManagedIdentity];
   [SigninEarlGrey signinWithFakeIdentity:fakeIdentity];
@@ -504,7 +493,7 @@ constexpr base::TimeDelta kSyncOperationTimeout = base::Seconds(10);
   [BookmarkEarlGrey
       setupStandardBookmarksInStorage:BookmarkStorageType::kLocalOrSyncable];
 
-  [SigninEarlGreyUI signOut];
+  [SigninEarlGreyUI signOutWithClearDataConfirmation:YES];
 
   // Open the Bookmarks screen on the Tools menu.
   [BookmarkEarlGreyUI openBookmarks];

@@ -7,7 +7,9 @@
 #include <cstdint>
 #include <optional>
 #include <set>
+#include <variant>
 
+#include "base/check.h"
 #include "base/functional/bind.h"
 #include "base/functional/overloaded.h"
 #include "base/memory/weak_ptr.h"
@@ -26,7 +28,6 @@
 #include "services/metrics/public/cpp/ukm_builders.h"
 #include "services/metrics/public/cpp/ukm_recorder.h"
 #include "services/metrics/public/cpp/ukm_source_id.h"
-#include "third_party/abseil-cpp/absl/types/variant.h"
 #include "third_party/blink/public/common/input/web_input_event.h"
 #include "url/gurl.h"
 #include "url/origin.h"
@@ -123,12 +124,12 @@ struct NoBtmService {};
 struct NoInteraction {};
 // Represents the BTM.ShortVisit::TimeSinceLastInteraction UKM metric.
 using TimeSinceInteraction =
-    absl::variant<NoBtmService, NoInteraction, base::TimeDelta>;
+    std::variant<NoBtmService, NoInteraction, base::TimeDelta>;
 
 // Get the actual integer that should be reported in
 // BTM.ShortVisit::TimeSinceLastInteraction.
 int64_t ToMetricValue(TimeSinceInteraction interaction_time) {
-  return absl::visit(  //
+  return std::visit(  //
       base::Overloaded{[&](NoBtmService) -> int64_t { return -2; },
                        [&](NoInteraction) -> int64_t { return -1; },
                        [&](base::TimeDelta td) -> int64_t {
@@ -373,7 +374,7 @@ void BtmShortVisitObserver::OnCookiesAccessed(
 void BtmShortVisitObserver::OnCookiesAccessed(
     NavigationHandle* navigation_handle,
     const CookieAccessDetails& details) {
-  if (!IsInPrimaryPage(navigation_handle)) {
+  if (!IsInPrimaryPage(*navigation_handle)) {
     return;
   }
 

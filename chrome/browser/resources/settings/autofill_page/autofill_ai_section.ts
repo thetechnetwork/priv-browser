@@ -29,10 +29,10 @@ import type {CrActionMenuElement} from 'chrome://resources/cr_elements/cr_action
 import type {CrLazyRenderElement} from 'chrome://resources/cr_elements/cr_lazy_render/cr_lazy_render.js';
 import {I18nMixin} from 'chrome://resources/cr_elements/i18n_mixin.js';
 import {assert} from 'chrome://resources/js/assert.js';
-import {OpenWindowProxyImpl} from 'chrome://resources/js/open_window_proxy.js';
 import {PolymerElement} from 'chrome://resources/polymer/v3_0/polymer/polymer_bundled.min.js';
 import type {DomRepeatEvent} from 'chrome://resources/polymer/v3_0/polymer/polymer_bundled.min.js';
 
+import type {SettingsToggleButtonElement} from '../controls/settings_toggle_button.js';
 import {loadTimeData} from '../i18n_setup.js';
 import {routes} from '../route.js';
 import {Router} from '../router.js';
@@ -55,6 +55,7 @@ export interface SettingsAutofillAiSectionElement {
     actionMenu: CrLazyRenderElement<CrActionMenuElement>,
     addMenu: CrLazyRenderElement<CrActionMenuElement>,
     entriesHeaderTitle: HTMLElement,
+    prefToggle: SettingsToggleButtonElement,
   };
 }
 
@@ -85,6 +86,20 @@ export class SettingsAutofillAiSectionElement extends
         type: Boolean,
         reflectToAttribute: true,
         value: false,
+      },
+
+      /**
+         A "fake" preference object that reflects the state of the opt-in
+         toggle.
+       */
+      optedIn_: {
+        type: Object,
+        value: {
+          // Does not correspond to an actual pref - this is faked to allow
+          // writing it into a GAIA-id keyed dictionary of opt-ins.
+          type: chrome.settingsPrivate.PrefType.BOOLEAN,
+          value: false,
+        },
       },
 
       /**
@@ -132,6 +147,7 @@ export class SettingsAutofillAiSectionElement extends
   }
 
   ineligibleUser: boolean;
+  private optedIn_: chrome.settingsPrivate.PrefObject;
   private activeEntityInstance_: EntityInstance|null;
   private completeEntityTypesList_: EntityType[];
   private showAddOrEditEntityInstanceDialog_: boolean;
@@ -149,6 +165,10 @@ export class SettingsAutofillAiSectionElement extends
 
   override connectedCallback() {
     super.connectedCallback();
+
+    this.set(
+        'optedIn_.value',
+        !this.ineligibleUser && loadTimeData.getBoolean('autofillAiOptedIn'));
 
     this.entityInstancesChangedListener_ =
         (entityInstances => this.entityInstances_ = entityInstances);
@@ -188,14 +208,8 @@ export class SettingsAutofillAiSectionElement extends
     this.entityInstancesChangedListener_ = null;
   }
 
-  private onToggleSubLabelLinkClick_(): void {
-    OpenWindowProxyImpl.getInstance().openUrl(
-        loadTimeData.getString('autofillAiLearnMoreURL'));
-  }
-
-  private computeDisableAddButton_(
-      ineligibleUser: boolean, optInPrefValue: boolean): boolean {
-    return ineligibleUser || !optInPrefValue;
+  private onOptInToggleChange_() {
+    this.entityDataManager_.setOptInStatus(this.$.prefToggle.checked);
   }
 
   /**

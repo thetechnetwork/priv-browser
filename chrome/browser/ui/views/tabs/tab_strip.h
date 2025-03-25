@@ -88,8 +88,7 @@ class TabStrip : public views::View,
 
   // Returns the size needed for the specified views. This is invoked during
   // drag and drop to calculate offsets and positioning.
-  static int GetSizeNeededForViews(
-      const std::vector<raw_ptr<TabSlotView, VectorExperimental>>& views);
+  static int GetSizeNeededForViews(const std::vector<TabSlotView*>& views);
 
   // Sets the observer to be notified of changes within this TabStrip.
   void SetTabStripObserver(TabStripObserver* observer);
@@ -301,7 +300,7 @@ class TabStrip : public views::View,
   bool EndDrag(EndDragReason reason) override;
   Tab* GetTabAt(const gfx::Point& point) override;
   Tab* GetAdjacentTab(const Tab* tab, int offset) override;
-  Tab* GetAdjacentSplitTab(const Tab* tab) override;
+  std::vector<Tab*> GetTabsInSplit(const Tab* tab) override;
   void OnMouseEventInTab(views::View* source,
                          const ui::MouseEvent& event) override;
   void UpdateHoverCard(Tab* tab, HoverCardUpdateType update_type) override;

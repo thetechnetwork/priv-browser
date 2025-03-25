@@ -10,16 +10,17 @@
 #include <optional>
 #include <string>
 #include <tuple>
+#include <variant>
 #include <vector>
 
 #include "base/memory/raw_ref.h"
 #include "base/memory/weak_ptr.h"
+#include "components/autofill/core/browser/data_model/payments/bnpl_issuer.h"
 #include "components/autofill/core/browser/foundations/autofill_client.h"
 #include "components/autofill/core/browser/payments/legal_message_line.h"
 #include "components/autofill/core/browser/payments/payments_autofill_client.h"
 #include "components/autofill/core/browser/payments/payments_window_manager.h"
 #include "components/autofill/core/browser/suggestions/suggestion.h"
-#include "third_party/abseil-cpp/absl/types/variant.h"
 
 namespace autofill {
 
@@ -117,18 +118,18 @@ class BnplManager {
     // Context token shared between client and Payments server.
     std::string context_token;
 
-    // Terms and legal messages from the selected issuer. These messages will
-    // be set in `OnDidGetDetailsForCreateBnplPaymentInstrument()` when the
-    // server response is received after the user selects an unlinked
-    // buy-now-pay-later issuer.
-    LegalMessageLines legal_message_lines;
-
     // URL that the the partner redirected the user to after finishing the BNPL
     // flow on the partner website.
     GURL redirect_url;
 
-    // The ID of the BNPL partner the user is trying to retrieve the VCN from.
-    std::string issuer_id;
+    // The BNPL partner the user is trying to retrieve the VCN from. Set when
+    // the user selects an issuer in the issuer selection dialog. If it is an
+    // unlinked issuer, and the user links it, `issuer` will still be the
+    // unlinked version throughout the flow. The instrument ID returned from the
+    // Payments server during the linking will be what is used to retrieve the
+    // VCN, and then afterwards the linked version will be synced down to Chrome
+    // for future flows.
+    BnplIssuer issuer;
 
     // The final checkout amount on the page (in micros), used for the ongoing
     // BNPL flow.
@@ -139,8 +140,11 @@ class BnplManager {
   };
 
   // This function makes the appropriate call to the payments server to fetch
-  // the VCN details for the BNPL issuer selected in the BNPL manager.
-  void FetchVcnDetails();
+  // the VCN details for the BNPL issuer selected in the BNPL manager. `url` is
+  // the last URL navigated to inside of the pop-up, and will contain
+  // information that the issuer needs to fetch the virtual card details for the
+  // flow.
+  void FetchVcnDetails(GURL url);
 
   // The callback after the FetchVcnDetails call returns from the server. The
   // callback contains the result of the call as well as the VCN details.
@@ -193,14 +197,16 @@ class BnplManager {
 
   // The callback after `PaymentsWindowManager::InitBnplFlow()` calls.
   // The callback contains the result of the flow and will continue to
-  // VCN fetching if successful.
-  void OnPopupWindowCompleted(PaymentsWindowManager::BnplFlowResult result);
+  // VCN fetching if successful. `url` is the last URL that was navigated to
+  // inside of the pop-up.
+  void OnPopupWindowCompleted(PaymentsWindowManager::BnplFlowResult result,
+                              GURL url);
 
   // Combines `responses` from suggestion shown event and amount extraction,
   // and try to show card suggestions with buy-now-pay-later suggestion.
   void MaybeUpdateSuggestionsWithBnpl(
       const AutofillSuggestionTriggerSource trigger_source,
-      std::vector<absl::variant<SuggestionsShownResponse,
+      std::vector<std::variant<SuggestionsShownResponse,
                                std::optional<uint64_t>>> responses);
 
   // Callback triggered when the user accepts the ToS dialog. It will first load
@@ -248,7 +254,7 @@ class BnplManager {
   // Callback to collect the current shown suggestion list and checkout
   // amount, and insert BNPL suggestion if the amount is eligible.
   std::optional<base::RepeatingCallback<void(
-      absl::variant<SuggestionsShownResponse, std::optional<uint64_t>>)>>
+      std::variant<SuggestionsShownResponse, std::optional<uint64_t>>)>>
       update_suggestions_barrier_callback_;
 
   base::WeakPtrFactory<BnplManager> weak_factory_{this};

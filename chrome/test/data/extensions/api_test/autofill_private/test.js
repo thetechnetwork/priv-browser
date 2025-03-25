@@ -857,12 +857,6 @@ var availableTests = [
     chrome.test.succeed();
   },
 
-  function migrateCreditCards() {
-    chrome.autofillPrivate.migrateCreditCards();
-    chrome.test.assertNoLastError();
-    chrome.test.succeed();
-  },
-
   function logServerCardLinkClicked() {
     chrome.autofillPrivate.logServerCardLinkClicked();
     chrome.test.assertNoLastError();
@@ -1027,6 +1021,11 @@ var availableTests = [
     chrome.test.assertEq([], payOverTimeIssuerList);
     chrome.test.succeed();
   },
+
+  async function optIntoAutofillAi() {
+    await chrome.autofillPrivate.setAutofillAiOptInStatus(true);
+    chrome.test.succeed();
+  },
 ];
 
 /** @const */
@@ -1069,7 +1068,6 @@ var TESTS_FOR_CONFIG = {
       ['isUserEligibleForAutofillImprovements'],
   'predictionImprovementsIphFeatureUsed':
       ['predictionImprovementsIphFeatureUsed'],
-  'migrateCreditCards': ['migrateCreditCards'],
   'logServerCardLinkClicked': ['logServerCardLinkClicked'],
   'addVirtualCard': ['addVirtualCard'],
   'removeVirtualCard': ['removeVirtualCard'],
@@ -1086,6 +1084,7 @@ var TESTS_FOR_CONFIG = {
   'getAllAttributeTypesForEntityTypeName':
       ['getAllAttributeTypesForEntityTypeName'],
   'getEmptyPayOverTimeIssuerList': ['getEmptyPayOverTimeIssuerList'],
+  'optIntoAutofillAi': ['optIntoAutofillAi'],
 };
 
 var testConfig = window.location.search.substring(1);

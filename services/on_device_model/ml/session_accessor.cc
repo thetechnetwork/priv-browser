@@ -12,15 +12,15 @@ namespace ml {
 
 namespace {
 
-// TODO(crbug.com/385173789): Pass enable_image_input via LoadAdaptationParams.
-const base::FeatureParam<bool> kImageInput{
-    &optimization_guide::features::kOptimizationGuideOnDeviceModel,
-    "on_device_model_image_input", false};
+float GetTemperature(std::optional<float> temperature) {
+  return std::max(0.0f, temperature.value_or(0.0f));
+}
 
-// TODO(crbug.com/385173368): Pass enable_audio_input via LoadAdaptationParams.
-const base::FeatureParam<bool> kAudioInput{
-    &optimization_guide::features::kOptimizationGuideOnDeviceModel,
-    "on_device_model_audio_input", false};
+uint32_t GetTopK(std::optional<uint32_t> top_k) {
+  return std::min(static_cast<uint32_t>(
+                      optimization_guide::features::GetOnDeviceModelMaxTopK()),
+                  std::max(1u, top_k.value_or(1)));
+}
 
 }  // namespace
 
@@ -140,6 +140,8 @@ void SessionAccessor::CreateInternal(
     on_device_model::mojom::LoadAdaptationParamsPtr adaptation_params,
     std::optional<uint32_t> adaptation_id) {
   DCHECK(task_runner_->RunsTasksInCurrentSequence());
+  // TODO(crbug.com/403383823): Require `params` to be non-null and remove
+  // this fallback path.
   if (!params) {
     params = on_device_model::mojom::SessionParams::New();
     // If session params are not provided but adaptation params are, inherit
@@ -153,16 +155,17 @@ void SessionAccessor::CreateInternal(
       }
       params->max_tokens = adaptation_params->max_tokens;
     }
+    params->top_k = GetTopK(std::nullopt);
+    params->temperature = GetTemperature(std::nullopt);
+  } else {
+    // Clamp sampling params.
+    params->top_k = GetTopK(params->top_k);
+    params->temperature = GetTemperature(params->temperature);
   }
-  if (kImageInput.Get()) {
-    params->capabilities.Put(on_device_model::CapabilityFlags::kImageInput);
-  }
-  if (kAudioInput.Get()) {
-    params->capabilities.Put(on_device_model::CapabilityFlags::kAudioInput);
-  }
-
   ChromeMLAdaptationDescriptor descriptor = {
       .max_tokens = params->max_tokens,
+      .top_k = params->top_k,
+      .temperature = params->temperature,
       .enable_image_input = params->capabilities.Has(
           on_device_model::CapabilityFlags::kImageInput),
       .enable_audio_input = params->capabilities.Has(
@@ -214,8 +217,6 @@ void SessionAccessor::GenerateInternal(
   DCHECK(task_runner_->RunsTasksInCurrentSequence());
   ChromeMLExecuteOptions options{
       .max_output_tokens = generate_options->max_output_tokens,
-      .top_k = generate_options->top_k.value_or(1),
-      .temperature = generate_options->temperature.value_or(0),
   };
   if (output_fn) {
     options.execution_output_fn = &output_fn;

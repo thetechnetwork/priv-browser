@@ -542,8 +542,21 @@ enum class PasskeyCreationEligibility {
 
 // Returns the gaia ID associated with the current account.
 - (NSString*)gaia {
-  return UserDefaultsStringForKey(
+  NSString* gaia = UserDefaultsStringForKey(
       AppGroupUserDefaultsCredentialProviderUserID(), /*default_value=*/@"");
+  if (gaia.length > 0) {
+    return gaia;
+  }
+
+  // As a fallback, attempt to get a valid gaia from existing credentials.
+  NSArray<id<Credential>>* credentials = self.credentialStore.credentials;
+  NSUInteger credentialIndex =
+      [credentials indexOfObjectPassingTest:^BOOL(id<Credential> credential,
+                                                  NSUInteger idx, BOOL* stop) {
+        return credential.gaia.length > 0;
+      }];
+  return credentialIndex != NSNotFound ? credentials[credentialIndex].gaia
+                                       : nil;
 }
 
 // Returns the email address associated with the current account.
@@ -652,7 +665,14 @@ enum class PasskeyCreationEligibility {
                                               (PasskeyRequestDetails*)
                                                   passkeyRequestDetails {
   // Granular policy that allows enterprises to disable just passkey creation.
-  if (!IsPasskeyCreationAllowedByPolicy()) {
+  std::optional<bool> passkeyCreationPolicy = GetPasskeyCreationPolicy();
+
+  if (!passkeyCreationPolicy) {
+    // If the policy isn't set at all, the user has to sign in to Chrome.
+    return PasskeyCreationEligibility::kSignedOut;
+  } else if (!passkeyCreationPolicy.value()) {
+    // If the policy is set to false, the user is not allowed to create
+    // passkeys.
     return PasskeyCreationEligibility::kSaveDisabledByEnterprise;
   }
 

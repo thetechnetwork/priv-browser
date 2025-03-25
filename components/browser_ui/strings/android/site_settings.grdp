@@ -486,6 +486,9 @@
   <message name="IDS_WEBSITE_SETTINGS_BACKGROUND_SYNC_BLOCK" desc="Primary text corresponding to the block button in the background sync permission radio button group.">
     Don't allow closed sites to finish sending or receiving data
   </message>
+  <message name="IDS_WEBSITE_SETTINGS_BACKGROUND_SYNC_BLOCK_DESCRIPTION" desc="Description of block background sync permission.">
+    After closing a page, tasks you started might not finish
+  </message>
 
   <!-- Javascript Optimizer -->
 
@@ -564,6 +567,9 @@
   </message>
   <message name="IDS_WEBSITE_SETTINGS_CAMERA_BLOCK" desc="Primary text corresponding to the block button in the camera permission radio button group.">
     Don't allow sites to see your location
+  </message>
+  <message name="IDS_WEBSITE_SETTINGS_CAMERA_BLOCK_DESCRIPTION" desc="Description of block camera permission.">
+    Features that need a camera won't work
   </message>
 
   <!-- Clipboard -->
@@ -871,6 +877,9 @@
   <message name="IDS_WEBSITE_SETTINGS_MIC_BLOCK" desc="Primary text corresponding to the block button in the microphone permission radio button group.">
     Don't allow sites to use your microphone
   </message>
+  <message name="IDS_WEBSITE_SETTINGS_MIC_BLOCK_DESCRIPTION" desc="Description of block microphone permission.">
+    Features that need a microphone won't work
+  </message>
 
   <!-- Motion/Light sensors -->
 
@@ -900,6 +909,9 @@
   </message>
   <message name="IDS_WEBSITE_SETTINGS_MOTION_SENSORS_BLOCK" desc="Primary text corresponding to the block button in the motion sensors permission radio buttons group.">
     Don't allow sites to use motion sensors
+  </message>
+  <message name="IDS_WEBSITE_SETTINGS_MOTION_SENSORS_BLOCK_DESCRIPTION" desc="Description of block motion sensors permission.">
+    Features that need motion sensors won't work
   </message>
 
   <!-- NFC -->
@@ -988,6 +1000,15 @@
   <message name="IDS_WEBSITE_SETTINGS_PROTECTED_CONTENT_PAGE_DESCRIPTION" desc="Description of the protected content content setting.">
     To play content protected by copyright, sites may need to use a content protection service. <ph name="BEGIN_LINK">&lt;link&gt;</ph>Learn more<ph name="END_LINK">&lt;/link&gt;</ph>
   </message>
+  <message name="IDS_WEBSITE_SETTINGS_PROTECTED_CONTENT_ALLOW" desc="Primary text explaining that sites are allowed to play protected content.">
+    Sites can play protected content
+  </message>
+  <message name="IDS_WEBSITE_SETTINGS_PROTECTED_CONTENT_ASK" desc="Primary text explaining that sites need to ask for permission before playing protected content.">
+    Sites can ask to play protected content
+  </message>
+  <message name="IDS_WEBSITE_SETTINGS_PROTECTED_CONTENT_BLOCK" desc="Primary text explaining that sites are blocked from playing protected content.">
+    Don't allow sites to play protected content
+  </message>
 
   <!-- Sound -->
 
@@ -1017,6 +1038,9 @@
   </message>
   <message name="IDS_WEBSITE_SETTINGS_SOUND_BLOCK" desc="Primary text corresponding to the block button in the sound permission radio button group.">
     Don't allow sites to play sound
+  </message>
+  <message name="IDS_WEBSITE_SETTINGS_SOUND_BLOCK_DESCRIPTION" desc="Description of block sound permission.">
+    Features that need sound won't work
   </message>
 
   <!-- Storage -->

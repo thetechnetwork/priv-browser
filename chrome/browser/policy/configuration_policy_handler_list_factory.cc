@@ -1837,6 +1837,9 @@ const PolicyToPreferenceMapEntry kSimplePolicyMap[] = {
   { key::kGenAiChromeOsSmartActionsSettings,
     ash::prefs::kScannerEnterprisePolicyAllowed,
     base::Value::Type::INTEGER},
+  { key::kGenAIInlineImageSettings,
+    ash::prefs::kLobsterEnterprisePolicySettings,
+    base::Value::Type::INTEGER},
 #endif // BUILDFLAG(IS_CHROMEOS)
 
 #if BUILDFLAG(IS_LINUX)
@@ -2280,6 +2283,9 @@ const PolicyToPreferenceMapEntry kSimplePolicyMap[] = {
   { key::kStandardizedBrowserZoomEnabled,
     policy_prefs::kStandardizedBrowserZoomEnabled,
     base::Value::Type::BOOLEAN},
+  { key::kHappyEyeballsV3Enabled,
+    prefs::kHappyEyeballsV3Enabled,
+    base::Value::Type::BOOLEAN },
   { key::kIPv6ReachabilityOverrideEnabled,
     prefs::kIPv6ReachabilityOverrideEnabled,
     base::Value::Type::BOOLEAN },
@@ -2379,6 +2385,9 @@ const PolicyToPreferenceMapEntry kSimplePolicyMap[] = {
 
   { key::kWebAudioOutputBufferingEnabled,
     prefs::kWebAudioOutputBufferingEnabled,
+    base::Value::Type::BOOLEAN },
+  { key::kReduceAcceptLanguageEnabled,
+    prefs::kReduceAcceptLanguageEnabled,
     base::Value::Type::BOOLEAN },
 };
 // clang-format on
@@ -2836,6 +2845,17 @@ std::unique_ptr<ConfigurationPolicyHandlerList> BuildHandlerList(
           policy::SchemaOnErrorStrategy::SCHEMA_STRICT,
           policy::SimpleSchemaValidatingPolicyHandler::RECOMMENDED_PROHIBITED,
           policy::SimpleSchemaValidatingPolicyHandler::MANDATORY_ALLOWED));
+
+  handlers->AddHandler(std::make_unique<CloudUserOnlyPolicyHandler>(
+      std::make_unique<SimplePolicyHandler>(
+          key::kUserSecuritySignalsReporting,
+          enterprise_reporting::kUserSecuritySignalsReporting,
+          base::Value::Type::BOOLEAN)));
+  handlers->AddHandler(std::make_unique<CloudUserOnlyPolicyHandler>(
+      std::make_unique<SimplePolicyHandler>(
+          key::kUserSecurityAuthenticatedReporting,
+          enterprise_reporting::kUserSecurityAuthenticatedReporting,
+          base::Value::Type::BOOLEAN)));
 
 #elif BUILDFLAG(IS_CHROMEOS)
   handlers->AddHandler(
@@ -3351,6 +3371,9 @@ std::unique_ptr<ConfigurationPolicyHandlerList> BuildHandlerList(
   gen_ai_default_policies.emplace_back(
       key::kGenAiChromeOsSmartActionsSettings,
       ash::prefs::kScannerEnterprisePolicyAllowed);
+  gen_ai_default_policies.emplace_back(
+      key::kGenAIInlineImageSettings,
+      ash::prefs::kLobsterEnterprisePolicySettings);
 #endif  // BUILDFLAG(IS_CHROMEOS)
   handlers->AddHandler(std::make_unique<GenAiDefaultSettingsPolicyHandler>(
       std::move(gen_ai_default_policies)));

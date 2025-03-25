@@ -42,6 +42,7 @@
 #include "ui/base/mojom/menu_source_type.mojom-forward.h"
 #include "ui/compositor/layer.h"
 #include "ui/compositor/layer_type.h"
+#include "ui/gfx/native_widget_types.h"
 #include "ui/views/accessibility/view_accessibility.h"
 #include "ui/views/background.h"
 #include "ui/views/border.h"
@@ -125,8 +126,8 @@ task_manager::TaskManagerTableModel* TaskManagerView::Show(
   // On Chrome OS, pressing Search-Esc when there are no open browser windows
   // will open the task manager on the root window for new windows.
   gfx::NativeWindow context =
-      browser ? browser->window()->GetNativeWindow() : nullptr;
-  CreateDialogWidget(g_task_manager_view, context, nullptr);
+      browser ? browser->window()->GetNativeWindow() : gfx::NativeWindow();
+  CreateDialogWidget(g_task_manager_view, context, gfx::NativeView());
   g_task_manager_view->GetDialogClientView()->SetBackgroundColor(
       kColorTaskManagerBackground);
   g_task_manager_view->InitAlwaysOnTopState();
@@ -606,7 +607,7 @@ void TaskManagerView::Init() {
     // Disables alternating row colors on all platforms, including macOS.
     tab_table->SetAlternatingRowColorsEnabled(base::PassKey<TaskManagerView>(),
                                               false);
-    tab_table->SetMouseHoveringEnabled(false);
+    tab_table->SetMouseHoveringEnabled(true);
 
     tab_table->SetRowPadding(views::DISTANCE_TABLE_VERTICAL_TEXT_PADDING);
   }
@@ -620,6 +621,10 @@ void TaskManagerView::Init() {
                                                ? IDS_TASK_MANAGER_KILL_V2
                                                : IDS_TASK_MANAGER_KILL));
 
+  const auto* provider = ChromeLayoutProvider::Get();
+  const float corner_radius =
+      provider->GetCornerRadiusMetric(views::Emphasis::kHigh);
+
   if (table_config_.header_style) {
     views::TableHeaderStyle header_style = {
         .cell_vertical_padding = 14,
@@ -629,7 +634,9 @@ void TaskManagerView::Init() {
         .font_weight = gfx::Font::Weight::MEDIUM,
         .separator_horizontal_color_id = ui::kColorSysDivider,
         .separator_vertical_color_id = ui::kColorSysDivider,
-        .background_color_id = kColorTaskManagerTableHeaderBackground};
+        .background_color_id = kColorTaskManagerTableHeaderBackground,
+        .focus_ring_upper_corner_radius = corner_radius,
+    };
     tab_table->SetHeaderStyle(header_style);
   }
 
@@ -649,8 +656,6 @@ void TaskManagerView::Init() {
     };
     tab_table->SetTableStyle(table_style);
   }
-
-  const auto* provider = ChromeLayoutProvider::Get();
 
   // Margins around all contents
   const gfx::Insets dialog_insets = provider->GetInsetsMetric(
@@ -683,11 +688,10 @@ void TaskManagerView::Init() {
 
   if (table_config_.scroll_view_rounded) {
     tab_table_parent_->SetPaintToLayer(ui::LAYER_TEXTURED);
+
     ui::Layer* scroll_view_layer = tab_table_parent_->layer();
-
-    scroll_view_layer->SetRoundedCornerRadius(gfx::RoundedCornersF(
-        provider->GetCornerRadiusMetric(views::Emphasis::kHigh)));
-
+    scroll_view_layer->SetRoundedCornerRadius(
+        gfx::RoundedCornersF(corner_radius));
     scroll_view_layer->SetIsFastRoundedCorner(true);
   }
 

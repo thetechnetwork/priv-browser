@@ -15,6 +15,7 @@ import org.chromium.base.Token;
 import org.chromium.base.metrics.RecordUserAction;
 import org.chromium.base.supplier.Supplier;
 import org.chromium.build.annotations.NullMarked;
+import org.chromium.build.annotations.Nullable;
 import org.chromium.chrome.browser.profiles.Profile;
 import org.chromium.chrome.browser.tab.Tab;
 import org.chromium.chrome.browser.tabmodel.TabGroupModelFilter;
@@ -62,6 +63,8 @@ public class TabListEditorAddToGroupAction extends TabListEditorAction {
                     }
                 }
             };
+
+    private @Nullable TabGroupListBottomSheetCoordinator mTabGroupListBottomSheetCoordinator;
 
     /**
      * Create an action for adding one or more tabs to a tab group.
@@ -169,25 +172,31 @@ public class TabListEditorAddToGroupAction extends TabListEditorAction {
             BottomSheetController controller) {
         TabGroupCreationCallback groupCreationCallback =
                 tabGroupId -> {
-                    int rootId = filter.getRootIdFromTabGroupId(tabGroupId);
-                    mTabGroupCreationDialogManager.showDialog(rootId, filter);
+                    mTabGroupCreationDialogManager.showDialog(tabGroupId, filter);
                 };
 
-        TabGroupListBottomSheetCoordinator coordinator =
+        mTabGroupListBottomSheetCoordinator =
                 mFactory.create(
                         mActivity, profile, groupCreationCallback, filter, controller, true);
-        coordinator.showBottomSheet(tabs);
+        mTabGroupListBottomSheetCoordinator.showBottomSheet(tabs);
     }
 
     private void createNewTabGroup(List<Tab> tabs, TabGroupModelFilter filter, Tab destinationTab) {
-        filter.mergeListOfTabsToGroup(tabs, destinationTab, true);
-        mTabGroupCreationDialogManager.showDialog(destinationTab.getRootId(), filter);
+        if (tabs.size() == 1) {
+            filter.createSingleTabGroup(destinationTab);
+        } else {
+            filter.mergeListOfTabsToGroup(tabs, destinationTab, /* notify= */ true);
+        }
+        mTabGroupCreationDialogManager.showDialog(destinationTab.getTabGroupId(), filter);
     }
 
     private void destroy() {
         TabGroupModelFilter filter = getTabGroupModelFilter();
         filter.removeTabGroupObserver(mFilterObserver);
         filter.getTabModel().removeObserver(mTabModelObserver);
+        if (mTabGroupListBottomSheetCoordinator != null) {
+            mTabGroupListBottomSheetCoordinator.destroy();
+        }
     }
 
     private boolean hasTabGroups() {

@@ -13,6 +13,8 @@ import org.gradle.api.artifacts.result.*
 import java.util.concurrent.*
 import java.time.*
 import org.gradle.api.logging.Logger
+import java.nio.file.Path
+import java.nio.file.Paths
 
 /**
  * Parses the project dependencies and generates a graph of {@link ChromiumDepGraph.DependencyDescription} objects to
@@ -274,6 +276,10 @@ class ChromiumDepGraph {
     Project[] projects
     Logger logger
     boolean skipLicenses
+    boolean warnOnStaleDeps
+
+    // TODO: remove (set to true) when AUTOROLL_MIGRATION_IN_PROGRESS = false
+    boolean tagTargetsAsAutorolled
 
     private static String makeModuleIdInner(String group, String module, String version) {
         // Does not include version because by default the resolution strategy for gradle is to use the newest version
@@ -380,7 +386,7 @@ class ChromiumDepGraph {
             } else {
                 assert false : 'Unknown config ' + key
             }
-            if (key.endsWith("Latest")) {
+            if (tagTargetsAsAutorolled && key.endsWith("Latest")) {
                 autorolledIds.addAll(values)
             }
         }
@@ -436,10 +442,9 @@ class ChromiumDepGraph {
                 }
                 dep.versionFilter = overrides.versionFilter
             } else {
-                // TODO: only output this warning if we are in the main project,
-                // since it is expected that subprojects do not have all the
-                // deps.
-                logger.warn('PROPERTY_OVERRIDES has stale dep: ' + id)
+                if (warnOnStaleDeps) {
+                    logger.warn('PROPERTY_OVERRIDES has stale dep: ' + id)
+                }
             }
         }
     }
@@ -853,6 +858,76 @@ class ChromiumDepGraph {
         // When set, //third_party/android_deps/fetch_common.py will only versions that contain this string to be valid.
         // This variable is not used in groovy code.
         String versionFilter
+
+        String getDirectoryPath() {
+            return BuildConfigGenerator.LIBS_DIRECTORY + '/' + directoryName
+        }
+
+        String getArtifactDirectoryPath() {
+            if (artifactPrefix) {
+                return "$artifactPrefix/$directoryPath"
+            }
+            return directoryPath
+        }
+
+        String getArtifactPrefix() {
+            // All artifacts live under cipd/ in all projects
+            return 'cipd'
+        }
+
+        String getCommittedDirectoryPath() {
+            if (committedPrefix) {
+                return "$committedPrefix/$directoryPath"
+            }
+            return directoryPath
+        }
+
+        String getCommittedPrefix() {
+            if (isAndroidx || isAutorolled) {
+                return 'committed'
+            }
+            // Main project does not have committed subdir since it is all
+            // "committed".
+            return null
+        }
+
+        String getRebasePrefix(String basePath) {
+            return Paths.get(basePath).relativize(Paths.get(this.projectPath)).toString()
+        }
+
+        // When writing the BUILD.gn, the paths of autorolled deps is rebased
+        // with respect to the main project path since the autorolled BUILD.gn
+        // is imported to the main BUILD.gn
+        String getRebasedCommittedDirectoryPath(String currentProjectPath) {
+            if (currentProjectPath == this.projectPath) {
+                return this.committedDirectoryPath
+            }
+            String rebasePrefix = getRebasePrefix(currentProjectPath)
+            return "${rebasePrefix}/$committedDirectoryPath"
+        }
+
+        String getRebasedArtifactDirectoryPath(String currentProjectPath) {
+            if (currentProjectPath == this.projectPath) {
+                return this.artifactDirectoryPath
+            }
+            String rebasePrefix = getRebasePrefix(currentProjectPath)
+            return "${rebasePrefix}/$artifactDirectoryPath"
+        }
+
+        boolean getIsAndroidx() {
+            return id.startsWith('androidx')
+        }
+
+        // This indicates which BUILD.gn file this target lives in.
+        String getProjectPath() {
+            if (isAndroidx) {
+                return BuildConfigGenerator.ANDROIDX_PROJECT_PATH
+            }
+            if (isAutorolled) {
+                return BuildConfigGenerator.AUTOROLLED_PROJECT_PATH
+            }
+            return BuildConfigGenerator.MAIN_PROJECT_PATH
+        }
     }
 
     static class LicenseSpec {

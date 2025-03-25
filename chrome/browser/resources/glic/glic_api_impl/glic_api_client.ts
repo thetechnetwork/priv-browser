@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import type {ActInFocusedTabParams, ActInFocusedTabResult, AnnotatedPageData, ChromeVersion, DraggableArea, FocusedTabCandidate, FocusedTabData, GlicBrowserHost, GlicBrowserHostMetrics, GlicHostRegistry, GlicWebClient, ObservableValue, OpenPanelInfo, PanelOpeningData, PanelState, PdfDocumentData, Screenshot, ScrollToParams, Subscriber, TabContextOptions, TabContextResult, TabData, UserProfileInfo} from '../glic_api/glic_api.js';
+import type {ActInFocusedTabParams, ActInFocusedTabResult, AnnotatedPageData, ChromeVersion, DraggableArea, FocusedTabData, GlicBrowserHost, GlicBrowserHostMetrics, GlicHostRegistry, GlicWebClient, ObservableValue, OpenPanelInfo, PanelOpeningData, PanelState, PdfDocumentData, Screenshot, ScrollToParams, Subscriber, TabContextOptions, TabContextResult, TabData, UserProfileInfo} from '../glic_api/glic_api.js';
 
 import {replaceProperties} from './conversions.js';
 import {newSenderId, PostMessageRequestReceiver, PostMessageRequestSender} from './post_message_transport.js';
 import type {ResponseExtras} from './post_message_transport.js';
-import type {ActInFocusedTabResultPrivate, AnnotatedPageDataPrivate, FocusedTabCandidatePrivate, FocusedTabDataPrivate, PdfDocumentDataPrivate, RequestRequestType, RequestResponseType, RgbaImage, TabContextResultPrivate, TabDataPrivate, TransferableException, WebClientRequestTypes} from './request_types.js';
+import type {ActInFocusedTabResultPrivate, AnnotatedPageDataPrivate, FocusedTabDataPrivate, PdfDocumentDataPrivate, RequestRequestType, RequestResponseType, RgbaImage, TabContextResultPrivate, TabDataPrivate, TransferableException, WebClientRequestTypes} from './request_types.js';
 import {ImageAlphaType, ImageColorType, newTransferableException} from './request_types.js';
 
 
@@ -119,6 +119,12 @@ class WebClientMessageHandler implements WebClientMessageHandlerInterface {
     this.host.getTabContextPermissionState().assignAndSignal(payload.enabled);
   }
 
+  glicWebClientNotifyOsLocationPermissionStateChanged(payload: {
+    enabled: boolean,
+  }) {
+    this.host.getOsLocationPermissionState().assignAndSignal(payload.enabled);
+  }
+
   glicWebClientNotifyFocusedTabChanged(payload: {
     focusedTabDataPrivate: FocusedTabDataPrivate,
   }) {
@@ -126,7 +132,8 @@ class WebClientMessageHandler implements WebClientMessageHandlerInterface {
         convertFocusedTabDataFromPrivate(payload.focusedTabDataPrivate);
     this.host.getFocusedTabStateV2().assignAndSignal(focusedTabData);
     // Keep below for backwards compatibility.
-    this.host.getFocusedTabState().assignAndSignal(focusedTabData.focusedTab);
+    this.host.getFocusedTabState().assignAndSignal(
+        focusedTabData.hasFocus?.tabData);
   }
 
   glicWebClientNotifyPanelActiveChanged(payload: {panelActive: boolean}): void {
@@ -135,6 +142,18 @@ class WebClientMessageHandler implements WebClientMessageHandlerInterface {
 
   async glicWebClientCheckResponsive(): Promise<void> {
     return this.webClient.checkResponsive?.();
+  }
+
+  glicWebClientNotifyManualResizeChanged(payload: {resizing: boolean}) {
+    this.host.isManuallyResizing().assignAndSignal(payload.resizing);
+  }
+
+  glicWebClientBrowserIsOpenChanged(payload: {browserIsOpen: boolean}) {
+    this.host.isBrowserOpenValue.assignAndSignal(payload.browserIsOpen);
+  }
+
+  glicWebClientNotifyOsHotkeyStateChanged(payload: {hotkey: string}) {
+    this.host.getOsHotkeyState().assignAndSignal(payload);
   }
 }
 
@@ -155,8 +174,14 @@ class GlicBrowserHostImpl implements GlicBrowserHost {
   private permissionStateLocation = ObservableValueImpl.withNoValue<boolean>();
   private permissionStateTabContext =
       ObservableValueImpl.withNoValue<boolean>();
+  private permissionStateOsLocation =
+      ObservableValueImpl.withNoValue<boolean>();
+  private osHotkeyState = ObservableValueImpl.withNoValue<{hotkey: string}>();
   panelActiveValue = ObservableValueImpl.withNoValue<boolean>();
+  isBrowserOpenValue = ObservableValueImpl.withNoValue<boolean>();
+  private fitWindow = false;
   private metrics: GlicBrowserHostMetricsImpl;
+  private manuallyResizing = ObservableValueImpl.withValue<boolean>(false);
 
   constructor(public webClient: GlicWebClient, windowProxy: WindowProxy) {
     // TODO(harringtond): Ideally, we could ensure we only process requests from
@@ -193,7 +218,7 @@ class GlicBrowserHostImpl implements GlicBrowserHost {
     this.panelState.assignAndSignal(state.panelState);
     const focusedTabData =
         convertFocusedTabDataFromPrivate(state.focusedTabData);
-    this.focusedTabState.assignAndSignal(focusedTabData.focusedTab);
+    this.focusedTabState.assignAndSignal(focusedTabData.hasFocus?.tabData);
     this.focusedTabStateV2.assignAndSignal(focusedTabData);
     this.permissionStateMicrophone.assignAndSignal(
         state.microphonePermissionEnabled);
@@ -201,9 +226,14 @@ class GlicBrowserHostImpl implements GlicBrowserHost {
         state.locationPermissionEnabled);
     this.permissionStateTabContext.assignAndSignal(
         state.tabContextPermissionEnabled);
+    this.permissionStateOsLocation.assignAndSignal(
+        state.osLocationPermissionEnabled);
     this.canAttachPanelValue.assignAndSignal(state.canAttach);
     this.chromeVersion = state.chromeVersion;
     this.panelActiveValue.assignAndSignal(state.panelIsActive);
+    this.isBrowserOpenValue.assignAndSignal(state.browserIsOpen);
+    this.osHotkeyState.assignAndSignal({hotkey: state.hotkey});
+    this.fitWindow = state.fitWindow;
 
     if (!state.scrollToEnabled) {
       (this as GlicBrowserHost).scrollTo = undefined;
@@ -211,6 +241,14 @@ class GlicBrowserHostImpl implements GlicBrowserHost {
 
     if (!state.actInFocusedTabEnabled) {
       (this as GlicBrowserHost).actInFocusedTab = undefined;
+    }
+
+    if (!state.dragResizeEnabled) {
+      (this as GlicBrowserHost).enableDragResize = undefined;
+    }
+
+    if (!state.openOsSettingsApiIsAllowed) {
+      (this as GlicBrowserHost).openOsPermissionSettingsMenu = undefined;
     }
   }
 
@@ -242,6 +280,10 @@ class GlicBrowserHostImpl implements GlicBrowserHost {
 
   getChromeVersion() {
     return Promise.resolve(this.chromeVersion!);
+  }
+
+  shouldFitWindow() {
+    return Promise.resolve(this.fitWindow);
   }
 
   async createTab(
@@ -302,6 +344,11 @@ class GlicBrowserHostImpl implements GlicBrowserHost {
         'glicBrowserResizeWindow', {size: {width, height}, options});
   }
 
+  enableDragResize(enabled: boolean): Promise<void> {
+    return this.sender.requestWithResponse(
+        'glicBrowserEnableDragResize', {enabled});
+  }
+
   async captureScreenshot(): Promise<Screenshot> {
     const screenshotResult = await this.sender.requestWithResponse(
         'glicBrowserCaptureScreenshot', undefined);
@@ -330,6 +377,10 @@ class GlicBrowserHostImpl implements GlicBrowserHost {
     return this.canAttachPanelValue;
   }
 
+  isBrowserOpen(): ObservableValue<boolean> {
+    return this.isBrowserOpenValue;
+  }
+
   getFocusedTabState(): ObservableValueImpl<TabData|undefined> {
     return this.focusedTabState;
   }
@@ -348,6 +399,10 @@ class GlicBrowserHostImpl implements GlicBrowserHost {
 
   getTabContextPermissionState(): ObservableValueImpl<boolean> {
     return this.permissionStateTabContext;
+  }
+
+  getOsLocationPermissionState(): ObservableValueImpl<boolean> {
+    return this.permissionStateOsLocation;
   }
 
   setMicrophonePermissionState(enabled: boolean): Promise<void> {
@@ -410,6 +465,20 @@ class GlicBrowserHostImpl implements GlicBrowserHost {
   openOsPermissionSettingsMenu(permission: string): void {
     this.sender.requestNoResponse(
         'glicBrowserOpenOsPermissionSettingsMenu', {permission});
+  }
+
+  async getOsMicrophonePermissionStatus(): Promise<boolean> {
+    return (await this.sender.requestWithResponse(
+                'glicBrowserGetOsMicrophonePermissionStatus', undefined))
+        .enabled;
+  }
+
+  isManuallyResizing(): ObservableValueImpl<boolean> {
+    return this.manuallyResizing;
+  }
+
+  getOsHotkeyState(): ObservableValueImpl<{hotkey: string}> {
+    return this.osHotkeyState;
   }
 }
 
@@ -484,34 +553,43 @@ async function rgbaImageToBlob(image: RgbaImage): Promise<Blob> {
   });
 }
 
-function convertTabDataFromPrivate(data: TabDataPrivate): TabData {
+function convertTabDataFromPrivate(data: TabDataPrivate): TabData;
+function convertTabDataFromPrivate(data: TabDataPrivate|undefined): TabData|
+    undefined;
+function convertTabDataFromPrivate(data: TabDataPrivate|undefined): TabData|
+    undefined {
+  if (!data) {
+    return undefined;
+  }
   let faviconResult: Promise<Blob>|undefined;
+  const dataFavicon = data.favicon;
   async function getFavicon() {
-    if (data.favicon && !faviconResult) {
-      faviconResult = rgbaImageToBlob(data.favicon);
+    if (dataFavicon && !faviconResult) {
+      faviconResult = rgbaImageToBlob(dataFavicon);
       return faviconResult;
     }
     return faviconResult;
   }
 
-  const favicon = data.favicon && getFavicon;
+  const favicon = dataFavicon && getFavicon;
   return replaceProperties(data, {favicon});
-}
-
-function convertFocusedTabCandidateFromPrivate(
-    data: FocusedTabCandidatePrivate): FocusedTabCandidate {
-  const focusedTabCandidateData = data.focusedTabCandidateData &&
-      convertTabDataFromPrivate(data.focusedTabCandidateData);
-  return replaceProperties(data, {focusedTabCandidateData});
 }
 
 function convertFocusedTabDataFromPrivate(data: FocusedTabDataPrivate):
     FocusedTabData {
-  const focusedTab =
-      data.focusedTab && convertTabDataFromPrivate(data.focusedTab);
-  const focusedTabCandidate = data.focusedTabCandidate &&
-      convertFocusedTabCandidateFromPrivate(data.focusedTabCandidate);
-  return replaceProperties(data, {focusedTab, focusedTabCandidate});
+  const result: FocusedTabData = {};
+  if (data.hasFocus) {
+    result.hasFocus = replaceProperties(data.hasFocus, {
+      tabData: convertTabDataFromPrivate(data.hasFocus.tabData),
+    });
+  }
+  if (data.hasNoFocus) {
+    result.hasNoFocus = replaceProperties(data.hasNoFocus, {
+      tabFocusCandidateData:
+          convertTabDataFromPrivate(data.hasNoFocus.tabFocusCandidateData),
+    });
+  }
+  return result;
 }
 
 function streamFromBuffer(buffer: Uint8Array): ReadableStream<Uint8Array> {

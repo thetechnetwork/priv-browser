@@ -4,6 +4,7 @@
 
 #include "content/browser/btm/btm_page_visit_observer.h"
 
+#include "base/check.h"
 #include "content/browser/btm/btm_bounce_detector.h"
 #include "content/browser/btm/btm_utils.h"
 #include "content/browser/btm/cookie_access_filter.h"
@@ -112,7 +113,7 @@ NAVIGATION_HANDLE_USER_DATA_KEY_IMPL(NavigationState);
 void BtmPageVisitObserver::DidStartNavigation(
     NavigationHandle* navigation_handle) {
   // Ignore irrelevant navigations.
-  if (!IsInPrimaryPage(navigation_handle) ||
+  if (!IsInPrimaryPage(*navigation_handle) ||
       navigation_handle->IsSameDocument()) {
     return;
   }
@@ -207,19 +208,34 @@ void BtmPageVisitObserver::OnCookiesAccessed(
       details.type == CookieAccessDetails::Type::kRead &&
       details.source == CookieAccessDetails::Source::kNavigation;
   if (details.blocked_by_policy || is_passive_access ||
-      !btm::IsOrWasInPrimaryPage(render_frame_host)) {
+      !btm::IsOrWasInPrimaryPage(*render_frame_host)) {
     return;
   }
 
-  // Check to see if this is a late report for a redirect.
+  // Attribute accesses by iframes and other subresources to the first-party
+  // page they're embedded in.
+  const GURL& first_party_url = GetFirstPartyURL(*render_frame_host);
+
+  // BTM is only turned on when non-CHIPS 3PCs are blocked, so mirror that
+  // behavior by ignoring non-CHIPS 3PC accesses.
+  if (!HasCHIPS(details.cookie_access_result_list) &&
+      !IsSameSiteForBtm(first_party_url, details.url)) {
+    return;
+  }
+
+  // Check to see if this is a late report for a redirect. Only Navigation
+  // cookie accesses should be attributed to redirects.
   //
   // TODO: crbug.com/394059601 - once we have support for unit-testing cookie
   // accesses, add a unit test for this case.
-  for (VisitTuple& visit : pending_visits_) {
-    for (BtmServerRedirectInfo& redirect : visit.navigation.server_redirects) {
-      if (details.url == redirect.url) {
-        redirect.did_write_cookies = true;
-        return;
+  if (details.source == CookieAccessDetails::Source::kNavigation) {
+    for (VisitTuple& visit : pending_visits_) {
+      for (BtmServerRedirectInfo& redirect :
+           visit.navigation.server_redirects) {
+        if (details.url == redirect.url) {
+          redirect.did_write_cookies = true;
+          return;
+        }
       }
     }
   }
@@ -232,10 +248,8 @@ void BtmPageVisitObserver::OnCookiesAccessed(
 
   // If the cookie was accessed by a subresource request in a now-bfcached
   // page, try to find that page's visit.
-  const GURL& page_url =
-      render_frame_host->GetMainFrame()->GetLastCommittedURL();
   for (VisitTuple& visit : pending_visits_) {
-    if (page_url == visit.prev_page.url) {
+    if (first_party_url == visit.prev_page.url) {
       visit.prev_page.had_qualifying_storage_access = true;
       return;
     }
@@ -248,12 +262,21 @@ void BtmPageVisitObserver::OnCookiesAccessed(
   // Ignore irrelevant cookie accesses.
   if (details.blocked_by_policy ||
       details.type != CookieAccessDetails::Type::kChange ||
-      !IsInPrimaryPage(navigation_handle)) {
+      !IsInPrimaryPage(*navigation_handle)) {
     return;
   }
 
-  if (!navigation_handle->IsInMainFrame()) {
-    // Subframe navigation
+  bool is_subframe_navigation = !navigation_handle->IsInMainFrame();
+  if (is_subframe_navigation) {
+    const GURL& first_party_url = GetFirstPartyURL(*navigation_handle);
+    // BTM is only turned on when non-CHIPS 3PCs are blocked, so mirror that
+    // behavior by ignoring non-CHIPS 3PC accesses.
+    if (!HasCHIPS(details.cookie_access_result_list) &&
+        !IsSameSiteForBtm(first_party_url, details.url)) {
+      return;
+    }
+
+    // Attribute subframe storage accesses to the top-level page.
     current_page_.had_qualifying_storage_access = true;
     return;
   }

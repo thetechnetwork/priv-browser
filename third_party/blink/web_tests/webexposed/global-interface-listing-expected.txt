@@ -19,9 +19,11 @@ interface AICreateMonitor : EventTarget
     setter ondownloadprogress
 interface AILanguageDetector
     attribute @@toStringTag
+    getter inputQuota
     method constructor
     method destroy
     method detect
+    method measureInputUsage
 interface AILanguageDetectorFactory
     attribute @@toStringTag
     method availability
@@ -29,20 +31,18 @@ interface AILanguageDetectorFactory
     method create
 interface AILanguageModel : EventTarget
     attribute @@toStringTag
-    getter expectedInputLanguages
-    getter maxTokens
-    getter oncontextoverflow
+    getter inputQuota
+    getter inputUsage
+    getter onquotaoverflow
     getter temperature
-    getter tokensLeft
-    getter tokensSoFar
     getter topK
     method clone
     method constructor
-    method countPromptTokens
     method destroy
+    method measureInputUsage
     method prompt
     method promptStreaming
-    setter oncontextoverflow
+    setter onquotaoverflow
 interface AILanguageModelFactory
     attribute @@toStringTag
     method availability
@@ -98,10 +98,12 @@ interface AISummarizerFactory
     method create
 interface AITranslator
     attribute @@toStringTag
+    getter inputQuota
     getter sourceLanguage
     getter targetLanguage
     method constructor
     method destroy
+    method measureInputUsage
     method translate
     method translateStreaming
 interface AITranslatorFactory
@@ -201,6 +203,7 @@ interface Animation : EventTarget
     getter replaceState
     getter startTime
     getter timeline
+    getter trigger
     method cancel
     method commitStyles
     method constructor
@@ -221,6 +224,7 @@ interface Animation : EventTarget
     setter rangeStart
     setter startTime
     setter timeline
+    setter trigger
 interface AnimationEffect
     attribute @@toStringTag
     method constructor
@@ -3167,6 +3171,7 @@ interface GPUAdapterInfo
     getter architecture
     getter description
     getter device
+    getter isFallbackAdapter
     getter subgroupMaxSize
     getter subgroupMinSize
     getter vendor
@@ -5547,6 +5552,7 @@ interface IIRFilterNode : AudioNode
 interface IdentityCredential : Credential
     static method disconnect
     attribute @@toStringTag
+    getter configURL
     getter isAutoSelected
     getter token
     method constructor

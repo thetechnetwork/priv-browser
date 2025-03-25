@@ -106,7 +106,7 @@ public class TabGroupUiTest {
     public ChromeRenderTestRule mRenderTestRule =
             ChromeRenderTestRule.Builder.withPublicCorpus()
                     .setBugComponent(ChromeRenderTestRule.Component.UI_BROWSER_MOBILE_TAB_GROUPS)
-                    .setRevision(3)
+                    .setRevision(4)
                     .build();
 
     @Mock private BrowserControlsStateProvider mBrowserControlsStateProvider;
@@ -327,7 +327,7 @@ public class TabGroupUiTest {
                                     .getTabGroupModelFilterProvider()
                                     .getTabGroupModelFilter(false);
                     filter.mergeListOfTabsToGroup(
-                            List.of(tab), filter.getTabAt(0), /* notify= */ false);
+                            List.of(tab), filter.getRepresentativeTabAt(0), /* notify= */ false);
                 });
         ViewUtils.waitForVisibleView(
                 allOf(

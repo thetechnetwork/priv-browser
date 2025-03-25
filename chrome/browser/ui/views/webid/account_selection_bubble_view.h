@@ -45,8 +45,7 @@ class AccountSelectionBubbleView : public views::BubbleDialogDelegateView,
   void ShowMultiAccountPicker(
       const std::vector<IdentityRequestAccountPtr>& accounts,
       const std::vector<IdentityProviderDataPtr>& idp_list,
-      bool show_back_button,
-      bool is_choose_an_account) override;
+      bool show_back_button) override;
   void ShowVerifyingSheet(const IdentityRequestAccountPtr& account,
                           const std::u16string& title) override;
 
@@ -63,10 +62,6 @@ class AccountSelectionBubbleView : public views::BubbleDialogDelegateView,
 
   void ShowRequestPermissionDialog(
       const IdentityRequestAccountPtr& account) override;
-
-  void ShowSingleReturningAccountDialog(
-      const std::vector<IdentityRequestAccountPtr>& accounts,
-      const std::vector<IdentityProviderDataPtr>& idp_list) override;
 
   std::string GetDialogTitle() const override;
 
@@ -100,12 +95,8 @@ class AccountSelectionBubbleView : public views::BubbleDialogDelegateView,
                    views::View* accounts_content,
                    bool is_multi_idp);
 
-  // Returns a View containing a single returning account as well as a button to
-  // 'choose an account' which will show all accounts and IDPs that are
-  // available.
-  std::unique_ptr<views::View> CreateSingleReturningAccountChooser(
-      const std::vector<IdentityRequestAccountPtr>& accounts,
-      const std::vector<IdentityProviderDataPtr>& idp_list);
+  // Invoked whenever the expandable account chooser is scrolled.
+  void OnExpandableAccountsScrolled();
 
   // Returns a view containing a button for the user to login to an IDP for
   // which there was a login status mismatch, to be used in the multiple account
@@ -153,6 +144,13 @@ class AccountSelectionBubbleView : public views::BubbleDialogDelegateView,
 
   // View containing the bubble title.
   raw_ptr<views::Label> title_label_ = nullptr;
+
+  raw_ptr<views::ScrollView> expandable_account_scroll_view_ = nullptr;
+
+  // Subscription to notify of scrolling events from the expandable accounts
+  // scroller.
+  base::CallbackListSubscription on_contents_scrolled_subscription_;
+  float max_offset_ = 0.f;
 
   // Used to ensure that callbacks are not run if the AccountSelectionBubbleView
   // is destroyed.

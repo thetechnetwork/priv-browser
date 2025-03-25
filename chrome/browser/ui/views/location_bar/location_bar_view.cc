@@ -37,7 +37,6 @@
 #include "chrome/browser/themes/theme_service_factory.h"
 #include "chrome/browser/translate/chrome_translate_client.h"
 #include "chrome/browser/translate/translate_service.h"
-#include "chrome/browser/ui/autofill/payments/local_card_migration_bubble_controller_impl.h"
 #include "chrome/browser/ui/autofill/payments/save_card_bubble_controller_impl.h"
 #include "chrome/browser/ui/browser.h"
 #include "chrome/browser/ui/browser_actions.h"
@@ -54,7 +53,6 @@
 #include "chrome/browser/ui/tabs/saved_tab_groups/saved_tab_group_utils.h"
 #include "chrome/browser/ui/tabs/tab_strip_model.h"
 #include "chrome/browser/ui/ui_features.h"
-#include "chrome/browser/ui/views/autofill/payments/local_card_migration_icon_view.h"
 #include "chrome/browser/ui/views/chrome_layout_provider.h"
 #include "chrome/browser/ui/views/chrome_typography.h"
 #include "chrome/browser/ui/views/frame/browser_view.h"
@@ -69,6 +67,7 @@
 #include "chrome/browser/ui/views/omnibox/omnibox_view_views.h"
 #include "chrome/browser/ui/views/page_action/action_ids.h"
 #include "chrome/browser/ui/views/page_action/page_action_container_view.h"
+#include "chrome/browser/ui/views/page_action/page_action_controller.h"
 #include "chrome/browser/ui/views/page_action/page_action_icon_container.h"
 #include "chrome/browser/ui/views/page_action/page_action_icon_controller.h"
 #include "chrome/browser/ui/views/page_action/page_action_icon_params.h"
@@ -348,7 +347,8 @@ void LocationBarView::Init() {
   selected_keyword_view_ = AddChildView(
       std::make_unique<SelectedKeywordView>(this, profile_, font_list));
 
-  if (browser_ && apps::features::ShouldShowLinkCapturingUX()) {
+  if (browser_ && apps::features::ShouldShowLinkCapturingUX() &&
+      !IsPageActionMigrated(PageActionIconType::kIntentPicker)) {
     intent_chip_ =
         AddChildView(std::make_unique<IntentChipButton>(browser_, this));
   }
@@ -428,7 +428,6 @@ void LocationBarView::Init() {
   }
   params.types_enabled.push_back(PageActionIconType::kSaveCard);
   params.types_enabled.push_back(PageActionIconType::kSaveIban);
-  params.types_enabled.push_back(PageActionIconType::kLocalCardMigration);
   params.types_enabled.push_back(PageActionIconType::kFilledCardInformation);
   params.types_enabled.push_back(PageActionIconType::kVirtualCardEnroll);
   params.types_enabled.push_back(PageActionIconType::kMandatoryReauth);
@@ -1046,9 +1045,7 @@ void LocationBarView::Update(WebContents* contents) {
   }
 
   RefreshContentSettingViews();
-
   RefreshPageActionIconViews();
-  RefreshPageActionContainerView();
   location_icon_view_->Update(/*suppress_animations=*/contents,
                               omnibox_view_->model()->PopupIsOpen());
 
@@ -1061,6 +1058,11 @@ void LocationBarView::Update(WebContents* contents) {
   } else {
     omnibox_view_->Update();
   }
+
+  // Ensures that the page action updates is performed after the omnibox update.
+  // So we can determine whether page actions should be hidden or not.
+  RefreshPageActionContainerViewAndIconsVisibility(
+      /*should_hide_page_actions=*/ShouldHidePageActionIcons());
 
   if (merchant_trust_chip_controller_) {
     merchant_trust_chip_controller_->UpdateWebContents(contents);
@@ -1353,17 +1355,15 @@ void LocationBarView::RefreshPageActionIconViews() {
   page_action_icon_controller_->UpdateAll();
 }
 
-void LocationBarView::RefreshPageActionContainerView() {
-  page_actions::PageActionController* controller = nullptr;
-  if (browser_) {
-    if (tabs::TabInterface* active_tab = browser_->GetActiveTabInterface()) {
-      // Tab features may be null while the tab is being destroyed.
-      if (tabs::TabFeatures* tab_features = active_tab->GetTabFeatures()) {
-        controller = tab_features->page_action_controller();
-      }
-    }
+void LocationBarView::RefreshPageActionContainerViewAndIconsVisibility(
+    bool should_hide_page_actions) {
+  page_actions::PageActionController* page_action_controller =
+      GetPageActionController();
+  page_action_container_->SetController(page_action_controller);
+
+  if (page_action_controller) {
+    page_action_controller->SetShouldHidePageActions(should_hide_page_actions);
   }
-  page_action_container_->SetController(controller);
 }
 
 void LocationBarView::RefreshClearAllButtonIcon() {
@@ -1581,6 +1581,7 @@ void LocationBarView::OnChanged() {
       omnibox_view_ && omnibox_view_->model()->user_input_in_progress() &&
       !omnibox_view_->GetText().empty() &&
       IsVirtualKeyboardVisible(GetWidget()));
+
   InvalidateLayout();
   SchedulePaint();
   UpdateChipVisibility();
@@ -1824,6 +1825,25 @@ ui::MouseEvent LocationBarView::AdjustMouseEventLocationForOmniboxView(
 
 bool LocationBarView::GetPopupMode() const {
   return is_popup_mode_;
+}
+
+page_actions::PageActionController* LocationBarView::GetPageActionController() {
+  if (!browser_) {
+    return nullptr;
+  }
+
+  tabs::TabInterface* active_tab = browser_->GetActiveTabInterface();
+  if (!active_tab) {
+    return nullptr;
+  }
+
+  // Tab features may be null while the tab is being destroyed.
+  tabs::TabFeatures* tab_features = active_tab->GetTabFeatures();
+  if (!tab_features) {
+    return nullptr;
+  }
+
+  return tab_features->page_action_controller();
 }
 
 #if BUILDFLAG(IS_MAC)

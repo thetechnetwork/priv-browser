@@ -5,7 +5,9 @@
 #include "chrome/browser/glic/host/glic_page_handler.h"
 
 #include "base/callback_list.h"
+#include "base/feature_list.h"
 #include "base/functional/callback_helpers.h"
+#include "base/memory/raw_ptr.h"
 #include "base/metrics/histogram_functions.h"
 #include "base/notimplemented.h"
 #include "base/observer_list.h"
@@ -17,8 +19,8 @@
 #include "base/version_info/version_info.h"
 #include "chrome/browser/browser_process.h"
 #include "chrome/browser/enterprise/browser_management/management_service_factory.h"
-#include "chrome/browser/glic/glic.mojom.h"
 #include "chrome/browser/glic/glic_enabling.h"
+#include "chrome/browser/glic/glic_hotkey.h"
 #include "chrome/browser/glic/glic_keyed_service.h"
 #include "chrome/browser/glic/glic_keyed_service_factory.h"
 #include "chrome/browser/glic/glic_metrics.h"
@@ -26,6 +28,7 @@
 #include "chrome/browser/glic/glic_profile_manager.h"
 #include "chrome/browser/glic/host/auth_controller.h"
 #include "chrome/browser/glic/host/context/glic_tab_data.h"
+#include "chrome/browser/glic/host/glic.mojom.h"
 #include "chrome/browser/glic/host/glic_annotation_manager.h"
 #include "chrome/browser/glic/host/glic_synthetic_trial_manager.h"
 #include "chrome/browser/glic/host/glic_web_client_access.h"
@@ -34,14 +37,17 @@
 #include "chrome/browser/global_features.h"
 #include "chrome/browser/media/audio_ducker.h"
 #include "chrome/browser/permissions/system/system_permission_settings.h"
+#include "chrome/browser/profiles/profile.h"
 #include "chrome/browser/profiles/profile_attributes_storage.h"
 #include "chrome/browser/profiles/profile_manager.h"
 #include "chrome/browser/ui/browser.h"
+#include "chrome/browser/ui/browser_list.h"
 #include "chrome/common/chrome_features.h"
 #include "components/content_settings/core/common/content_settings_types.h"
 #include "components/prefs/pref_service.h"
 #include "components/signin/public/identity_manager/identity_manager.h"
 #include "content/public/browser/web_contents.h"
+#include "extensions/browser/guest_view/web_view/web_view_guest.h"
 #include "mojo/public/cpp/bindings/callback_helpers.h"
 #include "mojo/public/cpp/bindings/message.h"
 #include "ui/gfx/geometry/mojom/geometry.mojom.h"
@@ -161,6 +167,60 @@ class ActiveStateCalculator : public GlicWindowController::StateObserver {
   raw_ptr<Browser> attached_browser_ = nullptr;
 };
 
+class BrowserIsOpenCalculator : public BrowserListObserver {
+ public:
+  class Observer : public base::CheckedObserver {
+   public:
+    virtual void BrowserIsOpenChanged(bool browser_is_open) = 0;
+  };
+
+  explicit BrowserIsOpenCalculator(Profile* profile, Observer* observer)
+      : profile_(profile) {
+    BrowserList::AddObserver(this);
+    BrowserList* list = BrowserList::GetInstance();
+    for (Browser* browser : *list) {
+      OnBrowserAdded(browser);
+    }
+    // Don't notify observer during construction.
+    observer_ = observer;
+  }
+  ~BrowserIsOpenCalculator() override { BrowserList::RemoveObserver(this); }
+
+  void OnBrowserAdded(Browser* browser) override {
+    if (browser->profile() == profile_) {
+      UpdateBrowserCount(1);
+    }
+  }
+  void OnBrowserRemoved(Browser* browser) override {
+    if (browser->profile() == profile_) {
+      UpdateBrowserCount(-1);
+    }
+  }
+
+  bool IsOpen() const { return open_browser_count_ > 0; }
+
+ private:
+  void UpdateBrowserCount(int delta) {
+    bool was_open = IsOpen();
+    open_browser_count_ += delta;
+    bool is_open = IsOpen();
+    if (was_open != is_open && observer_) {
+      observer_->BrowserIsOpenChanged(is_open);
+    }
+  }
+  // Profile outlives this class. The glic web contents is torn down along with
+  // GlicKeyedService, which is tied to the profile.
+  raw_ptr<Profile> profile_;
+  raw_ptr<Observer> observer_ = nullptr;
+  int open_browser_count_ = 0;
+};
+
+mojom::WebClientSizingMode GetWebClientSizingMode() {
+  return base::FeatureList::IsEnabled(features::kGlicSizingFitWindow)
+             ? glic::mojom::WebClientSizingMode::kFitWindow
+             : glic::mojom::WebClientSizingMode::kNatural;
+}
+
 }  // namespace
 
 // WARNING: One instance of this class is created per WebUI navigated to
@@ -172,7 +232,8 @@ class GlicWebClientHandler : public glic::mojom::WebClientHandler,
                              public GlicWindowController::StateObserver,
                              public GlicWebClientAccess,
                              public BrowserAttachObserver,
-                             public ActiveStateCalculator::Observer {
+                             public ActiveStateCalculator::Observer,
+                             public BrowserIsOpenCalculator::Observer {
  public:
   explicit GlicWebClientHandler(
       GlicPageHandler* page_handler,
@@ -184,6 +245,7 @@ class GlicWebClientHandler : public glic::mojom::WebClientHandler,
             GlicKeyedServiceFactory::GetGlicKeyedService(browser_context)),
         pref_service_(profile_->GetPrefs()),
         active_state_calculator_(&glic_service_->window_controller()),
+        browser_is_open_calculator_(profile_, this),
         receiver_(this, std::move(receiver)),
         annotation_manager_(
             std::make_unique<GlicAnnotationManager>(glic_service_)) {
@@ -227,6 +289,11 @@ class GlicWebClientHandler : public glic::mojom::WebClientHandler,
 
     browser_attach_observation_ = ObserveBrowserForAttachment(profile_, this);
 
+    system_permission_settings_observation_ =
+        system_permission_settings::Observe(base::BindRepeating(
+            &GlicWebClientHandler::OnOsPermissionSettingChanged,
+            base::Unretained(this)));
+
     auto state = glic::mojom::WebClientInitialState::New();
     state->chrome_version = version_info::GetVersion();
     state->microphone_permission_enabled =
@@ -235,6 +302,8 @@ class GlicWebClientHandler : public glic::mojom::WebClientHandler,
         pref_service_->GetBoolean(prefs::kGlicGeolocationEnabled);
     state->tab_context_permission_enabled =
         pref_service_->GetBoolean(prefs::kGlicTabContextEnabled);
+    state->os_location_permission_enabled =
+        system_permission_settings::IsAllowed(ContentSettingsType::GEOLOCATION);
 
     state->panel_state =
         glic_service_->window_controller().GetPanelState().Clone();
@@ -243,6 +312,23 @@ class GlicWebClientHandler : public glic::mojom::WebClientHandler,
         CreateFocusedTabData(glic_service_->GetFocusedTabData());
     state->can_attach = browser_attach_observation_->CanAttachToBrowser();
     state->panel_is_active = active_state_calculator_.IsActive();
+
+    state->sizing_mode = GetWebClientSizingMode();
+
+    state->browser_is_open = browser_is_open_calculator_.IsOpen();
+
+#if BUILDFLAG(IS_MAC)
+    state->open_os_settings_api_is_allowed = true;
+#else
+    state->open_os_settings_api_is_allowed = false;
+#endif
+
+    local_state_pref_change_registrar_.Init(g_browser_process->local_state());
+    local_state_pref_change_registrar_.Add(
+        prefs::kGlicLauncherHotkey,
+        base::BindRepeating(&GlicWebClientHandler::OnLocalStatePrefChanged,
+                            base::Unretained(this)));
+    state->hotkey = GetHotkeyString();
 
     std::move(callback).Run(std::move(state));
     glic_service_->WebClientCreated();
@@ -298,16 +384,19 @@ class GlicWebClientHandler : public glic::mojom::WebClientHandler,
     glic_service_->ResizePanel(size, duration, std::move(callback));
   }
 
+  void EnableDragResize(bool enabled) override {
+    glic_service_->window_controller().ShouldEnableDragResize(enabled);
+  }
+
   void GetContextFromFocusedTab(
       glic::mojom::GetTabContextOptionsPtr options,
       GetContextFromFocusedTabCallback callback) override {
     glic_service_->GetContextFromFocusedTab(*options, std::move(callback));
   }
 
-  void ActInFocusedTab(
-      const std::vector<uint8_t>& action_proto,
-      glic::mojom::GetTabContextOptionsPtr options,
-      ActInFocusedTabCallback callback) override {
+  void ActInFocusedTab(const std::vector<uint8_t>& action_proto,
+                       glic::mojom::GetTabContextOptionsPtr options,
+                       ActInFocusedTabCallback callback) override {
     glic_service_->ActInFocusedTab(action_proto, *options, std::move(callback));
   }
 
@@ -317,13 +406,12 @@ class GlicWebClientHandler : public glic::mojom::WebClientHandler,
 
   void SetAudioDucking(bool enabled,
                        SetAudioDuckingCallback callback) override {
-    content::WebContents* web_contents = page_handler_->guest_contents();
-    if (!web_contents || web_contents->IsBeingDestroyed()) {
+    if (!page_handler_->GetGuestMainFrame()) {
       std::move(callback).Run(false);
       return;
     }
-    AudioDucker* audio_ducker =
-        AudioDucker::GetOrCreateForPage(web_contents->GetPrimaryPage());
+    AudioDucker* audio_ducker = AudioDucker::GetOrCreateForPage(
+        page_handler_->GetGuestMainFrame()->GetPage());
     std::move(callback).Run(enabled ? audio_ducker->StartDuckingOtherAudio()
                                     : audio_ducker->StopDuckingOtherAudio());
   }
@@ -349,6 +437,13 @@ class GlicWebClientHandler : public glic::mojom::WebClientHandler,
       bool enabled,
       SetMicrophonePermissionStateCallback callback) override {
     pref_service_->SetBoolean(prefs::kGlicMicrophoneEnabled, enabled);
+    if (enabled) {
+      base::RecordAction(
+          base::UserMetricsAction("GlicMicrophonePermissionEnabled"));
+    } else {
+      base::RecordAction(
+          base::UserMetricsAction("GlicMicrophonePermissionDisabled"));
+    }
     std::move(callback).Run();
   }
 
@@ -356,6 +451,13 @@ class GlicWebClientHandler : public glic::mojom::WebClientHandler,
       bool enabled,
       SetLocationPermissionStateCallback callback) override {
     pref_service_->SetBoolean(prefs::kGlicGeolocationEnabled, enabled);
+    if (enabled) {
+      base::RecordAction(
+          base::UserMetricsAction("GlicLocationPermissionEnabled"));
+    } else {
+      base::RecordAction(
+          base::UserMetricsAction("GlicLocationPermissionDisabled"));
+    }
     std::move(callback).Run();
   }
 
@@ -363,6 +465,13 @@ class GlicWebClientHandler : public glic::mojom::WebClientHandler,
       bool enabled,
       SetTabContextPermissionStateCallback callback) override {
     pref_service_->SetBoolean(prefs::kGlicTabContextEnabled, enabled);
+    if (enabled) {
+      base::RecordAction(
+          base::UserMetricsAction("GlicTabContextPermissionEnabled"));
+    } else {
+      base::RecordAction(
+          base::UserMetricsAction("GlicTabContextPermissionDisabled"));
+    }
     std::move(callback).Run();
   }
 
@@ -454,13 +563,27 @@ class GlicWebClientHandler : public glic::mojom::WebClientHandler,
   }
 
   void OpenOsPermissionSettingsMenu(ContentSettingsType type) override {
-    if (type == ContentSettingsType::MEDIASTREAM_MIC ||
-        type == ContentSettingsType::GEOLOCATION) {
-      system_permission_settings::OpenSystemSettings(
-          page_handler_->webui_contents(), type);
-    } else {
-      NOTIMPLEMENTED();
+#if BUILDFLAG(IS_MAC)
+    if (type != ContentSettingsType::MEDIASTREAM_MIC &&
+        type != ContentSettingsType::GEOLOCATION) {
+      // This will terminate the render process.
+      mojo::ReportBadMessage(
+          "OpenOsPermissionSettingsMenu received for unsupported "
+          "OS permission.");
+      return;
     }
+    system_permission_settings::OpenSystemSettings(
+        page_handler_->webui_contents(), type);
+#else
+    mojo::ReportBadMessage(
+        "OpenOsPermissionSettingsMenu not supported on this platform.");
+#endif
+  }
+
+  void GetOsMicrophonePermissionStatus(
+      GetOsMicrophonePermissionStatusCallback callback) override {
+    std::move(callback).Run(system_permission_settings::IsAllowed(
+        ContentSettingsType::MEDIASTREAM_MIC));
   }
 
   // GlicWindowController::StateObserver implementation.
@@ -489,6 +612,10 @@ class GlicWebClientHandler : public glic::mojom::WebClientHandler,
         mojo::WrapCallbackWithDefaultInvokeIfNotRun(std::move(done)));
   }
 
+  void ManualResizeChanged(bool resizing) override {
+    web_client_->NotifyManualResizeChanged(resizing);
+  }
+
   // BrowserAttachmentObserver implementation.
   void CanAttachToBrowserChanged(bool can_attach) override {
     web_client_->NotifyPanelCanAttachChange(can_attach);
@@ -499,6 +626,20 @@ class GlicWebClientHandler : public glic::mojom::WebClientHandler,
       web_client_->NotifyPanelActiveChange(is_active);
     }
   }
+  // BrowserIsOpenCalculator implementation.
+  void BrowserIsOpenChanged(bool is_open) override {
+    if (web_client_) {
+      web_client_->NotifyBrowserIsOpenChanged(is_open);
+    }
+  }
+
+  void OnOsPermissionSettingChanged(ContentSettingsType content_type,
+                                    bool is_blocked) {
+    // Ignore other content types.
+    if (content_type == ContentSettingsType::GEOLOCATION) {
+      web_client_->NotifyOsLocationPermissionStateChanged(!is_blocked);
+    }
+  }
 
  private:
   void Uninstall() {
@@ -507,6 +648,7 @@ class GlicWebClientHandler : public glic::mojom::WebClientHandler,
       glic_service_->window_controller().SetWebClient(nullptr);
     }
     pref_change_registrar_.Reset();
+    local_state_pref_change_registrar_.Reset();
     glic_service_->window_controller().RemoveStateObserver(this);
     focus_changed_subscription_ = {};
     browser_attach_observation_.reset();
@@ -527,9 +669,17 @@ class GlicWebClientHandler : public glic::mojom::WebClientHandler,
     }
   }
 
+  void OnLocalStatePrefChanged(const std::string& pref_name) {
+    if (pref_name == prefs::kGlicLauncherHotkey) {
+      web_client_->NotifyOsHotkeyStateChanged(GetHotkeyString());
+    } else {
+      CHECK(false) << "Unknown local state pref changed: " << pref_name;
+    }
+  }
+
   void OnFocusedTabChanged(FocusedTabData focused_tab_data) {
     focused_tab_data_observer_ = std::make_unique<TabDataObserver>(
-        focused_tab_data.focused_tab_contents.get(),
+        focused_tab_data.focus(),
         /*disconnect_on_primary_page_changed=*/true,
         base::BindRepeating(&GlicWebClientHandler::FocusedTabDataChanged,
                             base::Unretained(this)));
@@ -546,17 +696,21 @@ class GlicWebClientHandler : public glic::mojom::WebClientHandler,
   }
 
   PrefChangeRegistrar pref_change_registrar_;
+  PrefChangeRegistrar local_state_pref_change_registrar_;
   raw_ptr<Profile> profile_;
   raw_ptr<GlicPageHandler> page_handler_;
   raw_ptr<GlicKeyedService> glic_service_;
   raw_ptr<PrefService> pref_service_;
   ActiveStateCalculator active_state_calculator_;
+  BrowserIsOpenCalculator browser_is_open_calculator_;
   base::CallbackListSubscription focus_changed_subscription_;
   std::unique_ptr<TabDataObserver> focused_tab_data_observer_;
   mojo::Receiver<glic::mojom::WebClientHandler> receiver_;
   mojo::Remote<glic::mojom::WebClient> web_client_;
   std::unique_ptr<BrowserAttachObservation> browser_attach_observation_;
   std::unique_ptr<GlicAnnotationManager> annotation_manager_;
+  std::unique_ptr<system_permission_settings::ScopedObservation>
+      system_permission_settings_observation_;
 };
 
 GlicPageHandler::GlicPageHandler(
@@ -607,12 +761,16 @@ void GlicPageHandler::WebviewCommitted(const GURL& url) {
   }
 }
 
-void GlicPageHandler::GuestAdded(content::WebContents* guest_contents) {
-  guest_contents_ = guest_contents->GetWeakPtr();
+void GlicPageHandler::GuestAdded(extensions::WebViewGuest* guest) {
+  guest_ = guest->GetWeakPtr();
 }
 
 void GlicPageHandler::NotifyWindowIntentToShow() {
   page_->IntentToShow();
+}
+
+content::RenderFrameHost* GlicPageHandler::GetGuestMainFrame() {
+  return guest_ ? guest_->GetGuestMainFrame() : nullptr;
 }
 
 void GlicPageHandler::ClosePanel() {

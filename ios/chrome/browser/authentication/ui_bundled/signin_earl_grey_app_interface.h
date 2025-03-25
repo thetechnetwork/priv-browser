@@ -75,11 +75,14 @@ enum class UserSelectableType;
 // `fakeIdentity` is added if it was not added yet.
 + (void)signinWithFakeIdentity:(FakeSystemIdentity*)identity;
 
-// TODO(crbug.com/40066949): Remove all tests invoking this when deleting the
-// MaybeMigrateSyncingUserToSignedIn() call on //ios (not right after launching
-// kMigrateSyncingUserToSignedIn).
+// Signs in with the fake managed identity and access point Settings.
+// Adds the fake-identity to the identity manager if necessary.
+// Converts the personal profile into a managed one.
+// Call `[SigninEarlGrey
+// signinWithFakeManagedIdentityInPersonalProfile:identity]` instead.
 // `fakeIdentity` is added if it was not added yet.
-+ (void)signinAndEnableLegacySyncFeature:(FakeSystemIdentity*)identity;
++ (void)signinWithFakeManagedIdentityInPersonalProfile:
+    (FakeSystemIdentity*)identity;
 
 // Signs in with `identity` without history sync consent.
 // `fakeIdentity` is added if it was not added yet.

@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import {type WebClientInitialState} from '../glic.mojom-webui.js';
-import type {AnnotatedPageData, ActInFocusedTabParams, ActInFocusedTabResult, ChromeVersion, DraggableArea, ErrorReasonTypes, ErrorWithReason, FocusedTabCandidate, FocusedTabData, InvalidCandidateError, NoCandidateTabError, OpenPanelInfo, PanelOpeningData, PanelState, PdfDocumentData, Screenshot, ScrollToParams, TabContextOptions, TabContextResult, TabData, UserProfileInfo} from '../glic_api/glic_api.js';
+import type {ActInFocusedTabParams, ActInFocusedTabResult, AnnotatedPageData, ChromeVersion, DraggableArea, ErrorReasonTypes, ErrorWithReason, FocusedTabDataHasFocus, FocusedTabDataHasNoFocus, OpenPanelInfo, PageMetadata, PanelOpeningData, PanelState, PdfDocumentData, Screenshot, ScrollToParams, TabContextOptions, TabContextResult, TabData, UserProfileInfo} from '../glic_api/glic_api.js';
 
 /*
 This file defines messages sent over postMessage in-between the Glic WebUI
@@ -92,6 +92,11 @@ export declare interface HostRequestTypes {
       },
     },
   };
+  glicBrowserEnableDragResize: {
+    request: {
+      enabled: boolean,
+    },
+  };
   glicBrowserSetWindowDraggableAreas: {
     request: {
       areas: DraggableArea[],
@@ -165,6 +170,11 @@ export declare interface HostRequestTypes {
     },
   };
   glicBrowserOpenOsPermissionSettingsMenu: {request: {permission: string}};
+  glicBrowserGetOsMicrophonePermissionStatus: {
+    response: {
+      enabled: boolean,
+    },
+  };
 }
 
 // Types of requests to the GlicWebClient.
@@ -211,6 +221,11 @@ export declare interface WebClientRequestTypes {
       enabled: boolean,
     },
   };
+  glicWebClientNotifyOsLocationPermissionStateChanged: {
+    request: {
+      enabled: boolean,
+    },
+  };
   glicWebClientNotifyFocusedTabChanged: {
     request: {
       focusedTabDataPrivate: FocusedTabDataPrivate,
@@ -222,6 +237,21 @@ export declare interface WebClientRequestTypes {
     },
   };
   glicWebClientCheckResponsive: {};
+  glicWebClientNotifyManualResizeChanged: {
+    request: {
+      resizing: boolean,
+    },
+  };
+  glicWebClientBrowserIsOpenChanged: {
+    request: {
+      browserIsOpen: boolean,
+    },
+  };
+  glicWebClientNotifyOsHotkeyStateChanged: {
+    request: {
+      hotkey: string,
+    },
+  };
 }
 
 
@@ -246,6 +276,7 @@ type HostRequestEnumNamesType = {
     ActInFocusedTab: 0,
     CaptureScreenshot: 0,
     ResizeWindow: 0,
+    EnableDragResize: 0,
     SetWindowDraggableAreas: 0,
     SetMinimumWidgetSize: 0,
     SetMicrophonePermissionState: 0,
@@ -265,6 +296,7 @@ type HostRequestEnumNamesType = {
     ScrollTo: 0,
     SetSyntheticExperimentState: 0,
     OpenOsPermissionSettingsMenu: 0,
+    GetOsMicrophonePermissionStatus: 0,
   };
   return apiRequestTypes;
   // LINT.ThenChange(//tools/metrics/histograms/metadata/glic/histograms.xml:ApiRequestType)
@@ -346,6 +378,10 @@ export type WebClientInitialStatePrivate =
       scrollToEnabled: boolean,
       actInFocusedTabEnabled: boolean,
       loggingEnabled: boolean,
+      // Whether or not the web client should resize the content to fit the
+      // window size.
+      fitWindow: boolean,
+      dragResizeEnabled: boolean,
     }>;
 
 // TabData format for postMessage transport.
@@ -375,18 +411,10 @@ export enum ImageColorType {
 }
 
 // FocusedTabData data for postMessage transport.
-export declare interface FocusedTabDataPrivate extends Omit<
-    FocusedTabData, 'focusedTab'|'focusedTabCandidate'|'noCandidateTabError'> {
-  focusedTab?: TabDataPrivate;
-  focusedTabCandidate?: FocusedTabCandidatePrivate;
-  noCandidateTabError?: NoCandidateTabError;
-}
-
-// FocusedTabDataCandidate data for postMessage transport.
-export declare interface FocusedTabCandidatePrivate extends Omit<
-    FocusedTabCandidate, 'focusedTabCandidateData'|'invalidCandidateError'> {
-  focusedTabCandidateData?: TabDataPrivate;
-  invalidCandidateError?: InvalidCandidateError;
+export declare interface FocusedTabDataPrivate {
+  hasFocus?: Omit<FocusedTabDataHasFocus, 'tabData'>&{tabData: TabDataPrivate};
+  hasNoFocus?: Omit<FocusedTabDataHasNoFocus, 'tabFocusCandidateData'>&
+      {tabFocusCandidateData?: TabDataPrivate};
 }
 
 // TabContextResult data for postMessage transport.
@@ -415,8 +443,8 @@ export declare interface PdfDocumentDataPrivate extends
 export declare interface AnnotatedPageDataPrivate extends
     Omit<AnnotatedPageData, 'annotatedPageContent'> {
   annotatedPageContent?: ArrayBuffer;
+  metadata?: PageMetadata;
 }
-
 
 export class ErrorWithReasonImpl<T extends keyof ErrorReasonTypes> extends Error
     implements ErrorWithReason<T> {

@@ -798,7 +798,7 @@ class ComputedStyle final : public ComputedStyleBase {
            HasGlyphRelativeUnits();
   }
   bool HasAnyRelativeUnits() const {
-    return HasFontRelativeUnits() || HasContainerRelativeUnits() ||
+    return HasFontRelativeUnits() || HasContainerRelativeValue() ||
            HasLogicalDirectionRelativeUnits() || HasViewportUnits();
   }
 
@@ -996,7 +996,8 @@ class ComputedStyle final : public ComputedStyleBase {
   }
   bool ColumnRuleEquivalent(const ComputedStyle& other_style) const;
   bool HasColumnRule() const {
-    if (!SpecifiesColumns() && Display() != EDisplay::kGrid) [[likely]] {
+    if (!SpecifiesColumns() && (Display() != EDisplay::kGrid &&
+                                Display() != EDisplay::kFlex)) [[likely]] {
       return false;
     }
     return ColumnRuleWidth().GetLegacyValue() && !ColumnRuleIsTransparent() &&
@@ -1013,6 +1014,8 @@ class ComputedStyle final : public ComputedStyleBase {
     return RowRuleWidth().GetLegacyValue() && !RowRuleIsTransparent() &&
            BorderStyleIsVisible(RowRuleStyle().GetLegacyValue());
   }
+
+  bool HasGapRule() const { return HasColumnRule() || HasRowRule(); }
 
   // Flex utility functions.
   bool ResolvedIsColumnFlexDirection() const {
@@ -1591,6 +1594,9 @@ class ComputedStyle final : public ComputedStyleBase {
   }
   bool ContainsBlockSize() const {
     return EffectiveContainment() & kContainsBlockSize;
+  }
+  bool ContainsAnySize() const {
+    return EffectiveContainment() & kContainsSize;
   }
 
   CORE_EXPORT static bool ShouldApplyAnyContainment(
@@ -2383,6 +2389,10 @@ class ComputedStyle final : public ComputedStyleBase {
     return ScrollMarkerGroup() == other.ScrollMarkerGroup();
   }
 
+  bool ScrollMarkerContainNone() const {
+    return ScrollMarkerContain() == EScrollMarkerContain::kNone;
+  }
+
   PhysicalBoxStrut ScrollMarginStrut() const {
     return {LayoutUnit(ScrollMarginTop()), LayoutUnit(ScrollMarginRight()),
             LayoutUnit(ScrollMarginBottom()), LayoutUnit(ScrollMarginLeft())};
@@ -2917,6 +2927,16 @@ class ComputedStyleBuilder final : public ComputedStyleBuilderBase {
     SetColumnWidthInternal(0);
   }
 
+  // column-height
+  void SetColumnHeight(float f) {
+    SetHasAutoColumnHeightInternal(false);
+    SetColumnHeightInternal(f);
+  }
+  void SetHasAutoColumnHeight() {
+    SetHasAutoColumnHeightInternal(true);
+    SetColumnHeightInternal(0);
+  }
+
   // contain
   bool ShouldApplyAnyContainment(const Element& element) const {
     unsigned effective_containment = ComputedStyle::EffectiveContainment(
@@ -3369,16 +3389,6 @@ class ComputedStyleBuilder final : public ComputedStyleBuilderBase {
                                    CSSVariableData* value,
                                    bool is_inherited_property) {
     if (is_inherited_property) {
-      // Try to avoid cloning inherited_variables if we haven't already;
-      // taking the extra cost of a lookup and compare here can be worth it
-      // to reduce memory usage if the page sets the same variables
-      // over and over again (e.g. in a universal selector).
-      if (!has_own_inherited_variables_ && InheritedVariables()) {
-        if (auto existing_value = InheritedVariables()->GetData(name);
-            existing_value && base::ValuesEquivalent(*existing_value, value)) {
-          return;
-        }
-      }
       MutableInheritedVariables().SetData(name, value);
     } else {
       MutableNonInheritedVariables().SetData(name, value);

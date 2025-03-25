@@ -4,9 +4,14 @@
 
 #include "components/autofill/core/browser/ui/payments/bnpl_tos_controller_impl.h"
 
+#include "base/check_deref.h"
 #include "base/strings/utf_string_conversions.h"
+#include "components/autofill/core/browser/data_manager/payments/payments_data_manager.h"
+#include "components/autofill/core/browser/data_manager/personal_data_manager.h"
+#include "components/autofill/core/browser/foundations/autofill_client.h"
 #include "components/autofill/core/browser/ui/payments/bnpl_tos_view.h"
 #include "components/signin/public/identity_manager/account_info.h"
+#include "components/signin/public/identity_manager/identity_manager.h"
 #include "components/strings/grit/components_strings.h"
 #include "ui/base/l10n/l10n_util.h"
 #include "url/gurl.h"
@@ -24,24 +29,28 @@ constexpr std::string_view kWalletUrlString = "https://wallet.google.com/";
 
 BnplTosModel::BnplTosModel() = default;
 
+BnplTosModel::BnplTosModel(const BnplTosModel& other) = default;
+
 BnplTosModel::BnplTosModel(BnplTosModel&& other) = default;
+
+BnplTosModel& BnplTosModel::operator=(const BnplTosModel& other) = default;
+
 BnplTosModel& BnplTosModel::operator=(BnplTosModel&& other) = default;
 
 BnplTosModel::~BnplTosModel() = default;
 
-BnplTosControllerImpl::BnplTosControllerImpl() = default;
+BnplTosControllerImpl::BnplTosControllerImpl(AutofillClient* client)
+    : client_(CHECK_DEREF(client)) {}
 
 BnplTosControllerImpl::~BnplTosControllerImpl() = default;
 
-void BnplTosControllerImpl::OnViewClosing(bool user_accepted) {
-  // The view is being closed so set the pointer to nullptr.
-  view_.reset();
+void BnplTosControllerImpl::OnUserAccepted() {
+  std::move(accept_callback_).Run();
+}
 
-  if (user_accepted) {
-    std::move(accept_callback_).Run();
-  } else {
-    std::move(cancel_callback_).Run();
-  }
+void BnplTosControllerImpl::OnUserCancelled() {
+  Dismiss();
+  std::move(cancel_callback_).Run();
 }
 
 u16string BnplTosControllerImpl::GetOkButtonLabel() const {
@@ -87,8 +96,16 @@ const LegalMessageLines& BnplTosControllerImpl::GetLegalMessageLines() const {
   return model_.legal_message_lines;
 }
 
-const AccountInfo& BnplTosControllerImpl::GetAccountInfo() const {
-  return model_.account_info;
+AccountInfo BnplTosControllerImpl::GetAccountInfo() const {
+  signin::IdentityManager* identity_manager = client_->GetIdentityManager();
+  if (!identity_manager) {
+    return AccountInfo();
+  }
+
+  return identity_manager->FindExtendedAccountInfo(
+      client_->GetPersonalDataManager()
+          .payments_data_manager()
+          .GetAccountInfoForPaymentsServer());
 }
 
 const std::string& BnplTosControllerImpl::GetIssuerId() const {
@@ -115,6 +132,10 @@ void BnplTosControllerImpl::Show(
   cancel_callback_ = std::move(cancel_callback);
 
   view_ = std::move(create_and_show_view_callback).Run();
+}
+
+void BnplTosControllerImpl::Dismiss() {
+  view_.reset();
 }
 
 }  // namespace autofill

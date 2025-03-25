@@ -83,10 +83,10 @@
 #import "ios/chrome/browser/ui/popup_menu/overflow_menu/feature_flags.h"
 #import "ios/chrome/browser/ui/popup_menu/overflow_menu/overflow_menu_swift.h"
 #import "ios/chrome/browser/ui/popup_menu/popup_menu_constants.h"
-#import "ios/chrome/browser/ui/whats_new/constants.h"
-#import "ios/chrome/browser/ui/whats_new/whats_new_util.h"
 #import "ios/chrome/browser/web/model/font_size/font_size_java_script_feature.h"
 #import "ios/chrome/browser/web/model/font_size/font_size_tab_helper.h"
+#import "ios/chrome/browser/whats_new/coordinator/whats_new_util.h"
+#import "ios/chrome/browser/whats_new/public/constants.h"
 #import "ios/chrome/test/ios_chrome_scoped_testing_local_state.h"
 #import "ios/public/provider/chrome/browser/text_zoom/text_zoom_api.h"
 #import "ios/public/provider/chrome/browser/user_feedback/user_feedback_api.h"
@@ -111,21 +111,6 @@ using user_prefs::PrefRegistrySyncable;
 namespace {
 
 const int kNumberOfWebStates = 3;
-
-// Turns on Sync.
-// TODO(crbug.com/40066949): Remove Sync-the-feature related helper, and update
-// or remove related tests.
-void SetupSyncServiceEnabledExpectations(
-    syncer::MockSyncService* sync_service) {
-  ON_CALL(*sync_service, GetTransportState())
-      .WillByDefault(Return(syncer::SyncService::TransportState::ACTIVE));
-  ON_CALL(*sync_service->GetMockUserSettings(),
-          IsInitialSyncFeatureSetupComplete())
-      .WillByDefault(Return(true));
-  ON_CALL(*sync_service->GetMockUserSettings(), GetSelectedTypes())
-      .WillByDefault(Return(syncer::UserSelectableTypeSet::All()));
-  ON_CALL(*sync_service, HasSyncConsent()).WillByDefault(Return(true));
-}
 
 // Sync Service error that is eligble to be indicated as an Identity error when
 // Sync is turned OFF.
@@ -638,16 +623,9 @@ TEST_F(OverflowMenuMediatorTest, TestEnterpriseInfoHidden) {
 
   ASSERT_FALSE(HasEnterpriseInfoItem());
 }
-// Tests that the "Managed by..." item is shown for user level policies when
-// the UserPolicy features is enabled and the browser is signed in with a
-// managed account.
+// Tests that the "Managed by..." item is shown for user level policies when the
+// browser is signed in with a managed account.
 TEST_F(OverflowMenuMediatorTest, TestEnterpriseInfoShownForUserLevelPolicies) {
-  // Enable the UserPolicy feature.
-  base::test::ScopedFeatureList scoped_feature_list;
-  scoped_feature_list.InitWithFeatures(
-      /*enabled_features=*/{policy::kUserPolicyForSigninOrSyncConsentLevel},
-      {});
-
   // Add managed account to sign in with.
   FakeSystemIdentity* fake_system_identity =
       [FakeSystemIdentity fakeManagedIdentity];
@@ -901,14 +879,13 @@ TEST_F(OverflowMenuMediatorTest, TestSyncError) {
 }
 
 // Tests that there is no error cue (red dot) displayed on the Settings
-// destination when there is no error in both Sync and Identity levels.
-TEST_F(OverflowMenuMediatorTest, TestNoSyncError) {
+// destination when there is no identity error.
+TEST_F(OverflowMenuMediatorTest, TestNoIdentityError) {
   CreateMediator(/*is_incognito=*/NO);
 
   syncer::MockSyncService syncService;
   ON_CALL(syncService, GetUserActionableError())
       .WillByDefault(Return(syncer::SyncService::UserActionableError::kNone));
-  SetupSyncServiceEnabledExpectations(&syncService);
   mediator_.syncService = &syncService;
   mediator_.model = model_;
 
@@ -955,14 +932,13 @@ TEST_F(OverflowMenuMediatorTest, TestIdentityErrorWithWhatsNewPromo) {
 }
 
 // Tests that there is blue dot displayed on the Settings destination when there
-// is no sync error.
+// is no identity error.
 TEST_F(OverflowMenuMediatorTest, TestSettingsBlueDotBadge) {
   CreateMediator(/*is_incognito=*/NO);
 
   syncer::MockSyncService syncService;
   ON_CALL(syncService, GetUserActionableError())
       .WillByDefault(Return(syncer::SyncService::UserActionableError::kNone));
-  SetupSyncServiceEnabledExpectations(&syncService);
   mediator_.syncService = &syncService;
   mediator_.hasSettingsBlueDot = YES;
   mediator_.model = model_;

@@ -58,6 +58,8 @@
 #include "components/password_manager/core/common/password_manager_features.h"
 #include "components/password_manager/core/common/password_manager_util.h"
 #include "components/safe_browsing/buildflags.h"
+#include "components/signin/public/base/signin_buildflags.h"
+#include "components/signin/public/base/signin_switches.h"
 #include "content/public/renderer/render_frame.h"
 #include "net/base/registry_controlled_domains/registry_controlled_domain.h"
 #include "services/service_manager/public/cpp/interface_provider.h"
@@ -1717,7 +1719,9 @@ bool PasswordAutofillAgent::ShowSuggestionsForDomain(
 
   if (!password_info) {
     MaybeCheckSafeBrowsingReputation(element);
-    return false;
+    if (!CanShowPopupWithoutPasswords(password_element)) {
+      return false;
+    }
   }
 
   if (!element.IsTextField() || !IsElementEditable(element)) {
@@ -1831,12 +1835,13 @@ void PasswordAutofillAgent::ShowSuggestionPopup(
   const bool show_webauthn_credentials =
       field.parsed_autocomplete() && field.parsed_autocomplete()->webauthn;
   GetPasswordManagerDriver().ShowPasswordSuggestions(PasswordSuggestionRequest(
-      field.renderer_id(), form, trigger_source,
-      GetIndexOfElement(form, username_element),
-      GetIndexOfElement(form, password_element), field.text_direction(),
-      typed_username, show_webauthn_credentials,
-      gfx::RectF(render_frame()->ConvertViewportToWindow(
-          user_input.BoundsInWidget()))));
+      TriggeringField(field.renderer_id(), trigger_source,
+                      field.text_direction(), typed_username,
+                      show_webauthn_credentials,
+                      gfx::RectF(render_frame()->ConvertViewportToWindow(
+                          user_input.BoundsInWidget()))),
+      form, GetIndexOfElement(form, username_element),
+      GetIndexOfElement(form, password_element)));
 }
 
 void PasswordAutofillAgent::CleanupOnDocumentShutdown() {
@@ -2097,6 +2102,17 @@ void PasswordAutofillAgent::HidePopup() {
   if (autofill_agent_->unsafe_autofill_driver()) {
     autofill_agent_->unsafe_autofill_driver()->HidePopup();
   }
+}
+
+bool PasswordAutofillAgent::CanShowPopupWithoutPasswords(
+    const WebInputElement& password_element) const {
+#if BUILDFLAG(ENABLE_DICE_SUPPORT)
+  return password_element && IsElementEditable(password_element) &&
+         base::FeatureList::IsEnabled(
+             switches::kEnablePendingModePasswordsPromo);
+#else
+  return false;
+#endif
 }
 
 mojom::PasswordManagerDriver&

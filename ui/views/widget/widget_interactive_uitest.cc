@@ -626,7 +626,7 @@ TEST_F(WidgetTestInteractive, CheckResizeControllerEvents) {
   // |view| needs to be a particular size. Reset the LayoutManager so that
   // it doesn't get resized.
   toplevel->GetRootView()->SetLayoutManager(nullptr);
-  toplevel->GetRootView()->AddChildView(view);
+  toplevel->GetRootView()->AddChildViewRaw(view);
 
   toplevel->Show();
   RunPendingMessages();
@@ -1106,11 +1106,13 @@ TEST_F(DesktopWidgetTestInteractive, WindowModalWindowDestroyedActivationTest) {
   EXPECT_EQ(top_level_native_view, focus_changes[0]);
 
   // Create a modal dialog.
-  auto dialog_delegate = std::make_unique<DialogDelegateView>();
+  auto dialog_delegate =
+      std::make_unique<DialogDelegateView>(DialogDelegateView::CreatePassKey());
   dialog_delegate->SetModalType(ui::mojom::ModalType::kWindow);
 
   Widget* modal_dialog_widget = views::DialogDelegate::CreateDialogWidget(
-      dialog_delegate.release(), nullptr, top_level_widget->GetNativeView());
+      dialog_delegate.release(), gfx::NativeWindow(),
+      top_level_widget->GetNativeView());
   modal_dialog_widget->SetBounds(gfx::Rect(100, 100, 200, 200));
 
   // Note the dialog widget doesn't need a ShowSync. Since it is modal, it gains
@@ -1660,7 +1662,8 @@ TEST_F(DesktopWidgetTestInteractive,
 
   // Create a modal dialog.
   // This instance will be destroyed when the dialog is destroyed.
-  auto dialog_delegate = std::make_unique<DialogDelegateView>();
+  auto dialog_delegate =
+      std::make_unique<DialogDelegateView>(DialogDelegateView::CreatePassKey());
   dialog_delegate->SetModalType(ui::mojom::ModalType::kWindow);
   Widget* modal_dialog_widget = DialogDelegate::CreateDialogWidget(
       dialog_delegate.release(), nullptr, top_level->GetNativeView());
@@ -1934,7 +1937,7 @@ TEST_F(WidgetCaptureTest, ResetCaptureOnGestureEnd) {
 
   MouseView* mouse = new MouseView;
   mouse->SetBounds(30, 0, 30, 30);
-  container->AddChildView(mouse);
+  container->AddChildViewRaw(mouse);
 
   toplevel->SetSize(gfx::Size(100, 100));
   toplevel->Show();
@@ -2130,11 +2133,13 @@ TEST_F(WidgetCaptureTest, MAYBE_SystemModalWindowReleasesCapture) {
   EXPECT_TRUE(top_level_widget->HasCapture());
 
   // Create a modal dialog.
-  auto dialog_delegate = std::make_unique<DialogDelegateView>();
+  auto dialog_delegate =
+      std::make_unique<DialogDelegateView>(DialogDelegateView::CreatePassKey());
   dialog_delegate->SetModalType(ui::mojom::ModalType::kSystem);
 
   Widget* modal_dialog_widget = views::DialogDelegate::CreateDialogWidget(
-      dialog_delegate.release(), nullptr, top_level_widget->GetNativeView());
+      dialog_delegate.release(), gfx::NativeWindow(),
+      top_level_widget->GetNativeView());
   modal_dialog_widget->SetBounds(gfx::Rect(100, 100, 200, 200));
   ShowSync(modal_dialog_widget);
 

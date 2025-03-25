@@ -373,7 +373,7 @@ public class SelectableTabListEditorTest {
     @Test
     @RequiresApi(Build.VERSION_CODES.R)
     @EnableFeatures(ChromeFeatureList.TAB_STRIP_LAYOUT_OPTIMIZATION)
-    @Restriction(DeviceFormFactor.TABLET)
+    @Restriction({DeviceFormFactor.TABLET, DeviceRestriction.RESTRICTION_TYPE_NON_AUTO})
     @Feature("DesktopWindow")
     @SmallTest
     public void testMarginWithAppHeaders() {
@@ -1942,8 +1942,8 @@ public class SelectableTabListEditorTest {
 
         TabGroupModelFilter filter =
                 mTabModelSelector.getTabGroupModelFilterProvider().getCurrentTabGroupModelFilter();
-        for (int i = 0; i < filter.getCount(); i++) {
-            tabs.add(filter.getTabAt(i));
+        for (int i = 0; i < filter.getIndividualTabAndGroupCount(); i++) {
+            tabs.add(filter.getRepresentativeTabAt(i));
         }
 
         return tabs;

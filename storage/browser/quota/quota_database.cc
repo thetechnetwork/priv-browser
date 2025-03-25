@@ -135,7 +135,7 @@ QuotaErrorOr<BucketInfo> BucketInfoFromSqlStatement(sql::Statement& statement) {
   }
 
   std::optional<StorageKey> storage_key =
-      StorageKey::Deserialize(statement.ColumnString(1));
+      StorageKey::Deserialize(statement.ColumnStringView(1));
   if (!storage_key.has_value()) {
     return base::unexpected(QuotaError::kStorageKeyError);
   }
@@ -262,20 +262,6 @@ QuotaErrorOr<BucketInfo> QuotaDatabase::UpdateOrCreateBucket(
   }
 
   return bucket_result;
-}
-
-QuotaErrorOr<BucketInfo> QuotaDatabase::GetOrCreateBucketDeprecated(
-    const BucketInitParams& params,
-    StorageType type) {
-  DCHECK_CALLED_ON_VALID_SEQUENCE(sequence_checker_);
-
-  return GetBucket(params.storage_key, params.name, type)
-      .or_else([&](DetailedQuotaError error) -> QuotaErrorOr<BucketInfo> {
-        if (error != QuotaError::kNotFound) {
-          return base::unexpected(error);
-        }
-        return CreateBucketInternal(params, type);
-      });
 }
 
 QuotaErrorOr<BucketInfo> QuotaDatabase::CreateBucketForTesting(
@@ -621,7 +607,7 @@ QuotaErrorOr<mojom::BucketTableEntryPtr> QuotaDatabase::GetBucketInfoForTest(
   }
 
   std::optional<StorageKey> storage_key =
-      StorageKey::Deserialize(statement.ColumnString(1));
+      StorageKey::Deserialize(statement.ColumnStringView(1));
   if (!storage_key.has_value()) {
     return base::unexpected(QuotaError::kStorageKeyError);
   }
@@ -707,7 +693,7 @@ QuotaErrorOr<std::set<BucketLocator>> QuotaDatabase::GetBucketsForEviction(
 
   while (statement.Step()) {
     std::optional<StorageKey> read_storage_key =
-        StorageKey::Deserialize(statement.ColumnString(1));
+        StorageKey::Deserialize(statement.ColumnStringView(1));
     if (!read_storage_key.has_value()) {
       // TODO(estade): this row needs to be deleted.
       continue;
@@ -719,7 +705,7 @@ QuotaErrorOr<std::set<BucketLocator>> QuotaDatabase::GetBucketsForEviction(
     }
 
     // Only the default bucket is persisted by `navigator.storage.persist()`.
-    const bool is_default = statement.ColumnString(2) == kDefaultBucketName;
+    const bool is_default = statement.ColumnStringView(2) == kDefaultBucketName;
     const GURL read_gurl = read_storage_key->origin().GetURL();
     if (is_default && special_storage_policy &&
         (special_storage_policy->IsStorageDurable(read_gurl) ||
@@ -760,7 +746,7 @@ QuotaErrorOr<std::set<StorageKey>> QuotaDatabase::GetStorageKeysForType(
   std::set<StorageKey> storage_keys;
   while (statement.Step()) {
     std::optional<StorageKey> read_storage_key =
-        StorageKey::Deserialize(statement.ColumnString(0));
+        StorageKey::Deserialize(statement.ColumnStringView(0));
     if (!read_storage_key.has_value()) {
       continue;
     }
@@ -796,13 +782,13 @@ QuotaErrorOr<std::set<BucketLocator>> QuotaDatabase::GetBucketsModifiedBetween(
   std::set<BucketLocator> buckets;
   while (statement.Step()) {
     std::optional<StorageKey> read_storage_key =
-        StorageKey::Deserialize(statement.ColumnString(1));
+        StorageKey::Deserialize(statement.ColumnStringView(1));
     if (!read_storage_key.has_value()) {
       continue;
     }
     buckets.emplace(BucketId(statement.ColumnInt64(0)),
                     read_storage_key.value(), type,
-                    statement.ColumnString(2) == kDefaultBucketName);
+                    statement.ColumnStringView(2) == kDefaultBucketName);
   }
   return buckets;
 }
@@ -1305,7 +1291,7 @@ QuotaError QuotaDatabase::DumpBucketTable(const BucketTableCallback& callback) {
 
   while (statement.Step()) {
     std::optional<StorageKey> storage_key =
-        StorageKey::Deserialize(statement.ColumnString(1));
+        StorageKey::Deserialize(statement.ColumnStringView(1));
     if (!storage_key.has_value()) {
       continue;
     }

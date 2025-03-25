@@ -4,6 +4,7 @@
 
 package org.chromium.chrome.browser;
 
+import static org.chromium.chrome.browser.tabmodel.TabWindowManager.INVALID_WINDOW_ID;
 import static org.chromium.chrome.browser.ui.IncognitoRestoreAppLaunchDrawBlocker.IS_INCOGNITO_SELECTED;
 
 import android.app.Activity;
@@ -206,6 +207,8 @@ import org.chromium.chrome.browser.tab.TabLaunchType;
 import org.chromium.chrome.browser.tab.TabObscuringHandler;
 import org.chromium.chrome.browser.tab.TabSelectionType;
 import org.chromium.chrome.browser.tab.tab_restore.HistoricalTabModelObserver;
+import org.chromium.chrome.browser.tab_group_suggestion.GroupSuggestionsPromotionCoordinator;
+import org.chromium.chrome.browser.tab_group_suggestion.SuggestionEventObserver;
 import org.chromium.chrome.browser.tab_group_sync.TabGroupSyncServiceFactory;
 import org.chromium.chrome.browser.tab_resumption.TabResumptionModuleBuilder;
 import org.chromium.chrome.browser.tab_ui.TabGridIphDialogCoordinator;
@@ -231,12 +234,12 @@ import org.chromium.chrome.browser.tabmodel.TabModelSelectorObserver;
 import org.chromium.chrome.browser.tabmodel.TabModelSelectorTabModelObserver;
 import org.chromium.chrome.browser.tabmodel.TabModelSelectorTabObserver;
 import org.chromium.chrome.browser.tabmodel.TabModelUtils;
-import org.chromium.chrome.browser.tabmodel.TabWindowManager;
 import org.chromium.chrome.browser.tasks.HomeSurfaceTracker;
 import org.chromium.chrome.browser.tasks.ReturnToChromeUtil;
 import org.chromium.chrome.browser.tasks.tab_management.ActionConfirmationManager;
 import org.chromium.chrome.browser.tasks.tab_management.CloseAllTabsDialog;
 import org.chromium.chrome.browser.tasks.tab_management.CloseAllTabsHelper;
+import org.chromium.chrome.browser.tasks.tab_management.TabGroupMenuActionHandler;
 import org.chromium.chrome.browser.tasks.tab_management.TabGroupUi;
 import org.chromium.chrome.browser.tasks.tab_management.TabGroupVisualDataManager;
 import org.chromium.chrome.browser.tasks.tab_management.TabManagementDelegateProvider;
@@ -312,8 +315,6 @@ public class ChromeTabbedActivity extends ChromeActivity implements MismatchedIn
     private static final String TAG = "ChromeTabbedActivity";
 
     protected static final String WINDOW_INDEX = "window_index";
-
-    private static final int INVALID_WINDOW_ID = TabWindowManager.INVALID_WINDOW_INDEX;
 
     // How long to delay closing the current tab when our app is minimized.  Have to delay this
     // so that we don't show the contents of the next tab while minimizing.
@@ -544,6 +545,9 @@ public class ChromeTabbedActivity extends ChromeActivity implements MismatchedIn
 
     private OneshotSupplierImpl<SystemBarColorHelper> mBottomChinSupplier =
             new OneshotSupplierImpl<>();
+
+    private SuggestionEventObserver mSuggestionEventObserver;
+    private GroupSuggestionsPromotionCoordinator mGroupSuggestionsPromotionCoordinator;
 
     /**
      * This class is used to warm up the chrome split ClassLoader. See SplitChromeApplication for
@@ -836,7 +840,7 @@ public class ChromeTabbedActivity extends ChromeActivity implements MismatchedIn
                         adaptOnToolbarAlphaChange());
 
         // Set up layout state osberver for transitions between HSM and FSM on an XR device.
-        if (XrUtils.isXrDevice()) {
+        if (XrUtils.isXrDevice() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
             mXrLayoutStateObserver =
                     new XrLayoutStateObserver(
                             this,
@@ -979,9 +983,9 @@ public class ChromeTabbedActivity extends ChromeActivity implements MismatchedIn
                 new ObservableSupplierImpl<>(SemanticColorUtils.getDefaultBgColor(this));
         mHubManagerSupplier.onAvailable(
                 (hubManager) -> {
-                    ObservableSupplier<Integer> hubToolbarOverviewColorSupplier =
-                            hubManager.getHubToolbarOverviewColorSupplier();
-                    Callback<Integer> hubToolbarOverviewColorObserver = overviewColorSupplier::set;
+                    ObservableSupplier<Integer> hubOverviewColorSupplier =
+                            hubManager.getHubOverviewColorSupplier();
+                    Callback<Integer> hubOverviewColorObserver = overviewColorSupplier::set;
 
                     ObservableSupplier<Boolean> hubVisibilitySupplier =
                             hubManager.getHubVisibilitySupplier();
@@ -989,11 +993,10 @@ public class ChromeTabbedActivity extends ChromeActivity implements MismatchedIn
                     Callback<Boolean> hubVisibilityObserver =
                             isVisible -> {
                                 if (isVisible) {
-                                    hubToolbarOverviewColorSupplier.addObserver(
-                                            hubToolbarOverviewColorObserver);
+                                    hubOverviewColorSupplier.addObserver(hubOverviewColorObserver);
                                 } else {
-                                    hubToolbarOverviewColorSupplier.removeObserver(
-                                            hubToolbarOverviewColorObserver);
+                                    hubOverviewColorSupplier.removeObserver(
+                                            hubOverviewColorObserver);
                                 }
                             };
                     hubVisibilitySupplier.addObserver(hubVisibilityObserver);
@@ -1001,8 +1004,7 @@ public class ChromeTabbedActivity extends ChromeActivity implements MismatchedIn
                     mCleanUpHubOverviewColorObserver =
                             () -> {
                                 hubVisibilitySupplier.removeObserver(hubVisibilityObserver);
-                                hubToolbarOverviewColorSupplier.removeObserver(
-                                        hubToolbarOverviewColorObserver);
+                                hubOverviewColorSupplier.removeObserver(hubOverviewColorObserver);
                             };
                 });
         return overviewColorSupplier;
@@ -1034,7 +1036,9 @@ public class ChromeTabbedActivity extends ChromeActivity implements MismatchedIn
                                 mRootUiCoordinator.getDesktopWindowStateManager(),
                                 mTabModelNotificationDotManager
                                         .getNotificationDotObservableSupplier(),
-                                getCompositorViewHolderSupplier());
+                                getCompositorViewHolderSupplier(),
+                                getShareDelegateSupplier(),
+                                mTabBookmarkerSupplier);
         if (didFinishNativeInitialization()) {
             result.first.initWithNative();
         }
@@ -1319,6 +1323,19 @@ public class ChromeTabbedActivity extends ChromeActivity implements MismatchedIn
             mInactivityTracker.setLastVisibleTimeMsAndRecord(System.currentTimeMillis());
 
             getSnackbarManager().setEdgeToEdgeSupplier(getEdgeToEdgeSupplier().get());
+
+            if (ChromeFeatureList.isEnabled(ChromeFeatureList.GROUP_SUGGESTION_SERVICE)) {
+                mSuggestionEventObserver =
+                        new SuggestionEventObserver(
+                                mTabModelSelector.getModel(false), mHubManagerSupplier);
+                mGroupSuggestionsPromotionCoordinator =
+                        new GroupSuggestionsPromotionCoordinator(
+                                this,
+                                mRootUiCoordinator.getBottomSheetController(),
+                                mTabModelSelector
+                                        .getTabGroupModelFilterProvider()
+                                        .getTabGroupModelFilter(false));
+            }
         }
     }
 
@@ -2393,10 +2410,6 @@ public class ChromeTabbedActivity extends ChromeActivity implements MismatchedIn
         mDseNewTabUrlManager = new DseNewTabUrlManager(mTabModelProfileSupplier);
 
         initHub();
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-            XrUtils.getInstance().init(this);
-        }
     }
 
     @Override
@@ -2581,7 +2594,8 @@ public class ChromeTabbedActivity extends ChromeActivity implements MismatchedIn
 
         if (ChromeFeatureList.sPriceChangeModule.isEnabled()) {
             PriceChangeModuleBuilder priceChangeModuleBuilder =
-                    new PriceChangeModuleBuilder(this, mTabModelProfileSupplier, mTabModelSelector);
+                    new PriceChangeModuleBuilder(
+                            this, getProfileProviderSupplier(), mTabModelSelector);
             moduleRegistry.registerModule(ModuleType.PRICE_CHANGE, priceChangeModuleBuilder);
         }
 
@@ -2749,7 +2763,7 @@ public class ChromeTabbedActivity extends ChromeActivity implements MismatchedIn
         }
 
         if (mMultiInstanceManager != null) {
-            int assignedIndex = TabWindowManagerSingleton.getInstance().getIndexForWindow(this);
+            int assignedIndex = TabWindowManagerSingleton.getInstance().getIdForWindow(this);
             // The given index and the one computed by TabWindowManager should be one and the same.
             int taskId = ApplicationStatus.getTaskId(this);
             Map<String, Integer> taskMap =
@@ -3137,6 +3151,21 @@ public class ChromeTabbedActivity extends ChromeActivity implements MismatchedIn
                 Tracker tracker = TrackerFactory.getTrackerForProfile(profile);
                 tracker.notifyEvent(EventConstants.APP_MENU_NEW_INCOGNITO_TAB_CLICKED);
             }
+        } else if (id == R.id.add_to_group_menu_id) {
+            if (!mTabModelSelector.isTabStateInitialized()) return false;
+
+            TabGroupModelFilter filter =
+                    mTabModelSelector
+                            .getTabGroupModelFilterProvider()
+                            .getCurrentTabGroupModelFilter();
+
+            new TabGroupMenuActionHandler(
+                            this,
+                            filter,
+                            mRootUiCoordinator.getBottomSheetController(),
+                            getModalDialogManager(),
+                            mTabModelProfileSupplier.get())
+                    .handleAddToGroupAction(currentTab);
         } else if (id == R.id.all_bookmarks_menu_id) {
             getCompositorViewHolderSupplier()
                     .get()
@@ -3590,7 +3619,7 @@ public class ChromeTabbedActivity extends ChromeActivity implements MismatchedIn
             super.onSaveInstanceState(outState);
             CipherLazyHolder.sCipherInstance.saveToBundle(outState);
             outState.putInt(
-                    WINDOW_INDEX, TabWindowManagerSingleton.getInstance().getIndexForWindow(this));
+                    WINDOW_INDEX, TabWindowManagerSingleton.getInstance().getIdForWindow(this));
             Boolean is_incognito = getCurrentTabModel().isIncognito();
             outState.putBoolean(IS_INCOGNITO_SELECTED, is_incognito);
             // If it's Incognito and native is initialized and profile exists, serialize duration
@@ -3696,9 +3725,20 @@ public class ChromeTabbedActivity extends ChromeActivity implements MismatchedIn
             mDseNewTabUrlManager.destroy();
         }
 
-        if (mXrLayoutStateObserver != null) {
+        if (mXrLayoutStateObserver != null
+                && Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
             mXrLayoutStateObserver.destroy();
             mXrLayoutStateObserver = null;
+        }
+
+        if (mSuggestionEventObserver != null) {
+            mSuggestionEventObserver.destroy();
+            mSuggestionEventObserver = null;
+        }
+
+        if (mGroupSuggestionsPromotionCoordinator != null) {
+            mGroupSuggestionsPromotionCoordinator.destroy();
+            mGroupSuggestionsPromotionCoordinator = null;
         }
 
         super.onDestroyInternal();
@@ -3954,15 +3994,9 @@ public class ChromeTabbedActivity extends ChromeActivity implements MismatchedIn
             boolean isActivityInAppTasks,
             boolean isActivityInSameTask) {
         boolean shouldHandleMismatch =
-                (ChromeFeatureList.sTabWindowManagerIndexReassignmentActivityFinishing.isEnabled()
-                                && activityAtRequestedIndex.isFinishing())
-                        || (ChromeFeatureList.sTabWindowManagerIndexReassignmentActivityInSameTask
-                                        .isEnabled()
-                                && isActivityInSameTask)
-                        || (ChromeFeatureList
-                                        .sTabWindowManagerIndexReassignmentActivityNotInAppTasks
-                                        .isEnabled()
-                                && !isActivityInAppTasks);
+                activityAtRequestedIndex.isFinishing()
+                        || isActivityInSameTask
+                        || !isActivityInAppTasks;
 
         if (!shouldHandleMismatch
                 || !(activityAtRequestedIndex

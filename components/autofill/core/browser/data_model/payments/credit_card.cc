@@ -302,6 +302,7 @@ int CreditCard::IconResourceId(Suggestion::Icon icon) {
     case Suggestion::Icon::kDelete:
     case Suggestion::Icon::kDevice:
     case Suggestion::Icon::kVehicle:
+    case Suggestion::Icon::kWork:
     case Suggestion::Icon::kEdit:
     case Suggestion::Icon::kEmail:
     case Suggestion::Icon::kError:
@@ -310,6 +311,7 @@ int CreditCard::IconResourceId(Suggestion::Icon icon) {
     case Suggestion::Icon::kGoogleMonochrome:
     case Suggestion::Icon::kGooglePasswordManager:
     case Suggestion::Icon::kGooglePay:
+    case Suggestion::Icon::kHome:
     case Suggestion::Icon::kHttpsInvalid:
     case Suggestion::Icon::kHttpWarning:
     case Suggestion::Icon::kIdCard:
@@ -1046,8 +1048,7 @@ std::u16string CreditCard::CardNameForAutofillDisplay(
   if (HasNonEmptyValidNickname() || !customized_nickname.empty()) {
     return customized_nickname.empty() ? nickname_ : customized_nickname;
   }
-  if (base::FeatureList::IsEnabled(features::kAutofillEnableCardProductName) &&
-      !product_description_.empty()) {
+  if (!product_description_.empty()) {
     return product_description_;
   }
   return NetworkForDisplay();

@@ -687,8 +687,10 @@ source_set("ip_protection_probabilistic_reveal_token_manager") {
   ]
   deps = [
     ":ip_protection_probabilistic_reveal_token_crypter",
+    ":ip_protection_probabilistic_reveal_token_data_storage",
     ":ip_protection_telemetry",
     "//base",
+    "//net",
   ]
 }
 
@@ -705,6 +707,8 @@ source_set("ip_protection_probabilistic_reveal_token_manager_unittest") {
     "//services/network:test_support",
     "//services/network/public/cpp",
     "//services/network/public/mojom",
+    "//sql",
+    "//sql:test_support",
     "//testing/gmock",
     "//testing/gtest",
     "//third_party/private-join-and-compute/src:ec_commutative_cipher",
@@ -749,9 +753,9 @@ bundle_data("tests_bundle_data") {
       [ ":ip_protection_probabilistic_reveal_token_data_storage_unittest" ]
   testonly = true
   sources = [
-    "//components/test/data/ip_protection/probabilistic_reveal_tokens_v0.too_old.sql",
-    "//components/test/data/ip_protection/probabilistic_reveal_tokens_v1.sql",
-    "//components/test/data/ip_protection/probabilistic_reveal_tokens_v2.too_new.sql",
+    "//components/test/data/ip_protection/probabilistic_reveal_tokens_v1.too_old.sql",
+    "//components/test/data/ip_protection/probabilistic_reveal_tokens_v2.sql",
+    "//components/test/data/ip_protection/probabilistic_reveal_tokens_v3.too_new.sql",
   ]
   outputs = [ "{{bundle_resources_dir}}/" +
               "{{source_root_relative_dir}}/{{source_file_part}}" ]

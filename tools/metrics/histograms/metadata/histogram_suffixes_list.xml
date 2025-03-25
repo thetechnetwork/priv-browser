@@ -282,7 +282,7 @@ chromium-metrics-reviews@google.com.
   <suffix name="SyncPaused" label="Sync paused"/>
   <suffix name="Unknown" label="Unknown"/>
   <affected-histogram name="Autofill.Address.IsEnabled.PageLoad"/>
-  <affected-histogram name="Autofill.CardUploadEnabled"/>
+  <affected-histogram name="Autofill.CardUploadEnabled2"/>
   <affected-histogram name="Autofill.CreditCard.IsEnabled.PageLoad"/>
   <affected-histogram
       name="Autofill.FormEvents.CreditCard.WithBothServerAndLocalData"/>
@@ -314,12 +314,6 @@ chromium-metrics-reviews@google.com.
   <affected-histogram name="Autofill.UnmaskPrompt.Duration.Success"/>
   <affected-histogram name="Autofill.UnmaskPrompt.Events"/>
   <affected-histogram name="Autofill.UnmaskPrompt.TimeBeforeAbandonUnmasking"/>
-</histogram_suffixes>
-
-<histogram_suffixes name="BackgroundDownload" separator=".">
-  <suffix name="BackgroundDownload"
-      label="Download that started in background."/>
-  <affected-histogram name="Download.HttpResponseCode"/>
 </histogram_suffixes>
 
 <histogram_suffixes name="BlueZPerProfileResult" separator="."
@@ -604,40 +598,6 @@ chromium-metrics-reviews@google.com.
   <affected-histogram name="Cras.StreamRuntime.Output.LaCrOS"/>
 </histogram_suffixes>
 
-<histogram_suffixes name="DataUse_AppTabState_Dimensions" separator=".">
-  <suffix name="Downstream.AppBackground" label=""/>
-  <suffix name="Downstream.AppForeground.TabBackground" label=""/>
-  <suffix name="Downstream.AppForeground.TabForeground" label=""/>
-  <suffix name="Upstream.AppBackground" label=""/>
-  <suffix name="Upstream.AppForeground.TabBackground" label=""/>
-  <suffix name="Upstream.AppForeground.TabForeground" label=""/>
-  <affected-histogram name="DataUse.AppTabState"/>
-</histogram_suffixes>
-
-<histogram_suffixes name="DataUse_Dimensions" separator=".">
-  <suffix name="Downstream.Background.Cellular" label=""/>
-  <suffix name="Downstream.Background.NotCellular" label=""/>
-  <suffix name="Downstream.Foreground.Cellular" label=""/>
-  <suffix name="Downstream.Foreground.NotCellular" label=""/>
-  <suffix name="Downstream.Unknown.Cellular" label=""/>
-  <suffix name="Downstream.Unknown.NotCellular" label=""/>
-  <suffix name="Upstream.Background.Cellular" label=""/>
-  <suffix name="Upstream.Background.NotCellular" label=""/>
-  <suffix name="Upstream.Foreground.Cellular" label=""/>
-  <suffix name="Upstream.Foreground.NotCellular" label=""/>
-  <suffix name="Upstream.Unknown.Cellular" label=""/>
-  <suffix name="Upstream.Unknown.NotCellular" label=""/>
-  <affected-histogram name="DataUse.TrafficSize.User"/>
-</histogram_suffixes>
-
-<histogram_suffixes name="DevToolsLaunchPanels" separator=".">
-  <suffix name="Console" label="DevTools launched to the Console panel"/>
-  <suffix name="Elements" label="DevTools launched to the Elements panel"/>
-  <suffix name="Network" label="DevTools launched to the Network panel"/>
-  <suffix name="Sources" label="DevTools launched to the Sources panel"/>
-  <affected-histogram name="DevTools.Launch"/>
-</histogram_suffixes>
-
 <histogram_suffixes name="DnsImpact2" separator="_">
   <suffix name="disabled_prefetch"
       label="DNS pre-resolving is disabled in these clients"/>
@@ -695,60 +655,6 @@ chromium-metrics-reviews@google.com.
   <affected-histogram name="Net.DNS.ResolveContext.DohAutoupgrade.Status"/>
 </histogram_suffixes>
 
-<histogram_suffixes name="Download_Parallelizable" separator=".">
-  <suffix name="Parallelizable" label="Parallelizable download."/>
-  <affected-histogram name="Download.DownloadSize"/>
-</histogram_suffixes>
-
-<histogram_suffixes name="Download_Service_CleanUpReason" separator=".">
-  <suffix name="HardRecovery" label="File is deleted in hard recovery."/>
-  <suffix name="Orphaned" label="No client associated with the file."/>
-  <suffix name="Timeout" label="File is deleted after timeout."/>
-  <suffix name="Unknown" label="No database entry associated with the file."/>
-  <affected-histogram name="Download.Service.Files.CleanUp.External"/>
-  <affected-histogram name="Download.Service.Files.CleanUp.Failure"/>
-  <affected-histogram name="Download.Service.Files.CleanUp.Success"/>
-</histogram_suffixes>
-
-<histogram_suffixes name="Download_Service_Client" separator=".">
-  <suffix name="BackgroundFetch" label="Background fetch."/>
-  <suffix name="Debugging" label="Debugging client."/>
-  <suffix name="MountainInternal" label="Mountain internal client."/>
-  <suffix name="OfflinePage" label="Offline page prefetch."/>
-  <suffix name="OptimizationGuidePredictionModels"
-      label="Optimization Guide prediction models."/>
-  <suffix name="PluginVmImage" label="PluginVm image."/>
-  <affected-histogram name="Download.Service.Request.ClientAction"/>
-</histogram_suffixes>
-
-<histogram_suffixes name="Download_Service_EntryState" separator=".">
-  <suffix name="Active" label="The active state."/>
-  <suffix name="Available" label="The available state."/>
-  <suffix name="Complete" label="The complte state."/>
-  <suffix name="New" label="The initial state."/>
-  <suffix name="Paused" label="The paused state."/>
-  <affected-histogram name="Download.Service.Db.Records"/>
-</histogram_suffixes>
-
-<histogram_suffixes name="Download_Service_StartUpStep" separator=".">
-  <suffix name="Initialization" label="The initialization start up step."/>
-  <suffix name="Recovery" label="The recovery start up step."/>
-  <affected-histogram name="Download.Service.StartUpStatus"/>
-</histogram_suffixes>
-
-<histogram_suffixes name="Download_Service_TaskType" separator=".">
-  <suffix name="CleanUpTask" label="Clean up task."/>
-  <suffix name="DownloadTask" label="Download task."/>
-  <affected-histogram name="Download.Service.TaskScheduler.Status"/>
-</histogram_suffixes>
-
-<histogram_suffixes name="DownloadDialogSource" separator=".">
-  <suffix name="DownloadHome" label="Download home."/>
-  <suffix name="Infobar" label="Download infobar."/>
-  <suffix name="Main" label="Main download later dialog."/>
-  <affected-histogram name="Download.Later.UI.DialogChoice"/>
-</histogram_suffixes>
-
 <histogram_suffixes name="DownloadSource" separator=".">
   <suffix name="ContextMenu" label="ContextMenu."/>
   <suffix name="DragAndDrop" label="DragAndDrop."/>
@@ -766,24 +672,6 @@ chromium-metrics-reviews@google.com.
   <affected-histogram name="Download.Counts"/>
   <affected-histogram name="Download.InterruptedReason"/>
   <affected-histogram name="Download.NetworkConnectionType.StartNew"/>
-</histogram_suffixes>
-
-<histogram_suffixes name="DownloadType" separator=".">
-  <suffix name="Transient" label="Transient download."/>
-  <suffix name="UserDownload" label="User download."/>
-  <affected-histogram name="Download.PathGenerationEvent"/>
-  <affected-histogram name="Download.PathValidationResult"/>
-</histogram_suffixes>
-
-<histogram_suffixes name="DriveCommonTimings" separator=".">
-  <suffix name="FailTime" label=""/>
-  <suffix name="SuccessTime" label=""/>
-  <affected-histogram name="DriveCommon.Lifecycle.MountTime"/>
-  <affected-histogram name="DriveCommon.LocalSearch.OfflineSearchTime"/>
-  <affected-histogram name="DriveCommon.LocalSearch.SharedSearchTime"/>
-  <affected-histogram name="DriveCommon.LocalSearch.TextSearchTime"/>
-  <affected-histogram name="DriveCommon.RemoteSearch.SharedSearchTime"/>
-  <affected-histogram name="DriveCommon.RemoteSearch.TextSearchTime"/>
 </histogram_suffixes>
 
 <histogram_suffixes name="EncryptionLevel" separator=".">
@@ -877,13 +765,6 @@ chromium-metrics-reviews@google.com.
   <suffix name="AC2" label="The auto-correct level is 2"/>
   <affected-histogram name="InputMethod.Commit.Index.FR"/>
   <affected-histogram name="InputMethod.Commit.Index.US"/>
-</histogram_suffixes>
-
-<histogram_suffixes name="IMEMajorNames" separator=".">
-  <suffix name="FR" label="The French keyboard input method"/>
-  <suffix name="Pinyin" label="The Chinse Pinyin input method"/>
-  <suffix name="US" label="The US keyboard input method"/>
-  <affected-histogram name="InputMethod.Commit.Index"/>
 </histogram_suffixes>
 
 <histogram_suffixes name="IOMode" separator=".">
@@ -2013,6 +1894,7 @@ chromium-metrics-reviews@google.com.
   <suffix name="KeyboardAndPointerLock"
       label="Keyboard and pointer lock permission"/>
   <suffix name="KeyboardLock" label="Keyboard lock permission"/>
+  <suffix name="LocalNetworkAccess" label="Local network access permission"/>
   <suffix name="MidiSysEx" label="Midi SysEx permission"/>
   <suffix name="MultipleDownload" label="Multiple downloads permission"/>
   <suffix name="Nfc" label="NFC permission"/>
@@ -2053,6 +1935,8 @@ chromium-metrics-reviews@google.com.
       label="Keyboard and pointer lock permission"/>
   <suffix name="KeyboardLock" label="Keyboard lock permission"/>
   <suffix name="LocalFonts" label="Local fonts permission actions"/>
+  <suffix name="LocalNetworkAccess"
+      label="Local network access permission actions"/>
   <suffix name="MidiSysEx" label="Midi SysEx permsision actions"/>
   <suffix name="Nfc" label="Nfc permsision actions"/>
   <suffix name="Notifications" label="Notification permission actions"/>
@@ -2669,8 +2553,10 @@ chromium-metrics-reviews@google.com.
   <suffix name="DownloadService"
       label="Only counting memory used by Download service."/>
   <suffix name="FontCaches" label="Only counting memory used by font caches."/>
+  <suffix name="Gpu.GraphiteShaderCache"
+      label="Only counting memory used by Dawn/Graphite Shader Cache."/>
   <suffix name="Gpu.GrShaderCache"
-      label="Only counting memory used by Shader Cache."/>
+      label="Only counting memory used by Skia Shader Cache."/>
   <suffix name="GpuMappedMemory"
       label="Memory shared between the GPU process and its client for
              transfers."/>
@@ -3376,20 +3262,6 @@ chromium-metrics-reviews@google.com.
       name="Net.TrustTokens.NetErrorForTrustTokenOperation.Success"/>
   <affected-histogram name="Net.TrustTokens.OperationOutcome"/>
   <affected-histogram name="Net.TrustTokens.RequestHelperFactoryOutcome"/>
-</histogram_suffixes>
-
-<histogram_suffixes name="UnPackConsumer" separator="_">
-  <suffix name="ChromeArchivePatch"
-      label="compressed patch: chrome_patch.packed.7z holding
-             chrome_patch.diff (small)."/>
-  <suffix name="CompressedChromeArchive"
-      label="compressed archive: chrome.packed.7z holding chrome.7z (big)."/>
-  <suffix name="SetupExePatch"
-      label="compressed patch: setup_patch.packed.7z holding setup_patch.diff
-             (small)."/>
-  <suffix name="UncompressedChromeArchive"
-      label="uncompressed archive: chrome.7z holding install dir (big)."/>
-  <affected-histogram name="Setup.Install.LzmaUnPackStatus"/>
 </histogram_suffixes>
 
 <histogram_suffixes name="VideoFrameRateRange" separator=".">

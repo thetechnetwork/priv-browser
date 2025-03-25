@@ -99,7 +99,6 @@ public class CollaborationControllerDelegateImpl implements CollaborationControl
 
         if (mFlowType == FlowType.JOIN) {
             loadingFullscreenCoordinator.startLoading(
-                    mActivity.getString(R.string.collaboration_loading_text),
                     () -> {
                         destroy();
                     });
@@ -354,13 +353,13 @@ public class CollaborationControllerDelegateImpl implements CollaborationControl
     }
 
     private Intent createFullscreenSigninIntent() {
-        // TODO(haileywang): Add the correct logo: .signinLogoId(R.drawable.signin_logo).
         FullscreenSigninAndHistorySyncConfig fullscreenConfig =
                 new FullscreenSigninAndHistorySyncConfig.Builder()
                         .historyOptInMode(HistorySyncConfig.OptInMode.REQUIRED)
                         .signinTitleId(R.string.collaboration_signin_title)
                         .signinSubtitleId(R.string.collaboration_signin_description)
                         .signinDismissTextId(R.string.collaboration_signin_sync_dismiss)
+                        .signinLogoId(R.drawable.signin_logo)
                         .historySyncTitleId(R.string.collaboration_sync_title)
                         .historySyncSubtitleId(R.string.collaboration_sync_description)
                         .build();

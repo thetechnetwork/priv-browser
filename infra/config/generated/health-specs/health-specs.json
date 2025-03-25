@@ -4524,6 +4524,7 @@
         ]
       },
       "Mac13 Tests": {
+        "contact_team_email": "bling-engprod@google.com",
         "problem_specs": [
           {
             "name": "Unhealthy",
@@ -7502,27 +7503,6 @@
         ]
       },
       "android-cronet-mainline-clang-x86-rel": {
-        "contact_team_email": "cronet-team@google.com",
-        "problem_specs": [
-          {
-            "name": "Unhealthy",
-            "period_days": 7,
-            "score": 5,
-            "thresholds": {
-              "_default": "_default"
-            }
-          },
-          {
-            "name": "Low Value",
-            "period_days": 90,
-            "score": 1,
-            "thresholds": {
-              "_default": "_default"
-            }
-          }
-        ]
-      },
-      "android-cronet-marshmallow-arm64-perf-rel": {
         "contact_team_email": "cronet-team@google.com",
         "problem_specs": [
           {
@@ -10979,27 +10959,6 @@
         ]
       },
       "linux-x64-fuzzilli-coverage": {
-        "contact_team_email": "v8-security@google.com",
-        "problem_specs": [
-          {
-            "name": "Unhealthy",
-            "period_days": 7,
-            "score": 5,
-            "thresholds": {
-              "_default": "_default"
-            }
-          },
-          {
-            "name": "Low Value",
-            "period_days": 90,
-            "score": 1,
-            "thresholds": {
-              "_default": "_default"
-            }
-          }
-        ]
-      },
-      "linux-x86-fuzzilli-coverage": {
         "contact_team_email": "v8-security@google.com",
         "problem_specs": [
           {

@@ -1250,7 +1250,7 @@ AccessibilityFocusInfo PDFiumEngine::GetFocusInfo() {
   return focus_info;
 }
 
-bool PDFiumEngine::IsPDFDocTagged() {
+bool PDFiumEngine::IsPDFDocTagged() const {
   return FPDFCatalog_IsTagged(doc());
 }
 
@@ -1258,8 +1258,9 @@ uint32_t PDFiumEngine::GetLoadedByteSize() {
   return doc_loader_->GetDocumentSize();
 }
 
-bool PDFiumEngine::ReadLoadedBytes(base::span<uint8_t> buffer) {
-  return doc_loader_->GetBlock(0, buffer.size(), buffer.data());
+bool PDFiumEngine::ReadLoadedBytes(uint32_t offset,
+                                   base::span<uint8_t> buffer) {
+  return doc_loader_->GetBlock(offset, buffer.size(), buffer.data());
 }
 
 void PDFiumEngine::SetFormSelectedText(FPDF_FORMHANDLE form_handle,
@@ -2282,10 +2283,6 @@ void PDFiumEngine::SetReadOnly(bool read_only) {
   read_only_ = read_only;
   SetFormHighlight(!read_only_);
   ClearTextSelection();
-}
-
-bool PDFiumEngine::IsTagged() const {
-  return FPDFCatalog_IsTagged(doc());
 }
 
 void PDFiumEngine::SetDocumentLayout(DocumentLayout::PageSpread page_spread) {

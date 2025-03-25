@@ -20,7 +20,6 @@ namespace {
 constexpr static int kResizeAnimationDurationMs = 300;
 constexpr static int kAttachedWidgetOpacityDurationMs = 150;
 constexpr static int kDetachedWidgetOpacityDurationMs = 100;
-constexpr static int kInitialDetachedYPosition = 48;
 
 }  // namespace
 
@@ -131,10 +130,12 @@ void GlicWindowAnimator::RunOpenAttachedAnimation(GlicButton* glic_button,
                 std::move(callback));
 }
 
-void GlicWindowAnimator::RunOpenDetachedAnimation(base::OnceClosure callback) {
+void GlicWindowAnimator::RunOpenDetachedAnimation(base::OnceClosure callback,
+                                                  int animate_down_distance) {
   gfx::Rect target_bounds =
       window_controller_->GetGlicWidget()->GetWindowBoundsInScreen();
-  target_bounds.set_y(target_bounds.y() + kInitialDetachedYPosition);
+  // Only set the detached Y position if there isn't a browser.
+  target_bounds.set_y(target_bounds.y() + animate_down_distance);
 
   // Fade in widget while animating down.
   AnimateWindowOpacity(0.0f, 1.0f,

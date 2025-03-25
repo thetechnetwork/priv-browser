@@ -3554,11 +3554,12 @@ void LocalFrameView::ServiceScrollAnimations(base::TimeTicks start_time) {
 }
 
 void LocalFrameView::ScheduleAnimation(base::TimeDelta delay,
-                                       base::Location location) {
+                                       base::Location location,
+                                       bool urgent) {
   TRACE_EVENT("cc", "LocalFrameView::ScheduleAnimation", "frame", GetFrame(),
               "delay", delay, "location", location);
   if (auto* client = GetChromeClient())
-    client->ScheduleAnimation(this, delay);
+    client->ScheduleAnimation(this, delay, urgent);
 }
 
 void LocalFrameView::OnCommitRequested() {
@@ -4753,6 +4754,16 @@ void LocalFrameView::OnFirstContentfulPaint() {
               *frame_->GetDocument())) {
     viewport_position_tracker->OnFirstContentfulPaint();
   }
+}
+
+bool LocalFrameView::LifecycleUpdatePending() const {
+  if (auto* web_frame = WebLocalFrameImpl::FromFrame(frame_)) {
+    if (auto* widget = web_frame->LocalRootFrameWidget()) {
+      return widget->RequestedMainFramePending();
+    }
+  }
+
+  return false;
 }
 
 void LocalFrameView::RegisterForLifecycleNotifications(

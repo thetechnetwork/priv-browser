@@ -5,6 +5,7 @@
 #include "components/autofill/core/browser/autofill_field.h"
 
 #include <optional>
+#include <variant>
 
 #include "base/feature_list.h"
 #include "base/test/scoped_feature_list.h"
@@ -83,24 +84,6 @@ TEST_F(AutofillFieldTest, Type_ServerPredictionOfCityAndNumber_OverrideHtml) {
   EXPECT_EQ(PHONE_HOME_CITY_AND_NUMBER, field.Type().GetStorableType());
   EXPECT_EQ(field.PredictionSource(),
             AutofillPredictionSource::kServerCrowdsourcing);
-}
-
-// Tests that a local heuristics prediction for `EMAIL_ADDRESS` overrides server
-// predictions for `USERNAME` or `SINGLE_USERNAME`.
-TEST_F(AutofillFieldTest, EmailOverridesUsernameType) {
-  base::test::ScopedFeatureList feature_list{
-      features::kAutofillGivePrecedenceToEmailOverUsername};
-  AutofillField field;
-
-  field.set_server_predictions({CreateFieldPrediction(USERNAME)});
-  field.set_heuristic_type(GetActiveHeuristicSource(), EMAIL_ADDRESS);
-  EXPECT_EQ(field.Type().GetStorableType(), EMAIL_ADDRESS);
-  EXPECT_EQ(field.PredictionSource(), AutofillPredictionSource::kHeuristics);
-
-  field.set_server_predictions({CreateFieldPrediction(SINGLE_USERNAME)});
-  field.set_heuristic_type(GetActiveHeuristicSource(), EMAIL_ADDRESS);
-  EXPECT_EQ(field.Type().GetStorableType(), EMAIL_ADDRESS);
-  EXPECT_EQ(field.PredictionSource(), AutofillPredictionSource::kHeuristics);
 }
 
 TEST_F(AutofillFieldTest, IsFieldFillable) {
@@ -519,7 +502,20 @@ INSTANTIATE_TEST_SUITE_P(
             .server_type = NAME_LAST,
             .heuristic_type = NAME_LAST_CORE,
             .expected_result = NAME_LAST_CORE,
-            .expected_source = AutofillPredictionSource::kHeuristics}));
+            .expected_source = AutofillPredictionSource::kHeuristics},
+        AutofillLocalHeuristicsOverridesParams{
+            .html_field_type = HtmlFieldType::kUnspecified,
+            .server_type = PASSPORT_NAME_TAG,
+            .heuristic_type = NAME_FIRST,
+            .expected_result = NAME_FIRST,
+            .expected_source = AutofillPredictionSource::kHeuristics},
+        AutofillLocalHeuristicsOverridesParams{
+            .html_field_type = HtmlFieldType::kUnspecified,
+            .server_type = PASSPORT_NAME_TAG,
+            .heuristic_type = UNKNOWN_TYPE,
+            .expected_result = PASSPORT_NAME_TAG,
+            .expected_source =
+                AutofillPredictionSource::kServerCrowdsourcing}));
 
 // Tests that consecutive identical events are not added twice to the event log.
 TEST(AutofillFieldLogEventTypeTest, AppendLogEventIfNotRepeated) {
@@ -536,7 +532,7 @@ TEST(AutofillFieldLogEventTypeTest, AppendLogEventIfNotRepeated) {
                                .associated_country_code = "DE",
                                .timestamp = AutofillClock::Now()};
   AutofillField::FieldLogEventType c = FillFieldLogEvent{
-      .fill_event_id = absl::get<TriggerFillFieldLogEvent>(b).fill_event_id,
+      .fill_event_id = std::get<TriggerFillFieldLogEvent>(b).fill_event_id,
       .had_value_before_filling = OptionalBoolean::kTrue,
       .autofill_skipped_status = FieldFillingSkipReason::kAlreadyAutofilled,
       .was_autofilled_before_security_policy = OptionalBoolean::kTrue,

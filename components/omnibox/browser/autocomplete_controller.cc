@@ -54,6 +54,7 @@
 #include "components/omnibox/browser/builtin_provider.h"
 #include "components/omnibox/browser/calculator_provider.h"
 #include "components/omnibox/browser/clipboard_provider.h"
+#include "components/omnibox/browser/contextual_search_provider.h"
 #include "components/omnibox/browser/document_provider.h"
 #include "components/omnibox/browser/enterprise_search_aggregator_provider.h"
 #include "components/omnibox/browser/featured_search_provider.h"
@@ -1077,8 +1078,7 @@ bool AutocompleteController::ShouldRunProvider(
              TemplateURLData::PolicyOrigin::kSearchAggregator)) {
       if (keyword_turl->starter_pack_id() ==
           TemplateURLStarterPackData::kPage) {
-        return provider->type() == AutocompleteProvider::TYPE_SEARCH ||
-               provider->type() == AutocompleteProvider::TYPE_ZERO_SUGGEST;
+        return provider->type() == AutocompleteProvider::TYPE_CONTEXTUAL_SEARCH;
       }
       switch (provider->type()) {
         // Keyword provider creates the suggestion attached to the keyword chip
@@ -1248,6 +1248,10 @@ void AutocompleteController::InitializeAsyncProviders(int provider_types) {
     unscoped_extension_provider_ =
         new UnscopedExtensionProvider(provider_client_.get(), this);
     providers_.push_back(unscoped_extension_provider_.get());
+  }
+  if (provider_types & AutocompleteProvider::TYPE_CONTEXTUAL_SEARCH) {
+    providers_.push_back(
+        new ContextualSearchProvider(provider_client_.get(), this));
   }
 }
 
@@ -1593,6 +1597,25 @@ void AutocompleteController::AttachActions() {
   if (omnibox::IsLensSearchbox(input_.current_page_classification())) {
     return;
   }
+
+  #if !BUILDFLAG(IS_ANDROID) && !BUILDFLAG(IS_IOS)
+  // Attach the contextual search fulfillment actions in the @page keyword mode.
+  if (base::FeatureList::IsEnabled(
+          omnibox::kContextualZeroSuggestLensFulfillment) &&
+      input_.IsZeroSuggest()) {
+    internal_result_.AttachContextualSearchFulfillmentActionToMatches();
+  } else if (input_.InKeywordMode()) {
+    AutocompleteInput keyword_input = input_;
+    const TemplateURL* keyword_turl =
+        AutocompleteInput::GetSubstitutingTemplateURLForInput(
+            template_url_service_, &keyword_input);
+    if (keyword_turl->starter_pack_id() == TemplateURLStarterPackData::kPage) {
+      internal_result_.AttachContextualSearchFulfillmentActionToMatches();
+      return;
+    }
+  }
+#endif  // !BUILDFLAG(IS_ANDROID) && !BUILDFLAG(IS_IOS)
+
   // TabMatcher should run for ZPS for the Hub since open tab suggestions are
   // shown there.
   if (!input_.IsZeroSuggest() ||

@@ -2337,9 +2337,10 @@ class InterestGroupAuction::BuyerHelper
             ->RequestTrustedBiddingSignals(
                 auction_->url_loader_factory_,
                 auction_->auction_worklet_manager_->GetFrameTreeNodeID(),
-                auction_->main_frame_origin_, auction_->ip_address_space_,
-                interest_group.owner, interest_group.name,
-                interest_group.execution_mode, bid_state.bidder->joining_origin,
+                auction_->devtools_auction_id_, auction_->main_frame_origin_,
+                auction_->ip_address_space_, interest_group.owner,
+                interest_group.name, interest_group.execution_mode,
+                bid_state.bidder->joining_origin,
                 *interest_group.trusted_bidding_signals_url,
                 *interest_group.trusted_bidding_signals_coordinator,
                 interest_group.trusted_bidding_signals_keys,
@@ -3533,7 +3534,6 @@ InterestGroupAuction::CreateReporter(
   DCHECK(!load_interest_groups_phase_callback_);
   DCHECK(!bidding_and_scoring_phase_callback_);
   DCHECK_EQ(*final_auction_result_, AuctionResult::kSuccess);
-  DCHECK(non_kanon_enforced_auction_leader_.top_bid);
 
   // This should only be called on top-level auctions.
   DCHECK(!parent_);
@@ -5603,8 +5603,8 @@ void InterestGroupAuction::ScoreBid(std::unique_ptr<Bid> bid) {
             ->RequestTrustedScoringSignals(
                 url_loader_factory_,
                 auction_worklet_manager_->GetFrameTreeNodeID(),
-                main_frame_origin_, ip_address_space_, config_->seller,
-                *config_->trusted_scoring_signals_url,
+                devtools_auction_id_, main_frame_origin_, ip_address_space_,
+                config_->seller, *config_->trusted_scoring_signals_url,
                 *config_->non_shared_params.trusted_scoring_signals_coordinator,
                 bid->interest_group->owner,
                 bid->bid_state->bidder->joining_origin, bid->ad_descriptor.url,

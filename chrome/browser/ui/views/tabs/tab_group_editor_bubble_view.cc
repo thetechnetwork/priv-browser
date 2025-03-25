@@ -338,17 +338,13 @@ void TabGroupEditorBubbleView::RebuildMenuContents() {
     simple_menu_items_.push_back(AddChildView(BuildNewTabInGroupButton()));
     simple_menu_items_.push_back(
         AddChildView(BuildMoveGroupToNewWindowButton()));
+    AddChildView(BuildSeparator());
     simple_menu_items_.push_back(AddChildView(BuildUngroupButton()));
     simple_menu_items_.push_back(AddChildView(BuildHideGroupButton()));
-
   } else {
     simple_menu_items_.push_back(AddChildView(BuildNewTabInGroupButton()));
     simple_menu_items_.push_back(
         AddChildView(BuildMoveGroupToNewWindowButton()));
-
-    if (OwnsGroup()) {
-      simple_menu_items_.push_back(AddChildView(BuildUngroupButton()));
-    }
 
     if (CanShareGroups()) {
       if (IsGroupShared()) {
@@ -367,6 +363,10 @@ void TabGroupEditorBubbleView::RebuildMenuContents() {
 
     simple_menu_items_.push_back(AddChildView(BuildHideGroupButton()));
     AddChildView(BuildSeparator());
+
+    if (!IsGroupShared()) {
+      simple_menu_items_.push_back(AddChildView(BuildUngroupButton()));
+    }
 
     if (OwnsGroup()) {
       simple_menu_items_.push_back(AddChildView(BuildDeleteGroupButton()));
@@ -798,7 +798,9 @@ void TabGroupEditorBubbleView::ShareOrManagePressed() {
           browser_->profile());
   auto delegate = std::make_unique<CollaborationControllerDelegateDesktop>(
       const_cast<Browser*>(browser_.get()));
-  service->StartShareOrManageFlow(std::move(delegate), group_);
+  service->StartShareOrManageFlow(
+      std::move(delegate), group_,
+      collaboration::CollaborationServiceShareOrManageEntryPoint::kUnknown);
 
   bool is_group_shared = IsGroupShared();
   if (!is_group_shared) {

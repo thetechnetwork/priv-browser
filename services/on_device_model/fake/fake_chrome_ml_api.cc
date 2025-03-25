@@ -6,6 +6,7 @@
 
 #include "base/files/file.h"
 #include "base/files/file_util.h"
+#include "base/strings/strcat.h"
 #include "base/strings/string_number_conversions.h"
 #include "base/strings/stringprintf.h"
 #include "services/on_device_model/ml/chrome_ml_api.h"
@@ -76,22 +77,24 @@ bool GetCapabilities(PlatformFile file, ChromeMLCapabilities& capabilities) {
 }
 
 struct FakeModelInstance {
-  ml::ModelBackendType backend_type_;
+  ml::ModelBackendType backend_type;
   ml::ModelPerformanceHint performance_hint;
-  std::string model_data_;
+  std::string model_data;
 };
 
 struct FakeSessionInstance {
-  std::string adaptation_data_;
-  std::optional<uint32_t> adaptation_file_id_;
-  std::vector<std::string> context_;
+  std::string adaptation_data;
+  std::optional<uint32_t> adaptation_file_id;
+  std::vector<std::string> context;
   bool cloned;
   bool enable_image_input;
   bool enable_audio_input;
+  uint32_t top_k;
+  float temperature;
 };
 
 struct FakeTsModelInstance {
-  std::string model_data_;
+  std::string model_data;
 };
 
 struct FakeCancelInstance {
@@ -102,7 +105,7 @@ ChromeMLModel SessionCreateModel(const ChromeMLModelDescriptor* descriptor,
                                  uintptr_t context,
                                  ChromeMLScheduleFn schedule) {
   return reinterpret_cast<ChromeMLModel>(new FakeModelInstance{
-      .backend_type_ = descriptor->backend_type,
+      .backend_type = descriptor->backend_type,
       .performance_hint = descriptor->performance_hint,
   });
 }
@@ -126,16 +129,18 @@ ChromeMLSession CreateSession(ChromeMLModel model,
   if (descriptor) {
     instance->enable_image_input = descriptor->enable_image_input;
     instance->enable_audio_input = descriptor->enable_audio_input;
+    instance->top_k = descriptor->top_k;
+    instance->temperature = descriptor->temperature;
     if (descriptor->model_data) {
-      instance->adaptation_file_id_ = descriptor->model_data->file_id;
-      if (model_instance->backend_type_ == ml::ModelBackendType::kGpuBackend) {
-        instance->adaptation_data_ =
+      instance->adaptation_file_id = descriptor->model_data->file_id;
+      if (model_instance->backend_type == ml::ModelBackendType::kGpuBackend) {
+        instance->adaptation_data =
             ReadFile(descriptor->model_data->weights_file);
-      } else if (model_instance->backend_type_ ==
+      } else if (model_instance->backend_type ==
                  ml::ModelBackendType::kApuBackend) {
         base::ReadFileToString(
             base::FilePath::FromUTF8Unsafe(descriptor->model_data->model_path),
-            &instance->adaptation_data_);
+            &instance->adaptation_data);
       }
     }
   }
@@ -145,12 +150,14 @@ ChromeMLSession CreateSession(ChromeMLModel model,
 ChromeMLSession CloneSession(ChromeMLSession session) {
   auto* instance = reinterpret_cast<FakeSessionInstance*>(session);
   return reinterpret_cast<ChromeMLSession>(new FakeSessionInstance{
-      .adaptation_data_ = instance->adaptation_data_,
-      .adaptation_file_id_ = instance->adaptation_file_id_,
-      .context_ = instance->context_,
+      .adaptation_data = instance->adaptation_data,
+      .adaptation_file_id = instance->adaptation_file_id,
+      .context = instance->context,
       .cloned = true,
       .enable_image_input = instance->enable_image_input,
       .enable_audio_input = instance->enable_audio_input,
+      .top_k = instance->top_k,
+      .temperature = instance->temperature,
   });
 }
 
@@ -190,7 +197,7 @@ bool SessionExecuteModel(ChromeMLSession session,
   }
 
   if (!text.empty()) {
-    instance->context_.push_back(text);
+    instance->context.push_back(text);
   }
   if (options->context_saved_fn) {
     (*options->context_saved_fn)(static_cast<int>(text.size()));
@@ -217,16 +224,24 @@ bool SessionExecuteModel(ChromeMLSession session,
       ml::ModelPerformanceHint::kFastestInference) {
     OutputChunk("Fastest inference\n");
   }
-  if (!instance->adaptation_data_.empty()) {
-    std::string adaptation_str = "Adaptation: " + instance->adaptation_data_;
-    if (instance->adaptation_file_id_) {
+  if (!instance->adaptation_data.empty()) {
+    std::string adaptation_str = "Adaptation: " + instance->adaptation_data;
+    if (instance->adaptation_file_id) {
       adaptation_str +=
-          " (" + base::NumberToString(*instance->adaptation_file_id_) + ")";
+          " (" + base::NumberToString(*instance->adaptation_file_id) + ")";
     }
     OutputChunk(adaptation_str + "\n");
   }
-  if (!instance->context_.empty()) {
-    for (const std::string& context : instance->context_) {
+
+  // Only include sampling params if they're not the respective default values.
+  if (instance->top_k != 1 || instance->temperature != 0) {
+    OutputChunk(base::StrCat(
+        {"TopK: ", base::NumberToString(instance->top_k),
+         ", Temp: ", base::NumberToString(instance->temperature), "\n"}));
+  }
+
+  if (!instance->context.empty()) {
+    for (const std::string& context : instance->context) {
       OutputChunk("Context: " + context + "\n");
     }
   }

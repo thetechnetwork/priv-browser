@@ -29,11 +29,11 @@ class MasonryLayoutAlgorithmTest : public BaseLayoutAlgorithmTest {
                                          /*auto_repetitions=*/0);
 
     grid_axis_tracks_ = algorithm.BuildGridAxisTracks(
-        line_resolver, SizingConstraint::kLayout, &start_offset);
+        line_resolver, SizingConstraint::kLayout, start_offset);
 
     const auto grid_axis_direction = grid_axis_tracks_->Direction();
     for (const auto& masonry_item :
-         *algorithm.BuildVirtualMasonryItems(line_resolver, &start_offset)) {
+         algorithm.BuildVirtualMasonryItems(line_resolver, start_offset)) {
       MasonryItemCachedData item_data;
 
       item_data.resolved_span =
@@ -132,7 +132,7 @@ TEST_F(MasonryLayoutAlgorithmTest, ConstructMasonryItems) {
   MasonryNode node(GetLayoutBoxByElementId("masonry"));
 
   const GridLineResolver line_resolver(node.Style(), /*auto_repetitions=*/0);
-  const auto* masonry_items =
+  const auto masonry_items =
       node.ConstructMasonryItems(line_resolver, /*start_offset=*/0);
 
   const Vector<GridSpan> expected_spans = {
@@ -145,10 +145,10 @@ TEST_F(MasonryLayoutAlgorithmTest, ConstructMasonryItems) {
       GridSpan::TranslatedDefiniteGridSpan(0, 2),
       GridSpan::TranslatedDefiniteGridSpan(2, 4)};
 
-  EXPECT_EQ(masonry_items->Size(), expected_spans.size());
+  EXPECT_EQ(masonry_items.Size(), expected_spans.size());
 
   const auto grid_axis_direction = node.Style().MasonryTrackSizingDirection();
-  for (wtf_size_t i = 0; const auto& masonry_item : *masonry_items) {
+  for (wtf_size_t i = 0; const auto& masonry_item : masonry_items) {
     EXPECT_EQ(masonry_item.resolved_position.Span(grid_axis_direction),
               expected_spans[i++]);
   }
@@ -245,20 +245,21 @@ TEST_F(MasonryLayoutAlgorithmTest, CollectMasonryItemGroups) {
 
   MasonryNode node(GetLayoutBoxByElementId("masonry"));
 
-  wtf_size_t start_offset;
+  wtf_size_t max_end_line, start_offset;
   const GridLineResolver line_resolver(node.Style(), /*auto_repetitions=*/0);
-  const auto item_groups = node.CollectItemGroups(line_resolver, &start_offset);
+  const auto item_groups =
+      node.CollectItemGroups(line_resolver, max_end_line, start_offset);
 
   EXPECT_EQ(item_groups.size(), 4u);
 
-  for (const auto& [properties, items] : item_groups) {
+  for (const auto& [items, properties] : item_groups) {
     wtf_size_t expected_size = 0;
     const auto& span = properties.Span();
     if (span == GridSpan::IndefiniteGridSpan(3) ||
-        span == GridSpan::UntranslatedDefiniteGridSpan(0, 1)) {
+        span == GridSpan::TranslatedDefiniteGridSpan(0, 1)) {
       expected_size = 1;
     } else if (span == GridSpan::IndefiniteGridSpan(1) ||
-               span == GridSpan::UntranslatedDefiniteGridSpan(0, 3)) {
+               span == GridSpan::TranslatedDefiniteGridSpan(0, 3)) {
       expected_size = 2;
     }
     EXPECT_EQ(items.size(), expected_size);
@@ -307,6 +308,60 @@ TEST_F(MasonryLayoutAlgorithmTest, ExplicitlyPlacedVirtualItems) {
       expected_min_size = LayoutUnit(20);
     } else if (span == GridSpan::TranslatedDefiniteGridSpan(0, 3)) {
       expected_max_size = LayoutUnit(60);
+      expected_min_size = LayoutUnit(30);
+    }
+    EXPECT_EQ(MaxContentContribution(i), expected_max_size);
+    EXPECT_EQ(MinContentContribution(i), expected_min_size);
+  }
+}
+
+TEST_F(MasonryLayoutAlgorithmTest, AutoPlacedVirtualItems) {
+  LoadAhem();
+  SetBodyInnerHTML(R"HTML(
+    <style>
+    body { font: 10px/1 Ahem }
+    #masonry {
+      display: masonry;
+      masonry-template-tracks: repeat(3, auto);
+    }
+    </style>
+    <div id="masonry">
+      <div>X X X X X</div>
+      <div style="masonry-track: span 2">XXX X</div>
+      <div>XX XX XX XX XX</div>
+      <div style="masonry-track: span 2">X XX X</div>
+      <div>X XX XXX XX X</div>
+    </div>
+  )HTML");
+
+  BlockNode node(GetLayoutBoxByElementId("masonry"));
+
+  const auto space = ConstructBlockLayoutTestConstraintSpace(
+      {WritingMode::kHorizontalTb, TextDirection::kLtr},
+      LogicalSize(LayoutUnit(100), LayoutUnit(100)),
+      /*stretch_inline_size_if_auto=*/true,
+      /*is_new_formatting_context=*/true);
+
+  const auto fragment_geometry =
+      CalculateInitialFragmentGeometry(space, node, /*break_token=*/nullptr);
+
+  MasonryLayoutAlgorithm algorithm({node, fragment_geometry, space});
+  ComputeGeometry(algorithm);
+
+  const auto item_count = VirtualItemCount();
+  EXPECT_EQ(item_count, 5u);
+
+  for (wtf_size_t i = 0; i < item_count; ++i) {
+    LayoutUnit expected_max_size, expected_min_size;
+    const auto& span = VirtualItemSpan(i);
+    if (span == GridSpan::TranslatedDefiniteGridSpan(0, 2) ||
+        span == GridSpan::TranslatedDefiniteGridSpan(1, 3)) {
+      expected_max_size = LayoutUnit(60);
+      expected_min_size = LayoutUnit(30);
+    } else if (span == GridSpan::TranslatedDefiniteGridSpan(0, 1) ||
+               span == GridSpan::TranslatedDefiniteGridSpan(1, 2) ||
+               span == GridSpan::TranslatedDefiniteGridSpan(2, 3)) {
+      expected_max_size = LayoutUnit(140);
       expected_min_size = LayoutUnit(30);
     }
     EXPECT_EQ(MaxContentContribution(i), expected_max_size);

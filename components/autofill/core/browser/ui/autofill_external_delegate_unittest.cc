@@ -990,6 +990,33 @@ TEST_F(AutofillExternalDelegateTest,
                                           SuggestionPosition{.row = 0});
 }
 
+// Test that the Autofill delegate allows previewing `kLoyaltyCardEntry`
+// suggestions.
+TEST_F(AutofillExternalDelegateTest, ExternalDelegatePreviewsLoyalyCardEntry) {
+  IssueOnQuery();
+
+  EXPECT_CALL(client(),
+              ShowAutofillSuggestions(PopupOpenArgsAre(SuggestionVectorIdsAre(
+                                          SuggestionType::kLoyaltyCardEntry)),
+                                      _));
+  std::vector<Suggestion> suggestions;
+  const std::u16string loyalty_card_value = u"LOYALTYCARD1234";
+  suggestions.emplace_back(/*main_text=*/loyalty_card_value,
+                           SuggestionType::kLoyaltyCardEntry);
+  suggestions[0].main_text.value = loyalty_card_value;
+  OnSuggestionsReturned(queried_field().global_id(), suggestions);
+
+  EXPECT_CALL(driver(), RendererShouldClearPreviewedForm());
+  EXPECT_CALL(
+      manager(),
+      FillOrPreviewField(mojom::ActionPersistence::kPreview,
+                         mojom::FieldActionType::kReplaceAll,
+                         HasQueriedFormId(), HasQueriedFieldId(),
+                         loyalty_card_value, SuggestionType::kLoyaltyCardEntry,
+                         std::optional(LOYALTY_MEMBERSHIP_ID)));
+  external_delegate().DidSelectSuggestion(suggestions[0]);
+}
+
 // Test that the Autofill delegate routes the merchant promo code suggestions
 // footer redirect logic correctly.
 TEST_F(AutofillExternalDelegateTest,
@@ -2415,11 +2442,14 @@ TEST_F(AutofillExternalDelegateTest,
   pdm().address_data_manager().AddProfile(profile);
   IssueOnQuery();
 
-  std::u16string dummy_autocomplete_string(u"Jon doe");
+  std::u16string dummy_autofill_on_typing_string(u"Jon doe");
   Suggestion suggestion = test::CreateAutofillSuggestion(
-      SuggestionType::kAddressEntryOnTyping, dummy_autocomplete_string,
+      SuggestionType::kAddressEntryOnTyping, dummy_autofill_on_typing_string,
       Suggestion::AutofillProfilePayload(Suggestion::Guid(profile.guid())));
   suggestion.field_by_field_filling_type_used = NAME_FULL;
+  // Simulate that the user has typed the first 3 characters of their full name.
+  get_triggering_autofill_field()->set_value(
+      dummy_autofill_on_typing_string.substr(0, 3));
   base::HistogramTester histogram_tester;
 
   EXPECT_CALL(
@@ -2447,6 +2477,10 @@ TEST_F(AutofillExternalDelegateTest,
   // Note that the triggeting field is classified.
   histogram_tester.ExpectUniqueSample(
       "Autofill.AddressSuggestionOnTypingAcceptance.FieldClassication", true,
+      1);
+  // Above it was simulated that the user typed 3 characters in the field.
+  histogram_tester.ExpectBucketCount(
+      "Autofill.AddressSuggestionOnTypingAcceptance.NumberOfCharactersTyped", 3,
       1);
 }
 

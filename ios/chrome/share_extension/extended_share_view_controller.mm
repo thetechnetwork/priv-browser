@@ -135,7 +135,7 @@ const CGFloat kShareSheetCornerRadius = 20;
                     action:app_group::OPEN_IN_CHROME_ITEM
                     cancel:NO
                 completion:^{
-                  [weakSelf dismissAndReturnItem:weakSelf.shareItem error:nil];
+                  [weakSelf dissmissAndShowShareItem];
                 }];
 }
 
@@ -145,9 +145,11 @@ const CGFloat kShareSheetCornerRadius = 20;
       alertControllerWithTitle:nil
                        message:nil
                 preferredStyle:UIAlertControllerStyleActionSheet];
-  // TODO(crbug.com/398803565): Add strings translation.
+  NSString* cancelTitle = NSLocalizedString(
+      @"IDS_IOS_CANCEL_BUTTON_SHARE_EXTENSION",
+      @"The label of the cancel alert button in share extension.");
   UIAlertAction* cancelAlertAction =
-      [UIAlertAction actionWithTitle:@"Cancel"
+      [UIAlertAction actionWithTitle:cancelTitle
                                style:UIAlertActionStyleCancel
                              handler:nil];
 
@@ -182,6 +184,62 @@ const CGFloat kShareSheetCornerRadius = 20;
                   completion:^{
                     [weakSelf dismissAndReturnItem:weakSelf.shareItem
                                              error:nil];
+                  }];
+    return;
+  }
+
+  if (self.shareImage) {
+    [command prepareToSearchImage:self.shareImage];
+    [command executeInApp];
+    [self queueActionItemURL:_shareURL
+                       title:_shareTitle
+                      // TODO(crbug.com/398803565): Add and handle search text
+                      // and image in ShareExtensionItemType.
+                      action:app_group::OPEN_IN_CHROME_ITEM
+                      cancel:NO
+                  completion:^{
+                    [weakSelf dissmissAndShowShareItem];
+                  }];
+    return;
+  }
+}
+
+- (void)didTapSearchInIncognitoShareExtensionSheet:
+    (ShareExtensionSheet*)shareExtensionSheet {
+  CHECK(!self.shareURL);
+  __weak ExtendedShareViewController* weakSelf = self;
+  AppGroupCommand* command = [[AppGroupCommand alloc]
+      initWithSourceApp:app_group::kOpenCommandSourceShareExtension
+         URLOpenerBlock:^(NSURL* openURL) {
+           ExtensionOpenURL(openURL, weakSelf, nil);
+         }];
+  if (self.shareText) {
+    [command prepareToIncognitoSearchText:self.shareText];
+    [command executeInApp];
+    [self queueActionItemURL:_shareURL
+                       title:_shareText
+                      // TODO(crbug.com/398803565): Add and handle search text
+                      // and image in ShareExtensionItemType.
+                      action:app_group::OPEN_IN_CHROME_ITEM
+                      cancel:NO
+                  completion:^{
+                    [weakSelf dismissAndReturnItem:weakSelf.shareItem
+                                             error:nil];
+                  }];
+    return;
+  }
+
+  if (self.shareImage) {
+    [command prepareToIncognitoSearchImage:self.shareImage];
+    [command executeInApp];
+    [self queueActionItemURL:_shareURL
+                       title:_shareTitle
+                      // TODO(crbug.com/398803565): Add and handle search text
+                      // and image in ShareExtensionItemType.
+                      action:app_group::OPEN_IN_CHROME_ITEM
+                      cancel:NO
+                  completion:^{
+                    [weakSelf dissmissAndShowShareItem];
                   }];
     return;
   }
@@ -488,8 +546,10 @@ const CGFloat kShareSheetCornerRadius = 20;
 
 - (UIAlertAction*)addToBookmarksAlertAction {
   __weak ExtendedShareViewController* weakSelf = self;
-  // TODO(crbug.com/398803565): Add strings translation.
-  return [UIAlertAction actionWithTitle:@"Add to Bookmarks"
+  NSString* addToBookmarksTitle = NSLocalizedString(
+      @"IDS_IOS_ADD_BOOKMARKS_SHARE_EXTENSION",
+      @"The Add to bookmarks button text in share extension.");
+  return [UIAlertAction actionWithTitle:addToBookmarksTitle
                                   style:UIAlertActionStyleDefault
                                 handler:^(UIAlertAction* action) {
                                   [weakSelf handleAddingToBookmark];
@@ -498,8 +558,10 @@ const CGFloat kShareSheetCornerRadius = 20;
 
 - (UIAlertAction*)addToReadingListAlertAction {
   __weak ExtendedShareViewController* weakSelf = self;
-  // TODO(crbug.com/398803565): Add strings translation.
-  return [UIAlertAction actionWithTitle:@"Add to Reading List"
+  NSString* addToReadingListTitle = NSLocalizedString(
+      @"IDS_IOS_ADD_READING_LIST_SHARE_EXTENSION",
+      @"The add to reading list button text in share extension.");
+  return [UIAlertAction actionWithTitle:addToReadingListTitle
                                   style:UIAlertActionStyleDefault
                                 handler:^(UIAlertAction* action) {
                                   [weakSelf handleAddingToReadingList];
@@ -508,8 +570,10 @@ const CGFloat kShareSheetCornerRadius = 20;
 
 - (UIAlertAction*)openInIncognitoAlertAction {
   __weak ExtendedShareViewController* weakSelf = self;
-  // TODO(crbug.com/398803565): Add strings translation.
-  return [UIAlertAction actionWithTitle:@"Open in Incognitos"
+  NSString* openInIncognitoTitle = NSLocalizedString(
+      @"IDS_IOS_OPEN_IN_INCOGNITO_BUTTON_SHARE_EXTENSION",
+      @"The add to reading list button text in share extension.");
+  return [UIAlertAction actionWithTitle:openInIncognitoTitle
                                   style:UIAlertActionStyleDefault
                                 handler:^(UIAlertAction* action) {
                                   [weakSelf handleOpeningInIncognito];
@@ -539,7 +603,25 @@ const CGFloat kShareSheetCornerRadius = 20;
 }
 
 - (void)handleOpeningInIncognito {
-  // TODO(crbug.com/402278503): Add the incognito URL opening.
+  __weak ExtendedShareViewController* weakSelf = self;
+  AppGroupCommand* command = [[AppGroupCommand alloc]
+      initWithSourceApp:app_group::kOpenCommandSourceShareExtension
+         URLOpenerBlock:^(NSURL* openURL) {
+           ExtensionOpenURL(openURL, weakSelf, nil);
+         }];
+  [command prepareToOpenURLInIncognito:_shareURL];
+  [command executeInApp];
+
+  [self queueActionItemURL:_shareURL
+                     title:_shareTitle
+                    action:app_group::OPEN_IN_CHROME_ITEM
+                    cancel:NO
+                completion:^{
+                  [weakSelf dissmissAndShowShareItem];
+                }];
 }
 
+- (void)dissmissAndShowShareItem {
+  [self dismissAndReturnItem:_shareItem error:nil];
+}
 @end

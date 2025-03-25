@@ -56,6 +56,15 @@ public final class ChromePreferenceKeys {
     public static final String ADDRESS_BAR_SETTINGS_VIEW_COUNT =
             "Chrome.AddressBar.SettingsViewCount";
 
+    /** Timestamp of last time ai feature availability was checked. */
+    public static final String AI_ASSISTANT_ANALYZE_ATTACHMENT_AVAILABILITY =
+            "Chrome.AiAssistant.AnalyzeAttachmentAvailability";
+
+    public static final String AI_ASSISTANT_AVAILABILITY_CHECK_TIMESTAMP_MS =
+            "Chrome.AiAssistant.AvailabilityCheckTimestampMs";
+    public static final String AI_ASSISTANT_WEB_SUMMARIZATION_AVAILABILITY =
+            "Chrome.AiAssistant.WebSummarizationAvailability";
+
     public static final String APPEARANCE_SETTINGS_CLICKED = "Chrome.Appearance.SettingsClicked";
     public static final String APPEARANCE_SETTINGS_VIEW_COUNT =
             "Chrome.Appearance.SettingsViewCount";
@@ -790,6 +799,9 @@ public final class ChromePreferenceKeys {
     public static final String SIGNIN_PROMO_HISTORY_PAGE_DECLINED =
             "Chrome.SigninPromoHistoryPage.Declined";
 
+    public static final String SIGNIN_PROMO_HISTORY_PAGE_LAST_SHOWN_TIME =
+            "Chrome.SigninPromoHistoryPage.LastShownTime";
+
     /** SyncPromo Show Count preference. */
     public static final KeyPrefix SYNC_PROMO_SHOW_COUNT =
             new KeyPrefix("Chrome.SyncPromo.ShowCount.*");
@@ -951,6 +963,9 @@ public final class ChromePreferenceKeys {
                 ADAPTIVE_TOOLBAR_CUSTOMIZATION_SETTINGS,
                 ADDRESS_BAR_SETTINGS_CLICKED,
                 ADDRESS_BAR_SETTINGS_VIEW_COUNT,
+                AI_ASSISTANT_ANALYZE_ATTACHMENT_AVAILABILITY,
+                AI_ASSISTANT_AVAILABILITY_CHECK_TIMESTAMP_MS,
+                AI_ASSISTANT_WEB_SUMMARIZATION_AVAILABILITY,
                 APPEARANCE_SETTINGS_CLICKED,
                 APPEARANCE_SETTINGS_VIEW_COUNT,
                 AUTOFILL_ASSISTANT_FIRST_TIME_LITE_SCRIPT_USER,
@@ -1077,6 +1092,7 @@ public final class ChromePreferenceKeys {
                 SHARING_TABS_WITH_OS,
                 SYNC_PROMO_SHOW_COUNT.pattern(),
                 SIGNIN_PROMO_HISTORY_PAGE_DECLINED,
+                SIGNIN_PROMO_HISTORY_PAGE_LAST_SHOWN_TIME,
                 SIGNIN_PROMO_NTP_FIRST_SHOWN_TIME,
                 SIGNIN_PROMO_NTP_LAST_SHOWN_TIME,
                 SYNC_PROMO_TOTAL_SHOW_COUNT,

@@ -16,6 +16,10 @@
 namespace glic {
 namespace {
 
+bool UserResizeEnabled() {
+  return base::FeatureList::IsEnabled(features::kGlicUserResize);
+}
+
 class GlicWidgetDelegate : public views::WidgetDelegate {
  public:
   GlicWidgetDelegate() {
@@ -38,14 +42,18 @@ class GlicWidgetDelegate : public views::WidgetDelegate {
 void* kGlicWidgetIdentifier = &kGlicWidgetIdentifier;
 
 GlicWidget::GlicWidget(InitParams params) : views::Widget(std::move(params)) {
-  // TODO(402791189): Instead use a flag on Widget::InitParams when it's
-  // available.
-  if (base::FeatureList::IsEnabled(features::kGlicUserResize)) {
-    widget_delegate()->SetCanResize(true);
+  if (UserResizeEnabled()) {
+    // Widget starts out non-resizable; client may enable resizing.
+    minimum_widget_size_ = GetInitialSize();
   }
 }
 
 GlicWidget::~GlicWidget() = default;
+
+gfx::Size GlicWidget::GetInitialSize() {
+  return {features::kGlicInitialWidth.Get(),
+          features::kGlicInitialHeight.Get()};
+}
 
 std::unique_ptr<GlicWidget> GlicWidget::Create(
     Profile* profile,
@@ -57,10 +65,11 @@ std::unique_ptr<GlicWidget> GlicWidget::Create(
 #if BUILDFLAG(IS_WIN)
   params.dont_show_in_taskbar = true;
   params.force_system_menu_for_frameless = true;
-  params.opacity = views::Widget::InitParams::WindowOpacity::kTranslucent;
 #endif
   params.bounds = initial_bounds;
   params.sublevel = ChromeWidgetSublevel::kSublevelGlic;
+  // Don't change this name. This is used by other code to identify the glic
+  // window. See b/404947780.
   params.name = "GlicWidget";
   params.corner_radius = kCornerRadius;
   auto delegate = std::make_unique<GlicWidgetDelegate>();
@@ -91,14 +100,11 @@ display::Display GlicWidget::GetDisplay() {
 
 void GlicWidget::SetMinimumSize(const gfx::Size& size) {
   minimum_widget_size_ = size;
-  // TODO(sanaakbani): Set this to a more reasonable minimum fallback size.
-  minimum_widget_size_.SetToMax(gfx::Size(1, 1));
+  minimum_widget_size_.SetToMax(GetInitialSize());
 }
 
 gfx::Size GlicWidget::GetMinimumSize() const {
-  return base::FeatureList::IsEnabled(features::kGlicUserResize)
-             ? minimum_widget_size_
-             : gfx::Size();
+  return UserResizeEnabled() ? minimum_widget_size_ : gfx::Size();
 }
 
 }  // namespace glic

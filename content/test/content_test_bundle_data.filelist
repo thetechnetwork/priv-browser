@@ -1227,6 +1227,13 @@ data/accessibility/aria/aria-multiline-expected-blink.txt
 data/accessibility/aria/aria-multiline-expected-mac.txt
 data/accessibility/aria/aria-multiline-expected-win.txt
 data/accessibility/aria/aria-multiline.html
+data/accessibility/aria/aria-multiselectable-aria-labelledby-expected-android-external.txt
+data/accessibility/aria/aria-multiselectable-aria-labelledby-expected-android.txt
+data/accessibility/aria/aria-multiselectable-aria-labelledby-expected-auralinux.txt
+data/accessibility/aria/aria-multiselectable-aria-labelledby-expected-blink.txt
+data/accessibility/aria/aria-multiselectable-aria-labelledby-expected-mac.txt
+data/accessibility/aria/aria-multiselectable-aria-labelledby-expected-win.txt
+data/accessibility/aria/aria-multiselectable-aria-labelledby.html
 data/accessibility/aria/aria-multiselectable-expected-android-assist-data.txt
 data/accessibility/aria/aria-multiselectable-expected-android-external.txt
 data/accessibility/aria/aria-multiselectable-expected-android.txt
@@ -2468,7 +2475,6 @@ data/accessibility/event/caret-browsing-enabled-expected-uia-win.txt
 data/accessibility/event/caret-browsing-enabled-expected-win.txt
 data/accessibility/event/caret-browsing-enabled.html
 data/accessibility/event/caret-hide-expected-android.txt
-data/accessibility/event/caret-hide-expected-win.txt
 data/accessibility/event/caret-hide.html
 data/accessibility/event/caret-move-expected-android.txt
 data/accessibility/event/caret-move-expected-win.txt

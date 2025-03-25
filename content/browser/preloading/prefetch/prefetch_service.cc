@@ -216,17 +216,31 @@ bool CheckAndSetPrefetchHoldbackStatus(
   }();
 
   // Normally PreloadingAttemptImpl::ShouldHoldback() eventually computes its
-  // `holdback_status_`, but we forcely set the status in two special cases
+  // `holdback_status_`, but we forcely set the status in some special cases
   // below, by calling PreloadingAttemptImpl::SetHoldbackStatus().
   // As its comment describes, this is expected to be called only once.
+  //
+  // Note that, alternatively, determining holdback status can be done in
+  // triggers, e.g. in `PreloadingAttemptImpl::ctor()`. For more details, see
+  // https://crbug.com/406123867
 
   if (devtools_client_exist) {
     // 1. When developers debug Speculation Rules Prefetch using DevTools,
     // always set status to kAllowed for developer experience.
     prefetch_container->preloading_attempt()->SetHoldbackStatus(
         PreloadingHoldbackStatus::kAllowed);
+  } else if (prefetch_container->IsLikelyAheadOfPrerender()) {
+    // 2. If PrefetchContainer is likely ahead of prerender, always set status
+    // to kAllowed as it is likely used for prerender.
+    //
+    // Note that we don't use `PrefetchContainer::overridden_holdback_status_`
+    // for this purpose because it can't handle a prefetch that was not ahead of
+    // prerender but another ahead of prerender one is migrated into it. We need
+    // to update migration if we'd like to do it.
+    prefetch_container->preloading_attempt()->SetHoldbackStatus(
+        PreloadingHoldbackStatus::kAllowed);
   } else if (prefetch_container->HasOverriddenHoldbackStatus()) {
-    // 2. If PrefetchContainer has custom overridden status, set that value.
+    // 3. If PrefetchContainer has custom overridden status, set that value.
     prefetch_container->preloading_attempt()->SetHoldbackStatus(
         prefetch_container->GetOverriddenHoldbackStatus());
   }
@@ -548,6 +562,7 @@ bool PrefetchService::IsPrefetchAttemptFailedOrDiscardedInternal(
         kPrefetchIneligibleSameSiteCrossOriginPrefetchRequiredProxy:
     case PrefetchStatus::kPrefetchEvictedAfterCandidateRemoved:
     case PrefetchStatus::kPrefetchEvictedForNewerPrefetch:
+    case PrefetchStatus::kPrefetchEvictedAfterBrowsingDataRemoved:
       return true;
   }
 }
@@ -785,13 +800,11 @@ void PrefetchService::CheckHasServiceWorker(
         NOTREACHED();
 
       case PrefetchServiceWorkerState::kControlled:
-        // Currently we disallow redirects for ServiceWorker-controlled
+        // Currently we disallow redirects from ServiceWorker-controlled
         // prefetches.
-        // TODO(https://crbug.com/40947546): Supply an appropriate eligibility
-        // value if needed.
         OnGotEligibility(std::move(prefetch_container),
                          std::move(redirect_data),
-                         PreloadingEligibility::kUserHasServiceWorker);
+                         PreloadingEligibility::kRedirectFromServiceWorker);
         return;
     }
   } else {
@@ -970,14 +983,26 @@ void PrefetchService::OnGotCookiesForEligibilityCheck(
     // The cookie eligibility check just happened, and we might proceed anyway.
     // We might therefore need to delay further processing to the extent
     // required to obscure the outcome of this check from the current site.
-    // TODO(crbug.com/40946257): Currently browser-initiated prefetch will
-    // always be marked as cross-site contaminated since there is no initiator
-    // rfh. Revisit and add proper handlings.
     auto* initiator_rfh = RenderFrameHost::FromID(
         prefetch_container->GetReferringRenderFrameHostId());
-    const bool is_contamination_exempt =
-        delegate_ && initiator_rfh &&
-        delegate_->IsContaminationExempt(initiator_rfh->GetLastCommittedURL());
+    const bool is_contamination_exempt = [&] {
+      if (!prefetch_container->IsRendererInitiated()) {
+        // When browser-initiated prefetches, we can calculates prefetch's
+        // contamination exemption from the referring origin. Currently CCT
+        // prefetch is only the case hitting this, so the callee will check
+        // whether it is behind the feature flag tentatively.
+        // TODO(crbug.com/40946257): Migrate to use this in all cases.
+        return delegate_ &&
+               prefetch_container->GetReferringOrigin().has_value() &&
+               delegate_->IsContaminationExemptPerOrigin(
+                   prefetch_container->GetReferringOrigin().value());
+      } else {
+        return delegate_ && initiator_rfh &&
+               delegate_->IsContaminationExempt(
+                   initiator_rfh->GetLastCommittedURL());
+      }
+    }();
+
     if (!is_contamination_exempt) {
       prefetch_container->MarkCrossSiteContaminated();
     }
@@ -1860,6 +1885,30 @@ void PrefetchService::RecordExistingPrefetchWithMatchingURL(
         "PrefetchProxy.Prefetch."
         "NumExistingPrefetchWithMatchingURLAndRenderFrameHost",
         num_matching_prefetch_same_rfh);
+  }
+}
+
+void PrefetchService::EvictPrefetchesForBrowsingDataRemoval(
+    const StoragePartition::StorageKeyMatcherFunction& storage_key_filter,
+    PrefetchStatus status) {
+  // TODO(crbug.com/40262310): Handle for prefetches from non-SpeculationRules
+  std::vector<base::WeakPtr<PrefetchContainer>> prefetches_to_reset;
+  for (const auto& prefetch_iter : owned_prefetches_) {
+    base::WeakPtr<PrefetchContainer> prefetch_container =
+        prefetch_iter.second->GetWeakPtr();
+    CHECK(prefetch_container);
+    std::optional<url::Origin> referring_origin =
+        prefetch_container->GetReferringOrigin();
+    if (referring_origin.has_value() &&
+        storage_key_filter.Run(
+            blink::StorageKey::CreateFirstParty(referring_origin.value()))) {
+      prefetch_container->SetPrefetchStatus(status);
+      prefetches_to_reset.push_back(prefetch_container);
+    }
+  }
+
+  for (const auto& prefetch_container : prefetches_to_reset) {
+    ResetPrefetchContainer(prefetch_container);
   }
 }
 

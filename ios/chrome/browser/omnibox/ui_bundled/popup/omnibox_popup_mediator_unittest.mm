@@ -14,6 +14,7 @@
 #import "components/feature_engagement/test/mock_tracker.h"
 #import "components/image_fetcher/core/image_data_fetcher.h"
 #import "components/omnibox/browser/actions/omnibox_action_in_suggest.h"
+#import "components/omnibox/browser/actions/omnibox_pedal_concepts.h"
 #import "components/omnibox/browser/autocomplete_controller.h"
 #import "components/omnibox/browser/autocomplete_match.h"
 #import "components/omnibox/browser/autocomplete_match_test_util.h"
@@ -26,13 +27,13 @@
 #import "components/search_engines/template_url_service.h"
 #import "components/search_engines/template_url_service_client.h"
 #import "ios/chrome/browser/omnibox/model/autocomplete_result_wrapper.h"
-#import "ios/chrome/browser/omnibox/model/omnibox_popup_controller.h"
 #import "ios/chrome/browser/omnibox/ui_bundled/popup/autocomplete_match_formatter.h"
 #import "ios/chrome/browser/omnibox/ui_bundled/popup/autocomplete_result_consumer.h"
 #import "ios/chrome/browser/omnibox/ui_bundled/popup/autocomplete_suggestion.h"
 #import "ios/chrome/browser/omnibox/ui_bundled/popup/autocomplete_suggestion_group_impl.h"
 #import "ios/chrome/browser/omnibox/ui_bundled/popup/favicon_retriever.h"
 #import "ios/chrome/browser/omnibox/ui_bundled/popup/image_retriever.h"
+#import "ios/chrome/browser/omnibox/ui_bundled/popup/omnibox_pedal.h"
 #import "ios/chrome/browser/omnibox/ui_bundled/popup/omnibox_popup_mediator+Testing.h"
 #import "ios/chrome/browser/omnibox/ui_bundled/popup/pedal_suggestion_wrapper.h"
 #import "ios/chrome/browser/omnibox/ui_bundled/popup/popup_swift.h"
@@ -48,6 +49,29 @@
 #import "third_party/ocmock/gtest_support.h"
 #import "ui/base/window_open_disposition.h"
 #import "url/gurl.h"
+
+// Fake pedal used for testing.
+@interface FakePedal : NSObject <OmniboxPedal, OmniboxIcon>
+
+@end
+
+@implementation FakePedal
+
+@synthesize title = _title;
+@synthesize subtitle = _subtitle;
+@synthesize action = _action;
+@synthesize iconType = _iconType;
+@synthesize imageURL = _imageURL;
+@synthesize iconImage = _iconImage;
+@synthesize iconImageTintColor = _iconImageTintColor;
+@synthesize backgroundImageTintColor = _backgroundImageTintColor;
+@synthesize borderColor = _borderColor;
+
+- (NSInteger)type {
+  return (NSInteger)OmniboxPedalId::CLEAR_BROWSING_DATA;
+}
+
+@end
 
 namespace {
 
@@ -68,6 +92,14 @@ id<AutocompleteSuggestion> SuggestionWithReviewsAction() {
   }
 
   suggestion.actionsInSuggest = actions;
+
+  return suggestion;
+}
+
+PedalSuggestionWrapper* SuggestionWithClearBrowsingPedal() {
+  FakePedal* pedal = [[FakePedal alloc] init];
+  PedalSuggestionWrapper* suggestion =
+      [[PedalSuggestionWrapper alloc] initWithPedal:pedal];
 
   return suggestion;
 }
@@ -176,7 +208,8 @@ TEST_F(OmniboxPopupMediatorTest, ActionInSuggestMetricLogged) {
   NSArray<id<AutocompleteSuggestionGroup>>* groups =
       [[NSArray alloc] initWithObjects:group, nil];
 
-  [mediator_ popupController:nil didUpdateSuggestionsGroups:groups];
+  [mediator_ omniboxAutocompleteController:nil
+                didUpdateSuggestionsGroups:groups];
 
   id<AutocompleteSuggestion> actionSuggestion =
       mediator_.suggestionGroups[0].suggestions[0];
@@ -211,6 +244,37 @@ TEST_F(OmniboxPopupMediatorTest, ActionInSuggestMetricLogged) {
   // Expect Shown logged.
   histogram_tester.ExpectBucketCount("Omnibox.ActionInSuggest.Shown",
                                      kActionTypeReview, 1);
+}
+
+// Tests pedals shown logged.
+TEST_F(OmniboxPopupMediatorTest, PedalMetricLogged) {
+  id<AutocompleteSuggestion> match1 = SuggestionWithClearBrowsingPedal();
+  id<AutocompleteSuggestion> match2 = [[AutocompleteMatchFormatter alloc]
+      initWithMatch:CreateSearchMatch(u"search 1")];
+
+  id<AutocompleteSuggestionGroup> pedalgroup = [AutocompleteSuggestionGroupImpl
+      groupWithTitle:@""
+         suggestions:[[NSArray alloc] initWithObjects:match1, nil]
+                type:SuggestionGroupType::kPedalSuggestionGroup];
+
+  id<AutocompleteSuggestionGroup> nonPedalgroup =
+      [AutocompleteSuggestionGroupImpl
+          groupWithTitle:@""
+             suggestions:[[NSArray alloc] initWithObjects:match2, nil]
+                    type:SuggestionGroupType::kUnspecifiedSuggestionGroup];
+
+  NSArray<id<AutocompleteSuggestionGroup>>* groups =
+      [[NSArray alloc] initWithObjects:pedalgroup, nonPedalgroup, nil];
+
+  [mediator_ omniboxAutocompleteController:nil
+                didUpdateSuggestionsGroups:groups];
+
+  base::HistogramTester histogram_tester;
+
+  // Select a suggestion.
+  [mediator_ autocompleteResultConsumer:nil didSelectSuggestion:match2 inRow:1];
+
+  histogram_tester.ExpectUniqueSample("Omnibox.PedalShown", 1, 1);
 }
 
 }  // namespace

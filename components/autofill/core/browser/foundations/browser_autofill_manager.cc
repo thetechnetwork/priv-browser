@@ -21,6 +21,7 @@
 #include <tuple>
 #include <unordered_map>
 #include <utility>
+#include <variant>
 #include <vector>
 
 #include "autofill_client.h"
@@ -109,6 +110,7 @@
 #include "components/autofill/core/browser/payments/amount_extraction_manager.h"
 #include "components/autofill/core/browser/payments/autofill_offer_manager.h"
 #include "components/autofill/core/browser/payments/bnpl_manager.h"
+#include "components/autofill/core/browser/payments/constants.h"
 #include "components/autofill/core/browser/payments/credit_card_access_manager.h"
 #include "components/autofill/core/browser/permissions/autofill_ai/autofill_ai_permission_utils.h"
 #include "components/autofill/core/browser/single_field_fillers/autocomplete/autocomplete_history_manager.h"
@@ -138,10 +140,12 @@
 #include "components/autofill/core/common/form_data.h"
 #include "components/autofill/core/common/form_data_predictions.h"
 #include "components/autofill/core/common/form_field_data.h"
+#include "components/autofill/core/common/logging/log_macros.h"
 #include "components/autofill/core/common/mojom/autofill_types.mojom-shared.h"
 #include "components/autofill/core/common/password_form_fill_data.h"
 #include "components/autofill/core/common/signatures.h"
 #include "components/autofill/core/common/unique_ids.h"
+#include "components/optimization_guide/proto/features/model_prototyping.pb.h"
 #include "components/pref_registry/pref_registry_syncable.h"
 #include "components/prefs/pref_service.h"
 #include "components/security_interstitials/core/pref_names.h"
@@ -150,7 +154,6 @@
 #include "components/signin/public/identity_manager/identity_manager.h"
 #include "components/strings/grit/components_strings.h"
 #include "services/network/public/cpp/shared_url_loader_factory.h"
-#include "third_party/abseil-cpp/absl/types/variant.h"
 #include "ui/base/l10n/l10n_util.h"
 #include "ui/base/resource/resource_bundle.h"
 #include "ui/gfx/geometry/rect.h"
@@ -168,7 +171,7 @@ namespace {
 
 FillDataType GetFillDataTypeFromFillingPayload(
     const FillingPayload& filling_payload) {
-  return absl::visit(
+  return std::visit(
       base::Overloaded{
           [](const AutofillProfile*) { return FillDataType::kAutofillProfile; },
           [](const CreditCard*) { return FillDataType::kCreditCard; },
@@ -220,6 +223,7 @@ bool IsSingleFieldFillerFillingProduct(FillingProduct filling_product) {
     case FillingProduct::kAutocomplete:
     case FillingProduct::kIban:
     case FillingProduct::kMerchantPromoCode:
+    case FillingProduct::kLoyaltyCard:
       return true;
     case FillingProduct::kPlusAddresses:
     case FillingProduct::kAutofillAi:
@@ -240,6 +244,8 @@ FillDataType GetEventTypeFromSingleFieldSuggestionType(SuggestionType type) {
       return FillDataType::kSingleFieldFillerPromoCode;
     case SuggestionType::kIbanEntry:
       return FillDataType::kSingleFieldFillerIban;
+    case SuggestionType::kLoyaltyCardEntry:
+      return FillDataType::kSingleFieldFillerLoyaltyCard;
     case SuggestionType::kAccountStoragePasswordEntry:
     case SuggestionType::kAddressEntry:
     case SuggestionType::kAddressEntryOnTyping:
@@ -248,6 +254,7 @@ FillDataType GetEventTypeFromSingleFieldSuggestionType(SuggestionType type) {
     case SuggestionType::kManageAutofillAi:
     case SuggestionType::kManageCreditCard:
     case SuggestionType::kManageIban:
+    case SuggestionType::kManageLoyaltyCard:
     case SuggestionType::kManagePlusAddress:
     case SuggestionType::kUndoOrClear:
     case SuggestionType::kComposeResumeNudge:
@@ -278,12 +285,14 @@ FillDataType GetEventTypeFromSingleFieldSuggestionType(SuggestionType type) {
     case SuggestionType::kSaveAndFillCreditCardEntry:
     case SuggestionType::kShowAccountCards:
     case SuggestionType::kVirtualCreditCardEntry:
+    case SuggestionType::kIdentityCredential:
     case SuggestionType::kWebauthnCredential:
     case SuggestionType::kWebauthnSignInWithAnotherDevice:
     case SuggestionType::kDevtoolsTestAddresses:
     case SuggestionType::kDevtoolsTestAddressByCountry:
     case SuggestionType::kDevtoolsTestAddressEntry:
     case SuggestionType::kFillAutofillAi:
+    case SuggestionType::kPendingStateSignin:
       NOTREACHED();
   }
   NOTREACHED();
@@ -555,7 +564,7 @@ bool WasEmailOverrideAppliedOnSuggestions(
   return std::ranges::any_of(
       address_suggestions, [](const Suggestion& suggestion) {
         const Suggestion::AutofillProfilePayload* profile_payload =
-            absl::get_if<Suggestion::AutofillProfilePayload>(
+            std::get_if<Suggestion::AutofillProfilePayload>(
                 &suggestion.payload);
         return profile_payload && !profile_payload->email_override.empty();
       });
@@ -1451,23 +1460,25 @@ void BrowserAutofillManager::OnGenerateSuggestionsComplete(
   // and whether the suggestion is shown.
   FormStructure* form_structure = nullptr;
   AutofillField* autofill_field = nullptr;
+  bool form_and_field_cached = GetCachedFormAndField(
+      form.global_id(), field.global_id(), &form_structure, &autofill_field);
   if (trigger_source ==
           AutofillSuggestionTriggerSource::kFormControlElementClicked &&
-      GetCachedFormAndField(form.global_id(), field.global_id(),
-                            &form_structure, &autofill_field)) {
+      form_and_field_cached) {
     autofill_field->AppendLogEventIfNotRepeated(AskForValuesToFillFieldLogEvent{
         .has_suggestion = ToOptionalBoolean(!suggestions.empty()),
         .suggestion_is_shown = ToOptionalBoolean(show_suggestions),
     });
   }
 
-  // When user clicks on the credit card form on the merchant checkout pages,
-  // `this` checks `amount_extraction_manager_` if amount extraction should
-  // happen, and if so, triggers amount extraction.
-  if (amount_extraction_manager_->ShouldTriggerAmountExtraction(
+  // When a user interacts with the credit card form on the merchant checkout
+  // pages, `this` checks `amount_extraction_manager_` if amount extraction
+  // should happen, and if so, triggers amount extraction.
+  if (autofill_field &&
+      amount_extraction_manager_->ShouldTriggerAmountExtraction(
           context,
           ShouldSuppressSuggestions(context.suppress_reason, log_manager()),
-          !suggestions.empty())) {
+          !suggestions.empty(), autofill_field->Type().GetStorableType())) {
     if (payments::BnplManager* bnpl_manager =
             client().GetPaymentsAutofillClient()->GetPaymentsBnplManager()) {
       bnpl_manager->NotifyOfSuggestionGeneration(trigger_source);
@@ -1934,7 +1945,7 @@ void BrowserAutofillManager::DidShowSuggestions(
         continue;
       }
       const Suggestion::AutofillProfilePayload& profile_used_payload =
-          absl::get<Suggestion::AutofillProfilePayload>(suggestion.payload);
+          std::get<Suggestion::AutofillProfilePayload>(suggestion.payload);
       const AutofillProfile* profile_used =
           client()
               .GetPersonalDataManager()
@@ -2028,12 +2039,9 @@ void BrowserAutofillManager::OnSelectFieldOptionsDidChangeImpl(
       base::span_from_ref<raw_ptr<FormStructure, VectorExperimental>>(
           form_structure));
 
-  if (form_filler_->ShouldTriggerRefill(
-          *form_structure, RefillTriggerReason::kSelectOptionsChanged)) {
-    form_filler_->TriggerRefill(form,
-                                AutofillTriggerSource::kSelectOptionsChanged,
-                                RefillTriggerReason::kSelectOptionsChanged);
-  }
+  form_filler_->MaybeTriggerRefill(
+      form, *form_structure, RefillTriggerReason::kSelectOptionsChanged,
+      AutofillTriggerSource::kSelectOptionsChanged);
 }
 
 void BrowserAutofillManager::OnJavaScriptChangedAutofilledValueImpl(
@@ -2085,9 +2093,10 @@ void BrowserAutofillManager::OnJavaScriptChangedAutofilledValueImpl(
   }
   AnalyzeJavaScriptChangedAutofilledValue(*form_structure, *autofill_field,
                                           field.value().empty());
-  form_filler_->MaybeTriggerRefillForExpirationDate(
-      form, field, *form_structure, old_value,
-      AutofillTriggerSource::kJavaScriptChangedAutofilledValue);
+  form_filler_->MaybeTriggerRefill(
+      form, *form_structure, RefillTriggerReason::kExpirationDateFormatted,
+      AutofillTriggerSource::kJavaScriptChangedAutofilledValue, field,
+      old_value);
 }
 
 void BrowserAutofillManager::OnLoadedServerPredictionsImpl(
@@ -2127,9 +2136,20 @@ void BrowserAutofillManager::OnLoadedServerPredictionsImpl(
       return;
     }
 
-    LOG_AF(log_manager()) << LoggingScope::kAutofillAi
-                          << "Requesting model run for form." << Br{} << *form;
-    model_executor->GetPredictions(form->ToFormData());
+    if (features::kAutofillAiServerModelSendPageContent.Get()) {
+      LOG_AF(log_manager())
+          << LoggingScope::kAutofillAi
+          << "Requesting page page content for model run for form." << Br{}
+          << *form;
+      client().GetAiPageContent(
+          base::BindOnce(&AutofillAiModelExecutor::GetPredictions,
+                         model_executor->GetWeakPtr(), form->ToFormData()));
+    } else {
+      LOG_AF(log_manager())
+          << LoggingScope::kAutofillAi << "Requesting model run for form."
+          << Br{} << *form;
+      model_executor->GetPredictions(form->ToFormData(), {});
+    }
   }
 }
 
@@ -2266,7 +2286,7 @@ void BrowserAutofillManager::OnDidFillOrPreviewForm(
                       safe_field_ids, skip_reasons, filling_payload, is_refill);
   client().DidFillForm(trigger_source, is_refill);
 
-  absl::visit(
+  std::visit(
       base::Overloaded{[&](const AutofillProfile* profile) {
                          LogAndRecordProfileFill(
                              form_structure, trigger_autofill_field,
@@ -2303,7 +2323,7 @@ void BrowserAutofillManager::AppendFillLogEvents(
     bool is_refill) {
   std::string country_code;
   if (const AutofillProfile* const* address =
-          absl::get_if<const AutofillProfile*>(&filling_payload)) {
+          std::get_if<const AutofillProfile*>(&filling_payload)) {
     country_code =
         base::UTF16ToUTF8((*address)->GetRawInfo(ADDRESS_HOME_COUNTRY));
   }
@@ -2530,11 +2550,6 @@ AutofillField* BrowserAutofillManager::GetAutofillField(
                              &autofill_field)) {
     return nullptr;
   }
-
-  if (!form_structure->IsAutofillable()) {
-    return nullptr;
-  }
-
   return autofill_field;
 }
 
@@ -2749,14 +2764,11 @@ void BrowserAutofillManager::OnFormProcessed(
   }
 
   // If a form with the same FormGlobalId was previously filled, the structure
-  // of the form changed, and there has not been a refill attempt on that form
-  // yet, start the process of triggering a refill.
-  if (form_filler_->ShouldTriggerRefill(form_structure,
-                                        RefillTriggerReason::kFormChanged)) {
-    form_filler_->ScheduleRefill(form, form_structure,
-                                 AutofillTriggerSource::kFormsSeen,
-                                 RefillTriggerReason::kFormChanged);
-  }
+  // of the form changed, and we might be able to refill the form with other
+  // information.
+  form_filler_->MaybeTriggerRefill(form, form_structure,
+                                   RefillTriggerReason::kFormChanged,
+                                   AutofillTriggerSource::kFormsSeen);
 }
 
 void BrowserAutofillManager::UpdateInitialInteractionTimestamp(
@@ -2893,6 +2905,17 @@ BrowserAutofillManager::GetAvailableAddressAndCreditCardSuggestions(
   if (EvaluateAblationStudy(suggestions, CHECK_DEREF(autofill_field),
                             context)) {
     return {};
+  }
+
+  // TODO(crbug.com/380367784): Figure out how verified identity attributes
+  // (e.g. email addresses) rank compared to other sources.
+  if (const IdentityCredentialDelegate* identity_credential_delegate =
+          client().GetIdentityCredentialDelegate()) {
+    std::vector<Suggestion> verified_profiles =
+        identity_credential_delegate->GetVerifiedAutofillSuggestions(
+            *autofill_field);
+    suggestions.insert(suggestions.end(), verified_profiles.begin(),
+                       verified_profiles.end());
   }
 
   if (suggestions.empty() ||
@@ -3038,30 +3061,30 @@ void BrowserAutofillManager::LogEventCountsUMAMetric(
   for (const auto& autofill_field : form_structure) {
     for (const auto& log_event : autofill_field->field_log_events()) {
       static_assert(
-          absl::variant_size<AutofillField::FieldLogEventType>() == 10,
+          std::variant_size<AutofillField::FieldLogEventType>() == 10,
           "When adding new variants check that this function does not "
           "need to be updated.");
-      if (absl::holds_alternative<AskForValuesToFillFieldLogEvent>(log_event)) {
+      if (std::holds_alternative<AskForValuesToFillFieldLogEvent>(log_event)) {
         ++num_ask_for_values_to_fill_event;
-      } else if (absl::holds_alternative<TriggerFillFieldLogEvent>(log_event)) {
+      } else if (std::holds_alternative<TriggerFillFieldLogEvent>(log_event)) {
         ++num_trigger_fill_event;
-      } else if (absl::holds_alternative<FillFieldLogEvent>(log_event)) {
+      } else if (std::holds_alternative<FillFieldLogEvent>(log_event)) {
         ++num_fill_event;
-      } else if (absl::holds_alternative<TypingFieldLogEvent>(log_event)) {
+      } else if (std::holds_alternative<TypingFieldLogEvent>(log_event)) {
         ++num_typing_event;
-      } else if (absl::holds_alternative<HeuristicPredictionFieldLogEvent>(
+      } else if (std::holds_alternative<HeuristicPredictionFieldLogEvent>(
                      log_event)) {
         ++num_heuristic_prediction_event;
-      } else if (absl::holds_alternative<AutocompleteAttributeFieldLogEvent>(
+      } else if (std::holds_alternative<AutocompleteAttributeFieldLogEvent>(
                      log_event)) {
         ++num_autocomplete_attribute_event;
-      } else if (absl::holds_alternative<ServerPredictionFieldLogEvent>(
+      } else if (std::holds_alternative<ServerPredictionFieldLogEvent>(
                      log_event)) {
         ++num_server_prediction_event;
-      } else if (absl::holds_alternative<RationalizationFieldLogEvent>(
+      } else if (std::holds_alternative<RationalizationFieldLogEvent>(
                      log_event)) {
         ++num_rationalization_event;
-      } else if (absl::holds_alternative<AblationFieldLogEvent>(log_event)) {
+      } else if (std::holds_alternative<AblationFieldLogEvent>(log_event)) {
         ++num_ablation_event;
       } else {
         NOTREACHED();

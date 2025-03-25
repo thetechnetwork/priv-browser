@@ -113,7 +113,7 @@ chromium-metrics-reviews@google.com.
 </histogram>
 
 <histogram name="Windows.HasHighResolutionTimeTicks" enum="Boolean"
-    expires_after="2025-07-13">
+    expires_after="2025-09-14">
   <owner>brucedawson@chromium.org</owner>
   <owner>gab@chromium.org</owner>
   <summary>
@@ -182,7 +182,7 @@ chromium-metrics-reviews@google.com.
 </histogram>
 
 <histogram name="Windows.LegacyDisplayIdAlgorithm" enum="UsedDisplayIdFallback"
-    expires_after="2025-07-13">
+    expires_after="2025-09-14">
   <owner>btriebw@google.com</owner>
   <owner>msw@google.com</owner>
   <summary>
@@ -218,6 +218,8 @@ chromium-metrics-reviews@google.com.
   <token key="SyncedState">
     <variant name="DesktopSynced"
         summary="Desktop file path is synced with cloud provided."/>
+    <variant name="DocumentsSynced"
+        summary="Documents file path is synced with cloud provided."/>
     <variant name="Synced"
         summary="File path storage is synced with cloud provided."/>
   </token>

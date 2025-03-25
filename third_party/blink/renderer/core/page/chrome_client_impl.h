@@ -149,7 +149,9 @@ class CORE_EXPORT ChromeClientImpl final : public ChromeClient {
                                     String& result) override;
   bool TabsToLinks() override;
   void InvalidateContainer() override;
-  void ScheduleAnimation(const LocalFrameView*, base::TimeDelta delay) override;
+  void ScheduleAnimation(const LocalFrameView*,
+                         base::TimeDelta delay,
+                         bool urgent) override;
   gfx::Rect LocalRootToScreenDIPs(const gfx::Rect&,
                                   const LocalFrameView*) const override;
   float WindowToViewportScalar(LocalFrame*, const float) const override;
@@ -328,12 +330,6 @@ class CORE_EXPORT ChromeClientImpl final : public ChromeClient {
   // Returns WebAutofillClient associated with the WebLocalFrame. This takes and
   // returns nullable.
   WebAutofillClient* AutofillClientFromFrame(LocalFrame*);
-
-  // Returns a copy of `pending_rect`, adjusted for the given minimum window
-  // size. Defaulting to `blink::kMinimumWindowSize`.
-  gfx::Rect AdjustWindowRectForMinimum(
-      const gfx::Rect& pending_rect,
-      int minimum_size = blink::kMinimumWindowSize);
 
   // Returns a copy of |pending_rect|, adjusted for available screen area
   // constraints. This is used to synchronously estimate, or preemptively apply,

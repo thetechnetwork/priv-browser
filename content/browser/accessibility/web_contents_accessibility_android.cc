@@ -586,7 +586,7 @@ void WebContentsAccessibilityAndroid::DisableRendererAccessibility(
   // Turn off accessibility on the renderer side by resetting the AXMode.
   BrowserAccessibilityStateImpl* accessibility_state =
       BrowserAccessibilityStateImpl::GetInstance();
-  accessibility_state->ResetAccessibilityMode();
+  accessibility_state->DisableProcessAccessibility();
 }
 
 void WebContentsAccessibilityAndroid::ReEnableRendererAccessibility(
@@ -1144,7 +1144,8 @@ jboolean WebContentsAccessibilityAndroid::PopulateAccessibilityNodeInfo(
       node->CanScrollLeft(), node->CanScrollRight(), node->IsClickable(),
       node->IsTextField(), node->IsEnabled(), node->IsFocusable(),
       node->IsFocused(), node->IsCollapsed(), node->IsExpanded(),
-      node->HasNonEmptyValue(), !!node->GetTextContentLengthUTF16(),
+      node->HasNonEmptyValue(),
+      !!node->GetTextContentLengthUTF16() || !node->GetContainerTitle().empty(),
       node->IsSeekControl(), node->IsFormDescendant());
 
   Java_AccessibilityNodeInfoBuilder_setAccessibilityNodeInfoBaseAttributes(
@@ -1194,12 +1195,11 @@ jboolean WebContentsAccessibilityAndroid::PopulateAccessibilityNodeInfo(
         suggestion_starts_java, suggestion_ends_java, suggestion_text_java,
         base::android::ConvertUTF16ToJavaString(env,
                                                 node->GetStateDescription()),
+        base::android::ConvertUTF16ToJavaString(env, node->GetContainerTitle()),
         node->GetTextSize(), node->GetTextStyle(), node->GetTextColor(),
         node->GetTextBackgroundColor(),
         GetCanonicalJNIString(env, node->GetFontFamily()), node->IsSubscript(),
-        node->IsSuperscript()
-
-    );
+        node->IsSuperscript());
   } else {
     Java_AccessibilityNodeInfoBuilder_setAccessibilityNodeInfoText(
         env, obj, info,
@@ -1213,7 +1213,9 @@ jboolean WebContentsAccessibilityAndroid::PopulateAccessibilityNodeInfo(
                                        ax::mojom::StringAttribute::kLanguage)),
         suggestion_starts_java, suggestion_ends_java, suggestion_text_java,
         base::android::ConvertUTF16ToJavaString(env,
-                                                node->GetStateDescription()));
+                                                node->GetStateDescription()),
+        base::android::ConvertUTF16ToJavaString(env,
+                                                node->GetContainerTitle()));
   }
 
   std::u16string element_id;
@@ -2197,7 +2199,7 @@ void JNI_WebContentsAccessibilityImpl_SetBrowserAXMode(
   // Always update state if a known screen reader is running.
   auto* accessibility_state_android =
       static_cast<BrowserAccessibilityStateImplAndroid*>(accessibility_state);
-  accessibility_state_android->SetKnownScreenReaderAppActive(
+  accessibility_state_android->SetScreenReaderAppActive(
       is_known_screen_reader_running);
 
   // The AXMode flags will be set according to requirements of the current
@@ -2207,7 +2209,7 @@ void JNI_WebContentsAccessibilityImpl_SetBrowserAXMode(
     // When the browser is not yet accessible, then set the AXMode to
     // |ui::kAXModeComplete| for all web contents.
     if (!accessibility_state->IsAccessibleBrowser()) {
-      accessibility_state->OnScreenReaderDetected();
+      accessibility_state->EnableProcessAccessibility();
     }
     return;
   }

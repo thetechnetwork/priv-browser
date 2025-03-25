@@ -5,10 +5,12 @@
 #include "base/json/json_reader.h"
 #include "base/test/mock_callback.h"
 #include "chrome/browser/ui/autofill/payments/payments_view_factory.h"
+#include "chrome/browser/ui/views/autofill/payments/bnpl_tos_dialog.h"
 #include "chrome/browser/ui/views/autofill/payments/bnpl_tos_view_desktop.h"
 #include "chrome/test/base/interactive_test_utils.h"
 #include "chrome/test/interaction/interactive_browser_test.h"
 #include "components/autofill/core/browser/data_model/payments/bnpl_issuer.h"
+#include "components/autofill/core/browser/foundations/test_autofill_client.h"
 #include "components/autofill/core/browser/payments/constants.h"
 #include "components/autofill/core/browser/ui/payments/bnpl_tos_controller_impl.h"
 #include "components/signin/public/identity_manager/account_info.h"
@@ -35,7 +37,16 @@ class BnplTosViewDesktopInteractiveUiTest : public InteractiveBrowserTest {
 
   void SetUpOnMainThread() override {
     InteractiveBrowserTest::SetUpOnMainThread();
-    controller_ = std::make_unique<BnplTosControllerImpl>();
+    test_autofill_client_ = std::make_unique<TestAutofillClient>();
+    static_cast<TestPaymentsDataManager&>(
+        test_autofill_client_->GetPaymentsAutofillClient()
+            ->GetPaymentsDataManager())
+        .SetAccountInfoForPayments(
+            test_autofill_client_->identity_test_environment()
+                .MakePrimaryAccountAvailable("somebody@example.test",
+                                             signin::ConsentLevel::kSignin));
+    controller_ =
+        std::make_unique<BnplTosControllerImpl>(test_autofill_client_.get());
   }
 
   void TearDownOnMainThread() override {
@@ -50,7 +61,6 @@ class BnplTosViewDesktopInteractiveUiTest : public InteractiveBrowserTest {
             BrowserView::GetBrowserViewForBrowser(browser())->GetWidget()),
         Do([this]() {
           BnplTosModel model;
-          model.account_info.email = "somebody@example.test";
           model.issuer = BnplIssuer(
               /*instrument_id=*/std::nullopt, std::string(kBnplAffirmIssuerId),
               std::vector<BnplIssuer::EligiblePriceRange>{});
@@ -75,6 +85,7 @@ class BnplTosViewDesktopInteractiveUiTest : public InteractiveBrowserTest {
     return browser()->tab_strip_model()->GetActiveWebContents();
   }
 
+  std::unique_ptr<TestAutofillClient> test_autofill_client_;
   std::unique_ptr<BnplTosControllerImpl> controller_;
 
   base::MockOnceClosure accept_callback_;
@@ -96,7 +107,17 @@ IN_PROC_BROWSER_TEST_F(BnplTosViewDesktopInteractiveUiTest, DialogAccepted) {
   RunTestSequence(
       InvokeUiAndWaitForShow(),
       InAnyContext(PressButton(views::DialogClientView::kOkButtonElementId),
-                   WaitForHide(views::DialogClientView::kTopViewId)));
+                   WaitForShow(BnplTosDialog::kThrobberId)));
+}
+
+IN_PROC_BROWSER_TEST_F(BnplTosViewDesktopInteractiveUiTest,
+                       DialogAcceptedTwice) {
+  EXPECT_CALL(accept_callback_, Run);
+  RunTestSequence(
+      InvokeUiAndWaitForShow(),
+      InAnyContext(PressButton(views::DialogClientView::kOkButtonElementId),
+                   WaitForShow(BnplTosDialog::kThrobberId),
+                   PressButton(views::DialogClientView::kOkButtonElementId)));
 }
 
 IN_PROC_BROWSER_TEST_F(BnplTosViewDesktopInteractiveUiTest, DialogDeclined) {
@@ -105,6 +126,18 @@ IN_PROC_BROWSER_TEST_F(BnplTosViewDesktopInteractiveUiTest, DialogDeclined) {
       InvokeUiAndWaitForShow(),
       InAnyContext(PressButton(views::DialogClientView::kCancelButtonElementId),
                    WaitForHide(views::DialogClientView::kTopViewId)));
+}
+
+IN_PROC_BROWSER_TEST_F(BnplTosViewDesktopInteractiveUiTest,
+                       DialogAcceptedThenDeclined) {
+  EXPECT_CALL(accept_callback_, Run);
+  EXPECT_CALL(cancel_callback_, Run);
+  RunTestSequence(
+      InvokeUiAndWaitForShow(),
+      InAnyContext(PressButton(views::DialogClientView::kOkButtonElementId),
+                   WaitForShow(BnplTosDialog::kThrobberId)),
+      PressButton(views::DialogClientView::kCancelButtonElementId),
+      WaitForHide(views::DialogClientView::kTopViewId));
 }
 
 IN_PROC_BROWSER_TEST_F(BnplTosViewDesktopInteractiveUiTest, EscKeyPress) {

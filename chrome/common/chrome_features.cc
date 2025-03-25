@@ -323,6 +323,11 @@ BASE_FEATURE(kGlicDevelopmentSyncGoogleCookies,
 const base::FeatureParam<bool> kGlicStatusIconOpenMenuWithSecondaryClick{
     &kGlic, "open-status-icon-menu-with-secondary-click", true};
 
+// Controls whether the simplified version of the border should be used.
+BASE_FEATURE(kGlicForceSimplifiedBorder,
+             "GlicForceSimplifiedBorder",
+             base::FEATURE_DISABLED_BY_DEFAULT);
+
 const base::FeatureParam<int> kGlicPreLoadingTimeMs{
     &kGlic, "glic-pre-loading-time-ms", 200};
 
@@ -333,7 +338,7 @@ const base::FeatureParam<int> kGlicMaxLoadingTimeMs{
     &kGlic, "glic-max-loading-time-ms", 15000};
 
 const base::FeatureParam<int> kGlicInitialWidth{&kGlic, "glic-initial-width",
-                                                350};
+                                                352};
 const base::FeatureParam<int> kGlicInitialHeight{&kGlic, "glic-initial-height",
                                                  48};
 
@@ -408,23 +413,28 @@ BASE_FEATURE(kGlicDebugWebview,
 
 BASE_FEATURE(kGlicScrollTo, "GlicScrollTo", base::FEATURE_DISABLED_BY_DEFAULT);
 
-BASE_FEATURE(kGlicActInFocusedTab,
-             "GlicActInFocusedTab",
-             base::FEATURE_DISABLED_BY_DEFAULT);
-
 // Controls whether the Glic UI container can be resized by the user
 BASE_FEATURE(kGlicUserResize,
              "GlicUserResize",
              base::FEATURE_DISABLED_BY_DEFAULT);
 
+// Controls whether the web client should resize itself to fit the window.
+BASE_FEATURE(kGlicSizingFitWindow,
+             "GlicSizingFitWindow",
+             base::FEATURE_DISABLED_BY_DEFAULT);
+
 BASE_FEATURE(kGlicWarming, "GlicWarming", base::FEATURE_ENABLED_BY_DEFAULT);
+
+BASE_FEATURE(kGlicWarmMultiple,
+             "GlicWarmMultiple",
+             base::FEATURE_DISABLED_BY_DEFAULT);
 #endif  // BUILDFLAG(ENABLE_GLIC)
 
 BASE_FEATURE(kTabstripComboButton,
              "TabstripComboButton",
              base::FEATURE_DISABLED_BY_DEFAULT);
 
-bool IsTabstripComboButtonEnabled() {
+bool IsTabSearchMoving() {
   return base::FeatureList::IsEnabled(features::kTabstripComboButton);
 }
 
@@ -434,14 +444,23 @@ const base::FeatureParam<bool> kTabstripComboButtonHasBackground{
 const base::FeatureParam<bool> kTabstripComboButtonHasReverseButtonOrder{
     &kTabstripComboButton, "reverse_button_order", false};
 
+const base::FeatureParam<bool> kTabSearchToolbarButton{
+    &kTabstripComboButton, "tab_search_toolbar_button", false};
+
 bool HasTabstripComboButtonWithBackground() {
-  return IsTabstripComboButtonEnabled() &&
-         features::kTabstripComboButtonHasBackground.Get();
+  return IsTabSearchMoving() &&
+         features::kTabstripComboButtonHasBackground.Get() &&
+         !features::kTabSearchToolbarButton.Get();
 }
 
 bool HasTabstripComboButtonWithReverseButtonOrder() {
-  return IsTabstripComboButtonEnabled() &&
-         features::kTabstripComboButtonHasReverseButtonOrder.Get();
+  return IsTabSearchMoving() &&
+         features::kTabstripComboButtonHasReverseButtonOrder.Get() &&
+         !features::kTabSearchToolbarButton.Get();
+}
+
+bool HasTabSearchToolbarButton() {
+  return IsTabSearchMoving() && features::kTabSearchToolbarButton.Get();
 }
 
 // Force Privacy Guide to be available even if it would be unavailable
@@ -897,7 +916,7 @@ BASE_FEATURE(kListWebAppsSwitch,
 // extension system. Speculative fix for https://crbug.com/356643975.
 BASE_FEATURE(kMacDirectEmailShare,
              "DirectEmailShare",
-             base::FEATURE_DISABLED_BY_DEFAULT);
+             base::FEATURE_ENABLED_BY_DEFAULT);
 #endif
 
 #if BUILDFLAG(IS_CHROMEOS)
@@ -1572,11 +1591,6 @@ BASE_FEATURE(kUmaStorageDimensions,
 // Enables the accelerated default browser flow for Windows 10.
 BASE_FEATURE(kWin10AcceleratedDefaultBrowserFlow,
              "Win10AcceleratedDefaultBrowserFlow",
-             base::FEATURE_ENABLED_BY_DEFAULT);
-
-// When enabled, a UI pump is requested for the UtilWin utility process.
-BASE_FEATURE(kUtilWinProcessUsesUiPump,
-             "UtilWinProcessUsesUiPump",
              base::FEATURE_ENABLED_BY_DEFAULT);
 #endif  // BUILDFLAG(IS_WIN)
 

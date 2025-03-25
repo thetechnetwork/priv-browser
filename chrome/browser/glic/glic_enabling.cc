@@ -7,6 +7,7 @@
 #include "base/command_line.h"
 #include "chrome/browser/glic/glic_pref_names.h"
 #include "chrome/browser/profiles/profile.h"
+#include "chrome/browser/profiles/profile_attributes_storage.h"
 #include "chrome/browser/signin/identity_manager_factory.h"
 #include "chrome/common/chrome_features.h"
 #include "chrome/common/chrome_switches.h"
@@ -113,7 +114,10 @@ bool GlicEnabling::ShouldShowSettingsPage(Profile* profile) {
   return IsEnabledAndConsentForProfile(profile);
 }
 
-GlicEnabling::GlicEnabling(Profile* profile) : profile_(profile) {
+GlicEnabling::GlicEnabling(Profile* profile,
+                           ProfileAttributesStorage* profile_attributes_storage)
+    : profile_(profile),
+      profile_attributes_storage_(profile_attributes_storage) {
   pref_registrar_.Init(profile_->GetPrefs());
   pref_registrar_.Add(
       ::prefs::kGeminiSettings,
@@ -136,26 +140,49 @@ base::CallbackListSubscription GlicEnabling::RegisterAllowedChanged(
 }
 
 void GlicEnabling::OnGlicSettingsPolicyChanged() {
-  enable_changed_callback_list_.Notify();
+  UpdateEnabledStatus();
 }
 
 void GlicEnabling::OnPrimaryAccountChanged(
     const signin::PrimaryAccountChangeEvent& event_details) {
-  enable_changed_callback_list_.Notify();
+  UpdateEnabledStatus();
 }
 
 void GlicEnabling::OnExtendedAccountInfoUpdated(const AccountInfo& info) {
-  enable_changed_callback_list_.Notify();
+  UpdateEnabledStatus();
+}
+
+void GlicEnabling::OnExtendedAccountInfoRemoved(const AccountInfo& info) {
+  UpdateEnabledStatus();
 }
 
 void GlicEnabling::OnRefreshTokensLoaded() {
-  enable_changed_callback_list_.Notify();
+  UpdateEnabledStatus();
+}
+void GlicEnabling::OnRefreshTokenRemovedForAccount(
+    const CoreAccountId& account_id) {
+  UpdateEnabledStatus();
 }
 
 void GlicEnabling::OnErrorStateOfRefreshTokenUpdatedForAccount(
     const CoreAccountInfo& account_info,
     const GoogleServiceAuthError& error,
     signin_metrics::SourceForRefreshTokenOperation token_operation_source) {
+  // Check that the account info here is the same as the primary account, and
+  // ignore all events that are not about the primary account.
+  if (identity_manager_observation_.GetSource()->GetPrimaryAccountInfo(
+          signin::ConsentLevel::kSignin) != account_info) {
+    return;
+  }
+  UpdateEnabledStatus();
+}
+
+void GlicEnabling::UpdateEnabledStatus() {
+  if (ProfileAttributesEntry* entry =
+          profile_attributes_storage_->GetProfileAttributesWithPath(
+              profile_->GetPath())) {
+    entry->SetIsGlicEligible(IsAllowed());
+  }
   enable_changed_callback_list_.Notify();
 }
 

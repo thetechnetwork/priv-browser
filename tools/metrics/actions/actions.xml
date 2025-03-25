@@ -3880,7 +3880,7 @@ should be able to be added at any place in this file.
 </action>
 
 <action name="ApplicationShortcut.NewIncognitoSearchPressed">
-  <owner>pschaffner@chromium.org</owner>
+  <owner>olivierrobin@chromium.org</owner>
   <description>
     Force pressed on a springboard shortcut and tapped Incognito Search in
     Chrome for iOS.
@@ -3888,10 +3888,18 @@ should be able to be added at any place in this file.
 </action>
 
 <action name="ApplicationShortcut.NewSearchPressed">
-  <owner>pschaffner@chromium.org</owner>
+  <owner>olivierrobin@chromium.org</owner>
   <description>
     Force pressed on a springboard shortcut and tapped New Search in Chrome for
     iOS.
+  </description>
+</action>
+
+<action name="ApplicationShortcut.VoiceSearchPressed">
+  <owner>olivierrobin@chromium.org</owner>
+  <description>
+    Force pressed on a springboard shortcut and tapped Voice Search in Chrome
+    for iOS.
   </description>
 </action>
 
@@ -12207,7 +12215,8 @@ should be able to be added at any place in this file.
   <owner>iwells@google.com</owner>
   <owner>erikchen@chromium.org</owner>
   <description>
-    Logged anytime glic is disabled, regardless of source.
+    Logged anytime glic is disabled, regardless of source. Note: Glic can only
+    be disabled by account and policy changes that are not user initiated.
   </description>
 </action>
 
@@ -12215,7 +12224,11 @@ should be able to be added at any place in this file.
   <owner>iwells@google.com</owner>
   <owner>erikchen@chromium.org</owner>
   <description>
-    Logged anytime glic is enabled, regardless of source.
+    This metric is currently broken. It is logged once per profile
+    initialization if Glic is enabled for that profile. The only action a user
+    can take to enable Glic is to accept the FRE. Use Glic.Fre.Accept instead of
+    this metric. All other actions that might enable Glic are not user
+    initiated. And not likely to occur once the FRE has been accepted.
   </description>
 </action>
 
@@ -12273,11 +12286,100 @@ should be able to be added at any place in this file.
   </description>
 </action>
 
+<action name="Glic.Settings.Geolocation.Disabled">
+  <owner>tommasin@chromium.org</owner>
+  <owner>erikchen@chromium.org</owner>
+  <description>
+    Logged if the user disables geolocation in glic settings.
+  </description>
+</action>
+
+<action name="Glic.Settings.Geolocation.Enabled">
+  <owner>tommasin@chromium.org</owner>
+  <owner>erikchen@chromium.org</owner>
+  <description>
+    Logged if the user enables geolocation in glic settings.
+  </description>
+</action>
+
+<action name="Glic.Settings.Microphone.Disabled">
+  <owner>tommasin@chromium.org</owner>
+  <owner>erikchen@chromium.org</owner>
+  <description>
+    Logged if the user disables microphone in glic settings.
+  </description>
+</action>
+
+<action name="Glic.Settings.Microphone.Enabled">
+  <owner>tommasin@chromium.org</owner>
+  <owner>erikchen@chromium.org</owner>
+  <description>
+    Logged if the user enables microphone in glic settings.
+  </description>
+</action>
+
+<action name="Glic.Settings.TabContext.Disabled">
+  <owner>tommasin@chromium.org</owner>
+  <owner>erikchen@chromium.org</owner>
+  <description>
+    Logged if the user disables tab context in glic settings.
+  </description>
+</action>
+
+<action name="Glic.Settings.TabContext.Enabled">
+  <owner>tommasin@chromium.org</owner>
+  <owner>erikchen@chromium.org</owner>
+  <description>
+    Logged if the user enables tab context in glic settings.
+  </description>
+</action>
+
 <action name="Glic.Unpinned">
   <owner>charlesmeng@chromium.org</owner>
   <owner>erikchen@chromium.org</owner>
   <description>
     Logged anytime glic is unpinned from the tabstrip, regardless of source.
+  </description>
+</action>
+
+<action name="GlicLocationPermissionDisabled">
+  <owner>tommasin@chromium.org</owner>
+  <owner>erikchen@chromium.org</owner>
+  <description>
+    Tracks when glic location permission is disabled from the web client.
+  </description>
+</action>
+
+<action name="GlicLocationPermissionEnabled">
+  <owner>tommasin@chromium.org</owner>
+  <owner>erikchen@chromium.org</owner>
+  <description>
+    Tracks when glic location permission is enabled from the web client.
+  </description>
+</action>
+
+<action name="GlicMicrophonePermissionDisabled">
+  <owner>tommasin@chromium.org</owner>
+  <owner>erikchen@chromium.org</owner>
+  <description>
+    Tracks when glic microphone permission is disabled from the web client.
+  </description>
+</action>
+
+<action name="GlicMicrophonePermissionEnabled">
+  <owner>tommasin@chromium.org</owner>
+  <owner>erikchen@chromium.org</owner>
+  <description>
+    Tracks when glic microphone permission is enabled from the web client.
+  </description>
+</action>
+
+<action name="GlicOsEntrypoint.ContextMenuSelection.CloseGlic">
+  <owner>agale@chromium.org</owner>
+  <owner>erikchen@chromium.org</owner>
+  <description>
+    Tracks clicks on the close glic icon option from the glic os launcher
+    context menu.
   </description>
 </action>
 
@@ -12407,6 +12509,22 @@ should be able to be added at any place in this file.
   <owner>harringtond@chromium.org</owner>
   <owner>erikchen@chromium.org</owner>
   <description>Tracks when glic webui crashes.</description>
+</action>
+
+<action name="GlicTabContextPermissionDisabled">
+  <owner>erikchen@chromium.org</owner>
+  <owner>pauladedeji@google.com</owner>
+  <description>
+    Tracks when glic tab context permission is disabled from the web client.
+  </description>
+</action>
+
+<action name="GlicTabContextPermissionEnabled">
+  <owner>erikchen@chromium.org</owner>
+  <owner>pauladedeji@google.com</owner>
+  <description>
+    Tracks when glic tab context permission is enabled from the web client.
+  </description>
 </action>
 
 <action name="GlicWebClientSessionEnd">
@@ -14786,6 +14904,29 @@ should be able to be added at any place in this file.
   <description>
     Reported when the Set Up list cell is toggled from the Magic Stack page in
     the Home Customization menu.
+  </description>
+</action>
+
+<action
+    name="IOS.HomeCustomization.MagicStackPage.ShopCardPriceTracking.Toggled">
+  <owner>davidjm@chromium.org</owner>
+  <owner>gloriafang@google.com</owner>
+  <owner>thegreenfrog@chromium.org</owner>
+  <owner>chrome-shopping@google.com</owner>
+  <description>
+    Reported when the ShopCard Price Tracking cell is toggled from the Magic
+    Stack page in the Home Customization menu.
+  </description>
+</action>
+
+<action name="IOS.HomeCustomization.MagicStackPage.ShopCardReviews.Toggled">
+  <owner>davidjm@chromium.org</owner>
+  <owner>gloriafang@google.com</owner>
+  <owner>thegreenfrog@chromium.org</owner>
+  <owner>chrome-shopping@google.com</owner>
+  <description>
+    Reported when the ShopCard Reviews cell is toggled from the Magic Stack page
+    in the Home Customization menu.
   </description>
 </action>
 
@@ -23744,9 +23885,23 @@ should be able to be added at any place in this file.
   </description>
 </action>
 
+<action name="MobileMenuAddToGroup">
+  <owner>mfiaz@google.com</owner>
+  <owner>skym@chromium.org</owner>
+  <owner>fredmello@chromium.org</owner>
+  <description>User pressed 'Add to group' in the app menu.</description>
+</action>
+
 <action name="MobileMenuAddToHomescreen">
   <owner>aurimas@chromium.org</owner>
   <description>User pressed 'Add to homescreen' in the app menu.</description>
+</action>
+
+<action name="MobileMenuAddToNewGroup">
+  <owner>mfiaz@google.com</owner>
+  <owner>skym@chromium.org</owner>
+  <owner>fredmello@chromium.org</owner>
+  <description>User pressed 'Add to new group' in the app menu.</description>
 </action>
 
 <action name="MobileMenuAddToOrEditBookmark">
@@ -24100,6 +24255,23 @@ should be able to be added at any place in this file.
 <action name="MobileMenuShow">
   <owner>aurimas@chromium.org</owner>
   <description>User opened the app menu.</description>
+</action>
+
+<action name="MobileMenuShow.OverviewModeMenu">
+  <owner>ckitagawa@chromium.org</owner>
+  <description>
+    User opened the app menu in overview mode (AKA the hub or tab switcher).
+  </description>
+</action>
+
+<action name="MobileMenuShow.PageMenu">
+  <owner>ckitagawa@chromium.org</owner>
+  <description>User opened the app menu on a tab.</description>
+</action>
+
+<action name="MobileMenuShow.TabletEmptyModeMenu">
+  <owner>ckitagawa@chromium.org</owner>
+  <description>User opened the app menu in the empty tablet mode.</description>
 </action>
 
 <action name="MobileMenuSiteInformation">
@@ -31508,6 +31680,14 @@ should be able to be added at any place in this file.
   <owner>olesiamarukhno@google.com</owner>
   <owner>dullweber@chromium.org</owner>
   <description>Cookies subpage opened from PageInfo.</description>
+</action>
+
+<action name="PageInfo.CookiesSubpage.RwsSiteSettingsOpened">
+  <owner>mjenn@google.com</owner>
+  <owner>koilos@google.com</owner>
+  <description>
+    Opened the RWS site settings page for a website from PageInfo.
+  </description>
 </action>
 
 <action name="PageInfo.CookiesSubpage.SettingsLinkClicked">
@@ -44722,6 +44902,42 @@ should be able to be added at any place in this file.
   </description>
 </action>
 
+<action name="TrackingProtections.Bubble.FppActive.DisableProtections">
+  <owner>michelleabreo@google.com</owner>
+  <owner>koilos@google.com</owner>
+  <description>
+    Turn off protections in user bypass bubble while fingerprinting protection
+    is active on the current site.
+  </description>
+</action>
+
+<action name="TrackingProtections.Bubble.FppActive.EnableProtections">
+  <owner>michelleabreo@google.com</owner>
+  <owner>koilos@google.com</owner>
+  <description>
+    Turn on protections in user bypass bubble while fingerprinting protection is
+    active on the current site.
+  </description>
+</action>
+
+<action name="TrackingProtections.Bubble.IppActive.DisableProtections">
+  <owner>michelleabreo@google.com</owner>
+  <owner>koilos@google.com</owner>
+  <description>
+    Turn off protections in user bypass bubble while IP protection is active on
+    the current site.
+  </description>
+</action>
+
+<action name="TrackingProtections.Bubble.IppActive.EnableProtections">
+  <owner>michelleabreo@google.com</owner>
+  <owner>koilos@google.com</owner>
+  <description>
+    Turn on protections in user bypass bubble while IP protection is active on
+    the current site.
+  </description>
+</action>
+
 <action name="TrackpadScroll">
   <obsolete>
     Not needed as of 05/2018 since performance metrics for ScrollBegin show the
@@ -47574,6 +47790,7 @@ should be able to be added at any place in this file.
   <suffix name="Googlepayreauth" label="Google Pay Re-auth"/>
   <suffix name="HelpMeWrite" label="Help Me Write"/>
   <suffix name="HistoryEmbeddings" label="History Embeddings Search"/>
+  <suffix name="iOSLensSWYS" label="iOS Lens Search What You See"/>
   <suffix name="LensOverlayTranslateButton"
       label="Lens Overlay Translate Button"/>
   <suffix name="PdfSearchify" label="PDF Searchify"/>
@@ -47595,6 +47812,7 @@ should be able to be added at any place in this file.
 </action-suffix>
 
 <action-suffix separator="." ordering="suffix">
+  <suffix name="Glic" label="Glic edition."/>
   <suffix name="SafetyAwareness" label="Safety Awareness edition."/>
   <suffix name="Spark" label="Spark edition."/>
   <suffix name="TestEdition" label="Test edition."/>
@@ -47665,6 +47883,8 @@ should be able to be added at any place in this file.
       label="For AutofillDisabledVirtualCardSuggestion feature."/>
   <suffix name="AutofillExternalAccountProfileSuggestion"
       label="For AutofillExternalAccountProfileSuggestion feature."/>
+  <suffix name="AutofillHomeWorkProfileSuggestion"
+      label="For AutofillHomeWorkProfileSuggestion feature."/>
   <suffix name="AutofillVirtualCardCVCSuggestion"
       label="For autofill suggestion of virtual cards."/>
   <suffix name="AutofillVirtualCardSuggestion"
@@ -47862,6 +48082,10 @@ should be able to be added at any place in this file.
       label="For iOSDockingPromoRemindMeLater feature"/>
   <suffix name="iOSDownloadAutoDeletion"
       label="For iOS Auto-deletion half-sheet IPH."/>
+  <suffix name="iOSFeedSwipeAnimatedFeature"
+      label="For iOSFeedSwipeAnimatedFeature feature"/>
+  <suffix name="iOSFeedSwipeStaticFeature"
+      label="For iOSFeedSwipeStaticFeature feature"/>
   <suffix name="iOSHistoryOnOverflowMenuFeature"
       label="For iOSHistoryOnOverflowMenuFeature feature"/>
   <suffix name="iOSInlineEnhancedSafeBrowsingPromoFeature"

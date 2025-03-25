@@ -296,15 +296,10 @@ bool AuthenticationService::HasPrimaryIdentityManaged(
 bool AuthenticationService::ShouldClearDataForSignedInPeriodOnSignOut() const {
   // Data on the device should be cleared on signout when all conditions are
   // met:
-  // 1. `kClearDeviceDataOnSignOutForManagedUsers` feaature is enabled).
-  // 2. The user is signed in with a managed account.
-  // 3. The user is no longer using sync-the-feature.
-  // 4. The app management configuration key is present.
+  // 1. The user is signed in with a managed account.
+  // 2. The app management configuration key is present.
   // Note: data will be cleared from the time of sign-in in this case.
-  return base::FeatureList::IsEnabled(
-             kClearDeviceDataOnSignOutForManagedUsers) &&
-         HasPrimaryIdentityManaged(signin::ConsentLevel::kSignin) &&
-         !HasPrimaryIdentity(signin::ConsentLevel::kSync) &&
+  return HasPrimaryIdentityManaged(signin::ConsentLevel::kSignin) &&
          !IsApplicationManagedByMDM();
 }
 
@@ -351,9 +346,6 @@ void AuthenticationService::SignIn(id<SystemIdentity> identity,
   // mismatch between the old and the new authenticated accounts.
   if (!identity_manager_->HasPrimaryAccount(signin::ConsentLevel::kSignin)) {
     DCHECK(identity_manager_->GetPrimaryAccountMutator());
-    // Initial sign-in to Chrome does not automatically turn on Sync features.
-    // The Sync service will be enabled in a separate request to
-    // `GrantSyncConsent`.
     signin::PrimaryAccountMutator::PrimaryAccountError error =
         identity_manager_->GetPrimaryAccountMutator()->SetPrimaryAccount(
             account_id, signin::ConsentLevel::kSignin, access_point);
@@ -379,49 +371,6 @@ void AuthenticationService::SignIn(id<SystemIdentity> identity,
   crash_keys::SetCurrentlySignedIn(true);
 }
 
-void AuthenticationService::GrantSyncConsent(
-    id<SystemIdentity> identity,
-    signin_metrics::AccessPoint access_point) {
-  // TODO(crbug.com/40067025): Turn sync on was deprecated. Remove
-  // `GrantSyncConsent()` as it is obsolete.
-  DUMP_WILL_BE_CHECK(access_point !=
-                     signin_metrics::AccessPoint::kPostDeviceRestoreSigninPromo)
-      << "Turn sync on should not be available as sync promos are deprecated "
-         "[access point = "
-      << int(access_point) << "]";
-  DCHECK(account_manager_service_->IsValidIdentity(identity));
-  DCHECK(identity_manager_->HasPrimaryAccount(signin::ConsentLevel::kSignin));
-
-  const CoreAccountId account_id = identity_manager_->PickAccountIdForAccount(
-      GaiaId(identity.gaiaID), base::SysNSStringToUTF8(identity.userEmail));
-  // Ensure that the account the user is trying to sign into has been loaded
-  // from the SSO library and that hosted_domain is set (should be the proper
-  // hosted domain or kNoHostedDomainFound that are both non-empty strings).
-  const AccountInfo account_info =
-      identity_manager_->FindExtendedAccountInfoByAccountId(account_id);
-  CHECK(!account_info.IsEmpty());
-  CHECK(!account_info.hosted_domain.empty());
-
-  // When sync is disabled by enterprise, sync consent is not removed.
-  // Consent can be skipped.
-  if (!HasPrimaryIdentity(signin::ConsentLevel::kSync)) {
-    const signin::PrimaryAccountMutator::PrimaryAccountError error =
-        identity_manager_->GetPrimaryAccountMutator()->SetPrimaryAccount(
-            account_id, signin::ConsentLevel::kSync, access_point);
-    CHECK_EQ(signin::PrimaryAccountMutator::PrimaryAccountError::kNoError,
-             error)
-        << "SetPrimaryAccount error: " << static_cast<int>(error);
-  }
-  CHECK_EQ(account_id,
-           identity_manager_->GetPrimaryAccountId(signin::ConsentLevel::kSync));
-
-  // Kick-off sync: The authentication error UI (sign in infobar and warning
-  // badge in settings screen) check the sync auth error state. Sync
-  // needs to be kicked off so that it resets the auth error quickly once
-  // `identity` is reauthenticated.
-  sync_service_->SetSyncFeatureRequested();
-}
-
 void AuthenticationService::SignOut(
     signin_metrics::ProfileSignout signout_source,
     ProceduralBlock completion) {
@@ -442,9 +391,6 @@ void AuthenticationService::SignOut(
   const bool is_migrated_from_syncing =
       browser_sync::WasPrimaryAccountMigratedFromSyncingToSignedIn(
           identity_manager_, pref_service_);
-  // Get first setup complete value before stopping the sync service.
-  const bool is_initial_sync_feature_setup_complete =
-      sync_service_->GetUserSettings()->IsInitialSyncFeatureSetupComplete();
   const bool should_clear_data_for_signed_in_period =
       ShouldClearDataForSignedInPeriodOnSignOut();
 
@@ -463,17 +409,11 @@ void AuthenticationService::SignOut(
   base::OnceClosure callback_closure =
       completion ? base::BindOnce(completion) : base::DoNothing();
 
-  if (base::FeatureList::IsEnabled(kSeparateProfilesForManagedAccounts) &&
-      is_managed) {
-    if (completion) {
-      base::SingleThreadTaskRunner::GetCurrentDefault()->PostTask(
-          FROM_HERE, std::move(callback_closure));
-    }
-    return;
-  }
-
-  if ((is_managed && is_initial_sync_feature_setup_complete) ||
-      (is_managed && is_migrated_from_syncing)) {
+  // Note: Once `kSeparateProfilesForManagedAccounts` is launched, the "clear
+  // browsing data" cases are only reachable for managed accounts that were
+  // already signed in before that feature was enabled. Once those users have
+  // been migrated, this code can be cleaned up.
+  if (is_managed && is_migrated_from_syncing) {
     // If `is_clear_data_feature_for_managed_users_enabled` is false, browsing
     // data for managed account needs to be cleared only if sync has started at
     // least once. This also includes the case where a previously-syncing user

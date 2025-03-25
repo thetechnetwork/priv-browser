@@ -18,6 +18,7 @@ build_webui("build") {
     "images/cvc_amex.svg",
     "images/googleg_standard_clr_32px.svg",
     "images/iban.svg",
+    "images/iban_old.svg",
     "images/password_check_neutral.svg",
     "images/password_check_neutral_dark.svg",
     "images/password_check_positive.svg",
@@ -215,6 +216,7 @@ build_webui("build") {
     web_component_files += [
       "a11y_page/live_caption_section.ts",
       "a11y_page/live_translate_section.ts",
+      "clear_browsing_data_dialog/clear_browsing_data_account_indicator.ts",
       "default_browser_page/default_browser_page.ts",
       "languages_page/add_languages_dialog.ts",
       "languages_page/languages_page.ts",

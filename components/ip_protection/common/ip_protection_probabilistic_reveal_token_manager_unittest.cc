@@ -5,20 +5,28 @@
 #include "components/ip_protection/common/ip_protection_probabilistic_reveal_token_manager.h"
 
 #include <cstddef>
+#include <map>
 #include <memory>
 #include <string>
 #include <utility>
 #include <vector>
 
 #include "base/base64.h"
+#include "base/files/file_path.h"
+#include "base/files/scoped_temp_dir.h"
 #include "base/strings/string_number_conversions.h"
 #include "base/test/bind.h"
 #include "base/test/metrics/histogram_tester.h"
+#include "base/test/scoped_feature_list.h"
 #include "base/test/task_environment.h"
 #include "base/time/time.h"
 #include "components/ip_protection/common/ip_protection_probabilistic_reveal_token_crypter.h"
 #include "components/ip_protection/common/ip_protection_probabilistic_reveal_token_fetcher.h"
+#include "net/base/features.h"
 #include "net/base/net_errors.h"
+#include "sql/database.h"
+#include "sql/statement.h"
+#include "sql/test/test_helpers.h"
 #include "testing/gmock/include/gmock/gmock.h"
 #include "testing/gtest/include/gtest/gtest.h"
 #include "third_party/private-join-and-compute/src/crypto/context.h"
@@ -96,7 +104,8 @@ class MockIssuer {
                        ciphertext.u.ToBytesCompressed());
       ASSIGN_OR_RETURN(std::string e_compressed,
                        ciphertext.e.ToBytesCompressed());
-      tokens.emplace_back(1, std::move(u_compressed), std::move(e_compressed));
+      tokens.emplace_back(1, std::move(u_compressed), std::move(e_compressed),
+                          std::string(8, '0'));
     }
     return base::WrapUnique<MockIssuer>(new MockIssuer(
         std::move(context), std::move(group), std::move(encrypter),
@@ -242,6 +251,7 @@ class IpProtectionProbabilisticRevealTokenManagerTest : public testing::Test {
                             /*num_tokens_with_signal=*/7);
     ASSERT_TRUE(status.ok());
     fetcher_ptr_ = fetcher_.get();
+    ASSERT_TRUE(temp_dir_.CreateUniqueTempDir());
   }
 
  public:
@@ -280,6 +290,22 @@ class IpProtectionProbabilisticRevealTokenManagerTest : public testing::Test {
     return std::move(maybe_serialized_points.value());
   }
 
+  base::FilePath DbPath() const {
+    return DataDirectory().Append(
+        FILE_PATH_LITERAL("ProbabilisticRevealTokens"));
+  }
+
+  base::FilePath DataDirectory() const {
+    return temp_dir_.GetPath().AppendASCII("DataDirectory");
+  }
+
+  size_t CountTokenEntries(sql::Database& db) {
+    static const char kCountSQL[] = "SELECT COUNT(*) FROM tokens";
+    sql::Statement s(db.GetUniqueStatement(kCountSQL));
+    EXPECT_TRUE(s.Step());
+    return s.ColumnInt(0);
+  }
+
   base::test::TaskEnvironment task_environment_{
       base::test::TaskEnvironment::TimeSource::MOCK_TIME};
   std::unique_ptr<MockFetcher> fetcher_;
@@ -288,6 +314,7 @@ class IpProtectionProbabilisticRevealTokenManagerTest : public testing::Test {
   // to fetcher to modify its behavior after it is moved.
   raw_ptr<MockFetcher> fetcher_ptr_;
   base::HistogramTester histogram_tester_;
+  base::ScopedTempDir temp_dir_;
 };
 
 // Test whether IsTokenAvailable() returns false and GetToken() returns null,
@@ -295,7 +322,7 @@ class IpProtectionProbabilisticRevealTokenManagerTest : public testing::Test {
 // null.
 TEST_F(IpProtectionProbabilisticRevealTokenManagerTest, NotRequestedTokensYet) {
   manager_ = std::make_unique<IpProtectionProbabilisticRevealTokenManager>(
-      std::move(fetcher_));
+      std::move(fetcher_), DataDirectory());
   task_environment_.FastForwardBy(base::TimeDelta());
   EXPECT_FALSE(manager_->IsTokenAvailable());
   EXPECT_FALSE(manager_->GetToken("A", "b42"));
@@ -317,7 +344,7 @@ TEST_F(IpProtectionProbabilisticRevealTokenManagerTest,
             /*num_tokens_with_signal=*/3);
 
   manager_ = std::make_unique<IpProtectionProbabilisticRevealTokenManager>(
-      std::move(fetcher_));
+      std::move(fetcher_), DataDirectory());
   // Request tokens, schedules next fetch at `next_start`.
   manager_->RequestTokens();
   task_environment_.FastForwardBy(base::TimeDelta());
@@ -375,7 +402,7 @@ TEST_F(IpProtectionProbabilisticRevealTokenManagerTest,
 TEST_F(IpProtectionProbabilisticRevealTokenManagerTest,
        GetTokenSameFirstAndThirdParty) {
   manager_ = std::make_unique<IpProtectionProbabilisticRevealTokenManager>(
-      std::move(fetcher_));
+      std::move(fetcher_), DataDirectory());
   manager_->RequestTokens();
 
   task_environment_.FastForwardBy(base::TimeDelta());
@@ -400,7 +427,7 @@ TEST_F(IpProtectionProbabilisticRevealTokenManagerTest,
 TEST_F(IpProtectionProbabilisticRevealTokenManagerTest,
        GetTokenSameFirstParty) {
   manager_ = std::make_unique<IpProtectionProbabilisticRevealTokenManager>(
-      std::move(fetcher_));
+      std::move(fetcher_), DataDirectory());
   manager_->RequestTokens();
 
   task_environment_.FastForwardBy(base::TimeDelta());
@@ -423,7 +450,8 @@ TEST_F(IpProtectionProbabilisticRevealTokenManagerTest,
   EXPECT_EQ(serialized_point_ex, serialized_point_com);
 }
 
-// Verify RequestTokens() posts next fetch task at next epoch start.
+// Verify RequestTokens() posts next fetch task after next epoch start and
+// before token expiration.
 TEST_F(IpProtectionProbabilisticRevealTokenManagerTest, RefetchSuccess) {
   const base::Time first_batch_expiration = base::Time::Now() + base::Hours(8);
   const base::Time first_batch_next_start = base::Time::Now() + base::Hours(4);
@@ -434,7 +462,7 @@ TEST_F(IpProtectionProbabilisticRevealTokenManagerTest, RefetchSuccess) {
       fetcher_ptr_->Issuer()->Tokens();
 
   manager_ = std::make_unique<IpProtectionProbabilisticRevealTokenManager>(
-      std::move(fetcher_));
+      std::move(fetcher_), DataDirectory());
   manager_->RequestTokens();
   task_environment_.FastForwardBy(base::TimeDelta());
 
@@ -454,6 +482,14 @@ TEST_F(IpProtectionProbabilisticRevealTokenManagerTest, RefetchSuccess) {
   EXPECT_THAT(first_batch_points, testing::Contains(point))
       << "GetToken() returned a token that is not in the current batch.";
 
+  // Expect no re-fetch before the next epoch start.
+  task_environment_.FastForwardBy(first_batch_next_start - base::Seconds(1) -
+                                  base::Time::Now());
+  histogram_tester_.ExpectUniqueSample(
+      kGetTokensResultHistogram,
+      TryGetProbabilisticRevealTokensStatus::kSuccess, 1);
+  histogram_tester_.ExpectTotalCount(kGetTokensRequestTimeHistogram, 1);
+
   SetIssuer(/*private_key=*/77777,
             /*num_tokens=*/27,
             /*expiration=*/base::Time::Now() + base::Hours(16),
@@ -462,7 +498,7 @@ TEST_F(IpProtectionProbabilisticRevealTokenManagerTest, RefetchSuccess) {
   const std::vector<ProbabilisticRevealToken> second_batch_tokens =
       fetcher_ptr_->Issuer()->Tokens();
 
-  task_environment_.FastForwardBy(first_batch_next_start - base::Time::Now());
+  task_environment_.FastForwardBy(first_batch_expiration - base::Time::Now());
 
   // check that GetToken() returns a token that is in the second batch
   // by decrypting token returned by `GetToken()` and checking whether
@@ -489,7 +525,7 @@ TEST_F(IpProtectionProbabilisticRevealTokenManagerTest, NetworkErrorTryAgain) {
           TryGetProbabilisticRevealTokensStatus::kNetNotOk,
           net::ERR_OUT_OF_MEMORY, base::Time::Now() + base::Seconds(23)});
   manager_ = std::make_unique<IpProtectionProbabilisticRevealTokenManager>(
-      std::move(fetcher_));
+      std::move(fetcher_), DataDirectory());
   manager_->RequestTokens();
   task_environment_.FastForwardBy(base::TimeDelta());
 
@@ -539,7 +575,7 @@ TEST_F(IpProtectionProbabilisticRevealTokenManagerTest, PassedNextEpochStart) {
             /*num_tokens_with_signal=*/5);
 
   manager_ = std::make_unique<IpProtectionProbabilisticRevealTokenManager>(
-      std::move(fetcher_));
+      std::move(fetcher_), DataDirectory());
   manager_->RequestTokens();
 
   task_environment_.FastForwardBy(base::TimeDelta());
@@ -578,7 +614,7 @@ TEST_F(IpProtectionProbabilisticRevealTokenManagerTest,
                   std::nullopt});
 
   manager_ = std::make_unique<IpProtectionProbabilisticRevealTokenManager>(
-      std::move(fetcher_));
+      std::move(fetcher_), DataDirectory());
   manager_->RequestTokens();
   task_environment_.FastForwardBy(base::TimeDelta());
 
@@ -603,7 +639,7 @@ TEST_F(IpProtectionProbabilisticRevealTokenManagerTest,
 
   // Constructor fetches first batch and schedules next fetch at `next_start`.
   manager_ = std::make_unique<IpProtectionProbabilisticRevealTokenManager>(
-      std::move(fetcher_));
+      std::move(fetcher_), DataDirectory());
   manager_->RequestTokens();
   task_environment_.FastForwardBy(base::TimeDelta());
 
@@ -620,25 +656,20 @@ TEST_F(IpProtectionProbabilisticRevealTokenManagerTest,
       {TryGetProbabilisticRevealTokensStatus::kResponseParsingFailed, net::OK,
        /*try_again_after=*/std::nullopt});
 
-  // Check that fetching triggered at next start.
-  task_environment_.FastForwardBy(next_start - base::Time::Now());
-  EXPECT_EQ(fetcher_ptr_->NumCalls(), std::size_t(2));
-  histogram_tester_.ExpectBucketCount(
-      kGetTokensResultHistogram,
-      TryGetProbabilisticRevealTokensStatus::kResponseParsingFailed, 1);
-  histogram_tester_.ExpectBucketCount(
-      kGetTokensResultHistogram,
-      TryGetProbabilisticRevealTokensStatus::kSuccess, 1);
-  histogram_tester_.ExpectTotalCount(kGetTokensRequestTimeHistogram, 1);
+  // Check that fetching triggered before expiration.
+  task_environment_.FastForwardBy(expiration - base::Minutes(10) -
+                                  base::Time::Now());
 
-  // Check that manager re-tried fetching in an hour.
-  task_environment_.FastForwardBy(base::Hours(1) - base::Seconds(1));
-  EXPECT_EQ(fetcher_ptr_->NumCalls(), std::size_t(2));
-  task_environment_.FastForwardBy(base::Seconds(1));
-  EXPECT_EQ(fetcher_ptr_->NumCalls(), std::size_t(3));
-  histogram_tester_.ExpectBucketCount(
+  size_t num_calls_at_expiration = fetcher_ptr_->NumCalls();
+  int32_t parsing_error_count_at_expiration = histogram_tester_.GetBucketCount(
       kGetTokensResultHistogram,
-      TryGetProbabilisticRevealTokensStatus::kResponseParsingFailed, 2);
+      TryGetProbabilisticRevealTokensStatus::kResponseParsingFailed);
+
+  // Fetch should have been called at least one more time (could be more
+  // depending on the random time chosen between next epoch start and
+  // expiration).
+  EXPECT_GE(num_calls_at_expiration, std::size_t(2));
+  EXPECT_GE(parsing_error_count_at_expiration, 1);
   histogram_tester_.ExpectBucketCount(
       kGetTokensResultHistogram,
       TryGetProbabilisticRevealTokensStatus::kSuccess, 1);
@@ -656,10 +687,84 @@ TEST_F(IpProtectionProbabilisticRevealTokenManagerTest,
   EXPECT_THAT(first_batch_points, testing::Contains(point))
       << "GetToken() returned a token that is not in the current batch.";
 
-  // Tokens expire as expected
-  task_environment_.FastForwardBy(expiration - base::Time::Now());
+  // Check that manager re-tried fetching once more after an hour.
+  task_environment_.FastForwardBy(base::Hours(1));
+  EXPECT_EQ(fetcher_ptr_->NumCalls(), num_calls_at_expiration + 1);
+  EXPECT_EQ(histogram_tester_.GetBucketCount(
+                kGetTokensResultHistogram,
+                TryGetProbabilisticRevealTokensStatus::kResponseParsingFailed),
+            parsing_error_count_at_expiration + 1);
+  histogram_tester_.ExpectBucketCount(
+      kGetTokensResultHistogram,
+      TryGetProbabilisticRevealTokensStatus::kSuccess, 1);
+  histogram_tester_.ExpectTotalCount(kGetTokensRequestTimeHistogram, 1);
+
+  // First batch of tokens is now expired, and no re-fetch has succeeded.
   EXPECT_FALSE(manager_->IsTokenAvailable());
   EXPECT_FALSE(manager_->GetToken("ip", "protection"));
+}
+
+TEST_F(IpProtectionProbabilisticRevealTokenManagerTest,
+       StoreTokensWhenFeatureIsEnabled) {
+  std::map<std::string, std::string> parameters;
+  parameters[net::features::kIpPrivacyStoreProbabilisticRevealTokens.name] =
+      "true";
+  base::test::ScopedFeatureList scoped_feature_list;
+  scoped_feature_list.InitAndEnableFeatureWithParameters(
+      net::features::kEnableIpProtectionProxy, std::move(parameters));
+
+  const base::Time expiration = base::Time::Now() + base::Hours(8);
+  const base::Time next_start = base::Time::Now() + base::Hours(4);
+  SetIssuer(/*private_key=*/12345,
+            /*num_tokens=*/10, expiration, next_start,
+            /*num_tokens_with_signal=*/3);
+
+  manager_ = std::make_unique<IpProtectionProbabilisticRevealTokenManager>(
+      std::move(fetcher_), DataDirectory());
+  manager_->RequestTokens();
+  task_environment_.RunUntilIdle();
+
+  // Expect that tokens are available.
+  EXPECT_TRUE(manager_->IsTokenAvailable());
+  EXPECT_TRUE(manager_->GetToken("fp.ex", "tp.ex"));
+
+  // Destroy the manager to trigger the database write.
+  fetcher_ptr_ = nullptr;
+  manager_.reset();
+  task_environment_.RunUntilIdle();
+
+  // Expect that the database has 10 tokens.
+  sql::Database db(sql::test::kTestTag);
+  EXPECT_TRUE(db.Open(DbPath()));
+  EXPECT_EQ(CountTokenEntries(db), 10u);
+  db.Close();
+}
+
+TEST_F(IpProtectionProbabilisticRevealTokenManagerTest,
+       DoNotStoreTokensWhenFeatureIsDisabled) {
+  const base::Time expiration = base::Time::Now() + base::Hours(8);
+  const base::Time next_start = base::Time::Now() + base::Hours(4);
+  SetIssuer(/*private_key=*/12345,
+            /*num_tokens=*/10, expiration, next_start,
+            /*num_tokens_with_signal=*/3);
+
+  manager_ = std::make_unique<IpProtectionProbabilisticRevealTokenManager>(
+      std::move(fetcher_), DataDirectory());
+  manager_->RequestTokens();
+  task_environment_.RunUntilIdle();
+
+  // Expect that tokens are available.
+  EXPECT_TRUE(manager_->IsTokenAvailable());
+  EXPECT_TRUE(manager_->GetToken("fp.ex", "tp.ex"));
+
+  // Destroy the manager to trigger the database write.
+  fetcher_ptr_ = nullptr;
+  manager_.reset();
+  task_environment_.RunUntilIdle();
+
+  // Expect that the database does not exist.
+  sql::Database db(sql::test::kTestTag);
+  EXPECT_FALSE(db.Open(DbPath()));
 }
 
 }  // namespace ip_protection

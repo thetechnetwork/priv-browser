@@ -1574,6 +1574,10 @@ You can also use the keyboard shortcut. First, highlight text, then press <ph na
         Are you sure you want to turn off facial gestures?
       </message>
 
+      <message name="IDS_ASH_FACEGAZE_CLOSE_BUTTON_TEXT" desc="The text for the close button that is shown in the FaceGaze top bar UI.">
+        Turn off Face control
+      </message>
+
       <!-- Accessibility nudges -->
       <message name="IDS_ASH_ACCESSIBILITY_NUDGE_DICTATION_NO_FOCUSED_TEXT_FIELD" desc="Displayed in a nudge when Dictation is stopped automatically because there is no focused text field.">
         Go to a text field to use Dictation
@@ -4476,6 +4480,9 @@ No devices connected.
       <message name="IDS_ASH_ACCELERATOR_DESCRIPTION_TAKE_WINDOW_SCREENSHOT" desc="Label for accelerator action - Take window screenshot or screen recording.">
         Take window screenshot or screen recording
       </message>
+      <message name="IDS_ASH_ACCELERATOR_DESCRIPTION_START_SUNFISH_SESSION" desc="Label for accelerator action - Search my screen with Google Lens.">
+        Search my screen with Google Lens
+      </message>
       <message name="IDS_ASH_ACCELERATOR_DESCRIPTION_TILING_WINDOW_RESIZE_LEFT" desc="Label for accelerator action - Tiled resize window toward the left.">
         Tiled resize window toward the left
       </message>
@@ -6760,6 +6767,15 @@ Here are some things you can try to get started.
       <message name="IDS_ASH_SCREEN_CAPTURE_ALERT_WINDOW_RECORD" desc="Alert spoken by screen readers on recording window screen.">
         Press enter to record window: <ph name="WINDOW_TITLE">$1<ex>Text</ex></ph>
       </message>
+      <message name="IDS_ASH_SCREEN_CAPTURE_ALERT_DEFAULT_REGION_SELECTED" desc="Alert spoken by screen readers after a default capture region has been selected.">
+        Press tab to focus and move selected area
+      </message>
+      <message name="IDS_ASH_SCREEN_CAPTURE_SELECTED_AREA_ACCESSIBLE_NAME" desc="The accessible name of the selected region in capture mode.">
+        Selected area, use arrow keys to move
+      </message>
+      <message name="IDS_ASH_SCREEN_CAPTURE_SELECTED_DRAG_HANDLE_ACCESSIBLE_TITLE" desc="The accessible name of a drag handle that can be used to adjust the selected region in capture mode.">
+        Selected handle, use arrow keys to move
+      </message>
       <message name="IDS_ASH_SCREEN_CAPTURE_ALERT_SELECT_TYPE_IMAGE" desc="Alert spoken by screen readers on selecting screenshot mode.">
         Screenshot mode selected
       </message>
@@ -6859,6 +6875,9 @@ Here are some things you can try to get started.
       <message name="IDS_ASH_SCREEN_CAPTURE_SUNFISH_ACTION_BUTTON_WINDOW_TITLE" desc="The title of the window that contains available action buttons after the user has selected a region on their screen of interest. Example actions include copy text or create a Google Doc.">
         Actions
       </message>
+      <message name="IDS_ASH_SCREEN_CAPTURE_SUNFISH_SEARCH_BUTTON_TITLE" desc="The tile of the button that shows after the user selectes a region on their screen. ">
+        Search with Google
+      </message>
       <message name="IDS_ASH_SCREEN_CAPTURE_SUNFISH_CLOSE_BUTTON_ACCESSIBLE_NAME" desc="The accessible name of the close button for a screen capture mode, 'search my screen', where users can select a region on their screen to search.">
         Close search my screen
       </message>
@@ -6874,9 +6893,48 @@ Here are some things you can try to get started.
       <message name="IDS_ASH_SCREEN_CAPTURE_ACTION_ATTEMPTED_OFFLINE_ERROR" desc="The error message shown if the user is offline while attempting an action that requires an internet connection.">
         Check your internet and try again
       </message>
+      <message name="IDS_ASH_SUNFISH_SEARCH_DIALOG_CLOSE" desc="The accessible name of the close button of the search model dialog for the Sunfish feature. ">
+        Close Panel
+      </message>
+      <message name="IDS_ASH_SUNFISH_SEARCH_BOX_BUTTON" desc="The accessible name and tooltip of the search button for the Sunfish feature. ">
+        Search my screen with Google Lens
+      </message>
+      <message name="IDS_ASH_SUNFISH_EDUCATE_TOAST_MESSAGE" desc="The message shown in a toast window to educate the user about the Sunfish feature.">
+        Select anything on your screen to search, copy text, and more
+      </message>
 
       <!-- Scanner -->
-      <!-- TODO: crbug.com/375967525 - Finalize these strings and mark them as translateable -->
+      <message name="IDS_ASH_SCANNER_DISCLAIMER_TITLE" desc="Text shown as the title of the suggested actions when searching your screen disclaimer view.">
+        A few things to keep in mind
+      </message>
+      <message name="IDS_ASH_SCANNER_DISCLAIMER_PARAGRAPH_ONE" desc="Text shown as the first paragraph of the suggested actions when searching your screen disclaimer view.">
+        When you use suggested actions such as “add to Calendar” or “create Google Docs,” the content from the selected area is sent to Google servers to suggest actions, subject to <ph name="LINK_TO_SERVICE_TERMS">$1<ex>Google's Terms of Service and Privacy Policy</ex></ph>. Don't include anything personal, sensitive, or confidential.
+      </message>
+      <message name="IDS_ASH_SCANNER_DISCLAIMER_PARAGRAPH_TWO" desc="Text shown as the second paragraph of the suggested actions when searching your screen disclaimer view.">
+        Generative AI can make mistakes, including about people, so double-check it.
+      </message>
+      <message name="IDS_ASH_SCANNER_DISCLAIMER_PARAGRAPH_THREE" desc="Text shown as the third paragraph of the suggested actions when searching your screen disclaimer view.">
+        You can turn off this feature at any time in Settings. <ph name="LINK_TO_LEARN_MORE">$1<ex>Learn more</ex></ph>
+      </message>
+      <message name="IDS_ASH_SCANNER_DISCLAIMER_ACCEPT" desc="Text shown as the accept button of the suggested actions when searching your screen disclaimer view.">
+        Got it
+      </message>
+      <message name="IDS_ASH_SCANNER_DISCLAIMER_DECLINE" desc="Text shown as the decline button of the suggested actions when searching your screen disclaimer view.">
+        No thanks
+      </message>
+      <message name="IDS_ASH_SCANNER_DISCLAIMER_LEARN_MORE_LINK_TEXT" desc="The linked &quot;Learn more&quot; text in the suggested actions when searching your screen disclaimer view.">
+        Learn more
+      </message>
+      <message name="IDS_ASH_SCANNER_DISCLAIMER_TERMS_LINK_TEXT" desc="The linked Google terms of service and privacy policy text in the suggested actions when searching your screen disclaimer view.">
+        Google's Terms of Service and Privacy Policy
+      </message>
+      <message name="IDS_ASH_SCANNER_DISCLAIMER_REMINDER_TITLE" desc="Text shown as the title of the suggested actions when searching your screen disclaimer view when the disclaimer is shown as a reminder to the user.">
+        A reminder about suggested actions
+      </message>
+      <message name="IDS_ASH_SCANNER_DISCLAIMER_REMINDER_ACCEPT" desc="Text shown as the accept button of the suggested actions when searching your screen disclaimer view when the disclaimer is shown as a reminder to the user.">
+        OK
+      </message>
+
       <message name="IDS_ASH_SCANNER_SMART_ACTIONS_BUTTON_LABEL" desc="The label on a button that can be clicked to show more actions based on the contents of a screenshot. Example actions include creating a new doc or adding a detected event to the user's calendar.">
         More actions
       </message>
@@ -6887,27 +6945,45 @@ Here are some things you can try to get started.
         Create contact
       </message>
       <message name="IDS_ASH_SCANNER_ACTION_CREATE_SHEET" desc="The label on a button that can be clicked to create a new Google Sheet from the contents of a screenshot.">
-        Create Google Sheets
+        Create Google Sheet
       </message>
       <message name="IDS_ASH_SCANNER_ACTION_CREATE_DOC" desc="The label on a button that can be clicked to create a new Google Doc from the contents of a screenshot.">
-        Create Google Docs
+        Create Google Doc
       </message>
       <message name="IDS_ASH_SCANNER_ACTION_COPY_TEXT_AND_FORMAT" desc="The label on a button that can be clicked to copy text with formatting from the contents of a screenshot. Formatting includes properties such as text size, font, and color.">
         Copy with formatting
       </message>
-      <message name="IDS_ASH_SCANNER_ACTION_SUCCESS_TOAST_CREATE_EVENT" desc="The message shown on a toast to indicate that event details were created from the contents of a screenshot." translateable="false">
-        Created event
+      <message name="IDS_ASH_SCANNER_ACTION_PROGRESS_TITLE_ADDING_EVENT" desc="The title text on a notification shown to indicate that a new event is in the process of being added to the user's calendar.">
+        Adding...
       </message>
-      <message name="IDS_ASH_SCANNER_ACTION_SUCCESS_TOAST_CREATE_CONTACT" desc="The message shown on a toast to indicate a new contact was created from the contents of a screenshot." translateable="false">
+      <message name="IDS_ASH_SCANNER_ACTION_PROGRESS_TITLE_CREATING" desc="The title text on a notification shown to indicate that something is being created, e.g. a new document, a new spreadsheet, or a new contact.">
+        Creating...
+      </message>
+      <message name="IDS_ASH_SCANNER_ACTION_NEW_EVENT_SOURCE" desc="The Google Calendar product name, shown on a notification that indicates a new event is in the process of being added to the user's calendar.">
+        Google Calendar
+      </message>
+      <message name="IDS_ASH_SCANNER_ACTION_NEW_CONTACT_SOURCE" desc="The Google Contacts product name, shown on a notification that indicates a new contact is in the process of being added to the user's contact list.">
+        Google Contacts
+      </message>
+      <message name="IDS_ASH_SCANNER_ACTION_NEW_GOOGLE_DOC_SOURCE" desc="The Google Docs product name, shown on a notification that indicates a new Google Doc is in the process of being created.">
+        Google Docs
+      </message>
+      <message name="IDS_ASH_SCANNER_ACTION_NEW_GOOGLE_SHEET_SOURCE" desc="The Google Sheets product name, shown on a notification that indicates a new Google Sheet is in the process of being created.">
+        Google Sheets
+      </message>
+      <message name="IDS_ASH_SCANNER_ACTION_SUCCESS_TOAST_CREATE_EVENT" desc="The message shown on a toast to indicate that event details were created from the contents of a screenshot and added to the user's calendar.">
+        Added to Calendar
+      </message>
+      <message name="IDS_ASH_SCANNER_ACTION_SUCCESS_TOAST_CREATE_CONTACT" desc="The message shown on a toast to indicate a new contact was created from the contents of a screenshot.">
         Created contact
       </message>
-      <message name="IDS_ASH_SCANNER_ACTION_SUCCESS_TOAST_CREATE_DOC" desc="The message shown on a toast to indicate a new Google Doc was created from the contents of a screenshot." translateable="false">
+      <message name="IDS_ASH_SCANNER_ACTION_SUCCESS_TOAST_CREATE_DOC" desc="The message shown on a toast to indicate a new Google Doc was created from the contents of a screenshot.">
         Created Google Doc
       </message>
-      <message name="IDS_ASH_SCANNER_ACTION_SUCCESS_TOAST_CREATE_SHEET" desc="The message shown on a toast to indicate a new Google Sheet was created from the contents of a screenshot." translateable="false">
+      <message name="IDS_ASH_SCANNER_ACTION_SUCCESS_TOAST_CREATE_SHEET" desc="The message shown on a toast to indicate a new Google Sheet was created from the contents of a screenshot.">
         Created Google Sheet
       </message>
-      <message name="IDS_ASH_SCANNER_ACTION_SUCCESS_TOAST_COPY_TEXT_AND_FORMAT" desc="The message shown on a toast to indicate text with formatting was copied to the user's clipboard from the contents of a screenshot." translateable="false">
+      <message name="IDS_ASH_SCANNER_ACTION_SUCCESS_TOAST_COPY_TEXT_AND_FORMAT" desc="The message shown on a toast to indicate text with formatting was copied to the user's clipboard from the contents of a screenshot.">
         Text copied to Clipboard
       </message>
       <message name="IDS_ASH_SCANNER_ACTION_FAILURE_TOAST_CREATE_EVENT" desc="The message shown on a toast to indicate an error occurred when trying to add an event to the user's calendar from the contents of a screenshot.">

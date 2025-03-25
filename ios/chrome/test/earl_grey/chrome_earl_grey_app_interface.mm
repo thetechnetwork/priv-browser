@@ -893,6 +893,11 @@ NSString* SerializedValue(const base::Value* value) {
                                         visitTimestamp);
 }
 
++ (void)setHistoryServiceTitle:(NSString*)title forPage:(NSString*)URL {
+  chrome_test_util::SetPageTitle(GURL(base::SysNSStringToUTF8(URL)),
+                                 base::SysNSStringToUTF16(title));
+}
+
 + (void)deleteHistoryServiceTypedURL:(NSString*)URL {
   chrome_test_util::DeleteTypedUrlFromClient(
       GURL(base::SysNSStringToUTF8(URL)));
@@ -940,24 +945,6 @@ NSString* SerializedValue(const base::Value* value) {
 + (void)deleteAutofillProfileFromFakeSyncServerWithGUID:(NSString*)GUID {
   chrome_test_util::DeleteAutofillProfileFromFakeSyncServer(
       base::SysNSStringToUTF8(GUID));
-}
-
-+ (NSError*)waitForSyncFeatureEnabled:(BOOL)isEnabled
-                          syncTimeout:(base::TimeDelta)timeout {
-  bool success = WaitUntilConditionOrTimeout(timeout, ^{
-    ProfileIOS* profile = chrome_test_util::GetOriginalProfile();
-    DCHECK(profile);
-    syncer::SyncService* syncService =
-        SyncServiceFactory::GetForProfile(profile);
-    return syncService->IsSyncFeatureEnabled() == isEnabled;
-  });
-  if (!success) {
-    NSString* errorDescription =
-        [NSString stringWithFormat:@"Sync feature must be enabled: %@",
-                                   isEnabled ? @"YES" : @"NO"];
-    return testing::NSErrorWithLocalizedDescription(errorDescription);
-  }
-  return nil;
 }
 
 + (NSError*)waitForSyncTransportStateActiveWithTimeout:
@@ -1573,7 +1560,7 @@ int watchRunNumber = 0;
 
   UNNotificationRequest* request = [UNNotificationRequest
       requestWithIdentifier:kTipsNotificationId
-                    content:ContentForTipsNotificationType(type)
+                    content:ContentForTipsNotificationType(type, false)
                     trigger:nil];
 
   [center addNotificationRequest:request withCompletionHandler:nil];

@@ -10,6 +10,7 @@
 #include "third_party/blink/renderer/platform/heap/collection_support/heap_hash_map.h"
 #include "third_party/blink/renderer/platform/heap/garbage_collected.h"
 #include "third_party/blink/renderer/platform/heap/member.h"
+#include "third_party/blink/renderer/platform/instrumentation/memory_pressure_listener.h"
 #include "third_party/blink/renderer/platform/wtf/vector_backed_linked_list.h"
 
 namespace blink {
@@ -22,10 +23,11 @@ class FontSelectorClient;
 // This class maintains a cache that returns unique blink::Font instances from
 // equivalent blink::FontDescription instances.
 class CORE_EXPORT UniqueFontSelector
-    : public GarbageCollected<UniqueFontSelector> {
+    : public GarbageCollected<UniqueFontSelector>,
+      public MemoryPressureListener {
  public:
-  explicit UniqueFontSelector(FontSelector* base_selector);
-  void Trace(Visitor* visitor) const;
+  UniqueFontSelector(FontSelector* base_selector, bool enable_cache);
+  void Trace(Visitor* visitor) const override;
 
   const Font* FindOrCreateFont(const FontDescription& description);
   void DidSwitchFrame();
@@ -36,6 +38,9 @@ class CORE_EXPORT UniqueFontSelector
   void RegisterForInvalidationCallbacks(FontSelectorClient* client);
 
  private:
+  // MemoryPressureListener override:
+  void OnPurgeMemory() override;
+
   Member<FontSelector> base_selector_;
 
   struct CacheValue {
@@ -57,6 +62,8 @@ class CORE_EXPORT UniqueFontSelector
   // and back() points to the least recently used item.
   VectorBackedLinkedList<LruListKey> lru_list_;
   uint32_t frame_generation_ = 0;
+
+  const bool enable_cache_;
 };
 
 }  // namespace blink

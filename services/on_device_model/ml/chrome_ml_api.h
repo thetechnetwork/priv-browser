@@ -7,6 +7,7 @@
 
 #include <cstdint>
 #include <functional>
+#include <optional>
 #include <string>
 
 #include "services/on_device_model/ml/chrome_ml_types.h"
@@ -115,6 +116,10 @@ struct ChromeMLAdaptationDescriptor {
   // `max_tokens` set by the base model will be used.
   uint32_t max_tokens;
 
+  // Parameters which control the output sampling.
+  uint32_t top_k;
+  float temperature;
+
   // Whether this model will handle InputPieces containing images.
   bool enable_image_input;
 
@@ -200,8 +205,6 @@ struct ChromeMLExecuteOptions {
   const ChromeMLExecutionOutputFn* execution_output_fn;
   // Optional adaptation ID for this request.
   uint32_t* adaptation_id;
-  uint32_t top_k;
-  float temperature;
 
   const ml::InputPiece* input;
   size_t input_size;

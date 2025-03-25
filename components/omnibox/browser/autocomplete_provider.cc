@@ -12,6 +12,7 @@
 #include <algorithm>
 #include <string>
 
+#include "base/i18n/time_formatting.h"
 #include "base/notreached.h"
 #include "base/strings/string_util.h"
 #include "base/strings/utf_string_conversions.h"
@@ -89,11 +90,36 @@ const char* AutocompleteProvider::TypeToString(Type type) {
       return "UnscopedExtension";
     case TYPE_RECENTLY_CLOSED_TABS:
       return "RecentlyClosedTabs";
+    case TYPE_CONTEXTUAL_SEARCH:
+      return "ContextualSearch";
     default:
       DUMP_WILL_BE_NOTREACHED()
           << "Unhandled AutocompleteProvider::Type " << type;
       return "Unknown";
   }
+}
+
+const std::u16string AutocompleteProvider::LocalizedLastModifiedString(
+    base::Time now,
+    base::Time modified_time) {
+  // Use shorthand if the times fall on the same day or in the same year.
+  base::Time::Exploded exploded_modified_time;
+  base::Time::Exploded exploded_now;
+  modified_time.LocalExplode(&exploded_modified_time);
+  now.LocalExplode(&exploded_now);
+  if (exploded_modified_time.year == exploded_now.year) {
+    if (exploded_modified_time.month == exploded_now.month &&
+        exploded_modified_time.day_of_month == exploded_now.day_of_month) {
+      // Same local calendar day - use localized time.
+      return base::TimeFormatTimeOfDay(modified_time);
+    }
+
+    // Same year but not the same day: use abbreviated month/day ("Jan 1").
+    return base::LocalizedTimeFormatWithPattern(modified_time, "MMMd");
+  }
+
+  // No shorthand; display full MM/DD/YYYY.
+  return base::TimeFormatShortDateNumeric(modified_time);
 }
 
 void AutocompleteProvider::AddListener(AutocompleteProviderListener* listener) {
@@ -177,6 +203,8 @@ AutocompleteProvider::AsOmniboxEventProviderType() const {
       return metrics::OmniboxEventProto::UNSCOPED_EXTENSION;
     case TYPE_RECENTLY_CLOSED_TABS:
       return metrics::OmniboxEventProto::RECENTLY_CLOSED_TABS;
+    case TYPE_CONTEXTUAL_SEARCH:
+      return metrics::OmniboxEventProto::CONTEXTUAL_SEARCH_PROVIDER;
     default:
       // TODO(crbug.com/40940012) This was a NOTREACHED that we converted to
       //   help debug crbug.com/1499235 since NOTREACHED's don't log their

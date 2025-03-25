@@ -41,6 +41,14 @@ class AIManagerTest : public AITestUtils::AITestBase {
             [&] { return std::make_unique<NiceMock<MockSession>>(&session_); });
     ON_CALL(session_, GetTokenLimits())
         .WillByDefault(AITestUtils::GetFakeTokenLimits);
+    ON_CALL(session_, GetContextSizeInTokens(_, _))
+        .WillByDefault(
+            [&](optimization_guide::MultimodalMessageReadView request_metadata,
+                optimization_guide::OptimizationGuideModelSizeInTokenCallback
+                    callback) {
+              std::move(callback).Run(
+                  blink::mojom::kWritingAssistanceMaxInputTokenSize);
+            });
     ON_CALL(session_, GetOnDeviceFeatureMetadata())
         .WillByDefault(AITestUtils::GetFakeFeatureMetadata);
     ON_CALL(*mock_optimization_guide_keyed_service_,
@@ -113,8 +121,9 @@ TEST_F(AIManagerTest, AIContextBoundObjectSet) {
       blink::mojom::AILanguageModelCreateOptions::New(
           /*sampling_params=*/nullptr,
           /*system_prompt=*/std::nullopt,
+          /*initial_prompts=*/
           std::vector<blink::mojom::AILanguageModelPromptPtr>(),
-          std::vector<blink::mojom::AILanguageCodePtr>()));
+          /*expected_inputs=*/std::nullopt));
   run_loop.Run();
   ASSERT_EQ(1u, GetAIManagerContextBoundObjectSetSize());
 

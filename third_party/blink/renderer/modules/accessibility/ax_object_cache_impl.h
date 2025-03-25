@@ -335,6 +335,12 @@ class MODULES_EXPORT AXObjectCacheImpl : public AXObjectCacheBase {
                              Element*,
                              const PhysicalRect&) override;
 
+  // If the object referenced by `ax_id` is part of a canvas and had explicit
+  // bounds set, this returns the bounds for the object as well as the id of the
+  // canvas owner of this object.
+  std::optional<std::pair<PhysicalRect, AXID>> GetCanvasElementBounds(
+      AXID ax_id);
+
   void InlineTextBoxesUpdated(LayoutObject*) override;
 
   // Get the amount of time, in ms, that event processing should be deferred
@@ -735,7 +741,7 @@ class MODULES_EXPORT AXObjectCacheImpl : public AXObjectCacheBase {
     ax::mojom::blink::Action event_from_action;
     BlinkAXEventIntentsSet event_intents;
 
-    virtual ~TreeUpdateParams() = default;
+    ~TreeUpdateParams() = default;
     void Trace(Visitor* visitor) const { visitor->Trace(node); }
     std::string ToString();
   };
@@ -1335,6 +1341,10 @@ class MODULES_EXPORT AXObjectCacheImpl : public AXObjectCacheBase {
   // All the callbacks passed to `ScheduleAXUpdate` that `CompleteAXUpdate` has
   // to call once it's done.
   Vector<base::OnceClosure> ready_callbacks_;
+
+  // Holds the bounds as well as the canvas owner id of objects which had values
+  // explicitly set.
+  HashMap<AXID, std::pair<PhysicalRect, AXID>> ax_id_to_explicit_bounds_;
 };
 
 // This is the only subclass of AXObjectCache.

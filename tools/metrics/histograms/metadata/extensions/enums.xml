@@ -1358,7 +1358,7 @@ Called by update_extension_histograms.py.-->
   <int value="555" label="SYNCFILESYSTEM_GETSERVICESTATUS"/>
   <int value="556" label="ECHOPRIVATE_SETOFFERINFO"/>
   <int value="557" label="ECHOPRIVATE_GETOFFERINFO"/>
-  <int value="558" label="DEVELOPERPRIVATE_ISPROFILEMANAGED"/>
+  <int value="558" label="DELETED_DEVELOPERPRIVATE_ISPROFILEMANAGED"/>
   <int value="559" label="DELETED_FILEMANAGERPRIVATE_INSTALLWEBSTOREITEM"/>
   <int value="560" label="FILEMANAGERPRIVATEINTERNAL_STARTCOPY"/>
   <int value="561" label="FILEMANAGERPRIVATE_CANCELCOPY"/>
@@ -2814,6 +2814,7 @@ Called by update_extension_histograms.py.-->
       label="AUTOFILLPRIVATE_GETALLATTRIBUTETYPESFORENTITYTYPENAME"/>
   <int value="1930" label="AUTOFILLPRIVATE_GETENTITYINSTANCEBYGUID"/>
   <int value="1931" label="AUTOFILLPRIVATE_GETPAYOVERTIMEISSUERLIST"/>
+  <int value="1932" label="AUTOFILLPRIVATE_SETAUTOFILLAIOPTINSTATUS"/>
 </enum>
 
 <!-- LINT.ThenChange(//extensions/browser/extension_function_histogram_value.h:HistogramValue) -->
@@ -3379,6 +3380,17 @@ Called by update_extension_permission.py.-->
   <int value="12" label="Bad Update specification"/>
   <int value="13" label="Bad App Status"/>
 </enum>
+
+<!-- LINT.IfChange(ManifestSettingsOverrideType) -->
+
+<enum name="ManifestSettingsOverrideType">
+  <int value="0" label="NoOverride"/>
+  <int value="1" label="SearchEngine"/>
+  <int value="2" label="NewTabPage"/>
+  <int value="3" label="SearchEngineAndNewTabPage"/>
+</enum>
+
+<!-- LINT.ThenChange(/chrome/browser/extensions/unpacked_installer.h:ManifestSettingsOverrideType) -->
 
 <enum name="ManifestVersionPopulationSplit">
   <int value="0" label="No extensions"/>

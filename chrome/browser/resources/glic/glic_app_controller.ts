@@ -109,12 +109,12 @@ export class GlicAppController implements PageInterface, WebviewDelegate,
 
   // WebviewDelegate implementation.
   webviewUnresponsive(): void {
-    console.error('webview unresponsive');
+    console.warn('webview unresponsive');
     this.setState(WebUiState.kUnresponsive);
   }
 
   webviewError(reason: string): void {
-    console.error(`webview exit. reason: ${reason}`);
+    console.warn(`webview exit. reason: ${reason}`);
     this.setState(WebUiState.kError);
   }
 
@@ -129,6 +129,9 @@ export class GlicAppController implements PageInterface, WebviewDelegate,
         break;
       case 'regular':
         $.guestPanel.classList.toggle('show-header', false);
+        if (this.state === WebUiState.kReady) {
+          this.setState(WebUiState.kBeginLoad);
+        }
         break;
     }
   }
@@ -250,7 +253,7 @@ export class GlicAppController implements PageInterface, WebviewDelegate,
     // ways to avoid it.
     const {success} = await this.browserProxy.handler.prepareForClient();
     if (!success) {
-      console.error('prepareForClient in beginLoad() failed.');
+      console.warn('prepareForClient in beginLoad() failed.');
       this.setState(WebUiState.kError);
       return;
     }
@@ -289,7 +292,7 @@ export class GlicAppController implements PageInterface, WebviewDelegate,
     // `kMaxWaitTimeMs`. Switch to error state at that time unless interrupted
     // by `webClientReady`.
     this.loadingTimer = setTimeout(() => {
-      console.error('Exceeded timeout in finishLoading');
+      console.warn('Exceeded timeout in finishLoading');
       this.setState(WebUiState.kError);
     }, kMaxWaitTimeMs - kMinHoldLoadingTimeMs);
   }

@@ -226,7 +226,6 @@ class PDFiumEngine : public DocumentLoader::Client, public IFSDK_PAUSE {
   void RotateCounterclockwise();
   bool IsReadOnly() const;
   void SetReadOnly(bool read_only);
-  bool IsTagged() const;
   void SetDocumentLayout(DocumentLayout::PageSpread page_spread);
   void DisplayAnnotations(bool display);
 
@@ -369,16 +368,21 @@ class PDFiumEngine : public DocumentLoader::Client, public IFSDK_PAUSE {
   // Returns the focus info of current focus item.
   AccessibilityFocusInfo GetFocusInfo();
 
-  bool IsPDFDocTagged();
+  // Returns whether the "/Marked" attribute in the "MarkInfo" dictionary in the
+  // PDF's catalog is set to true. This should indicate whether the PDF includes
+  // a tree of structural elements which describe the logical organization of
+  // the document, e.g. into sections and headings, and describe special
+  // elements, e.g. headings and table cells.
+  virtual bool IsPDFDocTagged() const;
 
   virtual uint32_t GetLoadedByteSize();
 
-  // Copies data from `doc_loader_` into `buffer`.
+  // Copies data from `doc_loader_` into `buffer` starting from `offset`.
   // - `buffer` is completely filled, so its size should be less than or equal
-  //   to GetLoadedByteSize().
+  //   to GetLoadedByteSize() - `offset`.
   //
   // Returns true on success and writes into `buffer. Returns false on failure.
-  virtual bool ReadLoadedBytes(base::span<uint8_t> buffer);
+  virtual bool ReadLoadedBytes(uint32_t offset, base::span<uint8_t> buffer);
 
   // Requests rendering the page at `page_index` as a thumbnail at a given
   // `device_pixel_ratio`. Runs `send_callback` with the rendered thumbnail.

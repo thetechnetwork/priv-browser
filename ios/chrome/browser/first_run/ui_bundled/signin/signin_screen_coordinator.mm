@@ -97,7 +97,7 @@
   self.viewController.TOSHandler = TOSHandler;
   self.viewController.delegate = self;
 
-  ProfileIOS* profile = self.browser->GetProfile()->GetOriginalProfile();
+  ProfileIOS* profile = self.profile->GetOriginalProfile();
 
   self.authenticationService =
       AuthenticationServiceFactory::GetForProfile(profile);
@@ -133,6 +133,8 @@
 }
 
 - (void)stop {
+  [self.browser->GetCommandDispatcher()
+      stopDispatchingForProtocol:@protocol(TOSCommands)];
   [self stopIdentityChooserCoordinator];
   self.delegate = nil;
   self.viewController = nil;
@@ -203,11 +205,11 @@
       [[AuthenticationFlow alloc] initWithBrowser:self.browser
                                          identity:self.mediator.selectedIdentity
                                       accessPoint:_accessPoint
+                             precedingHistorySync:YES
                                 postSignInActions:PostSignInActionSet()
                          presentingViewController:self.viewController
                                        anchorView:nil
                                        anchorRect:CGRectNull];
-  authenticationFlow.precedingHistorySync = YES;
   __weak __typeof(self) weakSelf = self;
   ProceduralBlock completion = ^() {
     [weakSelf finishPresentingWithSignIn:YES];

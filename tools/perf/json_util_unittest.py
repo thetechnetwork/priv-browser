@@ -1072,14 +1072,21 @@ class JsonUtilTest(unittest.TestCase):
           'win-10-perf',
           'ChromiumPerf',
           False,
-          ['chrome-perf-public'],
+          ['chrome-perf-public', 'chrome-perf-non-public'],
       ),
       (
           'internal_builder',
           'win-11-perf',
           'ChromiumPerf',
           False,
-          ['chrome-perf-public', 'chrome-perf-non-public'],
+          ['chrome-perf-non-public'],
+      ),
+      (
+          'another_internal_builder',
+          'android-pixel6-perf',
+          'ChromiumPerf',
+          False,
+          ['chrome-perf-non-public'],
       ),
       (
           'experiment_only',
@@ -1137,6 +1144,108 @@ class JsonUtilTest(unittest.TestCase):
     # pylint: disable=protected-access
     got= json_util._get_improvement_direction(unit)
     self.assertEqual(got, expected)
+
+
+  @parameterized.expand([
+      ('none', None, True),
+      (
+          'with_empty_results',
+          {
+              'version': 1,
+              'git_hash': 'CP:1405221',
+              'key': {
+                  'master': 'ChromiumPerf',
+                  'bot': 'win-10-perf',
+                  'benchmark': 'speedometer3',
+              },
+              'results': [],
+              'links': {
+                  'Build Page':
+                  ('https://ci.chromium.org/ui/p/chrome/builders/ci/win-10-perf/39376'
+                   ),
+                  'OS Version':
+                  '10.0.19045',
+                  'Bot Id':
+                  'win-222-e504',
+                  'Chromium Commit Position':
+                  'https://crrev.com/1405221',
+                  'V8': ('https://chromium.googlesource.com/v8/v8/+/'
+                         '60e67b93909a1c858305b27111d9988f94fff0f8'),
+                  'WebRTC': ('https://webrtc.googlesource.com/src/+/'
+                             '1e19045eaa63d00a3b4017fd43c5b502c6ed73a2'),
+              }
+          },
+          True,
+      ),
+      (
+          'with_some_results',
+          {
+              'version':
+              1,
+              'git_hash':
+              'CP:1405221',
+              'key': {
+                  'master': 'ChromiumPerf',
+                  'bot': 'win-10-perf',
+                  'benchmark': 'speedometer3',
+              },
+              'results': [{
+                  'measurements': {
+                      'stat': [
+                          {
+                              'value': 'value',
+                              'measurement': 140.6900000002235
+                          },
+                          {
+                              'value': 'error',
+                              'measurement': 13.676537086499565
+                          },
+                          {
+                              'value': 'count',
+                              'measurement': 10.0
+                          },
+                          {
+                              'value': 'max',
+                              'measurement': 172.90000000130385
+                          },
+                          {
+                              'value': 'min',
+                              'measurement': 130.90000000037253
+                          },
+                          {
+                              'value': 'sum',
+                              'measurement': 1406.9000000022352
+                          },
+                      ]
+                  },
+                  'key': {
+                      'improvement_direction': 'down',
+                      'unit': 'ms_smallerIsBetter',
+                      'test': 'Editor-TipTap',
+                      'subtest_1': 'Speedometer3',
+                  },
+              }],
+              'links': {
+                  'Build Page':
+                  ('https://ci.chromium.org/ui/p/chrome/builders/ci/win-10-perf/39376'
+                   ),
+                  'OS Version':
+                  '10.0.19045',
+                  'Bot Id':
+                  'win-222-e504',
+                  'Chromium Commit Position':
+                  'https://crrev.com/1405221',
+                  'V8': ('https://chromium.googlesource.com/v8/v8/+/'
+                         '60e67b93909a1c858305b27111d9988f94fff0f8'),
+                  'WebRTC': ('https://webrtc.googlesource.com/src/+/'
+                             '1e19045eaa63d00a3b4017fd43c5b502c6ed73a2'),
+              }
+          },
+          False,
+      )
+  ])
+  def test_is_empty(self, _, data, expected):
+    self.assertEqual(json_util.is_empty(data), expected)
 
 
 if __name__ == '__main__':

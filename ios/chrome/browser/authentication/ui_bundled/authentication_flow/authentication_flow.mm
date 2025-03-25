@@ -32,7 +32,6 @@
 #import "ios/chrome/browser/flags/ios_chrome_flag_descriptions.h"
 #import "ios/chrome/browser/ntp/ui_bundled/new_tab_page_feature.h"
 #import "ios/chrome/browser/policy/model/browser_policy_connector_ios.h"
-#import "ios/chrome/browser/policy/model/cloud/user_policy_switch.h"
 #import "ios/chrome/browser/shared/coordinator/scene/scene_state.h"
 #import "ios/chrome/browser/shared/model/application_context/application_context.h"
 #import "ios/chrome/browser/shared/model/browser/browser.h"
@@ -59,9 +58,6 @@ using signin_ui::SigninCompletionCallback;
 namespace {
 
 // The states of the sign-in flow state machine.
-// TODO(crbug.com/403183877): Need to remove steps from `kSignOutIfNeeded` to
-// `kCompleteWithFailure` can be replaced with `AuthenticationFlowInProfile`
-// even without multi profile.
 enum class AuthenticationState {
   kBegin,
   // Check if there are unsynced data with the primary account, in the current
@@ -75,12 +71,7 @@ enum class AuthenticationState {
   kShowManagedConfirmationIfNeeded,
   kConvertPersonalProfileToManagedIfNeeded,
   kSwitchProfileIfNeeded,
-  kSignOutIfNeeded,
-  kSignIn,
-  kRegisterForUserPolicy,
-  kFetchUserPolicy,
-  kFetchCapabilities,
-  kCompleteWithSuccess,
+  kHandOverToAuthenticationFlowInProfile,
   kCompleteWithFailure,
   kCleanupBeforeDone,
   kDone,
@@ -205,6 +196,38 @@ void RecordIOSIdentityAvailableInProfile(
                                 identity_available);
 }
 
+// Enum for `Signin.IOSAccountSwitchType` histogram.
+// Entries should not be renumbered and numeric values should never be reused.
+// LINT.IfChange(IOSAccountSwitchType)
+enum class IOSAccountSwitchType : int {
+  kPersonalToPersonal = 0,
+  kPersonalToManaged = 1,
+  kManagedToPersonal = 2,
+  kManagedToManaged = 3,
+  kMaxValue = kManagedToManaged
+};
+// LINT.ThenChange(//tools/metrics/histograms/metadata/signin/enums.xml:IOSAccountSwitchType)
+
+IOSAccountSwitchType GetAccountSwitchType(bool originalIdentityWasManaged,
+                                          bool newIdentityIsManaged) {
+  if (!originalIdentityWasManaged && !newIdentityIsManaged) {
+    return IOSAccountSwitchType::kPersonalToPersonal;
+  } else if (!originalIdentityWasManaged && newIdentityIsManaged) {
+    return IOSAccountSwitchType::kPersonalToManaged;
+  } else if (originalIdentityWasManaged && !newIdentityIsManaged) {
+    return IOSAccountSwitchType::kManagedToPersonal;
+  } else {
+    return IOSAccountSwitchType::kManagedToManaged;
+  }
+}
+
+void RecordAccountSwitchTypeMetric(bool originalIdentityWasManaged,
+                                   bool newIdentityIsManaged) {
+  base::UmaHistogramEnumeration(
+      "Signin.IOSAccountSwitchType",
+      GetAccountSwitchType(originalIdentityWasManaged, newIdentityIsManaged));
+}
+
 // Records histogram for the unsync data.
 void RecordUnsyncedDataHistogramIfNeeded(UnsyncedDataTypeHistogram histogram,
                                          syncer::DataTypeSet set) {
@@ -249,7 +272,6 @@ void RecordUnsyncedDataHistogramIfNeeded(UnsyncedDataTypeHistogram histogram,
 
   // State machine tracking.
   AuthenticationState _state;
-  BOOL _didSignIn;
   CancelationReason _cancelationReason;
   // YES if the personal profile should be converted to a managed (work) profile
   // as part of the signin flow. Can only be true if the to-be-signed-in account
@@ -259,24 +281,15 @@ void RecordUnsyncedDataHistogramIfNeeded(UnsyncedDataTypeHistogram histogram,
   raw_ptr<Browser> _browser;
   id<SystemIdentity> _identityToSignIn;
   signin_metrics::AccessPoint _accessPoint;
+  BOOL _precedingHistorySync;
   NSString* _identityToSignInHostedDomain;
 
-  // Token to have access to user policies from dmserver.
-  NSString* _dmToken;
-  // ID of the client that is registered for user policy.
-  NSString* _clientID;
-  // List of IDs that represents the domain of the user. The list will be used
-  // to compare with a similiar list from device mangement to understand whether
-  // user and device are managed by the same domain.
-  NSArray<NSString*>* _userAffiliationIDs;
+  raw_ptr<Browser> _browserForAuthenticationFlowInProfile;
 
   // This AuthenticationFlow keeps a reference to `self` while a sign-in flow is
   // is in progress to ensure it outlives any attempt to destroy it in
   // `_signInCompletion`.
   AuthenticationFlow* _selfRetainer;
-
-  // Capabilities fetcher for the subsequent History Sync Opt-In screen.
-  HistorySyncCapabilitiesFetcher* _capabilitiesFetcher;
 
   // Value of the ProfileSeparationDataMigrationSettings for
   // `_identityToSignin`. This is used to know if the user can convert an
@@ -284,16 +297,14 @@ void RecordUnsyncedDataHistogramIfNeeded(UnsyncedDataTypeHistogram histogram,
   policy::ProfileSeparationDataMigrationSettings
       _profileSeparationDataMigrationSettings;
 
-  // `YES` if the profile switching is done.
-  BOOL _didSwitchProfile;
   // List of unsynced data types in the current profile. If there is no primary
   // account the set is empty.
   // The value is set during `kCheckUnsyncedData` step.
   std::optional<syncer::DataTypeSet> _unsyncedDataTypes;
-  // The lifetime of this ScopedClosureRunner denotes a batch of primary account
-  // changes. UI listens to batched changes to avoid visual artifacts during an
-  // account switch.
-  base::ScopedClosureRunner _accountSwitchingBatchClosureRunner;
+
+  // For metrics: Whether there was a managed primary account at the beginning
+  // of the flow. Set to nullopt if there was no primary account at all.
+  std::optional<bool> _wasPrimaryAccountManaged;
 }
 
 @synthesize handlingError = _handlingError;
@@ -304,6 +315,7 @@ void RecordUnsyncedDataHistogramIfNeeded(UnsyncedDataTypeHistogram histogram,
 - (instancetype)initWithBrowser:(Browser*)browser
                        identity:(id<SystemIdentity>)identity
                     accessPoint:(signin_metrics::AccessPoint)accessPoint
+           precedingHistorySync:(BOOL)precedingHistorySync
               postSignInActions:(PostSignInActionSet)postSignInActions
        presentingViewController:(UIViewController*)presentingViewController
                      anchorView:(UIView*)anchorView
@@ -315,6 +327,7 @@ void RecordUnsyncedDataHistogramIfNeeded(UnsyncedDataTypeHistogram histogram,
     _browser = browser;
     _identityToSignIn = identity;
     _accessPoint = accessPoint;
+    _precedingHistorySync = precedingHistorySync;
     _postSignInActions = postSignInActions;
     _presentingViewController = presentingViewController;
     _anchorView = anchorView;
@@ -323,6 +336,16 @@ void RecordUnsyncedDataHistogramIfNeeded(UnsyncedDataTypeHistogram histogram,
     _cancelationReason = CancelationReason::kNotCanceled;
     _profileSeparationDataMigrationSettings =
         policy::ProfileSeparationDataMigrationSettings::USER_OPT_IN;
+
+    ProfileIOS* profile = [self originalProfile];
+    AuthenticationService* authenticationService =
+        AuthenticationServiceFactory::GetForProfile(profile);
+    if (authenticationService->HasPrimaryIdentity(
+            signin::ConsentLevel::kSignin)) {
+      _wasPrimaryAccountManaged =
+          authenticationService->HasPrimaryIdentityManaged(
+              signin::ConsentLevel::kSignin);
+    }
   }
   return self;
 }
@@ -334,14 +357,13 @@ void RecordUnsyncedDataHistogramIfNeeded(UnsyncedDataTypeHistogram histogram,
   _signInCompletion = [completion copy];
   _selfRetainer = self;
   // Kick off the state machine.
-  if (!_performer) {
-    id<ChangeProfileCommands> changeProfileHandler = HandlerForProtocol(
-        _browser->GetSceneState().profileState.appState.appCommandDispatcher,
-        ChangeProfileCommands);
-    _performer = [[AuthenticationFlowPerformer alloc]
-            initWithDelegate:self
-        changeProfileHandler:changeProfileHandler];
-  }
+  id<ChangeProfileCommands> changeProfileHandler = HandlerForProtocol(
+      _browser->GetSceneState().profileState.appState.appCommandDispatcher,
+      ChangeProfileCommands);
+  _performer = [[AuthenticationFlowPerformer alloc]
+          initWithDelegate:self
+      changeProfileHandler:changeProfileHandler];
+
   // Make sure -[AuthenticationFlow startSignInWithCompletion:] doesn't call
   // the completion block synchronously.
   // Related to http://crbug.com/1246480.
@@ -383,15 +405,9 @@ void RecordUnsyncedDataHistogramIfNeeded(UnsyncedDataTypeHistogram histogram,
     case AuthenticationState::kShowManagedConfirmationIfNeeded:
     case AuthenticationState::kConvertPersonalProfileToManagedIfNeeded:
     case AuthenticationState::kSwitchProfileIfNeeded:
-    case AuthenticationState::kSignOutIfNeeded:
-    case AuthenticationState::kSignIn:
-    case AuthenticationState::kRegisterForUserPolicy:
-    case AuthenticationState::kFetchUserPolicy:
-    case AuthenticationState::kFetchCapabilities:
+    case AuthenticationState::kHandOverToAuthenticationFlowInProfile:
       return AuthenticationState::kCompleteWithFailure;
-    case AuthenticationState::kCompleteWithSuccess:
     case AuthenticationState::kCompleteWithFailure:
-      return AuthenticationState::kCleanupBeforeDone;
     case AuthenticationState::kCleanupBeforeDone:
     case AuthenticationState::kDone:
       return AuthenticationState::kDone;
@@ -421,45 +437,12 @@ void RecordUnsyncedDataHistogramIfNeeded(UnsyncedDataTypeHistogram histogram,
     case AuthenticationState::kConvertPersonalProfileToManagedIfNeeded:
       return AuthenticationState::kSwitchProfileIfNeeded;
     case AuthenticationState::kSwitchProfileIfNeeded:
-      if (_didSwitchProfile) {
-        // Once the profile switch is done, there is nothing more to do in this
-        // profile. The `kCompleteWithSuccess` should be skipped. The completion
-        // block has been passed to `AuthenticationFlowInProfile`.
-        CHECK(!_signInCompletion);
-        return AuthenticationState::kCleanupBeforeDone;
-      }
-      return AuthenticationState::kSignOutIfNeeded;
-    case AuthenticationState::kSignOutIfNeeded:
-      return AuthenticationState::kSignIn;
-    case AuthenticationState::kSignIn:
-      if (policy::IsAnyUserPolicyFeatureEnabled() &&
-          _identityToSignInHostedDomain.length > 0) {
-        return AuthenticationState::kRegisterForUserPolicy;
-      } else if ([self shouldFetchCapabilities]) {
-        return AuthenticationState::kFetchCapabilities;
-      } else {
-        return AuthenticationState::kCompleteWithSuccess;
-      }
-    case AuthenticationState::kRegisterForUserPolicy:
-      if (!_dmToken.length || !_clientID.length) {
-        // Skip fetching user policies when registration failed.
-        if ([self shouldFetchCapabilities]) {
-          return AuthenticationState::kFetchCapabilities;
-        } else {
-          return AuthenticationState::kCompleteWithSuccess;
-        }
-      }
-      // Fetch user policies when registration is successful.
-      return AuthenticationState::kFetchUserPolicy;
-    case AuthenticationState::kFetchUserPolicy:
-      if ([self shouldFetchCapabilities]) {
-        return AuthenticationState::kFetchCapabilities;
-      } else {
-        return AuthenticationState::kCompleteWithSuccess;
-      }
-    case AuthenticationState::kFetchCapabilities:
-      return AuthenticationState::kCompleteWithSuccess;
-    case AuthenticationState::kCompleteWithSuccess:
+      return AuthenticationState::kHandOverToAuthenticationFlowInProfile;
+    case AuthenticationState::kHandOverToAuthenticationFlowInProfile:
+      // The completion block has been passed to `AuthenticationFlowInProfile`,
+      // and the flow will continue there.
+      CHECK(!_signInCompletion);
+      return AuthenticationState::kCleanupBeforeDone;
     case AuthenticationState::kCompleteWithFailure:
       return AuthenticationState::kCleanupBeforeDone;
     case AuthenticationState::kCleanupBeforeDone:
@@ -510,34 +493,14 @@ void RecordUnsyncedDataHistogramIfNeeded(UnsyncedDataTypeHistogram histogram,
       [self switchProfileIfNeededStep];
       return;
 
-    case AuthenticationState::kSignOutIfNeeded:
-      [self signOutIfNeededStep];
+    case AuthenticationState::kHandOverToAuthenticationFlowInProfile:
+      [self handOverToAuthenticationFlowInProfileStep];
       return;
 
-    case AuthenticationState::kSignIn:
-      [self signInStep];
-      return;
-
-    case AuthenticationState::kRegisterForUserPolicy:
-      [_performer registerUserPolicy:profile forIdentity:_identityToSignIn];
-      return;
-
-    case AuthenticationState::kFetchUserPolicy:
-      [_performer fetchUserPolicy:profile
-                      withDmToken:_dmToken
-                         clientID:_clientID
-               userAffiliationIDs:_userAffiliationIDs
-                         identity:_identityToSignIn];
-      return;
-    case AuthenticationState::kFetchCapabilities:
-      [self fetchCapabilities];
-      return;
-    case AuthenticationState::kCompleteWithSuccess:
-      [self completeWithSuccessStep];
-      return;
     case AuthenticationState::kCompleteWithFailure:
       [self completeWithFailureStep];
       return;
+
     case AuthenticationState::kCleanupBeforeDone: {
       // Clean up asynchronously to ensure that `self` does not die while
       // the flow is running.
@@ -682,17 +645,12 @@ void RecordUnsyncedDataHistogramIfNeeded(UnsyncedDataTypeHistogram histogram,
 // If `_identityToSignIn` doesn't exist anymore, an error is generated.
 // If the identity is assigned to the current profile this step is a no-op.
 - (void)switchProfileIfNeededStep {
-  CHECK(!_didSwitchProfile);
   CHECK(_unsyncedDataTypes.has_value());
   ProfileIOS* profile = [self originalProfile];
   signin::IdentityManager* identityManager =
       IdentityManagerFactory::GetForProfile(profile);
   RecordIOSIdentityAvailableInProfile(_identityToSignIn.gaiaID, identityManager,
                                       profile->GetProfileName());
-  if (!AreSeparateProfilesForManagedAccountsEnabled()) {
-    [self continueFlow];
-    return;
-  }
   std::vector<AccountInfo> accountsOnDevice =
       identityManager->GetAccountsOnDevice();
   BOOL isValidIdentityOnDevice = base::Contains(
@@ -714,6 +672,7 @@ void RecordUnsyncedDataHistogramIfNeeded(UnsyncedDataTypeHistogram histogram,
     RecordUnsyncedDataHistogramIfNeeded(
         UnsyncedDataTypeHistogram::kUnsyncedDataOnAccountSwitching,
         _unsyncedDataTypes.value());
+    _browserForAuthenticationFlowInProfile = _browser;
     [self continueFlow];
     return;
   }
@@ -725,93 +684,31 @@ void RecordUnsyncedDataHistogramIfNeeded(UnsyncedDataTypeHistogram histogram,
                                sceneState:sceneState];
 }
 
-// Signs out, if the user is already signed in with a different identity.
-// Otherwise, this step does nothing and the flow continues to the next step.
-- (void)signOutIfNeededStep {
-  ProfileIOS* profile = [self originalProfile];
-  AuthenticationService* authenticationService =
-      AuthenticationServiceFactory::GetForProfile(profile);
-  id<SystemIdentity> currentIdentity =
-      authenticationService->GetPrimaryIdentity(signin::ConsentLevel::kSignin);
-  if (!currentIdentity || [currentIdentity isEqual:_identityToSignIn]) {
-    // No need to sign out.
-    [self continueFlow];
-    return;
+// Hands the sign-in flow over to `AuthenticationFlowInProfile`. This step is
+// only reached when the identity is in the current profile - either because it
+// was there in the first place, or `AuthenticationFlow` has switched to the
+// appropriate profile.
+- (void)handOverToAuthenticationFlowInProfileStep {
+  CHECK(_browserForAuthenticationFlowInProfile);
+  BOOL isManagedIdentity = _identityToSignInHostedDomain.length > 0;
+  if (_wasPrimaryAccountManaged.has_value()) {
+    RecordAccountSwitchTypeMetric(_wasPrimaryAccountManaged.value(),
+                                  isManagedIdentity);
   }
-  signin::IdentityManager* identityManager =
-      IdentityManagerFactory::GetForProfile(profile);
-  _accountSwitchingBatchClosureRunner =
-      identityManager->StartBatchOfPrimaryAccountChanges();
-  [_performer signOutForAccountSwitchWithProfile:profile];
-}
 
-// Sets the primary identity for the current profile.
-- (void)signInStep {
-  ProfileIOS* profile = [self originalProfile];
-  id<SystemIdentity> currentIdentity =
-      AuthenticationServiceFactory::GetForProfile(profile)->GetPrimaryIdentity(
-          signin::ConsentLevel::kSignin);
-  if ([currentIdentity isEqual:_identityToSignIn]) {
-    // The user is already signed in with the right identity.
-    [self continueFlow];
-    return;
-  }
-  signin::IdentityManager* identityManager =
-      IdentityManagerFactory::GetForProfile(profile);
-  std::vector<CoreAccountInfo> accountsInProfile =
-      identityManager->GetAccountsWithRefreshTokens();
-  BOOL isValidIdentityInProfile =
-      base::Contains(accountsInProfile, GaiaId(_identityToSignIn.gaiaID),
-                     &CoreAccountInfo::gaia);
-  if (isValidIdentityInProfile) {
-    [_performer signInIdentity:_identityToSignIn
-                 atAccessPoint:self.accessPoint
-                currentProfile:profile];
-    _didSignIn = YES;
-    [self continueFlow];
-  } else {
-    // Handle the case where the identity is no longer valid.
-    NSError* error = ios::provider::CreateMissingIdentitySigninError();
-    [self handleAuthenticationError:error];
-  }
-}
-
-// Fetches capabilities on successful authentication for the upcoming History
-// Sync Opt-In screen.
-- (void)fetchCapabilities {
-  CHECK([self shouldFetchCapabilities]);
-  ProfileIOS* profile = [self originalProfile];
-
-  // Create the capability fetcher and start fetching capabilities.
-  __weak __typeof(self) weakSelf = self;
-  _capabilitiesFetcher = [[HistorySyncCapabilitiesFetcher alloc]
-      initWithIdentityManager:IdentityManagerFactory::GetForProfile(profile)];
-
-  [_capabilitiesFetcher
-      startFetchingRestrictionCapabilityWithCallback:base::BindOnce(^(
-                                                         signin::Tribool
-                                                             capability) {
-        // The capability value is ignored.
-        [weakSelf continueFlow];
-      })];
-}
-
-// Runs `_signInCompletion` asynchronously when the flow is successful.
-- (void)completeWithSuccessStep {
-  DCHECK(_signInCompletion)
-      << "`completeSignInWithResult` should not be called twice.";
-  _accountSwitchingBatchClosureRunner.RunAndReset();
-  signin_metrics::SigninAccountType accountType =
-      (_identityToSignInHostedDomain.length > 0)
-          ? signin_metrics::SigninAccountType::kManaged
-          : signin_metrics::SigninAccountType::kRegular;
-  signin_metrics::LogSigninWithAccountType(accountType);
-  SigninCompletionCallback signInCompletion = _signInCompletion;
+  // The sign-in flow is passed to `authenticationFlowInProfile`, with the
+  // completion block. `AuthenticationFlowInProfile` retains itself until the
+  // sign-in is done. There is no need to own this instance.
+  AuthenticationFlowInProfile* authenticationFlowInProfile =
+      [[AuthenticationFlowInProfile alloc]
+               initWithBrowser:_browserForAuthenticationFlowInProfile
+                      identity:_identityToSignIn
+             isManagedIdentity:isManagedIdentity
+                   accessPoint:_accessPoint
+          precedingHistorySync:_precedingHistorySync
+             postSignInActions:self.postSignInActions];
+  [authenticationFlowInProfile startSignInWithCompletion:_signInCompletion];
   _signInCompletion = nil;
-  signInCompletion(SigninCoordinatorResult::SigninCoordinatorResultSuccess);
-  [_performer completePostSignInActions:_postSignInActions
-                           withIdentity:_identityToSignIn
-                                browser:_browser];
   [self continueFlow];
 }
 
@@ -821,11 +718,6 @@ void RecordUnsyncedDataHistogramIfNeeded(UnsyncedDataTypeHistogram histogram,
   // of the flow, this primary identity should be restored if possible.
   DCHECK(_signInCompletion)
       << "`completeSignInWithResult` should not be called twice.";
-  if (_didSignIn) {
-    ProfileIOS* profile = [self originalProfile];
-    [_performer signOutImmediatelyFromProfile:profile];
-  }
-  _accountSwitchingBatchClosureRunner.RunAndReset();
   SigninCoordinatorResult result;
   switch (_cancelationReason) {
     case CancelationReason::kFailed:
@@ -957,32 +849,17 @@ void RecordUnsyncedDataHistogramIfNeeded(UnsyncedDataTypeHistogram histogram,
 - (void)didSwitchToProfileWithSuccess:(BOOL)success
                     newProfileBrowser:(Browser*)newProfileBrowser {
   CHECK(AreSeparateProfilesForManagedAccountsEnabled());
-  CHECK(!_didSwitchProfile);
   if (!success) {
     NSError* error = ios::provider::CreateMissingIdentitySigninError();
     [self handleAuthenticationError:error];
     return;
   }
-  // TODO(crbug.com/375605482): Need to block user until
-  // `AuthenticationFlowInProfile` is done? Probably with a blur animation.
   // With the profile switching `_browser` and `_presentingViewController` are
   // not valid anymore.
   _browser = nullptr;
   _presentingViewController = nil;
-  // The sign-in flow is passed to `authenticationFlowInProfile`, with the
-  // completion block. `AuthenticationFlowInProfile` retains itself until the
-  // sign-in is done. There is no need to own this instance.
-  AuthenticationFlowInProfile* authenticationFlowInProfile =
-      [[AuthenticationFlowInProfile alloc]
-            initWithBrowser:newProfileBrowser
-                   identity:_identityToSignIn
-          isManagedIdentity:_identityToSignInHostedDomain.length > 0
-                accessPoint:_accessPoint
-          postSignInActions:self.postSignInActions];
-  authenticationFlowInProfile.precedingHistorySync = self.precedingHistorySync;
-  [authenticationFlowInProfile startSignInWithCompletion:_signInCompletion];
-  _signInCompletion = nil;
-  _didSwitchProfile = YES;
+
+  _browserForAuthenticationFlowInProfile = newProfileBrowser;
   [self continueFlow];
 }
 
@@ -990,18 +867,11 @@ void RecordUnsyncedDataHistogramIfNeeded(UnsyncedDataTypeHistogram histogram,
                                    clientID:(NSString*)clientID
                          userAffiliationIDs:
                              (NSArray<NSString*>*)userAffiliationIDs {
-  DCHECK_EQ(AuthenticationState::kRegisterForUserPolicy, _state);
-
-  _dmToken = dmToken;
-  _clientID = clientID;
-  _userAffiliationIDs = userAffiliationIDs;
-  [self continueFlow];
+  NOTREACHED();
 }
 
 - (void)didFetchUserPolicyWithSuccess:(BOOL)success {
-  DCHECK_EQ(AuthenticationState::kFetchUserPolicy, _state);
-  DLOG_IF(ERROR, !success) << "Error fetching policy for user";
-  [self continueFlow];
+  NOTREACHED();
 }
 
 - (void)didMakePersonalProfileManaged {
@@ -1020,32 +890,6 @@ void RecordUnsyncedDataHistogramIfNeeded(UnsyncedDataTypeHistogram histogram,
 
 - (PrefService*)prefs {
   return [self originalProfile]->GetPrefs();
-}
-
-// Return YES if capabilities should be fetched for the History Sync screen.
-- (BOOL)shouldFetchCapabilities {
-  if (!self.precedingHistorySync) {
-    return NO;
-  }
-
-  syncer::SyncService* syncService =
-      SyncServiceFactory::GetForProfile([self originalProfile]);
-  syncer::SyncUserSettings* userSettings = syncService->GetUserSettings();
-
-  if (userSettings->GetSelectedTypes().HasAll(
-          {syncer::UserSelectableType::kHistory,
-           syncer::UserSelectableType::kTabs})) {
-    // History Opt-In is already set and the screen won't be shown.
-    return NO;
-  }
-
-  return YES;
-}
-
-#pragma mark - Used for testing
-
-- (void)setPerformerForTesting:(AuthenticationFlowPerformer*)performer {
-  _performer = performer;
 }
 
 @end

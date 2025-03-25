@@ -322,7 +322,7 @@
   [sceneState addObserver:self];
 
   // Configures incognito NTP if user is in incognito mode.
-  if (self.browser->GetProfile()->IsOffTheRecord()) {
+  if (self.profile->IsOffTheRecord()) {
     DCHECK(!self.incognitoViewController);
     UrlLoadingBrowserAgent* URLLoader =
         UrlLoadingBrowserAgent::FromBrowser(self.browser);
@@ -355,7 +355,7 @@
 
   // Update the feed if the account is subject to parental controls.
   signin::IdentityManager* identityManager =
-      IdentityManagerFactory::GetForProfile(self.browser->GetProfile());
+      IdentityManagerFactory::GetForProfile(self.profile);
   signin::Tribool capability =
       supervised_user::IsPrimaryAccountSubjectToParentalControls(
           identityManager);
@@ -386,7 +386,7 @@
   SceneState* sceneState = self.browser->GetSceneState();
   [sceneState removeObserver:self];
 
-  if (self.browser->GetProfile()->IsOffTheRecord()) {
+  if (self.profile->IsOffTheRecord()) {
     self.incognitoViewController = nil;
     self.started = NO;
     return;
@@ -504,7 +504,7 @@
 }
 
 - (void)reload {
-  if (self.browser->GetProfile()->IsOffTheRecord()) {
+  if (self.profile->IsOffTheRecord()) {
     return;
   }
   [self.contentSuggestionsCoordinator refresh];
@@ -529,7 +529,7 @@
 }
 
 - (void)constrainNamedGuideForFeedIPH {
-  if (self.browser->GetProfile()->IsOffTheRecord()) {
+  if (self.profile->IsOffTheRecord()) {
     return;
   }
   UIView* viewToConstrain =
@@ -577,7 +577,7 @@
 }
 
 - (BOOL)isFakeboxPinned {
-  if (self.browser->GetProfile()->IsOffTheRecord()) {
+  if (self.profile->IsOffTheRecord()) {
     return YES;
   }
   return self.NTPViewController.isFakeboxPinned;
@@ -617,7 +617,7 @@
 
 // Gets all NTP services from the profile.
 - (void)initializeServices {
-  ProfileIOS* profile = self.browser->GetProfile();
+  ProfileIOS* profile = self.profile;
   self.authService = AuthenticationServiceFactory::GetForProfile(profile);
   self.templateURLService =
       ios::TemplateURLServiceFactory::GetForProfile(profile);
@@ -638,7 +638,7 @@
 
   // Start observing IdentityManager.
   signin::IdentityManager* identityManager =
-      IdentityManagerFactory::GetForProfile(self.browser->GetProfile());
+      IdentityManagerFactory::GetForProfile(self.profile);
   _identityObserverBridge =
       std::make_unique<signin::IdentityManagerObserverBridge>(identityManager,
                                                               self);
@@ -665,8 +665,10 @@
       self.componentFactory;
   self.logoVendor = ios::provider::CreateLogoVendor(browser, self.webState);
   self.NTPViewController = [componentFactory NTPViewController];
-  self.headerViewController =
-      [componentFactory headerViewControllerForBrowser:browser];
+  self.headerViewController = [componentFactory headerViewController];
+  [self.headerViewController
+      setUserSignedIn:self.authService && self.authService->HasPrimaryIdentity(
+                                              signin::ConsentLevel::kSignin)];
   self.NTPMediator =
       [componentFactory NTPMediatorForBrowser:browser
                      identityDiscImageUpdater:self.headerViewController];
@@ -863,7 +865,7 @@
 
 - (UIViewController*)viewController {
   DCHECK(self.started);
-  if (self.browser->GetProfile()->IsOffTheRecord()) {
+  if (self.profile->IsOffTheRecord()) {
     return self.incognitoViewController;
   } else {
     return self.containerViewController;
@@ -1268,6 +1270,11 @@
   [self.feedHeaderViewController updateForFeedVisibilityChanged];
 }
 
+- (void)feedDidScroll {
+  feature_engagement::TrackerFactory::GetForProfile(self.profile)
+      ->NotifyEvent(feature_engagement::events::kIOSScrolledOnFeed);
+}
+
 #pragma mark - NewTabPageDelegate
 
 - (void)updateFeedLayout {
@@ -1528,7 +1535,13 @@
   if (!self.started) {
     return;
   }
-  switch (event.GetEventTypeFor(signin::ConsentLevel::kSignin)) {
+  signin::PrimaryAccountChangeEvent::Type eventType =
+      event.GetEventTypeFor(signin::ConsentLevel::kSignin);
+  [self.headerViewController
+      setUserSignedIn:eventType ==
+                      signin::PrimaryAccountChangeEvent::Type::kSet];
+
+  switch (eventType) {
     case signin::PrimaryAccountChangeEvent::Type::kSet:
     case signin::PrimaryAccountChangeEvent::Type::kCleared: {
       [self.contentSuggestionsCoordinator refresh];
@@ -1585,13 +1598,12 @@
 #pragma mark - Private
 
 - (bool)hasIdentitiesOnDevice {
-  ProfileIOS* profile = self.browser->GetProfile();
   if (IsUseAccountListFromIdentityManagerEnabled()) {
-    return !IdentityManagerFactory::GetForProfile(profile)
+    return !IdentityManagerFactory::GetForProfile(self.profile)
                 ->GetAccountsOnDevice()
                 .empty();
   } else {
-    return ChromeAccountManagerServiceFactory::GetForProfile(profile)
+    return ChromeAccountManagerServiceFactory::GetForProfile(self.profile)
         ->HasIdentities();
   }
 }
@@ -1628,7 +1640,7 @@
 - (void)updateStartForVisibilityChange:(BOOL)visible {
   if (visible && NewTabPageTabHelper::FromWebState(self.webState)
                      ->ShouldShowStartSurface()) {
-    DiscoverFeedServiceFactory::GetForProfile(self.browser->GetProfile())
+    DiscoverFeedServiceFactory::GetForProfile(self.profile)
         ->SetIsShownOnStartSurface(true);
   }
   if (!visible && NewTabPageTabHelper::FromWebState(self.webState)
@@ -1762,7 +1774,7 @@
   self.visible = visible;
   self.NTPViewController.NTPVisible = visible;
 
-  if (!self.browser->GetProfile()->IsOffTheRecord()) {
+  if (!self.profile->IsOffTheRecord()) {
     if (visible) {
       self.didAppearTime = base::TimeTicks::Now();
 
@@ -1826,7 +1838,7 @@
 
 // Returns whether the user policies allow them to sync.
 - (BOOL)isSyncAllowedByPolicy {
-  return !SyncServiceFactory::GetForProfile(self.browser->GetProfile())
+  return !SyncServiceFactory::GetForProfile(self.profile)
               ->HasDisableReason(
                   syncer::SyncService::DISABLE_REASON_ENTERPRISE_POLICY);
 }
@@ -1861,7 +1873,7 @@
   _customizationCoordinator.delegate = self;
   [_customizationCoordinator start];
   [_customizationCoordinator presentCustomizationMenuPage:page];
-  feature_engagement::TrackerFactory::GetForProfile(self.browser->GetProfile())
+  feature_engagement::TrackerFactory::GetForProfile(self.profile)
       ->NotifyEvent(feature_engagement::events::kHomeCustomizationMenuUsed);
 }
 

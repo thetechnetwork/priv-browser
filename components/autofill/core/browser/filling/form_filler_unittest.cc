@@ -48,7 +48,6 @@
 #include "components/autofill/core/common/mojom/autofill_types.mojom-shared.h"
 #include "testing/gmock/include/gmock/gmock.h"
 #include "testing/gtest/include/gtest/gtest.h"
-#include "third_party/abseil-cpp/absl/types/variant.h"
 
 namespace autofill {
 namespace {
@@ -442,6 +441,33 @@ TEST_F(FormFillerTest, UndoSavesFormFillingDataForAutofillAi) {
       test::GetPassportEntityInstance());
   browser_autofill_manager_->UndoAutofill(mojom::ActionPersistence::kFill, form,
                                           form.fields().front());
+}
+
+TEST_F(FormFillerTest, UndoPreviewDoesNotChangeTheCache) {
+  FormData form = test::CreateTestAddressFormData();
+  FormsSeen({form});
+  AutofillField* autofill_field =
+      GetAutofillField(form.global_id(), form.fields().front().global_id());
+  AutofillProfile profile = test::GetFullProfile();
+
+  EXPECT_CALL(autofill_driver_, ApplyFormAction)
+      .WillRepeatedly(
+          Return(base::flat_set<FieldGlobalId>{autofill_field->global_id()}));
+
+  form_filler().FillOrPreviewForm(
+      mojom::ActionPersistence::kFill, form, &profile, *GetFormStructure(form),
+      *autofill_field, AutofillTriggerSource::kPopup);
+  ASSERT_TRUE(autofill_field->is_autofilled());
+
+  // A preview of the undo operation won't reset the autofill state.
+  browser_autofill_manager_->UndoAutofill(mojom::ActionPersistence::kPreview,
+                                          form, form.fields().front());
+  EXPECT_TRUE(autofill_field->is_autofilled());
+
+  // An actual undo operation will reset the autofill state.
+  browser_autofill_manager_->UndoAutofill(mojom::ActionPersistence::kFill, form,
+                                          form.fields().front());
+  EXPECT_FALSE(autofill_field->is_autofilled());
 }
 
 TEST_F(FormFillerTest, UndoSavesFieldByFieldFillingData) {
@@ -1557,7 +1583,6 @@ TEST_F(FormFillerTest, FillPassportEntity) {
   set_format_string(4, "M/YY");
   set_server_type(5, PASSPORT_EXPIRATION_DATE);
   set_format_string(5, "DD/MM/YYYY");
-  form_structure->UpdateAutofillCount();
 
   EntityInstance passport = test::GetPassportEntityInstance();
 

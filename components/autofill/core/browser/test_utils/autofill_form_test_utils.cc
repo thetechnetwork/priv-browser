@@ -24,6 +24,7 @@ testing::Message DescribeFormData(const FormData& form_data) {
 
 FormFieldData CreateFieldByRole(FieldType role) {
   FormFieldData field;
+  // TODO(crbug.com/406073718): Add the missing roles and/or fail loudly.
   switch (role) {
     case FieldType::USERNAME:
       field.set_label(u"Username");
@@ -82,7 +83,10 @@ FormFieldData CreateFieldByRole(FieldType role) {
       field.set_name(u"password");
       break;
     case FieldType::EMPTY_TYPE:
+      break;
     default:
+      LOG(ERROR) << __func__ << "() does not know the role "
+                 << FieldTypeToStringView(role) << "!";
       break;
   }
   return field;
@@ -145,6 +149,9 @@ FormFieldData GetFormFieldData(const FieldDescription& fd) {
     ff.set_check_status(
         fd.checked ? FormFieldData::CheckStatus::kChecked
                    : FormFieldData::CheckStatus::kCheckableButUnchecked);
+  }
+  if (fd.form_control_ax_id) {
+    ff.set_form_control_ax_id(*fd.form_control_ax_id);
   }
   CHECK(!fd.checked ||
         ff.form_control_type() == FormControlType::kInputCheckbox ||
@@ -222,7 +229,10 @@ void FormStructureTest::CheckFormStructureTestData(
       EXPECT_TRUE(form_structure->ShouldBeUploaded());
     }
     if (test_case.form_flags.has_author_specified_types) {
-      EXPECT_TRUE(form_structure->has_author_specified_types());
+      EXPECT_TRUE(
+          std::ranges::any_of(form_structure->fields(), [](const auto& field) {
+            return field->parsed_autocomplete().has_value();
+          }));
     }
 
     if (test_case.form_flags.is_complete_credit_card_form.has_value()) {
@@ -237,7 +247,10 @@ void FormStructureTest::CheckFormStructureTestData(
     }
     if (test_case.form_flags.autofill_count) {
       ASSERT_EQ(*test_case.form_flags.autofill_count,
-                static_cast<int>(form_structure->autofill_count()));
+                static_cast<int>(std::ranges::count_if(
+                    form_structure->fields(), [](const auto& field) {
+                      return field->IsFieldFillable();
+                    })));
     }
     if (test_case.form_flags.section_count) {
       std::set<Section> section_names;

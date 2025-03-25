@@ -40,7 +40,6 @@
 #include "build/build_config.h"
 #include "components/autofill/core/browser/autofill_field.h"
 #include "components/autofill/core/browser/autofill_type.h"
-#include "components/autofill/core/browser/crowdsourcing/randomized_encoder.h"
 #include "components/autofill/core/browser/crowdsourcing/server_prediction_overrides.h"
 #include "components/autofill/core/browser/data_quality/autofill_data_util.h"
 #include "components/autofill/core/browser/data_quality/validation.h"
@@ -111,6 +110,30 @@ std::string_view ToYesOrNo(bool value) {
   return value ? "Yes" : "No";
 }
 
+bool has_autocomplete(const std::unique_ptr<AutofillField>& field) {
+  return field->parsed_autocomplete().has_value();
+}
+
+bool is_password_field(const std::unique_ptr<AutofillField>& field) {
+  return field->form_control_type() == FormControlType::kInputPassword;
+}
+
+// Returns true if at least `num` fields satisfy `p`.
+// This is useful if `num` is significantly smaller than `fields.size()` because
+// it may avoid iterating over all of `fields`. It's equivalent to
+// `std::range::count_if(fields, [](auto& f) { p(*f); }) >= num`.
+template <typename Predicate>
+bool AtLeastNumSatisfy(base::span<const std::unique_ptr<AutofillField>> fields,
+                       size_t num,
+                       Predicate p) {
+  for (auto it = fields.begin(); it != fields.end() && num > 0; ++it) {
+    if (std::invoke(p, **it)) {
+      --num;
+    }
+  }
+  return num == 0;
+}
+
 }  // namespace
 
 FormStructure::FormStructure(const FormData& form)
@@ -122,7 +145,6 @@ FormStructure::FormStructure(const FormData& form)
       full_source_url_(form.full_url()),
       target_url_(form.action()),
       main_frame_origin_(form.main_frame_origin()),
-      all_fields_are_passwords_(!form.fields().empty()),
       form_parsed_timestamp_(base::TimeTicks::Now()),
       host_frame_(form.host_frame()),
       version_(form.version()),
@@ -133,13 +155,6 @@ FormStructure::FormStructure(const FormData& form)
     if (!IsCheckable(field.check_status())) {
       ++active_field_count_;
     }
-
-    if (field.form_control_type() == FormControlType::kInputPassword) {
-      has_password_field_ = true;
-    } else {
-      all_fields_are_passwords_ = false;
-    }
-
     fields_.push_back(std::make_unique<AutofillField>(field));
   }
 
@@ -208,7 +223,6 @@ void FormStructure::DetermineHeuristicTypes(
   FieldCandidatesMap regex_predictions = ParseFieldTypesWithPatterns(context);
   AssignBestFieldTypes(regex_predictions, HeuristicSource::kRegexes);
 
-  UpdateAutofillCount();
   AssignSections(fields_);
   RationalizeFormStructure(log_manager);
   RationalizePhoneNumberFieldsForFilling();
@@ -314,11 +328,9 @@ bool FormStructure::IsAutofillable() const {
   size_t min_required_fields =
       std::min({kMinRequiredFieldsForHeuristics, kMinRequiredFieldsForQuery,
                 kMinRequiredFieldsForUpload});
-  if (autofill_count() < min_required_fields) {
-    return false;
-  }
-
-  return ShouldBeParsed();
+  return AtLeastNumSatisfy(fields_, min_required_fields,
+                           &AutofillField::IsFieldFillable) &&
+         ShouldBeParsed();
 }
 
 bool FormStructure::IsCompleteCreditCardForm(
@@ -350,15 +362,6 @@ bool FormStructure::IsCompleteCreditCardForm(
   }
 }
 
-void FormStructure::UpdateAutofillCount() {
-  autofill_count_ = 0;
-  for (const auto& field : *this) {
-    if (field && field->IsFieldFillable()) {
-      ++autofill_count_;
-    }
-  }
-}
-
 bool FormStructure::ShouldBeParsed(ShouldBeParsedParams params,
                                    LogManager* log_manager) const {
   // Exclude URLs not on the web via HTTP(S).
@@ -369,10 +372,10 @@ bool FormStructure::ShouldBeParsed(ShouldBeParsedParams params,
   }
 
   if (active_field_count() < params.min_required_fields &&
-      (!all_fields_are_passwords() ||
-       active_field_count() <
-           params.required_fields_for_forms_with_only_password_fields) &&
-      !has_author_specified_types_) {
+      (active_field_count() <
+           params.required_fields_for_forms_with_only_password_fields ||
+       !std::ranges::all_of(fields_, is_password_field)) &&
+      std::ranges::none_of(fields_, has_autocomplete)) {
     LOG_AF(log_manager) << LoggingScope::kAbortParsing
                         << LogMessage::kAbortParsingNotEnoughFields
                         << active_field_count() << *this;
@@ -407,8 +410,8 @@ bool FormStructure::ShouldRunHeuristicsForSingleFields() const {
 }
 
 bool FormStructure::ShouldBeQueried() const {
-  return (has_password_field_ ||
-          active_field_count() >= kMinRequiredFieldsForQuery) &&
+  return (active_field_count() >= kMinRequiredFieldsForQuery ||
+          std::ranges::any_of(fields_, is_password_field)) &&
          ShouldBeParsed();
 }
 
@@ -644,8 +647,6 @@ void FormStructure::RetrieveFromCache(const FormStructure& cached_form,
     field->set_field_log_events(cached_field->field_log_events());
   }
 
-  UpdateAutofillCount();
-
   // Preserve timestamp from the cache as a new form from the renderer does not
   // know the parsing/filling history, as this information is computed in the
   // browser.
@@ -669,7 +670,7 @@ void FormStructure::LogDetermineHeuristicTypesMetrics() {
   developer_engagement_metrics_ = 0;
   if (IsAutofillable()) {
     AutofillMetrics::DeveloperEngagementMetric metric =
-        has_author_specified_types_
+        std::ranges::any_of(fields_, has_autocomplete)
             ? AutofillMetrics::FILLABLE_FORM_PARSED_WITH_TYPE_HINTS
             : AutofillMetrics::FILLABLE_FORM_PARSED_WITHOUT_TYPE_HINTS;
     developer_engagement_metrics_ |= 1 << metric;
@@ -678,7 +679,6 @@ void FormStructure::LogDetermineHeuristicTypesMetrics() {
 }
 
 void FormStructure::SetFieldTypesFromAutocompleteAttribute() {
-  has_author_specified_types_ = false;
   std::map<FieldSignature, size_t> field_rank_map;
   for (const std::unique_ptr<AutofillField>& field : fields_) {
     if (!field->parsed_autocomplete()) {
@@ -689,7 +689,6 @@ void FormStructure::SetFieldTypesFromAutocompleteAttribute() {
     // is considered a type hint. This allows a website's author to specify an
     // attribute like autocomplete="other" on a field to disable all Autofill
     // heuristics for the form.
-    has_author_specified_types_ = true;
     if (field->parsed_autocomplete()->field_type ==
         HtmlFieldType::kUnspecified) {
       continue;
@@ -895,11 +894,6 @@ DenseSet<FormType> FormStructure::GetFormTypes() const {
     }
   }
   return form_types;
-}
-
-void FormStructure::set_randomized_encoder(
-    std::unique_ptr<RandomizedEncoder> encoder) {
-  randomized_encoder_ = std::move(encoder);
 }
 
 void FormStructure::RationalizePhoneNumberFieldsForFilling() {

@@ -70,7 +70,7 @@
 #import "ios/chrome/browser/tab_switcher/ui_bundled/tab_strip/coordinator/tab_strip_coordinator.h"
 #import "ios/chrome/browser/tabs/model/tab_helper_util.h"
 #import "ios/chrome/browser/tabs/ui_bundled/foreground_tab_animation_view.h"
-#import "ios/chrome/browser/tabs/ui_bundled/tab_strip_legacy_coordinator.h"
+#import "ios/chrome/browser/tips_manager/model/tips_manager_ios_factory.h"
 #import "ios/chrome/browser/toolbar/ui_bundled/toolbar_coordinator.h"
 #import "ios/chrome/browser/ui/popup_menu/popup_menu_coordinator.h"
 #import "ios/chrome/browser/url_loading/model/new_tab_animation_tab_helper.h"
@@ -137,6 +137,9 @@ class BrowserViewControllerTest : public BlockCleanupTest {
             GetInstance(),
         segmentation_platform::SegmentationPlatformServiceFactory::
             GetDefaultFactory());
+    test_profile_builder.AddTestingFactory(
+        TipsManagerIOSFactory::GetInstance(),
+        TipsManagerIOSFactory::GetDefaultFactory());
 
     profile_ =
         profile_manager_.AddProfileWithBuilder(std::move(test_profile_builder));
@@ -251,9 +254,6 @@ class BrowserViewControllerTest : public BlockCleanupTest {
     tab_strip_coordinator_ =
         [[TabStripCoordinator alloc] initWithBrowser:browser_.get()];
 
-    legacy_tab_strip_coordinator_ =
-        [[TabStripLegacyCoordinator alloc] initWithBrowser:browser_.get()];
-
     fullscreen_controller_ = FullscreenController::FromBrowser(browser_.get());
     side_swipe_coordinator_ = [[SideSwipeCoordinator alloc]
         initWithBaseViewController:nil
@@ -276,7 +276,6 @@ class BrowserViewControllerTest : public BlockCleanupTest {
     dependencies.popupMenuCoordinator = popup_menu_coordinator_;
     dependencies.toolbarCoordinator = toolbar_coordinator_;
     dependencies.tabStripCoordinator = tab_strip_coordinator_;
-    dependencies.legacyTabStripCoordinator = legacy_tab_strip_coordinator_;
     dependencies.sideSwipeCoordinator = side_swipe_coordinator_;
     dependencies.bookmarksCoordinator = bookmarks_coordinator_;
     dependencies.fullscreenController = fullscreen_controller_;
@@ -323,7 +322,6 @@ class BrowserViewControllerTest : public BlockCleanupTest {
     [bvc_ shutdown];
     [bookmarks_coordinator_ stop];
     [tab_strip_coordinator_ stop];
-    [legacy_tab_strip_coordinator_ stop];
     [toolbar_coordinator_ stop];
     [popup_menu_coordinator_ stop];
     [NTPCoordinator_ stop];
@@ -355,7 +353,10 @@ class BrowserViewControllerTest : public BlockCleanupTest {
 
   std::unique_ptr<web::WebState> CreateOffTheRecordWebState() {
     web::WebState::CreateParams params(
-        GetProfile()->CreateOffTheRecordBrowserStateWithTestingFactories());
+        GetProfile()->CreateOffTheRecordBrowserStateWithTestingFactories(
+            {TestProfileIOS::TestingFactory{
+                TipsManagerIOSFactory::GetInstance(),
+                TipsManagerIOSFactory::GetDefaultFactory()}}));
     auto web_state = web::WebState::Create(params);
     AttachTabHelpers(web_state.get());
     return web_state;
@@ -415,7 +416,6 @@ class BrowserViewControllerTest : public BlockCleanupTest {
   PopupMenuCoordinator* popup_menu_coordinator_;
   ToolbarCoordinator* toolbar_coordinator_;
   TabStripCoordinator* tab_strip_coordinator_;
-  TabStripLegacyCoordinator* legacy_tab_strip_coordinator_;
   SideSwipeCoordinator* side_swipe_coordinator_;
   BookmarksCoordinator* bookmarks_coordinator_;
   raw_ptr<FullscreenController> fullscreen_controller_;
