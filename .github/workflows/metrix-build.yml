@@ -207,25 +207,68 @@ jobs:
           gclient sync --no-history --with_branch_heads --with_tags -D
           gclient runhooks
 
-      - name: Configure Chromium build
+      - name: Configure Chromium build (Windows)
+        if: runner.os == 'Windows'
+        shell: powershell
+        run: |
+          New-Item -ItemType Directory -Force -Path src\out\Release | Out-Null
+          gn gen out\Release --args="is_debug=false use_sysroot=false is_component_build=false symbol_level=0"
+
+        
+      - name: Configure Chromium build (Linux/macOS)
+        if: runner.os != 'Windows'
         shell: bash
         run: |
           mkdir -p src/out/Release
           gn gen src/out/Release --args="is_debug=false use_sysroot=false is_component_build=false symbol_level=0"
 
-      - name: Build Chromium
+      - name: Build Chromium (Windows)
+        if: runner.os == 'Windows'
+        shell: powershell
+        run: |
+          ninja -C out\Release chrome
+
+      - name: Build Chromium (Linux/macOS)
+        if: runner.os != 'Windows'
         shell: bash
         run: |
           ninja -C src/out/Release chrome
 
-      - name: Package Chromium build
+      - name: Package Chromium build (Windows)
+        if: runner.os == 'Windows'
+        shell: powershell
+        run: |
+          New-Item -ItemType Directory -Force -Path artifacts | Out-Null
+          Set-Location src\out\Release
+          Compress-Archive -Path chrome.exe, *.pak, *.bin, locales, resources, MEIPreload, swiftshader, icudtl.dat, *.dll -DestinationPath ..\..\..\..\artifacts\chromium-${{ matrix.runner }}.zip -Force
+
+      - name: Package Chromium build (Linux/macOS)
+        if: runner.os != 'Windows'
         shell: bash
         run: |
           mkdir -p artifacts
           cd src/out/Release
           tar -czf ../../../../artifacts/chromium-${{ matrix.runner }}.tar.gz chrome *.pak *.bin locales resources MEIPreload swiftshader icudtl.dat *.so || true
 
-      - name: Store artifacts
+      - name: Store artifacts (Windows)
+        if: runner.os == 'Windows'
+        shell: powershell
+        run: |
+          $artifactDir = Join-Path $env:GITHUB_WORKSPACE "build-artifacts\${{ matrix.runner }}"
+          New-Item -ItemType Directory -Force -Path $artifactDir | Out-Null
+          Copy-Item -Path artifacts\* -Destination $artifactDir -Recurse -Force -ErrorAction SilentlyContinue
+
+          $infoPath = Join-Path $artifactDir "build-info.txt"
+          Set-Content -Path $infoPath -Value "Build date: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')"
+          Add-Content -Path $infoPath -Value "Branch: $env:FORK_BRANCH"
+          Push-Location src
+          $commit = git rev-parse HEAD
+          Pop-Location
+          Add-Content -Path $infoPath -Value "Commit: $commit"
+          Add-Content -Path $infoPath -Value "Runner: ${{ matrix.runner }}"
+
+      - name: Store artifacts (Linux/macOS)
+        if: runner.os != 'Windows'
         shell: bash
         run: |
           mkdir -p $GITHUB_WORKSPACE/build-artifacts/${{ matrix.runner }}
