@@ -259,7 +259,7 @@ jobs:
               "name": "src",
               "url": "$Env:FORK_URL",
               "deps_file": "DEPS",
-              "managed": false,
+              "managed": False,
               "custom_deps": {},
               "custom_vars": {},
             },
