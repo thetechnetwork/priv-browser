@@ -430,8 +430,8 @@ jobs:
       #######################################################################
       # (OPTIONAL) UPLOAD ARTIFACTS                                         #
       #######################################################################
-      # - name: Upload build artifacts
-      #   uses: actions/upload-artifact@v3
-      #   with:
-      #     name: chromium-${{ matrix.runner }}
-      #     path: $GITHUB_WORKSPACE/build-artifacts/${{ matrix.runner }}
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v3
+         with:
+         name: chromium-${{ matrix.runner }}
+           path: $GITHUB_WORKSPACE/build-artifacts/${{ matrix.runner }}
