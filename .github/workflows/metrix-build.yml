@@ -264,7 +264,7 @@ jobs:
               "custom_vars": {},
             },
           ]
-          "@ | Out-File -FilePath .gclient -Encoding utf8
+          "@ | Out-File -FilePath .gclient -Encoding UTF8NoBOM
           }
 
           if (Test-Path "src\.git") {
