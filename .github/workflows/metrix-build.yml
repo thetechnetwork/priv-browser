@@ -253,7 +253,7 @@ jobs:
           Set-Location chromium
 
           if (!(Test-Path ".gclient")) {
-          @"
+          $gclientContent = @"
           solutions = [
             {
               "name": "src",
@@ -264,7 +264,12 @@ jobs:
               "custom_vars": {},
             },
           ]
-          "@ | Out-File -FilePath .gclient -Encoding UTF8NoBOM
+          "@
+          # Create a UTF8Encoding instance with BOM disabled
+          $utf8NoBOM = New-Object System.Text.UTF8Encoding($False)
+          [System.IO.File]::WriteAllText(".gclient", $gclientContent, $utf8NoBOM)
+
+          # Write .gclient without a BOM
           }
 
           if (Test-Path "src\.git") {
