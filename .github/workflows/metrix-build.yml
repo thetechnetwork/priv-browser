@@ -434,4 +434,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: chromium-${{ matrix.runner }}
-          path: $GITHUB_WORKSPACE/build-artifacts/${{ matrix.runner }}
+          path: /home/user/actions-runner/_work/priv-browser/priv-browser/build-artifacts/${{ matrix.runner }}
