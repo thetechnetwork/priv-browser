@@ -250,8 +250,10 @@ jobs:
         shell: powershell
         run: |
           New-Item -ItemType Directory -Path "chromium" -Force | Out-Null
+          # Always go into the chromium directory
           Set-Location chromium
 
+          # Create .gclient if it doesn't exist
           if (!(Test-Path ".gclient")) {
           $utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $false
           [System.IO.File]::WriteAllText(".gclient", @"
@@ -269,6 +271,7 @@ jobs:
 
           }
 
+          # Ensure src is present
           if (Test-Path "src\.git") {
             Write-Host "Found existing clone; fetching latest changes..."
             Set-Location src
@@ -276,12 +279,14 @@ jobs:
             git fetch --prune
             git checkout $Env:FORK_BRANCH
             git pull
+            Set-Location ..
           }
           else {
             Write-Host "No local clone found; cloning fresh..."
             git clone $Env:FORK_URL src
             Set-Location src
             git checkout $Env:FORK_BRANCH
+            Set-Location ..
           }
 
           # Sync dependencies
