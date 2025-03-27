@@ -220,6 +220,7 @@ jobs:
         shell: bash
         run: |
           mkdir -p src/out/Release
+          cd src
           gn gen src/out/Release --args="is_debug=false use_sysroot=false is_component_build=false symbol_level=0"
 
       - name: Build Chromium (Windows)
@@ -231,7 +232,7 @@ jobs:
       - name: Build Chromium (Linux/macOS)
         if: runner.os != 'Windows'
         shell: bash
-        run: |
+        run: | 
           ninja -C src/out/Release chrome
 
       - name: Package Chromium build (Windows)
