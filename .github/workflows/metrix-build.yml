@@ -195,7 +195,7 @@ jobs:
         if: runner.os == 'Windows'
         shell: cmd
         env:
-          INCLUDE= ""
+          INCLUDE: ""
         run: |
           cd src
           if not exist out\Release mkdir out\Release
