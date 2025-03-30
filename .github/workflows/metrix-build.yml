@@ -211,6 +211,7 @@ jobs:
         if: runner.os == 'Windows'
         shell: powershell
         run: |
+          cd src
           New-Item -ItemType Directory -Force -Path src\out\Release | Out-Null
           gn gen out\Release --args="is_debug=false use_sysroot=false is_component_build=false symbol_level=0"
 
