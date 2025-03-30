@@ -90,22 +90,64 @@ jobs:
           popd
           echo PATH=%cd%\depot_tools;%PATH%>> %GITHUB_ENV%
 
-      - name: Install depot_tools (Linux/macOS)
-        if: runner.os != 'Windows'
+      - name: Install depot_tools (Linux)
+        if: contains(matrix.runner, 'linux')
         shell: bash
         run: |
-          if [ ! -d "depot_tools" ]; then
-            git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
-          else
-            cd depot_tools && git pull && cd ..
+          # Clean up any existing depot_tools
+          if [ -d "depot_tools" ]; then
+            rm -rf depot_tools
           fi
+          
+          # Fresh clone
+          git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
+          
+          # Set executable permissions
+          chmod +x depot_tools/gclient
+          chmod +x depot_tools/gclient.py
+          
+          # Set PATH for this step
+          export PATH="$(pwd)/depot_tools:$PATH"
+          
+          # Set PATH for future steps
           echo "PATH=$(pwd)/depot_tools:$PATH" >> $GITHUB_ENV
-          # Verify depot_tools is in PATH
-          echo "PATH is: $PATH"
-          ls -la $(pwd)/depot_tools
+          
+          # Verify installation
+          echo "Current directory: $(pwd)"
+          ls -la depot_tools
+          echo "PATH: $PATH"
+          which gclient || depot_tools/gclient --version
 
-      - name: Setup ccache (Linux/macOS)
-        if: runner.os != 'Windows'
+      - name: Install depot_tools (macOS)
+        if: contains(matrix.runner, 'macos')
+        shell: bash
+        run: |
+          # Clean up any existing depot_tools
+          if [ -d "depot_tools" ]; then
+            rm -rf depot_tools
+          fi
+          
+          # Fresh clone
+          git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
+          
+          # Set executable permissions
+          chmod +x depot_tools/gclient
+          chmod +x depot_tools/gclient.py
+          
+          # Set PATH for this step
+          export PATH="$(pwd)/depot_tools:$PATH"
+          
+          # Set PATH for future steps
+          echo "PATH=$(pwd)/depot_tools:$PATH" >> $GITHUB_ENV
+          
+          # Verify installation
+          echo "Current directory: $(pwd)"
+          ls -la depot_tools
+          echo "PATH: $PATH"
+          which gclient || depot_tools/gclient --version
+
+      - name: Setup ccache (Linux)
+        if: contains(matrix.runner, 'linux')
         shell: bash
         run: |
           mkdir -p ~/.ccache
@@ -114,8 +156,27 @@ jobs:
           echo "CC=ccache cc" >> $GITHUB_ENV
           echo "CXX=ccache c++" >> $GITHUB_ENV
 
-      - name: Set fork details (Linux/macOS)
-        if: runner.os != 'Windows'
+      - name: Setup ccache (macOS)
+        if: contains(matrix.runner, 'macos')
+        shell: bash
+        run: |
+          mkdir -p ~/.ccache
+          echo "max_size = 50G" > ~/.ccache/ccache.conf
+          echo "CCACHE_DIR=$(pwd)/.ccache" >> $GITHUB_ENV
+          echo "CC=ccache cc" >> $GITHUB_ENV
+          echo "CXX=ccache c++" >> $GITHUB_ENV
+
+      - name: Set fork details (Linux)
+        if: contains(matrix.runner, 'linux')
+        shell: bash
+        run: |
+          FORK_URL="https://github.com/TheTechNetwork/priv-browser.git"
+          FORK_BRANCH="${{ github.event.inputs.fork_branch || 'main' }}"
+          echo "FORK_URL=$FORK_URL" >> $GITHUB_ENV
+          echo "FORK_BRANCH=$FORK_BRANCH" >> $GITHUB_ENV
+
+      - name: Set fork details (macOS)
+        if: contains(matrix.runner, 'macos')
         shell: bash
         run: |
           FORK_URL="https://github.com/TheTechNetwork/priv-browser.git"
@@ -133,6 +194,12 @@ jobs:
           ) else (
             echo FORK_BRANCH=main>> %GITHUB_ENV%
           )
+
+      - name: Check Windows SDK
+        if: runner.os == 'Windows'
+        shell: cmd
+        run: |
+          dir "C:\Program Files (x86)\Windows Kits\10\include" || echo SDK directory not found
 
       - name: Fetch Chromium source (Windows)
         if: runner.os == 'Windows'
@@ -164,8 +231,8 @@ jobs:
           gclient sync --no-history --with_branch_heads --with_tags -D
           gclient runhooks
 
-      - name: Fetch Chromium source (Linux/macOS)
-        if: runner.os != 'Windows'
+      - name: Fetch Chromium source (Linux)
+        if: contains(matrix.runner, 'linux')
         shell: bash
         run: |
           cat > .gclient << EOF
@@ -191,6 +258,48 @@ jobs:
             git clone "$FORK_URL" src
             cd src && git checkout "$FORK_BRANCH" && cd ..
           fi
+          
+          # Debug info
+          echo "Current directory: $(pwd)"
+          echo "PATH: $PATH"
+          which gclient
+          
+          gclient sync --no-history --with_branch_heads --with_tags -D
+          gclient runhooks
+
+      - name: Fetch Chromium source (macOS)
+        if: contains(matrix.runner, 'macos')
+        shell: bash
+        run: |
+          cat > .gclient << EOF
+          solutions = [
+            {
+              "name": "src",
+              "url": "$FORK_URL",
+              "deps_file": "DEPS",
+              "managed": False,
+              "custom_deps": {},
+              "custom_vars": {},
+            },
+          ]
+          EOF
+          if [ -d src/.git ]; then
+            cd src
+            git remote set-url origin "$FORK_URL"
+            git fetch --prune
+            git checkout "$FORK_BRANCH"
+            git pull
+            cd ..
+          else
+            git clone "$FORK_URL" src
+            cd src && git checkout "$FORK_BRANCH" && cd ..
+          fi
+          
+          # Debug info
+          echo "Current directory: $(pwd)"
+          echo "PATH: $PATH"
+          which gclient
+          
           gclient sync --no-history --with_branch_heads --with_tags -D
           gclient runhooks
 
@@ -202,15 +311,23 @@ jobs:
         run: |
           cd src
           if not exist out\Release mkdir out\Release
-          gn gen out\Release --args="is_debug=false use_sysroot=false is_component_build=false symbol_level=0 windows_sdk_version=\"10.0.26100.0\""
+          gn gen out\Release --args="is_debug=false use_sysroot=false is_component_build=false symbol_level=0 windows_sdk_version=\"10.0.22621.0\""
 
-      - name: Configure Chromium build (Linux/macOS)
-        if: runner.os != 'Windows'
+      - name: Configure Chromium build (Linux)
+        if: contains(matrix.runner, 'linux')
         shell: bash
         run: |
-          mkdir -p src/out/Release
           cd src
-          gn gen src/out/Release --args="is_debug=false use_sysroot=false is_component_build=false symbol_level=0"
+          mkdir -p out/Release
+          gn gen out/Release --args="is_debug=false use_sysroot=false is_component_build=false symbol_level=0"
+
+      - name: Configure Chromium build (macOS)
+        if: contains(matrix.runner, 'macos')
+        shell: bash
+        run: |
+          cd src
+          mkdir -p out/Release
+          gn gen out/Release --args="is_debug=false use_sysroot=false is_component_build=false symbol_level=0"
 
       - name: Build Chromium (Windows)
         if: runner.os == 'Windows'
@@ -219,12 +336,19 @@ jobs:
           cd src
           ninja -C out\Release chrome
 
-      - name: Build Chromium (Linux/macOS)
-        if: runner.os != 'Windows'
+      - name: Build Chromium (Linux)
+        if: contains(matrix.runner, 'linux')
         shell: bash
         run: |
           cd src
-          ninja -C src/out/Release chrome
+          ninja -C out/Release chrome
+
+      - name: Build Chromium (macOS)
+        if: contains(matrix.runner, 'macos')
+        shell: bash
+        run: |
+          cd src
+          ninja -C out/Release chrome
 
       - name: Package Chromium build (Windows)
         if: runner.os == 'Windows'
@@ -234,8 +358,16 @@ jobs:
           cd src\out\Release
           powershell -Command "Compress-Archive -Path chrome.exe, *.pak, *.bin, locales, resources, MEIPreload, swiftshader, icudtl.dat, *.dll -DestinationPath ..\..\..\..\artifacts\chromium-${{ matrix.runner }}.zip -Force"
 
-      - name: Package Chromium build (Linux/macOS)
-        if: runner.os != 'Windows'
+      - name: Package Chromium build (Linux)
+        if: contains(matrix.runner, 'linux')
+        shell: bash
+        run: |
+          mkdir -p artifacts
+          cd src/out/Release
+          tar -czf ../../../../artifacts/chromium-${{ matrix.runner }}.tar.gz chrome *.pak *.bin locales resources MEIPreload swiftshader icudtl.dat *.so || true
+
+      - name: Package Chromium build (macOS)
+        if: contains(matrix.runner, 'macos')
         shell: bash
         run: |
           mkdir -p artifacts
@@ -257,8 +389,19 @@ jobs:
           echo Commit: %COMMIT%>> %ARTIFACT_DIR%\build-info.txt
           echo Runner: ${{ matrix.runner }}>> %ARTIFACT_DIR%\build-info.txt
 
-      - name: Store artifacts (Linux/macOS)
-        if: runner.os != 'Windows'
+      - name: Store artifacts (Linux)
+        if: contains(matrix.runner, 'linux')
+        shell: bash
+        run: |
+          mkdir -p $GITHUB_WORKSPACE/build-artifacts/${{ matrix.runner }}
+          cp -r artifacts/* $GITHUB_WORKSPACE/build-artifacts/${{ matrix.runner }}/ || true
+          echo "Build date: $(date)" > $GITHUB_WORKSPACE/build-artifacts/${{ matrix.runner }}/build-info.txt
+          echo "Branch: $FORK_BRANCH" >> $GITHUB_WORKSPACE/build-artifacts/${{ matrix.runner }}/build-info.txt
+          echo "Commit: $(cd src && git rev-parse HEAD)" >> $GITHUB_WORKSPACE/build-artifacts/${{ matrix.runner }}/build-info.txt
+          echo "Runner: ${{ matrix.runner }}" >> $GITHUB_WORKSPACE/build-artifacts/${{ matrix.runner }}/build-info.txt
+
+      - name: Store artifacts (macOS)
+        if: contains(matrix.runner, 'macos')
         shell: bash
         run: |
           mkdir -p $GITHUB_WORKSPACE/build-artifacts/${{ matrix.runner }}
