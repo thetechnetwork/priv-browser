@@ -78,17 +78,6 @@ jobs:
           where ninja || choco install ninja -y
           where ccache || choco install ccache -y
 
-      - name: Install depot_tools (Linux/macOS)
-        if: runner.os != 'Windows'
-        shell: bash
-        run: |
-          if [ ! -d "depot_tools" ]; then
-            git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
-          else
-            cd depot_tools && git pull && cd ..
-          fi
-          echo "PATH=$PATH:$(pwd)/depot_tools" >> $GITHUB_ENV
-
       - name: Install depot_tools (Windows)
         if: runner.os == 'Windows'
         shell: cmd
@@ -99,7 +88,18 @@ jobs:
           git fetch --prune --all
           git pull origin main
           popd
-          echo PATH=%PATH%;%cd%\depot_tools>> %GITHUB_ENV%
+          echo PATH=%cd%\depot_tools;%PATH%>> %GITHUB_ENV%
+
+      - name: Install depot_tools (Linux/macOS)
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          if [ ! -d "depot_tools" ]; then
+            git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
+          else
+            cd depot_tools && git pull && cd ..
+          fi
+          echo "PATH=$PATH:$(pwd)/depot_tools" >> $GITHUB_ENV
 
       - name: Setup ccache (Linux/macOS)
         if: runner.os != 'Windows'
@@ -131,6 +131,36 @@ jobs:
             echo FORK_BRANCH=main>> %GITHUB_ENV%
           )
 
+      - name: Fetch Chromium source (Windows)
+        if: runner.os == 'Windows'
+        shell: cmd
+        run: |
+          echo solutions = [ > .gclient
+          echo   { >> .gclient
+          echo     "name": "src", >> .gclient
+          echo     "url": "%FORK_URL%", >> .gclient
+          echo     "deps_file": "DEPS", >> .gclient
+          echo     "managed": False, >> .gclient
+          echo     "custom_deps": {}, >> .gclient
+          echo     "custom_vars": {}, >> .gclient
+          echo   }, >> .gclient
+          echo ] >> .gclient
+
+          if exist src\.git (
+            cd src
+            git remote set-url origin %FORK_URL%
+            git fetch --prune
+            git checkout %FORK_BRANCH%
+            git pull
+            cd ..
+          ) else (
+            git clone %FORK_URL% src
+            cd src && git checkout %FORK_BRANCH% && cd ..
+          )
+
+          gclient sync --no-history --with_branch_heads --with_tags -D
+          gclient runhooks
+
       - name: Fetch Chromium source (Linux/macOS)
         if: runner.os != 'Windows'
         shell: bash
@@ -158,34 +188,6 @@ jobs:
             git clone "$FORK_URL" src
             cd src && git checkout "$FORK_BRANCH" && cd ..
           fi
-          gclient sync --no-history --with_branch_heads --with_tags -D
-          gclient runhooks
-
-      - name: Fetch Chromium source (Windows)
-        if: runner.os == 'Windows'
-        shell: cmd
-        run: |
-          echo solutions = [ > .gclient
-          echo   { >> .gclient
-          echo     "name": "src", >> .gclient
-          echo     "url": "%FORK_URL%", >> .gclient
-          echo     "deps_file": "DEPS", >> .gclient
-          echo     "managed": False, >> .gclient
-          echo     "custom_deps": {}, >> .gclient
-          echo     "custom_vars": {}, >> .gclient
-          echo   }, >> .gclient
-          echo ] >> .gclient
-          if exist src\.git (
-            cd src
-            git remote set-url origin %FORK_URL%
-            git fetch --prune
-            git checkout %FORK_BRANCH%
-            git pull
-            cd ..
-          ) else (
-            git clone %FORK_URL% src
-            cd src && git checkout %FORK_BRANCH% && cd ..
-          )
           gclient sync --no-history --with_branch_heads --with_tags -D
           gclient runhooks
 
