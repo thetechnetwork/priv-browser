@@ -194,10 +194,11 @@ jobs:
       - name: Configure Chromium build (Windows)
         if: runner.os == 'Windows'
         shell: cmd
+        env: |
+          INCLUDE= ""
         run: |
           cd src
           if not exist out\Release mkdir out\Release
-          set INCLUDE=
           gn gen out\Release --args="is_debug=false use_sysroot=false is_component_build=false symbol_level=0 windows_sdk_version=\"10.0.22621.0\""
 
       - name: Configure Chromium build (Linux/macOS)
