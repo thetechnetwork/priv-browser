@@ -99,7 +99,7 @@ jobs:
           else
             cd depot_tools && git pull && cd ..
           fi
-          echo PATH=%cd%\priv-browser\depot_tools;%PATH%>> %GITHUB_ENV%
+          echo "PATH=$(pwd)/depot_tools:$PATH" >> $GITHUB_ENV
 
       - name: Setup ccache (Linux/macOS)
         if: runner.os != 'Windows'
@@ -205,9 +205,9 @@ jobs:
         if: runner.os != 'Windows'
         shell: bash
         run: |
-          mkdir -p src/out/Release
           cd src
-          gn gen src/out/Release --args="is_debug=false use_sysroot=false is_component_build=false symbol_level=0"
+          mkdir -p out/Release
+          gn gen out/Release --args="is_debug=false use_sysroot=false is_component_build=false symbol_level=0"
 
       - name: Build Chromium (Windows)
         if: runner.os == 'Windows'
