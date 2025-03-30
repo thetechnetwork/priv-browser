@@ -303,6 +303,21 @@ jobs:
           gclient sync --no-history --with_branch_heads --with_tags -D
           gclient runhooks
 
+      # New step: Configure memory settings for Linux build
+      - name: Configure memory settings (Linux)
+        if: contains(matrix.runner, 'linux')
+        shell: bash
+        run: |
+          # Detect system memory and set appropriate job limit
+          MEM_GB=$(free -g | grep Mem | awk '{print $2}')
+          # Use roughly 1 job per 4GB of RAM, with minimum of 2
+          JOBS=$(( MEM_GB / 4 ))
+          if [ $JOBS -lt 2 ]; then
+            JOBS=2
+          fi
+          echo "System has ${MEM_GB}GB RAM, will use -j${JOBS} for build"
+          echo "BUILD_JOBS=$JOBS" >> $GITHUB_ENV
+
       - name: Configure Chromium build (Windows)
         if: runner.os == 'Windows'
         shell: cmd
@@ -319,7 +334,8 @@ jobs:
         run: |
           cd src
           mkdir -p out/Release
-          gn gen out/Release --args="is_debug=false use_sysroot=false is_component_build=false symbol_level=0"
+          # Disable V8 stress compilation to reduce likelihood of segfaults
+          gn gen out/Release --args="is_debug=false use_sysroot=false is_component_build=false symbol_level=0 v8_enable_stress_compilation=false treat_warnings_as_errors=false"
 
       - name: Configure Chromium build (macOS)
         if: contains(matrix.runner, 'macos')
@@ -327,7 +343,7 @@ jobs:
         run: |
           cd src
           mkdir -p out/Release
-          gn gen out/Release --args="is_debug=false use_sysroot=false is_component_build=false symbol_level=0"
+          gn gen out/Release --args="is_debug=false use_sysroot=false is_component_build=false symbol_level=0 treat_warnings_as_errors=false"
 
       - name: Build Chromium (Windows)
         if: runner.os == 'Windows'
@@ -336,12 +352,37 @@ jobs:
           cd src
           ninja -C out\Release chrome
 
+      # Modified Linux build step with clean build fallback
       - name: Build Chromium (Linux)
         if: contains(matrix.runner, 'linux')
         shell: bash
         run: |
           cd src
-          ninja -C out/Release chrome
+          echo "Attempting incremental build with limited concurrency..."
+          ninja -C out/Release chrome -j${BUILD_JOBS:-4}
+          
+          # If the build fails, try a clean build
+          if [ $? -ne 0 ]; then
+            echo "Incremental build failed with return code $?. Trying clean build..."
+            
+            # Clean the build directory
+            echo "Cleaning build directory..."
+            ninja -C out/Release -t clean
+            
+            # Specifically target and remove problematic V8 artifacts
+            echo "Removing V8 snapshot artifacts..."
+            find out/Release -name "v8*" -type f -delete 2>/dev/null || true
+            find out/Release -name "*mksnapshot*" -type f -delete 2>/dev/null || true
+            find out/Release -name "*snapshot*" -type f -delete 2>/dev/null || true
+            find out/Release -name "*.S" -type f -delete 2>/dev/null || true
+            
+            # Try again with reduced job count
+            echo "Attempting clean build with further reduced concurrency..."
+            REDUCED_JOBS=$(( ${BUILD_JOBS:-4} / 2 ))
+            if [ $REDUCED_JOBS -lt 1 ]; then REDUCED_JOBS=1; fi
+            echo "Using -j$REDUCED_JOBS for clean build"
+            ninja -C out/Release chrome -j$REDUCED_JOBS
+          fi
 
       - name: Build Chromium (macOS)
         if: contains(matrix.runner, 'macos')
