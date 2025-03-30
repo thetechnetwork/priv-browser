@@ -213,7 +213,7 @@ jobs:
         run: |
           cd src
           New-Item -ItemType Directory -Force -Path src\out\Release | Out-Null
-          gn gen out\Release --args='is_debug=false use_sysroot=false is_component_build=false symbol_level=0 windows_sdk_version = "10.0.22621.0"'
+          gn gen out\Release --args='is_debug=false use_sysroot=false is_component_build=false symbol_level=0 windows_sdk_version="10.0.22621.0"'
 
         
       - name: Configure Chromium build (Linux/macOS)
