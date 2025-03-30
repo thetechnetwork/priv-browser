@@ -194,7 +194,7 @@ jobs:
       - name: Configure Chromium build (Windows)
         if: runner.os == 'Windows'
         shell: cmd
-        env: |
+        env:
           INCLUDE= ""
         run: |
           cd src
