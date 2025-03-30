@@ -42,16 +42,16 @@ jobs:
 
       - name: Verify Python (Windows)
         if: runner.os == 'Windows'
-        shell: powershell
+        shell: cmd
         run: |
           python --version
           pip --version
 
       - name: Enable Windows long paths + Git config
         if: runner.os == 'Windows'
-        shell: powershell
+        shell: cmd
         run: |
-          reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\FileSystem" /v LongPathsEnabled /t REG_DWORD /d 1 /f
+          reg add "HKLM\SYSTEM\CurrentControlSet\Control\FileSystem" /v LongPathsEnabled /t REG_DWORD /d 1 /f
           git config --system core.longpaths true
 
       - name: Install Linux dependencies
@@ -73,14 +73,10 @@ jobs:
 
       - name: Install Windows dependencies
         if: runner.os == 'Windows'
-        shell: powershell
+        shell: cmd
         run: |
-          if (!(Get-Command ninja -ErrorAction SilentlyContinue)) {
-            choco install ninja -y
-          }
-          if (!(Get-Command ccache -ErrorAction SilentlyContinue)) {
-            choco install ccache -y
-          }
+          where ninja || choco install ninja -y
+          where ccache || choco install ccache -y
 
       - name: Install depot_tools (Linux/macOS)
         if: runner.os != 'Windows'
@@ -95,21 +91,15 @@ jobs:
 
       - name: Install depot_tools (Windows)
         if: runner.os == 'Windows'
-        shell: powershell
+        shell: cmd
         run: |
-          if (!(Test-Path "depot_tools")) {
-            git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
-          } else {
-            Push-Location .\depot_tools
-            if ((git branch --show-current) -ne "main") {
-              git checkout -B main origin/main
-            }
-            git fetch --prune --all
-            git pull origin main
-            Pop-Location
-          }
-          $newPath = "PATH=$($Env:PATH);$(Resolve-Path .\depot_tools)"
-          $newPath | Out-File -FilePath $Env:GITHUB_ENV -Append
+          if not exist depot_tools git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
+          pushd depot_tools
+          git checkout -B main origin/main
+          git fetch --prune --all
+          git pull origin main
+          popd
+          echo PATH=%PATH%;%cd%\depot_tools>> %GITHUB_ENV%
 
       - name: Setup ccache (Linux/macOS)
         if: runner.os != 'Windows'
@@ -132,18 +122,19 @@ jobs:
 
       - name: Set fork details (Windows)
         if: runner.os == 'Windows'
-        shell: powershell
+        shell: cmd
         run: |
-          $FORK_URL = "https://github.com/TheTechNetwork/priv-browser.git"
-          $FORK_BRANCH = if ($Env:github_event_inputs_fork_branch) { $Env:github_event_inputs_fork_branch } else { "main" }
-          Add-Content -Path $Env:GITHUB_ENV -Value "FORK_URL=$FORK_URL"
-          Add-Content -Path $Env:GITHUB_ENV -Value "FORK_BRANCH=$FORK_BRANCH"
+          echo FORK_URL=https://github.com/TheTechNetwork/priv-browser.git>> %GITHUB_ENV%
+          if defined github_event_inputs_fork_branch (
+            echo FORK_BRANCH=%github_event_inputs_fork_branch%>> %GITHUB_ENV%
+          ) else (
+            echo FORK_BRANCH=main>> %GITHUB_ENV%
+          )
 
       - name: Fetch Chromium source (Linux/macOS)
         if: runner.os != 'Windows'
         shell: bash
         run: |
-          # Write .gclient
           cat > .gclient << EOF
           solutions = [
             {
@@ -156,8 +147,6 @@ jobs:
             },
           ]
           EOF
-          
-          # Clone
           if [ -d src/.git ]; then
             cd src
             git remote set-url origin "$FORK_URL"
@@ -174,48 +163,40 @@ jobs:
 
       - name: Fetch Chromium source (Windows)
         if: runner.os == 'Windows'
-        shell: powershell
+        shell: cmd
         run: |
-          $utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $false
-          [System.IO.File]::WriteAllText(".gclient", @"
-          solutions = [
-            {
-              "name": "src",
-              "url": "$Env:FORK_URL",
-              "deps_file": "DEPS",
-              "managed": False,
-              "custom_deps": {},
-              "custom_vars": {},
-            },
-          ]
-          "@, $utf8NoBomEncoding)
-
-          if (Test-Path "src\.git") {
-            Set-Location src
-            git remote set-url origin $Env:FORK_URL
+          echo solutions = [ > .gclient
+          echo   { >> .gclient
+          echo     "name": "src", >> .gclient
+          echo     "url": "%FORK_URL%", >> .gclient
+          echo     "deps_file": "DEPS", >> .gclient
+          echo     "managed": False, >> .gclient
+          echo     "custom_deps": {}, >> .gclient
+          echo     "custom_vars": {}, >> .gclient
+          echo   }, >> .gclient
+          echo ] >> .gclient
+          if exist src\.git (
+            cd src
+            git remote set-url origin %FORK_URL%
             git fetch --prune
-            git checkout $Env:FORK_BRANCH
+            git checkout %FORK_BRANCH%
             git pull
-            Set-Location ..
-          } else {
-            git clone $Env:FORK_URL src
-            Set-Location src
-            git checkout $Env:FORK_BRANCH
-            Set-Location ..
-          }
-
+            cd ..
+          ) else (
+            git clone %FORK_URL% src
+            cd src && git checkout %FORK_BRANCH% && cd ..
+          )
           gclient sync --no-history --with_branch_heads --with_tags -D
           gclient runhooks
 
       - name: Configure Chromium build (Windows)
         if: runner.os == 'Windows'
-        shell: powershell
+        shell: cmd
         run: |
           cd src
-          New-Item -ItemType Directory -Force -Path src\out\Release | Out-Null
-          gn gen out\Release --args='is_debug=false use_sysroot=false is_component_build=false symbol_level=0 windows_sdk_version="10.0.22621.0"'
+          if not exist out\Release mkdir out\Release
+          gn gen out\Release --args="is_debug=false use_sysroot=false is_component_build=false symbol_level=0 windows_sdk_version=\"10.0.22621.0\""
 
-        
       - name: Configure Chromium build (Linux/macOS)
         if: runner.os != 'Windows'
         shell: bash
@@ -226,8 +207,9 @@ jobs:
 
       - name: Build Chromium (Windows)
         if: runner.os == 'Windows'
-        shell: powershell
+        shell: cmd
         run: |
+          cd src
           ninja -C out\Release chrome
 
       - name: Build Chromium (Linux/macOS)
@@ -239,11 +221,11 @@ jobs:
 
       - name: Package Chromium build (Windows)
         if: runner.os == 'Windows'
-        shell: powershell
+        shell: cmd
         run: |
-          New-Item -ItemType Directory -Force -Path artifacts | Out-Null
-          Set-Location src\out\Release
-          Compress-Archive -Path chrome.exe, *.pak, *.bin, locales, resources, MEIPreload, swiftshader, icudtl.dat, *.dll -DestinationPath ..\..\..\..\artifacts\chromium-${{ matrix.runner }}.zip -Force
+          if not exist artifacts mkdir artifacts
+          cd src\out\Release
+          powershell -Command "Compress-Archive -Path chrome.exe, *.pak, *.bin, locales, resources, MEIPreload, swiftshader, icudtl.dat, *.dll -DestinationPath ..\..\..\..\artifacts\chromium-${{ matrix.runner }}.zip -Force"
 
       - name: Package Chromium build (Linux/macOS)
         if: runner.os != 'Windows'
@@ -255,20 +237,18 @@ jobs:
 
       - name: Store artifacts (Windows)
         if: runner.os == 'Windows'
-        shell: powershell
+        shell: cmd
         run: |
-          $artifactDir = Join-Path $env:GITHUB_WORKSPACE "build-artifacts\${{ matrix.runner }}"
-          New-Item -ItemType Directory -Force -Path $artifactDir | Out-Null
-          Copy-Item -Path artifacts\* -Destination $artifactDir -Recurse -Force -ErrorAction SilentlyContinue
-
-          $infoPath = Join-Path $artifactDir "build-info.txt"
-          Set-Content -Path $infoPath -Value "Build date: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')"
-          Add-Content -Path $infoPath -Value "Branch: $env:FORK_BRANCH"
-          Push-Location src
-          $commit = git rev-parse HEAD
-          Pop-Location
-          Add-Content -Path $infoPath -Value "Commit: $commit"
-          Add-Content -Path $infoPath -Value "Runner: ${{ matrix.runner }}"
+          set ARTIFACT_DIR=%GITHUB_WORKSPACE%\build-artifacts\${{ matrix.runner }}
+          mkdir %ARTIFACT_DIR%
+          xcopy /E /I /Y artifacts\* %ARTIFACT_DIR%\
+          echo Build date: %DATE% %TIME%> %ARTIFACT_DIR%\build-info.txt
+          echo Branch: %FORK_BRANCH%>> %ARTIFACT_DIR%\build-info.txt
+          cd src
+          for /f %%i in ('git rev-parse HEAD') do set COMMIT=%%i
+          cd ..
+          echo Commit: %COMMIT%>> %ARTIFACT_DIR%\build-info.txt
+          echo Runner: ${{ matrix.runner }}>> %ARTIFACT_DIR%\build-info.txt
 
       - name: Store artifacts (Linux/macOS)
         if: runner.os != 'Windows'
