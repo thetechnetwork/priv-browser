@@ -391,13 +391,29 @@ jobs:
           cd src
           ninja -C out/Release chrome
 
+      # Fixed packaging step for Windows
       - name: Package Chromium build (Windows)
         if: runner.os == 'Windows'
         shell: cmd
         run: |
-          if not exist artifacts mkdir artifacts
+          mkdir artifacts
           cd src\out\Release
-          powershell -Command "Compress-Archive -Path chrome.exe, *.pak, *.bin, locales, resources, MEIPreload, swiftshader, icudtl.dat, *.dll -DestinationPath ..\..\..\..\artifacts\chromium-${{ matrix.runner }}.zip -Force"
+          
+          mkdir temp_pkg
+          copy chrome.exe temp_pkg\ || echo chrome.exe not found
+          copy *.pak temp_pkg\ || echo No pak files found
+          copy *.bin temp_pkg\ || echo No bin files found
+          xcopy /E /I /Y locales temp_pkg\locales || echo locales folder not found
+          xcopy /E /I /Y resources temp_pkg\resources || echo resources folder not found
+          xcopy /E /I /Y MEIPreload temp_pkg\MEIPreload || echo MEIPreload folder not found
+          xcopy /E /I /Y swiftshader temp_pkg\swiftshader || echo swiftshader folder not found
+          copy icudtl.dat temp_pkg\ || echo icudtl.dat not found
+          copy *.dll temp_pkg\ || echo No dll files found
+          
+          cd ..\..\..
+          powershell -Command "Compress-Archive -Path src\out\Release\temp_pkg\* -DestinationPath artifacts\chromium-${{ matrix.runner }}.zip -Force"
+          
+          rmdir /S /Q src\out\Release\temp_pkg
 
       - name: Package Chromium build (Linux)
         if: contains(matrix.runner, 'linux')
