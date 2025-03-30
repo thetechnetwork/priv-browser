@@ -99,7 +99,7 @@ jobs:
           else
             cd depot_tools && git pull && cd ..
           fi
-          echo "PATH=$PATH:$(pwd)/depot_tools" >> $GITHUB_ENV
+          echo PATH=%cd%\priv-browser\depot_tools;%PATH%>> %GITHUB_ENV%
 
       - name: Setup ccache (Linux/macOS)
         if: runner.os != 'Windows'
