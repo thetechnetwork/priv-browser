@@ -125,6 +125,11 @@ bool ContentBrowserClient::IsBrowserStartupComplete() {
   return true;
 }
 
+void ContentBrowserClient::OnUiTaskRunnerReady(
+    base::OnceClosure enable_native_ui_task_execution_callback) {
+  std::move(enable_native_ui_task_execution_callback).Run();
+}
+
 void ContentBrowserClient::SetBrowserStartupIsCompleteForTesting() {}
 
 std::unique_ptr<WebContentsViewDelegate>
@@ -1211,6 +1216,10 @@ bool ContentBrowserClient::ShouldOverrideUrlLoading(
   return true;
 }
 #endif
+
+bool ContentBrowserClient::SupportsAvoidUnnecessaryBeforeUnloadCheckSync() {
+  return true;
+}
 
 bool ContentBrowserClient::ShouldAllowSameSiteRenderFrameHostChange(
     const RenderFrameHost& rfh) {

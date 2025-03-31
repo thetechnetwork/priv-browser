@@ -37,12 +37,14 @@
 #include "components/data_sharing/public/features.h"
 #include "components/saved_tab_groups/internal/saved_tab_group_model.h"
 #include "components/saved_tab_groups/internal/saved_tab_group_sync_bridge.h"
+#include "components/saved_tab_groups/internal/shared_tab_group_account_data_sync_bridge.h"
 #include "components/saved_tab_groups/internal/stats.h"
 #include "components/saved_tab_groups/internal/sync_data_type_configuration.h"
 #include "components/saved_tab_groups/internal/tab_group_sync_bridge_mediator.h"
 #include "components/saved_tab_groups/internal/tab_group_sync_metrics_logger_impl.h"
 #include "components/saved_tab_groups/public/features.h"
 #include "components/saved_tab_groups/public/saved_tab_group_tab.h"
+#include "components/saved_tab_groups/public/tab_group_sync_metrics_logger.h"
 #include "components/saved_tab_groups/public/tab_group_sync_service.h"
 #include "components/saved_tab_groups/public/types.h"
 #include "components/sync/base/data_type.h"
@@ -110,8 +112,7 @@ CreateSharedTabGroupDataChangeProcessor() {
 std::unique_ptr<SyncDataTypeConfiguration>
 MaybeCreateSyncConfigurationForSharedTabGroupData(
     syncer::OnceDataTypeStoreFactory store_factory) {
-  if (!base::FeatureList::IsEnabled(
-          data_sharing::features::kDataSharingFeature)) {
+  if (!data_sharing::features::IsDataSharingFunctionalityEnabled()) {
     return nullptr;
   }
 
@@ -130,8 +131,7 @@ CreateSharedTabGroupAccountDataChangeProcessor() {
 std::unique_ptr<SyncDataTypeConfiguration>
 MaybeCreateSyncConfigurationForSharedTabGroupAccountData(
     syncer::OnceDataTypeStoreFactory store_factory) {
-  if (!base::FeatureList::IsEnabled(
-          data_sharing::features::kDataSharingFeature) ||
+  if (!data_sharing::features::IsDataSharingFunctionalityEnabled() ||
       !base::FeatureList::IsEnabled(syncer::kSyncSharedTabGroupAccountData)) {
     return nullptr;
   }

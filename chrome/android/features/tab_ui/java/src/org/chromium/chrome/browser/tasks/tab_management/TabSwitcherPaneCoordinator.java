@@ -404,20 +404,21 @@ public class TabSwitcherPaneCoordinator implements BackPressHandler {
                     new TabGroupListBottomSheetCoordinator(
                             activity,
                             profile,
-                            tabGroupId -> {
-                                tabGroupCreationDialogManager.showDialog(tabGroupId, filter);
-                            },
+                            tabGroupId ->
+                                    tabGroupCreationDialogManager.showDialog(tabGroupId, filter),
                             filter,
                             bottomSheetController,
-                            true);
+                            /* showNewGroupRow= */ true,
+                            /* destroyOnHide= */ false);
 
             TabBookmarker tabBookmarker = tabBookmarkerSupplier.get();
             mContextMenuCoordinator =
                     TabSwitcherContextMenuCoordinator.createContextMenuCoordinator(
                             activity,
                             tabBookmarker,
-                            filter::getTabModel,
+                            filter,
                             mTabGroupListBottomSheetCoordinator,
+                            tabGroupCreationDialogManager,
                             shareDelegateSupplier,
                             tabListEditorManager);
         }

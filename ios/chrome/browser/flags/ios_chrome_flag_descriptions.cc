@@ -114,6 +114,11 @@ const char kAutofillEnableRankingFormulaCreditCardsDescription[] =
     "When enabled, Autofill will use a new ranking formula to rank Autofill "
     "data model credit card suggestions.";
 
+const char kAutofillEnableSupportForHomeAndWorkName[] =
+    "Enable support for home and work addresses";
+const char kAutofillEnableSupportForHomeAndWorkDescription[] =
+    "When enabled, chrome will support home and work addresses from account.";
+
 const char kAutofillEnableVerveCardSupportName[] =
     "Enable autofill support for Verve cards";
 const char kAutofillEnableVerveCardSupportDescription[] =
@@ -285,12 +290,6 @@ const char kMeasurementsName[] = "Measurements experience enable";
 const char kMeasurementsDescription[] =
     "When enabled, one tapping or long pressing on a measurement will trigger "
     "the measurement conversion experience.";
-
-const char kEnableNewParcelTrackingNumberDetectionName[] =
-    "Improve Tracking Number Detection";
-const char kEnableNewParcelTrackingNumberDetectionDescription[] =
-    "When enabled carrier names are parsed out and must match tracking "
-    "numbers.";
 
 const char kEnableExpKitTextClassifierDateName[] =
     "Date with Text Classifier in Experience Kit";
@@ -491,6 +490,10 @@ const char kFeedSwipeInProductHelpName[] = "Enable Feed Swipe IPH";
 const char kFeedSwipeInProductHelpDescription[] =
     "Presents an in-product help on the NTP to promote swiping on the Feed";
 
+const char kFeedbackIncludeVariationsName[] = "Feedback include variations";
+const char kFeedbackIncludeVariationsDescription[] =
+    "In Chrome feedback report, include commandline variations.";
+
 const char kForceStartupSigninPromoName[] = "Display the startup sign-in promo";
 const char kForceStartupSigninPromoDescription[] =
     "When enabled, the startup sign-in promo is always displayed when starting "
@@ -568,12 +571,6 @@ const char kIOSDetectUsernameInUffName[] = "Detect username in UFF";
 const char kIOSDetectUsernameInUffDescription[] =
     "Detect the username in UFF for saving.";
 
-const char kIOSDisableParcelTrackingName[] = "Disable Parcel Tracking";
-const char kIOSDisableParcelTrackingDescription[] =
-    "Disables the parcel tracking feature; when set, users will not be offered "
-    "to track new parcels nor will they see Magic Stack cards for parcel "
-    "tracking.";
-
 const char kIOSDockingPromoName[] = "Docking Promo";
 const char kIOSDockingPromoDescription[] =
     "When enabled, the user will be presented an animated, instructional "
@@ -640,6 +637,12 @@ const char kIOSProactivePasswordGenerationBottomSheetName[] =
 const char kIOSProactivePasswordGenerationBottomSheetDescription[] =
     "Enables the display of the proactive password generation bottom sheet on "
     "IOS.";
+
+const char kIOSPromptSearchEngineChoiceAfterDeviceRestoreName[] =
+    "Prompt the search engine choice after device restore";
+const char kIOSPromptSearchEngineChoiceAfterDeviceRestoreDescription[] =
+    "The dialog is triggered when opening Chrome if there is no external "
+    "intent.";
 
 const char kIOSQuickDeleteName[] = "Quick Delete for iOS";
 const char kIOSQuickDeleteDescription[] =
@@ -808,6 +811,12 @@ extern const char kLensOverlayForceShowOnboardingScreenName[] =
 extern const char kLensOverlayForceShowOnboardingScreenDescription[] =
     "When enabled, it forces showing the onboarding screen everytime lens "
     "overlay is open";
+
+extern const char kLensOverlayNavigationHistoryName[] =
+    "Enable Lens overlay navigation history";
+extern const char kLensOverlayNavigationHistoryDescription[] =
+    "When enabled, web navigation in the Lens overlay are recorded in browser "
+    "history.";
 
 extern const char kLensPrewarmHardStickinessInInputSelectionName[] =
     "Lens prewarm hard stickiness in input selection";
@@ -1038,6 +1047,11 @@ const char kOptimizationGuidePushNotificationClientDescription[] =
     "Enables the client that handles incoming push notifications on behalf of "
     "the optimization guide.";
 
+const char kPageActionMenuName[] = "Page Action Menu";
+const char kPageActionMenuDescription[] =
+    "When enabled, the entry point for the Page Action Menu becomes available "
+    "for actions relating to the web page.";
+
 const char kPageContentAnnotationsName[] = "Page content annotations";
 const char kPageContentAnnotationsDescription[] =
     "Enables page content to be annotated on-device.";
@@ -1115,6 +1129,16 @@ const char kNotificationSettingsMenuItemName[] =
 const char kNotificationSettingsMenuItemDescription[] =
     "Displays the menu item for the notification controls inside the chrome "
     "settings UI.";
+
+const char kReaderModeDistillerName[] = "Enables Reader Mode distillation";
+const char kReaderModeDistillerDescription[] =
+    "Enables Reader Mode distillation on the current web page.";
+
+const char kReaderModeDistillerHeuristicName[] =
+    "Reader Mode distillation trigger heuristic";
+const char kReaderModeDistillerHeuristicDescription[] =
+    "Enables Reader Mode distillation heuristic that triggers Reader Mode UI "
+    "entry point if available";
 
 const char kRefactorToolbarsSizeName[] = "Refactor toolbars size";
 const char kRefactorToolbarsSizeDescription[] =
@@ -1242,6 +1266,11 @@ const char kSignInButtonNoAvatarName[] =
 const char kSignInButtonNoAvatarDescription[] =
     "When enabled, the sign-in button is shown without an avatar on the NTP.";
 
+const char kNTPBackgroundCustomizationName[] =
+    "Enable background customization menu on the NTP";
+const char kNTPBackgroundCustomizationDescription[] =
+    "When enabled, the background customization menu is available on the NTP.";
+
 const char kSpotlightNeverRetainIndexName[] = "Don't retain spotlight index";
 const char kSpotlightNeverRetainIndexDescription[] =
     "Tentative spotlight memory improvement by not storing a strong pointer to "
@@ -1314,6 +1343,12 @@ const char kEnableLensContextMenuUnifiedExperienceName[] =
     "Enable Lens Context Menu Unified Experience";
 const char kEnableLensContextMenuUnifiedExperienceDescription[] =
     "Enables unified native experience for Lens Context Menu";
+
+const char kExplainGeminiEditMenuName[] =
+    "Enable Explain Gemini Edit Menu Experience";
+const char kExplainGeminiEditMenuDescription[] =
+    "Enables a new button in the Edit Menu that explains the selected text "
+    "with Gemini.";
 
 const char kTabGridNewTransitionsName[] = "Enable new TabGrid transitions";
 const char kTabGridNewTransitionsDescription[] =

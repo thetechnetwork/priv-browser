@@ -121,10 +121,16 @@ class EmbeddedPermissionPromptInteractiveTest
         ExecuteJsAt(kWebContentsElementId, pepc_visible.where, "click"));
   }
 
-  auto PushPEPCPromptButton(ui::ElementIdentifier button_identifier) {
-    return InAnyContext(
-        WaitForShow(button_identifier), PressButton(button_identifier),
-        WaitForHide(EmbeddedPermissionPromptBaseView::kMainViewId));
+  auto PushPEPCPromptButton(ui::ElementIdentifier button_identifier,
+                            bool wait_for_prompt_resolution = true) {
+    if (wait_for_prompt_resolution) {
+      return InAnyContext(
+          WaitForShow(button_identifier), PressButton(button_identifier),
+          WaitForHide(EmbeddedPermissionPromptBaseView::kMainViewId));
+    } else {
+      return InAnyContext(WaitForShow(button_identifier),
+                          PressButton(button_identifier));
+    }
   }
 
   // Checks that the next value in the queue matches the text in the label
@@ -697,7 +703,7 @@ IN_PROC_BROWSER_TEST_P(EmbeddedPermissionPromptInteractiveTest, TestPepcUkm) {
           permissions::RequestTypeForUma::MULTIPLE_AUDIO_AND_VIDEO_CAPTURE,
           permissions::RequestTypeForUma::MULTIPLE_AUDIO_AND_VIDEO_CAPTURE,
           permissions::ElementAnchoredBubbleAction::kGranted,
-          permissions::ElementAnchoredBubbleVariant::ASK, 0),
+          permissions::ElementAnchoredBubbleVariant::kAsk, 0),
 
       // Now mic+camera are granted.
       ClickOnPEPCElement("camera"),
@@ -708,7 +714,7 @@ IN_PROC_BROWSER_TEST_P(EmbeddedPermissionPromptInteractiveTest, TestPepcUkm) {
           permissions::RequestTypeForUma::PERMISSION_MEDIASTREAM_CAMERA,
           permissions::RequestTypeForUma::PERMISSION_MEDIASTREAM_CAMERA,
           permissions::ElementAnchoredBubbleAction::kDenied,
-          permissions::ElementAnchoredBubbleVariant::PREVIOUSLY_GRANTED, 0),
+          permissions::ElementAnchoredBubbleVariant::kPreviouslyGranted, 0),
 
       ClickOnPEPCElement("microphone"),
       InAnyContext(WaitForShow(EmbeddedPermissionPromptBaseView::kMainViewId)),
@@ -718,7 +724,7 @@ IN_PROC_BROWSER_TEST_P(EmbeddedPermissionPromptInteractiveTest, TestPepcUkm) {
           permissions::RequestTypeForUma::PERMISSION_MEDIASTREAM_MIC,
           permissions::RequestTypeForUma::PERMISSION_MEDIASTREAM_MIC,
           permissions::ElementAnchoredBubbleAction::kOk,
-          permissions::ElementAnchoredBubbleVariant::PREVIOUSLY_GRANTED, 0),
+          permissions::ElementAnchoredBubbleVariant::kPreviouslyGranted, 0),
 
       // Mic is granted, camera is blocked. Triggering the double permission
       // prompt will show the screen that is only for camera, while the prompt
@@ -731,7 +737,7 @@ IN_PROC_BROWSER_TEST_P(EmbeddedPermissionPromptInteractiveTest, TestPepcUkm) {
           permissions::RequestTypeForUma::MULTIPLE_AUDIO_AND_VIDEO_CAPTURE,
           permissions::RequestTypeForUma::PERMISSION_MEDIASTREAM_CAMERA,
           permissions::ElementAnchoredBubbleAction::kGrantedOnce,
-          permissions::ElementAnchoredBubbleVariant::PREVIOUSLY_DENIED, 0),
+          permissions::ElementAnchoredBubbleVariant::kPreviouslyDenied, 0),
 
       // Both permissions are granted. Dismiss the prompt via clicking on the
       // scrim.
@@ -749,7 +755,7 @@ IN_PROC_BROWSER_TEST_P(EmbeddedPermissionPromptInteractiveTest, TestPepcUkm) {
           permissions::RequestTypeForUma::MULTIPLE_AUDIO_AND_VIDEO_CAPTURE,
           permissions::RequestTypeForUma::MULTIPLE_AUDIO_AND_VIDEO_CAPTURE,
           permissions::ElementAnchoredBubbleAction::kDismissedScrim,
-          permissions::ElementAnchoredBubbleVariant::PREVIOUSLY_GRANTED, 0));
+          permissions::ElementAnchoredBubbleVariant::kPreviouslyGranted, 0));
 }
 
 IN_PROC_BROWSER_TEST_P(EmbeddedPermissionPromptInteractiveTest,
@@ -800,10 +806,6 @@ IN_PROC_BROWSER_TEST_P(EmbeddedPermissionPromptInteractiveTest,
 #endif
 IN_PROC_BROWSER_TEST_P(EmbeddedPermissionPromptInteractiveTest,
                        MAYBE_TestOsSystemAutoResolves) {
-  std::unique_ptr<base::AutoReset<bool>> mock_system_settings =
-      std::make_unique<base::AutoReset<bool>>(
-          system_permission_settings::MockShowSystemSettingsForTesting());
-
   std::unique_ptr<system_permission_settings::ScopedSettingsForTesting>
       scoped_system_permission_camera = std::make_unique<
           system_permission_settings::ScopedSettingsForTesting>(
@@ -820,7 +822,6 @@ IN_PROC_BROWSER_TEST_P(EmbeddedPermissionPromptInteractiveTest,
       InAnyContext(
           WaitForShow(EmbeddedPermissionPromptSystemSettingsView::kMainViewId)),
       Do([&]() {
-        mock_system_settings.reset();
         scoped_system_permission_camera.reset();
         scoped_system_permission_mic.reset();
         scoped_system_permission_camera = std::make_unique<
@@ -843,6 +844,51 @@ IN_PROC_BROWSER_TEST_P(EmbeddedPermissionPromptInteractiveTest,
 
       // Now that both system permissions changed to allowed, the PEPC prompt
       // advances to the next screen.
+      InAnyContext(WaitForShow(EmbeddedPermissionPromptAskView::kAllowId)));
+}
+
+// This test relies on the presence of the "Go to [OS] setting" button which is
+// not implemented for the linux version of the prompt.
+#if BUILDFLAG(IS_LINUX)
+#define MAYBE_TestOsSystemAutoResolvesOnButton \
+  DISABLED_TestOsSystemAutoResolvesOnButton
+#else
+#define MAYBE_TestOsSystemAutoResolvesOnButton TestOsSystemAutoResolvesOnButton
+#endif
+IN_PROC_BROWSER_TEST_P(EmbeddedPermissionPromptInteractiveTest,
+                       MAYBE_TestOsSystemAutoResolvesOnButton) {
+  std::unique_ptr<system_permission_settings::ScopedSettingsForTesting>
+      scoped_system_permission_camera = std::make_unique<
+          system_permission_settings::ScopedSettingsForTesting>(
+          ContentSettingsType::MEDIASTREAM_CAMERA, /*blocked=*/true);
+  std::unique_ptr<system_permission_settings::ScopedSettingsForTesting>
+      scoped_system_permission_mic = std::make_unique<
+          system_permission_settings::ScopedSettingsForTesting>(
+          ContentSettingsType::MEDIASTREAM_MIC, /*blocked=*/true);
+
+  RunTestSequence(
+      InstrumentTab(kWebContentsElementId),
+      NavigateWebContents(kWebContentsElementId, GetURL()),
+      ClickOnPEPCElement("camera-microphone"),
+      InAnyContext(
+          WaitForShow(EmbeddedPermissionPromptSystemSettingsView::kMainViewId)),
+      Do([&]() {
+        scoped_system_permission_camera.reset();
+        scoped_system_permission_mic.reset();
+        scoped_system_permission_camera = std::make_unique<
+            system_permission_settings::ScopedSettingsForTesting>(
+            ContentSettingsType::MEDIASTREAM_CAMERA, /*blocked=*/false);
+        scoped_system_permission_mic = std::make_unique<
+            system_permission_settings::ScopedSettingsForTesting>(
+            ContentSettingsType::MEDIASTREAM_MIC, /*blocked=*/false);
+      }),
+
+      PushPEPCPromptButton(
+          EmbeddedPermissionPromptSystemSettingsView::kOpenSettingsId,
+          /*wait_for_prompt_resolution=*/false),
+
+      // Now that both system permissions changed to allowed, clicking the "open
+      // settings" button means the prompt progresses to the next screen.
       InAnyContext(WaitForShow(EmbeddedPermissionPromptAskView::kAllowId)));
 }
 

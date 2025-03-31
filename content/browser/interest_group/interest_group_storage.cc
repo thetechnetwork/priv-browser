@@ -9,6 +9,7 @@
 
 #include <algorithm>
 #include <cstdint>
+#include <iterator>
 #include <limits>
 #include <memory>
 #include <optional>
@@ -16,6 +17,7 @@
 #include <utility>
 #include <vector>
 
+#include "base/containers/adapters.h"
 #include "base/containers/flat_map.h"
 #include "base/containers/flat_set.h"
 #include "base/containers/span.h"
@@ -31,6 +33,7 @@
 #include "base/notreached.h"
 #include "base/sequence_checker.h"
 #include "base/strings/escape.h"
+#include "base/strings/strcat.h"
 #include "base/strings/string_number_conversions.h"
 #include "base/strings/string_util.h"
 #include "base/time/time.h"
@@ -54,6 +57,7 @@
 #include "sql/meta_table.h"
 #include "sql/recovery.h"
 #include "sql/statement.h"
+#include "sql/statement_id.h"
 #include "sql/transaction.h"
 #include "third_party/blink/public/common/features.h"
 #include "third_party/blink/public/common/interest_group/ad_auction_constants.h"
@@ -122,6 +126,7 @@ const base::FilePath::CharType kDatabasePath[] =
 // Version 32 - 2025/02 - crrev.com/c/6239846
 // Version 33 - 2025/02 - crrev.com/c/6248184
 // Version 34 - 2025/02 - crrev.com/c/6256880
+// Version 35 - 2025/03 - crrev.com/c/6361984
 //
 // Version 1 adds a table for interest groups.
 // Version 2 adds a column for rate limiting interest group updates.
@@ -167,11 +172,20 @@ const base::FilePath::CharType kDatabasePath[] =
 //  renames its last_report_sent_time column to starting_time.
 // Version 33 adds view_and_click_counts_providers interest_groups field.
 // Version 34 adds view_and_click_events table.
+// Version 35 adds a cache of k-anon hashes previously retrieved from the
+//  k-anonymity server with a TTL of the QueryInterval.
 
-const int kCurrentVersionNumber = 34;
+const int kCurrentVersionNumber = 35;
 
 // Earliest version of the code which can use a |kCurrentVersionNumber| database
-// without failing.
+// without failing. This is used to determine if an upgraded version of the
+// database -- upgraded by running a newer version of the client -- can still
+// work when later running on an older version of the client. Note that if the
+// older version of the client isn't identified as compatible, the client will
+// wipe the database entirely before proceeding. As a rule of thumb, this
+// probably needs to be incremented to the `kCurrentVersionNumber` if you're
+// adding or deleting columns to an existing table, but not if you're just
+// adding a new table.
 const int kCompatibleVersionNumber = 33;
 
 // Latest version of the database that cannot be upgraded to
@@ -479,9 +493,25 @@ DeserializeInterestGroupAdVectorProto(const PassKey& passkey,
             blink::features::kFledgeAuctionDealSupport) &&
         !ad_proto.selectable_buyer_and_seller_reporting_ids().empty()) {
       std::vector<std::string> selectable_buyer_and_seller_reporting_ids;
-      for (const auto& id :
-           ad_proto.selectable_buyer_and_seller_reporting_ids()) {
-        selectable_buyer_and_seller_reporting_ids.emplace_back(id);
+      size_t selectable_reporting_ids_load_limit =
+          ad_proto.selectable_buyer_and_seller_reporting_ids().size();
+      if (base::FeatureList::IsEnabled(
+              features::
+                  kFledgeLimitSelectableBuyerAndSellerReportingIdsFetchedFromKAnon) &&
+          features::
+                  kFledgeSelectableBuyerAndSellerReportingIdsFetchedFromKAnonLimit
+                      .Get() >= 0 &&
+          features::
+              kFledgeSelectableBuyerAndSellerReportingIdsTruncateToKAnonLimit
+                  .Get()) {
+        selectable_reporting_ids_load_limit =
+            features::
+                kFledgeSelectableBuyerAndSellerReportingIdsFetchedFromKAnonLimit
+                    .Get();
+      }
+      for (size_t i = 0; i < selectable_reporting_ids_load_limit; ++i) {
+        selectable_buyer_and_seller_reporting_ids.emplace_back(
+            ad_proto.selectable_buyer_and_seller_reporting_ids()[i]);
       }
       ad.selectable_buyer_and_seller_reporting_ids =
           std::move(selectable_buyer_and_seller_reporting_ids);
@@ -1204,12 +1234,68 @@ bool CreateCurrentSchema(sql::Database& db) {
     return false;
   }
 
+  DCHECK(!db.DoesTableExist("cached_k_anonymity_hashes"));
+  static const char kCachedKAnonymityHashesTableSql[] =
+      // clang-format off
+      "CREATE TABLE cached_k_anonymity_hashes("
+        "key_hash BLOB NOT NULL,"
+        "is_k_anon INTEGER NOT NULL,"
+        "fetch_time INTEGER NOT NULL,"
+      "PRIMARY KEY(key_hash))";
+  // clang-format on
+  if (!db.Execute(kCachedKAnonymityHashesTableSql)) {
+    return false;
+  }
+
+  // Index on fetch_time, needed to delete keys when they expire.
+  DCHECK(!db.DoesIndexExist("cached_k_anonymity_hashes_expiration_index"));
+  static const char kCachedKAnonymityHashesExpirationIndexSql[] =
+      // clang-format off
+      "CREATE INDEX cached_k_anonymity_hashes_expiration_index"
+      " ON cached_k_anonymity_hashes(fetch_time)";
+  // clang-format on
+  if (!db.Execute(kCachedKAnonymityHashesExpirationIndexSql)) {
+    return false;
+  }
+
   return true;
 }
 
 bool VacuumDB(sql::Database& db) {
   static const char kVacuum[] = "VACUUM";
   return db.Execute(kVacuum);
+}
+
+bool UpgradeV34SchemaToV35(sql::Database& db, sql::MetaTable& meta_table) {
+  // Make a new table, `cached_k_anonymity_hashes`.
+  DCHECK(!db.DoesTableExist("cached_k_anonymity_hashes"));
+  static const char kCachedKAnonymityHashesTableSql[] =
+      // clang-format off
+      "CREATE TABLE cached_k_anonymity_hashes("
+        "key_hash BLOB NOT NULL,"
+        "is_k_anon INTEGER NOT NULL,"
+        "fetch_time INTEGER NOT NULL,"
+      "PRIMARY KEY(key_hash))";
+  // clang-format on
+  if (!db.Execute(kCachedKAnonymityHashesTableSql)) {
+    DLOG(ERROR) << "cached_k_anonymity_hashes upgrade CREATE SQL "
+                   "statement did not compile: "
+                << db.GetErrorMessage();
+    return false;
+  }
+
+  // Index on fetch_time, needed to delete keys when they expire.
+  DCHECK(!db.DoesIndexExist("cached_k_anonymity_hashes_expiration_index"));
+  static const char kCachedKAnonymityHashesExpirationIndexSql[] =
+      // clang-format off
+      "CREATE INDEX cached_k_anonymity_hashes_expiration_index"
+      " ON cached_k_anonymity_hashes(fetch_time)";
+  // clang-format on
+  if (!db.Execute(kCachedKAnonymityHashesExpirationIndexSql)) {
+    return false;
+  }
+
+  return true;
 }
 
 bool UpgradeV33SchemaToV34(sql::Database& db, sql::MetaTable& meta_table) {
@@ -3268,6 +3354,11 @@ bool UpgradeDB(sql::Database& db,
       if (!UpgradeV33SchemaToV34(db, meta_table)) {
         return false;
       }
+      [[fallthrough]];
+    case 34:
+      if (!UpgradeV34SchemaToV35(db, meta_table)) {
+        return false;
+      }
       if (!meta_table.SetVersionNumber(kCurrentVersionNumber)) {
         return false;
       }
@@ -4701,6 +4792,27 @@ void DoIncrementViewClickCounts(base::Time now,
   return true;
 }
 
+// Returns true if the rate limit (10 events in the last 20 seconds) has been
+// exceeded.
+bool IsClickinessRateLimited(base::Time now,
+                             const ListOfTimestamps& uncompacted_events) {
+  constexpr int kMaxEvents = 10;
+  constexpr base::TimeDelta kRateLimitWindow = base::Seconds(20);
+  int event_count = 0;
+  // Iterate backwards -- the newest events are at the end.
+  for (int64_t timestamp : base::Reversed(uncompacted_events.timestamps())) {
+    base::TimeDelta event_age = now - base::Time::FromDeltaSinceWindowsEpoch(
+                                          base::Microseconds(timestamp));
+    if (event_age > kRateLimitWindow) {
+      return false;
+    }
+    if (++event_count >= kMaxEvents) {
+      return true;
+    }
+  }
+  return false;
+}
+
 void DoRecordViewClick(sql::Database& db,
                        const network::AdAuctionEventRecord& record,
                        base::Time now) {
@@ -4757,16 +4869,20 @@ void DoRecordViewClick(sql::Database& db,
       return;
     }
 
-    // TODO(crbug.com/394108643): enforce rate limit.
-
     const int64_t int_now = now.ToDeltaSinceWindowsEpoch().InMicroseconds();
     switch (record.type) {
       case AdAuctionEventRecord::Type::kUninitialized:
         NOTREACHED();
       case AdAuctionEventRecord::Type::kView:
+        if (IsClickinessRateLimited(now, uncompacted_view_events)) {
+          return;
+        }
         uncompacted_view_events.add_timestamps(int_now);
         break;
       case AdAuctionEventRecord::Type::kClick:
+        if (IsClickinessRateLimited(now, uncompacted_click_events)) {
+          return;
+        }
         uncompacted_click_events.add_timestamps(int_now);
         break;
     }
@@ -5097,6 +5213,34 @@ std::optional<DebugReportLockout> DoGetDebugReportLockout(
   }
   // Reading the table succeeded but there was no row.
   return std::nullopt;
+}
+
+void DoGetAllDebugReportCooldowns(
+    sql::Database& db,
+    std::optional<base::Time> ignore_before,
+    DebugReportLockoutAndCooldowns& debug_report_lockout_and_cooldowns) {
+  sql::Statement cooldowns(
+      db.GetCachedStatement(SQL_FROM_HERE,
+                            "SELECT origin, starting_time, type "
+                            "FROM cooldown_debugging_only_report "
+                            "WHERE starting_time > ?"));
+  if (!cooldowns.is_valid()) {
+    DLOG(ERROR) << "GetAllDebugReportCooldowns SQL statement did not compile: "
+                << db.GetErrorMessage();
+    return;
+  }
+  cooldowns.BindTime(0, ignore_before.value_or(base::Time::Min()));
+
+  while (cooldowns.Step()) {
+    url::Origin origin = DeserializeOrigin(cooldowns.ColumnStringView(0));
+    debug_report_lockout_and_cooldowns
+        .debug_report_cooldown_map[std::move(origin)] = DebugReportCooldown(
+        cooldowns.ColumnTime(1),
+        static_cast<DebugReportCooldownType>(cooldowns.ColumnInt(2)));
+  }
+
+  // TODO(qingxinwu): When reading the table fails, treat it as there is an
+  // unexpired cooldown.
 }
 
 std::optional<DebugReportCooldown> DoGetDebugReportCooldownForOrigin(
@@ -5918,6 +6062,21 @@ bool ClearExpiredBiddingAndAuctionKeys(sql::Database& db, base::Time now) {
   return clear_expired_keys.Run();
 }
 
+bool ClearExpiredCachedKAnonymityHashes(sql::Database& db, base::Time now) {
+  const base::TimeDelta ttl = features::kFledgeCacheKAnonHashedKeysTtl.Get();
+  sql::Statement clear_expired_cache_entries(
+      db.GetCachedStatement(SQL_FROM_HERE,
+                            "DELETE FROM cached_k_anonymity_hashes "
+                            "WHERE fetch_time<?"));
+  if (!clear_expired_cache_entries.is_valid()) {
+    DLOG(ERROR)
+        << "ClearExpiredCachedKAnonymityHashes SQL statement did not compile.";
+    return {};
+  }
+  clear_expired_cache_entries.BindTime(0, now - ttl);
+  return clear_expired_cache_entries.Run();
+}
+
 bool DoSetBiddingAndAuctionServerKeys(sql::Database& db,
                                       const url::Origin& coordinator,
                                       std::string_view serialized_keys,
@@ -5927,6 +6086,11 @@ bool DoSetBiddingAndAuctionServerKeys(sql::Database& db,
       "INSERT OR REPLACE INTO "
       "bidding_and_auction_server_keys(coordinator,keys,expiration) "
       "VALUES  (?,?,?)"));
+  if (!insert_keys_statement.is_valid()) {
+    DLOG(ERROR)
+        << "DoSetBiddingAndAuctionServerKeys SQL statement did not compile.";
+    return false;
+  }
 
   insert_keys_statement.Reset(true);
   insert_keys_statement.BindString(0, Serialize(coordinator));
@@ -5960,6 +6124,148 @@ std::pair<base::Time, std::string> DoGetBiddingAndAuctionServerKeys(
     return {expiration, std::move(key_blob)};
   }
   return {base::Time::Min(), {}};
+}
+
+bool DoWriteHashedKAnonymityKeysToCache(
+    sql::Database& db,
+    const std::vector<std::string>& positive_hashed_keys,
+    const std::vector<std::string>& negative_hashed_keys,
+    base::Time fetch_time) {
+  sql::Statement insert_keys_statement(db.GetCachedStatement(
+      SQL_FROM_HERE,
+      "INSERT OR REPLACE INTO "
+      "cached_k_anonymity_hashes(key_hash,is_k_anon,fetch_time) "
+      "VALUES  (?,?,?)"));
+  if (!insert_keys_statement.is_valid()) {
+    DLOG(ERROR)
+        << "DoWriteHashedKAnonymityKeysToCache SQL statement did not compile.";
+    return {};
+  }
+
+  sql::Transaction transaction(&db);
+  if (!transaction.Begin()) {
+    return false;
+  }
+  for (const std::string& key : positive_hashed_keys) {
+    insert_keys_statement.Reset(true);
+    insert_keys_statement.BindBlob(0, key);
+    insert_keys_statement.BindBool(1, true);
+    insert_keys_statement.BindTime(2, fetch_time);
+    if (!insert_keys_statement.Run()) {
+      return false;
+    }
+  }
+  for (const std::string& key : negative_hashed_keys) {
+    insert_keys_statement.Reset(true);
+    insert_keys_statement.BindBlob(0, key);
+    insert_keys_statement.BindBool(1, false);
+    insert_keys_statement.BindTime(2, fetch_time);
+    if (!insert_keys_statement.Run()) {
+      return false;
+    }
+  }
+  return transaction.Commit();
+}
+
+bool AppendKAnonCacheQueryStatement(
+    sql::Database& db,
+    sql::StatementID statement_id,
+    size_t number_of_keys,
+    std::vector<std::pair<size_t, std::unique_ptr<sql::Statement>>>* levels) {
+  if (number_of_keys < 1) {
+    return false;
+  }
+
+  std::string query_string =
+      "SELECT key_hash, is_k_anon "
+      "FROM cached_k_anonymity_hashes "
+      "WHERE fetch_time >= ? AND key_hash ";
+  if (number_of_keys > 1) {
+    base::StrAppend(&query_string, {"IN (?"});
+    base::StrAppend(&query_string,
+                    std::vector<std::string>(number_of_keys - 1, ",?"));
+    base::StrAppend(&query_string, {")"});
+  } else {
+    base::StrAppend(&query_string, {"= ?"});
+  }
+
+  std::unique_ptr<sql::Statement> statement = std::make_unique<sql::Statement>(
+      db.GetCachedStatement(statement_id, query_string));
+  if (!statement->is_valid()) {
+    DLOG(ERROR) << "CreateKAnonCacheQueryStatement "
+                << "for number_of_keys=" << number_of_keys
+                << " SQL statement did not compile.";
+    return false;
+  }
+
+  levels->emplace_back(number_of_keys, std::move(statement));
+  return true;
+}
+
+InterestGroupStorage::KAnonymityCacheResponse
+DoLoadPositiveHashedKAnonymityKeysFromCache(
+    sql::Database& db,
+    const std::vector<std::string>& keys,
+    const base::Time fetch_time) {
+  const base::TimeDelta ttl = features::kFledgeCacheKAnonHashedKeysTtl.Get();
+  const base::Time min_valid_time = fetch_time - ttl;
+
+  // These should always be in descending order of number_of_keys, and the
+  // last one should always be number_of_keys = 1.
+  std::vector<std::pair<size_t, std::unique_ptr<sql::Statement>>> levels;
+  if (!AppendKAnonCacheQueryStatement(db, SQL_FROM_HERE, 100, &levels)) {
+    return {{}, keys};
+  }
+  if (!AppendKAnonCacheQueryStatement(db, SQL_FROM_HERE, 10, &levels)) {
+    return {{}, keys};
+  }
+  if (!AppendKAnonCacheQueryStatement(db, SQL_FROM_HERE, 1, &levels)) {
+    return {{}, keys};
+  }
+
+  base::flat_map<std::string, bool> lookup_results;
+  size_t key_index = 0;
+  while (key_index < keys.size()) {
+    for (auto& level : levels) {
+      const size_t number_of_keys = level.first;
+      if (keys.size() - key_index >= number_of_keys) {
+        sql::Statement* statement = level.second.get();
+        statement->Reset(true);
+        statement->BindTime(0, min_valid_time);
+        for (size_t param_index = 1; param_index <= number_of_keys;
+             ++param_index) {
+          statement->BindBlob(param_index, keys[key_index++]);
+        }
+        while (statement->Step()) {
+          lookup_results.emplace(statement->ColumnString(0),
+                                 statement->ColumnBool(1));
+        }
+        if (!statement->Succeeded()) {
+          DLOG(ERROR) << "DoLoadPositiveHashedKAnonymityKeysFromCache "
+                      << "Encountered error while stepping through results";
+          return {{}, keys};
+        }
+        break;
+      }
+    }
+  }
+
+  std::vector<std::string> positive_hashed_keys;
+  std::vector<std::string> keys_to_fetch;
+  for (const std::string& key : keys) {
+    auto is_k_anon_iterator = lookup_results.find(key);
+    if (is_k_anon_iterator == lookup_results.end()) {
+      keys_to_fetch.emplace_back(key);
+    } else if (is_k_anon_iterator->second) {
+      positive_hashed_keys.emplace_back(key);
+    }
+  }
+
+  base::UmaHistogramPercentage(
+      "Storage.InterestGroup.KAnonymityKeysCacheHitRate",
+      (keys.size() - keys_to_fetch.size()) * 100 / keys.size());
+
+  return {positive_hashed_keys, keys_to_fetch};
 }
 
 bool DoPerformDatabaseMaintenance(sql::Database& db,
@@ -6001,6 +6307,9 @@ bool DoPerformDatabaseMaintenance(sql::Database& db,
     return false;
   }
   if (!ClearExpiredBiddingAndAuctionKeys(db, now)) {
+    return false;
+  }
+  if (!ClearExpiredCachedKAnonymityHashes(db, now)) {
     return false;
   }
   return transaction.Commit();
@@ -6334,15 +6643,6 @@ std::vector<std::string> InterestGroupStorage::ClearOriginJoinedInterestGroups(
   return std::move(left_interest_groups.value());
 }
 
-std::optional<DebugReportLockout>
-InterestGroupStorage::GetDebugReportLockout() {
-  DCHECK_CALLED_ON_VALID_SEQUENCE(sequence_checker_);
-  if (!EnsureDBInitialized()) {
-    return std::nullopt;
-  }
-  return DoGetDebugReportLockout(*db_, GetSampleDebugReportStartingFrom());
-}
-
 std::optional<DebugReportLockoutAndCooldowns>
 InterestGroupStorage::GetDebugReportLockoutAndCooldowns(
     const base::flat_set<url::Origin>& origins) {
@@ -6359,6 +6659,24 @@ InterestGroupStorage::GetDebugReportLockoutAndCooldowns(
       DoGetDebugReportLockout(*db_, ignore_before);
   DoGetDebugReportCooldowns(*db_, origins, ignore_before,
                             debug_report_lockout_and_cooldowns);
+  return debug_report_lockout_and_cooldowns;
+}
+
+std::optional<DebugReportLockoutAndCooldowns>
+InterestGroupStorage::GetDebugReportLockoutAndAllCooldowns() {
+  DCHECK_CALLED_ON_VALID_SEQUENCE(sequence_checker_);
+  if (!EnsureDBInitialized()) {
+    return std::nullopt;
+  }
+  DebugReportLockoutAndCooldowns debug_report_lockout_and_cooldowns;
+
+  // Ignore lockout and cooldowns whose start time is before
+  // kFledgeEnableFilteringDebugReportStartingFrom.
+  std::optional<base::Time> ignore_before = GetSampleDebugReportStartingFrom();
+  debug_report_lockout_and_cooldowns.lockout =
+      DoGetDebugReportLockout(*db_, ignore_before);
+  DoGetAllDebugReportCooldowns(*db_, ignore_before,
+                               debug_report_lockout_and_cooldowns);
   return debug_report_lockout_and_cooldowns;
 }
 
@@ -6778,6 +7096,46 @@ InterestGroupStorage::GetBiddingAndAuctionServerKeys(
     return {base::Time::Min(), {}};
   }
   return DoGetBiddingAndAuctionServerKeys(*db_, coordinator);
+}
+
+bool InterestGroupStorage::WriteHashedKAnonymityKeysToCache(
+    const std::vector<std::string>& positive_hashed_keys,
+    const std::vector<std::string>& negative_hashed_keys,
+    base::Time fetch_time) {
+  DCHECK_CALLED_ON_VALID_SEQUENCE(sequence_checker_);
+  if (!EnsureDBInitialized()) {
+    return false;
+  }
+  return DoWriteHashedKAnonymityKeysToCache(*db_, positive_hashed_keys,
+                                            negative_hashed_keys, fetch_time);
+}
+
+InterestGroupStorage::KAnonymityCacheResponse::KAnonymityCacheResponse(
+    std::vector<std::string> _positive_hashed_keys_from_cache,
+    std::vector<std::string> _ids_to_query_from_server)
+    : positive_hashed_keys_from_cache(
+          std::move(_positive_hashed_keys_from_cache)),
+      ids_to_query_from_server(std::move(_ids_to_query_from_server)) {}
+
+InterestGroupStorage::KAnonymityCacheResponse::KAnonymityCacheResponse(
+    const KAnonymityCacheResponse& other) = default;
+
+InterestGroupStorage::KAnonymityCacheResponse&
+InterestGroupStorage::KAnonymityCacheResponse::operator=(
+    const KAnonymityCacheResponse& other) = default;
+
+InterestGroupStorage::KAnonymityCacheResponse::~KAnonymityCacheResponse() =
+    default;
+
+InterestGroupStorage::KAnonymityCacheResponse
+InterestGroupStorage::LoadPositiveHashedKAnonymityKeysFromCache(
+    const std::vector<std::string>& keys,
+    base::Time check_time) {
+  DCHECK_CALLED_ON_VALID_SEQUENCE(sequence_checker_);
+  if (!EnsureDBInitialized()) {
+    return {{}, keys};
+  }
+  return DoLoadPositiveHashedKAnonymityKeysFromCache(*db_, keys, check_time);
 }
 
 // static

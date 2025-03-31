@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "chrome/browser/safe_browsing/chrome_enterprise_url_lookup_service.h"
+#include "components/safe_browsing/core/browser/realtime/chrome_enterprise_url_lookup_service.h"
 
 #include "base/functional/bind.h"
 #include "base/test/bind.h"
@@ -53,6 +53,8 @@ namespace {
 constexpr char kRealTimeLookupUrl[] =
     "https://enterprise-safebrowsing.googleapis.com/safebrowsing/clientreport/"
     "realtime";
+
+constexpr char kTestProfileEmail[] = "test@example.com";
 
 class MockReferrerChainProvider : public ReferrerChainProvider {
  public:
@@ -128,16 +130,8 @@ class ChromeEnterpriseRealTimeUrlLookupServiceTest : public PlatformTest {
 
     test_profile_ = profile_manager_->CreateTestingProfile("testing_profile");
 
-    // TODO(crbug.com/399376916): Remove direct dependency to
-    // enterprise_connectors::GetProfileEmail which uses the profile-bound
-    // IdentityManager.
-    signin::IdentityManager* identity_manager =
-        IdentityManagerFactory::GetForProfile(test_profile_);
-    signin::SetPrimaryAccount(identity_manager, "test@example.com",
-                              signin::ConsentLevel::kSignin);
-
     identity_test_env_.MakePrimaryAccountAvailable(
-        "test@example.com", signin::ConsentLevel::kSignin);
+        kTestProfileEmail, signin::ConsentLevel::kSignin);
 
     management_service_ = std::make_unique<policy::ManagementService>(
         std::vector<std::unique_ptr<policy::ManagementStatusProvider>>());
@@ -165,7 +159,7 @@ class ChromeEnterpriseRealTimeUrlLookupServiceTest : public PlatformTest {
 
     auto enterprise_rt_service = std::make_unique<
         ChromeEnterpriseRealTimeUrlLookupService>(
-        test_shared_loader_factory_, cache_manager_.get(), profile,
+        test_shared_loader_factory_, cache_manager_.get(),
         base::BindRepeating(
             [](Profile* profile, syncer::TestSyncService* test_sync_service) {
               ChromeUserPopulation population =
@@ -180,11 +174,15 @@ class ChromeEnterpriseRealTimeUrlLookupServiceTest : public PlatformTest {
             },
             profile, &test_sync_service_),
         std::move(token_fetcher),
+        // TODO(crbug.com/406211981): Replace with mock ConnectorsServiceBase.
         enterprise_connectors::ConnectorsServiceFactory::GetForBrowserContext(
             profile),
         referrer_chain_provider_.get(), &test_pref_service_,
-        identity_test_env_.identity_manager(), management_service_.get(),
-        is_off_the_record, is_guest_session);
+        /*webui_delegate=*/nullptr, identity_test_env_.identity_manager(),
+        management_service_.get(), is_off_the_record, is_guest_session,
+        base::BindRepeating([]() -> std::string { return kTestProfileEmail; }),
+        base::BindRepeating([] { return true; }),
+        /*is_command_line_switch_supported=*/true);
 
     test_pref_service_.SetInteger(
         enterprise_connectors::kEnterpriseRealTimeUrlCheckMode,

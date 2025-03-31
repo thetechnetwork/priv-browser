@@ -194,11 +194,6 @@ BASE_FEATURE(kOmitCorsClientCert,
              "OmitCorsClientCert",
              base::FEATURE_DISABLED_BY_DEFAULT);
 
-// Load Pervasive Payloads List for Cache Transparency.
-BASE_FEATURE(kPervasivePayloadsList,
-             "PervasivePayloadsList",
-             base::FEATURE_DISABLED_BY_DEFAULT);
-
 // Enables support for the `Variants` response header and reduce
 // accept-language. https://github.com/Tanych/accept-language
 BASE_FEATURE(kReduceAcceptLanguage,
@@ -322,6 +317,13 @@ BASE_FEATURE(kReduceTransferSizeUpdatedIPC,
 BASE_FEATURE(kRendererSideContentDecoding,
              "RendererSideContentDecoding",
              base::FEATURE_DISABLED_BY_DEFAULT);
+// When non-zero, a Mojo data pipe of this size will be used between the
+// decoding thread and the data receiving thread.
+BASE_FEATURE_PARAM(int,
+                   kRendererSideContentDecodingPipeSize,
+                   &kRendererSideContentDecoding,
+                   /*name=*/"RendererSideContentDecodingPipeSize",
+                   /*default_value=*/0);
 
 // This feature allows skipping TPCD mitigation checks when the cookie access
 // is tagged as being used for advertising purposes. This means that cookies
@@ -535,6 +537,13 @@ BASE_FEATURE_PARAM(bool,
                    "ExposeDebugMessageForSettingsStatus",
                    false);
 
+// Enables transactional behavior for sharedStorage.batchUpdate(). This also
+// disallows the 'withLock' option for methods within batchUpdate().
+// https://wicg.github.io/shared-storage/#batch-update
+BASE_FEATURE(kSharedStorageTransactionalBatchUpdate,
+             "SharedStorageTransactionalBatchUpdate",
+             base::FEATURE_DISABLED_BY_DEFAULT);
+
 // Kill switch for the Interest Group API, i.e. if disabled, the
 // API exposure will be disabled regardless of the OT config.
 BASE_FEATURE(kInterestGroupStorage,
@@ -574,5 +583,9 @@ BASE_FEATURE(kGetCookiesOnSet,
 BASE_FEATURE(kPopulatePermissionsPolicyOnRequest,
              "PopulatePermissionsPolicyOnRequest",
              base::FEATURE_DISABLED_BY_DEFAULT);
+
+BASE_FEATURE(kProtectedAudienceCorsSafelistKVv2Signals,
+             "ProtectedAudienceCorsSafelistKVv2Signals",
+             base::FEATURE_ENABLED_BY_DEFAULT);
 
 }  // namespace network::features

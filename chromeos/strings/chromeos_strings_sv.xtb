@@ -11,6 +11,7 @@
 <translation id="102432830749687801">Se till att använda appen Innehållsöverföring från Google för att flytta data från ditt skolkonto till ditt personliga konto innan du förlorar åtkomsten.</translation>
 <translation id="1026212596705997935">Kortkommandot används för <ph name="CONFLICT_ACCEL_NAME" />. Tryck på ett nytt kortkommando. Tryck på det befintliga kortkommandot igen om du vill ersätta det.</translation>
 <translation id="1030856839388844477">Återställ dataanvändning</translation>
+<translation id="1047095725494118091">Nedladdningen misslyckades. Försök igen eller starta om din <ph name="DEVICE_TYPE" />.</translation>
 <translation id="1047458377670401304"><ph name="CPU_NAME" /> (<ph name="THREAD_COUNT" /> trådar, <ph name="CPU_MAX_CLOCK_SPEED" /> GHz)</translation>
 <translation id="1047773237499189053">Det finns en ny funktion. Tryck på uppåtpilen om du vill läsa mer.</translation>
 <translation id="1049663189809099096">pastellgul</translation>
@@ -26,6 +27,7 @@
 <translation id="1082009148392559545">Laddar ned skärmsläckaren</translation>
 <translation id="1094693127011229778">IP-adress är inte tillgänglig</translation>
 <translation id="1100902271996134409">Skapar bilder …</translation>
+<translation id="1107856713690040084"><ph name="DEVICE_TYPE" />-ljud</translation>
 <translation id="1116694919640316211">Om</translation>
 <translation id="1118572504348554005">Vi kan dela feedback som skickas via det här formuläret med våra partners för att felsöka problem som du rapporterar till oss. Ange inte känsliga uppgifter somlösenord.</translation>
 <translation id="1119403468619527527">Det går inte att förenkla med så få ord</translation>
@@ -292,6 +294,7 @@
 <translation id="2163937499206714165">Aktivera mörkt läge</translation>
 <translation id="2164131940279488868">Se till att en mikrofon är ansluten för att börja spela in ljud</translation>
 <translation id="2173302385160625112">Kontrollera internetanslutningen</translation>
+<translation id="2176909213844392588">Det gick inte att ladda ned transkriptionsmodellen för <ph name="LANGUAGE_NAME" />. Försök igen eller starta om din <ph name="DEVICE_TYPE" />.</translation>
 <translation id="2180197493692062006">Något gick fel. Testa att öppna appen igen.</translation>
 <translation id="2189104374785738357">Redigera APN-information</translation>
 <translation id="2195732836444333448">Jag kan inte göra det just nu. Testa igen om ett tag.</translation>
@@ -480,6 +483,7 @@
 <translation id="3199982728237701504">Dokumentmatare (tvåsidig)</translation>
 <translation id="3201315366910775591">Delade album kan uppdateras av andra</translation>
 <translation id="3211671540163313381">Tangentmappning: styrkors</translation>
+<translation id="3217462202230355157">Kontrollera att mikrofonen är ansluten eller försök starta om din <ph name="DEVICE_TYPE" /></translation>
 <translation id="3226405216343213872">Söker efter skannrar</translation>
 <translation id="3226657629376379887">Layoutåtgärdsmeny</translation>
 <translation id="3227186760713762082">Dividera värdet för <ph name="CATEGORY_TEXT" /> med <ph name="CONVERSION_RATE" /></translation>
@@ -515,6 +519,7 @@
 <translation id="3383623117265110236">Exklusivt</translation>
 <translation id="3404249063913988450">Aktivera skärmsläckare</translation>
 <translation id="3413935475507503304">Klicka på Nästa om du vill fortsätta med uppdateringen.</translation>
+<translation id="3416709353545797224">Spela in allt ljud på <ph name="DEVICE_TYPE" /></translation>
 <translation id="3428551088151258685">utomhus</translation>
 <translation id="3428971106895559033">pastell</translation>
 <translation id="3434107140712555581"><ph name="BATTERY_PERCENTAGE" /> %</translation>
@@ -678,6 +683,7 @@
 <translation id="4155551848414053977">Kontrollera att skannern är på och tillgänglig via nätverket eller med direktanslutning</translation>
 <translation id="4159238217853743776">Partiell</translation>
 <translation id="4159784952369912983">Lila</translation>
+<translation id="416219735020840807">Det gick inte att ladda ned transkriptionsmodellen. Försök igen eller starta om din <ph name="DEVICE_TYPE" />.</translation>
 <translation id="4170180284036919717">Ta ett foto</translation>
 <translation id="4170700058716978431">MISSLYCKADES</translation>
 <translation id="4171077696775491955">minska ljusstyrkan</translation>
@@ -698,6 +704,16 @@
 <translation id="4249717042534905822">på söndag</translation>
 <translation id="4250229828105606438">Skärmbild</translation>
 <translation id="4251839292699800785">Elegant kontor</translation>
+<translation id="4252261480746798874">När du väljer Skapa din egen kan du skriva en anpassad prompt. Du kan även välja Välj ett tema och sedan välja de understrukna orden för att anpassa AI-bakgrunden.
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          Välj Inspirera mig för att få mer unika och varierade AI-bildalternativ.
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          När du skapar en egen bakgrund skickas prompten till Googles servrar för att generera bilder och förbättra produkten i enlighet med <ph name="BEGIN_LINK_GOOGLE_PRIVACY_POLICY" />Googles användarvillkor och integritetspolicy<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" />. Ange inget som är personligt, känsligt eller konfidentiellt.
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          Generativ AI kan göra misstag, inklusive om personer, så dubbelkolla svaren. <ph name="BEGIN_LINK_CREATE_YOUR_OWN_WALLPAPER" />Läs mer<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" /></translation>
 <translation id="4258281355379922695">HTTP-latens</translation>
 <translation id="4266143281602681663">garn</translation>
 <translation id="4269815121975886860">Startinställningar</translation>
@@ -775,7 +791,6 @@
 <translation id="4593212453765072419">Proxyautentisering krävs</translation>
 <translation id="4594021849294327751">Skapa transkription</translation>
 <translation id="4594541568452132351">Välj transkriptionsspråk och ladda ned modell</translation>
-<translation id="4607282946861182308">Det går inte att skapa bilder av detta. Testa en annan prompt.</translation>
 <translation id="4609350030397390689">Tangenten som minskar ljusstyrkan på tangentbordet</translation>
 <translation id="4627232916386272576"><ph name="DOCUMENT_TITLE" />, <ph name="PRINTER_NAME" />, <ph name="CREATION_TIME" />, <ph name="PRINTED_PAGE_NUMBER" /> av <ph name="TOTAL_PAGE_NUMBER" />. Tryck på retur för att avbryta utskriftsjobbet.</translation>
 <translation id="463791356324567266">Skanningen avbryts …</translation>
@@ -942,6 +957,7 @@
 <translation id="5344619683981067131">Ersätter markerad text med förslag</translation>
 <translation id="5346687412805619883">Lokalt nätverk</translation>
 <translation id="5358174242040570474">Något gick fel. Testa att välja en bakgrund igen eller öppna appen på nytt.</translation>
+<translation id="5368228070728130240">Det gick inte att ladda ned modellen för sammanfattning och skapande av titlar. Försök igen eller starta om din <ph name="DEVICE_TYPE" />.</translation>
 <translation id="5372659122375744710">wifi-nätverket är inte säkert</translation>
 <translation id="5376354385557966694">Automatiskt ljust läge</translation>
 <translation id="5378184552853359930">IP-typ</translation>
@@ -1247,6 +1263,7 @@
 <translation id="6766275201586212568">Misslyckade DNS-matchningar</translation>
 <translation id="6768237774506518020">Hög felfrekvens för DNS-matchningar</translation>
 <translation id="6786747875388722282">Tillägg</translation>
+<translation id="6789891265243243337">När <ph name="DEVICE_TYPE" />-ljud är aktiverat spelar ljudinspelaren in allt ljud som spelas upp på enheten</translation>
 <translation id="6791471867139427246">färg på tangentbordets belysning</translation>
 <translation id="6796229976413584781">Genvägen har raderats</translation>
 <translation id="6798678288485555829">Textnavigering</translation>
@@ -1522,6 +1539,7 @@ Ladda ned transkriptionsmodellen (upp till 100 MB) för att få transkriptioner
 <translation id="8010765388850538088">Läs mer om generativ AI</translation>
 <translation id="8017679124341497925">Genvägen har ändrats</translation>
 <translation id="802154636333426148">Nedladdningen misslyckades</translation>
+<translation id="8027467664787098346">Läs mer om den valda bakgrunden</translation>
 <translation id="8028993641010258682">Storlek</translation>
 <translation id="8031884997696620457">HSPAPlus</translation>
 <translation id="80398733265834479">Aktivera automatiskt färgläge</translation>
@@ -1640,6 +1658,7 @@ Ladda ned transkriptionsmodellen (upp till 100 MB) för att få transkriptioner
 <translation id="8543574988889671960">Läs in fliken igen</translation>
 <translation id="8550364285433943656">Ställ in kontroller i spelåtgärder för att spela med tangenterna</translation>
 <translation id="8557447961879934694">WPA2</translation>
+<translation id="8558521694042102707">Generativ AI kan göra misstag, inklusive om personer, så dubbelkolla svaren.</translation>
 <translation id="8575298406870537639">Det här alternativet kan krävas för att du ska kunna ansluta till operatörens nätverk. Kontakta operatören för mer information.</translation>
 <translation id="8576249514688522074">Inte initierat</translation>
 <translation id="8584654835905316966">En omstart krävs för att slutföra firmwareinstallationen för <ph name="DEVICE_NAME" /> till version <ph name="VERSION" />. Det kan verka som om datorn startas om flera gånger. Detta beteende är förväntat.</translation>
@@ -1654,7 +1673,6 @@ Ladda ned transkriptionsmodellen (upp till 100 MB) för att få transkriptioner
 <translation id="8655295600908251630">Kanal</translation>
 <translation id="8655828773034788261">Dela webbadress:</translation>
 <translation id="8660881923941176839">pund</translation>
-<translation id="8670057600920888023">Generativ AI är experimentell, och innehållet kan vara felaktigt, vilseledande eller stötande.</translation>
 <translation id="8670574982334489519">höger</translation>
 <translation id="8675354002693747642">I förväg delad nyckel</translation>
 <translation id="8677859815076891398">Du har inga album. Skapa ett album i <ph name="LINK_BEGIN" />Google Foto<ph name="LINK_END" />.</translation>
@@ -1718,6 +1736,7 @@ Ladda ned transkriptionsmodellen (upp till 100 MB) för att få transkriptioner
 <translation id="8930622219860340959">Trådlöst</translation>
 <translation id="8933650076320258356">Tangenten <ph name="KEYS" /> har valts för <ph name="DIRECTION" />. <ph name="REASSIGN_INSTRUCTION" /></translation>
 <translation id="8936793075252196307">Klientens IP-adress</translation>
+<translation id="8938606491880817721">Nedladdningen misslyckades. Försök igen eller starta om din <ph name="DEVICE_TYPE" />.</translation>
 <translation id="8944651180182756621">Färg på appstartaren</translation>
 <translation id="8945308580158685341">bin</translation>
 <translation id="894617464444543719">Enheten är en telefon.</translation>

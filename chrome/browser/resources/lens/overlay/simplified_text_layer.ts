@@ -43,7 +43,7 @@ export class SimplifiedTextLayerElement extends CrLitElement implements
 
   static override get properties() {
     return {
-      hasCopiedText: {type: Boolean, reflect: true},
+      hasActionedText: {type: Boolean, reflect: true},
       hideHighlightedLines: {type: Boolean, reflect: true},
       highlightedLines: {type: Array},
     };
@@ -57,9 +57,9 @@ export class SimplifiedTextLayerElement extends CrLitElement implements
     return getHtml.bind(this)();
   }
 
-  // Whether the user has copied text pertaining to the newest region selection
-  // made.
-  protected hasCopiedText: boolean = false;
+  // Whether the user has actioned on the text pertaining to the newest region
+  // selection made either by attempting to copy or translate.
+  protected hasActionedText: boolean = false;
   // Whether to hide the highlighted lines in the region. Starts off true so
   // highlighted lines can initially fade in.
   protected hideHighlightedLines: boolean = true;
@@ -75,6 +75,12 @@ export class SimplifiedTextLayerElement extends CrLitElement implements
   // this class needing to call getBoundingClientRect()
   private selectionOverlayRect: DOMRect;
   private listenerIds: number[] = [];
+  // Whether the user is in the middle of selecting a new region.
+  private isSelectingRegion: boolean = false;
+  // Whether to send an event to the parent selection overlay to show the
+  // context menu after detecting text in a region. Set to false if the context
+  // menu was already shown.
+  private shouldShowContextMenuIfDetectsText: boolean = true;
   // Timeout for onTextReceived for the full image response text. The selected
   // region context menu should not be shown until either the text is received
   // or the timeout elapses.      ;
@@ -114,6 +120,10 @@ export class SimplifiedTextLayerElement extends CrLitElement implements
     this.listenerIds = [
       this.browserProxy.callbackRouter.textReceived.addListener(
           this.onTextReceived.bind(this)),
+      this.browserProxy.callbackRouter.clearAllSelections.addListener(
+          this.onClearRegionSelection.bind(this)),
+      this.browserProxy.callbackRouter.clearRegionSelection.addListener(
+          this.onClearRegionSelection.bind(this)),
     ];
 
     this.setTextReceivedTimeout();
@@ -159,7 +169,9 @@ export class SimplifiedTextLayerElement extends CrLitElement implements
   }
 
   onSelectionStart(): void {
-    this.hasCopiedText = false;
+    this.isSelectingRegion = true;
+    this.hasActionedText = false;
+    this.shouldShowContextMenuIfDetectsText = true;
     // Hide highlighted lines but do not clear them in order to allow them to
     // fade out.
     this.hideHighlightedLines = true;
@@ -167,6 +179,7 @@ export class SimplifiedTextLayerElement extends CrLitElement implements
   }
 
   onSelectionFinish(): void {
+    this.isSelectingRegion = false;
     // Clear the previous region selection text response as a new selection has
     // been made. Also clear any timeouts that also pertained to the last region
     // response.
@@ -180,6 +193,7 @@ export class SimplifiedTextLayerElement extends CrLitElement implements
 
   selectAndTranslateWords(startIndex: number, endIndex: number) {
     if (this.regionTextResponse) {
+      this.hasActionedText = true;
       translateWords(
           this.getRegionText(), this.regionTextResponse.contentLanguage, 0,
           this.regionTextResponse.receivedWords.length - 1, this.browserProxy);
@@ -188,6 +202,7 @@ export class SimplifiedTextLayerElement extends CrLitElement implements
 
     assert(this.fullTextResponse);
     if (this.translateTimeout.timeoutElapsedOrCleared) {
+      this.hasActionedText = true;
       // This layer does not support selection of text. So just translate the
       // words.
       translateWords(
@@ -207,6 +222,13 @@ export class SimplifiedTextLayerElement extends CrLitElement implements
     }, this.translateTimeout.timeout);
   }
 
+  private onClearRegionSelection() {
+    this.isSelectingRegion = false;
+    this.hasActionedText = false;
+    this.hideHighlightedLines = true;
+    this.highlightedLines = [];
+  }
+
   private setTextReceivedTimeout() {
     this.textReceivedTimeout.timeoutElapsedOrCleared = false;
     this.textReceivedTimeout.timeoutId = setTimeout(() => {
@@ -222,10 +244,16 @@ export class SimplifiedTextLayerElement extends CrLitElement implements
       return;
     }
 
+    const showOrUpdateEventName = this.shouldShowContextMenuIfDetectsText ?
+        'show-selected-region-context-menu' :
+        'update-selected-region-context-menu';
+    // Only ever show the region context menu once per region selection. All
+    // other times it should only update the context menu.
+    this.shouldShowContextMenuIfDetectsText = false;
     // If there is region text in the interaction response,
     if (this.regionTextResponse) {
       if (this.regionTextResponse.receivedWords.length > 0) {
-        this.fire('show-selected-region-context-menu', {
+        this.fire(showOrUpdateEventName, {
           box,
           selectionStartIndex: 0,
           selectionEndIndex: this.regionTextResponse.receivedWords.length - 1,
@@ -236,7 +264,7 @@ export class SimplifiedTextLayerElement extends CrLitElement implements
 
       // Do not show the detected text context menu items if there was no text
       // found in the region.
-      this.fire('show-selected-region-context-menu', {
+      this.fire(showOrUpdateEventName, {
         box,
         selectionStartIndex: -1,
         selectionEndIndex: -1,
@@ -253,7 +281,7 @@ export class SimplifiedTextLayerElement extends CrLitElement implements
       // context menu but do not send the selection indices so that options for
       // detected text are not shown.
       if (selection.iou > 0.1) {
-        this.fire('show-selected-region-context-menu', {
+        this.fire(showOrUpdateEventName, {
           box,
           selectionStartIndex: selection.startIndex,
           selectionEndIndex: selection.endIndex,
@@ -266,7 +294,7 @@ export class SimplifiedTextLayerElement extends CrLitElement implements
 
     // Do not show the detected text context menu items if there was no text
     // found in the region.
-    this.fire('show-selected-region-context-menu', {
+    this.fire(showOrUpdateEventName, {
       box,
       selectionStartIndex: -1,
       selectionEndIndex: -1,
@@ -274,6 +302,12 @@ export class SimplifiedTextLayerElement extends CrLitElement implements
   }
 
   private onRegionTextReceived(text: Text) {
+    // If the user is currently selecting a new region, ignore any text received
+    // for the old region.
+    if (this.isSelectingRegion) {
+      return;
+    }
+
     // If there was rendered text, log a text gleam render end event.
     if (this.regionTextResponse &&
         this.regionTextResponse.receivedWords.length > 0) {
@@ -398,7 +432,7 @@ export class SimplifiedTextLayerElement extends CrLitElement implements
     if (startIndex < 0 || endIndex < 0) {
       return;
     }
-    this.hasCopiedText = true;
+    this.hasActionedText = true;
 
     if (this.regionTextResponse) {
       callback(/*textStartIndex=*/ 0,
@@ -523,6 +557,10 @@ export class SimplifiedTextLayerElement extends CrLitElement implements
 
   getElementForTesting(): Element {
     return this;
+  }
+
+  getHasActionedTextForTesting(): boolean {
+    return this.hasActionedText;
   }
 
   setSelectionOverlayRectForTesting(rect: DOMRect): void {

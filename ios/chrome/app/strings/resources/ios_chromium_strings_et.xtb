@@ -95,7 +95,6 @@ Kui soovite näha veel seadeid, mis kasutavad andmeid, et parandada teie Chromiu
 <translation id="328933489847748230">{count,plural, =1{Nüüd kuvatakse 1 Chromiumi aken}other{Nüüd kuvatakse {count} Chromiumi akent}}</translation>
 <translation id="3344973607274501920">Chromiumil ei õnnestunud teie paroole kontrollida. Kontrollige internetiühendust.</translation>
 <translation id="3366305173356742781">Chromiumi andmed teie kontol</translation>
-<translation id="33788334537425157">Lülitage sisse valik „Lukusta Chromiumi sulgemisel inkognito vahelehed”</translation>
 <translation id="3387107508582892610">{THRESHOLD,plural, =1{See juhtub siis, kui Chromiumi ei kasutata {THRESHOLD} minuti jooksul. Need võivad hõlmata ajalugu ja automaattäidet.}other{See juhtub siis, kui Chromiumi ei kasutata {THRESHOLD} minuti jooksul. Need võivad hõlmata ajalugu ja automaattäidet.}}</translation>
 <translation id="3410395242749598859">Mõned teie Chromiumi andmed ei ole veel kontole <ph name="EMAIL" /> salvestatud.
 Oodake enne konto vahetamist paar minutit. Kui vahetate kohe kontot, siis need andmed kustutatakse.</translation>
@@ -208,7 +207,6 @@ Tasub teada
   • Kui sünkroonite oma ajaloo Google’i kontoga, võivad mõõdikud sisaldada teavet ka teie külastatavate URL-ide kohta.<ph name="END_INDENT" /></translation>
 <translation id="5932787118589620366">Chromiumis sirvimisandmete kustutamine</translation>
 <translation id="593808800391107017">Saate hoiatusi mis tahes privaatsus- ja turvaprobleemide kohta, mille Chromium automaatselt teie eest tuvastab.</translation>
-<translation id="5945387852661427312">Logite sisse kontoga, mida haldab <ph name="DOMAIN" />, ja annate selle administraatorile üle Chromiumi andmete juhtimise. Teie andmed seotakse jäädavalt selle kontoga. Chromiumist väljalogimisel kustutatakse teie andmed sellest seadmest, kuid need jäävad alles teie Google'i kontole.</translation>
 <translation id="5951593919357934226">Kasutage Chromiumi parimal moel.</translation>
 <translation id="5985254578475526217">Chromiumilt märguannete saamiseks lülitage iOS-i seadetes märguanded sisse.</translation>
 <translation id="6104024151682120539">Ava Chromiumis</translation>

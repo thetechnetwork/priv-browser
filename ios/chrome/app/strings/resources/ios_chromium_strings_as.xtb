@@ -91,11 +91,11 @@
 <translation id="3054480780637153380">iOSত Chromiumৰ ছেটিং খোলক আৰু তাৰ পাছত "ডিফ’ল্ট ব্ৰাউজাৰ এপ"ত টিপক আৰু Chromium বাছনি কৰক।</translation>
 <translation id="3102849287235003384">আটাইবোৰ ৱেবছাইটত আপোনাৰ Google একাউণ্টৰ পৰা ছাইন আউট কৰিবলৈ <ph name="BEGIN_LINK" />Chromiumৰ পৰা ছাইন আউট কৰক<ph name="END_LINK" />।</translation>
 <translation id="3115956258722352278">Chromiumক আপোনাৰ ডি’ফল্ট ব্ৰাউজাৰ কৰিবনে?</translation>
+<translation id="3180939591219927904">“আপুনি Chromium বন্ধ কৰিলে ইনক’গনিট’ টেব লক কৰক” সুবিধাটো অন কৰক</translation>
 <translation id="3242612358525156339">আপোনাৰ ডিভাইচৰ ছেটিঙৰ পৰা "<ph name="TEXT_OF_THE_SETTINGS_MENU_ITEM" />" খোলক আৰু "Chromium" বাছনি কৰক</translation>
 <translation id="328933489847748230">{count,plural, =1{এতিয়া ১ খন Chromium ৱিণ্ড’ দেখুৱাই থকা হৈছে}one{এতিয়া {count} খন Chromium ৱিণ্ড’ দেখুৱাই থকা হৈছে}other{এতিয়া {count} খন Chromium ৱিণ্ড’ দেখুৱাই থকা হৈছে}}</translation>
 <translation id="3344973607274501920">Chromiumএ আপোনাৰ পাছৱর্ডসমূহ পৰীক্ষা কৰিব নোৱাৰিলে। আপোনাৰ ইণ্টাৰনেট সংযোগ পৰীক্ষা কৰি চাওক।</translation>
 <translation id="3366305173356742781">আপোনাৰ একাউণ্টত Chromium ডেটা</translation>
-<translation id="33788334537425157">“আপুনি Chromium বন্ধ কৰিলে ইনক’গনিট’ টেব লক কৰক” সুবিধাটো অন কৰক</translation>
 <translation id="3387107508582892610">{THRESHOLD,plural, =1{Chromium {THRESHOLD} মিনিটলৈকে ব্যৱহাৰ কৰা নহ’লে এনে হয়। ইয়াত ইতিহাস আৰু স্বয়ংক্ৰিয়ভাৱে পূৰ হোৱাৰ সুবিধা অন্তৰ্ভুক্ত হ’ব পাৰে।}one{Chromium {THRESHOLD} মিনিটলৈকে ব্যৱহাৰ কৰা নহ’লে এনে হয়। ইয়াত ইতিহাস আৰু স্বয়ংক্ৰিয়ভাৱে পূৰ হোৱাৰ সুবিধা অন্তৰ্ভুক্ত হ’ব পাৰে।}other{Chromium {THRESHOLD} মিনিটলৈকে ব্যৱহাৰ কৰা নহ’লে এনে হয়। ইয়াত ইতিহাস আৰু স্বয়ংক্ৰিয়ভাৱে পূৰ হোৱাৰ সুবিধা অন্তৰ্ভুক্ত হ’ব পাৰে।}}</translation>
 <translation id="3410395242749598859">আপোনাৰ Chromiumৰ কিছুমান ডেটা এতিয়াও <ph name="EMAIL" />ত ছেভ কৰা হোৱা নাই।
 একাউণ্ট সলনি কৰাৰ আগতে কেইমিনিটমান অপেক্ষা কৰি চাওক। যদি আপুনি এতিয়াই একাউণ্ট সলনি কৰে, এই ডেটা মচি পেলোৱা হ’ব।</translation>
@@ -208,7 +208,6 @@
   • যদি আপুনি আপোনাৰ ইতিহাস আপোনাৰ Google একাউণ্টৰ সৈতে ছিংক কৰে, মেট্ৰিক্সত আপুনি ভ্ৰমণ কৰা URLসমূহৰ বিষয়ে তথ্যও অন্তৰ্ভুক্ত কৰিব পাৰে।<ph name="END_INDENT" /></translation>
 <translation id="5932787118589620366">Chromiumত ব্ৰাউজিঙৰ ডেটা মচক।</translation>
 <translation id="593808800391107017">Chromiumএ স্বয়ংক্ৰিয়ভাৱে আপোনাৰ বাবে চিনাক্ত কৰা যিকোনো গোপনীয়তা বা সুৰক্ষা সম্পৰ্কীয় সমস্যাৰ ওপৰত সতৰ্কবার্তা পাওক।</translation>
-<translation id="5945387852661427312">আপুনি <ph name="DOMAIN" />এ পৰিচালনা কৰা এটা একাউণ্টৰ জৰিয়তে ছাইন ইন কৰিছে আৰু সেইটোৰ প্ৰশাসকক আপোনাৰ Chromium ডেটা নিয়ন্ত্ৰণ কৰিবলৈ সুবিধা দিছে। আপোনাৰ ডেটা এই একাউণ্টটোৰ সৈতে স্থায়ীভাৱে সংযুক্ত হৈ থাকিব। Chromiumৰ পৰা ছাইন আউট কৰিলে আপোনাৰ ডেটা মচা যাব কিন্ত সেইবোৰ আপোনাৰ Google একাউণ্টত জমা হৈয়ে থাকিব।</translation>
 <translation id="5951593919357934226">Chromium পাৰ্যমানে ব্যৱহাৰ কৰক</translation>
 <translation id="5985254578475526217">Chromiumৰ পৰা জাননী পাবলৈ, আপোনাৰ iOS ছেটিঙত জাননী অন কৰক।</translation>
 <translation id="6104024151682120539">Chromiumত খোলক</translation>
@@ -262,6 +261,7 @@
 <translation id="7337881442233988129">Chromium</translation>
 <translation id="7357211569052832586">বাছনি কৰা ডেটাখিনি Chromium আৰু ছিংক কৰি থোৱা ডিভাইচসমূহৰ পৰা আঁতৰোৱা হৈছে। Googleৰ অন্য সেৱাত কৰা সন্ধান আৰু অন্যান্য কাৰ্যকলাপৰ দৰে আপোনাৰ Google একাউণ্টৰ অইন ধৰণৰ ব্ৰাউজিঙৰ ইতিহাস history.google.comত থাকিব পাৰে।</translation>
 <translation id="7395825497086981028">আপোনাৰ পাছৱৰ্ডটো <ph name="EMAIL" />ৰ পাছৱৰ্ড পৰিচালকত ছেভ কৰা হ’ব।</translation>
+<translation id="7504829997542308412">Chromium খোলক</translation>
 <translation id="7531461704633548377">Chromiumৰ পৰা</translation>
 <translation id="7554983317097061001">Chromium ব্যৱহাৰ সম্পৰ্কীয় কিটিপ: Chromiumক ড’কলৈ স্থানান্তৰ কৰক</translation>
 <translation id="7576863740961052505">Chromiumৰ ছেটিং পৰিচালনা কৰক</translation>

@@ -150,7 +150,11 @@ export declare interface GlicBrowserHost {
   resizeWindow(width: number, height: number, options?: ResizeWindowOptions):
       Promise<void>;
 
-  /** Sets the state of the panel's user drag-to-resize capability. */
+  /**
+   * Set the state of the panel's user drag-to-resize capability, or if the
+   * panel hasn't been created yet, set whether it will be user resizable when
+   * it is created. No effect if the GlicUserResize feature flag is disabled.
+   */
   enableDragResize?(enabled: boolean): Promise<void>;
 
   /**
@@ -233,13 +237,19 @@ export declare interface GlicBrowserHost {
    */
   createTab?(url: string, options: CreateTabOptions): Promise<TabData>;
 
-  /** Opens a new tab to the glic settings page. */
-  openGlicSettingsPage?(): void;
+  /**
+   * Opens a tab with the glic settings page, optionally highlighting a specific
+   * field in it. If an open tab already has the glic settings page loaded, it
+   * is focused instead.
+   */
+  openGlicSettingsPage?(options?: OpenSettingsOptions): void;
 
   /** Requests the closing of the panel containing the web client. */
   closePanel?(): Promise<void>;
 
   /**
+   * @deprecated The panel will only maintain the detached state.
+   *
    * Requests that the web client's panel be attached to a browser window.
    * If attachment fails, the panel's state will not be updated. getPanelState
    * can be used to monitor whether attachment is successful.
@@ -247,6 +257,8 @@ export declare interface GlicBrowserHost {
   attachPanel?(): void;
 
   /**
+   * @deprecated The panel will only maintain the detached state.
+   *
    * Requests that the web client's panel be detached from a browser window
    * (floats free).
    */
@@ -259,7 +271,11 @@ export declare interface GlicBrowserHost {
    */
   showProfilePicker?(): void;
 
-  /** Returns the state of the panel. */
+  /**
+   * @deprecated The panel will only maintain the detached state.
+   *
+   * Returns the state of the panel.
+   */
   getPanelState?(): ObservableValue<PanelState>;
 
   /**
@@ -273,6 +289,8 @@ export declare interface GlicBrowserHost {
   panelActive(): ObservableValue<boolean>;
 
   /**
+   * @deprecated The panel will only maintain the detached state.
+   *
    * Whether the panel can be attached. This is true if there is a browser
    * window suitable for attachment. This state is only meaningful when the
    * panel is in the detached state, and should be not be considered otherwise
@@ -406,8 +424,8 @@ export declare interface GlicBrowserHost {
   setSyntheticExperimentState?(trialName: string, groupName: string): void;
 
   /**
-   * Opens the OS permission settings menu for the given permission type.
-   * Supports `media` for microphone ad `geolocation` for location. This
+   * Opens the OS permission settings page for the given permission type.
+   * Supports `media` for microphone and `geolocation` for location. This
    * function is available when running on Mac.
    */
   openOsPermissionSettingsMenu?(permission: string): void;
@@ -422,6 +440,23 @@ export declare interface GlicBrowserHost {
    * panel and false when the user stops.
    */
   isManuallyResizing?(): ObservableValue<boolean>;
+}
+
+/** Fields of interest from the Glic settings page. */
+export enum SettingsPageField {
+  /** The OS hotkey configuration field. */
+  OS_HOTKEY = 1,
+  /** The OS entrypoint enabling field. */
+  OS_ENTRYPOINT_TOGGLE = 2,
+}
+
+/** Optional parameters for the openGlicSettingsPage function. */
+export declare interface OpenSettingsOptions {
+  /**
+   * Optionally select a field to be highlighted while opening the Glic settings
+   * page.
+   */
+  highlightField?: SettingsPageField;
 }
 
 /** Holds optional parameters for `GlicBrowserHost#resizeWindow`. */
@@ -503,9 +538,20 @@ export declare interface OpenPanelInfo {
    * arguments will be used.
    */
   resizeParams?: {width: number, height: number, options?: ResizeWindowOptions};
+
+  /**
+   * Whether the panel should start out resizable by the user. The panel is
+   * resizable if this field is not provided. No effect if the GlicUserResize
+   * feature flag is disabled.
+   */
+  canUserResize?: boolean;
 }
 
-/** A panel can be in one of these three states. */
+/**
+ * @deprecated The panel will only maintain the detached state.
+ *
+ * A panel can be in one of these three states.
+ */
 export enum PanelStateKind {
   /** Not shown. This is the initial state. */
   HIDDEN = 0,
@@ -519,9 +565,15 @@ export enum PanelStateKind {
   ATTACHED = 2,
 }
 
-/** Information of how the panel is being presented/configured. */
+/**
+ * @deprecated The panel will only maintain the detached state.
+ *
+ * Information of how the panel is being presented/configured.
+ */
 export declare interface PanelState {
-  /** The panel's presentation kind/state. */
+  /**
+   * The panel's presentation kind/state.
+   */
   kind: PanelStateKind;
   /**
    * Present only when attached to a window, indicating which window it is
@@ -535,10 +587,14 @@ export declare interface PanelState {
  * information.
  */
 export declare interface PanelOpeningData {
-  /** The state of the panel as it's being opened. */
-  panelState: PanelState;
+  /**
+   * @deprecated The panel will only maintain the detached state.
+   *
+   * The state of the panel as it's being opened.
+   */
+  panelState?: PanelState;
   /** Indicates the entry point used to trigger the opening of the panel. */
-  invocationSource: InvocationSource;
+  invocationSource?: InvocationSource;
 }
 
 /** Entry points that can trigger the opening of the panel. */
@@ -873,6 +929,14 @@ export declare interface ScrollToParams {
 
   /** Used to specify content to scroll to and highlight. */
   selector: ScrollToSelector;
+
+  /**
+   * Identifies the document we want to perform the scrollTo operation on. When
+   * specified, we verify that the currently focused tab's document matches the
+   * ID, and throw an error if doesn't. If not specified, the implementation
+   * will use the main frame of the currently focused tab without verification.
+   */
+  documentId?: string;
 }
 
 /**
@@ -927,6 +991,13 @@ export enum ScrollToErrorReason {
    * scrollTo() call.
    */
   FOCUSED_TAB_CHANGED_OR_NAVIGATED = 4,
+  /**
+   * The documentId provided doesn't match the currently focused tab's primary
+   * document. The document may have been navigated away, may not currently be
+   * in focus, or may not be in a primary main frame (we don't currently support
+   * iframes).
+   */
+  NO_MATCHING_DOCUMENT = 5,
 }
 
 /**
@@ -1046,6 +1117,7 @@ export interface BackwardsCompatibleTypes {
   userProfileInfo: UserProfileInfo;
   webClient: GlicWebClient;
   webPageData: WebPageData;
+  openSettingsOptions: OpenSettingsOptions;
 }
 
 // Enums that should not be changed.
@@ -1061,4 +1133,5 @@ export interface ExtensibleEnums {
   webClientInitializeErrorReason: typeof WebClientInitializeErrorReason;
   invocationSource: typeof InvocationSource;
   actInFocusedTabErrorReason: typeof ActInFocusedTabErrorReason;
+  settingsPageField: typeof SettingsPageField;
 }

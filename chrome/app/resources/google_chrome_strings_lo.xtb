@@ -517,7 +517,6 @@ Google Chrome ບໍ່ສາມາດກູ້ຄືນການຕັ້ງຄ
 <translation id="7787950393032327779">ປະກົດວ່າໂປຣໄຟລ໌ຖືກຂະບວນການອື່ນຂອງ Google Chrome (<ph name="PROCESS_ID" />) ໃຊ້ງານຢູ່ໃນຄອມພິວເຕີອື່ນ (<ph name="HOST_NAME" />). Chrome ໄດ້ລັອກໂປຣໄຟລ໌ແລ້ວ ດັ່ງນັ້ນມັນບໍ່ຖືກ​ເຮັດ​​ໃຫ້ເສຍຫາຍ. ຖ້າທ່ານແນ່ໃຈວ່າ ບໍມີຂະບວນການອື່ນກໍາລັງໃຊ້ໂປຣໄຟລ໌ນີ້ຢູ່, ທ່ານສາມາດປົດລັອກໂປຣໄຟລ໌ ແລະເປີດໃຊ້ Chrome ຄືນໃໝ່ໄດ້.</translation>
 <translation id="7801699035218095297">Google Chrome ກໍາລັງພະຍາຍາມສຳເນົາລະຫັດຜ່ານ. ພິມລະຫັດຜ່ານ Windows ຂອງທ່ານ ເພື່ອອະນຸຍາດອັນນີ້.</translation>
 <translation id="7808348361785373670">ເອົາ​ອອກ​ໄປຈາກ Chrome...</translation>
-<translation id="782480918904119604">ເພື່ອໃຊ້ໂປຣໄຟລ໌ນີ້ກັບ Glic, ໃຫ້ເປີດ Chrome ແລະ ເຂົ້າສູ່ລະບົບ</translation>
 <translation id="7825851276765848807">ການ​ຕິດ​ຕັ້ງ​ບໍ່​ສໍາ​ເລັດ ​ເນື່ອງ​ຈາກ​ຄວາມຜິດພາດທີ່ບໍ່ໄດ້ລະບຸ​. ກະ​ລຸ​ນາ​ດາວ​ໂຫລດ Google Chrome ອີກ​.</translation>
 <translation id="7845233973568007926">ຂໍຂອບໃຈສຳລັບການຕິດຕັ້ງ. ທ່ານຈະຕ້ອງຣີສະຕາດຄອມພິວເຕີຂອງທ່ານກ່ອນການໃຊ້ <ph name="BUNDLE_NAME" />.</translation>
 <translation id="7872446069773932638">ກຳລັງດາວໂຫຼດ... ຍັງເຫຼືອ <ph name="SECONDS" /> ວິນາທີ</translation>
@@ -573,6 +572,7 @@ Google Chrome ບໍ່ສາມາດກູ້ຄືນການຕັ້ງຄ
 <translation id="8516431725144212809">ຄວາມສົນໃຈຂອງທ່ານຕາມທີ່ Chrome ປະເມີນ</translation>
 <translation id="8521348052903287641">ກົດລະບຽບຂາເຂົ້າສໍາລັບ Google Chrome Dev ເພື່ອອະນຸຍາດການຮັບສົ່ງຂໍ້ມູນ mDNS.</translation>
 <translation id="852529348814672339">ສະແດງ Chrome ໃນພາສານີ້</translation>
+<translation id="8533056045953418157">ຕັ້ງຄ່າ Google Chrome ເປັນໂປຣແກຣມອ່ານ PDF ເລີ່ມຕົ້ນຂອງທ່ານ</translation>
 <translation id="8550334526674375523">ໂປຣໄຟລ໌ບ່ອນເຮັດວຽກນີ້ແຍກກັນຢ່າງສິ້ນເຊີງຈາກໂປຣໄຟລ໌ສ່ວນຕົວຂອງທ່ານ.</translation>
 <translation id="8555465886620020932">ບໍລິການຜິດພາດ: <ph name="SERVICE_ERROR" />.</translation>
 <translation id="856656450041460113">ຊອກຫາລາຍການພາສາ</translation>

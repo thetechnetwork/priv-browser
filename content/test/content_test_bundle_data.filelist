@@ -2092,9 +2092,12 @@ data/accessibility/css/pseudo-element-alternative-text-expected-android.txt
 data/accessibility/css/pseudo-element-alternative-text-expected-auralinux.txt
 data/accessibility/css/pseudo-element-alternative-text-expected-blink.txt
 data/accessibility/css/pseudo-element-alternative-text.html
+data/accessibility/css/pseudo-element-check-mark-expected-auralinux.txt
 data/accessibility/css/pseudo-element-check-mark-expected-blink.txt
+data/accessibility/css/pseudo-element-check-mark-override-content-alternative-text-expected-auralinux.txt
 data/accessibility/css/pseudo-element-check-mark-override-content-alternative-text-expected-blink.txt
 data/accessibility/css/pseudo-element-check-mark-override-content-alternative-text.html
+data/accessibility/css/pseudo-element-check-mark-override-content-expected-auralinux.txt
 data/accessibility/css/pseudo-element-check-mark-override-content-expected-blink.txt
 data/accessibility/css/pseudo-element-check-mark-override-content.html
 data/accessibility/css/pseudo-element-check-mark.html
@@ -2477,7 +2480,6 @@ data/accessibility/event/caret-browsing-enabled.html
 data/accessibility/event/caret-hide-expected-android.txt
 data/accessibility/event/caret-hide.html
 data/accessibility/event/caret-move-expected-android.txt
-data/accessibility/event/caret-move-expected-win.txt
 data/accessibility/event/caret-move-hidden-input-expected-android.txt
 data/accessibility/event/caret-move-hidden-input-expected-auralinux.txt
 data/accessibility/event/caret-move-hidden-input-expected-uia-win.txt
@@ -2533,6 +2535,9 @@ data/accessibility/event/description-change-no-relation-expected-uia-win.txt
 data/accessibility/event/description-change-no-relation-expected-win.txt
 data/accessibility/event/description-change-no-relation.html
 data/accessibility/event/description-change.html
+data/accessibility/event/description-changed-pane-title-expected-android.txt
+data/accessibility/event/description-changed-pane-title.html
+data/accessibility/event/description-changed-subtree.html
 data/accessibility/event/disabled-state-changed-expected-auralinux.txt
 data/accessibility/event/disabled-state-changed-expected-win.txt
 data/accessibility/event/disabled-state-changed.html
@@ -4797,6 +4802,8 @@ data/accessibility/html/ol-expected-mac.txt
 data/accessibility/html/ol-expected-uia-win.txt
 data/accessibility/html/ol-expected-win.txt
 data/accessibility/html/ol.html
+data/accessibility/html/on-screen-mode-expected-blink.txt
+data/accessibility/html/on-screen-mode.html
 data/accessibility/html/open-modal-expected-blink.txt
 data/accessibility/html/open-modal.html
 data/accessibility/html/optgroup-custom-menulist-expected-android-assist-data.txt
@@ -6666,6 +6673,8 @@ data/download/download-with-xfo-deny.html.mock-http-headers
 data/download/empty.bin
 data/download/empty.bin.mock-http-headers
 data/download/forms.mhtml
+data/download/gzip-content-with-content-disposition.gz
+data/download/gzip-content-with-content-disposition.gz.mock-http-headers
 data/download/gzip-content.gz
 data/download/gzip-content.gz.mock-http-headers
 data/download/hello.mhtml
@@ -7376,6 +7385,7 @@ data/interest_group/autogenSchemaV31.sql
 data/interest_group/autogenSchemaV32.sql
 data/interest_group/autogenSchemaV33.sql
 data/interest_group/autogenSchemaV34.sql
+data/interest_group/autogenSchemaV35.sql
 data/interest_group/bidding_argument_validator.js
 data/interest_group/bidding_argument_validator.js.mock-http-headers
 data/interest_group/bidding_logic.js
@@ -7822,6 +7832,7 @@ data/prerender/doc-with-display-none-iframe.html
 data/prerender/duplicate_prerenders.html
 data/prerender/empty.html
 data/prerender/image_loading_lazy.html
+data/prerender/multiple_prerender_with_tags.html
 data/prerender/origin_trial_initiator.html
 data/prerender/page-with-embedded-plugin.html
 data/prerender/page-with-object-plugin.html
@@ -8304,6 +8315,8 @@ data/sxg/test.example.org_long_cert_validity.sxg.mock-http-headers
 data/sxg/test.example.org_noext_test.sxg
 data/sxg/test.example.org_test.html.gz.sxg
 data/sxg/test.example.org_test.sxg
+data/sxg/test.example.org_test.sxg.gz
+data/sxg/test.example.org_test.sxg.gz.mock-http-headers
 data/sxg/test.example.org_test.sxg.mock-http-headers
 data/sxg/test.example.org_test_bad_mice.sxg
 data/sxg/test.example.org_test_bad_mice.sxg.mock-http-headers

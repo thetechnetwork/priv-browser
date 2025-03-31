@@ -27,7 +27,7 @@ BASE_FEATURE(kAppPreloadService,
 // as long as the PWA is on the start menu.  b/40285965.
 BASE_FEATURE(kAppSpecificNotifications,
              "AppSpecificNotifications",
-             base::FEATURE_DISABLED_BY_DEFAULT);
+             base::FEATURE_ENABLED_BY_DEFAULT);
 
 // When enabled, invokes `SetProcessPriorityBoost` to disable priority boosting
 // when a thread is taken out of the wait state. The default Windows behavior is
@@ -312,7 +312,7 @@ BASE_FEATURE(kGlic, "Glic", base::FEATURE_DISABLED_BY_DEFAULT);
 BASE_FEATURE(kGlicActor, "GlicActor", base::FEATURE_DISABLED_BY_DEFAULT);
 
 // Controls whether the Glic feature is always detached.
-BASE_FEATURE(kGlicDetached, "GlicDetached", base::FEATURE_DISABLED_BY_DEFAULT);
+BASE_FEATURE(kGlicDetached, "GlicDetached", base::FEATURE_ENABLED_BY_DEFAULT);
 
 // Whether to sync @google.com account cookies. This is only for development and
 // testing.
@@ -416,7 +416,7 @@ BASE_FEATURE(kGlicScrollTo, "GlicScrollTo", base::FEATURE_DISABLED_BY_DEFAULT);
 // Controls whether the Glic UI container can be resized by the user
 BASE_FEATURE(kGlicUserResize,
              "GlicUserResize",
-             base::FEATURE_DISABLED_BY_DEFAULT);
+             base::FEATURE_ENABLED_BY_DEFAULT);
 
 // Controls whether the web client should resize itself to fit the window.
 BASE_FEATURE(kGlicSizingFitWindow,
@@ -424,6 +424,10 @@ BASE_FEATURE(kGlicSizingFitWindow,
              base::FEATURE_DISABLED_BY_DEFAULT);
 
 BASE_FEATURE(kGlicWarming, "GlicWarming", base::FEATURE_ENABLED_BY_DEFAULT);
+
+BASE_FEATURE(kGlicFreWarming,
+             "GlicFreWarming",
+             base::FEATURE_ENABLED_BY_DEFAULT);
 
 BASE_FEATURE(kGlicWarmMultiple,
              "GlicWarmMultiple",
@@ -813,6 +817,11 @@ BASE_FEATURE(kIncompatibleApplicationsWarning,
              "IncompatibleApplicationsWarning",
              base::FEATURE_DISABLED_BY_DEFAULT);
 #endif
+
+// Prevents the installation of non-allowlisted Isolated Web Apps.
+BASE_FEATURE(kIsolatedWebAppAllowlist,
+             "IsolatedWebAppAllowlist",
+             base::FEATURE_DISABLED_BY_DEFAULT);
 
 // Enables Isolated Web App Developer Mode, which allows developers to
 // install untrusted Isolated Web Apps.
@@ -1623,6 +1632,12 @@ BASE_FEATURE(kEventBasedLogUpload,
 // go/legacy-log-upload-migration.
 BASE_FEATURE(kPeriodicLogUploadMigration,
              "PeriodicLogUploadMigration",
+             base::FEATURE_DISABLED_BY_DEFAULT);
+
+// A feature to enable periodic log K12 user age classification. See
+// go/teachers-on-chromeos-data.
+BASE_FEATURE(kK12AgeClassificationMetricsProvider,
+             "K12AgeClassificationMetricsProvider",
              base::FEATURE_DISABLED_BY_DEFAULT);
 #endif  // BUILDFLAG(IS_CHROMEOS)
 

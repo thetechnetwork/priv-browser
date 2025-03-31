@@ -6,7 +6,6 @@
 <translation id="1143896152279775643">비밀번호가 <ph name="EMAIL" />의 Google 비밀번호 관리자에 저장됩니다.</translation>
 <translation id="1146503048444965320">Chrome에서 새 탭 열기</translation>
 <translation id="1166460004393506534">Chrome에서 인터넷 사용 기록 삭제</translation>
-<translation id="1171255741903316750">'Chrome 종료 시 시크릿 탭 잠금'을 사용 설정합니다.</translation>
 <translation id="1179527450541388808">iPad의 홈 화면 도크에서 Chrome에 더 빠르게 액세스하세요.</translation>
 <translation id="1180362651362502943">Google 계정의 Chrome 데이터를 계속 사용하세요.</translation>
 <translation id="1200396280085622191">언제든지 메시지와 기타 앱에서 링크를 탭하여 Chrome을 사용합니다.</translation>
@@ -178,6 +177,7 @@
 <translation id="5716154293141027663">다른 앱에서 링크를 탭할 때마다 Chrome을 엽니다.</translation>
 <translation id="5752489513673657785">Google에서 나를 위해 제공하는 맞춤 피드</translation>
 <translation id="5772407442571703917">여기에서 Chrome을 다운로드하세요.</translation>
+<translation id="5777468213129569553">Chrome 열기</translation>
 <translation id="5779767936254214055">Chrome을 종료하거나 다른 앱으로 전환할 때 시크릿 탭을 잠급니다</translation>
 <translation id="5808435672482059465">Chrome 방문 기록 보기</translation>
 <translation id="5833027901704861726">Chrome 데이터 중 일부가 아직 <ph name="EMAIL" />에 저장되지 않았습니다.
@@ -213,7 +213,6 @@
 <translation id="6636941099779251629">조직에서 Chrome을 사용하려면 로그인할 것을 요구합니다. <ph name="BEGIN_LINK" />자세히 알아보기<ph name="END_LINK" /></translation>
 <translation id="6646696210740573446">IP 주소를 숨기는 개인 정보 보호 서버를 통해 URL의 난독화된 부분을 Google로 전송합니다. 사이트에서 사용자의 비밀번호를 도용하려고 하거나 사용자가 유해한 파일을 다운로드하는 경우, Chrome에서 페이지 콘텐츠 일부를 비롯한 URL을 Google에 보낼 수 있습니다.</translation>
 <translation id="6647304104688527905">Chrome에서 새 탭을 엽니다.</translation>
-<translation id="6648150602980899529"><ph name="DOMAIN" />에서 관리하는 계정으로 로그인합니다. 계정 관리자가 내 Chrome 데이터를 관리하게 되며 데이터는 이 계정에 영구적으로 연결됩니다. Chrome에서 로그아웃하면 데이터가 기기에서 삭제되지만 Google 계정에는 그대로 유지됩니다.</translation>
 <translation id="6684809838922667136">Chrome 개선에 참여</translation>
 <translation id="6695698548122852044">{THRESHOLD,plural, =1{이 현상은 Chrome을 {THRESHOLD}분 동안 사용하지 않는 경우에 발생합니다. 로그인되어 있는 동안 이 기기에만 저장된 데이터는 삭제됩니다. 여기에는 방문 기록 및 비밀번호가 포함될 수 있습니다.}other{이 현상은 Chrome을 {THRESHOLD}분 동안 사용하지 않는 경우에 발생합니다. 로그인되어 있는 동안 이 기기에만 저장된 데이터는 삭제됩니다. 여기에는 방문 기록 및 비밀번호가 포함될 수 있습니다.}}</translation>
 <translation id="6709398533399187136">정보 유출로 인해 비밀번호가 노출되었습니다. Google 비밀번호 관리자에서 지금 바로 비밀번호를 변경하시기 바랍니다.</translation>
@@ -332,7 +331,7 @@ Chrome 환경을 개선하는 데 데이터를 사용하는 설정을 더 보려
 <translation id="9176561303811134420">Chrome에서 결제 수단 관리</translation>
 <translation id="9181628561061032322">Chrome 최근 탭을 엽니다.</translation>
 <translation id="948597495737267756">Chrome 방문 기록 페이지를 엽니다.</translation>
-<translation id="97300214378190234">언제든지 다른 앱에서 링크를 탭하여 Chrome을 사용합니다.</translation>
+<translation id="97300214378190234">언제든지 다른 앱에서 링크를 탭하여 Chrome을 사용하세요.</translation>
 <translation id="997929539742564806">Chrome에서 비밀번호 및 패스키를 자동 완성하여 앱과 사이트에 빠르게 로그인하세요.</translation>
 <translation id="998677222109959694">Chrome 설정 관리</translation>
 </translationbundle>

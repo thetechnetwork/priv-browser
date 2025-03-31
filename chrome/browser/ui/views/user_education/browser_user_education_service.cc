@@ -30,6 +30,7 @@
 #include "chrome/browser/ui/tabs/tab_group_model.h"
 #include "chrome/browser/ui/toolbar/app_menu_model.h"
 #include "chrome/browser/ui/toolbar/bookmark_sub_menu_model.h"
+#include "chrome/browser/ui/toolbar/pinned_toolbar/pinned_toolbar_actions_model.h"
 #include "chrome/browser/ui/toolbar/reading_list_sub_menu_model.h"
 #include "chrome/browser/ui/ui_features.h"
 #include "chrome/browser/ui/user_education/show_promo_in_page.h"
@@ -646,10 +647,10 @@ void MaybeRegisterChromeFeaturePromos(
   registry.RegisterFeature(std::move(
       FeaturePromoSpecification::CreateForTutorialPromo(
           feature_engagement::kIPHLensOverlayFeature,
-          kToolbarAppMenuButtonElementId, IDS_TUTORIAL_LENS_OVERLAY_INTRO_BODY,
-          kLensOverlayTutorialId)
+          kToolbarAppMenuButtonElementId,
+          IDS_TUTORIAL_LENS_OVERLAY_HOMEWORK_INTRO_BODY, kLensOverlayTutorialId)
           .SetBubbleIcon(kLightbulbOutlineIcon)
-          .SetBubbleTitleText(IDS_TUTORIAL_LENS_OVERLAY_INTRO_HEADER)
+          .SetBubbleTitleText(IDS_TUTORIAL_LENS_OVERLAY_HOMEWORK_INTRO_HEADER)
           .SetMetadata(131, "nguyenbryan@google.com",
                        "Triggered by certain URLs to start the Lens Overlay "
                        "tutorial.")));
@@ -983,6 +984,31 @@ void MaybeRegisterChromeFeaturePromos(
                     .SetMetadata(92, "tluk@chromium.org",
                                  "Triggered once when there are more than 8 "
                                  "tabs in the tab strip.")));
+
+  // kIPHTabSearchToolbarButtonFeature:
+  registry.RegisterFeature(std::move(
+      FeaturePromoSpecification::CreateForCustomAction(
+          feature_engagement::kIPHTabSearchToolbarButtonFeature,
+          kTabSearchButtonElementId, IDS_TAB_SEARCH_TOOLBAR_BUTTON_PROMO_BODY,
+          IDS_TAB_SEARCH_TOOLBAR_BUTTON_PROMO_ACTION,
+          base::BindRepeating(
+              [](ui::ElementContext context,
+                 user_education::FeaturePromoHandle promo_handle) {
+                auto* browser =
+                    chrome::FindBrowserWithUiElementContext(context);
+                if (browser) {
+                  PinnedToolbarActionsModel::Get(browser->profile())
+                      ->UpdatePinnedState(kActionTabSearch, false);
+                }
+              }))
+          .SetBubbleArrow(user_education::HelpBubbleArrow::kTopRight)
+          .SetBubbleIcon(kLightbulbOutlineIcon)
+          .SetBubbleTitleText(IDS_TAB_SEARCH_TOOLBAR_BUTTON_PROMO_TITLE)
+          .SetMetadata(136, "emshack@chromium.org",
+                       "Triggered when the tab search button has been moved "
+                       "into the toolbar.")
+          .SetPromoSubtype(
+              FeaturePromoSpecification::PromoSubtype::kActionableAlert)));
 
 #if BUILDFLAG(ENABLE_WEBUI_TAB_STRIP)
   // kIPHWebUITabStripFeature:
@@ -1522,44 +1548,19 @@ void MaybeRegisterChromeTutorials(
 
             // Bubble step - Lens button
             TutorialDescription::BubbleStep(kLensOverlayPageActionIconElementId)
-                .SetBubbleBodyText(IDS_TUTORIAL_LENS_OVERLAY_CLICK_LENS)
+                .SetBubbleBodyText(
+                    IDS_TUTORIAL_LENS_OVERLAY_HOMEWORK_CLICK_LENS)
                 .SetBubbleArrow(HelpBubbleArrow::kTopRight),
 
             // Lens button hides when clicked
             HiddenStep::WaitForHidden(kLensOverlayPageActionIconElementId),
 
-            // Bubble step - coachmark
-            TutorialDescription::BubbleStep(kLensPreselectionBubbleElementId)
-                .SetBubbleBodyText(IDS_TUTORIAL_LENS_OVERLAY_SELECT)
-                .SetBubbleArrow(HelpBubbleArrow::kNone),
-
-            // Coachmark hides when user starts selecting
-            HiddenStep::WaitForHidden(kLensPreselectionBubbleElementId),
-
-            // Bubble step - Search box (WebUI context)
+            // Completion of the tutorial after side panel appears.
             TutorialDescription::BubbleStep(kLensSidePanelSearchBoxElementId)
-                .SetBubbleBodyText(IDS_TUTORIAL_LENS_OVERLAY_CLICK_SEARCH_BOX)
-                .SetBubbleArrow(HelpBubbleArrow::kTopCenter)
-                .InAnyContext(),
-
-            // Event step - Click the search box
-            TutorialDescription::EventStep(
-                kLensSidePanelSearchBoxFocusedEventId)
-                .InAnyContext(),
-
-            // Bubble step - Pin icon
-            TutorialDescription::BubbleStep(kSidePanelPinButtonElementId)
-                .SetBubbleBodyText(IDS_TUTORIAL_LENS_OVERLAY_CLICK_PIN_ICON)
-                .SetBubbleArrow(HelpBubbleArrow::kRightBottom),
-
-            // Wait for pin icon click
-            HiddenStep::WaitForActivated(kSidePanelPinButtonElementId),
-
-            // Completion of the tutorial.
-            TutorialDescription::BubbleStep(kPinnedActionToolbarButtonElementId)
                 .SetBubbleTitleText(IDS_TUTORIAL_GENERIC_SUCCESS_TITLE)
-                .SetBubbleBodyText(IDS_TUTORIAL_LENS_OVERLAY_SUCCESS_BODY)
-                .SetBubbleArrow(HelpBubbleArrow::kTopRight));
+                .SetBubbleBodyText(IDS_TUTORIAL_LENS_OVERLAY_CLICK_SEARCH_BOX)
+                .SetBubbleArrow(HelpBubbleArrow::kLeftTop)
+                .InAnyContext());
 
     lens_overlay_tutorial.metadata.additional_description =
         "Tutorial for the Lens Overlay.";

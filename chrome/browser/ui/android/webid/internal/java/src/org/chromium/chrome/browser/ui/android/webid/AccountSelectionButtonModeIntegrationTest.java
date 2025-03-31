@@ -621,7 +621,7 @@ public class AccountSelectionButtonModeIntegrationTest extends AccountSelectionI
                 ((TextView) contentView.findViewById(R.id.header_title)).getText().toString();
         String expectedSubtitle =
                 ((TextView) contentView.findViewById(R.id.header_subtitle)).getText().toString();
-        onView(withId(R.id.header_idp_icon)).check(matches(isDisplayed()));
+        onView(withId(R.id.header_icon)).check(matches(isDisplayed()));
         onView(withId(R.id.header_rp_icon)).check(matches(not(isDisplayed())));
         onView(withId(R.id.arrow_range_icon)).check(matches(not(isDisplayed())));
 
@@ -634,7 +634,7 @@ public class AccountSelectionButtonModeIntegrationTest extends AccountSelectionI
         assertEquals(
                 expectedSubtitle,
                 ((TextView) contentView.findViewById(R.id.header_subtitle)).getText().toString());
-        onView(withId(R.id.header_idp_icon)).check(matches(isDisplayed()));
+        onView(withId(R.id.header_icon)).check(matches(isDisplayed()));
         onView(withId(R.id.header_rp_icon)).check(matches(not(isDisplayed())));
         onView(withId(R.id.arrow_range_icon)).check(matches(not(isDisplayed())));
     }
@@ -668,7 +668,7 @@ public class AccountSelectionButtonModeIntegrationTest extends AccountSelectionI
                 ((TextView) contentView.findViewById(R.id.header_title)).getText().toString();
         String expectedSubtitle =
                 ((TextView) contentView.findViewById(R.id.header_subtitle)).getText().toString();
-        onView(withId(R.id.header_idp_icon)).check(matches(isDisplayed()));
+        onView(withId(R.id.header_icon)).check(matches(isDisplayed()));
         onView(withId(R.id.header_rp_icon)).check(matches(isDisplayed()));
         onView(withId(R.id.arrow_range_icon)).check(matches(isDisplayed()));
 
@@ -681,7 +681,7 @@ public class AccountSelectionButtonModeIntegrationTest extends AccountSelectionI
         assertEquals(
                 expectedSubtitle,
                 ((TextView) contentView.findViewById(R.id.header_subtitle)).getText().toString());
-        onView(withId(R.id.header_idp_icon)).check(matches(isDisplayed()));
+        onView(withId(R.id.header_icon)).check(matches(isDisplayed()));
         onView(withId(R.id.header_rp_icon)).check(matches(isDisplayed()));
         onView(withId(R.id.arrow_range_icon)).check(matches(isDisplayed()));
     }

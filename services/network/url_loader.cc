@@ -42,6 +42,7 @@
 #include "build/build_config.h"
 #include "mojo/public/cpp/bindings/shared_remote.h"
 #include "mojo/public/cpp/system/simple_watcher.h"
+#include "net/base/completion_once_callback.h"
 #include "net/base/elements_upload_data_stream.h"
 #include "net/base/isolation_info.h"
 #include "net/base/load_flags.h"
@@ -77,6 +78,7 @@
 #include "net/ssl/ssl_private_key.h"
 #include "net/traffic_annotation/network_traffic_annotation.h"
 #include "net/url_request/redirect_info.h"
+#include "net/url_request/url_request.h"
 #include "net/url_request/url_request_context.h"
 #include "net/url_request/url_request_context_getter.h"
 #include "services/network/ad_heuristic_cookie_overrides.h"
@@ -957,8 +959,10 @@ void URLLoader::ConfigureRequest(
   url_request_->cookie_setting_overrides() = cookie_setting_overrides;
   url_request_->SetLoadFlags(request_load_flags);
   SetRequestCredentials(url);
-  url_request_->set_storage_access_status(
-      url_request_->CalculateStorageAccessStatus());
+  if (request_credentials_mode_ == mojom::CredentialsMode::kInclude) {
+    url_request_->set_storage_access_status(
+        url_request_->CalculateStorageAccessStatus());
+  }
 
   SetFetchMetadataHeaders(url_request_.get(), request_mode_,
                           has_user_activation_, request_destination_, nullptr,
@@ -1462,8 +1466,12 @@ void URLLoader::FollowRedirect(
   // `CalculateStorageAccessStatus` depends on
   // `url_request->cookie_setting_overrides()`. `SetFetchMetadataHeaders`
   // depends on `url_request_->storage_access_status()`.
-  url_request_->set_storage_access_status(
-      url_request_->CalculateStorageAccessStatus());
+  if (request_credentials_mode_ == mojom::CredentialsMode::kInclude) {
+    url_request_->set_storage_access_status(
+        url_request_->CalculateStorageAccessStatus());
+  } else {
+    url_request_->reset_storage_access_status();
+  }
 
   // We may need to clear out old Sec- prefixed request headers. We'll attempt
   // to do this before we re-add any.
@@ -1621,9 +1629,57 @@ int URLLoader::OnConnected(net::URLRequest* url_request,
             PrivateNetworkAccessCheckResult::kBlockedByTargetIpAddressSpace) {
       return net::ERR_INCONSISTENT_IP_ADDRESS_SPACE;
     }
+
+    // Local network access permission is required for this connection.
+    if (url_loader_network_observer_ &&
+        result == PrivateNetworkAccessCheckResult::kLNAPermissionRequired) {
+      // Check if the user has granted permission, otherwise trigger the
+      // permission request and wait for the result.
+      // `ProcessLocalNetworkAccessPermissionResultOnCOnnected` is then called
+      // to either continue the load (if granted) or result in an error (if
+      // denied).
+      // This is bound with a WeakPtr because the URLLoader may not own the
+      // observer's pipe, so we can't rely on destruction to stop the callback
+      // the callback from being invoked.
+      (*url_loader_network_observer_)
+          .OnLocalNetworkAccessPermissionRequired(base::BindOnce(
+              &URLLoader::ProcessLocalNetworkAccessPermissionResultOnConnected,
+              weak_ptr_factory_.GetWeakPtr(), info, url_request,
+              std::move(callback)));
+      return net::ERR_IO_PENDING;
+    }
+
+    // Otherwise, if there was a Private Network Access CORS error, block by
+    // default.
     return net::ERR_BLOCKED_BY_PRIVATE_NETWORK_ACCESS_CHECKS;
   }
 
+  return ProcessAcceptCHFrameOnConnected(info, url_request,
+                                         std::move(callback));
+}
+
+void URLLoader::ProcessLocalNetworkAccessPermissionResultOnConnected(
+    const net::TransportInfo& info,
+    net::URLRequest* url_request,
+    net::CompletionOnceCallback callback,
+    bool permission_granted) {
+  if (!permission_granted) {
+    std::move(callback).Run(net::ERR_BLOCKED_BY_PRIVATE_NETWORK_ACCESS_CHECKS);
+    return;
+  }
+  std::pair<net::CompletionOnceCallback, net::CompletionOnceCallback> split =
+      base::SplitOnceCallback(std::move(callback));
+  int result = ProcessAcceptCHFrameOnConnected(info, url_request,
+                                               std::move(split.first));
+  if (result != net::ERR_IO_PENDING) {
+    std::move(split.second).Run(result);
+  }
+}
+
+int URLLoader::ProcessAcceptCHFrameOnConnected(
+    const net::TransportInfo& info,
+    net::URLRequest* url_request,
+    net::CompletionOnceCallback callback) {
   if (!accept_ch_frame_observer_ || info.accept_ch_frame.empty() ||
       !base::FeatureList::IsEnabled(features::kAcceptCHFrame)) {
     return net::OK;
@@ -1640,11 +1696,12 @@ int URLLoader::OnConnected(net::URLRequest* url_request,
   // started. Otherwise, the callback to continue the network transaction will
   // be called and the URLLoader will continue as normal.
   if (!hints.empty()) {
+    // `accept_ch_frame_observer_` is owned by `this`, so passing in
+    // `callback` is safe.
     accept_ch_frame_observer_->OnAcceptCHFrameReceived(
         url::Origin::Create(url_request->url()), hints, std::move(callback));
     return net::ERR_IO_PENDING;
   }
-
   return net::OK;
 }
 
@@ -1734,12 +1791,8 @@ mojom::URLResponseHeadPtr URLLoader::BuildResponseHead() const {
       private_network_access_checker_.ClientAddressSpace();
 
   response->load_with_storage_access = ShouldSetLoadWithStorageAccess();
-  if (url_request_->client_side_content_decoding_enabled() &&
-      response->headers) {
-    response->client_side_content_decoding_types =
-        net::FilterSourceStream::GetContentEncodingTypes(
-            url_request_->accepted_stream_types(), *response->headers);
-  }
+  url_request_->GetClientSideContentDecodingTypes(
+      &response->client_side_content_decoding_types);
 
   return response;
 }
@@ -1957,7 +2010,8 @@ net::CookieSettingOverrides URLLoader::CalculateCookieSettingOverrides(
   // each other's storage access API grants. This must be updated on redirects.
   if (net::cookie_util::ShouldAddInitialStorageAccessApiOverride(
           request.url, request.storage_access_api_status,
-          request.request_initiator, emit_metrics)) {
+          request.request_initiator, emit_metrics,
+          request.credentials_mode == mojom::CredentialsMode::kInclude)) {
     overrides.Put(net::CookieSettingOverride::kStorageAccessGrantEligible);
   }
 
@@ -2209,8 +2263,7 @@ void URLLoader::ContinueOnResponseStartedImmediately() {
   // https://wicg.github.io/signature-based-sri/
   if (std::optional<mojom::BlockedByResponseReason> blocked_reason =
           MaybeBlockResponseForSRIMessageSignature(
-              url_request_->url(), *response_,
-              /*checks_forced_by_initiator=*/!expected_public_keys_.empty(),
+              url_request_->url(), *response_, expected_public_keys_,
               devtools_observer_, devtools_request_id().value_or(""))) {
     CompleteBlockedResponse(net::ERR_BLOCKED_BY_RESPONSE, false,
                             blocked_reason);
@@ -3064,6 +3117,7 @@ void URLLoader::SetRawRequestHeadersAndNotify(
     if (!reported_cookies.empty()) {
       cookie_access_details_.emplace_back(mojom::CookieAccessDetails::New(
           mojom::CookieAccessDetails::Type::kRead, url_request_->url(),
+          url_request_->isolation_info().frame_origin(),
           url_request_->isolation_info().top_frame_origin().value_or(
               url::Origin()),
           url_request_->site_for_cookies(), std::move(reported_cookies),
@@ -3399,6 +3453,7 @@ void URLLoader::ReportFlaggedResponseCookies(bool call_cookie_observer) {
   if (!reported_cookies.empty()) {
     cookie_access_details_.emplace_back(mojom::CookieAccessDetails::New(
         mojom::CookieAccessDetails::Type::kChange, url_request_->url(),
+        url_request_->isolation_info().frame_origin(),
         url_request_->isolation_info().top_frame_origin().value_or(
             url::Origin()),
         url_request_->site_for_cookies(), std::move(reported_cookies),
@@ -3577,6 +3632,10 @@ bool URLLoader::ShouldSetLoadWithStorageAccess() const {
             url_request_->url())) {
       return net::cookie_util::ActivateStorageAccessLoadOutcome::
           kFailureHeaderDisabled;
+    }
+    if (!url_request_->storage_access_status().IsSet()) {
+      url_request_->set_storage_access_status(
+          url_request_->CalculateStorageAccessStatus());
     }
     if (!url_request_->storage_access_status()
              .GetStatusForThirdPartyContext()) {

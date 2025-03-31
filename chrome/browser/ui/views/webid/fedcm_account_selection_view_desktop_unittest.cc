@@ -76,6 +76,7 @@ class TestAccountSelectionView : public AccountSelectionViewBase,
   void ShowMultiAccountPicker(
       const std::vector<IdentityRequestAccountPtr>& accounts,
       const std::vector<IdentityProviderDataPtr>& idp_list,
+      const gfx::Image& rp_icon,
       bool show_back_button) override {
     show_back_button_ = show_back_button;
     sheet_type_ = SheetType::kAccountPicker;
@@ -363,8 +364,8 @@ class FedCmAccountSelectionViewDesktopTest : public ChromeViewsTestBase {
             blink::mojom::RpMode rp_mode,
             const std::vector<IdentityRequestAccountPtr>& new_accounts =
                 std::vector<IdentityRequestAccountPtr>()) {
-    controller.Show(kTopFrameEtldPlusOne, {idp_data_}, accounts, sign_in_mode,
-                    rp_mode, new_accounts);
+    controller.Show(content::RelyingPartyData(kTopFrameEtldPlusOne),
+                    {idp_data_}, accounts, sign_in_mode, rp_mode, new_accounts);
   }
 
   std::unique_ptr<TestFedCmAccountSelectionView> CreateAndShowMismatchDialog(
@@ -422,8 +423,8 @@ class FedCmAccountSelectionViewDesktopTest : public ChromeViewsTestBase {
       blink::mojom::RpMode rp_mode) {
     auto controller = std::make_unique<TestFedCmAccountSelectionView>(
         delegate_.get(), tab_interface_.get(), this);
-    controller->Show(kTopFrameEtldPlusOne, idp_list, accounts, sign_in_mode,
-                     rp_mode,
+    controller->Show(content::RelyingPartyData(kTopFrameEtldPlusOne), idp_list,
+                     accounts, sign_in_mode, rp_mode,
                      /*new_accounts=*/std::vector<IdentityRequestAccountPtr>());
     return controller;
   }
@@ -2075,7 +2076,9 @@ TEST_F(FedCmAccountSelectionViewDesktopTest, SupportAddAccount) {
     // Single account passive mode.
     std::unique_ptr<TestFedCmAccountSelectionView> controller = CreateAndShow(
         accounts_, SignInMode::kExplicit, blink::mojom::RpMode::kPassive);
-    EXPECT_EQ(TestAccountSelectionView::SheetType::kAccountPicker,
+    // We do not support add account on passive mode, so should show single
+    // account dialog.
+    EXPECT_EQ(TestAccountSelectionView::SheetType::kConfirmAccount,
               controller->GetTestView()->sheet_type_);
   }
   {
@@ -2101,38 +2104,6 @@ TEST_F(FedCmAccountSelectionViewDesktopTest, SupportAddAccount) {
     EXPECT_EQ(TestAccountSelectionView::SheetType::kAccountPicker,
               controller->GetTestView()->sheet_type_);
   }
-}
-
-// Tests that when adding accounts is supported, the back button is shown even
-// if there is a single account after logging in.
-TEST_F(FedCmAccountSelectionViewDesktopTest,
-       IdpSigninStatusMismatchToAccountChooserWithSupportAddAccount) {
-  std::unique_ptr<TestFedCmAccountSelectionView> controller =
-      CreateAndShowMismatchDialog();
-
-  EXPECT_EQ(TestAccountSelectionView::SheetType::kFailure,
-            controller->GetTestView()->sheet_type_);
-
-  idp_data_->idp_metadata.supports_add_account = true;
-
-  Show(*controller, accounts_, SignInMode::kExplicit,
-       blink::mojom::RpMode::kPassive, new_accounts_);
-
-  EXPECT_EQ(TestAccountSelectionView::SheetType::kConfirmAccount,
-            controller->GetTestView()->sheet_type_);
-  ASSERT_TRUE(controller->GetTestView()->show_back_button_);
-  controller->OnBackButtonClicked();
-  EXPECT_EQ(TestAccountSelectionView::SheetType::kAccountPicker,
-            controller->GetTestView()->sheet_type_);
-
-  controller->OnAccountSelected(accounts_[0], CreateMouseEvent());
-  EXPECT_EQ(TestAccountSelectionView::SheetType::kConfirmAccount,
-            controller->GetTestView()->sheet_type_);
-  controller->OnAccountSelected(accounts_[0], CreateMouseEvent());
-  EXPECT_EQ(TestAccountSelectionView::SheetType::kVerifying,
-            controller->GetTestView()->sheet_type_);
-
-  EXPECT_EQ(1u, controller->num_dialogs_);
 }
 
 // Tests that the correct account chooser result metrics are recorded.

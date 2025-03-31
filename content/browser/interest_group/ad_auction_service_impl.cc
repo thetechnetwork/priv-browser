@@ -743,7 +743,13 @@ scoped_refptr<SiteInstance> AdAuctionServiceImpl::GetFrameSiteInstance() {
 
 network::mojom::ClientSecurityStatePtr
 AdAuctionServiceImpl::GetClientSecurityState() {
-  return GetFrame()->BuildClientSecurityState();
+  network::mojom::ClientSecurityStatePtr frame_state =
+      GetFrame()->BuildClientSecurityState();
+  // Ensure all Local Network Access requests are blocked as this could lead to
+  // information leakage.
+  frame_state->private_network_request_policy =
+      network::mojom::PrivateNetworkRequestPolicy::kBlock;
+  return frame_state;
 }
 
 std::optional<std::string> AdAuctionServiceImpl::GetCookieDeprecationLabel() {
@@ -769,8 +775,8 @@ void AdAuctionServiceImpl::GetTrustedKeyValueServerKey(
     base::OnceCallback<void(
         base::expected<BiddingAndAuctionServerKey, std::string>)> callback) {
   GetInterestGroupManager().GetTrustedServerKey(
-      TrustedServerAPIType::kTrustedKeyValue, scope_origin, coordinator,
-      std::move(callback));
+      InterestGroupManager::TrustedServerAPIType::kTrustedKeyValue,
+      scope_origin, coordinator, std::move(callback));
 }
 
 AdAuctionServiceImpl::AdAuctionServiceImpl(
@@ -1163,10 +1169,14 @@ void AdAuctionServiceImpl::LoadAuctionDataAndKeyForNextQueuedRequest() {
     return;
   }
 
+  std::vector<url::Origin> seller_origins;
+  for (const auto& [seller, _] : state.sellers) {
+    seller_origins.push_back(seller);
+  }
   GetInterestGroupManager().GetInterestGroupAdAuctionData(
       GetTopWindowOrigin(),
       /* generation_id=*/base::Uuid::GenerateRandomV4(), state.timestamp,
-      std::move(state.config),
+      std::move(state.config), std::move(seller_origins),
       base::BindOnce(&AdAuctionServiceImpl::OnGotAuctionData,
                      weak_ptr_factory_.GetWeakPtr(), state.request_id));
 
@@ -1181,7 +1191,8 @@ void AdAuctionServiceImpl::LoadAuctionDataAndKeyForNextQueuedRequest() {
       // GetBiddingAndAuctionServerKey can call its callback synchronously, and
       // during the last loop iteration the callback may invalidate `state`.
       GetInterestGroupManager().GetTrustedServerKey(
-          TrustedServerAPIType::kBiddingAndAuction, seller, coordinator,
+          InterestGroupManager::TrustedServerAPIType::kBiddingAndAuction,
+          seller, coordinator,
           base::BindOnce(
               &AdAuctionServiceImpl::OnGotOneBiddingAndAuctionServerKey,
               weak_ptr_factory_.GetWeakPtr(), state.request_id, seller));
@@ -1243,7 +1254,7 @@ void AdAuctionServiceImpl::OnGotAuctionDataAndKey(
   BiddingAndAuctionDataConstructionState& state = ba_data_callbacks_.front();
   DCHECK(state.data);
 
-  if (state.data->request.empty()) {
+  if (state.data->requests[seller].empty()) {
     AddEmptyGetInterestGroupAdAuctionDataRequest(seller, "");
     return;
   }
@@ -1259,7 +1270,8 @@ void AdAuctionServiceImpl::OnGotAuctionDataAndKey(
 
   auto maybe_request =
       quiche::ObliviousHttpRequest::CreateClientObliviousRequest(
-          std::string(state.data->request.begin(), state.data->request.end()),
+          std::string(state.data->requests[seller].begin(),
+                      state.data->requests[seller].end()),
           ba_key.key, maybe_key_config.value(),
           kBiddingAndAuctionEncryptionRequestMediaType);
   if (!maybe_request.ok()) {

@@ -4,6 +4,8 @@
 
 package org.chromium.chrome.browser.toolbar.top;
 
+import static org.chromium.ui.accessibility.KeyboardFocusUtil.setFocusOnFirstFocusableDescendant;
+
 import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
@@ -42,6 +44,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 import androidx.appcompat.content.res.AppCompatResources;
 import androidx.appcompat.graphics.drawable.DrawableWrapperCompat;
+import androidx.core.content.ContextCompat;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.core.widget.ImageViewCompat;
 
@@ -60,10 +63,8 @@ import org.chromium.chrome.browser.omnibox.suggestions.OmniboxSuggestionsDropdow
 import org.chromium.chrome.browser.tab.Tab;
 import org.chromium.chrome.browser.theme.ThemeUtils;
 import org.chromium.chrome.browser.toolbar.ButtonData;
-import org.chromium.chrome.browser.toolbar.KeyboardNavigationListener;
 import org.chromium.chrome.browser.toolbar.R;
 import org.chromium.chrome.browser.toolbar.ToolbarDataProvider;
-import org.chromium.chrome.browser.toolbar.ToolbarFeatures;
 import org.chromium.chrome.browser.toolbar.ToolbarProgressBar;
 import org.chromium.chrome.browser.toolbar.ToolbarTabController;
 import org.chromium.chrome.browser.toolbar.menu_button.MenuButtonCoordinator;
@@ -77,6 +78,7 @@ import org.chromium.chrome.browser.ui.theme.BrandedColorScheme;
 import org.chromium.chrome.browser.user_education.UserEducationHelper;
 import org.chromium.components.browser_ui.styles.ChromeColors;
 import org.chromium.components.browser_ui.styles.SemanticColorUtils;
+import org.chromium.components.browser_ui.util.KeyboardNavigationListener;
 import org.chromium.components.browser_ui.widget.animation.CancelAwareAnimatorListener;
 import org.chromium.components.embedder_support.util.UrlUtilities;
 import org.chromium.components.feature_engagement.EventConstants;
@@ -305,8 +307,7 @@ public class ToolbarPhone extends ToolbarLayout
         mBackgroundHeightIncreaseWhenFocus =
                 OmniboxResourceProvider.getToolbarOnFocusHeightIncrease(context);
         mToolbarBackgroundColorForNtp =
-                ChromeColors.getSurfaceColor(
-                        getContext(), R.dimen.home_surface_background_color_elevation);
+                ContextCompat.getColor(getContext(), R.color.home_surface_background_color);
         float LocationBarBackgroundColorAlphaForNtp =
                 ResourcesCompat.getFloat(
                         getResources(), R.dimen.home_surface_search_box_background_alpha);
@@ -1622,11 +1623,7 @@ public class ToolbarPhone extends ToolbarLayout
 
     @Override
     public CaptureReadinessResult isReadyForTextureCapture() {
-        if (ToolbarFeatures.shouldSuppressCaptures()) {
-            return getReadinessStateWithSuppression();
-        } else {
-            return CaptureReadinessResult.unknown(!(urlHasFocus() || mUrlFocusChangeInProgress));
-        }
+        return getReadinessStateWithSuppression();
     }
 
     private CaptureReadinessResult getReadinessStateWithSuppression() {
@@ -1662,20 +1659,14 @@ public class ToolbarPhone extends ToolbarLayout
     }
 
     private PhoneCaptureStateToken generateToolbarSnapshotState() {
-        UrlBarData urlBarData;
-        @DrawableRes int securityIconResource;
-        if (ToolbarFeatures.shouldSuppressCaptures()) {
-            urlBarData = mLocationBar.getUrlBarData();
-            if (urlBarData == null) urlBarData = getToolbarDataProvider().getUrlBarData();
-            StatusCoordinator statusCoordinator = mLocationBar.getStatusCoordinator();
-            securityIconResource =
-                    statusCoordinator == null
-                            ? getToolbarDataProvider().getSecurityIconResource(false)
-                            : statusCoordinator.getSecurityIconResource();
-        } else {
-            urlBarData = getToolbarDataProvider().getUrlBarData();
-            securityIconResource = getToolbarDataProvider().getSecurityIconResource(false);
-        }
+        UrlBarData urlBarData = mLocationBar.getUrlBarData();
+        if (urlBarData == null) urlBarData = getToolbarDataProvider().getUrlBarData();
+        StatusCoordinator statusCoordinator = mLocationBar.getStatusCoordinator();
+        @DrawableRes
+        int securityIconResource =
+                statusCoordinator == null
+                        ? getToolbarDataProvider().getSecurityIconResource(false)
+                        : statusCoordinator.getSecurityIconResource();
 
         VisibleUrlText visibleUrlText =
                 new VisibleUrlText(
@@ -2177,12 +2168,12 @@ public class ToolbarPhone extends ToolbarLayout
     private void updateRippleBackground() {
         var toolbarIconRippleId =
                 isIncognitoBranded()
-                        ? R.drawable.toolbar_button_ripple_incognito
-                        : R.drawable.toolbar_button_ripple;
+                        ? R.drawable.default_icon_background_baseline
+                        : R.drawable.default_icon_background;
         var omniboxIconRippleId =
                 isIncognitoBranded()
-                        ? R.drawable.omnibox_button_ripple_incognito
-                        : R.drawable.omnibox_button_ripple;
+                        ? R.drawable.search_box_icon_background_baseline
+                        : R.drawable.search_box_icon_background;
         mHomeButton.setBackgroundResource(toolbarIconRippleId);
         getTabSwitcherButtonCoordinator()
                 .getContainerView()
@@ -2574,7 +2565,7 @@ public class ToolbarPhone extends ToolbarLayout
             mOptionalButtonCoordinator =
                     new OptionalButtonCoordinator(
                             optionalButton,
-                            mUserEducationHelper,
+                            () -> mUserEducationHelper,
                             /* transitionRoot= */ mToolbarButtonsContainer,
                             isAnimationAllowedPredicate,
                             mTrackerSupplier);
@@ -2846,6 +2837,13 @@ public class ToolbarPhone extends ToolbarLayout
     public void onTransitionEnd() {
         mInLayoutTransition = false;
         updateToolbarBackgroundFromState(mVisualState);
+    }
+
+    @Override
+    public void requestKeyboardFocus() {
+        setFocusOnFirstFocusableDescendant(this);
+        // TODO(crbug.com/360423850): Replace this setFocus(mLocationBar) when omnibox keyboard
+        // behavior is fixed.
     }
 
     /**

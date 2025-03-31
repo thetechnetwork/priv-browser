@@ -10,6 +10,7 @@
 #include "ash/boca/on_task/on_task_pod_controller.h"
 #include "ash/resources/vector_icons/vector_icons.h"
 #include "ash/style/icon_button.h"
+#include "ash/style/style_util.h"
 #include "ash/style/tab_slider.h"
 #include "ash/style/tab_slider_button.h"
 #include "ash/style/typography.h"
@@ -36,6 +37,12 @@ std::unique_ptr<IconButton> CreateIconButton(base::RepeatingClosure callback,
       is_togglable, /*has_border=*/false);
   button->SetIconColor(cros_tokens::kCrosSysOnSurface);
   button->SetBackgroundColor(SK_ColorTRANSPARENT);
+  // Set up highlight for button hover and press.
+  StyleUtil::SetUpInkDropForButton(button.get(), gfx::Insets(),
+                                   /*highlight_on_hover=*/true,
+                                   /*highlight_on_focus=*/false);
+  button->SetAnimateOnStateChange(true);
+  button->SetHasInkDropActionOnClick(true);
   return button;
 }
 
@@ -48,8 +55,9 @@ class PinTabStripButton : public views::LabelButton {
                     std::u16string_view text)
       : views::LabelButton(std::move(callback), text) {
     SetImageModel(views::Button::STATE_NORMAL,
-                  ui::ImageModel::FromVectorIcon(
-                      kOnTaskPodTabsIcon, cros_tokens::kCrosSysOnSurface));
+                  ui::ImageModel::FromVectorIcon(kOnTaskPodTabsIcon,
+                                                 cros_tokens::kCrosSysOnSurface,
+                                                 kLabelButtonIconSize));
     // Accessing protected member label() to set the font list.
     label()->SetFontList(TypographyProvider::Get()->ResolveTypographyToken(
         TypographyToken::kCrosButton2));
@@ -59,7 +67,9 @@ class PinTabStripButton : public views::LabelButton {
         kLabelButtonButtomPadding, kLabelButtonRightPadding)));
     SetHorizontalAlignment(gfx::ALIGN_CENTER);
     SetImageLabelSpacing(kLabelButtonIconTextSpace);
-    SetPreferredSize(gfx::Size(kLabelButtonWidth, kLabelButtonHeight));
+    int labelButtonWidth = kLabelButtonIconSize + kLabelButtonIconTextSpace +
+                           GetPreferredSize().width();
+    SetPreferredSize(gfx::Size(labelButtonWidth, kLabelButtonHeight));
     SetBackground(views::CreateRoundedRectBackground(
         cros_tokens::kCrosSysSystemOnBase, kLabelButtonRadius));
   }

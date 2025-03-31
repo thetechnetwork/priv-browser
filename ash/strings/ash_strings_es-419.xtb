@@ -91,6 +91,7 @@ Estas son algunas de las cosas que puedes probar para comenzar.</translation>
 <translation id="1269405891096105529">El dispositivo periférico no es compatible en el Modo de invitado.</translation>
 <translation id="1270290102613614947">Teclado en pantalla inhabilitado</translation>
 <translation id="1272079795634619415">Interrumpir</translation>
+<translation id="12741168609094094">Selecciona cualquier elemento de la pantalla para buscar, copiar texto y mucho más</translation>
 <translation id="1275285675049378717">Cargando <ph name="POWER_SOURCE" /></translation>
 <translation id="1275718070701477396">Seleccionada</translation>
 <translation id="1276975447697633661">Selecciona el archivo y, luego, presiona <ph name="KEY" /></translation>
@@ -149,6 +150,7 @@ Estas son algunas de las cosas que puedes probar para comenzar.</translation>
 <translation id="1455242230282523554">Mostrar la configuración de idioma</translation>
 <translation id="1459693405370120464">Clima</translation>
 <translation id="1460620680449458626">El volumen está silenciado.</translation>
+<translation id="1462439140224375968">Se creó el documento de Google</translation>
 <translation id="14648076227129703">Permite el acceso a la cámara para <ph name="APP1_NAME" />, <ph name="APP2_NAME" /> y todas las apps y sitios web con el permiso correspondiente</translation>
 <translation id="1467432559032391204">Izquierda</translation>
 <translation id="146902737843070955">Tu administrador solicitó este cambio</translation>
@@ -226,6 +228,7 @@ Estas son algunas de las cosas que puedes probar para comenzar.</translation>
 <translation id="1720230731642245863">El hotspot está desactivado</translation>
 <translation id="1731815243805539470">Cambiar al usuario anterior</translation>
 <translation id="1733996486177697563">Cambia entre los temas oscuro y claro. Mantén presionado el escritorio y elige Estilo y fondo de pantalla.</translation>
+<translation id="1735992454301033090">Se seleccionó el área, usa las teclas de flecha para moverte</translation>
 <translation id="1736898441010944794">"<ph name="NAME" />" visible para dispositivos Bluetooth.</translation>
 <translation id="1737078180382804488">Descartar la configuración de la visualización de las notificaciones de tu teléfono</translation>
 <translation id="174102739345480129">El marcador está desactivado.</translation>
@@ -493,6 +496,7 @@ Se conectaron <ph name="DEVICECOUNT" /> dispositivos.</translation>
 <translation id="2683887737780133806">El <ph name="DAY_OF_WEEK" /> de la semana pasada</translation>
 <translation id="2687510499067466116">Se modificó la combinación de teclas</translation>
 <translation id="2689613560355655046">Escritorio 8</translation>
+<translation id="2692092709110488417">Presiona Tab para enfocar y mover el área seleccionada</translation>
 <translation id="2695305337569143674">web</translation>
 <translation id="2697697418792422688">Mostrar la configuración del teclado. Se seleccionó <ph name="KEYBOARD_NAME" />.</translation>
 <translation id="2699913284398121653">Usa la app de Transferencia de contenido para mover los datos de tu cuenta educativa a tu cuenta personal</translation>
@@ -550,6 +554,7 @@ De lo contrario, el panel táctil integrado se volverá a habilitar dentro de <p
 <translation id="2872353916818027657">Intercambiar monitor principal</translation>
 <translation id="2872961005593481000">Apagar</translation>
 <translation id="2876338922445400217">Acercar la pantalla</translation>
+<translation id="2876760662374103627">Control con gestos faciales activo</translation>
 <translation id="2878884018241093801">No hay elementos recientes</translation>
 <translation id="2880541185262491188">Demasiados intentos de ingresar PIN. Espera <ph name="TIME_LEFT" /> y vuelve a intentarlo</translation>
 <translation id="2883271196820422439">Reanudar teclas del mouse</translation>
@@ -593,6 +598,7 @@ De lo contrario, el panel táctil integrado se volverá a habilitar dentro de <p
 <translation id="301584155502740476">Mostrar detalles del hotspot. El hotspot está desactivado.</translation>
 <translation id="3017079585324758401">Imagen de fondo</translation>
 <translation id="3018135054368884502">Adelantar contenido multimedia</translation>
+<translation id="3026897869154397692">Se agregó al Calendario</translation>
 <translation id="3033545621352269033">Sí</translation>
 <translation id="3033912566804961911">Combinar con <ph name="DESK_NAME" /></translation>
 <translation id="3036649622769666520">Abrir archivos</translation>
@@ -726,6 +732,7 @@ De lo contrario, el panel táctil integrado se volverá a habilitar dentro de <p
 <translation id="346243998268439747">Restablecer el nivel de zoom</translation>
 <translation id="3465223694362104965">Se conectó otro teclado a este dispositivo desde la última vez que accediste. Asegúrate de que este teclado sea de confianza antes de usarlo.</translation>
 <translation id="3465356146291925647">Administrada por tu administrador</translation>
+<translation id="3470502288861289375">Copiando…</translation>
 <translation id="347117769229524881"><ph name="MODIFIER_ONE" /><ph name="MODIFIER_TWO" /><ph name="KEY_ONE" />, luego, <ph name="KEY_TWO" /> o <ph name="KEY_THREE" /></translation>
 <translation id="3477079411857374384">Control-Mayúscula-Espacio</translation>
 <translation id="3485319357743610354"><ph name="SECURITY_STATUS" />, <ph name="CONNECTION_STATUS" />, intensidad de la señal: <ph name="SIGNAL_STRENGTH" /></translation>
@@ -1013,6 +1020,7 @@ Algunas funciones están limitadas para aumentar la duración de la batería.</t
 <translation id="4351244548802238354">Cerrar cuadro de diálogo</translation>
 <translation id="4356872429719185452">Mostrar detalles del hotspot. Se está activando el hotspot.</translation>
 <translation id="4364101114148522660"><ph name="DURATION" /> Grabando</translation>
+<translation id="4368227575116094370">Crear hoja de cálculo de Google</translation>
 <translation id="4371348193907997655">Configuración de transmisión</translation>
 <translation id="4371834685492830207">El PIN debe contener solo caracteres válidos</translation>
 <translation id="4375482231364171368">Buscar en la barra de direcciones</translation>
@@ -1030,6 +1038,7 @@ Algunas funciones están limitadas para aumentar la duración de la batería.</t
 <translation id="4412698727486357573">Centro de ayuda</translation>
 <translation id="4412944820643904175">La función <ph name="FEATURE_NAME" /> está desactivada.</translation>
 <translation id="4417647906073317561">Configuración del Modo sin distracciones. Establece un temporizador, una tarea y música para concentrarte.</translation>
+<translation id="4418600384772451109">Cerrar panel</translation>
 <translation id="4424159417645388645">Escritorio 5</translation>
 <translation id="4426817706804363424">¡Así se hace!</translation>
 <translation id="4430019312045809116">Volumen</translation>
@@ -1482,6 +1491,7 @@ No hay dispositivos conectados.</translation>
 <translation id="5825969630400862129">Configuración de dispositivos conectados</translation>
 <translation id="5830180081891717894"><ph name="WINDOWS" /> más</translation>
 <translation id="5837036133683224804">Detener <ph name="ROUTE_TITLE" /> en <ph name="RECEIVER_NAME" /></translation>
+<translation id="5840658767386246331">Buscar con Google</translation>
 <translation id="5841296711770970362">Ir a la pista siguiente</translation>
 <translation id="5842553299352339114">El hotspot de <ph name="DEVICE_NAME" /> está activado y no hay dispositivos conectados.</translation>
 <translation id="584525477304726060">Mantener presionada para maximizar</translation>
@@ -1513,6 +1523,7 @@ No hay dispositivos conectados.</translation>
 <translation id="595202126637698455">Seguimiento de rendimiento habilitado</translation>
 <translation id="5955304353782037793">apl</translation>
 <translation id="5958529069007801266">Usuario supervisado</translation>
+<translation id="596035801491797438">Desactivar el Control con gestos faciales</translation>
 <translation id="5960410286721553511">Mira las fotos y el contenido multimedia recientes del teléfono</translation>
 <translation id="5965524703725988602">Activar o desactivar el Tema oscuro. <ph name="STATE_TEXT" />.</translation>
 <translation id="5975235751479998104">Desplazarse hacia adelante por las ventanas</translation>
@@ -1895,6 +1906,7 @@ Nueva instalación</translation>
 <translation id="7228968829656641943">Selecciona para buscar en la pantalla. Presiona Tab y, luego, la barra espaciadora para navegar con el teclado.</translation>
 <translation id="7229029500464092426"><ph name="AVAILABLE_MEMORY" /> de memoria | <ph name="TOTAL_MEMORY" /> en total</translation>
 <translation id="7239814253344511868">Ambos botones del mouse</translation>
+<translation id="7240636904654154599">Se creó la hoja de cálculo de Google</translation>
 <translation id="7244725679040769470">Queda <ph name="PERCENTAGE" />% de batería. Conecta tu dispositivo a la corriente.</translation>
 <translation id="7246071203293827765"><ph name="UPDATE_TEXT" />. Debes reiniciar esta Chromebook para aplicar una actualización. Este proceso puede tardar 1 minuto.</translation>
 <translation id="7256057185598509352">ExpressKey 2</translation>
@@ -2223,6 +2235,7 @@ Para apagarlo, vuelve a mantener presionado el botón de encendido.</translation
 <translation id="8287009018010202411">Productividad</translation>
 <translation id="828708037801473432">No</translation>
 <translation id="8297006494302853456">Débil</translation>
+<translation id="8300451473979404345">Se seleccionó el controlador, usa las teclas de flecha para moverlo</translation>
 <translation id="8308637677604853869">Menú anterior</translation>
 <translation id="830868413617744215">Beta</translation>
 <translation id="8314772463905284467">Bloq Mayús está activado.</translation>
@@ -2283,6 +2296,7 @@ Para apagarlo, vuelve a mantener presionado el botón de encendido.</translation
 <translation id="851458219935658693">Está seleccionado el botón que muestra las ventanas del escritorio actual</translation>
 <translation id="851660987304951246">Usa Help me read para resumir contenido o hacer preguntas rápidamente</translation>
 <translation id="8517041960877371778">Tu <ph name="DEVICE_TYPE" /> podría no cargarse si el dispositivo está encendido.</translation>
+<translation id="8519329096920173967">Buscar en mi pantalla con Google Lens</translation>
 <translation id="8535393432370007982">Deshacer el orden por color</translation>
 <translation id="8536886494750559755">Mostrar la configuración de Quick Share. Visible para todos durante <ph name="TIME_REMAINING" />.</translation>
 <translation id="8539803091108018926">Se copió el texto en el Portapapeles</translation>
@@ -2405,6 +2419,7 @@ Para apagarlo, vuelve a mantener presionado el botón de encendido.</translation
 <translation id="8921624153894383499">El Asistente de Google no habla este idioma</translation>
 <translation id="8926951137623668982">Biblioteca siempre oculta</translation>
 <translation id="8929566928381252430">¿Quieres usar Bloq Mayús? Usa</translation>
+<translation id="8929623844713377237">Se creó el contacto</translation>
 <translation id="8934418770423095813">Crear documento de Google</translation>
 <translation id="8934926665751933910">{NUM_FILES,plural, =1{1 archivo}other{# archivos}}</translation>
 <translation id="8936501819958976551">desactivada</translation>

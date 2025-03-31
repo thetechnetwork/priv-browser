@@ -114,7 +114,7 @@ class TabGroupSyncServiceImpl : public TabGroupSyncService,
                           std::string_view collaboration_id,
                           TabGroupSharingCallback callback) override;
   void MakeTabGroupSharedForTesting(const LocalTabGroupID& local_group_id,
-                                    std::string_view collaboration_id);
+                                    std::string_view collaboration_id) override;
 
   void AboutToUnShareTabGroup(const LocalTabGroupID& local_group_id,
                               base::OnceClosure on_complete_callback) override;
@@ -134,8 +134,9 @@ class TabGroupSyncServiceImpl : public TabGroupSyncService,
   std::optional<std::u16string> GetTitleForPreviouslyExistingSharedTabGroup(
       const CollaborationId& collaboration_id) const override;
 
-  void OpenTabGroup(const base::Uuid& sync_group_id,
-                    std::unique_ptr<TabGroupActionContext> context) override;
+  std::optional<LocalTabGroupID> OpenTabGroup(
+      const base::Uuid& sync_group_id,
+      std::unique_ptr<TabGroupActionContext> context) override;
   void UpdateLocalTabGroupMapping(const base::Uuid& sync_id,
                                   const LocalTabGroupID& local_id,
                                   OpeningSource opening_source) override;

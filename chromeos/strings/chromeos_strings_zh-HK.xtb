@@ -11,6 +11,7 @@
 <translation id="102432830749687801">請務必在失去學校帳戶存取權前，使用 Google 的「內容轉移」應用程式將學校帳戶資料移至個人帳戶。</translation>
 <translation id="1026212596705997935">「<ph name="CONFLICT_ACCEL_NAME" />」正在使用快速鍵。請按下新的快速鍵。如要取代現有快速鍵，請再次按下此快速鍵。</translation>
 <translation id="1030856839388844477">重設數據用量</translation>
+<translation id="1047095725494118091">無法下載，請再試一次或重新啟動 <ph name="DEVICE_TYPE" />。</translation>
 <translation id="1047458377670401304"><ph name="CPU_NAME" /> (<ph name="THREAD_COUNT" /> 個執行緒；<ph name="CPU_MAX_CLOCK_SPEED" /> GHz)</translation>
 <translation id="1047773237499189053">推出咗新功能，請用向上箭咀掣了解詳情。</translation>
 <translation id="1049663189809099096">淡彩黃</translation>
@@ -26,6 +27,7 @@
 <translation id="1082009148392559545">下載緊螢幕保護程式</translation>
 <translation id="1094693127011229778">缺少 IP 位址</translation>
 <translation id="1100902271996134409">正在建立圖片…</translation>
+<translation id="1107856713690040084"><ph name="DEVICE_TYPE" /> 音訊</translation>
 <translation id="1116694919640316211">關於</translation>
 <translation id="1118572504348554005">我們可能會將透過此表格提交的意見提供給合作夥伴，以便解決錯誤及你報告的其他問題。請勿輸入密碼等敏感資料。</translation>
 <translation id="1119403468619527527">字數太少，無法簡化</translation>
@@ -292,6 +294,7 @@
 <translation id="2163937499206714165">開啟暗光模式</translation>
 <translation id="2164131940279488868">請確保已連接麥克風以開始錄音</translation>
 <translation id="2173302385160625112">檢查互聯網連線</translation>
+<translation id="2176909213844392588">下載唔到<ph name="LANGUAGE_NAME" />轉錄模型，請再試一次或者重新啟動 <ph name="DEVICE_TYPE" />。</translation>
 <translation id="2180197493692062006">發生錯誤，請嘗試重新開啟應用程式。</translation>
 <translation id="2189104374785738357">編輯 APN 詳情</translation>
 <translation id="2195732836444333448">目前已達資源上限，請稍後再回來。</translation>
@@ -480,6 +483,7 @@
 <translation id="3199982728237701504">文件送紙器 (雙面)</translation>
 <translation id="3201315366910775591">其他人可更新共享相簿</translation>
 <translation id="3211671540163313381">對應緊十字制</translation>
+<translation id="3217462202230355157">請確保已連接麥克風，或嘗試重新啟動 <ph name="DEVICE_TYPE" /></translation>
 <translation id="3226405216343213872">正在尋找掃瞄器</translation>
 <translation id="3226657629376379887">版面配置操作選單</translation>
 <translation id="3227186760713762082">將<ph name="CATEGORY_TEXT" />的數值除以 <ph name="CONVERSION_RATE" /></translation>
@@ -515,6 +519,7 @@
 <translation id="3383623117265110236">獨家</translation>
 <translation id="3404249063913988450">啟用螢幕保護程式</translation>
 <translation id="3413935475507503304">如要繼續進行更新，請按一下 [下一步]。</translation>
+<translation id="3416709353545797224">錄製所有 <ph name="DEVICE_TYPE" /> 音訊</translation>
 <translation id="3428551088151258685">室外</translation>
 <translation id="3428971106895559033">粉彩色</translation>
 <translation id="3434107140712555581"><ph name="BATTERY_PERCENTAGE" />%</translation>
@@ -678,6 +683,7 @@
 <translation id="4155551848414053977">請確認掃瞄器已開啟，並可供透過網絡或直接連線使用</translation>
 <translation id="4159238217853743776">部分</translation>
 <translation id="4159784952369912983">紫色</translation>
+<translation id="416219735020840807">無法下載轉錄模型，請再試一次或重新啟動 <ph name="DEVICE_TYPE" />。</translation>
 <translation id="4170180284036919717">拍攝相片</translation>
 <translation id="4170700058716978431">失敗</translation>
 <translation id="4171077696775491955">校暗</translation>
@@ -698,16 +704,16 @@
 <translation id="4249717042534905822">星期日</translation>
 <translation id="4250229828105606438">螢幕截圖</translation>
 <translation id="4251839292699800785">優雅的辦公室</translation>
-<translation id="4252261480746798874">選取「自製桌布」後，你可以自行輸入提示，也可以依序選取「選擇主題」和畫底線的字詞，打造個人化的 AI 桌布。
+<translation id="4252261480746798874">選取 [自行建立] 即可撰寫自訂提示。你也可以選取 [選擇主題]，再選取有底線的字詞以製作個人化 AI 桌布。
           <ph name="LINE_BREAK" />
           <ph name="LINE_BREAK" />
-          選取「給我靈感」可取得更多獨特而有變化的 AI 圖像選項。
+          選取 [給我驚喜] 即可取得更多獨特多變的 AI 圖片選項。
           <ph name="LINE_BREAK" />
           <ph name="LINE_BREAK" />
-          自製桌布時，系統會將提示傳送到 Google 伺服器，以產生圖像及提升產品品質，過程中會遵守 <ph name="BEGIN_LINK_GOOGLE_PRIVACY_POLICY" />Google 的《服務條款》和《隱私權政策》<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" />規定。請勿加入任何個人、敏感或機密資訊。
+          自製桌布時，系統會將提示傳送至 Google 伺服器，以便生成圖像及提升產品品質。在處理資料的過程中須遵守 <ph name="BEGIN_LINK_GOOGLE_PRIVACY_POLICY" />Google 的《服務條款》及《私隱權政策》<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" />。請勿加入任何個人、敏感或機密內容。
           <ph name="LINE_BREAK" />
           <ph name="LINE_BREAK" />
-          生成式 AI 提供的內容未必準確 (包括人物相關資訊)，因此請多加查證。<ph name="BEGIN_LINK_CREATE_YOUR_OWN_WALLPAPER" />瞭解詳情<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" /></translation>
+          生成式 AI 可能會出錯 (包括人物資料)，請加以複查。<ph name="BEGIN_LINK_CREATE_YOUR_OWN_WALLPAPER" />瞭解詳情<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" /></translation>
 <translation id="4258281355379922695">HTTP 延遲時間</translation>
 <translation id="4266143281602681663">紗線</translation>
 <translation id="4269815121975886860">啟動偏好設定</translation>
@@ -785,7 +791,6 @@
 <translation id="4593212453765072419">需要 Proxy 驗證</translation>
 <translation id="4594021849294327751">建立轉錄文字</translation>
 <translation id="4594541568452132351">選取轉錄語言並下載模型</translation>
-<translation id="4607282946861182308">無法製作相應的圖像，請嘗試其他提示。</translation>
 <translation id="4609350030397390689">鍵盤校暗亮度</translation>
 <translation id="4627232916386272576"><ph name="DOCUMENT_TITLE" />、<ph name="PRINTER_NAME" />、<ph name="CREATION_TIME" />，印咗 <ph name="PRINTED_PAGE_NUMBER" /> 頁，總共有 <ph name="TOTAL_PAGE_NUMBER" /> 頁。㩒一下 Enter 鍵就可以取消列印工作。</translation>
 <translation id="463791356324567266">正在取消掃瞄…</translation>
@@ -952,6 +957,7 @@
 <translation id="5344619683981067131">以建議內容取代所選文字</translation>
 <translation id="5346687412805619883">本地網絡</translation>
 <translation id="5358174242040570474">發生錯誤，請再次選取桌布，或者重新開啟應用程式</translation>
+<translation id="5368228070728130240">下載唔到摘要同標題建立模型，請再試一次或者重新啟動 <ph name="DEVICE_TYPE" />。</translation>
 <translation id="5372659122375744710">Wi-Fi 網絡不安全</translation>
 <translation id="5376354385557966694">自動明亮模式</translation>
 <translation id="5378184552853359930">IP 類型</translation>
@@ -1257,6 +1263,7 @@
 <translation id="6766275201586212568">DNS 解析失敗</translation>
 <translation id="6768237774506518020">DNS 解析失敗率高</translation>
 <translation id="6786747875388722282">擴充功能</translation>
+<translation id="6789891265243243337"><ph name="DEVICE_TYPE" /> 音訊開啟時，「錄音機」會錄下裝置播放的所有內容</translation>
 <translation id="6791471867139427246">鍵盤背光顏色</translation>
 <translation id="6796229976413584781">刪除咗捷徑</translation>
 <translation id="6798678288485555829">文字導覽</translation>
@@ -1532,6 +1539,7 @@
 <translation id="8010765388850538088">進一步瞭解生成式 AI</translation>
 <translation id="8017679124341497925">已編輯捷徑</translation>
 <translation id="802154636333426148">下載失敗</translation>
+<translation id="8027467664787098346">進一步了解揀咗嘅桌布</translation>
 <translation id="8028993641010258682">大小</translation>
 <translation id="8031884997696620457">HSPAPlus</translation>
 <translation id="80398733265834479">啟用自動調色模式</translation>
@@ -1650,6 +1658,7 @@
 <translation id="8543574988889671960">重新載入分頁</translation>
 <translation id="8550364285433943656">針對遊戲操作設定控制項，即可使用鍵盤按鍵玩遊戲</translation>
 <translation id="8557447961879934694">WPA2</translation>
+<translation id="8558521694042102707">生成式 AI 可能會出錯 (包括人物資料)，請加以複查。</translation>
 <translation id="8575298406870537639">流動網絡供應商可能會要求您必須選擇此選項，才能連接他們的網絡。詳情請聯絡流動網絡供應商。</translation>
 <translation id="8576249514688522074">未初始化</translation>
 <translation id="8584654835905316966"><ph name="DEVICE_NAME" />必須重新啟動，才能完成安裝韌體版本 <ph name="VERSION" />。電腦可能會多次重新啟動，這是正常現象。</translation>
@@ -1664,7 +1673,6 @@
 <translation id="8655295600908251630">版本</translation>
 <translation id="8655828773034788261">分享網址：</translation>
 <translation id="8660881923941176839">磅</translation>
-<translation id="8670057600920888023">生成式 AI 尚在實驗階段，內容或會不準確、誤導或令人反感。</translation>
 <translation id="8670574982334489519">右邊</translation>
 <translation id="8675354002693747642">預先共用密鑰</translation>
 <translation id="8677859815076891398">沒有相簿。請在「<ph name="LINK_BEGIN" />Google 相片<ph name="LINK_END" />」中建立相簿。</translation>
@@ -1728,6 +1736,7 @@
 <translation id="8930622219860340959">無線網絡</translation>
 <translation id="8933650076320258356">幫「<ph name="DIRECTION" />」揀咗嘅按鍵係 <ph name="KEYS" />。<ph name="REASSIGN_INSTRUCTION" /></translation>
 <translation id="8936793075252196307">用戶端 IP 位址</translation>
+<translation id="8938606491880817721">無法下載，請再試一次或重新啟動 <ph name="DEVICE_TYPE" />。</translation>
 <translation id="8944651180182756621">啟動器顏色</translation>
 <translation id="8945308580158685341">蜜蜂</translation>
 <translation id="894617464444543719">裝置類型係手機。</translation>

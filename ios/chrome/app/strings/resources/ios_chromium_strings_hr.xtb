@@ -91,11 +91,11 @@ Više postavki koje upotrebljavaju podatke za poboljšanje vašeg doživljaja u 
 <translation id="3054480780637153380">Otvorite postavke Chromiuma na iOS-u, zatim dodirnite opciju Zadana aplikacija preglednika i odaberite Chromium.</translation>
 <translation id="3102849287235003384">Da biste se odjavili sa svojeg Google računa na svim web-lokacijama, <ph name="BEGIN_LINK" />odjavite se iz Chromiuma<ph name="END_LINK" />.</translation>
 <translation id="3115956258722352278">Želite li postaviti Chromium kao zadani preglednik?</translation>
+<translation id="3180939591219927904">Uključite opciju Zaključaj anonimne kartice pri zatvaranju Chromiuma</translation>
 <translation id="3242612358525156339">U postavkama uređaja otvorite <ph name="TEXT_OF_THE_SETTINGS_MENU_ITEM" /> i odaberite Chromium</translation>
 <translation id="328933489847748230">{count,plural, =1{Sada se prikazuje jedan Chromiumov prozor}one{Sada se prikazuje {count} Chromiumov prozor}few{Sada se prikazuju {count} Chromiumova prozora}other{Sada se prikazuje {count} Chromiumovih prozora}}</translation>
 <translation id="3344973607274501920">Chromium nije uspio provjeriti vaše zaporke. Provjerite internetsku vezu.</translation>
 <translation id="3366305173356742781">Podaci Chromiuma na vašem računu</translation>
-<translation id="33788334537425157">Uključite opciju Zaključaj anonimne kartice kad zatvorite Chrome</translation>
 <translation id="3387107508582892610">{THRESHOLD,plural, =1{To se događa kada se Chromium ne koristi {THRESHOLD} minutu. To može uključivati povijest i automatsko popunjavanje.}one{To se događa kada se Chromium ne koristi {THRESHOLD} minutu. To može uključivati povijest i automatsko popunjavanje.}few{To se događa kada se Chromium ne koristi {THRESHOLD} minute. To može uključivati povijest i automatsko popunjavanje.}other{To se događa kada se Chromium ne koristi {THRESHOLD} minuta. To može uključivati povijest i automatsko popunjavanje.}}</translation>
 <translation id="3410395242749598859">Neki vaši podaci iz Chromiuma još nisu spremljeni na račun <ph name="EMAIL" />.
 Pokušajte pričekati nekoliko minuta prije prebacivanja na drugi račun. Ako sada promijenite račune, ti će se podaci izbrisati.</translation>
@@ -208,7 +208,6 @@ Važne napomene:
   • Ako povijest sinkronizirate s Google računom, mjerni podaci mogu uključivati i podatke o URL-ovima koje posjećujete.<ph name="END_INDENT" /></translation>
 <translation id="5932787118589620366">Brisanje podataka o pregledavanju u Chromiumu.</translation>
 <translation id="593808800391107017">Primajte upozorenja o problemima s privatnošću ili sigurnošću koje Chromium automatski otkrije za vas.</translation>
-<translation id="5945387852661427312">Prijavljujete se računom kojim upravlja <ph name="DOMAIN" /> i njegovom administratoru dajete kontrolu nad svojim podacima u Chromiumu. Vaši će se podaci trajno povezati s tim računom. Ako se odjavite s Chromiuma, vaši će se podaci izbrisati s ovog uređaja, no ostat će pohranjeni na vašem Google računu.</translation>
 <translation id="5951593919357934226">Iskoristite sve prednosti Chromiuma.</translation>
 <translation id="5985254578475526217">Da biste primali obavijesti Chromiuma, uključite ih u postavkama iOS-a.</translation>
 <translation id="6104024151682120539">Otvori u Chromiumu</translation>
@@ -262,6 +261,7 @@ Vaše šifrirane podatke može pročitati samo osoba koja ima vašu šifru. Šif
 <translation id="7337881442233988129">Chromium</translation>
 <translation id="7357211569052832586">Odabrani podaci uklonjeni su iz Chromiuma i sa sinkroniziranih uređaja. Na Google računu možda postoje drugi oblici povijesti pregledavanja, primjerice pretraživanja i aktivnosti s drugih Googleovih usluga, na stranici history.google.com.</translation>
 <translation id="7395825497086981028">Zaporka će se spremiti u Upravitelj zaporki za <ph name="EMAIL" />.</translation>
+<translation id="7504829997542308412">Otvorite Chromium</translation>
 <translation id="7531461704633548377">S Chromiuma</translation>
 <translation id="7554983317097061001">Savjet za Chromium: premjestite Chromium na donju traku</translation>
 <translation id="7576863740961052505">Upravljanje postavkama Chromiuma</translation>

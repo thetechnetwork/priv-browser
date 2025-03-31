@@ -873,14 +873,6 @@ class AutofillMetrics {
       std::variant<payments::PaymentsAutofillClient::PaymentsRpcCardType,
                    CreditCard::RecordType> card_type);
 
-  // Returns 64-bit hash of the string of form global id, which consists of
-  // |frame_token| and |renderer_id|.
-  static uint64_t FormGlobalIdToHash64Bit(const FormGlobalId& form_global_id);
-  // Returns 64-bit hash of the string of field global id, which consists of
-  // |frame_token| and |renderer_id|.
-  static uint64_t FieldGlobalIdToHash64Bit(
-      const FieldGlobalId& field_global_id);
-
   // Logs the Autofill2_FieldInfoAfterSubmission UKM event after the form is
   // submitted and uploaded for votes to the crowdsourcing server.
   static void LogAutofillFieldInfoAfterSubmission(
@@ -901,6 +893,14 @@ class AutofillMetrics {
 
   static void LogAutofillPopupVisibleDuration(FillingProduct filling_product,
                                               base::TimeDelta duration);
+
+  // TODO(crbug.com/316143236): Remove all datalist related metrics once
+  // debugging is complete.
+  static void LogDataListSuggestionsShown();
+
+  static void LogDataListSuggestionsUpdated();
+
+  static void LogDataListSuggestionsInserted();
 };
 
 #if defined(UNIT_TEST)

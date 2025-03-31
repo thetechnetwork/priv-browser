@@ -91,6 +91,7 @@
 <translation id="1269405891096105529">الأجهزة الملحقة غير متاحة للاستخدام في وضع الضيف.</translation>
 <translation id="1270290102613614947">تم إيقاف لوحة المفاتيح على الشاشة</translation>
 <translation id="1272079795634619415">إيقاف</translation>
+<translation id="12741168609094094">يمكن اختيار أي محتوى على الشاشة للبحث عنه أو نسخ نص منه وغير ذلك</translation>
 <translation id="1275285675049378717">شحن <ph name="POWER_SOURCE" /></translation>
 <translation id="1275718070701477396">تم التحديد</translation>
 <translation id="1276975447697633661">اختَر الملف، ثم اضغط على <ph name="KEY" />.</translation>
@@ -228,6 +229,7 @@
 <translation id="1720230731642245863">نقطة الاتصال غير مفعَّلة</translation>
 <translation id="1731815243805539470">التبديل إلى المستخدم السابق</translation>
 <translation id="1733996486177697563">يمكنك التبديل بين المظهرَين الداكن والفاتح. انقر مع الاستمرار على سطح المكتب، ثم اختَر "الخلفية والأسلوب".</translation>
+<translation id="1735992454301033090">المنطقة المحدَّدة، يمكن استخدام مفاتيح الأسهم لتحريكها</translation>
 <translation id="1736898441010944794">سيظهر "<ph name="NAME" />" للأجهزة التي تتضمّن بلوتوث.</translation>
 <translation id="1737078180382804488">عدم إعداد ميزة عرض الإشعارات في هاتفك</translation>
 <translation id="174102739345480129">أداة التحديد غير مفعَّلة.</translation>
@@ -495,6 +497,7 @@
 <translation id="2683887737780133806">يوم <ph name="DAY_OF_WEEK" /> من الأسبوع الماضي</translation>
 <translation id="2687510499067466116">تم تغيير اختصار لوحة المفاتيح</translation>
 <translation id="2689613560355655046">سطح المكتب 8</translation>
+<translation id="2692092709110488417">‏يمكن الضغط على مفتاح Tab للتركيز على المنطقة المحدّدة وتحريكها</translation>
 <translation id="2695305337569143674">الويب</translation>
 <translation id="2697697418792422688">عرض إعدادات لوحة المفاتيح: تمّ اختيار "<ph name="KEYBOARD_NAME" />".</translation>
 <translation id="2699913284398121653">يمكنك استخدام تطبيق "نقل المحتوى" لنقل بيانات حسابك الذي تديره المؤسسة التعليمية إلى حسابك الشخصي</translation>
@@ -550,6 +553,7 @@
 <translation id="2872353916818027657">تبديل الشاشة الرئيسية</translation>
 <translation id="2872961005593481000">إيقاف التشغيل</translation>
 <translation id="2876338922445400217">التكبير على الشاشة</translation>
+<translation id="2876760662374103627">ميزة "التحكّم بالوجه" مفعَّلة</translation>
 <translation id="2878884018241093801">ليست هناك عناصر تم استخدامها مؤخرًا</translation>
 <translation id="2880541185262491188">تم إدخال رقم التعريف الشخصي مرات كثيرة جدًا. يُرجى الانتظار لمدة <ph name="TIME_LEFT" /> وإعادة المحاولة</translation>
 <translation id="2883271196820422439">استئناف استخدام مفاتيح الماوس</translation>
@@ -725,6 +729,7 @@
 <translation id="346243998268439747">إعادة ضبط مستوى التكبير أو التصغير</translation>
 <translation id="3465223694362104965">تم ربط لوحة مفاتيح أخرى بهذا الجهاز منذ آخر مرة سجَّلت الدخول فيها. يُرجى التأكُّد من أن لوحة المفاتيح هذه موثوقة قبل استخدامها.</translation>
 <translation id="3465356146291925647">يديرها المشرف</translation>
+<translation id="3470502288861289375">جارٍ النسخ...</translation>
 <translation id="347117769229524881">‏‫‎<ph name="MODIFIER_ONE" /><ph name="MODIFIER_TWO" /><ph name="KEY_ONE" />، ثم <ph name="KEY_TWO" /> أو <ph name="KEY_THREE" /></translation>
 <translation id="3477079411857374384">Control-Shift-Space</translation>
 <translation id="3485319357743610354">حالة الأمان <ph name="SECURITY_STATUS" />، حالة الاتصال <ph name="CONNECTION_STATUS" />، قوة الإشارة <ph name="SIGNAL_STRENGTH" /></translation>
@@ -1030,6 +1035,7 @@
 <translation id="4412698727486357573">مركز المساعدة</translation>
 <translation id="4412944820643904175">ميزة <ph name="FEATURE_NAME" /> غير مُفعَّلة.</translation>
 <translation id="4417647906073317561">إعدادات "وضع التركيز" لضبط موقّت ومَهمّة وموسيقى ومساعدتك في التركيز على مهامك</translation>
+<translation id="4418600384772451109">إغلاق اللوحة</translation>
 <translation id="4424159417645388645">سطح المكتب 5</translation>
 <translation id="4426817706804363424">حسنًا!</translation>
 <translation id="4430019312045809116">مستوى الصوت</translation>
@@ -1482,6 +1488,7 @@
 <translation id="5825969630400862129">إعدادات الأجهزة المتّصلة</translation>
 <translation id="5830180081891717894">و<ph name="WINDOWS" /> نافذة أخرى</translation>
 <translation id="5837036133683224804">إيقاف <ph name="ROUTE_TITLE" /> في <ph name="RECEIVER_NAME" /></translation>
+<translation id="5840658767386246331">‏البحث باستخدام Google</translation>
 <translation id="5841296711770970362">الانتقال إلى المقطع الصوتي التالي</translation>
 <translation id="5842553299352339114">نقطة اتصال <ph name="DEVICE_NAME" /> مفعَّلة، وما مِن أجهزة متصلة بها.</translation>
 <translation id="584525477304726060">انقر مع الاستمرار على النافذة لتكبيرها.</translation>
@@ -1513,6 +1520,7 @@
 <translation id="595202126637698455">تم تفعيل تتبع مستوى الأداء</translation>
 <translation id="5955304353782037793">app</translation>
 <translation id="5958529069007801266">مستخدم يخضع للإدارة</translation>
+<translation id="596035801491797438">إيقاف ميزة "التحكّم بالوجه"</translation>
 <translation id="5960410286721553511">عرض الصور والوسائط الحديثة على هاتفك</translation>
 <translation id="5965524703725988602">إيقاف/تفعيل المظهر الداكن: <ph name="STATE_TEXT" /></translation>
 <translation id="5975235751479998104">الانتقال إلى الأمام في قائمة النوافذ</translation>
@@ -2225,6 +2233,7 @@
 <translation id="8287009018010202411">تطبيقات الإنتاجية</translation>
 <translation id="828708037801473432">غير مُفعَّلة</translation>
 <translation id="8297006494302853456">ضعيفة</translation>
+<translation id="8300451473979404345">المقبض المحدَّد، يمكن استخدام مفاتيح الأسهم لتحريكه</translation>
 <translation id="8308637677604853869">القائمة السابقة</translation>
 <translation id="830868413617744215">تجريبي</translation>
 <translation id="8314772463905284467">‏مفتاح Caps Lock قيد التفعيل</translation>
@@ -2285,6 +2294,7 @@
 <translation id="851458219935658693">عرض النوافذ المفتوحة في سطح المكتب الحالي، تم النقر على زر الاختيار.</translation>
 <translation id="851660987304951246">يمكنك استخدام ميزة "ساعدني في القراءة" لتلخيص المحتوى بسرعة أو طرح الأسئلة</translation>
 <translation id="8517041960877371778">قد يتعذر شحن <ph name="DEVICE_TYPE" /> أثناء التشغيل.</translation>
+<translation id="8519329096920173967">‏البحث عن محتوى شاشتي باستخدام "عدسة Google"</translation>
 <translation id="8535393432370007982">عكس نظام الترتيب حسب اللون</translation>
 <translation id="8536886494750559755">‏يعرض هذا المربّع إعدادات ميزة Quick Share. وسيظل الجهاز مرئيًا للجميع لمدة <ph name="TIME_REMAINING" /></translation>
 <translation id="8539803091108018926">تم نسخ النص إلى الحافظة</translation>

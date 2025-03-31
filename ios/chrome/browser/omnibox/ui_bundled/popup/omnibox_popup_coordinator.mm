@@ -23,17 +23,19 @@
 #import "ios/chrome/browser/net/model/crurl.h"
 #import "ios/chrome/browser/omnibox/model/autocomplete_result_wrapper.h"
 #import "ios/chrome/browser/omnibox/model/omnibox_autocomplete_controller.h"
+#import "ios/chrome/browser/omnibox/model/omnibox_image_fetcher.h"
 #import "ios/chrome/browser/omnibox/public/omnibox_ui_features.h"
 #import "ios/chrome/browser/omnibox/ui_bundled/popup/carousel/carousel_item.h"
 #import "ios/chrome/browser/omnibox/ui_bundled/popup/carousel/carousel_item_menu_provider.h"
 #import "ios/chrome/browser/omnibox/ui_bundled/popup/content_providing.h"
+#import "ios/chrome/browser/omnibox/ui_bundled/popup/debugger/omnibox_debugger_mediator.h"
+#import "ios/chrome/browser/omnibox/ui_bundled/popup/debugger/omnibox_debugger_view_controller.h"
 #import "ios/chrome/browser/omnibox/ui_bundled/popup/omnibox_pedal_annotator.h"
 #import "ios/chrome/browser/omnibox/ui_bundled/popup/omnibox_popup_mediator.h"
 #import "ios/chrome/browser/omnibox/ui_bundled/popup/omnibox_popup_presenter.h"
 #import "ios/chrome/browser/omnibox/ui_bundled/popup/omnibox_popup_view_controller.h"
 #import "ios/chrome/browser/omnibox/ui_bundled/popup/omnibox_popup_view_ios.h"
 #import "ios/chrome/browser/omnibox/ui_bundled/popup/pedal_section_extractor.h"
-#import "ios/chrome/browser/omnibox/ui_bundled/popup/popup_debug_info_view_controller.h"
 #import "ios/chrome/browser/policy/model/policy_util.h"
 #import "ios/chrome/browser/search_engines/model/template_url_service_factory.h"
 #import "ios/chrome/browser/shared/coordinator/layout_guide/layout_guide_util.h"
@@ -68,7 +70,12 @@
 @end
 
 @implementation OmniboxPopupCoordinator {
+  /// The omnibox autocomplete controller.
   __weak OmniboxAutocompleteController* _omniboxAutocompleteController;
+  /// The omnibox debugger mediator.
+  OmniboxDebuggerMediator* _omniboxDebuggerMediator;
+  /// The omnibox image fetcher.
+  OmniboxImageFetcher* _omniboxImageFetcher;
 }
 
 #pragma mark - Public
@@ -100,20 +107,17 @@
       std::make_unique<image_fetcher::ImageDataFetcher>(
           self.profile->GetSharedURLLoaderFactory());
 
+  _omniboxImageFetcher = [[OmniboxImageFetcher alloc]
+      initWithFaviconLoader:IOSChromeFaviconLoaderFactory::GetForProfile(
+                                self.profile)
+               imageFetcher:std::move(imageFetcher)];
+
   BOOL isIncognito = self.profile->IsOffTheRecord();
 
-  RemoteSuggestionsService* remoteSuggestionsService =
-      RemoteSuggestionsServiceFactory::GetForProfile(
-          self.profile, /*create_if_necessary=*/true);
-
   self.mediator = [[OmniboxPopupMediator alloc]
-               initWithFetcher:std::move(imageFetcher)
-                 faviconLoader:IOSChromeFaviconLoaderFactory::GetForProfile(
-                                   self.profile)
-        autocompleteController:self.autocompleteController
-      remoteSuggestionsService:remoteSuggestionsService
-                       tracker:feature_engagement::TrackerFactory::
-                                   GetForProfile(self.profile)];
+          initWithTracker:feature_engagement::TrackerFactory::GetForProfile(
+                              self.profile)
+      omniboxImageFetcher:_omniboxImageFetcher];
 
   TemplateURLService* templateURLService =
       ios::TemplateURLServiceFactory::GetForProfile(self.profile);
@@ -169,7 +173,7 @@
 }
 
 - (void)stop {
-  [self.mediator disconnect];
+  [_omniboxDebuggerMediator disconnect];
 
   [self.sharingCoordinator stop];
   self.sharingCoordinator = nil;
@@ -231,9 +235,17 @@
 - (void)setupDebug {
   DCHECK(experimental_flags::IsOmniboxDebuggingEnabled());
 
+  RemoteSuggestionsService* remoteSuggestionsService =
+      RemoteSuggestionsServiceFactory::GetForProfile(
+          self.profile, /*create_if_necessary=*/true);
+
+  _omniboxDebuggerMediator = [[OmniboxDebuggerMediator alloc]
+      initWithAutocompleteController:_autocompleteController
+            remoteSuggestionsService:remoteSuggestionsService];
+
   PopupDebugInfoViewController* viewController =
       [[PopupDebugInfoViewController alloc] init];
-  self.mediator.debugInfoConsumer = viewController;
+  _omniboxDebuggerMediator.consumer = viewController;
 
   UINavigationController* navController = [[UINavigationController alloc]
       initWithRootViewController:viewController];

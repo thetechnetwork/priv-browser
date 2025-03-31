@@ -250,6 +250,7 @@ Solo chi conosce la tua passphrase può leggere i tuoi dati criptati. La passphr
 <translation id="2172905120685242547">Chiudere la finestra?</translation>
 <translation id="2173302385160625112">Controlla la connessione a internet</translation>
 <translation id="2175927920773552910">Codice QR</translation>
+<translation id="2181097965834437145">Mostra o nasconde la barra dei preferiti</translation>
 <translation id="2184272387334793084">Accedi per avere a disposizione le password e altri dati su tutti i tuoi dispositivi</translation>
 <translation id="218608176142494674">Condivisione</translation>
 <translation id="219283042927675668">Schede nel gruppo</translation>
@@ -306,6 +307,7 @@ Solo chi conosce la tua passphrase può leggere i tuoi dati criptati. La passphr
 <translation id="2453860139492968684">Termina</translation>
 <translation id="2461378706168271257">Cerca nelle schede</translation>
 <translation id="2461822463642141190">Attuale</translation>
+<translation id="2463770278804271243">PAGINA</translation>
 <translation id="2468444275314013497">Il tuo browser è protetto</translation>
 <translation id="2472163211318554013">Accedi per usare al meglio Chrome</translation>
 <translation id="247737702124049222">Le descrizioni delle immagini sono attive</translation>
@@ -324,7 +326,6 @@ Solo chi conosce la tua passphrase può leggere i tuoi dati criptati. La passphr
 <translation id="2527209463677295330">Se includi più testo di una pagina, potresti vedere risultati migliori</translation>
 <translation id="2527779675047087889">Nascondi contenuti degli appunti</translation>
 <translation id="2532336938189706096">Visualizzazione web</translation>
-<translation id="2534155362429831547"><ph name="NUMBER_OF_ITEMS" /> elementi eliminati</translation>
 <translation id="253498598929009420">Il sito potrà vedere i contenuti del tuo schermo</translation>
 <translation id="2536728043171574184">È visualizzata una copia offline della pagina</translation>
 <translation id="2542548955756682219"><ph name="TAB_TITLE" />, scheda</translation>
@@ -364,7 +365,6 @@ Solo chi conosce la tua passphrase può leggere i tuoi dati criptati. La passphr
 <translation id="2677748264148917807">Esci</translation>
 <translation id="2687009626279857299">Ha smesso di funzionare su questo dispositivo</translation>
 <translation id="2702516483241149200">Novità: condividi un link che scorre direttamente a questo testo</translation>
-<translation id="2705073298859543115">Crea riepilogo</translation>
 <translation id="2708051474374549906">Protezione proattiva in tempo reale da estensioni, siti e download pericolosi in base ai tuoi dati di navigazione inviati a Google.</translation>
 <translation id="2708226184420201102">Apri nel browser <ph name="PRODUCT_NAME" /></translation>
 <translation id="271033894570825754">Nuovo</translation>
@@ -459,7 +459,6 @@ Solo chi conosce la tua passphrase può leggere i tuoi dati criptati. La passphr
 <translation id="3114507951000454849">Leggi le notizie di oggi <ph name="NEWS_ICON" /></translation>
 <translation id="3122883569442693641">Altri dettagli</translation>
 <translation id="3123734510202723619">Annunci</translation>
-<translation id="3131961580615093332"><ph name="GIVEN_NAME" /> ha modificato la scheda "<ph name="TAB_NAME" />"</translation>
 <translation id="3148237711805373460">Vai</translation>
 <translation id="314939179385989105">Pagina iniziale di Chrome</translation>
 <translation id="3158667104057012316">Ordinamento manuale</translation>
@@ -677,6 +676,7 @@ Solo chi conosce la tua passphrase può leggere i tuoi dati criptati. La passphr
 <translation id="4195643157523330669">Apri in un'altra scheda</translation>
 <translation id="4197828496439691735">{NUM_TABS,plural, =1{1 scheda su questo dispositivo}other{# schede su questo dispositivo}}</translation>
 <translation id="4198423547019359126">Nessun percorso di download disponibile</translation>
+<translation id="4209029522667123437">Utilizzato su questo sito: <ph name="IDENTITY_PROVIDER_ETLD_PLUS_ONE" /></translation>
 <translation id="4214315110991671325">Se consenti i cookie, Chrome potrebbe usarli per il caricamento.</translation>
 <translation id="4216511743389425832">Ascolta questa pagina</translation>
 <translation id="4225725533026049334">Stai seguendo</translation>
@@ -841,14 +841,12 @@ Il tuo Account Google potrebbe avere altre forme di cronologia di navigazione, a
 <translation id="4910889077668685004">App per pagamenti</translation>
 <translation id="4912413785358399818">Sposta scheda</translation>
 <translation id="4913169188695071480">Interrompi aggiornamento</translation>
-<translation id="4918086044614829423">Accetto</translation>
 <translation id="4925120120285606924">Screenshot <ph name="CURRENT_DATE_ISO" /></translation>
 <translation id="49268022542405662">Le tue password verranno esportate e scaricate in un file di testo. Saranno visibili a qualsiasi persona e app con accesso alla cartella di destinazione.</translation>
 <translation id="4926901776383726965">Puoi salvare immagini e file per visualizzarli offline o condividerli in altre app</translation>
 <translation id="4932247056774066048">Poiché stai uscendo da un account gestito da <ph name="DOMAIN_NAME" />, i tuoi dati di Chrome verranno eliminati da questo dispositivo. Rimarranno memorizzati nel tuo Account Google.</translation>
 <translation id="4943703118917034429">Realtà virtuale</translation>
 <translation id="4943872375798546930">Nessun risultato</translation>
-<translation id="4953833914914492602">Il gruppo di schede "<ph name="TAB_GROUP_NAME" />" non è più disponibile</translation>
 <translation id="4957722034734105353">Scopri di più...</translation>
 <translation id="4961107849584082341">Traduci questa pagina in qualsiasi lingua</translation>
 <translation id="4964614743143953889">Chrome ti avvisa in caso di siti e download non sicuri</translation>
@@ -967,7 +965,6 @@ Il tuo Account Google potrebbe avere altre forme di cronologia di navigazione, a
 <translation id="5526281268548144413">Impossibile eseguire la chiusura in più finestre</translation>
 <translation id="5528925345478618296">{MINUTES,plural, =1{# min fa}other{# min fa}}</translation>
 <translation id="5548606607480005320">Controllo di sicurezza</translation>
-<translation id="5551564597369878730"><ph name="GIVEN_NAME" /> ha aggiunto il gruppo di schede "<ph name="TAB_GROUP_NAME" />"</translation>
 <translation id="5554520618550346933">Quando utilizzi una password, Chrome ti avvisa se è stata pubblicata online. Durante questa operazione, le tue password e i tuoi nomi utente vengono criptati, quindi non possono essere letti da nessuno, Google compresa.</translation>
 <translation id="5555525474779371165">Scegli il livello di protezione di Navigazione sicura che preferisci</translation>
 <translation id="5556459405103347317">Ricarica</translation>
@@ -1184,7 +1181,6 @@ Ad esempio, alcuni siti web potrebbero rispondere alla richiesta mostrando annun
 <translation id="6481963882741794338">Collega Chrome e altri servizi Google per la personalizzazione e altri scopi</translation>
 <translation id="6482749332252372425">Download di <ph name="FILE_NAME" /> non riuscito a causa dello spazio di archiviazione insufficiente.</translation>
 <translation id="6486420406192123355">Questo file PDF proviene da un sito che utilizza una connessione non sicura</translation>
-<translation id="6495590690749880440">Aprire il gruppo di schede?</translation>
 <translation id="650224091954855786">{FILE_COUNT,plural, =1{File scaricato}other{# download completati}}</translation>
 <translation id="6508722015517270189">Riavvia Chrome</translation>
 <translation id="6518133107902771759">Verifica</translation>
@@ -1202,7 +1198,6 @@ Ad esempio, alcuni siti web potrebbero rispondere alla richiesta mostrando annun
 <translation id="6564820424018738527">Il tuo dispositivo Android potrebbe includere un'impostazione simile. Se la misurazione degli annunci è attiva in Chrome e sul tuo dispositivo Android, una società potrebbe essere in grado di misurare l'efficacia di un annuncio sui siti web che visiti e sulle app che utilizzi.</translation>
 <translation id="6565959834589222080">Viene utilizzata la rete Wi-Fi quando è disponibile</translation>
 <translation id="6569373978618239158">Vedrai storie di <ph name="SITE_NAME" /> quando aprirai una nuova scheda. I siti che segui vengono salvati nel tuo Account Google. Puoi gestirli nelle impostazioni di Discover.</translation>
-<translation id="6570116402456758630">Riepilogo pagina</translation>
 <translation id="657177046675873214">Per trovare i tuoi preferiti su tutti i dispositivi, attiva l'opzione "Preferiti" nelle impostazioni</translation>
 <translation id="6573096386450695060">Consenti sempre</translation>
 <translation id="6573431926118603307">Le schede aperte in Chrome sugli altri dispositivi verranno visualizzate qui.</translation>
@@ -1619,7 +1614,6 @@ Per modificare questa impostazione, <ph name="BEGIN_LINK" />elimina i dati di Ch
 <translation id="8282297628636750033">Applica il tema scuro ai siti, se possibile</translation>
 <translation id="8282950411412455249">Vai alle impostazioni di sicurezza</translation>
 <translation id="8306751933352925837">A breve le password non funzioneranno più su questo dispositivo. Per continuare a utilizzare le tue password, aggiorna Google Play Services. <ph name="BEGIN_LINK" />Scopri di più<ph name="END_LINK" /></translation>
-<translation id="8307517230426267469"><ph name="GIVEN_NAME" /> ha rimosso la scheda "<ph name="TAB_NAME" />"</translation>
 <translation id="8310451567823644042">A breve le password non funzioneranno più</translation>
 <translation id="831192587911042850">Consente di aggiungere il sito web corrente all'elenco di siti web che segui.</translation>
 <translation id="8320212361750431956">Attività recente</translation>

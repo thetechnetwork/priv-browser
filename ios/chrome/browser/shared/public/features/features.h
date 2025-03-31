@@ -1035,6 +1035,13 @@ bool IsIPHGestureRecognitionPanAblationEnabled();
 // Returns true if swipes during an IPH presentation should be ignored.
 bool IsIPHGestureRecognitionSwipeAblationEnabled();
 
+// Returns true if IPH gesture recognizers should set the `cancelsTouchesInView`
+// property to YES.
+bool ShouldCancelTouchesInViewForIPH();
+
+// Returns true if the IPH gesture recognition improvements are enabled.
+bool IsIPHGestureRecognitionImprovementEnabled();
+
 // Feature flag for enabling the non-modal sign-in promo.
 BASE_DECLARE_FEATURE(kNonModalSignInPromo);
 
@@ -1089,5 +1096,11 @@ BASE_DECLARE_FEATURE(kSignInButtonNoAvatar);
 
 // Returns whether the sign-in button without avatar is enabled.
 bool IsSignInButtonNoAvatarEnabled();
+
+// Feature flag to enable background customization on the NTP.
+BASE_DECLARE_FEATURE(kNTPBackgroundCustomization);
+
+// Checks if background customization is enabled on the NTP.
+bool IsNTPBackgroundCustomizationEnabled();
 
 #endif  // IOS_CHROME_BROWSER_SHARED_PUBLIC_FEATURES_FEATURES_H_

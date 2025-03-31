@@ -91,6 +91,7 @@ Her er noen ting du kan prøve til å begynne med.</translation>
 <translation id="1269405891096105529">Den eksterne enheten støttes ikke i Gjestemodus</translation>
 <translation id="1270290102613614947">Skjermtastaturet er deaktivert</translation>
 <translation id="1272079795634619415">Stopp</translation>
+<translation id="12741168609094094">Velg hva som helst på skjermen for å søke, kopiere tekst med mer</translation>
 <translation id="1275285675049378717">Gir strøm til <ph name="POWER_SOURCE" /></translation>
 <translation id="1275718070701477396">Valgt</translation>
 <translation id="1276975447697633661">Velg en fil og trykk på <ph name="KEY" /></translation>
@@ -149,6 +150,7 @@ Her er noen ting du kan prøve til å begynne med.</translation>
 <translation id="1455242230282523554">Vis språkinnstillinger</translation>
 <translation id="1459693405370120464">Vær</translation>
 <translation id="1460620680449458626">Lyden er dempet.</translation>
+<translation id="1462439140224375968">Opprettet et Google-dokument</translation>
 <translation id="14648076227129703">Dette gir <ph name="APP1_NAME" />, <ph name="APP2_NAME" /> og alle apper og nettsteder som har kameratillatelsen, tilgang til kameraet</translation>
 <translation id="1467432559032391204">Venstre</translation>
 <translation id="146902737843070955">Administratoren din har forespurt denne endringen</translation>
@@ -226,6 +228,7 @@ Her er noen ting du kan prøve til å begynne med.</translation>
 <translation id="1720230731642245863">Wifi-sonen er av</translation>
 <translation id="1731815243805539470">Bytt til forrige bruker</translation>
 <translation id="1733996486177697563">Bytt mellom mørkt og lyst tema. Trykk og hold på skrivebordet, og velg Bakgrunn og stil.</translation>
+<translation id="1735992454301033090">Du har valgt et område – bruk piltastene for å flytte det</translation>
 <translation id="1736898441010944794">«<ph name="NAME" />» er synlig for Bluetooth-enheter.</translation>
 <translation id="1737078180382804488">Lukk konfigurering av visning av varsler fra telefonen din</translation>
 <translation id="174102739345480129">Markøren er av.</translation>
@@ -493,6 +496,7 @@ Her er noen ting du kan prøve til å begynne med.</translation>
 <translation id="2683887737780133806"><ph name="DAY_OF_WEEK" /> forrige uke</translation>
 <translation id="2687510499067466116">Hurtigtasten er endret</translation>
 <translation id="2689613560355655046">Skrivebord 8</translation>
+<translation id="2692092709110488417">Trykk på Tab for å fokusere på og flytte det valgte området</translation>
 <translation id="2695305337569143674">nett</translation>
 <translation id="2697697418792422688">Vis tastaturinnstillinger. <ph name="KEYBOARD_NAME" /> er valgt.</translation>
 <translation id="2699913284398121653">Bruk Innholdsoverføring-appen til å flytte dataene fra skolekontoen til den personlige kontoen din</translation>
@@ -550,6 +554,7 @@ Ellers blir den innebygde styreflaten slått på igjen om <ph name="TIMEOUT_SECO
 <translation id="2872353916818027657">Bytt hovedskjerm</translation>
 <translation id="2872961005593481000">Slå av</translation>
 <translation id="2876338922445400217">Zoom inn på skjermen</translation>
+<translation id="2876760662374103627">Ansiktskontroll er på</translation>
 <translation id="2878884018241093801">Ingen nylige elementer</translation>
 <translation id="2880541185262491188">For mange PIN-kodeforsøk. Vent <ph name="TIME_LEFT" />, og prøv på nytt</translation>
 <translation id="2883271196820422439">Gjenoppta musetaster</translation>
@@ -593,6 +598,7 @@ Ellers blir den innebygde styreflaten slått på igjen om <ph name="TIMEOUT_SECO
 <translation id="301584155502740476">Vis detaljer for wifi-sonen. Wifi-sonen er av.</translation>
 <translation id="3017079585324758401">Bakgrunn</translation>
 <translation id="3018135054368884502">Spol medieinnhold fremover</translation>
+<translation id="3026897869154397692">Lagt til i kalenderen</translation>
 <translation id="3033545621352269033">På</translation>
 <translation id="3033912566804961911">Kombiner med <ph name="DESK_NAME" /></translation>
 <translation id="3036649622769666520">Åpne filer</translation>
@@ -726,6 +732,7 @@ Ellers blir den innebygde styreflaten slått på igjen om <ph name="TIMEOUT_SECO
 <translation id="346243998268439747">Tilbakestill zoomnivået</translation>
 <translation id="3465223694362104965">Et annet tastatur er koblet til denne enheten siden du sist logget på. Sørg for at du stoler på dette tastaturet før du bruker det.</translation>
 <translation id="3465356146291925647">Administreres av administratoren din</translation>
+<translation id="3470502288861289375">Kopierer ...</translation>
 <translation id="347117769229524881"><ph name="MODIFIER_ONE" /><ph name="MODIFIER_TWO" /><ph name="KEY_ONE" />, deretter <ph name="KEY_TWO" /> eller <ph name="KEY_THREE" /></translation>
 <translation id="3477079411857374384">Ctrl+Shift+Mellomrom</translation>
 <translation id="3485319357743610354"><ph name="SECURITY_STATUS" /> – <ph name="CONNECTION_STATUS" /> – signalstyrke <ph name="SIGNAL_STRENGTH" /></translation>
@@ -1012,6 +1019,7 @@ Noen funksjoner er begrenset for å forlenge batterilevetiden.</translation>
 <translation id="4351244548802238354">Lukk dialogboks</translation>
 <translation id="4356872429719185452">Vis detaljer for wifi-sonen. Wifi-sonen slås på.</translation>
 <translation id="4364101114148522660"><ph name="DURATION" /> – opptak</translation>
+<translation id="4368227575116094370">Opprett et Google-regneark</translation>
 <translation id="4371348193907997655">Cast-innstillinger</translation>
 <translation id="4371834685492830207">PIN-koden kan bare inneholde gyldige tegn</translation>
 <translation id="4375482231364171368">Søk i adressefeltet</translation>
@@ -1029,6 +1037,7 @@ Noen funksjoner er begrenset for å forlenge batterilevetiden.</translation>
 <translation id="4412698727486357573">Brukerstøtte</translation>
 <translation id="4412944820643904175"><ph name="FEATURE_NAME" /> er av.</translation>
 <translation id="4417647906073317561">Innstillinger for fokus. Start en nedtelling, velg en oppgave og sett på musikk for å komme inn i en god flyt.</translation>
+<translation id="4418600384772451109">Lukk panelet</translation>
 <translation id="4424159417645388645">Skrivebord 5</translation>
 <translation id="4426817706804363424">Supert!</translation>
 <translation id="4430019312045809116">Volum</translation>
@@ -1481,6 +1490,7 @@ Ingen enheter er tilkoblet.</translation>
 <translation id="5825969630400862129">Innstillinger for tilkoblede enheter</translation>
 <translation id="5830180081891717894"><ph name="WINDOWS" /> til</translation>
 <translation id="5837036133683224804">Stopp <ph name="ROUTE_TITLE" /> på <ph name="RECEIVER_NAME" /></translation>
+<translation id="5840658767386246331">Søk med Google</translation>
 <translation id="5841296711770970362">Gå til neste spor</translation>
 <translation id="5842553299352339114">Wifi-sonen på <ph name="DEVICE_NAME" /> er på – ingen enheter er tilkoblet</translation>
 <translation id="584525477304726060">Hold for å maksimere</translation>
@@ -1512,6 +1522,7 @@ Ingen enheter er tilkoblet.</translation>
 <translation id="595202126637698455">Ytelsessporing er aktivert</translation>
 <translation id="5955304353782037793">app</translation>
 <translation id="5958529069007801266">Administrert bruker</translation>
+<translation id="596035801491797438">Slå av ansiktskontroll</translation>
 <translation id="5960410286721553511">Se nylige bilder og medier fra telefonen din</translation>
 <translation id="5965524703725988602">Slå av/på mørkt tema. <ph name="STATE_TEXT" />.</translation>
 <translation id="5975235751479998104">Gå fremover gjennom vinduer</translation>
@@ -1894,6 +1905,7 @@ Nylig installert</translation>
 <translation id="7228968829656641943">Velg for å søke på skjermen. Trykk på Tab og deretter på mellomromstasten for å navigere med tastaturet.</translation>
 <translation id="7229029500464092426">Minne <ph name="AVAILABLE_MEMORY" /> | <ph name="TOTAL_MEMORY" /> totalt</translation>
 <translation id="7239814253344511868">Begge museknappene</translation>
+<translation id="7240636904654154599">Opprettet et Google-regneark</translation>
 <translation id="7244725679040769470"><ph name="PERCENTAGE" /> % batteri gjenstår. Koble enheten til strøm.</translation>
 <translation id="7246071203293827765"><ph name="UPDATE_TEXT" />. Chromebook må startes på nytt for å ta i bruk en oppdatering. Dette kan ta opptil ett minutt.</translation>
 <translation id="7256057185598509352">ExpressKey 2</translation>
@@ -2222,6 +2234,7 @@ For å slå av enheten, trykk og hold på av/på-knappen på enheten igjen.</tra
 <translation id="8287009018010202411">Produktivitet</translation>
 <translation id="828708037801473432">Av</translation>
 <translation id="8297006494302853456">Svakt</translation>
+<translation id="8300451473979404345">Du har valgt et håndtak – bruk piltastene for å flytte det</translation>
 <translation id="8308637677604853869">Forrige meny</translation>
 <translation id="830868413617744215">Beta</translation>
 <translation id="8314772463905284467">Caps Lock er på</translation>
@@ -2282,6 +2295,7 @@ For å slå av enheten, trykk og hold på av/på-knappen på enheten igjen.</tra
 <translation id="851458219935658693">Vis vinduer fra det gjeldende skrivebordet – alternativknappen er valgt</translation>
 <translation id="851660987304951246">Bruk Hjelp meg å lese for å lage sammendrag av innhold eller stille spørsmål raskt</translation>
 <translation id="8517041960877371778">Det kan hende at din <ph name="DEVICE_TYPE" /> ikke lader når den er slått på.</translation>
+<translation id="8519329096920173967">Søk på skjermen med Google Lens</translation>
 <translation id="8535393432370007982">Angre sortering etter farge</translation>
 <translation id="8536886494750559755">Vis innstillinger for Quick Share. Synlig for alle i <ph name="TIME_REMAINING" /></translation>
 <translation id="8539803091108018926">Teksten er kopiert til utklippstavlen</translation>
@@ -2404,6 +2418,7 @@ For å slå av enheten, trykk og hold på av/på-knappen på enheten igjen.</tra
 <translation id="8921624153894383499">Google-assistenten kan ikke dette språket.</translation>
 <translation id="8926951137623668982">Hyllen skjules alltid</translation>
 <translation id="8929566928381252430">Prøver du å bruke Caps Lock-tasten? Bruk</translation>
+<translation id="8929623844713377237">Opprettet kontakt</translation>
 <translation id="8934418770423095813">Opprett Google-dokument</translation>
 <translation id="8934926665751933910">{NUM_FILES,plural, =1{1 fil}other{# filer}}</translation>
 <translation id="8936501819958976551">deaktivert</translation>

@@ -11,6 +11,7 @@
 <translation id="102432830749687801">Google のコンテンツ移行アプリを使用して、アクセス権が失われる前に、学校用アカウントのデータを個人アカウントに移動してください。</translation>
 <translation id="1026212596705997935">ショートカットは「<ph name="CONFLICT_ACCEL_NAME" />」で使用しています。新しいショートカットを押してください。既存のショートカットを置き換えるには、このショートカットをもう一度押します。</translation>
 <translation id="1030856839388844477">データ使用量をリセット</translation>
+<translation id="1047095725494118091">ダウンロードできません。もう一度お試しになるか、<ph name="DEVICE_TYPE" /> を再起動してください。</translation>
 <translation id="1047458377670401304"><ph name="CPU_NAME" />（スレッド数 <ph name="THREAD_COUNT" />、<ph name="CPU_MAX_CLOCK_SPEED" /> GHz）</translation>
 <translation id="1047773237499189053">新しい機能があります。上矢印キーで詳細を確認できます。</translation>
 <translation id="1049663189809099096">パステル イエロー</translation>
@@ -26,6 +27,7 @@
 <translation id="1082009148392559545">スクリーン セーバーをダウンロードしています</translation>
 <translation id="1094693127011229778">IP アドレスを取得できません</translation>
 <translation id="1100902271996134409">画像を作成しています...</translation>
+<translation id="1107856713690040084"><ph name="DEVICE_TYPE" /> オーディオ</translation>
 <translation id="1116694919640316211">概要</translation>
 <translation id="1118572504348554005">Google は、バグやその他ご報告いただいた問題を解決するため、このフォームからお送りいただいたフィードバックをパートナーと共有する場合があります。パスワードなどの機密情報は含めないでください。</translation>
 <translation id="1119403468619527527">単語が少なすぎるため簡略化できません</translation>
@@ -292,6 +294,7 @@
 <translation id="2163937499206714165">ダークモードをオンにする</translation>
 <translation id="2164131940279488868">音声の録音を開始するには、マイクが接続されていることを確認してください</translation>
 <translation id="2173302385160625112">インターネット接続を確認してください</translation>
+<translation id="2176909213844392588"><ph name="LANGUAGE_NAME" /> の音声文字変換モデルをダウンロードできません。もう一度お試しになるか、<ph name="DEVICE_TYPE" /> を再起動してください。</translation>
 <translation id="2180197493692062006">エラーが発生しました。アプリをもう一度開いてください。</translation>
 <translation id="2189104374785738357">APN の詳細の編集</translation>
 <translation id="2195732836444333448">キャパシティに達しています。しばらくしてからもう一度お試しください。</translation>
@@ -480,6 +483,7 @@
 <translation id="3199982728237701504">ドキュメント フィーダー（両面）</translation>
 <translation id="3201315366910775591">共有アルバムは他のユーザーも更新できます</translation>
 <translation id="3211671540163313381">キーマッピングの D-pad</translation>
+<translation id="3217462202230355157">マイクが接続されていることを確認するか、<ph name="DEVICE_TYPE" /> を再起動してみてください</translation>
 <translation id="3226405216343213872">スキャナを検索しています</translation>
 <translation id="3226657629376379887">レイアウトの操作メニュー</translation>
 <translation id="3227186760713762082"><ph name="CATEGORY_TEXT" /> の値を <ph name="CONVERSION_RATE" /> で割る</translation>
@@ -515,6 +519,7 @@
 <translation id="3383623117265110236">限定</translation>
 <translation id="3404249063913988450">スクリーン セーバーを有効にする</translation>
 <translation id="3413935475507503304">更新を進めるには、[次へ] をクリックしてください。</translation>
+<translation id="3416709353545797224"><ph name="DEVICE_TYPE" /> の音声をすべて録音</translation>
 <translation id="3428551088151258685">アウトドア</translation>
 <translation id="3428971106895559033">パステル</translation>
 <translation id="3434107140712555581"><ph name="BATTERY_PERCENTAGE" />%</translation>
@@ -678,6 +683,7 @@
 <translation id="4155551848414053977">スキャナの電源がオンになっていて、ネットワーク経由または直接接続して使用できることを確認してください</translation>
 <translation id="4159238217853743776">一部</translation>
 <translation id="4159784952369912983">パープル</translation>
+<translation id="416219735020840807">音声文字変換モデルをダウンロードできません。もう一度お試しになるか、<ph name="DEVICE_TYPE" /> を再起動してください。</translation>
 <translation id="4170180284036919717">写真を撮る</translation>
 <translation id="4170700058716978431">失敗</translation>
 <translation id="4171077696775491955">明るさを下げる</translation>
@@ -698,6 +704,16 @@
 <translation id="4249717042534905822">日曜日</translation>
 <translation id="4250229828105606438">スクリーンショット</translation>
 <translation id="4251839292699800785">洗練されたオフィス</translation>
+<translation id="4252261480746798874">[独自に作成] を選択すると、カスタムのプロンプトを入力できます。[テーマを選択] を選択した後、下線が引かれた単語を選択して AI 壁紙をカスタマイズすることもできます。
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          [ひらめきがほしい] を選択すると、より個性的で多様な AI 画像オプションが表示されます。
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          独自の壁紙を作成すると、<ph name="BEGIN_LINK_GOOGLE_PRIVACY_POLICY" />Google の利用規約とプライバシー ポリシー<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" />に沿ってプロンプトが Google サーバーに送信され、画像の生成とサービスの改善に使用されます。個人情報や機密情報は含めないでください。
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          生成 AI は間違った画像（人物に関する画像など）を生成することがあるため、生成された画像は再確認するようにしてください。<ph name="BEGIN_LINK_CREATE_YOUR_OWN_WALLPAPER" />詳細<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" /></translation>
 <translation id="4258281355379922695">HTTP レイテンシ</translation>
 <translation id="4266143281602681663">毛糸</translation>
 <translation id="4269815121975886860">起動時の設定</translation>
@@ -775,7 +791,6 @@
 <translation id="4593212453765072419">プロキシ認証が必要です</translation>
 <translation id="4594021849294327751">文字起こしを行う</translation>
 <translation id="4594541568452132351">文字起こしの言語を選択してモデルをダウンロード</translation>
-<translation id="4607282946861182308">この画像を作成できません。別のプロンプトをお試しください。</translation>
 <translation id="4609350030397390689">キーボードの明るさを下げる</translation>
 <translation id="4627232916386272576"><ph name="DOCUMENT_TITLE" />、<ph name="PRINTER_NAME" />、<ph name="CREATION_TIME" />、<ph name="PRINTED_PAGE_NUMBER" />/<ph name="TOTAL_PAGE_NUMBER" />。印刷ジョブをキャンセルするには、Enter キーを押します。</translation>
 <translation id="463791356324567266">スキャンをキャンセルしています...</translation>
@@ -942,6 +957,7 @@
 <translation id="5344619683981067131">選択したテキストを候補に置き換えています</translation>
 <translation id="5346687412805619883">ローカル ネットワーク</translation>
 <translation id="5358174242040570474">エラーが発生しました。壁紙を選択しなおすか、アプリをもう一度開いてみてください。</translation>
+<translation id="5368228070728130240">要約とタイトル作成のモデルをダウンロードできません。もう一度お試しになるか、<ph name="DEVICE_TYPE" /> を再起動してください。</translation>
 <translation id="5372659122375744710">Wi-Fi ネットワークが保護されていません</translation>
 <translation id="5376354385557966694">ライトモードを自動的に設定する</translation>
 <translation id="5378184552853359930">IP タイプ</translation>
@@ -1247,6 +1263,7 @@
 <translation id="6766275201586212568">DNS 解決に失敗しました</translation>
 <translation id="6768237774506518020">DNS 解決の失敗率が高くなっています</translation>
 <translation id="6786747875388722282">拡張機能</translation>
+<translation id="6789891265243243337"><ph name="DEVICE_TYPE" /> オーディオがオンの場合、レコーダーはこのデバイスで再生されるすべての音声を録音します</translation>
 <translation id="6791471867139427246">キーボード ライトの色</translation>
 <translation id="6796229976413584781">ショートカットを削除しました</translation>
 <translation id="6798678288485555829">テキスト内の移動</translation>
@@ -1522,6 +1539,7 @@
 <translation id="8010765388850538088">生成 AI の詳細</translation>
 <translation id="8017679124341497925">ショートカットを編集しました</translation>
 <translation id="802154636333426148">ダウンロード エラー</translation>
+<translation id="8027467664787098346">選択した壁紙について</translation>
 <translation id="8028993641010258682">サイズ</translation>
 <translation id="8031884997696620457">HSPAPlus</translation>
 <translation id="80398733265834479">自動カラー モードを有効にする</translation>
@@ -1640,6 +1658,7 @@
 <translation id="8543574988889671960">タブを再読み込み</translation>
 <translation id="8550364285433943656">キーボードのキーでプレイするにはゲーム操作のコントロールを設定します</translation>
 <translation id="8557447961879934694">WPA2</translation>
+<translation id="8558521694042102707">生成 AI は間違った情報（人物に関する情報など）を表示することがあるため、生成された回答は再確認するようにしてください。</translation>
 <translation id="8575298406870537639">ご利用の携帯通信会社でのネットワーク接続にこのオプションが必要な場合があります。詳しくは携帯通信会社にお問い合わせください。</translation>
 <translation id="8576249514688522074">初期化が未完了</translation>
 <translation id="8584654835905316966"><ph name="DEVICE_NAME" /> でバージョン <ph name="VERSION" /> へのファームウェアのインストールを完了するには、再起動が必要です。その際、コンピュータに再起動の画面が複数回表示されることがありますが、これは正常な動作です。</translation>
@@ -1654,7 +1673,6 @@
 <translation id="8655295600908251630">チャンネル</translation>
 <translation id="8655828773034788261">URL を共有:</translation>
 <translation id="8660881923941176839">ポンド</translation>
-<translation id="8670057600920888023">生成 AI は試験運用中のため、不正確または不適切な内容や、誤解を招く内容が出力される可能性があります。</translation>
 <translation id="8670574982334489519">右</translation>
 <translation id="8675354002693747642">事前共有キー</translation>
 <translation id="8677859815076891398">アルバムはありません。<ph name="LINK_BEGIN" />Google フォト<ph name="LINK_END" />でアルバムを作成してください。</translation>
@@ -1718,6 +1736,7 @@
 <translation id="8930622219860340959">ワイヤレス</translation>
 <translation id="8933650076320258356"><ph name="DIRECTION" /> に選択したキーは <ph name="KEYS" /> です。<ph name="REASSIGN_INSTRUCTION" /></translation>
 <translation id="8936793075252196307">クライアント IP アドレス</translation>
+<translation id="8938606491880817721">ダウンロードできません。もう一度お試しになるか、<ph name="DEVICE_TYPE" /> を再起動してください。</translation>
 <translation id="8944651180182756621">ランチャーの色</translation>
 <translation id="8945308580158685341">ハチ</translation>
 <translation id="894617464444543719">デバイスの種類はスマートフォンです。</translation>

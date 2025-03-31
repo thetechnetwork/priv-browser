@@ -6,6 +6,7 @@
 #define COMPONENTS_VISITED_URL_RANKING_INTERNAL_URL_GROUPING_TAB_EVENT_TRACKER_IMPL_H_
 
 #include "base/functional/callback_forward.h"
+#include "base/time/time.h"
 #include "components/visited_url_ranking/public/url_grouping/tab_event_tracker.h"
 
 namespace visited_url_ranking {
@@ -26,15 +27,30 @@ class TabEventTrackerImpl : public TabEventTracker {
   void DidSelectTab(int tab_id,
                     TabSelectionType tab_selection_type,
                     int last_tab_id) override;
+  void WillCloseTab(int tab_id) override;
+  void TabClosureUndone(int tab_id) override;
+  void TabClosureCommitted(int tab_id) override;
   void DidMoveTab(int tab_id, int new_index, int current_index) override;
+  void OnPageLoadFinished(int tab_id) override;
   void DidEnterTabSwitcher() override;
 
   int GetSelectedCount(int tab_id) const;
 
  private:
-  OnNewEventCallback on_new_event_callback_;
+  struct TabSelection {
+    TabSelection(int tab_id,
+                 TabSelectionType tab_selection_type,
+                 base::Time time);
+    ~TabSelection();
 
-  std::map<int, int> tab_id_to_selected_count_;
+    int tab_id;
+    TabSelectionType tab_selection_type;
+    base::Time time;
+  };
+
+  std::map<int, std::vector<TabSelection>> tab_id_selection_map_;
+  std::set<int> closing_tabs_;
+  OnNewEventCallback on_new_event_callback_;
 };
 
 }  // namespace visited_url_ranking

@@ -9,6 +9,7 @@
 
 #include "base/feature_list.h"
 #include "base/metrics/field_trial_params.h"
+#include "chrome/common/chrome_features.h"
 
 namespace chrome {
 namespace android {
@@ -141,6 +142,7 @@ BASE_DECLARE_FEATURE(kMultiInstanceApplicationStatusCleanup);
 BASE_DECLARE_FEATURE(kNativePageTransitionHardwareCapture);
 BASE_DECLARE_FEATURE(kNavBarColorAnimation);
 BASE_DECLARE_FEATURE(kNavBarColorMatchesTabBackground);
+BASE_DECLARE_FEATURE(kNavigationCaptureRefactorAndroid);
 BASE_DECLARE_FEATURE(kNewTabSearchEngineUrlAndroid);
 BASE_DECLARE_FEATURE(kNewTabPageAndroidTriggerForPrerender2);
 BASE_DECLARE_FEATURE(kNotificationPermissionVariant);
@@ -169,11 +171,11 @@ BASE_DECLARE_FEATURE(kReadAloudPlayback);
 BASE_DECLARE_FEATURE(kReadAloudTapToSeek);
 BASE_DECLARE_FEATURE(kReadAloudServerExperiments);
 BASE_DECLARE_FEATURE(kReadAloudIPHMenuButtonHighlightCCT);
-BASE_DECLARE_FEATURE(kRedirectExplicitCTAIntentsToExistingActivity);
 BASE_DECLARE_FEATURE(kReengagementNotification);
 BASE_DECLARE_FEATURE(kRecordSuppressionMetrics);
 BASE_DECLARE_FEATURE(kRelatedSearchesAllLanguage);
 BASE_DECLARE_FEATURE(kRelatedSearchesSwitch);
+BASE_DECLARE_FEATURE(kRemoveTabFocusOnShowingAndSelect);
 BASE_DECLARE_FEATURE(kReportParentalControlSitesChild);
 BASE_DECLARE_FEATURE(kRightEdgeGoesForwardGestureNav);
 BASE_DECLARE_FEATURE(kSearchInCCT);
@@ -185,8 +187,8 @@ BASE_DECLARE_FEATURE(kSharingHubLinkToggle);
 BASE_DECLARE_FEATURE(kSkipIsolatedSplitPreload);
 BASE_DECLARE_FEATURE(kSmallerTabStripTitleLimit);
 BASE_DECLARE_FEATURE(kScrollToTLDOptimization);
-BASE_DECLARE_FEATURE(kSuppressToolbarCaptures);
 BASE_DECLARE_FEATURE(kSuppressToolbarCapturesAtGestureEnd);
+BASE_DECLARE_FEATURE(kTabGroupEntryPointsAndroid);
 BASE_DECLARE_FEATURE(kTabGroupParityBottomSheetAndroid);
 BASE_DECLARE_FEATURE(kToolbarPhoneCleanup);
 BASE_DECLARE_FEATURE(kTabStateFlatBuffer);
@@ -199,7 +201,6 @@ BASE_DECLARE_FEATURE(kTabStripLayoutOptimization);
 BASE_DECLARE_FEATURE(kTabClosureMethodRefactor);
 BASE_DECLARE_FEATURE(kTabStripTransitionInDesktopWindow);
 BASE_DECLARE_FEATURE(kTabSwitcherColorBlendAnimate);
-BASE_DECLARE_FEATURE(kTabSwitcherContextMenuAndroid);
 BASE_DECLARE_FEATURE(kTabSwitcherForeignFaviconSupport);
 BASE_DECLARE_FEATURE(kTabWindowManagerReportIndicesMismatch);
 BASE_DECLARE_FEATURE(kHideTabletToolbarDownloadButton);

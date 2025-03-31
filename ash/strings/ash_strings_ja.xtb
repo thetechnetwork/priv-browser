@@ -91,6 +91,7 @@
 <translation id="1269405891096105529">ゲストモードでは周辺機器を使用できません</translation>
 <translation id="1270290102613614947">画面キーボードは無効です</translation>
 <translation id="1272079795634619415">停止</translation>
+<translation id="12741168609094094">画面上で選択して、検索、テキストのコピーなどを行います</translation>
 <translation id="1275285675049378717"><ph name="POWER_SOURCE" />を充電中</translation>
 <translation id="1275718070701477396">選択中</translation>
 <translation id="1276975447697633661">ファイルを選択して <ph name="KEY" /> キーを押す</translation>
@@ -227,6 +228,7 @@
 <translation id="1720230731642245863">アクセス ポイントはオフです</translation>
 <translation id="1731815243805539470">前のユーザーに切り替えます</translation>
 <translation id="1733996486177697563">ダークモードとライトモードを切り替えます。デスクトップを長押しして、[壁紙とスタイル] を選択します。</translation>
+<translation id="1735992454301033090">選択した領域、矢印キーを使用して移動します</translation>
 <translation id="1736898441010944794">Bluetooth デバイスに「<ph name="NAME" />」が表示されます。</translation>
 <translation id="1737078180382804488">スマートフォンの通知の表示の設定を行わない</translation>
 <translation id="174102739345480129">マーカーはオフになっています。</translation>
@@ -494,6 +496,7 @@
 <translation id="2683887737780133806">先週の <ph name="DAY_OF_WEEK" /></translation>
 <translation id="2687510499067466116">キーボード ショートカットが変更されました</translation>
 <translation id="2689613560355655046">デスク 8</translation>
+<translation id="2692092709110488417">Tab キーを押して、選択した領域にフォーカスおよび移動します</translation>
 <translation id="2695305337569143674">ウェブ</translation>
 <translation id="2697697418792422688">キーボード設定を表示します。<ph name="KEYBOARD_NAME" /> が選択されています。</translation>
 <translation id="2699913284398121653">コンテンツ移行アプリを使用して、学校用アカウントのデータを個人アカウントに移動してください</translation>
@@ -551,6 +554,7 @@
 <translation id="2872353916818027657">メイン モニターを入れ替える</translation>
 <translation id="2872961005593481000">終了</translation>
 <translation id="2876338922445400217">画面を拡大する</translation>
+<translation id="2876760662374103627">フェイスナビが有効になっています</translation>
 <translation id="2878884018241093801">最近使用されたアイテムはありません</translation>
 <translation id="2880541185262491188">PIN の試行回数が上限を超えました。<ph name="TIME_LEFT" /> ほど待ってから、もう一度お試しください</translation>
 <translation id="2883271196820422439">マウスキーを再開</translation>
@@ -728,6 +732,7 @@
 <translation id="346243998268439747">拡大縮小をリセットする</translation>
 <translation id="3465223694362104965">前回のログイン後に、別のキーボードがこのデバイスに接続されました。このキーボードを使用する前に信頼できるものかどうか確認してください。</translation>
 <translation id="3465356146291925647">管理者によって管理</translation>
+<translation id="3470502288861289375">コピーしています...</translation>
 <translation id="347117769229524881"><ph name="MODIFIER_ONE" />+<ph name="MODIFIER_TWO" />+<ph name="KEY_ONE" /> キーを押してから、<ph name="KEY_TWO" /> または <ph name="KEY_THREE" /> キーを押す</translation>
 <translation id="3477079411857374384">Control+Shift+Space</translation>
 <translation id="3485319357743610354"><ph name="SECURITY_STATUS" />、<ph name="CONNECTION_STATUS" />、信号強度 <ph name="SIGNAL_STRENGTH" /></translation>
@@ -1014,6 +1019,7 @@
 <translation id="4351244548802238354">ダイアログを閉じる</translation>
 <translation id="4356872429719185452">アクセス ポイントの詳細を表示します。アクセス ポイントはオンです。</translation>
 <translation id="4364101114148522660"><ph name="DURATION" /> 録画中</translation>
+<translation id="4368227575116094370">Google スプレッドシートを作成</translation>
 <translation id="4371348193907997655">キャスト設定</translation>
 <translation id="4371834685492830207">PIN には有効な文字のみを使用してください</translation>
 <translation id="4375482231364171368">アドレスバーで検索する</translation>
@@ -1031,6 +1037,7 @@
 <translation id="4412698727486357573">ヘルプセンター</translation>
 <translation id="4412944820643904175"><ph name="FEATURE_NAME" /> はオフになっています。</translation>
 <translation id="4417647906073317561">フォーカス モードの設定。タイマー、タスク、音楽を設定して、作業に集中できます。</translation>
+<translation id="4418600384772451109">パネルを閉じる</translation>
 <translation id="4424159417645388645">デスク 5</translation>
 <translation id="4426817706804363424">その調子です！</translation>
 <translation id="4430019312045809116">音量</translation>
@@ -1483,6 +1490,7 @@
 <translation id="5825969630400862129">接続済みデバイスの設定</translation>
 <translation id="5830180081891717894">他 <ph name="WINDOWS" /> 件</translation>
 <translation id="5837036133683224804"><ph name="RECEIVER_NAME" /> の「<ph name="ROUTE_TITLE" />」を停止します</translation>
+<translation id="5840658767386246331">Google で検索</translation>
 <translation id="5841296711770970362">次のトラックに移動する</translation>
 <translation id="5842553299352339114"><ph name="DEVICE_NAME" /> のアクセス ポイントはオンです。デバイスが接続されていません</translation>
 <translation id="584525477304726060">長押しして最大化</translation>
@@ -1514,6 +1522,7 @@
 <translation id="595202126637698455">パフォーマンス追跡機能が有効です</translation>
 <translation id="5955304353782037793">アプリ</translation>
 <translation id="5958529069007801266">監視対象ユーザー</translation>
+<translation id="596035801491797438">フェイスナビをオフにする</translation>
 <translation id="5960410286721553511">スマートフォンの最近の写真やメディアを表示します</translation>
 <translation id="5965524703725988602">ダークモードのオンとオフを切り替えます。<ph name="STATE_TEXT" />。</translation>
 <translation id="5975235751479998104">ウィンドウ間を順方向に移動する</translation>
@@ -2226,6 +2235,7 @@
 <translation id="8287009018010202411">仕事効率化</translation>
 <translation id="828708037801473432">オフ</translation>
 <translation id="8297006494302853456">弱い</translation>
+<translation id="8300451473979404345">選択したハンドル、矢印キーを使用して移動します</translation>
 <translation id="8308637677604853869">前のメニュー</translation>
 <translation id="830868413617744215">Beta</translation>
 <translation id="8314772463905284467">Caps Lock がオンになっています</translation>
@@ -2286,6 +2296,7 @@
 <translation id="851458219935658693">現在のデスクのウィンドウを表示する、ラジオボタンが選択されています</translation>
 <translation id="851660987304951246">文書読解サポート機能を使って、コンテンツをすばやく要約したり、質問したりできます</translation>
 <translation id="8517041960877371778"><ph name="DEVICE_TYPE" /> は電源がオンのままでは充電できない可能性があります。</translation>
+<translation id="8519329096920173967">Google レンズで画面を検索</translation>
 <translation id="8535393432370007982">色による並べ替えを元に戻す</translation>
 <translation id="8536886494750559755">Quick Share の設定を表示します。<ph name="TIME_REMAINING" />間すべてのユーザーに公開</translation>
 <translation id="8539803091108018926">テキストをクリップボードにコピーしました</translation>

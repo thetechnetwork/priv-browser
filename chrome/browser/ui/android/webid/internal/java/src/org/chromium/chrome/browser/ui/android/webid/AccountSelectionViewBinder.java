@@ -162,7 +162,7 @@ class AccountSelectionViewBinder {
                             /* cornerRadiusDp= */ avatarSize / 2,
                             /* backgroundColor= */ Color.GRAY,
                             avatarMonogramTextSize);
-            avatar = roundedIconGenerator.generateIconForText(avatarData.mName);
+            avatar = roundedIconGenerator.generateIconForText(avatarData.mDisplayName);
         }
         Drawable croppedAvatar = AvatarGenerator.makeRoundAvatar(resources, avatar, avatarSize);
         avatarView.setImageDrawable(croppedAvatar);
@@ -200,13 +200,16 @@ class AccountSelectionViewBinder {
             // Name is not shown in the account chip of the request permission dialog. The name is
             // shown in the Continue button instead.
             if (title != null) {
-                title.setText(account.isFilteredOut() ? account.getEmail() : account.getName());
+                title.setText(
+                        account.isFilteredOut()
+                                ? account.getDisplayIdentifier()
+                                : account.getDisplayName());
             }
             TextView description = view.findViewById(R.id.description);
             description.setText(
                     account.isFilteredOut()
                             ? view.getContext().getString(R.string.filtered_account_message)
-                            : account.getEmail());
+                            : account.getDisplayIdentifier());
             TextView secondaryDescription = view.findViewById(R.id.secondary_description);
             // The secondary description is not shown in the account chip of active mode's
             // request permission dialog. In this case, the view is not present.
@@ -657,7 +660,7 @@ class AccountSelectionViewBinder {
                                     context.getString(R.string.account_selection_continue),
                                     givenName);
                 }
-                button.setContentDescription(btnText + ", " + account.getEmail());
+                button.setContentDescription(btnText + ", " + account.getDisplayIdentifier());
             }
 
             assert btnText != null;
@@ -684,6 +687,12 @@ class AccountSelectionViewBinder {
             if (itemView == null) return;
             itemView.setVisibility(
                     model.get(ItemProperties.SPINNER_ENABLED) ? View.VISIBLE : View.GONE);
+            return;
+        }
+        if (key == ItemProperties.DRAGBAR_HANDLE_VISIBLE) {
+            itemView = view.findViewById(R.id.drag_handlebar);
+            itemView.setVisibility(
+                    model.get(ItemProperties.DRAGBAR_HANDLE_VISIBLE) ? View.VISIBLE : View.GONE);
             return;
         }
         PropertyModel itemModel = model.get((WritableObjectPropertyKey<PropertyModel>) key);
@@ -832,29 +841,33 @@ class AccountSelectionViewBinder {
                 view.findViewById(R.id.header_divider)
                         .setVisibility(!progressBarVisible ? View.VISIBLE : View.GONE);
             }
-            if (key == HeaderProperties.IS_MULTIPLE_IDPS) {
-                // Do not reserve space for IDP icon if there are multiple IDPs.
-                ImageView headerIconView = (ImageView) view.findViewById(R.id.header_idp_icon);
-                if (model.get(HeaderProperties.IS_MULTIPLE_IDPS)) {
-                    headerIconView.setVisibility(View.GONE);
-                }
+        } else if (key == HeaderProperties.HEADER_ICON) {
+            Bitmap brandIcon = model.get(HeaderProperties.HEADER_ICON);
+            // Do not crop the header icon when it is the RP icon, e.g. when there are multiple IDPs
+            // in the current dialog.
+            boolean shouldCircleCrop = !model.get(HeaderProperties.IS_MULTIPLE_IDPS);
+            if (brandIcon == null) {
+                return;
             }
-        } else if (key == HeaderProperties.IDP_BRAND_ICON) {
-            // There should not be an IDP icon when multi IDPs are used.
-            if (model.get(HeaderProperties.IS_MULTIPLE_IDPS)) return;
-            Bitmap brandIcon = model.get(HeaderProperties.IDP_BRAND_ICON);
-            if (brandIcon != null) {
-                int iconSize =
-                        resources.getDimensionPixelSize(
-                                model.get(HeaderProperties.RP_MODE) == RpMode.ACTIVE
-                                        ? R.dimen.account_selection_active_mode_sheet_icon_size
-                                        : R.dimen.account_selection_sheet_icon_size);
+            int iconSize =
+                    resources.getDimensionPixelSize(
+                            model.get(HeaderProperties.RP_MODE) == RpMode.ACTIVE
+                                    ? R.dimen.account_selection_active_mode_sheet_icon_size
+                                    : R.dimen.account_selection_sheet_icon_size);
+            ImageView headerIconView = (ImageView) view.findViewById(R.id.header_icon);
+            if (shouldCircleCrop) {
                 Drawable croppedBrandIcon =
                         createBitmapWithMaskableIconSafeZone(resources, brandIcon, iconSize);
-                ImageView headerIconView = (ImageView) view.findViewById(R.id.header_idp_icon);
                 headerIconView.setImageDrawable(croppedBrandIcon);
-                headerIconView.setVisibility(View.VISIBLE);
+            } else {
+                Bitmap output = Bitmap.createBitmap(iconSize, iconSize, Config.ARGB_8888);
+                Canvas canvas = new Canvas(output);
+                Paint paint = new Paint();
+                paint.setAntiAlias(true);
+                canvas.drawBitmap(brandIcon, null, new Rect(0, 0, iconSize, iconSize), paint);
+                headerIconView.setImageDrawable(new BitmapDrawable(resources, output));
             }
+            headerIconView.setVisibility(View.VISIBLE);
         } else if (key == HeaderProperties.RP_BRAND_ICON) {
             // RP icon is not shown in passive mode.
             if (model.get(HeaderProperties.RP_MODE) == RpMode.PASSIVE) return;
@@ -872,7 +885,7 @@ class AccountSelectionViewBinder {
             }
             boolean isRpIconVisible =
                     brandIcon != null
-                            && model.get(HeaderProperties.IDP_BRAND_ICON) != null
+                            && model.get(HeaderProperties.HEADER_ICON) != null
                             && model.get(HeaderProperties.TYPE)
                                     == HeaderProperties.HeaderType.REQUEST_PERMISSION_MODAL;
             headerIconView.setVisibility(isRpIconVisible ? View.VISIBLE : View.GONE);

@@ -65,6 +65,7 @@
 #include "gpu/config/gpu_finch_features.h"
 #include "media/media_buildflags.h"
 #include "net/base/features.h"
+#include "services/tracing/public/cpp/perfetto/track_name_recorder.h"
 #include "third_party/blink/public/common/features.h"
 #include "third_party/blink/public/common/switches.h"
 #include "tools/v8_context_snapshot/buildflags.h"
@@ -209,11 +210,6 @@ std::optional<int> AwMainDelegate::BasicStartupComplete() {
 
     // Enabled by default for webview.
     features.EnableIfNotSet(::features::kWebViewThreadSafeMediaDefault);
-
-    // WebView uses kWebViewFrameRateHints to control this. Not using
-    // AwFieldTrials::RegisterFeatureOverrides to avoid misconfiguring
-    // experimients accidentally enabling kUseFrameIntervalDecider for WebView.
-    features.DisableIfNotSet(::features::kUseFrameIntervalDecider);
   }
 
   android_webview::RegisterPathProvider();
@@ -224,7 +220,7 @@ std::optional<int> AwMainDelegate::BasicStartupComplete() {
       base::BindRepeating(&IsTraceEventArgsAllowlisted));
   base::trace_event::TraceLog::GetInstance()->SetMetadataFilterPredicate(
       base::BindRepeating(&IsTraceMetadataAllowlisted));
-  base::trace_event::TraceLog::GetInstance()->SetRecordHostAppPackageName(true);
+  tracing::TrackNameRecorder::GetInstance()->SetRecordHostAppPackageName(true);
 
   // The TLS slot used by the memlog allocator shim needs to be initialized
   // early to ensure that it gets assigned a low slot number. If it gets

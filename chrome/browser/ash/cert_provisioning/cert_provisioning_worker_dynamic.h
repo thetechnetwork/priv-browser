@@ -75,8 +75,7 @@ class CertProvisioningWorkerDynamic : public CertProvisioningWorker {
                                 chromeos::platform_keys::Status status);
 
   void GenerateKeyForVa();
-  void OnGenerateKeyForVaDone(base::TimeTicks start_time,
-                              const attestation::TpmChallengeKeyResult& result);
+  void OnGenerateKeyForVaDone(const attestation::TpmChallengeKeyResult& result);
 
   void Start();
   void OnStartResponse(
@@ -98,7 +97,6 @@ class CertProvisioningWorkerDynamic : public CertProvisioningWorker {
 
   void BuildVaChallengeResponse();
   void OnBuildVaChallengeResponseDone(
-      base::TimeTicks start_time,
       const attestation::TpmChallengeKeyResult& result);
 
   void RegisterKey();
@@ -117,8 +115,7 @@ class CertProvisioningWorkerDynamic : public CertProvisioningWorker {
       base::expected<void, CertProvisioningClient::Error> response);
 
   void BuildProofOfPossession();
-  void OnBuildProofOfPossessionDone(base::TimeTicks start_time,
-                                    std::vector<uint8_t> signature,
+  void OnBuildProofOfPossessionDone(std::vector<uint8_t> signature,
                                     chromeos::platform_keys::Status status);
 
   void UploadProofOfPossession();
@@ -134,11 +131,14 @@ class CertProvisioningWorkerDynamic : public CertProvisioningWorker {
   // require an invalidation to continue.
   void ScheduleNextStep(base::TimeDelta delay,
                         bool try_provisioning_on_timeout);
+  // Same as ScheduleNextStep, but also calls `state_change_callback` given
+  // in the constructor.
+  void ScheduleNextStepAndNotifyStateChange(base::TimeDelta delay,
+                                            bool try_provisioning_on_timeout);
   void CancelScheduledTasks();
 
   enum class ContinueReason {
     kTimeout,
-    kSubscribedToInvalidation,
     kInvalidationReceived
   };
   void OnShouldContinue(ContinueReason reason);

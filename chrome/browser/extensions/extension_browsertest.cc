@@ -203,9 +203,9 @@ void ExtensionBrowserTest::SetUpOnMainThread() {
           ? std::make_unique<ChromeExtensionTestNotificationObserver>(browser())
           : std::make_unique<ChromeExtensionTestNotificationObserver>(
                 profile());
-  if (extension_service()->updater()) {
-    extension_service()->updater()->SetExtensionCacheForTesting(
-        test_extension_cache_.get());
+  ExtensionUpdater* updater = ExtensionUpdater::Get(profile());
+  if (updater->enabled()) {
+    updater->SetExtensionCacheForTesting(test_extension_cache_.get());
   }
 
   content::URLDataSource::Add(profile(),
@@ -267,12 +267,6 @@ const Extension* ExtensionBrowserTest::LoadExtension(
   }
 
   return extension.get();
-}
-
-void ExtensionBrowserTest::DisableExtension(
-    const ExtensionId& extension_id,
-    const DisableReasonSet& disable_reasons) {
-  extension_service()->DisableExtension(extension_id, disable_reasons);
 }
 
 const Extension* ExtensionBrowserTest::LoadExtensionAsComponentWithManifest(
@@ -528,29 +522,6 @@ void ExtensionBrowserTest::ReloadExtension(
 
   // Wait for any additionally-registered extension views to load.
   observer_->WaitForExtensionViewsToLoad();
-}
-
-void ExtensionBrowserTest::UnloadExtension(
-    const extensions::ExtensionId& extension_id) {
-  extension_service()->UnloadExtension(extension_id,
-                                       UnloadedExtensionReason::DISABLE);
-}
-
-void ExtensionBrowserTest::UninstallExtension(
-    const extensions::ExtensionId& extension_id) {
-  extension_service()->UninstallExtension(
-      extension_id, UNINSTALL_REASON_FOR_TESTING, nullptr);
-}
-
-void ExtensionBrowserTest::DisableExtension(
-    const extensions::ExtensionId& extension_id) {
-  extension_service()->DisableExtension(extension_id,
-                                        disable_reason::DISABLE_USER_ACTION);
-}
-
-void ExtensionBrowserTest::EnableExtension(
-    const extensions::ExtensionId& extension_id) {
-  extension_service()->EnableExtension(extension_id);
 }
 
 bool ExtensionBrowserTest::WaitForPageActionVisibilityChangeTo(int count) {

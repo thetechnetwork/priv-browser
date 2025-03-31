@@ -771,22 +771,25 @@ void AXPlatformNodeWin::NotifyAccessibilityEvent(ax::mojom::Event event_type) {
     }
   }
 
-  if (std::optional<PROPERTYID> uia_property =
-          MojoEventToUIAProperty(event_type);
-      uia_property.has_value() && HasEventListenerForProperty(*uia_property)) {
-    // For this event, we're not concerned with the old value.
-    base::win::ScopedVariant old_value;
-    ::VariantInit(old_value.Receive());
-    base::win::ScopedVariant new_value;
-    ::VariantInit(new_value.Receive());
-    GetPropertyValueImpl(*uia_property, new_value.Receive());
-    ::UiaRaiseAutomationPropertyChangedEvent(this, *uia_property, old_value,
-                                             new_value);
-  }
+  if (AXPlatform::GetInstance().IsUiaProviderEnabled()) {
+    if (std::optional<PROPERTYID> uia_property =
+            MojoEventToUIAProperty(event_type);
+        uia_property.has_value() &&
+        HasEventListenerForProperty(*uia_property)) {
+      // For this event, we're not concerned with the old value.
+      base::win::ScopedVariant old_value;
+      ::VariantInit(old_value.Receive());
+      base::win::ScopedVariant new_value;
+      ::VariantInit(new_value.Receive());
+      GetPropertyValueImpl(*uia_property, new_value.Receive());
+      ::UiaRaiseAutomationPropertyChangedEvent(this, *uia_property, old_value,
+                                               new_value);
+    }
 
-  if (std::optional<EVENTID> uia_event = MojoEventToUIAEvent(event_type);
-      uia_event.has_value() && HasEventListenerForEvent(*uia_event)) {
-    ::UiaRaiseAutomationEvent(this, *uia_event);
+    if (std::optional<EVENTID> uia_event = MojoEventToUIAEvent(event_type);
+        uia_event.has_value() && HasEventListenerForEvent(*uia_event)) {
+      ::UiaRaiseAutomationEvent(this, *uia_event);
+    }
   }
 
   // Keep track of objects that are a target of an alert event.
@@ -811,13 +814,11 @@ void AXPlatformNodeWin::OnActiveComposition(
   // AXPlatformNodeTextProviderWin
   active_composition_range_ = range;
   // Fire the UiaTextEditTextChangedEvent
-  FireUiaTextEditTextChangedEvent(range,
-                                  base::UTF16ToWide(active_composition_text),
+  FireUiaTextEditTextChangedEvent(base::UTF16ToWide(active_composition_text),
                                   is_composition_committed);
 }
 
 void AXPlatformNodeWin::FireUiaTextEditTextChangedEvent(
-    const gfx::Range& range,
     const std::wstring& active_composition_text,
     bool is_composition_committed) {
   if (!AXPlatform::GetInstance().IsUiaProviderEnabled() ||
@@ -825,8 +826,9 @@ void AXPlatformNodeWin::FireUiaTextEditTextChangedEvent(
     return;
   }
 
-  // This API is only supported from Win8.1 onwards
-  // Check if the function pointer is valid or not
+  // This API is documented as being supported from Win 8.1 onwards. Other UIA
+  // APIs have been found to be missing in early versions of Win 10, so check
+  // for the function and return early if it is not found.
   using UiaRaiseTextEditTextChangedEventFunction = HRESULT(WINAPI*)(
       IRawElementProviderSimple*, TextEditChangeType, SAFEARRAY*);
   UiaRaiseTextEditTextChangedEventFunction text_edit_text_changed_func =
@@ -837,29 +839,24 @@ void AXPlatformNodeWin::FireUiaTextEditTextChangedEvent(
     return;
   }
 
-  TextEditChangeType text_edit_change_type =
-      is_composition_committed ? TextEditChangeType_CompositionFinalized
-                               : TextEditChangeType_Composition;
-  // Composition has been finalized by TSF
-  base::win::ScopedBstr composition_text(active_composition_text.c_str());
   base::win::ScopedSafearray changed_data(
-      SafeArrayCreateVector(VT_BSTR /* element type */, 0 /* lower bound */,
-                            1 /* number of elements */));
+      ::SafeArrayCreateVector(VT_BSTR, /*lLbound=*/0, /*cElements=*/1));
   if (!changed_data.Get()) {
     return;
   }
 
   LONG index = 0;
-  HRESULT hr =
-      SafeArrayPutElement(changed_data.Get(), &index, composition_text.Get());
-
-  if (FAILED(hr)) {
+  if (FAILED(::SafeArrayPutElement(
+          changed_data.Get(), &index,
+          base::win::ScopedBstr(active_composition_text).Get()))) {
     return;
-  } else {
-    // Fire the UiaRaiseTextEditTextChangedEvent
-    text_edit_text_changed_func(this, text_edit_change_type,
-                                changed_data.Release());
   }
+
+  text_edit_text_changed_func(this,
+                              is_composition_committed
+                                  ? TextEditChangeType_CompositionFinalized
+                                  : TextEditChangeType_Composition,
+                              changed_data.Get());
 }
 
 bool AXPlatformNodeWin::IsValidUiaRelationTarget(
@@ -8066,10 +8063,6 @@ std::optional<DWORD> AXPlatformNodeWin::MojoEventToMSAAEvent(
 // static
 std::optional<EVENTID> AXPlatformNodeWin::MojoEventToUIAEvent(
     ax::mojom::Event event) {
-  if (!AXPlatform::GetInstance().IsUiaProviderEnabled()) {
-    return std::nullopt;
-  }
-
   switch (event) {
     case ax::mojom::Event::kAlert:
       return UIA_SystemAlertEventId;
@@ -8107,10 +8100,6 @@ std::optional<EVENTID> AXPlatformNodeWin::MojoEventToUIAEvent(
 // static
 std::optional<PROPERTYID> AXPlatformNodeWin::MojoEventToUIAProperty(
     ax::mojom::Event event) {
-  if (!AXPlatform::GetInstance().IsUiaProviderEnabled()) {
-    return std::nullopt;
-  }
-
   switch (event) {
     case ax::mojom::Event::kControlsChanged:
       return UIA_ControllerForPropertyId;

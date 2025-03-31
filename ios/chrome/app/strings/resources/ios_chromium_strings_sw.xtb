@@ -91,11 +91,11 @@ Kwa mipangilio zaidi inayotumia data kuboresha hali yako ya utumiaji wa Chromium
 <translation id="3054480780637153380">Fungua mipangilio ya Chromium kwenye iOS, kisha uguse "Programu Chaguomsingi ya Kivinjari" na uchague Chromium.</translation>
 <translation id="3102849287235003384">Ili uondoke kwenye akaunti yako ya Google katika tovuti zote, <ph name="BEGIN_LINK" />ondoka kwenye akaunti yako katika kivinjari cha Chromium<ph name="END_LINK" />.</translation>
 <translation id="3115956258722352278">Je ungependa kufanya Chromium iwe kivinjari chako chaguomsingi?</translation>
+<translation id="3180939591219927904">Washa "Funga Vichupo vya Faragha unapofunga Chromium"</translation>
 <translation id="3242612358525156339">Kwenye mipangilio ya kifaa chako, fungua "<ph name="TEXT_OF_THE_SETTINGS_MENU_ITEM" />" kisha uchague "Chromium"</translation>
 <translation id="328933489847748230">{count,plural, =1{Sasa inaonyesha dirisha 1 la Chromium}other{Sasa inaonyesha madirisha {count} ya Chromium}}</translation>
 <translation id="3344973607274501920">Chromium imeshindwa kukagua manenosiri yako. Jaribu kuangalia muunganisho wako wa Intaneti.</translation>
 <translation id="3366305173356742781">Data ya Chromium kwenye akaunti yako</translation>
-<translation id="33788334537425157">Washa "Funga vichupo vya Faraghani unapofunga Chromium"</translation>
 <translation id="3387107508582892610">{THRESHOLD,plural, =1{Hali hii hutokea wakati hujatumia Chromium kwa dakika {THRESHOLD}. Data hii inaweza kujumuisha historia na matukio ya kujaza kiotomatiki.}other{Hali hii hutokea wakati hujatumia Chromium kwa dakika {THRESHOLD}. Data hii inaweza kujumuisha historia na matukio ya kujaza kiotomatiki.}}</translation>
 <translation id="3410395242749598859">Baadhi ya data yako ya Chromium bado haijahifadhiwa kwenye <ph name="EMAIL" />.
 Jaribu kusubiri dakika chache kabla ya kubadilisha akaunti. Ukibadilisha akaunti sasa, data hii itafutwa.</translation>
@@ -208,7 +208,6 @@ Mambo ya kuzingatia:
   • Iwapo umesawazisha historia yako kwenye Akaunti yako Google, huenda vipimo vikajumuisha pia maelezo kuhusu URL unazotembelea.<ph name="END_INDENT" /></translation>
 <translation id="5932787118589620366">Futa data ya kuvinjari kwenye Chromium.</translation>
 <translation id="593808800391107017">Pokea arifa kuhusu matatizo yoyote ya faragha au ya usalama ambayo Chromium itatambua kiotomatiki kuwa yanakuathiri.</translation>
-<translation id="5945387852661427312">Unaingia kwa kutumia akaunti inayodhibitiwa na <ph name="DOMAIN" /> na kumpa msimamizi wa kikoa hicho udhibiti wa data yako ya Chromium. Data yako ya Chromium itahusishwa na akaunti hii daima. Kuondoka kwenye Chromium kutafuta data yako kwenye kifaa hiki, lakini itaendelea kuhifadhiwa katika Akaunti yako ya Google.</translation>
 <translation id="5951593919357934226">Nufaika zaidi na Chromium.</translation>
 <translation id="5985254578475526217">Ili upokee arifa kutoka Chromium, washa arifa katika Mipangilio yako ya iOS.</translation>
 <translation id="6104024151682120539">Fungua kwenye Chromium</translation>
@@ -262,6 +261,7 @@ Mtu aliye na kauli yako ya siri pekee ndiye anaweza kusoma data yako iliyosimbwa
 <translation id="7337881442233988129">Chromium</translation>
 <translation id="7357211569052832586">Data uliyochagua imeondolewa kwenye Chromium na kwenye vifaa vilivyosawazishwa. Huenda Akaunti yako ya Google ina aina nyingine za historia ya mambo uliyovinjari kama vile mambo uliyotafuta na shughuli kutoka huduma nyingine za Google katika history.google.com.</translation>
 <translation id="7395825497086981028">Nenosiri lako litahifadhiwa kwenye Kidhibiti cha Manenosiri kwa ajili ya <ph name="EMAIL" />.</translation>
+<translation id="7504829997542308412">Fungua Chromium</translation>
 <translation id="7531461704633548377">Kutoka Chromium</translation>
 <translation id="7554983317097061001">Kidokezo cha Chromium: Weka Chromium kwenye sehemu iliyopachikwa</translation>
 <translation id="7576863740961052505">Dhibiti mipangilio ya Chromium</translation>

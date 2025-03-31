@@ -91,6 +91,7 @@
 <translation id="1269405891096105529">ไม่รองรับอุปกรณ์ต่อพ่วงในโหมดผู้มาเยือน</translation>
 <translation id="1270290102613614947">ปิดใช้แป้นพิมพ์บนหน้าจออยู่</translation>
 <translation id="1272079795634619415">หยุด</translation>
+<translation id="12741168609094094">เลือกสิ่งใดก็ได้บนหน้าจอเพื่อค้นหา คัดลอกข้อความ และอื่นๆ</translation>
 <translation id="1275285675049378717">การชาร์จไฟ <ph name="POWER_SOURCE" /></translation>
 <translation id="1275718070701477396">เลือกแล้ว</translation>
 <translation id="1276975447697633661">เลือกไฟล์แล้วกด <ph name="KEY" /></translation>
@@ -227,6 +228,7 @@
 <translation id="1720230731642245863">ฮอตสปอตปิดอยู่</translation>
 <translation id="1731815243805539470">เปลี่ยนเป็นผู้ใช้ก่อนหน้า</translation>
 <translation id="1733996486177697563">สลับระหว่างธีมมืดและธีมสว่าง แตะเดสก์ท็อปค้างไว้ แล้วเลือก "วอลเปเปอร์และสไตล์"</translation>
+<translation id="1735992454301033090">บริเวณที่เลือก ใช้แป้นลูกศรเพื่อย้าย</translation>
 <translation id="1736898441010944794">อุปกรณ์บลูทูธจะมองเห็น "<ph name="NAME" />" ได้</translation>
 <translation id="1737078180382804488">ปิดการตั้งค่าการดูการแจ้งเตือนของโทรศัพท์</translation>
 <translation id="174102739345480129">ปิดตัวทำเครื่องหมายอยู่</translation>
@@ -494,6 +496,7 @@
 <translation id="2683887737780133806"><ph name="DAY_OF_WEEK" />ของสัปดาห์ที่ผ่านมา</translation>
 <translation id="2687510499067466116">เปลี่ยนแป้นพิมพ์ลัดแล้ว</translation>
 <translation id="2689613560355655046">เดสก์ 8</translation>
+<translation id="2692092709110488417">กด Tab เพื่อโฟกัสและย้ายบริเวณที่เลือก</translation>
 <translation id="2695305337569143674">เว็บ</translation>
 <translation id="2697697418792422688">แสดงการตั้งค่าแป้นพิมพ์ เลือก <ph name="KEYBOARD_NAME" /> แล้ว</translation>
 <translation id="2699913284398121653">ใช้แอป Content Transfer เพื่อย้ายข้อมูลบัญชีโรงเรียนไปยังบัญชีส่วนตัว</translation>
@@ -551,6 +554,7 @@
 <translation id="2872353916818027657">สลับหน้าจอหลัก</translation>
 <translation id="2872961005593481000">ปิด</translation>
 <translation id="2876338922445400217">ซูมเข้าบนหน้าจอ</translation>
+<translation id="2876760662374103627">การควบคุมด้วยใบหน้าทำงานอยู่</translation>
 <translation id="2878884018241093801">ไม่มีรายการล่าสุด</translation>
 <translation id="2880541185262491188">พยายามป้อน PIN หลายครั้งเกินไป โปรดรอ <ph name="TIME_LEFT" /> แล้วลองอีกครั้ง</translation>
 <translation id="2883271196820422439">ทำให้แป้นเมาส์กลับมาทำงานอีกครั้ง</translation>
@@ -728,6 +732,7 @@
 <translation id="346243998268439747">รีเซ็ตระดับการซูม</translation>
 <translation id="3465223694362104965">แป้นพิมพ์อีกรายการหนึ่งเชื่อมต่อกับอุปกรณ์นี้นับจากที่คุณลงชื่อเข้าใช้ครั้งล่าสุด โปรดตรวจสอบว่าแป้นพิมพ์นี้เชื่อถือได้ก่อนใช้งาน</translation>
 <translation id="3465356146291925647">จัดการโดยผู้ดูแลระบบ</translation>
+<translation id="3470502288861289375">กำลังคัดลอก...</translation>
 <translation id="347117769229524881"><ph name="MODIFIER_ONE" /><ph name="MODIFIER_TWO" /><ph name="KEY_ONE" /> แล้วกด <ph name="KEY_TWO" /> หรือ <ph name="KEY_THREE" /></translation>
 <translation id="3477079411857374384">Control-Shift-Space</translation>
 <translation id="3485319357743610354"><ph name="SECURITY_STATUS" />, <ph name="CONNECTION_STATUS" />, ความแรงสัญญาณ <ph name="SIGNAL_STRENGTH" /></translation>
@@ -1027,6 +1032,7 @@
 <translation id="4412698727486357573">ศูนย์ช่วยเหลือ</translation>
 <translation id="4412944820643904175"><ph name="FEATURE_NAME" /> ปิดอยู่</translation>
 <translation id="4417647906073317561">การตั้งค่าโหมดโฟกัส ตั้งตัวจับเวลา งาน และเพลงเพื่อโฟกัสกับงาน</translation>
+<translation id="4418600384772451109">ปิดแผง</translation>
 <translation id="4424159417645388645">เดสก์ 5</translation>
 <translation id="4426817706804363424">เยี่ยมเลย</translation>
 <translation id="4430019312045809116">ระดับเสียง</translation>
@@ -1479,6 +1485,7 @@
 <translation id="5825969630400862129">การตั้งค่าอุปกรณ์ที่เชื่อมต่อ</translation>
 <translation id="5830180081891717894">อีก <ph name="WINDOWS" /> รายการ</translation>
 <translation id="5837036133683224804">หยุด <ph name="ROUTE_TITLE" /> ใน<ph name="RECEIVER_NAME" /></translation>
+<translation id="5840658767386246331">ค้นหาด้วย Google</translation>
 <translation id="5841296711770970362">ไปที่แทร็กถัดไป</translation>
 <translation id="5842553299352339114">ฮอตสปอต <ph name="DEVICE_NAME" /> เปิดอยู่ ไม่มีอุปกรณ์ใดเชื่อมต่อ</translation>
 <translation id="584525477304726060">กดค้างเพื่อขยายใหญ่สุด</translation>
@@ -1510,6 +1517,7 @@
 <translation id="595202126637698455">เปิดใช้งานการติดตามการปฏิบัติงานแล้ว</translation>
 <translation id="5955304353782037793">แอป</translation>
 <translation id="5958529069007801266">ผู้ใช้ภายใต้การควบคุมดูแล</translation>
+<translation id="596035801491797438">ปิดการควบคุมด้วยใบหน้า</translation>
 <translation id="5960410286721553511">ดูรูปภาพและสื่อล่าสุดของโทรศัพท์</translation>
 <translation id="5965524703725988602">เปิด/ปิดธีมมืด <ph name="STATE_TEXT" /></translation>
 <translation id="5975235751479998104">สลับระหว่างหน้าต่าง (ไปข้างหน้า)</translation>
@@ -2221,6 +2229,7 @@
 <translation id="8287009018010202411">ประสิทธิภาพการทำงาน</translation>
 <translation id="828708037801473432">ปิด</translation>
 <translation id="8297006494302853456">อ่อน</translation>
+<translation id="8300451473979404345">เลือกแฮนเดิลแล้ว ใช้แป้นลูกศรเพื่อย้าย</translation>
 <translation id="8308637677604853869">เมนูก่อนหน้า</translation>
 <translation id="830868413617744215">เบต้า</translation>
 <translation id="8314772463905284467">Caps Lock เปิดอยู่</translation>
@@ -2281,6 +2290,7 @@
 <translation id="851458219935658693">แสดงหน้าต่างจากเดสก์ปัจจุบัน เลือกปุ่มตัวเลือกแล้ว</translation>
 <translation id="851660987304951246">ใช้ฟีเจอร์ช่วยฉันอ่านเพื่อสรุปเนื้อหาหรือถามคำถามอย่างรวดเร็ว</translation>
 <translation id="8517041960877371778"><ph name="DEVICE_TYPE" /> ของคุณอาจไม่ชาร์จเมื่อเครื่องเปิดอยู่</translation>
+<translation id="8519329096920173967">ค้นหาบนหน้าจอด้วย Google Lens</translation>
 <translation id="8535393432370007982">เลิกทำการจัดเรียงลำดับตามสี</translation>
 <translation id="8536886494750559755">แสดงการตั้งค่า Quick Share ทุกคนจะมองเห็นได้เป็นเวลา <ph name="TIME_REMAINING" /></translation>
 <translation id="8539803091108018926">คัดลอกข้อความไปยังคลิปบอร์ดแล้ว</translation>

@@ -91,6 +91,29 @@ chromium-metrics-reviews@google.com.
       summary="Software secure Widevine key system"/>
 </variants>
 
+<variants name="MediaRebufferingCategories">
+  <variant name=".Audio.EME"
+      summary="Metric for EME media with an audio track."/>
+  <variant name=".Audio.MSE"
+      summary="Metric for MSE media with an audio track."/>
+  <variant name=".Audio.SRC"
+      summary="Metric for SRC media with an audio track."/>
+  <variant name=".AudioVideo.EME"
+      summary="Metric for EME media with both an audio and video track."/>
+  <variant name=".AudioVideo.MSE"
+      summary="Metric for MSE media with both an audio and video track."/>
+  <variant name=".AudioVideo.SRC"
+      summary="Metric for SRC media with both an audio and video track."/>
+</variants>
+
+<variants name="MediaRouteProvider">
+  <variant name=".AndroidCaf"
+      summary="Cast Application Framework (CAF) base MRPs on Clank"/>
+  <variant name=".Cast" summary="Native Cast MRP"/>
+  <variant name=".DIAL" summary="Native DIAL MRP"/>
+  <variant name=".WiredDisplay" summary="Wired Display MRP"/>
+</variants>
+
 <variants name="MF_MEDIA_ENGINE_ERR">
   <variant name="MF_MEDIA_ENGINE_ERR_ABORTED"/>
   <variant name="MF_MEDIA_ENGINE_ERR_DECODE"/>
@@ -908,14 +931,21 @@ chromium-metrics-reviews@google.com.
   </summary>
 </histogram>
 
-<histogram name="Media.Audio.InputStartupSuccessMac" enum="BooleanSuccess"
-    expires_after="2025-09-14">
+<histogram name="Media.Audio.InputStartupSuccessMac{MacAudioInputVariants}"
+    enum="BooleanSuccess" expires_after="2025-09-14">
   <owner>henrika@chromium.org</owner>
   <owner>webrtc-audio-uma@google.com</owner>
   <summary>
     Indicates if audio capturing did start after stream startup was requested.
     Sampled once, a few seconds after a stream has been asked to start.
+    {MacAudioInputVariants}
   </summary>
+  <token key="MacAudioInputVariants">
+    <variant name=""/>
+    <variant name="_HighLatency"
+        summary="Measures the standard Mac audio driver (i.e. not
+                 low-latency)."/>
+  </token>
 </histogram>
 
 <histogram name="Media.Audio.Mac.AggregateDeviceCompositionPropertyIsNull"
@@ -950,6 +980,15 @@ chromium-metrics-reviews@google.com.
     <variant name="Stream" summary="Latency reported by the stream"/>
     <variant name="Total" summary="Total reported latency"/>
   </token>
+</histogram>
+
+<histogram name="Media.Audio.Mac.NoiseSuppressionAvailable"
+    enum="BooleanSuccess" expires_after="2026-03-19">
+  <owner>brandstrom@chromium.org</owner>
+  <owner>webrtc-audio-uma@google.com</owner>
+  <summary>
+    If the device reports that system noise supression is available.
+  </summary>
 </histogram>
 
 <histogram name="Media.Audio.MakeAudioInputStreamStatus"
@@ -1566,14 +1605,27 @@ chromium-metrics-reviews@google.com.
   </summary>
 </histogram>
 
-<histogram name="Media.AudioInputController" units="ms" expires_after="never">
+<histogram name="Media.AudioInputController{MediaAudioInputControllerTime}"
+    units="ms" expires_after="never">
 <!-- expires-never: Audio pipeline health metric. -->
 
   <owner>dalecurtis@chromium.org</owner>
   <owner>olka@chromium.org</owner>
   <owner>media-dev-uma@chromium.org</owner>
   <owner>webrtc-audio-uma@google.com</owner>
-  <summary>Measures the time taken for AudioInputController::</summary>
+  <summary>
+    Measures the time taken for AudioInputController::
+    {MediaAudioInputControllerTime}
+  </summary>
+  <token key="MediaAudioInputControllerTime">
+    <variant name=""/>
+    <variant name=".CloseTime"
+        summary="Measures the time taken for DoClose()."/>
+    <variant name=".CreateTime"
+        summary="Measures the time taken for DoCreate()."/>
+    <variant name=".RecordTime"
+        summary="Measures the time taken for DoRecord()."/>
+  </token>
 </histogram>
 
 <histogram name="Media.AudioInputDevice.AudioServiceDelay" units="ms"
@@ -2073,8 +2125,8 @@ chromium-metrics-reviews@google.com.
   </summary>
 </histogram>
 
-<histogram name="Media.Controls.CTR" enum="MediaControlsCTREvent"
-    expires_after="2025-01-05">
+<histogram name="Media.Controls.CTR{MediaControlsElements}"
+    enum="MediaControlsCTREvent" expires_after="2025-01-05">
   <owner>steimel@chromium.org</owner>
   <owner>media-dev-uma@chromium.org</owner>
   <summary>
@@ -2090,8 +2142,40 @@ chromium-metrics-reviews@google.com.
     &quot;Displayed&quot; is only computed when metadata are available unless
     preloading was disabled on the element or the browser.
 
-    Data is missing from 2020-04-05 to 2021-05-18.
+    Data is missing from 2020-04-05 to 2021-05-18. {MediaControlsElements}
   </summary>
+  <token key="MediaControlsElements">
+    <variant name=""/>
+    <variant name=".CastButton" summary="Cast button"/>
+    <variant name=".CastOverflowButton" summary="Cast overflow button"/>
+    <variant name=".CastOverlayButton" summary="Cast overlay button"/>
+    <variant name=".ClosedCaptionButton" summary="Closed caption button"/>
+    <variant name=".ClosedCaptionOverflowButton"
+        summary="Closed caption overflow button"/>
+    <variant name=".DisplayCutoutFullscreenButton"
+        summary="Display cutout fullscreen button"/>
+    <variant name=".DownloadButton" summary="Download button"/>
+    <variant name=".DownloadOverflowButton" summary="Download overflow button"/>
+    <variant name=".FullscreenButton" summary="Fullscreen button"/>
+    <variant name=".FullscreenOverflowButton"
+        summary="Fullscreen overflow button"/>
+    <variant name=".MuteButton" summary="Mute button"/>
+    <variant name=".MuteOverflowButton" summary="Mute overflow button"/>
+    <variant name=".OverflowButton" summary="Overflow button"/>
+    <variant name=".PictureInPictureButton"
+        summary="Picture-in-Picture button"/>
+    <variant name=".PictureInPictureOverflowButton"
+        summary="Picture-in-Picture overflow button"/>
+    <variant name=".PlaybackSpeedButton" summary="Playback speed button"/>
+    <variant name=".PlaybackSpeedOverflowButton"
+        summary="Playback speed overlay button"/>
+    <variant name=".PlayOverlayButton" summary="Play overlay button"/>
+    <variant name=".PlayPauseButton" summary="Play/pause button"/>
+    <variant name=".PlayPauseOverflowButton"
+        summary="Play/pause overflow button"/>
+    <variant name=".TimelineSlider" summary="Timeline slider"/>
+    <variant name=".VolumeSlider" summary="Volume slider"/>
+  </token>
 </histogram>
 
 <histogram name="Media.Controls.PlaybackSpeed"
@@ -2357,13 +2441,16 @@ chromium-metrics-reviews@google.com.
 </histogram>
 
 <histogram name="Media.ElementCapture.RestrictTo.Result"
-    enum="ApplySubCaptureTargetResult" expires_after="2024-09-20">
+    enum="ApplySubCaptureTargetResult" expires_after="2026-03-25">
   <owner>eladalon@chromium.org</owner>
   <owner>jophba@chromium.org</owner>
   <owner>mfoltz@chromium.org</owner>
   <summary>
     Tracks the result of calls to BrowserCaptureMediaStreamTrack.restrictTo().
     Recorded when resolving the promise produced by restrictTo().
+
+    Warning: this histogram was expired from 2024-09-20 to 2025-03-25; data may
+    be missing.
   </summary>
 </histogram>
 
@@ -2472,6 +2559,15 @@ chromium-metrics-reviews@google.com.
   <owner>xhwang@chromium.org</owner>
   <owner>media-dev-uma@chromium.org</owner>
   <summary>The time spent to load a library CDM.</summary>
+</histogram>
+
+<histogram name="Media.EME.CdmProcessDebuggerAttached" enum="Boolean"
+    expires_after="2026-01-15">
+  <owner>vpasupathy@chromium.org</owner>
+  <owner>media-dev-uma@chromium.org</owner>
+  <summary>
+    Counts every time a debugger is attached to a CDM utility process.
+  </summary>
 </histogram>
 
 <histogram name="Media.EME.CdmStorageDatabase.IncompatibleDatabaseDetected"
@@ -3940,15 +4036,19 @@ chromium-metrics-reviews@google.com.
   </summary>
 </histogram>
 
-<histogram name="Media.MeanTimeBetweenRebuffers" units="ms"
-    expires_after="2025-09-14">
+<histogram name="Media.MeanTimeBetweenRebuffers{MediaRebufferingCategories}"
+    units="ms" expires_after="2025-09-14">
   <owner>dalecurtis@chromium.org</owner>
   <summary>
     The total watch time (see Media.WatchTime) of a given playback divided by
     the number of rebuffering events that occured during that playback. Only
     reported when rebuffering happened. Therefore, alway refer to other UMAs
     like `Media.RebuffersCount` when checking this UMA.
+    {MediaRebufferingCategories}
   </summary>
+  <token key="MediaRebufferingCategories" variants="MediaRebufferingCategories">
+    <variant name=""/>
+  </token>
 </histogram>
 
 <histogram name="Media.MediaCodecError.NegativeCodecExceptionErrorCode"
@@ -4871,18 +4971,23 @@ chromium-metrics-reviews@google.com.
   </summary>
 </histogram>
 
-<histogram name="Media.RebuffersCount" units="rebuffers" expires_after="never">
+<histogram name="Media.RebuffersCount{MediaRebufferingCategories}"
+    units="rebuffers" expires_after="never">
 <!-- expires-never: Media pipeline health metric. -->
 
   <owner>dalecurtis@chromium.org</owner>
   <owner>media-dev-uma@chromium.org</owner>
   <summary>
     Indicates the number of rebuffers a given watch time session had.
+    {MediaRebufferingCategories}
   </summary>
+  <token key="MediaRebufferingCategories" variants="MediaRebufferingCategories">
+    <variant name=""/>
+  </token>
 </histogram>
 
 <histogram name="Media.RegionCapture.CropTo.Latency" units="ms"
-    expires_after="2025-01-07">
+    expires_after="2026-03-25">
   <owner>eladalon@chromium.org</owner>
   <owner>jophba@chromium.org</owner>
   <owner>mfoltz@chromium.org</owner>
@@ -4891,22 +4996,28 @@ chromium-metrics-reviews@google.com.
     BrowserCaptureMediaStreamTrack.cropTo() call to resolve (either successfully
     or with an error). Note a call which never resolves won't be counted in this
     metric.
+
+    Warning: this histogram was expired from 2025-01-07 to 2025-03-25; data may
+    be missing.
   </summary>
 </histogram>
 
 <histogram name="Media.RegionCapture.CropTo.Result2"
-    enum="ApplySubCaptureTargetResult" expires_after="2025-01-07">
+    enum="ApplySubCaptureTargetResult" expires_after="2026-03-25">
   <owner>eladalon@chromium.org</owner>
   <owner>jophba@chromium.org</owner>
   <owner>mfoltz@chromium.org</owner>
   <summary>
     Tracks the result of calls to BrowserCaptureMediaStreamTrack.cropTo().
     Recorded when resolving the promise produced by cropTo().
+
+    Warning: this histogram was expired from 2025-01-07 to 2025-03-25; data may
+    be missing.
   </summary>
 </histogram>
 
 <histogram name="Media.RegionCapture.ProduceCropTarget.Function.Result"
-    enum="ProduceTargetFunctionResult" expires_after="2025-01-07">
+    enum="ProduceTargetFunctionResult" expires_after="2026-03-25">
   <owner>eladalon@chromium.org</owner>
   <owner>jophba@chromium.org</owner>
   <owner>mfoltz@chromium.org</owner>
@@ -4915,11 +5026,14 @@ chromium-metrics-reviews@google.com.
     histogram tracks whether a new Promise was produced, and if not, why not.
     Another histogram tracks the result of new Promises, i.e. whether they were
     resolved or rejected.
+
+    Warning: this histogram was expired from 2025-01-07 to 2025-03-25; data may
+    be missing.
   </summary>
 </histogram>
 
 <histogram name="Media.RegionCapture.ProduceCropTarget.Promise.Result"
-    enum="ProduceTargetPromiseResult" expires_after="2025-01-07">
+    enum="ProduceTargetPromiseResult" expires_after="2026-03-25">
   <owner>eladalon@chromium.org</owner>
   <owner>jophba@chromium.org</owner>
   <owner>mfoltz@chromium.org</owner>
@@ -4927,6 +5041,9 @@ chromium-metrics-reviews@google.com.
     When CropTarget.fromElement() is called for the first time on a given
     Element, a new Promise is produced. This histogram tracks the result of this
     Promise - whether it was resolved or rejected.
+
+    Warning: this histogram was expired from 2025-01-07 to 2025-03-25; data may
+    be missing.
   </summary>
 </histogram>
 
@@ -5025,11 +5142,29 @@ chromium-metrics-reviews@google.com.
   <summary>Tracks the trigger for starting a remoting session.</summary>
 </histogram>
 
-<histogram name="Media.Remoting.SessionStopTrigger" enum="RemotingStopTrigger"
-    expires_after="2026-03-12">
+<histogram name="Media.Remoting.SessionStopTrigger{RemotingSessionDuration}"
+    enum="RemotingStopTrigger" expires_after="2026-03-12">
   <owner>jophba@chromium.org</owner>
   <owner>openscreen-eng@google.com</owner>
-  <summary>Tracks the trigger for stopping a remoting session.</summary>
+  <summary>
+    Tracks the trigger for stopping a remoting session.
+    {RemotingSessionDuration}
+  </summary>
+  <token key="RemotingSessionDuration">
+    <variant name=""/>
+    <variant name=".Duration0To100MilliSec"
+        summary="remoting sessions have duration in (0, 0.1] seconds"/>
+    <variant name=".Duration1To3Sec"
+        summary="remoting sessions have duration in (1, 3] seconds"/>
+    <variant name=".Duration3To5Sec"
+        summary="remoting sessions have duration in (3, 5] seconds"/>
+    <variant name=".Duration5To10Sec"
+        summary="remoting sessions have duration in (5, 10] seconds"/>
+    <variant name=".Duration10To15Sec"
+        summary="remoting sessions have duration in (10, 15] seconds"/>
+    <variant name=".Duration100MilliSecTo1Sec"
+        summary="remoting sessions have duration in (0.1, 1] seconds"/>
+  </token>
 </histogram>
 
 <histogram name="Media.Remoting.ShortSessionDuration" units="ms"
@@ -5938,16 +6073,26 @@ chromium-metrics-reviews@google.com.
   </summary>
 </histogram>
 
-<histogram name="Media.Video.Roughness" units="ms" expires_after="2025-08-03">
+<histogram name="Media.Video.Roughness{VideoFrameRateRange}" units="ms"
+    expires_after="2025-08-03">
   <owner>eugene@chromium.org</owner>
   <owner>media-dev-uma@chromium.org</owner>
   <summary>
     Video playback roughness for a 100s interval. Suffixed by the framerate.
+    {VideoFrameRateRange}
   </summary>
+  <token key="VideoFrameRateRange">
+    <variant name=""/>
+    <variant name=".24fps" summary="24 fps"/>
+    <variant name=".25fps" summary="25 fps"/>
+    <variant name=".30fps" summary="30 fps"/>
+    <variant name=".50fps" summary="50 fps"/>
+    <variant name=".60fps" summary="60 fps"/>
+  </token>
 </histogram>
 
 <histogram name="Media.VideoCapture.AspectRatio" units="%"
-    expires_after="2025-04-24">
+    expires_after="2026-03-25">
   <owner>mcasas@chromium.org</owner>
   <owner>jophba@chromium.org</owner>
   <summary>
@@ -6060,7 +6205,7 @@ chromium-metrics-reviews@google.com.
 </histogram>
 
 <histogram name="Media.VideoCapture.Device.SupportedResolution"
-    enum="VideoResolutionDesignation" expires_after="2025-12-15">
+    enum="VideoResolutionDesignation" expires_after="2026-03-25">
   <owner>bryantchandler@chromium.org</owner>
   <owner>eshr@google.com</owner>
   <owner>handellm@google.com</owner>
@@ -6100,7 +6245,7 @@ chromium-metrics-reviews@google.com.
 </histogram>
 
 <histogram name="Media.VideoCapture.FrameRate" units="fps"
-    expires_after="2025-12-15">
+    expires_after="2026-03-25">
   <owner>mcasas@chromium.org</owner>
   <owner>guidou@chromium.org</owner>
   <owner>armax@chromium.org</owner>
@@ -6125,13 +6270,16 @@ chromium-metrics-reviews@google.com.
 </histogram>
 
 <histogram name="Media.VideoCapture.Height" units="pixels"
-    expires_after="2023-12-31">
+    expires_after="2026-03-25">
   <owner>mcasas@chromium.org</owner>
   <owner>handellm@google.com</owner>
   <owner>jophba@chromium.org</owner>
   <summary>
     Video Capture Device captured frame height in pixels. The collection is made
     in the VideoCaptureController upon reception of the first frame.
+
+    Warning: this histogram was expired from 2023-12-31 to 2025-03-25; data may
+    be missing.
   </summary>
 </histogram>
 
@@ -6203,7 +6351,7 @@ chromium-metrics-reviews@google.com.
 </histogram>
 
 <histogram name="Media.VideoCapture.ScaleOverride" units="units"
-    expires_after="2025-04-24">
+    expires_after="2026-03-25">
   <owner>jophba@chromium.org</owner>
   <owner>klausw@chromium.org</owner>
   <summary>
@@ -6215,7 +6363,7 @@ chromium-metrics-reviews@google.com.
 </histogram>
 
 <histogram name="Media.VideoCapture.ScaleOverrideChangeCount" units="units"
-    expires_after="2025-04-24">
+    expires_after="2026-03-25">
   <owner>jophba@chromium.org</owner>
   <owner>klausw@chromium.org</owner>
   <summary>
@@ -6289,7 +6437,7 @@ chromium-metrics-reviews@google.com.
 </histogram>
 
 <histogram name="Media.VideoCapture.Track.FrameDrop.{StreamType}"
-    enum="VideoCaptureFrameDropReason" expires_after="2024-03-03">
+    enum="VideoCaptureFrameDropReason" expires_after="2026-03-25">
   <owner>mcasas@chromium.org</owner>
   <owner>guidou@chromium.org</owner>
   <owner>armax@chromium.org</owner>
@@ -6302,6 +6450,9 @@ chromium-metrics-reviews@google.com.
     the frame drop reason changes. The frame drop is recorder on a per-track
     basis (i.e. cloned tracks also log) and includes out-of-process frame drops
     (e.g. a DeviceCapture webcam source dropping frames in the capture process).
+
+    Warning: this histogram was expired from 2024-03-03 to 2025-03-25; data may
+    be missing.
   </summary>
   <token key="StreamType">
     <variant name="DeviceCapture"/>
@@ -6313,7 +6464,7 @@ chromium-metrics-reviews@google.com.
 </histogram>
 
 <histogram name="Media.VideoCapture.Width" units="pixels"
-    expires_after="2025-05-05">
+    expires_after="2026-03-25">
   <owner>mcasas@chromium.org</owner>
   <owner>handellm@google.com</owner>
   <owner>jophba@chromium.org</owner>
@@ -6660,7 +6811,8 @@ chromium-metrics-reviews@google.com.
   </summary>
 </histogram>
 
-<histogram name="Media.WatchTime" units="ms" expires_after="2025-09-14">
+<histogram name="Media.WatchTime{MediaWatchTimeCategories}" units="ms"
+    expires_after="2025-09-14">
   <owner>dalecurtis@chromium.org</owner>
   <summary>
     Watch time is defined as the amount of elapsed media time for audio+video
@@ -6677,8 +6829,144 @@ chromium-metrics-reviews@google.com.
     the aforementioned properties, will not stop metric collection.
 
     Each seek event will result in a new watch time metric being started and the
-    old metric finalized as accurately as possible.
+    old metric finalized as accurately as possible. {MediaWatchTimeCategories}
   </summary>
+  <token key="MediaWatchTimeCategories">
+    <variant name=""/>
+    <variant name=".Audio.AC"
+        summary="Watch time for all media with only an audio track on AC
+                 power."/>
+    <variant name=".Audio.All"
+        summary="Watch time for all media with only an audio track."/>
+    <variant name=".Audio.Background.AC"
+        summary="Background watch time for all media with only an audio track
+                 on AC power."/>
+    <variant name=".Audio.Background.All"
+        summary="Background watch time for all media with only an audio
+                 track."/>
+    <variant name=".Audio.Background.Battery"
+        summary="Background watch time for all media with only an audio track
+                 on battery power."/>
+    <variant name=".Audio.Background.EmbeddedExperience"
+        summary="Background watch time for downloaded media on Android with
+                 only an audio track."/>
+    <variant name=".Audio.Background.EME"
+        summary="Background watch time for EME media with only an audio
+                 track."/>
+    <variant name=".Audio.Background.MSE"
+        summary="Background watch time for MSE media with only an audio
+                 track."/>
+    <variant name=".Audio.Background.SRC"
+        summary="Background watch time for SRC media with only an audio
+                 track."/>
+    <variant name=".Audio.Battery"
+        summary="Watch time for all media with only an audio track on battery
+                 power."/>
+    <variant name=".Audio.Discarded.EME"
+        summary="Watch time less than 7 seconds for EME media with only an
+                 audio track."/>
+    <variant name=".Audio.Discarded.MSE"
+        summary="Watch time less than 7 seconds for MSE media with only an
+                 audio track."/>
+    <variant name=".Audio.Discarded.SRC"
+        summary="Watch time less than 7 seconds for SRC media with only an
+                 audio track."/>
+    <variant name=".Audio.EmbeddedExperience"
+        summary="Watch time for downloaded media on Android with only an
+                 audio track."/>
+    <variant name=".Audio.EME"
+        summary="Watch time for EME media with only an audio track."/>
+    <variant name=".Audio.MSE"
+        summary="Watch time for MSE media with only an audio track."/>
+    <variant name=".Audio.NativeControlsOff"
+        summary="Watch time for all media with only an audio track not using
+                 native controls."/>
+    <variant name=".Audio.NativeControlsOn"
+        summary="Watch time for all media with only an audio track using
+                 native controls."/>
+    <variant name=".Audio.SRC"
+        summary="Watch time for SRC media with only an audio track."/>
+    <variant name=".AudioVideo.AC"
+        summary="Watch time for all media with both an audio and video track
+                 on AC power."/>
+    <variant name=".AudioVideo.All"
+        summary="Watch time for all media with both an audio and video track."/>
+    <variant name=".AudioVideo.Background.AC"
+        summary="Background watch time for all media with both an audio and
+                 video track on AC power."/>
+    <variant name=".AudioVideo.Background.All"
+        summary="Background watch time for all media with both an audio and
+                 video track."/>
+    <variant name=".AudioVideo.Background.Battery"
+        summary="Background watch time for all media with both an audio and
+                 video track on battery power."/>
+    <variant name=".AudioVideo.Background.EmbeddedExperience"
+        summary="Background watch time for downloaded media on Android with
+                 both an audio and video track."/>
+    <variant name=".AudioVideo.Background.EME"
+        summary="Background watch time for EME media with both an audio and
+                 video track."/>
+    <variant name=".AudioVideo.Background.MSE"
+        summary="Background watch time for MSE media with both an audio and
+                 video track."/>
+    <variant name=".AudioVideo.Background.SRC"
+        summary="Background watch time for SRC media with both an audio and
+                 video track."/>
+    <variant name=".AudioVideo.Battery"
+        summary="Watch time for all media with both an audio and video track
+                 on battery power."/>
+    <variant name=".AudioVideo.Discarded.EME"
+        summary="Watch time less than 7 seconds for EME media with only with
+                 both an audio and video track."/>
+    <variant name=".AudioVideo.Discarded.MSE"
+        summary="Watch time less than 7 seconds for MSE media with only with
+                 both an audio and video track."/>
+    <variant name=".AudioVideo.Discarded.SRC"
+        summary="Watch time less than 7 seconds for SRC media with with both
+                 an audio and video track."/>
+    <variant name=".AudioVideo.DisplayFullscreen"
+        summary="Watch time for all media with both an audio and video track
+                 displayed in fullscreen."/>
+    <variant name=".AudioVideo.DisplayInline"
+        summary="Watch time for all media with both an audio and video track
+                 displayed inline."/>
+    <variant name=".AudioVideo.DisplayPictureInPicture"
+        summary="Watch time for all media with both an audio and video track
+                 displayed in picture-in-picture."/>
+    <variant name=".AudioVideo.EmbeddedExperience"
+        summary="Watch time for downloaded media on Android with both an
+                 audio and video track."/>
+    <variant name=".AudioVideo.EME"
+        summary="Watch time for EME media with both an audio and video track."/>
+    <variant name=".AudioVideo.MediaFoundation.All"
+        summary="MediaFoundations renderer watch time for all media with both
+                 an audio and video track."/>
+    <variant name=".AudioVideo.MediaFoundation.Eme"
+        summary="MediaFoundations renderer watch time for EME media with both
+                 an audio and video track."/>
+    <variant name=".AudioVideo.MSE"
+        summary="Watch time for MSE media with both an audio and video track."/>
+    <variant name=".AudioVideo.Muted.All"
+        summary="Muted watch time for all media with both an audio and video
+                 track."/>
+    <variant name=".AudioVideo.Muted.EME"
+        summary="Muted watch time for EME media with both an audio and video
+                 track."/>
+    <variant name=".AudioVideo.Muted.MSE"
+        summary="Muted watch time for MSE media with both an audio and video
+                 track."/>
+    <variant name=".AudioVideo.Muted.SRC"
+        summary="Muted watch time for SRC media with both an audio and video
+                 track."/>
+    <variant name=".AudioVideo.NativeControlsOff"
+        summary="Watch time for all media with both an audio and video track
+                 not using native controls."/>
+    <variant name=".AudioVideo.NativeControlsOn"
+        summary="Watch time for all media with both an audio and video track
+                 using native controls."/>
+    <variant name=".AudioVideo.SRC"
+        summary="Watch time for SRC media with both an audio and video track."/>
+  </token>
 </histogram>
 
 <histogram name="Media.WebMediaPlayerCompositor.ReasonToClearRenderBuffer"
@@ -6864,7 +7152,7 @@ chromium-metrics-reviews@google.com.
 </histogram>
 
 <histogram name="MediaPreviews.UI.DeviceSelection.PageInfo.Camera.NumDevices"
-    units="devices" expires_after="2025-06-08">
+    units="devices" expires_after="2025-11-30">
   <owner>bryantchandler@chromium.org</owner>
   <owner>openscreen-eng@google.com</owner>
   <summary>
@@ -6876,7 +7164,7 @@ chromium-metrics-reviews@google.com.
 </histogram>
 
 <histogram name="MediaPreviews.UI.DeviceSelection.PageInfo.Mic.NumDevices"
-    units="devices" expires_after="2025-04-01">
+    units="devices" expires_after="2025-11-30">
   <owner>bryantchandler@chromium.org</owner>
   <owner>openscreen-eng@google.com</owner>
   <summary>
@@ -6889,7 +7177,7 @@ chromium-metrics-reviews@google.com.
 
 <histogram
     name="MediaPreviews.UI.DeviceSelection.Permissions.Camera.NumDevices"
-    units="devices" expires_after="2025-08-10">
+    units="devices" expires_after="2025-11-30">
   <owner>bryantchandler@chromium.org</owner>
   <owner>openscreen-eng@google.com</owner>
   <summary>
@@ -6901,7 +7189,7 @@ chromium-metrics-reviews@google.com.
 </histogram>
 
 <histogram name="MediaPreviews.UI.DeviceSelection.Permissions.Mic.NumDevices"
-    units="devices" expires_after="2025-08-10">
+    units="devices" expires_after="2025-11-30">
   <owner>bryantchandler@chromium.org</owner>
   <owner>openscreen-eng@google.com</owner>
   <summary>
@@ -6913,7 +7201,7 @@ chromium-metrics-reviews@google.com.
 </histogram>
 
 <histogram name="MediaPreviews.UI.DeviceSelection.{UiLocation}.{Type}.Action"
-    enum="MediaPreviewDeviceSelectionUserAction" expires_after="2025-08-10">
+    enum="MediaPreviewDeviceSelectionUserAction" expires_after="2025-11-30">
   <owner>ahmedmoussa@google.com</owner>
   <owner>openscreen-eng@google.com</owner>
   <summary>
@@ -6931,7 +7219,7 @@ chromium-metrics-reviews@google.com.
 </histogram>
 
 <histogram name="MediaPreviews.UI.PageInfo.Camera.NumInUseDevices"
-    units="devices" expires_after="2025-06-08">
+    units="devices" expires_after="2025-11-30">
   <owner>bryantchandler@chromium.org</owner>
   <owner>openscreen-eng@google.com</owner>
   <summary>
@@ -6940,7 +7228,7 @@ chromium-metrics-reviews@google.com.
 </histogram>
 
 <histogram name="MediaPreviews.UI.PageInfo.Camera.PixelHeight" units="pixels"
-    expires_after="2025-08-10">
+    expires_after="2025-11-30">
   <owner>bryantchandler@chromium.org</owner>
   <owner>openscreen-eng@google.com</owner>
   <summary>
@@ -6950,7 +7238,7 @@ chromium-metrics-reviews@google.com.
 </histogram>
 
 <histogram name="MediaPreviews.UI.PageInfo.Mic.NumInUseDevices" units="devices"
-    expires_after="2025-04-01">
+    expires_after="2025-11-30">
   <owner>bryantchandler@chromium.org</owner>
   <owner>openscreen-eng@google.com</owner>
   <summary>
@@ -6960,7 +7248,7 @@ chromium-metrics-reviews@google.com.
 </histogram>
 
 <histogram name="MediaPreviews.UI.Permissions.Camera.PixelHeight"
-    units="pixels" expires_after="2025-08-10">
+    units="pixels" expires_after="2025-11-30">
   <owner>bryantchandler@chromium.org</owner>
   <owner>openscreen-eng@google.com</owner>
   <summary>
@@ -6970,7 +7258,7 @@ chromium-metrics-reviews@google.com.
 </histogram>
 
 <histogram name="MediaPreviews.UI.Preview.{UiLocation}.Video.ActualFPS"
-    units="fps" expires_after="2025-08-10">
+    units="fps" expires_after="2025-11-30">
   <owner>bryantchandler@chromium.org</owner>
   <owner>openscreen-eng@google.com</owner>
   <summary>
@@ -6984,7 +7272,7 @@ chromium-metrics-reviews@google.com.
 </histogram>
 
 <histogram name="MediaPreviews.UI.Preview.{UiLocation}.Video.Delay" units="ms"
-    expires_after="2025-08-31">
+    expires_after="2025-11-30">
   <owner>ahmedmoussa@google.com</owner>
   <owner>openscreen-eng@google.com</owner>
   <summary>
@@ -6998,7 +7286,7 @@ chromium-metrics-reviews@google.com.
 </histogram>
 
 <histogram name="MediaPreviews.UI.Preview.{UiLocation}.Video.ExpectedFPS"
-    units="fps" expires_after="2025-08-10">
+    units="fps" expires_after="2025-11-30">
   <owner>bryantchandler@chromium.org</owner>
   <owner>openscreen-eng@google.com</owner>
   <summary>
@@ -7013,7 +7301,7 @@ chromium-metrics-reviews@google.com.
 </histogram>
 
 <histogram name="MediaPreviews.UI.Preview.{UiLocation}.Video.RenderedPercent"
-    units="%" expires_after="2025-08-10">
+    units="%" expires_after="2025-11-30">
   <owner>bryantchandler@chromium.org</owner>
   <owner>openscreen-eng@google.com</owner>
   <summary>
@@ -7029,7 +7317,7 @@ chromium-metrics-reviews@google.com.
 
 <histogram
     name="MediaPreviews.UI.Preview.{UiLocation}.Video.TimeToActionWithoutPreview"
-    units="ms" expires_after="2025-08-31">
+    units="ms" expires_after="2025-11-30">
   <owner>ahmedmoussa@google.com</owner>
   <owner>openscreen-eng@google.com</owner>
   <summary>
@@ -7044,7 +7332,7 @@ chromium-metrics-reviews@google.com.
 
 <histogram
     name="MediaPreviews.UI.Preview.{UiLocation}.Video.TotalVisibleDuration"
-    units="ms" expires_after="2025-08-31">
+    units="ms" expires_after="2025-11-30">
   <owner>ahmedmoussa@google.com</owner>
   <owner>openscreen-eng@google.com</owner>
   <summary>
@@ -7061,7 +7349,7 @@ chromium-metrics-reviews@google.com.
 </histogram>
 
 <histogram name="MediaPreviews.UI.Preview.{UiLocation}.VideoCaptureError"
-    units="VideoCaptureError" expires_after="2025-11-11">
+    units="VideoCaptureError" expires_after="2025-11-30">
   <owner>ahmedmoussa@google.com</owner>
   <owner>openscreen-eng@google.com</owner>
   <summary>
@@ -7074,7 +7362,7 @@ chromium-metrics-reviews@google.com.
 </histogram>
 
 <histogram name="MediaPreviews.UI.{UiLocation}.OriginTrialAllowed"
-    enum="Boolean" expires_after="2025-09-14">
+    enum="Boolean" expires_after="2025-11-30">
   <owner>mfoltz@chromium.org</owner>
   <owner>openscreen-eng@google.com</owner>
   <summary>
@@ -7089,7 +7377,7 @@ chromium-metrics-reviews@google.com.
 </histogram>
 
 <histogram name="MediaPreviews.UI.{UiLocation}.{Type}.Duration" units="s"
-    expires_after="2025-08-10">
+    expires_after="2025-11-30">
   <owner>ahmedmoussa@google.com</owner>
   <owner>openscreen-eng@google.com</owner>
   <summary>
@@ -7108,17 +7396,19 @@ chromium-metrics-reviews@google.com.
   </token>
 </histogram>
 
-<histogram base="true" name="MediaRouter.Cast.App.Availability" units="ms"
-    expires_after="2026-03-01">
-<!-- Name completed by histogram_suffixes name="MediaRouterSuccess" -->
-
+<histogram name="MediaRouter.Cast.App.Availability{MediaRouterSuccess}"
+    units="ms" expires_after="2026-03-01">
   <owner>muyaoxu@google.com</owner>
   <owner>mfoltz@chromium.org</owner>
   <owner>openscreen-eng@google.com</owner>
   <summary>
     Round trip time for a Cast app availability request. Can be suffixed with
-    Success or Failure.
+    Success or Failure. {MediaRouterSuccess}
   </summary>
+  <token key="MediaRouterSuccess">
+    <variant name=".Failure" summary="Failure"/>
+    <variant name=".Success" summary="Success"/>
+  </token>
 </histogram>
 
 <histogram name="MediaRouter.Cast.Channel.ConnectResult" enum="BooleanSuccess"
@@ -7468,46 +7758,50 @@ chromium-metrics-reviews@google.com.
   </summary>
 </histogram>
 
-<histogram name="MediaRouter.Provider.CreateRoute.Result"
+<histogram name="MediaRouter.Provider.CreateRoute.Result{MediaRouteProvider}"
     enum="MediaRouteProviderResult" expires_after="2025-08-05">
-<!-- Name completed by histogram_suffixes name="MediaRouteProvider" -->
-
   <owner>muyaoxu@google.com</owner>
   <owner>mfoltz@chromium.org</owner>
   <owner>openscreen-eng@google.com</owner>
   <summary>
     Result of a request to a MediaRouteProvider to create a route.
     CreateRoute.Result (without a suffix) is recorded for the extension or an
-    unknown MRP.
+    unknown MRP. {MediaRouteProvider}
   </summary>
+  <token key="MediaRouteProvider" variants="MediaRouteProvider">
+    <variant name=""/>
+  </token>
 </histogram>
 
-<histogram name="MediaRouter.Provider.JoinRoute.Result"
+<histogram name="MediaRouter.Provider.JoinRoute.Result{MediaRouteProvider}"
     enum="MediaRouteProviderResult" expires_after="2025-08-05">
-<!-- Name completed by histogram_suffixes name="MediaRouteProvider" -->
-
   <owner>muyaoxu@google.com</owner>
   <owner>mfoltz@chromium.org</owner>
   <owner>openscreen-eng@google.com</owner>
   <summary>
     Result of a request to a MediaRouteProvider to join a route.
     JoinRoute.Result (without a suffix) is recorded for the extension or an
-    unknown MRP.
+    unknown MRP. {MediaRouteProvider}
   </summary>
+  <token key="MediaRouteProvider" variants="MediaRouteProvider">
+    <variant name=""/>
+  </token>
 </histogram>
 
-<histogram name="MediaRouter.Provider.TerminateRoute.Result"
+<histogram
+    name="MediaRouter.Provider.TerminateRoute.Result{MediaRouteProvider}"
     enum="MediaRouteProviderResult" expires_after="2025-08-05">
-<!-- Name completed by histogram_suffixes name="MediaRouteProvider" -->
-
   <owner>muyaoxu@google.com</owner>
   <owner>mfoltz@chromium.org</owner>
   <owner>openscreen-eng@google.com</owner>
   <summary>
     Result of a request to a MediaRouteProvider to terminate a route.
     TerminateRoute.Result (without a suffix) is recorded for the extension or an
-    unknown MRP.
+    unknown MRP. {MediaRouteProvider}
   </summary>
+  <token key="MediaRouteProvider" variants="MediaRouteProvider">
+    <variant name=""/>
+  </token>
 </histogram>
 
 <histogram name="MediaRouter.RemotePlayback.SessionLoadTime" units="ms"

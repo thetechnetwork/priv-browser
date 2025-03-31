@@ -260,19 +260,19 @@ OmniboxUrlSuggestionsOnFocus::OmniboxUrlSuggestionsOnFocus() {
                                "ShowRecentlyClosedTabs", false)
           .Get();
   max_suggestions = base::FeatureParam<size_t>(&kOmniboxUrlSuggestionsOnFocus,
-                                               "OnFocusMaxSuggestions", 8)
+                                               "OnFocusMaxSuggestions", 6)
                         .Get();
   max_search_suggestions =
       base::FeatureParam<size_t>(&kOmniboxUrlSuggestionsOnFocus,
-                                 "OnFocusMaxSearchSuggestions", 4)
+                                 "OnFocusMaxSearchSuggestions", 3)
           .Get();
   max_url_suggestions =
       base::FeatureParam<size_t>(&kOmniboxUrlSuggestionsOnFocus,
-                                 "OnFocusMaxUrlSuggestions", 4)
+                                 "OnFocusMaxUrlSuggestions", 3)
           .Get();
   most_visited_recency_window =
       base::FeatureParam<size_t>(&kOmniboxUrlSuggestionsOnFocus,
-                                 "OnFocusMostVisitedRecencyWindow", 13)
+                                 "OnFocusMostVisitedRecencyWindow", 0)
           .Get();
   most_visited_recency_factor =
       base::FeatureParam<std::string>(&kOmniboxUrlSuggestionsOnFocus,
@@ -284,6 +284,14 @@ OmniboxUrlSuggestionsOnFocus::OmniboxUrlSuggestionsOnFocus() {
                                "OnFocusMostVisitedDirectlyQueryHistoryService",
                                true)
           .Get();
+  prefetch_most_visited_sites =
+      base::FeatureParam<bool>(&kOmniboxUrlSuggestionsOnFocus,
+                               "OnFocusPrefetchMostVisitedSites", true)
+          .Get();
+  prefetch_most_visited_sites_delay_ms =
+      base::FeatureParam<int>(&kOmniboxUrlSuggestionsOnFocus,
+                              "OnFocusPrefetchDelay", 300)
+          .Get();
 }
 
 OmniboxUrlSuggestionsOnFocus::OmniboxUrlSuggestionsOnFocus(
@@ -293,4 +301,26 @@ OmniboxUrlSuggestionsOnFocus& OmniboxUrlSuggestionsOnFocus::operator=(
     const OmniboxUrlSuggestionsOnFocus&) = default;
 
 OmniboxUrlSuggestionsOnFocus::~OmniboxUrlSuggestionsOnFocus() = default;
+
+bool OmniboxUrlSuggestionsOnFocus::MostVisitedPrefetchingEnabled() const {
+  return enabled && prefetch_most_visited_sites;
+}
+
+BASE_FEATURE(HappinessTrackingSurveyForOmniboxOnFocusZps::
+                 kHappinessTrackingSurveyForOmniboxOnFocusZps,
+             "HappinessTrackingSurveyForOmniboxOnFocusZps",
+             base::FEATURE_DISABLED_BY_DEFAULT);
+HappinessTrackingSurveyForOmniboxOnFocusZps::
+    HappinessTrackingSurveyForOmniboxOnFocusZps() {
+  enabled = base::FeatureList::IsEnabled(
+      kHappinessTrackingSurveyForOmniboxOnFocusZps);
+  focus_threshold =
+      base::FeatureParam<size_t>(&kHappinessTrackingSurveyForOmniboxOnFocusZps,
+                                 "FocusThreshold", 5)
+          .Get();
+  survey_delay =
+      base::FeatureParam<size_t>(&kHappinessTrackingSurveyForOmniboxOnFocusZps,
+                                 "SurveyDelay", 7000)
+          .Get();
+}
 }  // namespace omnibox_feature_configs

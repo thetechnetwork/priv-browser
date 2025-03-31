@@ -103,6 +103,12 @@ const base::FeatureParam<std::string> kIPHLensOverlayUrlAllowFilters{
     &feature_engagement::kIPHLensOverlayFeature, "x_url_allow_filters", "[]"};
 const base::FeatureParam<std::string> kIPHLensOverlayUrlBlockFilters{
     &feature_engagement::kIPHLensOverlayFeature, "x_url_block_filters", "[]"};
+const base::FeatureParam<std::string> kIPHLensOverlayUrlPathMatchAllowPatterns{
+    &feature_engagement::kIPHLensOverlayFeature,
+    "x_url_path_match_allow_patterns", "[]"};
+const base::FeatureParam<std::string> kIPHLensOverlayUrlPathMatchBlockPatterns{
+    &feature_engagement::kIPHLensOverlayFeature,
+    "x_url_path_match_block_patterns", "[]"};
 const base::FeatureParam<base::TimeDelta> kIPHLensOverlayDelayTime{
     &feature_engagement::kIPHLensOverlayFeature, "x_wait_time",
     base::Seconds(7)};
@@ -201,6 +207,9 @@ BASE_FEATURE(kIPHTabOrganizationSuccessFeature,
              base::FEATURE_DISABLED_BY_DEFAULT);
 BASE_FEATURE(kIPHTabSearchFeature,
              "IPH_TabSearch",
+             base::FEATURE_DISABLED_BY_DEFAULT);
+BASE_FEATURE(kIPHTabSearchToolbarButtonFeature,
+             "IPH_TabSearchToolbarButton",
              base::FEATURE_DISABLED_BY_DEFAULT);
 BASE_FEATURE(kIPHWebUITabStripFeature,
              "IPH_WebUITabStrip",
@@ -400,6 +409,9 @@ BASE_FEATURE(kIPHPageInfoStoreInfoFeature,
              base::FEATURE_DISABLED_BY_DEFAULT);
 BASE_FEATURE(kIPHPageZoomFeature,
              "IPH_PageZoom",
+             base::FEATURE_ENABLED_BY_DEFAULT);
+BASE_FEATURE(kIPHPdfPageDownloadFeature,
+             "IPH_PdfPageDownload",
              base::FEATURE_ENABLED_BY_DEFAULT);
 BASE_FEATURE(kIPHPreviewsOmniboxUIFeature,
              "IPH_PreviewsOmniboxUI",
@@ -652,7 +664,7 @@ BASE_FEATURE(kIPHHomeCustomizationMenuFeature,
              base::FEATURE_ENABLED_BY_DEFAULT);
 BASE_FEATURE(kIPHiOSLensOverlayEntrypointTipFeature,
              "IPH_iOSLensOverlayEntrypointTip",
-             base::FEATURE_ENABLED_BY_DEFAULT);
+             base::FEATURE_DISABLED_BY_DEFAULT);
 BASE_FEATURE(kIPHiOSLensOverlayEscapeHatchTipFeature,
              "IPH_iOSLensOverlayEscapeHatchTip",
              base::FEATURE_ENABLED_BY_DEFAULT);

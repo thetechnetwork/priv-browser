@@ -444,6 +444,12 @@ void URLRequest::GetCharset(std::string* charset) const {
   job_->GetCharset(charset);
 }
 
+void URLRequest::GetClientSideContentDecodingTypes(
+    std::vector<net::SourceStreamType>* types) const {
+  CHECK(job_.get());
+  job_->GetClientSideContentDecodingTypes(types);
+}
+
 int URLRequest::GetResponseCode() const {
   DCHECK(job_.get());
   return job_->GetResponseCode();
@@ -1396,8 +1402,6 @@ void URLRequest::set_socket_tag(const SocketTag& socket_tag) {
 }
 
 StorageAccessStatusCache URLRequest::CalculateStorageAccessStatus() const {
-  CHECK_EQ(is_redirecting(), deferred_redirect_info_.has_value());
-
   // `Delegate::OnReceivedRedirect` may set `defer_redirect` inside of
   // `URLRequest::ReceivedRedirect` to true, which in turn sets the
   // `deferred_redirect_info_` that has to be used when calculating new storage

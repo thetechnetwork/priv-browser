@@ -509,7 +509,6 @@
 <translation id="7787950393032327779">Úgy tűnik, a profilt egy másik Google Chrome-folyamat (<ph name="PROCESS_ID" />) használja egy másik számítógépen (<ph name="HOST_NAME" />). A Chrome zárolta a profilt, hogy az ne sérülhessen. Ha biztos benne, hogy nem használja másik folyamat a profilt, feloldhatja azt, és újraindíthatja a Chrome-ot.</translation>
 <translation id="7801699035218095297">A Google Chrome megpróbálkozik a jelszavak másolásával. Ennek engedélyezéséhez írja be Windows-jelszavát.</translation>
 <translation id="7808348361785373670">Eltávolítás a Chrome-ból…</translation>
-<translation id="782480918904119604">Ha ezt a profilt szeretné használni a Glic szolgáltatással, nyissa meg a Chrome-ot, és jelentkezzen be.</translation>
 <translation id="7825851276765848807">A telepítés egy meg nem határozott hiba miatt nem sikerült. Kérjük, töltse le újra a Google Chrome-ot.</translation>
 <translation id="7845233973568007926">Köszönjük, hogy elvégezte a telepítést. A(z) <ph name="BUNDLE_NAME" /> használata előtt újra kell indítania a számítógépet.</translation>
 <translation id="7872446069773932638">Letöltés… <ph name="SECONDS" /> másodperc van hátra</translation>
@@ -565,6 +564,7 @@
 <translation id="8516431725144212809">Az Ön Chrome által megbecsült érdeklődési körei</translation>
 <translation id="8521348052903287641">Bejövő szabály a Google Chrome Devhez az mDNS forgalom engedélyezése céljából.</translation>
 <translation id="852529348814672339">A Chrome megjelenítése ezen a nyelven</translation>
+<translation id="8533056045953418157">A Google Chrome beállítása alapértelmezett PDF-megtekintőként</translation>
 <translation id="8550334526674375523">Ez a munkaprofil teljesen el van választva a személyes profiljától.</translation>
 <translation id="8555465886620020932">Szolgáltatáshiba: <ph name="SERVICE_ERROR" />.</translation>
 <translation id="856656450041460113">Keresés a nyelvek listájában</translation>

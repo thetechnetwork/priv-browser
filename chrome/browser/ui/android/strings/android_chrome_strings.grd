@@ -1487,9 +1487,6 @@ Your Google account may have other forms of browsing history like searches and a
       <message name="IDS_ANDROID_HISTORY_BLOCKED_SITE" desc="The text displayed in the history page indicating that a visit to a web site was blocked due to an administrator policy.">
         Blocked site
       </message>
-      <message name="IDS_MULTIPLE_HISTORY_ITEMS_DELETED" desc="Accessibility announcement when multiple browsing history items have been deleted.">
-        <ph name="NUMBER_OF_ITEMS">%1$s<ex>3</ex></ph> items deleted
-      </message>
 
       <!-- Privacy Guide -->
       <message name="IDS_PRIVACY_GUIDE_PREF_TITLE" desc="The title of the privacy guide menu item.">
@@ -3095,8 +3092,14 @@ To change this setting, <ph name="BEGIN_LINK">BEGIN_LINK</ph>delete the Chrome d
       </message>
 
       <!-- ContextMenu -->
-      <message name="IDS_CONTEXTMENU_SAVE_PAGE" desc="This string is shown in the context menu for saving the current page.">
+      <message name="IDS_CONTEXTMENU_SAVE_PAGE" desc="This string is shown in the context menu for saving the current page. [CHAR_LIMIT=30]">
         Download
+      </message>
+      <message name="IDS_CONTEXTMENU_SHARE_PAGE" desc="This string is shown in the context menu for sharing the current page. [CHAR_LIMIT=30]">
+        Share
+      </message>
+      <message name="IDS_CONTEXTMENU_PRINT_PAGE" desc="This string is shown in the context menu for printing the current page. [CHAR_LIMIT=30]">
+        Print
       </message>
       <message name="IDS_CONTEXTMENU_OPEN_IN_OTHER_WINDOW" desc="Context sensitive menu item to open the selected link in the other window. [CHAR_LIMIT=30]">
         Open in other window
@@ -4204,7 +4207,10 @@ To change this setting, <ph name="BEGIN_LINK">BEGIN_LINK</ph>delete the Chrome d
         Listen to this page
       </message>
       <message name="IDS_ADAPTIVE_TOOLBAR_BUTTON_PREFERENCE_PAGE_SUMMARY" desc="Title name for the page_summary option in the preference.">
-        Page summary
+        Summarize this page
+      </message>
+      <message name="IDS_ADAPTIVE_TOOLBAR_BUTTON_PREFERENCE_PAGE_SUMMARY_DESCRIPTION" desc="Description for the page_summary option in the preference.">
+        Invokes AI Assistant
       </message>
       <message name="IDS_ADAPTIVE_TOOLBAR_BUTTON_PREFERENCE_BASED_ON_YOUR_USAGE" desc="Title name for the based on your usage option in the preference.">
         Based on your usage
@@ -4251,6 +4257,12 @@ To change this setting, <ph name="BEGIN_LINK">BEGIN_LINK</ph>delete the Chrome d
       <message name="IDS_ADAPTIVE_TOOLBAR_BUTTON_VOICE_SEARCH_IPH_SETTINGS" desc="An in-product-help message for the voice search button referring to toolbar settings.">
         Quickly search with your voice. To edit this shortcut, go to Settings.
       </message>
+      <message name="IDS_ADAPTIVE_TOOLBAR_BUTTON_PAGE_SUMMARY_IPH" desc="An in-product-help message for the page summary button.">
+        Summarize page with AI
+      </message>
+      <message name="IDS_ADAPTIVE_TOOLBAR_BUTTON_REVIEW_PDF_IPH" desc="An in-product-help message for the review PDF button.">
+        Review PDF with AI
+      </message>
       <message name="IDS_ADAPTIVE_TOOLBAR_MENU_EDIT_SHORTCUT" desc="The menu option for opening adaptive toolbar settings.">
         Edit shortcut
       </message>
@@ -4265,6 +4277,9 @@ To change this setting, <ph name="BEGIN_LINK">BEGIN_LINK</ph>delete the Chrome d
       </message>
       <message name="IDS_TOOLBAR_COPY_LINK" desc="The menu option for copying link in the address bar.">
         Copy link
+      </message>
+      <message name="IDS_AI_ASSISTANT_SERVICE_ERROR_TOAST" desc="Text to be shown in a toast when unable to invoke an AI assistant">
+        Couldn’t open AI assistant. Try again.
       </message>
 
       <!-- Main menu items -->
@@ -4414,6 +4429,12 @@ To change this setting, <ph name="BEGIN_LINK">BEGIN_LINK</ph>delete the Chrome d
       <message name="IDS_MENU_OPEN_WITH" desc="Menu item to open the content with another app.">
         Open with…
       </message>
+      <message name="IDS_MENU_SUMMARIZE_WITH_AI" desc="Menu item to summarize a page with AI.">
+        Summarize with AI
+      </message>
+      <message name="IDS_MENU_REVIEW_PDF_WITH_AI" desc="Menu item to review a PDF file with AI.">
+        Review PDF with AI
+      </message>
 
       <!-- Bookmarks strings -->
       <message name="IDS_BOOKMARKS" desc="Title of the bookmarks page, which shows a list of the user's bookmarks. [CHAR_LIMIT=18]">
@@ -4525,6 +4546,9 @@ To change this setting, <ph name="BEGIN_LINK">BEGIN_LINK</ph>delete the Chrome d
       </message>
       <message name="IDS_BOOKMARK_PAGE_MOVED_LOCATION" desc="App-based message shown after user moves a bookmark to specify the location of a bookmark. [CHAR_LIMIT=32]">
         to <ph name="PRODUCT_NAME">%1$s<ex>Reading List</ex></ph>
+      </message>
+      <message name="IDS_BOOKMARK_WIDGET_DESCRIPTION" desc="Description text for the bookmark widget">
+        Easily access your bookmarks
       </message>
 
       <!-- Bookmark bar strings -->
@@ -4723,6 +4747,11 @@ To change this setting, <ph name="BEGIN_LINK">BEGIN_LINK</ph>delete the Chrome d
         On this device
       </message>
 
+      <!-- Bookmark widget strings -->
+      <message name="IDS_BOOKMARK_WIDGET_EMPTY_MSG" desc="Message displayed in the bookmark widget when the current folder contains no bookmarks.">
+        Nothing to show yet
+      </message>
+
       <!-- Read later strings -->
       <message name="IDS_READING_LIST_READ" desc="The header for the read section in the reading list UI.">
         Read
@@ -4861,6 +4890,11 @@ To change this setting, <ph name="BEGIN_LINK">BEGIN_LINK</ph>delete the Chrome d
       </message>
       <message name="IDS_RDS_SITE_SETTINGS_GENERIC_IPH_TEXT_MOBILE" desc="Message on the generic text bubble shown to educate the user about using the desktop site site-level setting to switch to mobile mode.">
         You can request the mobile site for <ph name="HOST_NAME">%1$s<ex>www.example.com</ex></ph>
+      </message>
+
+      <!-- Pdf Page -->
+      <message name="IDS_PDF_PAGE_DOWNLOAD_IPH_TEXT" desc="Text shown in the text bubble to inform users about the option to download a PDF when the PDF document is opened in Chrome.">
+        You can download PDFs here
       </message>
 
       <!-- Accessibility -->
@@ -5168,6 +5202,9 @@ To change this setting, <ph name="BEGIN_LINK">BEGIN_LINK</ph>delete the Chrome d
       </message>
       <message name="IDS_TAB_DROPPED_DIFFERENT_MODEL" desc="Toast that appears when a tab is dropped into tab strip with a different profile (regular v.s. incognito).">
         You can find all open tabs in the tab switcher
+      </message>
+      <message name="IDS_TAB_CANNOT_BE_MOVED" desc="Toast that appears when attempting to move a tab group containing an MHTML tab into another window.">
+        Tab <ph name="TAB_TITLE">%1$s<ex>Google</ex></ph> can't be moved
       </message>
 
       <message name="IDS_CLOSE_TAB" desc="Context menu option that allows the user to close the selected tab.">
@@ -5512,6 +5549,9 @@ To change this setting, <ph name="BEGIN_LINK">BEGIN_LINK</ph>delete the Chrome d
       <message name="IDS_KEYBOARD_SHORTCUT_HELP_CENTER" desc="A text label that appears next to the keyboard shortcut that will open the Google Chrome Help Center in a new tab. The shortcut description is shown in a system dialog along with all other supported shortcuts. [CHAR_LIMIT=55]">
         Open the Chrome Help Center in a new tab
       </message>
+      <message name="IDS_KEYBOARD_SHORTCUT_TOGGLE_BOOKMARK_BAR" desc="A text label that appears next to the keyboard shortcut that will toggle the bookmark bar. The shortcut description is shown in a system dialog along with all other supported shortcuts. [CHAR_LIMIT=55]">
+        Show or hide the bookmarks bar
+      </message>
       <message name="IDS_KEYBOARD_SHORTCUT_TAB_GROUP_HEADER" desc="A text label that appears above a list of shortcuts that are related to the tab window. This group is part of several groups of keyboard shortcuts all shown in a dialog.">
         Tab and window shortcuts
       </message>
@@ -5700,6 +5740,9 @@ To change this setting, <ph name="BEGIN_LINK">BEGIN_LINK</ph>delete the Chrome d
       <message name="IDS_IPH_DOWNLOAD_INFOBAR_DOWNLOAD_CONTINUING_TEXT" desc="The in-product-help message on the download InfoBar to inform that download is still continuing.">
         Your download is still in progress
       </message>
+      <message name="IDS_SEARCH_WIDGET_DESCRIPTION" desc="Description text for the search widget">
+        Quickly start a search in Chrome
+      </message>
 
       <!-- Quick Action Search Widget -->
       <message name="IDS_QUICK_ACTION_SEARCH_WIDGET_SEARCH_BAR_HINT" desc="Hint text for to search box on the quick action search widget">
@@ -5717,10 +5760,16 @@ To change this setting, <ph name="BEGIN_LINK">BEGIN_LINK</ph>delete the Chrome d
       <message name="IDS_QUICK_ACTION_SEARCH_WIDGET_MESSAGE_NO_GOOGLE_LENS" desc="Toast message shown when the user tries to use Google Lens which is disabled on the device.">
         Google Lens is not available on this device
       </message>
+      <message name="IDS_QUICK_ACTION_SEARCH_WIDGET_DESCRIPTION" desc="Description text for the quick action search widget">
+        Search using keyboard, voice, Incognito, or camera
+      </message>
 
       <!-- Dino Widget -->
       <message name="IDS_DINO_WIDGET_TEXT" desc="Text displayed on the Dino Widget. One medium-length or two short words max (area for about 10em)">
               Chrome Dino
+      </message>
+      <message name="IDS_DINO_WIDGET_DESCRIPTION" desc="Description text for the dino widget">
+        Jump into a fun Dino game
       </message>
 
       <!-- Launcher Shortcuts -->
@@ -6639,10 +6688,6 @@ To change this setting, <ph name="BEGIN_LINK">BEGIN_LINK</ph>delete the Chrome d
       </message>
       <message name="IDS_WEBAUTHN_INCOGNITO_CONFIRMATION_SHEET_CLOSED" desc="Accessibility string that describes closing a bottomsheet that confirms with the user that they want to create passkey while in Incognito mode. (See the glossary for translations of the word 'passkey'. Do not translate as 'password'." formatter_data="android_java">
         Passkey confirmation sheet closed
-      </message>
-
-      <message name="IDS_SHARING_CREATE_SUMMARY" desc="Label of menu item to create a summary of the currently shared page.">
-        Create summary
       </message>
 
       <!-- Data Sharing -->

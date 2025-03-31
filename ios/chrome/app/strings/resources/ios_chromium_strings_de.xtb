@@ -46,7 +46,7 @@
 <translation id="2042889939382983733">Meinen Chromium-Verlauf ansehen</translation>
 <translation id="2052320862053429062">Chromium prüft in regelmäßigen Abständen, ob deine Passwörter auf Listen erscheinen, die online veröffentlicht wurden. Dabei werden deine Passwörter und Nutzernamen verschlüsselt, damit sie von niemandem gelesen werden können, auch nicht von Google.</translation>
 <translation id="2059365270911640413">Chromium fertig einrichten</translation>
-<translation id="2147210759439165826">Bleib mit Inhalten und hilfreichen Chromium-Tipps auf dem Laufenden.</translation>
+<translation id="2147210759439165826">Du kannst dich über Inhalte und hilfreiche Chromium-Tipps informieren lassen.</translation>
 <translation id="2168108852149185974">Einige Add-ons führen zum Ausfall von Chromium. Bitte deinstalliere:</translation>
 <translation id="2168593389981132306">Chromium verbessern</translation>
 <translation id="2178608107313874732">Chromium kann gerade nicht auf die Kamera zugreifen</translation>
@@ -94,7 +94,6 @@ Weitere Einstellungen, bei denen Daten zur Verbesserung von Chromium verwendet w
 <translation id="328933489847748230">{count,plural, =1{Aktuell wird 1 Chromium-Fenster angezeigt}other{Aktuell werden {count} Chromium-Fenster angezeigt}}</translation>
 <translation id="3344973607274501920">Chromium konnte deine Passwörter nicht prüfen. Prüfe deine Internetverbindung.</translation>
 <translation id="3366305173356742781">Chromium-Daten in deinem Konto</translation>
-<translation id="33788334537425157">Aktiviere die Option „Inkognitotabs sperren, wenn Chromium geschlossen wird“</translation>
 <translation id="3387107508582892610">{THRESHOLD,plural, =1{Das passiert, wenn Chromium {THRESHOLD} Minute lang nicht verwendet wird. Dazu können der Verlauf und die Funktion „Autofill“ gehören.}other{Das passiert, wenn Chromium {THRESHOLD} Minuten lang nicht verwendet wird. Dazu können der Verlauf und die Funktion „Autofill“ gehören.}}</translation>
 <translation id="3410395242749598859">Einige deiner Chromium-Daten wurden noch nicht in <ph name="EMAIL" /> gespeichert.
 Warte einige Minuten, bevor du das Konto wechselst. Wenn du jetzt das Konto wechselst, werden diese Daten gelöscht.</translation>
@@ -207,7 +206,6 @@ Wichtige Hinweise:
   • Falls du die Synchronisierung deines Verlaufs in deinem Google-Konto aktivierst, können die Messwerte auch Informationen zu den von dir besuchten URLs enthalten.<ph name="END_INDENT" /></translation>
 <translation id="5932787118589620366">Browserdaten in Chromium löschen.</translation>
 <translation id="593808800391107017">Du erhältst Benachrichtigungen bei Problemen mit dem Datenschutz oder der Sicherheit, die Chromium automatisch für dich erkennt.</translation>
-<translation id="5945387852661427312">Du meldest dich mit einem von <ph name="DOMAIN" /> verwalteten Konto an und gibst dem Administrator der Domain Kontrolle über deine Chromium-Daten. Die Daten werden diesem Konto dauerhaft zugeordnet. Wenn du dich von Chromium abmeldest, werden deine Daten auf dem Gerät gelöscht, bleiben jedoch in deinem Google-Konto erhalten.</translation>
 <translation id="5951593919357934226">Chromium optimal nutzen.</translation>
 <translation id="5985254578475526217">Wenn du Benachrichtigungen von Chromium erhalten möchtest, aktiviere Benachrichtigungen in deinen iOS-Einstellungen.</translation>
 <translation id="6104024151682120539">In Chromium öffnen</translation>

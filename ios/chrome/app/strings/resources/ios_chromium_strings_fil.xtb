@@ -91,11 +91,11 @@ Para sa higit pang setting na gumagamit ng data para pahusayin ang iyong experie
 <translation id="3054480780637153380">Buksan ang mga setting ng Chromium sa iOS, pagkatapos ay i-tap ang "Default Browser App" at piliin ang Chromium.</translation>
 <translation id="3102849287235003384">Para mag-sign out sa iyong Google Account sa lahat ng website, <ph name="BEGIN_LINK" />mag-sign out sa Chromium<ph name="END_LINK" />.</translation>
 <translation id="3115956258722352278">Gawing default na browser mo ang Chromium?</translation>
+<translation id="3180939591219927904">I-on ang "I-lock ang mga tab na Incognito kapag isinara mo ang Chromium"</translation>
 <translation id="3242612358525156339">Sa mga setting ng iyong device, buksan ang "<ph name="TEXT_OF_THE_SETTINGS_MENU_ITEM" />" at piliin ang "Chromium"</translation>
 <translation id="328933489847748230">{count,plural, =1{Nagpapakita ngayon ng 1 window ng Chromium}one{Nagpapakita ngayon ng {count} window ng Chromium}other{Nagpapakita ngayon ng {count} na window ng Chromium}}</translation>
 <translation id="3344973607274501920">Hindi masuri ng Chromium ang iyong mga password. Subukang tingnan ang iyong koneksyon sa internet.</translation>
 <translation id="3366305173356742781">Data sa Chromium sa iyong account</translation>
-<translation id="33788334537425157">I-on ang "I-lock ang mga tab na Icognito kapag isinara mo ang Chromium"</translation>
 <translation id="3387107508582892610">{THRESHOLD,plural, =1{Nangyayari ito kapag hindi ginamit ang Chromium nang {THRESHOLD} minuto. Posibleng kasama rito ang history at autofill.}one{Nangyayari ito kapag hindi ginamit ang Chromium nang {THRESHOLD} minuto. Posibleng kasama rito ang history at autofill.}other{Nangyayari ito kapag hindi ginamit ang Chromium nang {THRESHOLD} na minuto. Posibleng kasama rito ang history at autofill.}}</translation>
 <translation id="3410395242749598859">Hindi pa nase-save sa <ph name="EMAIL" /> ang ilan sa iyong data sa Chromium.
 Subukang maghintay nang ilang minuto bago lumipat ng account. Kung lilipat ka ng account ngayon, made-delete ang data na ito.</translation>
@@ -208,7 +208,6 @@ Mga bagay na dapat isaalang-alang:
   • Kung isi-sync mo ang iyong history sa Google Account mo, posibleng kasama rin sa mga sukatan ang impormasyon tungkol sa mga URL na binibisita mo.<ph name="END_INDENT" /></translation>
 <translation id="5932787118589620366">I-delete ang data mula sa pag-browse sa Chromium.</translation>
 <translation id="593808800391107017">Makatanggap ng mga alerto sa anumang isyu sa privacy o seguridad na awtomatikong dine-detect ng Chromium para sa iyo.</translation>
-<translation id="5945387852661427312">Nag-sign in ka gamit ang account na pinamamahalaan ng <ph name="DOMAIN" /> at binibigyan mo ang administrator nito ng kontrol sa iyong data sa Chromium. Permanenteng mauugnay ang data mo sa account na ito. Made-delete ang data mo sa device na ito kapag nag-sign out ka sa Chromium, ngunit mananatili itong naka-store sa Google Account mo.</translation>
 <translation id="5951593919357934226">Sulitin ang Chromium.</translation>
 <translation id="5985254578475526217">Para makatanggap ng mga notification mula sa Chromium, i-on ang mga notification sa iyong Mga Setting ng iOS.</translation>
 <translation id="6104024151682120539">Buksan sa Chromium</translation>
@@ -262,6 +261,7 @@ Ang taong may passphrase mo lang ang makakapagbasa ng iyong naka-encrypt na data
 <translation id="7337881442233988129">Chromium</translation>
 <translation id="7357211569052832586">Inalis ang piniling data mula sa Chromium at mga naka-sync na device. Maaaring mayroong ibang mga uri ng history ng pag-browse ang iyong Google Account gaya ng mga paghahanap at aktibidad mula sa iba pang mga serbisyo ng Google sa history.google.com.</translation>
 <translation id="7395825497086981028">Ise-save ang iyong password sa Password Manager para sa <ph name="EMAIL" />.</translation>
+<translation id="7504829997542308412">Buksan ang Chromium</translation>
 <translation id="7531461704633548377">Mula sa Chromium</translation>
 <translation id="7554983317097061001">Tip sa Chromium: Ilipat ang Chromium sa dock</translation>
 <translation id="7576863740961052505">Pamahalaan ang mga setting ng Chromium</translation>

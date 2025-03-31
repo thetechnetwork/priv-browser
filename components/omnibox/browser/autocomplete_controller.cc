@@ -41,6 +41,7 @@
 #include "base/trace_event/memory_dump_manager.h"
 #include "build/build_config.h"
 #include "components/history_embeddings/history_embeddings_features.h"
+#include "components/lens/lens_features.h"
 #include "components/omnibox/browser/actions/omnibox_action_in_suggest.h"
 #include "components/omnibox/browser/actions/omnibox_answer_action.h"
 #include "components/omnibox/browser/actions/omnibox_pedal_provider.h"
@@ -463,6 +464,10 @@ void AutocompleteController::ExtendMatchSubtypes(
     }
     case AutocompleteMatchType::HISTORY_BODY: {
       subtypes->emplace(omnibox::SUBTYPE_OMNIBOX_HISTORY_BODY);
+      break;
+    }
+    case AutocompleteMatchType::HISTORY_KEYWORD: {
+      subtypes->emplace(omnibox::SUBTYPE_OMNIBOX_HISTORY_KEYWORD);
       break;
     }
     case AutocompleteMatchType::BOOKMARK_TITLE: {
@@ -1046,6 +1051,15 @@ bool AutocompleteController::ShouldRunProvider(
     return false;
   }
 
+  // If zero prefix suggest is disabled for the Lens contextual searchbox, only
+  // run the typed search provider. Else, will use the IsLensSearchbox check
+  // below.
+  if (omnibox::IsLensContextualSearchbox(
+          input_.current_page_classification()) &&
+      !lens::features::ShowContextualSearchboxZeroPrefixSuggest()) {
+    return provider->type() == AutocompleteProvider::TYPE_SEARCH;
+  }
+
   // Only a subset of providers are run for the Lens searchboxes.
   if (omnibox::IsLensSearchbox(input_.current_page_classification())) {
     return provider->type() == AutocompleteProvider::TYPE_SEARCH ||
@@ -1285,9 +1299,8 @@ void AutocompleteController::InitializeSyncProviders(int provider_types) {
   if (provider_types & AutocompleteProvider::TYPE_MOST_VISITED_SITES) {
     providers_.push_back(
         new MostVisitedSitesProvider(provider_client_.get(), this));
-    // Note: the need for the always-present verbatim match originates from the
-    // search-ready omnibox (SRO) in Incognito mode, where the
-    // ZeroSuggestProvider intentionally never gets invoked.
+  }
+  if (provider_types & AutocompleteProvider::TYPE_VERBATIM_MATCH) {
     providers_.push_back(
         new ZeroSuggestVerbatimMatchProvider(provider_client_.get()));
   }
@@ -1532,6 +1545,7 @@ void AutocompleteController::PostProcessMatches() {
   UpdateKeywordDescriptions(&internal_result_);
   UpdateAssociatedKeywords(&internal_result_);
   UpdateSearchboxStats(&internal_result_);
+  UpdateShownInSession(&internal_result_);
   UpdateTailSuggestPrefix(&internal_result_);
   MaybeRemoveCompanyEntityImages(&internal_result_);
   MaybeCleanSuggestionsForKeywordMode(input_, &internal_result_);
@@ -1941,6 +1955,13 @@ void AutocompleteController::UpdateSearchboxStats(AutocompleteResult* result) {
                 .spec());
       }
     }
+  }
+}
+
+void AutocompleteController::UpdateShownInSession(AutocompleteResult* result) {
+  for (auto& match : *result) {
+    match.zero_prefix_suggestions_shown_in_session =
+        result->num_zero_prefix_suggestions_shown_in_session() > 0;
   }
 }
 

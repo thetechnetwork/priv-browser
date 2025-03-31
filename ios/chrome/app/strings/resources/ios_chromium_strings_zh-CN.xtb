@@ -95,7 +95,6 @@
 <translation id="328933489847748230">{count,plural, =1{目前显示了 1 个 Chromium 窗口}other{目前显示了 {count} 个 Chromium 窗口}}</translation>
 <translation id="3344973607274501920">Chromium 无法检查您的密码。请尝试检查您的互联网连接。</translation>
 <translation id="3366305173356742781">您账号中的 Chromium 数据</translation>
-<translation id="33788334537425157">开启“在您关闭 Chromium 时锁定无痕式标签页”</translation>
 <translation id="3387107508582892610">{THRESHOLD,plural, =1{当 Chromium 闲置 {THRESHOLD} 分钟后，就会发生这种情况。清除的数据可能包括历史记录和自动填充数据。}other{当 Chromium 闲置 {THRESHOLD} 分钟后，就会发生这种情况。清除的数据可能包括历史记录和自动填充数据。}}</translation>
 <translation id="3410395242749598859">部分 Chromium 数据尚未保存到 <ph name="EMAIL" />。
 建议等待几分钟，然后再尝试切换账号。如果现在就切换账号，这些数据将被删除。</translation>
@@ -208,7 +207,6 @@
   • 如果您将历史记录同步到 Google 账号，相关指标可能会包含与您访问的网址有关的信息。<ph name="END_INDENT" /></translation>
 <translation id="5932787118589620366">删除 Chromium 中的浏览数据。</translation>
 <translation id="593808800391107017">接收有关 Chromium 为您自动检测到的任何隐私或安全问题的提醒。</translation>
-<translation id="5945387852661427312">您正要登录由 <ph name="DOMAIN" /> 管理的账号，并要授权其管理员控制您的 Chromium 数据。您的数据将与此账号永久关联。退出 Chromium 后，您的数据将从这台设备上删除，但仍会保留在您的 Google 账号中。</translation>
 <translation id="5951593919357934226">最大限度利用 Chromium。</translation>
 <translation id="5985254578475526217">若要接收来自 Chromium 的通知，请在 iOS 设置中开启通知。</translation>
 <translation id="6104024151682120539">在 Chromium 中打开</translation>

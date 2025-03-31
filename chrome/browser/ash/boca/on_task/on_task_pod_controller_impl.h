@@ -38,6 +38,7 @@ class OnTaskPodControllerImpl : public OnTaskPodController,
   void ReloadCurrentPage() override;
   void ToggleTabStripVisibility(bool show) override;
   void SetSnapLocation(OnTaskPodSnapLocation snap_location) override;
+  void OnPauseModeChanged() override;
   void OnPageNavigationContextChanged() override;
   bool CanNavigateToPreviousPage() override;
   bool CanNavigateToNextPage() override;
@@ -48,6 +49,7 @@ class OnTaskPodControllerImpl : public OnTaskPodController,
                              const gfx::Rect& old_bounds,
                              const gfx::Rect& new_bounds,
                              ui::PropertyChangeReason reason) override;
+  void OnWindowVisibilityChanged(aura::Window* window, bool visible) override;
 
   // Component accessors used for testing purposes.
   views::Widget* GetPodWidgetForTesting();

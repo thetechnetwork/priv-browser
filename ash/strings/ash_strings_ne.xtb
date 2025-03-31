@@ -91,6 +91,7 @@
 <translation id="1269405891096105529">गेस्ट मोड अन हुँदा सहायक डिभाइसहरूले काम गर्दैनन्</translation>
 <translation id="1270290102613614947">अन-स्क्रिन किबोर्ड अक्षम गरियो</translation>
 <translation id="1272079795634619415">रोक्नुहोस्</translation>
+<translation id="12741168609094094">खोज्ने, टेक्स्ट कपी गर्नेलगायतका कार्य गर्न डिभाइसको स्क्रिनमा भएको जुनसुकै सामग्री चयन गर्नुहोस्</translation>
 <translation id="1275285675049378717"><ph name="POWER_SOURCE" /> चार्ज गर्दै</translation>
 <translation id="1275718070701477396">चयन गरिएको</translation>
 <translation id="1276975447697633661">फाइल चयन गर्नुहोस् अनि <ph name="KEY" /> थिच्नुहोस्</translation>
@@ -227,6 +228,7 @@
 <translation id="1720230731642245863">हटस्पट अफ गरिएको छ</translation>
 <translation id="1731815243805539470">अघिल्लो प्रयोगकर्ताका रूपमा साइन इन गर्नुहोस्</translation>
 <translation id="1733996486177697563">अँध्यारो तथा उज्यालो थिम अदलबदल गर्नुहोस्। डेस्कटपमा टच एण्ड होल्ड गर्नुहोस् अनि "वालपेपर तथा शैली" चयन गर्नुहोस्।</translation>
+<translation id="1735992454301033090">चयन गरिएको क्षेत्र, सार्न एरो कीहरू प्रयोग गर्नुहोस्</translation>
 <translation id="1736898441010944794">ब्लुटुथ डिभाइसहरूले "<ph name="NAME" />" देख्न सक्छन्।</translation>
 <translation id="1737078180382804488">आफ्नो फोनमा भएका सूचनाहरू हेर्ने सुविधा सेटअप गर्ने प्रक्रिया खारेज गर्नुहोस्</translation>
 <translation id="174102739345480129">मार्कर अफ छ।</translation>
@@ -494,6 +496,7 @@
 <translation id="2683887737780133806">गत हप्ताको <ph name="DAY_OF_WEEK" /></translation>
 <translation id="2687510499067466116">किबोर्डका सर्टकट परिवर्तन भएका छन्</translation>
 <translation id="2689613560355655046">डेस्क ८</translation>
+<translation id="2692092709110488417">चयन गरिएको क्षेत्रमा फोकस गर्न र उक्त क्षेत्र सार्न ट्याब थिच्नुहोस्</translation>
 <translation id="2695305337569143674">वेब</translation>
 <translation id="2697697418792422688">किबोर्डका सेटिङ देखाउनुहोस् <ph name="KEYBOARD_NAME" /> चयन गरिएको छ।</translation>
 <translation id="2699913284398121653">आफ्नो विद्यालयको खातामा भण्डारण गरिएको जानकारी सारेर आफ्नो व्यक्तिगत खातामा लैजान कन्टेन्ट ट्रान्स्फर एप प्रयोग गर्नुहोस्</translation>
@@ -551,6 +554,7 @@
 <translation id="2872353916818027657">प्राथमिक मनिटर बदल्नुहोस्</translation>
 <translation id="2872961005593481000">बन्द गर्नुहोस्</translation>
 <translation id="2876338922445400217">स्क्रिनमा जुम इन गर्नुहोस्</translation>
+<translation id="2876760662374103627">फेस कन्ट्रोल अन छ</translation>
 <translation id="2878884018241093801">हालसालैको कुनै पनि सामग्री छैन</translation>
 <translation id="2880541185262491188">धेरै पटक PIN हाल्ने प्रयास गरियो। <ph name="TIME_LEFT" /> पर्खेर फेरि प्रयास गर्नुहोस्</translation>
 <translation id="2883271196820422439">माउस की सुविधा सुचारु गर्नुहोस्</translation>
@@ -728,6 +732,7 @@
 <translation id="346243998268439747">जुमको स्तर रिसेट गर्नुहोस्</translation>
 <translation id="3465223694362104965">तपाईंले पछिल्लो पटक साइन इन गरेयता यो डिभाइसमा अर्को किबोर्ड जडान गरिएको छ। यो किबोर्डको प्रयोग थाल्नुअघि तपाईं यसमाथि भरोसा गर्नुहुन्छ भन्ने कुरा सुनिश्चित गर्नुहोस्।</translation>
 <translation id="3465356146291925647">तपाईंका प्रशासकले व्यवस्थित गर्नुभएको छ</translation>
+<translation id="3470502288861289375">प्रतिलिपि बनाउँदै...</translation>
 <translation id="347117769229524881"><ph name="MODIFIER_ONE" /><ph name="MODIFIER_TWO" /><ph name="KEY_ONE" /> थिच्नुहोस् अनि <ph name="KEY_TWO" /> वा <ph name="KEY_THREE" /> थिच्नुहोस्</translation>
 <translation id="3477079411857374384">Control-Shift-Space</translation>
 <translation id="3485319357743610354"><ph name="SECURITY_STATUS" />, <ph name="CONNECTION_STATUS" />, सिग्नलको क्षमता <ph name="SIGNAL_STRENGTH" /></translation>
@@ -1032,6 +1037,7 @@
 <translation id="4412698727486357573">मद्दत केन्द्र</translation>
 <translation id="4412944820643904175"><ph name="FEATURE_NAME" /> अफ छ।</translation>
 <translation id="4417647906073317561">फोकस मोडका सेटिङ। यो सेटिङ प्रयोग गरी टाइमर, कार्य र सङ्गीत सेट गर्नुहोस्।</translation>
+<translation id="4418600384772451109">प्यानल बन्द गर्नुहोस्</translation>
 <translation id="4424159417645388645">डेस्क ५</translation>
 <translation id="4426817706804363424">स्याबास!</translation>
 <translation id="4430019312045809116">आयतन</translation>
@@ -1484,6 +1490,7 @@
 <translation id="5825969630400862129">कनेक्ट गरिएका यन्त्रहरूसम्बन्धी सेटिङ</translation>
 <translation id="5830180081891717894">थप <ph name="WINDOWS" /> वटा</translation>
 <translation id="5837036133683224804"><ph name="RECEIVER_NAME" /> मा <ph name="ROUTE_TITLE" /> बन्द गर्नुहोस्</translation>
+<translation id="5840658767386246331">Google मार्फत खोज्नुहोस्</translation>
 <translation id="5841296711770970362">अर्को ट्र्याक प्ले गर्नुहोस्</translation>
 <translation id="5842553299352339114"><ph name="DEVICE_NAME" /> को हटस्पट अन छ, कुनै पनि डिभाइस कनेक्ट गरिएको छैन</translation>
 <translation id="584525477304726060">अधिकतम बनाउन होल्ड गर्नुहोस्</translation>
@@ -1515,6 +1522,7 @@
 <translation id="595202126637698455">प्रदर्शन ट्रेसिङ सक्षम गरियो</translation>
 <translation id="5955304353782037793">एप</translation>
 <translation id="5958529069007801266">सुपरिवेक्षित प्रयोगकर्ता</translation>
+<translation id="596035801491797438">फेस कन्ट्रोल अफ गर्नुहोस्</translation>
 <translation id="5960410286721553511">आफ्नो फोनका हालसालैका फोटो तथा मिडिया हेर्नुहोस्</translation>
 <translation id="5965524703725988602">अँध्यारो थिम टगल गर्नुहोस्। <ph name="STATE_TEXT" />।</translation>
 <translation id="5975235751479998104">विन्डोहरू सुल्टो क्रमअनुसार पालैपालो हेर्नुहोस्</translation>
@@ -2226,6 +2234,7 @@
 <translation id="8287009018010202411">उत्पादकत्व</translation>
 <translation id="828708037801473432">अफ</translation>
 <translation id="8297006494302853456">कमजोर</translation>
+<translation id="8300451473979404345">चयन गरिएको ह्यान्डल, सार्न एरो कीहरू प्रयोग गर्नुहोस्</translation>
 <translation id="8308637677604853869">अघिल्लो मेनु</translation>
 <translation id="830868413617744215">बेटा</translation>
 <translation id="8314772463905284467">क्याप्स लक अन छ</translation>
@@ -2286,6 +2295,7 @@
 <translation id="851458219935658693">हालको डेस्कमा भएका विन्डोहरू देखाउनुहोस्, रेडियो बटन चयन गरियो</translation>
 <translation id="851660987304951246">तुरुन्तै सामग्रीको सारांश बनाउन वा प्रश्नहरू सोध्न "मलाई पढ्न मद्दत गर" प्रयोग गर्नुहोस्</translation>
 <translation id="8517041960877371778">खुला हुँदा तपाईँको <ph name="DEVICE_TYPE" /> चार्ज नहुन सक्छ।</translation>
+<translation id="8519329096920173967">Google लेन्स प्रयोग गरी मेरो डिभाइसको स्क्रिनमा भएका सामग्री खोज्नुहोस्</translation>
 <translation id="8535393432370007982">रङअनुसार क्रमबद्ध गर्ने कार्य अन्डू गर्नुहोस्</translation>
 <translation id="8536886494750559755">क्विक सेयरसम्बन्धी सेटिङ देखाउनुहोस्। सबै जना <ph name="TIME_REMAINING" /> सम्म देख्न सक्छन्</translation>
 <translation id="8539803091108018926">टेक्स्ट क्लिपबोर्डमा कपी गरिएको छ</translation>

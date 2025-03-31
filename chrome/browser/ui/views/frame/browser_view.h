@@ -471,9 +471,8 @@ class BrowserView : public BrowserWindow,
   std::optional<bool> GetWebApiWindowResizable() const;
 
   // Return the tab strip index of the single tab (if any) that is inactive but
-  // part of a split view. Assumes there is max one split view in the tab
-  // strip, it contains exactly two tabs, and one of those tabs is currently
-  // active.
+  // part of a split view. Assumes the split view contains exactly two tabs, and
+  // one of those tabs is currently active.
   int GetInactiveSplitTabIndex();
 
   // Display the current active split view as a series of multiple side-by-side
@@ -710,6 +709,9 @@ class BrowserView : public BrowserWindow,
                          split_tabs::SplitTabId split_id,
                          SplitTabAddReason reason,
                          tabs::SplitTabLayout tab_layout) override;
+  void OnSplitTabRemoved(std::vector<std::pair<tabs::TabInterface*, int>> tabs,
+                         split_tabs::SplitTabId split_id,
+                         SplitTabRemoveReason reason) override;
   void TabStripEmpty() override;
   void WillCloseAllTabs(TabStripModel* tab_strip_model) override;
   void CloseAllTabsStopped(TabStripModel* tab_strip_model,
@@ -1101,6 +1103,9 @@ class BrowserView : public BrowserWindow,
   // Attempts to show IPH promo for experimental AI.
   void MaybeShowExperimentalAIIPH();
 
+  // Attempts to show IPH promo for the tab search toolbar button.
+  void MaybeShowTabStripToolbarButtonIPH();
+
   void UpdateWindowControlsOverlayEnabled();
 
   // Updates the visibility of the Window Controls Overlay toggle button.
@@ -1222,6 +1227,8 @@ class BrowserView : public BrowserWindow,
   // The Bookmark Bar View for this window. Lazily created. May be null for
   // non-tabbed browsers like popups. May not be visible.
   std::unique_ptr<BookmarkBarView> bookmark_bar_view_;
+
+  std::unique_ptr<TabSearchBubbleHost> tab_search_bubble_host_;
 
   // Separator between top container and contents.
   raw_ptr<views::View> contents_separator_ = nullptr;

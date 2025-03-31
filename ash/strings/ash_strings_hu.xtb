@@ -91,6 +91,7 @@
 <translation id="1269405891096105529">A periféria nem támogatott vendég módban</translation>
 <translation id="1270290102613614947">Képernyő-billentyűzet kikapcsolva</translation>
 <translation id="1272079795634619415">Leállítás</translation>
+<translation id="12741168609094094">A képernyőn bármit kijelölhet kereséshez, szöveg másolásához, stb.</translation>
 <translation id="1275285675049378717">A következő töltése: <ph name="POWER_SOURCE" />…</translation>
 <translation id="1275718070701477396">Kijelölve</translation>
 <translation id="1276975447697633661">Válassza ki a fájlt, majd nyomja meg a(z) <ph name="KEY" /> billentyűt</translation>
@@ -227,6 +228,7 @@
 <translation id="1720230731642245863">A hotspot ki van kapcsolva</translation>
 <translation id="1731815243805539470">Váltás az előző felhasználóra</translation>
 <translation id="1733996486177697563">Válthat a sötét és a világos téma között. Tartsa lenyomva ujját az asztalon, majd válassza a Háttérkép és stílus elemet.</translation>
+<translation id="1735992454301033090">Terület kijelölve, a nyílbillentyűkkel mozoghatja</translation>
 <translation id="1736898441010944794">A(z) „<ph name="NAME" />” látható a Bluetooth-eszközök számára.</translation>
 <translation id="1737078180382804488">A telefon értesítéseinek megtekintésére vonatkozó beállítás elvetése</translation>
 <translation id="174102739345480129">Jelölő kikapcsolva.</translation>
@@ -494,6 +496,7 @@
 <translation id="2683887737780133806">Múlt hét <ph name="DAY_OF_WEEK" /></translation>
 <translation id="2687510499067466116">A billentyűparancs módosult</translation>
 <translation id="2689613560355655046">8. asztal</translation>
+<translation id="2692092709110488417">Nyomja le a Tab billentyűt a kijelölt területre való fókuszáláshoz és a mozgatásához</translation>
 <translation id="2695305337569143674">böngésző</translation>
 <translation id="2697697418792422688">Billentyűzetbeállítások megjelenítése. <ph name="KEYBOARD_NAME" /> kiválasztva.</translation>
 <translation id="2699913284398121653">Az iskolai fiókjában lévő adatok személyes fiókba történő áthelyezéshez használja a Tartalomátvitel alkalmazást</translation>
@@ -551,6 +554,7 @@ Ellenkező esetben a beépített érintőpad <ph name="TIMEOUT_SECONDS" /> múlv
 <translation id="2872353916818027657">Elsődleges monitor felcserélése</translation>
 <translation id="2872961005593481000">Leállítás</translation>
 <translation id="2876338922445400217">A képernyő nagyítása</translation>
+<translation id="2876760662374103627">Az arcalapú vezérlés aktív</translation>
 <translation id="2878884018241093801">Nincsenek mostanában használt elemek</translation>
 <translation id="2880541185262491188">Túl sokszor próbálkozott a PIN-kód megadásával. <ph name="TIME_LEFT" /> várakozást követően próbálja meg újra.</translation>
 <translation id="2883271196820422439">Egérgombok használatának folytatása</translation>
@@ -728,6 +732,7 @@ Ellenkező esetben a beépített érintőpad <ph name="TIMEOUT_SECONDS" /> múlv
 <translation id="346243998268439747">A nagyítási szint alaphelyzetbe állítása</translation>
 <translation id="3465223694362104965">Az utolsó bejelentkezése óta másik billentyűzetet csatlakoztattak ehhez az eszközhöz. Mielőtt elkezdené használni, győződjön meg róla, hogy biztonságos.</translation>
 <translation id="3465356146291925647">A rendszergazdája kezeli</translation>
+<translation id="3470502288861289375">Másolás...</translation>
 <translation id="347117769229524881"><ph name="MODIFIER_ONE" /><ph name="MODIFIER_TWO" /><ph name="KEY_ONE" />, majd <ph name="KEY_TWO" /> vagy <ph name="KEY_THREE" /></translation>
 <translation id="3477079411857374384">Control+Shift+szóköz</translation>
 <translation id="3485319357743610354"><ph name="SECURITY_STATUS" />, <ph name="CONNECTION_STATUS" />, jelerősség: <ph name="SIGNAL_STRENGTH" /></translation>
@@ -1015,6 +1020,7 @@ Az akkumulátor-élettartam növelése érdekében egyes funkciók korlátozotta
 <translation id="4351244548802238354">Párbeszédablak bezárása</translation>
 <translation id="4356872429719185452">Hotspotadatok megjelenítése. A hotspot bekapcsolása folyamatban van.</translation>
 <translation id="4364101114148522660"><ph name="DURATION" />  Felvétel…</translation>
+<translation id="4368227575116094370">Google-táblázat létrehozása</translation>
 <translation id="4371348193907997655">Átküldés beállításai</translation>
 <translation id="4371834685492830207">A PIN-kód csak érvényes karaktereket tartalmazhat</translation>
 <translation id="4375482231364171368">Keresés a címsávban</translation>
@@ -1032,6 +1038,7 @@ Az akkumulátor-élettartam növelése érdekében egyes funkciók korlátozotta
 <translation id="4412698727486357573">Súgó</translation>
 <translation id="4412944820643904175"><ph name="FEATURE_NAME" /> kikapcsolva.</translation>
 <translation id="4417647906073317561">Összpontosítási üzemmód beállításai. Állítson be időzítőt, feladatot és zenét, hogy lendületbe kerüljön.</translation>
+<translation id="4418600384772451109">Panel bezárása</translation>
 <translation id="4424159417645388645">5. asztal</translation>
 <translation id="4426817706804363424">Szuper!</translation>
 <translation id="4430019312045809116">Hangerő</translation>
@@ -1484,6 +1491,7 @@ Nincsenek csatlakoztatott eszközök.</translation>
 <translation id="5825969630400862129">Csatlakoztatott eszközök beállításai</translation>
 <translation id="5830180081891717894">További <ph name="WINDOWS" /></translation>
 <translation id="5837036133683224804">A(z) <ph name="ROUTE_TITLE" /> leállítása itt: <ph name="RECEIVER_NAME" /></translation>
+<translation id="5840658767386246331">Keresés a Google-lal</translation>
 <translation id="5841296711770970362">Ugrás a következő számra</translation>
 <translation id="5842553299352339114">Be van kapcsolva a következő hotspot: <ph name="DEVICE_NAME" />; nincs csatlakoztatott eszköz</translation>
 <translation id="584525477304726060">Tartsa, ha maximalizálni szeretné</translation>
@@ -1515,6 +1523,7 @@ Nincsenek csatlakoztatott eszközök.</translation>
 <translation id="595202126637698455">Teljesítménykövetés engedélyezve</translation>
 <translation id="5955304353782037793">alk</translation>
 <translation id="5958529069007801266">Felügyelt felhasználó</translation>
+<translation id="596035801491797438">Arcalapú vezérlés kikapcsolása</translation>
 <translation id="5960410286721553511">A telefonon található friss fotók és médiatartalmak megtekintése</translation>
 <translation id="5965524703725988602">Sötét téma be-/kikapcsolása. <ph name="STATE_TEXT" />.</translation>
 <translation id="5975235751479998104">Váltás előre az ablakokon keresztül</translation>
@@ -2226,6 +2235,7 @@ Az eszköz leállításához tartsa ismét nyomva az eszköz bekapcsológombját
 <translation id="8287009018010202411">Hatékonyság</translation>
 <translation id="828708037801473432">Ki</translation>
 <translation id="8297006494302853456">Gyenge</translation>
+<translation id="8300451473979404345">Fogantyú kiválasztva, a nyílbillentyűkkel mozgathatja</translation>
 <translation id="8308637677604853869">Előző menü</translation>
 <translation id="830868413617744215">Béta</translation>
 <translation id="8314772463905284467">A Caps Lock be van kapcsolva</translation>
@@ -2286,6 +2296,7 @@ Az eszköz leállításához tartsa ismét nyomva az eszköz bekapcsológombját
 <translation id="851458219935658693">A jelenlegi asztal ablakainak megjelenítésére vonatkozó kapcsológomb van kiválasztva</translation>
 <translation id="851660987304951246">A Segítség az olvasáshoz funkció használatával gyorsan foglalhat össze tartalmakat és tehet fel kérdéseket</translation>
 <translation id="8517041960877371778">Előfordulhat, hogy a(z) <ph name="DEVICE_TYPE" /> nem töltődik, amíg be van kapcsolva.</translation>
+<translation id="8519329096920173967">Keresés a képernyőn a Google Lens segítségével</translation>
 <translation id="8535393432370007982">Szín szerinti rendezés visszavonása</translation>
 <translation id="8536886494750559755">A Quick Share beállításainak megjelenítése. Mindenki számára látható ennyi ideig: <ph name="TIME_REMAINING" />.</translation>
 <translation id="8539803091108018926">Szöveg vágólapra másolva</translation>

@@ -5,7 +5,7 @@
 import 'chrome://settings/settings.js';
 
 import type {CrShortcutInputElement} from 'chrome://settings/lazy_load.js';
-import type {SettingsGlicPageElement, SettingsPrefsElement} from 'chrome://settings/settings.js';
+import type {SettingsGlicPageElement, SettingsPrefsElement, SettingsToggleButtonElement} from 'chrome://settings/settings.js';
 import {CrSettingsPrefs, GlicBrowserProxyImpl, loadTimeData, MetricsBrowserProxyImpl, resetRouterForTesting, Router, routes, SettingsGlicPageFeaturePrefName as PrefName} from 'chrome://settings/settings.js';
 import {assertEquals, assertFalse, assertTrue} from 'chrome://webui-test/chai_assert.js';
 import {keyDownOn} from 'chrome://webui-test/keyboard_mock_interactions.js';
@@ -189,6 +189,71 @@ suite('GlicPageFocusTest', function() {
       userActions = await metricsBrowserProxy.getArgs('recordAction');
       assertEquals(1, userActions.length);
       verifyUserAction('GlicOsEntrypoint.Settings.ShortcutEnabled');
+    });
+
+    test('edit shortcut', async () => {
+      // Flush task for focusing on the back button.
+      await flushTasks();
+
+      // Assert.
+      booleanHistograms =
+          await metricsBrowserProxy.getArgs('recordBooleanHistogram');
+      assertEquals(0, booleanHistograms.length);
+
+      // Arrange.
+      const shortcutInput = $<CrShortcutInputElement>('shortcutInput');
+      assertTrue(!!shortcutInput);
+      const field = shortcutInput.$.input;
+      assertEquals('⌃A', field.value);
+
+      // Act.
+      shortcutInput.$.edit.click();
+      await metricsBrowserProxy.whenCalled('recordBooleanHistogram');
+      await flushTasks();
+      glicBrowserProxy.setGlicShortcutResponse('Ctrl + B');
+      keyDownOn(field, 66, ['ctrl']);
+      await flushTasks();
+
+      // Assert.
+      booleanHistograms =
+          await metricsBrowserProxy.getArgs('recordBooleanHistogram');
+      assertEquals(2, booleanHistograms.length);
+      const hasValue = 'Glic.OsEntrypoint.Settings.Shortcut';
+      verifyBooleanMetric(hasValue, true);
+      verifyBooleanMetric(hasValue, true);
+      userActions = await metricsBrowserProxy.getArgs('recordAction');
+      assertEquals(1, userActions.length);
+      verifyUserAction('GlicOsEntrypoint.Settings.ShortcutEdited');
+    });
+
+    test('toggle OS entrypoint', async () => {
+      // Assert no actions are logged upon load.
+      userActions = await metricsBrowserProxy.getArgs('recordAction');
+      assertEquals(0, userActions.length);
+
+      // Arrange.
+      const launcherToggle = $<SettingsToggleButtonElement>('launcherToggle');
+      assertTrue(!!launcherToggle);
+      assertTrue(launcherToggle.checked);
+
+      // Act.
+      launcherToggle.click();
+      await flushTasks();
+
+      // Assert.
+      assertTrue(!launcherToggle.checked);
+      userActions = await metricsBrowserProxy.getArgs('recordAction');
+      assertEquals(1, userActions.length);
+      verifyUserAction('Glic.OsEntrypoint.Settings.Toggle.Disabled');
+
+      // Act.
+      launcherToggle.click();
+      await flushTasks();
+
+      // Assert.
+      userActions = await metricsBrowserProxy.getArgs('recordAction');
+      assertEquals(2, userActions.length);
+      verifyUserAction('Glic.OsEntrypoint.Settings.Toggle.Enabled');
     });
   });
 });

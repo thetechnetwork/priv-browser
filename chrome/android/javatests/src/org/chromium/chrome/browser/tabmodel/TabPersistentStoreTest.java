@@ -40,6 +40,7 @@ import org.chromium.base.test.util.CallbackHelper;
 import org.chromium.base.test.util.CommandLineFlags;
 import org.chromium.base.test.util.Criteria;
 import org.chromium.base.test.util.CriteriaHelper;
+import org.chromium.base.test.util.DisabledTest;
 import org.chromium.base.test.util.Feature;
 import org.chromium.base.test.util.Features.DisableFeatures;
 import org.chromium.base.test.util.Features.EnableFeatures;
@@ -316,7 +317,7 @@ public class TabPersistentStoreTest {
                     }
                 }
             };
-    private static TabWindowManagerImpl sTabWindowManager;
+    private static TabWindowManager sTabWindowManager;
     private static CipherFactory sCipherFactory;
 
     /** Class for mocking out the directory containing all of the TabState files. */
@@ -344,11 +345,8 @@ public class TabPersistentStoreTest {
 
         sCipherFactory = new CipherFactory();
 
-        ThreadUtils.runOnUiThreadBlocking(
-                () -> {
-                    sTabWindowManager =
-                            (TabWindowManagerImpl) TabWindowManagerSingleton.getInstance();
-                });
+        sTabWindowManager =
+                ThreadUtils.runOnUiThreadBlocking(TabWindowManagerSingleton::getInstance);
     }
 
     @AfterClass
@@ -438,8 +436,6 @@ public class TabPersistentStoreTest {
     public void tearDown() {
         ThreadUtils.runOnUiThreadBlocking(
                 () -> {
-                    sTabWindowManager.onActivityStateChange(
-                            mChromeActivity, ActivityState.DESTROYED);
                     ApplicationStatus.onStateChangeForTesting(
                             mChromeActivity, ActivityState.DESTROYED);
                     ApplicationStatus.unregisterActivityStateListener(mActivityStateListener);
@@ -651,6 +647,7 @@ public class TabPersistentStoreTest {
     @SmallTest
     @Feature("TabPersistentStore")
     @EnableFeatures(ChromeFeatureList.TAB_STATE_FLAT_BUFFER + ":migrate_stale_tabs/true")
+    @DisabledTest(message = "crbug.com/406258165")
     public void testSaveStateNoFlatBufferPrior() throws Exception {
         Pair<TabPersistentStore, Tab[]> storeAndRestoredTabs = createStoreAndRestoreTabs();
         TabPersistentStore store = storeAndRestoredTabs.first;
@@ -678,11 +675,13 @@ public class TabPersistentStoreTest {
                 });
         helper.waitForCallback(0);
 
-        assertFalse(
-                "Legacy TabState File "
-                        + legacyFile
-                        + " should not exist, as it has been deprecated",
-                legacyFile.exists());
+        CriteriaHelper.pollInstrumentationThread(
+                () -> {
+                    Criteria.checkThat(
+                            legacyFile + " should not exist as it has been deprecated",
+                            legacyFile.exists(),
+                            Matchers.is(false));
+                });
         assertTrue(
                 "FlatBuffer TabState File "
                         + flatBufferFile
@@ -1444,13 +1443,15 @@ public class TabPersistentStoreTest {
         TestTabModelSelector selector =
                 ThreadUtils.runOnUiThreadBlocking(
                         () -> {
-                            ApplicationStatus.onStateChangeForTesting(
-                                    mChromeActivity, ActivityState.STARTED);
                             // Clear any existing TestTabModelSelector (required when
                             // createAndRestoreRealTabModelImpls is called multiple times in one
                             // test).
-                            sTabWindowManager.onActivityStateChange(
+                            ApplicationStatus.onStateChangeForTesting(
                                     mChromeActivity, ActivityState.DESTROYED);
+                            ApplicationStatus.onStateChangeForTesting(
+                                    mChromeActivity, ActivityState.CREATED);
+                            ApplicationStatus.onStateChangeForTesting(
+                                    mChromeActivity, ActivityState.STARTED);
                             var profileProvider =
                                     new ActivityProfileProvider(
                                             mChromeActivity.getLifecycleDispatcher());

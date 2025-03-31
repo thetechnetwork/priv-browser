@@ -91,6 +91,7 @@ Pour commencer, voici des exemples de ce que vous pouvez me demander.</translati
 <translation id="1269405891096105529">Périphérique non accepté en mode Invité</translation>
 <translation id="1270290102613614947">Clavier à l'écran désactivé</translation>
 <translation id="1272079795634619415">Arrêter</translation>
+<translation id="12741168609094094">Sélectionnez n'importe quel élément à l'écran pour effectuer une recherche, copier du texte, etc.</translation>
 <translation id="1275285675049378717">En cours d'alimentation : <ph name="POWER_SOURCE" /></translation>
 <translation id="1275718070701477396">Sélectionnée</translation>
 <translation id="1276975447697633661">Sélectionnez le fichier, puis appuyez sur <ph name="KEY" /></translation>
@@ -149,6 +150,7 @@ Pour commencer, voici des exemples de ce que vous pouvez me demander.</translati
 <translation id="1455242230282523554">Afficher les paramètres de langue</translation>
 <translation id="1459693405370120464">Météo</translation>
 <translation id="1460620680449458626">Le volume est désactivé.</translation>
+<translation id="1462439140224375968">Document Google Docs créé</translation>
 <translation id="14648076227129703">L'accès à l'appareil photo est accordé à <ph name="APP1_NAME" /> et <ph name="APP2_NAME" />, ainsi qu'à l'ensemble des sites Web et applis ayant l'autorisation d'y accéder</translation>
 <translation id="1467432559032391204">À gauche</translation>
 <translation id="146902737843070955">Votre administrateur a demandé cette modification</translation>
@@ -226,6 +228,7 @@ Pour commencer, voici des exemples de ce que vous pouvez me demander.</translati
 <translation id="1720230731642245863">Le point d'accès est désactivé</translation>
 <translation id="1731815243805539470">Passer à l'utilisateur précédent</translation>
 <translation id="1733996486177697563">Basculez entre les thèmes sombre et clair. Appuyez de manière prolongée sur le bureau, puis sélectionnez "Fond d'écran et style".</translation>
+<translation id="1735992454301033090">Zone sélectionnée, utiliser les touches fléchées pour la déplacer</translation>
 <translation id="1736898441010944794">"<ph name="NAME" />" est visible par les appareils Bluetooth.</translation>
 <translation id="1737078180382804488">Ignorer la configuration concernant l'affichage des notifications de votre téléphone</translation>
 <translation id="174102739345480129">Le repère est désactivé.</translation>
@@ -493,6 +496,7 @@ Pour commencer, voici des exemples de ce que vous pouvez me demander.</translati
 <translation id="2683887737780133806"><ph name="DAY_OF_WEEK" /> de la semaine dernière</translation>
 <translation id="2687510499067466116">Le raccourci clavier a changé</translation>
 <translation id="2689613560355655046">Bureau 8</translation>
+<translation id="2692092709110488417">Appuyer sur Tabulation pour sélectionner une zone et la déplacer</translation>
 <translation id="2695305337569143674">web</translation>
 <translation id="2697697418792422688">Afficher les paramètres du clavier. <ph name="KEYBOARD_NAME" /> sélectionné.</translation>
 <translation id="2699913284398121653">Utilisez l'appli Transfert de contenus pour transférer les données de votre compte scolaire vers votre compte personnel</translation>
@@ -550,6 +554,7 @@ Sinon, le pavé tactile intégré sera réactivé dans <ph name="TIMEOUT_SECONDS
 <translation id="2872353916818027657">Changer de moniteur principal</translation>
 <translation id="2872961005593481000">Éteindre</translation>
 <translation id="2876338922445400217">Faire un zoom avant sur l'écran</translation>
+<translation id="2876760662374103627">Commande par le visage active</translation>
 <translation id="2878884018241093801">Aucun élément récent</translation>
 <translation id="2880541185262491188">Trop de tentatives de saisie de code infructueuses. Patientez <ph name="TIME_LEFT" /> et réessayez.</translation>
 <translation id="2883271196820422439">Réactiver les touches pour la souris</translation>
@@ -593,6 +598,7 @@ Sinon, le pavé tactile intégré sera réactivé dans <ph name="TIMEOUT_SECONDS
 <translation id="301584155502740476">Voir les détails du point d'accès. Celui-ci est désactivé.</translation>
 <translation id="3017079585324758401">Arrière-plan</translation>
 <translation id="3018135054368884502">Faire une avance rapide sur le contenu multimédia</translation>
+<translation id="3026897869154397692">Ajouté à Agenda</translation>
 <translation id="3033545621352269033">Activé</translation>
 <translation id="3033912566804961911">Associer à <ph name="DESK_NAME" /></translation>
 <translation id="3036649622769666520">Ouvrir les fichiers</translation>
@@ -726,6 +732,7 @@ Sinon, le pavé tactile intégré sera réactivé dans <ph name="TIMEOUT_SECONDS
 <translation id="346243998268439747">Réinitialiser le niveau de zoom</translation>
 <translation id="3465223694362104965">Un autre clavier a été connecté à cet appareil depuis votre dernière connexion. Avant d'utiliser ce clavier, assurez-vous qu'il s'agit d'un clavier de confiance.</translation>
 <translation id="3465356146291925647">Géré par votre administrateur</translation>
+<translation id="3470502288861289375">Copie en cours…</translation>
 <translation id="347117769229524881"><ph name="MODIFIER_ONE" /><ph name="MODIFIER_TWO" /><ph name="KEY_ONE" />, puis <ph name="KEY_TWO" /> ou <ph name="KEY_THREE" /></translation>
 <translation id="3477079411857374384">Ctrl+Maj+Espace</translation>
 <translation id="3485319357743610354"><ph name="SECURITY_STATUS" />, <ph name="CONNECTION_STATUS" />, force du signal : <ph name="SIGNAL_STRENGTH" /></translation>
@@ -1012,6 +1019,7 @@ Certaines fonctionnalités sont limitées afin d'augmenter l'autonomie de la bat
 <translation id="4351244548802238354">Fermer la boîte de dialogue</translation>
 <translation id="4356872429719185452">Voir les détails du point d'accès. Il est en cours d'activation.</translation>
 <translation id="4364101114148522660">Enregistrement de <ph name="DURATION" /></translation>
+<translation id="4368227575116094370">Créer une feuille de calcul Google Sheets</translation>
 <translation id="4371348193907997655">Paramètres Cast</translation>
 <translation id="4371834685492830207">Le code ne doit contenir que des caractères valides</translation>
 <translation id="4375482231364171368">Rechercher dans la barre d'adresse</translation>
@@ -1029,6 +1037,7 @@ Certaines fonctionnalités sont limitées afin d'augmenter l'autonomie de la bat
 <translation id="4412698727486357573">Centre d'aide</translation>
 <translation id="4412944820643904175">La fonctionnalité <ph name="FEATURE_NAME" /> est désactivée.</translation>
 <translation id="4417647906073317561">Paramètres du mode Sans distractions. Choisissez un minuteur, une tâche et de la musique pour vous concentrer.</translation>
+<translation id="4418600384772451109">Fermer le panneau</translation>
 <translation id="4424159417645388645">Bureau 5</translation>
 <translation id="4426817706804363424">Bien joué !</translation>
 <translation id="4430019312045809116">Volume</translation>
@@ -1481,6 +1490,7 @@ Aucun appareil connecté.</translation>
 <translation id="5825969630400862129">Paramètres des appareils connectés</translation>
 <translation id="5830180081891717894"><ph name="WINDOWS" /> autre(s)</translation>
 <translation id="5837036133683224804">Arrêter <ph name="ROUTE_TITLE" /> vers <ph name="RECEIVER_NAME" /></translation>
+<translation id="5840658767386246331">Rechercher avec Google</translation>
 <translation id="5841296711770970362">Passer au titre suivant</translation>
 <translation id="5842553299352339114">Le point d'accès <ph name="DEVICE_NAME" /> est activé, aucun appareil connecté</translation>
 <translation id="584525477304726060">Maintenez pour agrandir</translation>
@@ -1512,6 +1522,7 @@ Aucun appareil connecté.</translation>
 <translation id="595202126637698455">Suivi des performances activé</translation>
 <translation id="5955304353782037793">application</translation>
 <translation id="5958529069007801266">Utilis. supervisé</translation>
+<translation id="596035801491797438">Désactiver la commande par le visage</translation>
 <translation id="5960410286721553511">Afficher les photos et contenus multimédias récents de votre téléphone</translation>
 <translation id="5965524703725988602">Activer/Désactiver le thème sombre. <ph name="STATE_TEXT" />.</translation>
 <translation id="5975235751479998104">Passer à la fenêtre suivante</translation>
@@ -1894,6 +1905,7 @@ Nouvelle installation</translation>
 <translation id="7228968829656641943">Sélectionner pour rechercher à l'écran. Appuyer sur Tabulation, puis sur Espace pour la navigation au clavier.</translation>
 <translation id="7229029500464092426">Mémoire : <ph name="AVAILABLE_MEMORY" /> | Total : <ph name="TOTAL_MEMORY" /></translation>
 <translation id="7239814253344511868">Les deux boutons de la souris</translation>
+<translation id="7240636904654154599">Feuille de calcul Google Sheets créée</translation>
 <translation id="7244725679040769470">Il reste <ph name="PERCENTAGE" /> % de batterie.
 Branchez votre appareil sur une source d'alimentation.</translation>
 <translation id="7246071203293827765"><ph name="UPDATE_TEXT" />. Ce Chromebook doit redémarrer pour installer une mise à jour. Ceci peut prendre jusqu'à une minute.</translation>
@@ -2223,6 +2235,7 @@ Pour éteindre l'appareil, appuyez à nouveau de manière prolongée sur le bout
 <translation id="8287009018010202411">Productivité</translation>
 <translation id="828708037801473432">Désactivé</translation>
 <translation id="8297006494302853456">Faible</translation>
+<translation id="8300451473979404345">Poignée sélectionnée, utiliser les touches fléchées pour la déplacer</translation>
 <translation id="8308637677604853869">Menu précédent</translation>
 <translation id="830868413617744215">Bêta</translation>
 <translation id="8314772463905284467">Touche Verr Maj activée</translation>
@@ -2283,6 +2296,7 @@ Pour éteindre l'appareil, appuyez à nouveau de manière prolongée sur le bout
 <translation id="851458219935658693">Afficher les fenêtres du bureau actuel, case d'option cochée</translation>
 <translation id="851660987304951246">Utilisez Aide à la lecture pour résumer rapidement un contenu ou poser des questions</translation>
 <translation id="8517041960877371778">Il est possible que votre appareil <ph name="DEVICE_TYPE" /> ne se recharge pas lorsqu'il est allumé.</translation>
+<translation id="8519329096920173967">Rechercher sur mon écran avec Google Lens</translation>
 <translation id="8535393432370007982">Annuler le tri par couleur</translation>
 <translation id="8536886494750559755">Affichez les paramètres de Quick Share. Visible par tous pendant <ph name="TIME_REMAINING" /></translation>
 <translation id="8539803091108018926">Texte copié dans le presse-papiers</translation>
@@ -2404,6 +2418,7 @@ Pour éteindre l'appareil, appuyez à nouveau de manière prolongée sur le bout
 <translation id="8921624153894383499">L'Assistant Google ne parle pas cette langue.</translation>
 <translation id="8926951137623668982">Étagère toujours masquée</translation>
 <translation id="8929566928381252430">Vous essayez d'utiliser Verr Maj ? Utilisez</translation>
+<translation id="8929623844713377237">Contact créé</translation>
 <translation id="8934418770423095813">Créer un document Google Docs</translation>
 <translation id="8934926665751933910">{NUM_FILES,plural, =1{1 fichier}one{# fichier}other{# fichiers}}</translation>
 <translation id="8936501819958976551">a désactivé</translation>

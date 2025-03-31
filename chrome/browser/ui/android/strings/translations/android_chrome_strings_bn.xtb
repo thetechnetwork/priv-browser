@@ -250,6 +250,7 @@
 <translation id="2172905120685242547">উইন্ডো বন্ধ করবেন?</translation>
 <translation id="2173302385160625112">আপনার ইন্টারনেট কানেকশন ঠিক আছে কিনা ভাল করে দেখে নিন</translation>
 <translation id="2175927920773552910">QR কোড</translation>
+<translation id="2181097965834437145">বুকমার্ক বার দেখুন অথবা লুকান</translation>
 <translation id="2184272387334793084">আপনার সব ডিভাইসে পাসওয়ার্ড ও আরও অনেক কিছু পেতে সাইন-ইন করুন</translation>
 <translation id="218608176142494674">শেয়ার করা সংক্রান্ত বিজ্ঞপ্তি</translation>
 <translation id="219283042927675668">গ্রুপে থাকা ট্যাব</translation>
@@ -324,7 +325,6 @@
 <translation id="2527209463677295330">কোনও পৃষ্ঠার টেক্সটে আরও শব্দ যোগ করলে, আপনি হয়ত আরও ভাল ফলাফল দেখতে পারবেন</translation>
 <translation id="2527779675047087889">ক্লিপবোর্ডের কন্টেন্ট লুকান</translation>
 <translation id="2532336938189706096">ওয়েব দর্শন</translation>
-<translation id="2534155362429831547"><ph name="NUMBER_OF_ITEMS" />টি আইটেম মোছা হয়েছে</translation>
 <translation id="253498598929009420">সাইটটি আপনার স্ক্রিনের কন্টেন্ট দেখতে পারবে</translation>
 <translation id="2536728043171574184">এই পৃষ্ঠার একটি অফলাইন কপি দেখছেন</translation>
 <translation id="2542548955756682219"><ph name="TAB_TITLE" />, ট্যাব</translation>
@@ -364,7 +364,6 @@
 <translation id="2677748264148917807">ছেড়ে চলে যান</translation>
 <translation id="2687009626279857299">এই ডিভাইসে কাজ করা বন্ধ করে দিয়েছে</translation>
 <translation id="2702516483241149200">নতুন: এই টেক্সট পর্যন্ত স্ক্রোল করতে পারে এমন লিঙ্ক শেয়ার করুন</translation>
-<translation id="2705073298859543115">সারসংক্ষেপ তৈরি করুন</translation>
 <translation id="2708051474374549906">Google-কে পাঠানো আপনার ব্রাউজ করা ডেটা অনুযায়ী বিপজ্জনক সাইট, ডাউনলোড এবং এক্সটেনশন থেকে রিয়েল-টাইমে সুরক্ষা পাওয়া যায়</translation>
 <translation id="2708226184420201102"><ph name="PRODUCT_NAME" /> ব্রাউজারে খুলুন</translation>
 <translation id="271033894570825754">নতুন</translation>
@@ -459,7 +458,6 @@
 <translation id="3114507951000454849">আজকের খবর পড়ুন <ph name="NEWS_ICON" /></translation>
 <translation id="3122883569442693641">আরও বিবরণ</translation>
 <translation id="3123734510202723619">ঘোষণা</translation>
-<translation id="3131961580615093332"><ph name="GIVEN_NAME" />, “<ph name="TAB_NAME" />” ট্যাব পরিবর্তন করেছেন</translation>
 <translation id="3148237711805373460">আমি সেখানে যেতে চাই</translation>
 <translation id="314939179385989105">Chrome-এর হোমপেজ</translation>
 <translation id="3158667104057012316">ম্যানুয়াল অর্ডার অনুযায়ী সাজানো হচ্ছে</translation>
@@ -677,6 +675,7 @@
 <translation id="4195643157523330669">নতুন ট্যাবে খুলুন</translation>
 <translation id="4197828496439691735">{NUM_TABS,plural, =1{এই ডিভাইসে ১টি ট্যাব}one{এই ডিভাইসে #টি ডিভাইস}other{এই ডিভাইসে #টি ডিভাইস}}</translation>
 <translation id="4198423547019359126">ডাউনলোড করার জন্য লোকেশন উপলভ্য নেই</translation>
+<translation id="4209029522667123437"><ph name="IDENTITY_PROVIDER_ETLD_PLUS_ONE" /> • এই সাইটে আপনি ব্যবহার করেছেন</translation>
 <translation id="4214315110991671325">আপনি কুকি ব্যবহার করার অনুমতি দিলে, প্রিলোড করার জন্য Chrome সেটি ব্যবহার করতে পারে।</translation>
 <translation id="4216511743389425832">এই পৃষ্ঠার কন্টেন্ট শুনুন</translation>
 <translation id="4225725533026049334">ফলো করছেন</translation>
@@ -821,6 +820,7 @@
 <translation id="483742037940503070">{TAB_COUNT,plural, =1{নতুন ব্যাকগ্রাউন্ড ট্যাব গ্রুপ হিসেবে, <ph name="COLOR_NAME" /> কালার সহ <ph name="TAB_COUNT_ONE" />টি ট্যাবের ট্যাব গ্রুপ ফিরিয়ে আনুন।}one{নতুন ব্যাকগ্রাউন্ড ট্যাব গ্রুপ হিসেবে, <ph name="COLOR_NAME" /> কালার সহ <ph name="TAB_COUNT_MANY" />টি ট্যাবের ট্যাব গ্রুপ ফিরিয়ে আনুন।}other{নতুন ব্যাকগ্রাউন্ড ট্যাব গ্রুপ হিসেবে, <ph name="COLOR_NAME" /> কালার সহ <ph name="TAB_COUNT_MANY" />টি ট্যাবের ট্যাব গ্রুপ ফিরিয়ে আনুন।}}</translation>
 <translation id="4837753911714442426">‘পৃষ্ঠা প্রিন্ট করুন’-এর বিকল্পগুলি খুলুন</translation>
 <translation id="4844633725025837809">অতিরিক্ত নিরাপত্তার জন্য, Google পাসওয়ার্ড ম্যানেজারে সেভ করার আগে আপনার ডিভাইসে পাসওয়ার্ড এনক্রিপ্ট করুন</translation>
+<translation id="4849731766219625109">আপনার <ph name="IDENTITY_PROVIDER_ETLD_PLUS_ONE" /> অ্যাকাউন্ট ব্যবহার করুন</translation>
 <translation id="4850886885716139402">দেখুন</translation>
 <translation id="4852014461738377247">সাইন-ইন করা হচ্ছে</translation>
 <translation id="4860895144060829044">কল করুন</translation>
@@ -840,14 +840,12 @@
 <translation id="4910889077668685004">পেমেন্ট অ্যাপ্লিকেশান</translation>
 <translation id="4912413785358399818">ট্যাব সরান</translation>
 <translation id="4913169188695071480">রিফ্রেশ করা বন্ধ করুন</translation>
-<translation id="4918086044614829423">স্বীকার</translation>
 <translation id="4925120120285606924">স্ক্রিনশট <ph name="CURRENT_DATE_ISO" /></translation>
 <translation id="49268022542405662">আপনার পাসওয়ার্ড এক্সপোর্ট করা হবে এবং টেক্সট ফাইল হিসেবে ডাউনলোড করা হবে। যে ফোল্ডারে ডাউনলোড হবে সেখানের অ্যাক্সেস সহ সেগুলি সবাই দেখতে পাবে এবং সব অ্যাপে দেখা যাবে।</translation>
 <translation id="4926901776383726965">অফলাইনে দেখতে বা অন্য অ্যাপের সাথে শেয়ার করতে, আপনি ছবি ও ফাইল সেভ করে রাখতে পারবেন</translation>
 <translation id="4932247056774066048">যেহেতু আপনি <ph name="DOMAIN_NAME" />-এর ম্যানেজ করা অ্যাকাউন্ট থেকে সাইন-আউট করছেন তাই এই ডিভাইস থেকে আপনার Chrome ডেটা মুছে ফেলা হবে। এটি আপনার Google অ্যাকাউন্টে থাকবে।</translation>
 <translation id="4943703118917034429">ভার্চুয়াল রিয়ালিটি</translation>
 <translation id="4943872375798546930">কোন ফলাফল নেই</translation>
-<translation id="4953833914914492602">“<ph name="TAB_GROUP_NAME" />” ট্যাব গ্রুপ আর উপলভ্য হবে না</translation>
 <translation id="4957722034734105353">আরও জানুন...</translation>
 <translation id="4961107849584082341">এই পৃষ্ঠাটি যেকোনও ভাষায় অনুবাদ করুন</translation>
 <translation id="4964614743143953889">নিরাপদ নয় এমন সাইট ও ডাউনলোড সম্পর্কে Chrome আপনাকে সতর্ক করে দেয়</translation>
@@ -966,7 +964,6 @@
 <translation id="5526281268548144413">একাধিক উইন্ডো জুড়ে ট্যাব বন্ধ করা যাবে না</translation>
 <translation id="5528925345478618296">{MINUTES,plural, =1{# মিনিট আগে}one{# মিনিট আগে}other{# মিনিট আগে}}</translation>
 <translation id="5548606607480005320">নিরাপত্তা সংক্রান্ত পরীক্ষা</translation>
-<translation id="5551564597369878730"><ph name="GIVEN_NAME" />, “<ph name="TAB_GROUP_NAME" />” ট্যাব গ্রুপে যোগ দিয়েছেন</translation>
 <translation id="5554520618550346933">আপনি পাসওয়ার্ড ব্যবহার করার সময়, সেটি অনলাইনে প্রকাশিত হয়েছে কিনা সেই সম্পর্কে Chrome সতর্ক করে। এটি করার সময় আপনার পাসওয়ার্ড ও ইউজারনেম এনক্রিপ্ট করা থাকে, তাই সেগুলি কেউ দেখতে পাবে না, এমনকি Google-ও না।</translation>
 <translation id="5555525474779371165">আপনার Safe Browsing সুরক্ষা বেছে নিন</translation>
 <translation id="5556459405103347317">রিলোড করুন</translation>
@@ -1183,7 +1180,6 @@
 <translation id="6481963882741794338">পছন্দমতো অভিজ্ঞতা এবং অন্যান্য সুবিধা পেতে Google-এর সব পরিষেবাগুলি সাথে Chrome লিঙ্ক করুন</translation>
 <translation id="6482749332252372425">স্টোরেজে জায়গার ঘাটতির কারণে <ph name="FILE_NAME" /> ডাউনলোড করা যায়নি।</translation>
 <translation id="6486420406192123355">অসুরক্ষিত কানেকশন ব্যবহার করে এমন কোনও সাইট থেকে এই পিডিএফ ফাইল পাওয়া গেছে</translation>
-<translation id="6495590690749880440">ট্যাব গ্রুপ খুলতে চান?</translation>
 <translation id="650224091954855786">{FILE_COUNT,plural, =1{ফাইল ডাউনলোড হয়েছে}one{#টি ডাউনলোড হয়ে গেছে}other{#টি ডাউনলোড হয়ে গেছে}}</translation>
 <translation id="6508722015517270189">Chrome পুনরায় চালু করুন</translation>
 <translation id="6518133107902771759">যাচাই করুন</translation>
@@ -1201,7 +1197,6 @@
 <translation id="6564820424018738527">আপনার Android ডিভাইসে একই ধরনের সেটিংস অন্তর্ভুক্ত থাকতে পারে। যদি Chrome এবং আপনার Android ডিভাইসে বিজ্ঞাপন পরিমাপ করার প্রসেস চালু থাকে, তাহলে কোনও কোম্পানি আপনার ভিজিট করা ওয়েবসাইট এবং ব্যবহার করা বিভিন্ন অ্যাপ জুড়ে বিজ্ঞাপনের কার্যকারিতা হয়ত পরিমাপ করতে পারবে।</translation>
 <translation id="6565959834589222080">ওয়াই-ফাই উপলভ্য হলে ব্যবহার করা হয়</translation>
 <translation id="6569373978618239158">এখন আপনি নতুন কোনও ট্যাব খুললেই, <ph name="SITE_NAME" />-এর গল্প পড়তে পারবেন। আপনি যেসব সাইট ফলো করেন, সেগুলি আপনার Google অ্যাকাউন্টে সেভ হয়ে যায়। আপনি 'ডিসকভার' সেটিংসে গিয়ে সেগুলি ম্যানেজ করতে পারেন।</translation>
-<translation id="6570116402456758630">পৃষ্ঠার সারাংশ</translation>
 <translation id="657177046675873214">আপনার সমস্ত ডিভাইসে নিজের বুকমার্ক পেতে, সেটিংসে গিয়ে “বুকমার্ক” চালু করুন</translation>
 <translation id="6573096386450695060">সর্বদা অনুমতি দিন</translation>
 <translation id="6573431926118603307">আপনার অন্য ডিভাইসগুলিতে Chrome এ আপনি যে ট্যাবগুলি খুলেছেন সেগুলি এখানে দেখা যাবে।</translation>
@@ -1562,6 +1557,7 @@
 <translation id="8073388330009372546">নতুন ট্যাবে ছবি খুলুন</translation>
 <translation id="8076492880354921740">ট্যাবগুলি</translation>
 <translation id="8078096376109663956">শুধুমাত্র টেক্সট শেয়ার করুন</translation>
+<translation id="8078348702936632821">এই শর্টকার্ট পিন করুন</translation>
 <translation id="8084114998886531721">সংরক্ষিত পাসওয়ার্ড</translation>
 <translation id="8084285576995584326">আপনার Google অ্যাকাউন্টের ডেটা নিয়ন্ত্রণ করুন</translation>
 <translation id="8084864785646838999">আপনার কিছু ইতিহাস এখানে নাও দেখা যেতে পারে। আপনার সব Chrome ইতিহাস দেখতে, সম্পূর্ণ Chrome ইতিহাস খুলুন। এছাড়াও, <ph name="BEGIN_LINK" />myactivity.google.com<ph name="END_LINK" /> লিঙ্কে আপনার Google অ্যাকাউন্টের অন্যান্য ধরনের ব্রাউজিং ইতিহাস থাকতে পারে।</translation>
@@ -1617,7 +1613,6 @@
 <translation id="8282297628636750033">সম্ভব হলে সাইটে ডার্ক থিম রাখুন</translation>
 <translation id="8282950411412455249">নিরাপত্তা সেটিংসে যান</translation>
 <translation id="8306751933352925837">এই ডিভাইসে পাসওয়ার্ড শীঘ্রই কাজ করা বন্ধ করে দেবে। আপনার পাসওয়ার্ড ব্যবহার করা চালিয়ে যেতে, Google Play পরিষেবা আপডেট করুন। <ph name="BEGIN_LINK" />আরও জানুন<ph name="END_LINK" /></translation>
-<translation id="8307517230426267469"><ph name="GIVEN_NAME" />, “<ph name="TAB_NAME" />” ট্যাব সরিয়ে দিয়েছেন</translation>
 <translation id="8310451567823644042">পাসওয়ার্ড শীঘ্রই কাজ করা বন্ধ করে দেবে</translation>
 <translation id="831192587911042850">আপনার ফলো করা ওয়েবসাইটের তালিকায় বর্তমান ওয়েব সাইট যোগ করে।</translation>
 <translation id="8320212361750431956">সাম্প্রতিক অ্যাক্টিভিটি</translation>

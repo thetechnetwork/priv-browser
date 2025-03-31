@@ -514,7 +514,6 @@ Prehliadač Google Chrome nedokáže obnoviť vaše nastavenia.</translation>
 <translation id="7787950393032327779">Zdá sa, že profil používa ďalší proces prehliadača Google Chrome (<ph name="PROCESS_ID" />) na inom počítači (<ph name="HOST_NAME" />). Prehliadač Chrome daný profil uzamkol, aby sa nepoškodil. Ak s istotou viete, že tento profil nepoužívajú žiadne iné procesy, môžete ho odomknúť a prehliadač Chrome znova spustiť.</translation>
 <translation id="7801699035218095297">Google Chrome sa pokúša kopírovať heslá. Ak to chcete povoliť, zadajte heslo systému Windows.</translation>
 <translation id="7808348361785373670">Odstrániť z prehliadača Chrome...</translation>
-<translation id="782480918904119604">Ak chcete používať tento profil so službou Glic, otvorte Chrome a prihláste sa</translation>
 <translation id="7825851276765848807">Inštalácia zlyhala kvôli neznámej chybe. Skúste aplikáciu Google Chrome stiahnuť znova.</translation>
 <translation id="7845233973568007926">Ďakujeme za inštaláciu. Než začnete aplikáciu <ph name="BUNDLE_NAME" /> používať, musíte reštartovať počítač.</translation>
 <translation id="7872446069773932638">Sťahuje sa… Zostávajúci čas: <ph name="SECONDS" /> s</translation>
@@ -570,6 +569,7 @@ Prehliadač Google Chrome nedokáže obnoviť vaše nastavenia.</translation>
 <translation id="8516431725144212809">Vaše záujmy podľa odhadu Chromu</translation>
 <translation id="8521348052903287641">Pravidlo pre prichádzajúce prenosy pre prehliadač Google Chrome verzie pre vývojárov, ktoré povoľuje prenos dát mDNS.</translation>
 <translation id="852529348814672339">Zobrazovať informácie v Chrome v tomto jazyku</translation>
+<translation id="8533056045953418157">Nastavte si Google Chrome ako predvolený zobrazovač súborov PDF</translation>
 <translation id="8550334526674375523">Tento pracovný profil je úplne oddelený od vášho osobného.</translation>
 <translation id="8555465886620020932">Chyba služby: <ph name="SERVICE_ERROR" />.</translation>
 <translation id="856656450041460113">Vyhľadať v zozname jazykov</translation>

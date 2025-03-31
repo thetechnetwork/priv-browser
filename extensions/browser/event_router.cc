@@ -64,6 +64,8 @@ using content::RenderProcessHost;
 
 namespace extensions {
 
+base::TimeDelta kEventAckMetricTimeLimit = base::Minutes(5);
+
 namespace {
 
 // A dictionary of event names to lists of filters that this extension has
@@ -467,8 +469,7 @@ void EventRouter::AddListenerForMainThread(
 
   const mojom::EventListenerOwner& listener_owner =
       *event_listener->listener_owner;
-  if (listener_owner.is_extension_id() &&
-      crx_file::id_util::IdIsValid(listener_owner.get_extension_id())) {
+  if (listener_owner.is_extension_id()) {
     AddEventListener(event_listener->event_name, process,
                      listener_owner.get_extension_id());
   } else if (listener_owner.is_listener_url() &&
@@ -489,8 +490,7 @@ void EventRouter::AddListenerForServiceWorker(
 
   const mojom::EventListenerOwner& listener_owner =
       *event_listener->listener_owner;
-  if (!listener_owner.is_extension_id() ||
-      !crx_file::id_util::IdIsValid(listener_owner.get_extension_id())) {
+  if (!listener_owner.is_extension_id()) {
     mojo::ReportBadMessage(kAddEventListenerWithInvalidExtensionID);
     return;
   }
@@ -507,14 +507,6 @@ void EventRouter::AddLazyListenerForMainThread(const ExtensionId& extension_id,
                                                const std::string& event_name) {
   DCHECK_CURRENTLY_ON(BrowserThread::UI);
 
-  // TODO(https://crbug.com/394042459): Perform more IPC validation here.
-  if (!crx_file::id_util::IdIsValid(extension_id)) {
-    bad_message::ReceivedBadMessage(
-        GetRenderProcessHostForCurrentReceiver(),
-        bad_message::ER_INVALID_EXTENSION_ID_FOR_PROCESS);
-    return;
-  }
-
   std::unique_ptr<EventListener> listener = EventListener::CreateLazyListener(
       event_name, extension_id, browser_context_, false, GURL(), std::nullopt);
   AddLazyEventListenerImpl(std::move(listener), RegisteredEventType::kLazy);
@@ -524,13 +516,6 @@ void EventRouter::AddLazyListenerForServiceWorker(
     const ExtensionId& extension_id,
     const GURL& worker_scope_url,
     const std::string& event_name) {
-  if (!crx_file::id_util::IdIsValid(extension_id)) {
-    bad_message::ReceivedBadMessage(
-        GetRenderProcessHostForCurrentReceiver(),
-        bad_message::ER_INVALID_EXTENSION_ID_FOR_PROCESS);
-    return;
-  }
-
   // TODO(richardzh): Passing in browser context from the process.
   // Browser context is added to listener object in order to separate lazy
   // listeners for regular and incognito(split) context. The first step adds
@@ -585,8 +570,7 @@ void EventRouter::RemoveListenerForMainThread(
 
   const mojom::EventListenerOwner& listener_owner =
       *event_listener->listener_owner;
-  if (listener_owner.is_extension_id() &&
-      crx_file::id_util::IdIsValid(listener_owner.get_extension_id())) {
+  if (listener_owner.is_extension_id()) {
     RemoveEventListener(event_listener->event_name, process,
                         listener_owner.get_extension_id());
   } else if (listener_owner.is_listener_url() &&
@@ -607,8 +591,7 @@ void EventRouter::RemoveListenerForServiceWorker(
 
   const mojom::EventListenerOwner& listener_owner =
       *event_listener->listener_owner;
-  if (!listener_owner.is_extension_id() ||
-      !crx_file::id_util::IdIsValid(listener_owner.get_extension_id())) {
+  if (!listener_owner.is_extension_id()) {
     mojo::ReportBadMessage(kRemoveEventListenerWithInvalidExtensionID);
     return;
   }
@@ -626,14 +609,6 @@ void EventRouter::RemoveLazyListenerForMainThread(
     const std::string& event_name) {
   DCHECK_CURRENTLY_ON(BrowserThread::UI);
 
-  // TODO(https://crbug.com/394042459): Perform more IPC validation here.
-  if (!crx_file::id_util::IdIsValid(extension_id)) {
-    bad_message::ReceivedBadMessage(
-        GetRenderProcessHostForCurrentReceiver(),
-        bad_message::ER_INVALID_EXTENSION_ID_FOR_PROCESS);
-    return;
-  }
-
   std::unique_ptr<EventListener> listener = EventListener::CreateLazyListener(
       event_name, extension_id, browser_context_, false, GURL(), std::nullopt);
   RemoveLazyEventListenerImpl(std::move(listener), RegisteredEventType::kLazy);
@@ -643,13 +618,6 @@ void EventRouter::RemoveLazyListenerForServiceWorker(
     const ExtensionId& extension_id,
     const GURL& worker_scope_url,
     const std::string& event_name) {
-  if (!crx_file::id_util::IdIsValid(extension_id)) {
-    bad_message::ReceivedBadMessage(
-        GetRenderProcessHostForCurrentReceiver(),
-        bad_message::ER_INVALID_EXTENSION_ID_FOR_PROCESS);
-    return;
-  }
-
   // TODO(richardzh): Passing in browser context from the process.
   // Browser context is added to listener object in order to separate lazy
   // listeners for regular and incognito(split) context. The first step adds
@@ -1054,7 +1022,9 @@ void EventRouter::DispatchEventToURL(const GURL& url,
 
 void EventRouter::DispatchEventWithLazyListener(const ExtensionId& extension_id,
                                                 std::unique_ptr<Event> event) {
-  DCHECK(!extension_id.empty());
+  // This method calls multiple mojom::EventRouter implementations. Ensure the
+  // id is valid before we proceed.
+  CHECK(crx_file::id_util::IdIsValid(extension_id));
   const Extension* extension = ExtensionRegistry::Get(browser_context_)
                                    ->enabled_extensions()
                                    .GetByID(extension_id);

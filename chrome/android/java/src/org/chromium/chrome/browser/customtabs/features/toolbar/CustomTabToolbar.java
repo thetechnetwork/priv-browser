@@ -9,6 +9,7 @@ import static androidx.browser.customtabs.CustomTabsIntent.NO_TITLE;
 
 import static org.chromium.base.MathUtils.interpolate;
 import static org.chromium.chrome.browser.browserservices.intents.BrowserServicesIntentDataProvider.CustomTabProfileType.INCOGNITO;
+import static org.chromium.ui.accessibility.KeyboardFocusUtil.setFocusOnFirstFocusableDescendant;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -98,7 +99,6 @@ import org.chromium.chrome.browser.tabmodel.TabCreator;
 import org.chromium.chrome.browser.theme.ThemeUtils;
 import org.chromium.chrome.browser.toolbar.ButtonData;
 import org.chromium.chrome.browser.toolbar.LocationBarModel;
-import org.chromium.chrome.browser.toolbar.ToolbarFeatures;
 import org.chromium.chrome.browser.toolbar.ToolbarProgressBar;
 import org.chromium.chrome.browser.toolbar.menu_button.MenuButton;
 import org.chromium.chrome.browser.toolbar.optional_button.OptionalButtonCoordinator;
@@ -827,6 +827,11 @@ public class CustomTabToolbar extends ToolbarLayout implements View.OnLongClickL
         mLocationBar.updateOptionalButton(buttonData);
     }
 
+    @Override
+    public void requestKeyboardFocus() {
+        setFocusOnFirstFocusableDescendant(this);
+    }
+
     private void updateCustomActionButtonVisuals(
             ImageButton button, Drawable drawable, String description) {
         Resources resources = getResources();
@@ -1338,17 +1343,13 @@ public class CustomTabToolbar extends ToolbarLayout implements View.OnLongClickL
 
     @Override
     public CaptureReadinessResult isReadyForTextureCapture() {
-        if (ToolbarFeatures.shouldSuppressCaptures()) {
-            CustomTabCaptureStateToken currentToken = generateCaptureStateToken();
-            final @ToolbarSnapshotDifference int difference =
-                    currentToken.getAnyDifference(mLastCustomTabCaptureStateToken);
-            if (difference == ToolbarSnapshotDifference.NONE) {
-                return CaptureReadinessResult.notReady(TopToolbarBlockCaptureReason.SNAPSHOT_SAME);
-            } else {
-                return CaptureReadinessResult.readyWithSnapshotDifference(difference);
-            }
+        CustomTabCaptureStateToken currentToken = generateCaptureStateToken();
+        final @ToolbarSnapshotDifference int difference =
+                currentToken.getAnyDifference(mLastCustomTabCaptureStateToken);
+        if (difference == ToolbarSnapshotDifference.NONE) {
+            return CaptureReadinessResult.notReady(TopToolbarBlockCaptureReason.SNAPSHOT_SAME);
         } else {
-            return CaptureReadinessResult.unknown(/* isReady= */ true);
+            return CaptureReadinessResult.readyWithSnapshotDifference(difference);
         }
     }
 
@@ -1466,7 +1467,6 @@ public class CustomTabToolbar extends ToolbarLayout implements View.OnLongClickL
         private ToolbarBrandingOverlayCoordinator mBrandingOverlayCoordinator;
 
         private OptionalButtonCoordinator mOptionalButtonCoordinator;
-        private UserEducationHelper mUserEducationHelper;
         private final ObservableSupplierImpl<Tracker> mTrackerSupplier =
                 new ObservableSupplierImpl<>();
 
@@ -1476,17 +1476,23 @@ public class CustomTabToolbar extends ToolbarLayout implements View.OnLongClickL
 
             ViewStub optionalButtonStub = findViewById(R.id.optional_button_stub);
             if (optionalButtonStub == null) return;
-
             optionalButtonStub.setLayoutResource(R.layout.optional_button_layout);
             View optionalButton = optionalButtonStub.inflate();
-            Tab currentTab = getCurrentTab();
-            Activity activity = currentTab.getWindowAndroid().getActivity().get();
-            mUserEducationHelper =
-                    new UserEducationHelper(activity, () -> currentTab.getProfile(), new Handler());
+            if (mCustomActionButtons.getChildCount() >= 2) {
+                // Place the optional button at the leftmost position.
+                mCustomActionButtons.removeView(optionalButton);
+                mCustomActionButtons.addView(optionalButton, 0);
+            }
             mOptionalButtonCoordinator =
                     new OptionalButtonCoordinator(
                             optionalButton,
-                            mUserEducationHelper,
+                            /* userEducationHelper= */ () -> {
+                                Tab currentTab = getCurrentTab();
+                                return new UserEducationHelper(
+                                        currentTab.getWindowAndroid().getActivity().get(),
+                                        () -> currentTab.getProfile(),
+                                        new Handler());
+                            },
                             /* transitionRoot= */ CustomTabToolbar.this,
                             /* isAnimationAllowedPredicate= */ () -> false,
                             mTrackerSupplier);
@@ -1506,6 +1512,10 @@ public class CustomTabToolbar extends ToolbarLayout implements View.OnLongClickL
 
         private void updateOptionalButton(ButtonData buttonData) {
             if (mOptionalButtonCoordinator == null) initializeOptionalButton();
+            Tab tab = getCurrentTab();
+            if (tab != null && mTrackerSupplier.get() == null) {
+                mTrackerSupplier.set(TrackerFactory.getTrackerForProfile(tab.getProfile()));
+            }
             mOptionalButtonCoordinator.updateButton(buttonData, isIncognitoBranded());
         }
 
@@ -1793,13 +1803,6 @@ public class CustomTabToolbar extends ToolbarLayout implements View.OnLongClickL
                 // via the listeners set on mTitleUrlContainer.
                 setTitleUrlBarAccessibilityDelegate(mTitleBar);
                 setTitleUrlBarAccessibilityDelegate(mUrlBar);
-            }
-            if (ChromeFeatureList.isEnabled(ChromeFeatureList.CCT_ADAPTIVE_BUTTON)) {
-                Tab currentTab = getCurrentTab();
-                if (currentTab != null) {
-                    mTrackerSupplier.set(
-                            TrackerFactory.getTrackerForProfile(currentTab.getProfile()));
-                }
             }
         }
 

@@ -4,6 +4,8 @@
 
 package org.chromium.chrome.browser.toolbar.top;
 
+import static org.chromium.ui.accessibility.KeyboardFocusUtil.setFocusOnFirstFocusableDescendant;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
@@ -42,10 +44,8 @@ import org.chromium.chrome.browser.tab.Tab;
 import org.chromium.chrome.browser.theme.ThemeUtils;
 import org.chromium.chrome.browser.toolbar.ButtonData;
 import org.chromium.chrome.browser.toolbar.ButtonData.ButtonSpec;
-import org.chromium.chrome.browser.toolbar.KeyboardNavigationListener;
 import org.chromium.chrome.browser.toolbar.R;
 import org.chromium.chrome.browser.toolbar.ToolbarDataProvider;
-import org.chromium.chrome.browser.toolbar.ToolbarFeatures;
 import org.chromium.chrome.browser.toolbar.ToolbarProgressBar;
 import org.chromium.chrome.browser.toolbar.ToolbarTabController;
 import org.chromium.chrome.browser.toolbar.menu_button.MenuButtonCoordinator;
@@ -55,6 +55,7 @@ import org.chromium.chrome.browser.toolbar.top.NavigationPopup.HistoryDelegate;
 import org.chromium.chrome.browser.ui.theme.BrandedColorScheme;
 import org.chromium.chrome.browser.user_education.UserEducationHelper;
 import org.chromium.components.browser_ui.styles.ChromeColors;
+import org.chromium.components.browser_ui.util.KeyboardNavigationListener;
 import org.chromium.components.browser_ui.widget.animation.CancelAwareAnimatorListener;
 import org.chromium.components.feature_engagement.Tracker;
 import org.chromium.ui.base.DeviceFormFactor;
@@ -79,8 +80,9 @@ public class ToolbarTablet extends ToolbarLayout
          *
          * @param context Context to pull resources from.
          * @param tab Tab containing the page to download.
+         * @param fromAppMenu Whether the download is started from the app menu.
          */
-        void downloadPage(Context context, Tab tab);
+        void downloadPage(Context context, Tab tab, boolean fromAppMenu);
     }
 
     private ImageButton mHomeButton;
@@ -183,7 +185,6 @@ public class ToolbarTablet extends ToolbarLayout
                     }
                 });
 
-        mBackButton.setOnClickListener(this);
         mBackButton.setLongClickable(true);
         mBackButton.setOnKeyListener(
                 new KeyboardNavigationListener() {
@@ -276,13 +277,9 @@ public class ToolbarTablet extends ToolbarLayout
 
     @Override
     public boolean showContextMenuForChild(View originalView) {
-        if (mBackButton == originalView) {
-            // Display backwards navigation popup.
-            displayNavigationPopup(false, mBackButton);
-            return true;
-        } else if (mForwardButton == originalView) {
+        if (mForwardButton == originalView) {
             // Display forwards navigation popup.
-            displayNavigationPopup(true, mForwardButton);
+            displayNavigationPopupForForwardButton(mForwardButton);
             return true;
         }
         return super.showContextMenuForChild(originalView);
@@ -298,7 +295,7 @@ public class ToolbarTablet extends ToolbarLayout
         super.onWindowFocusChanged(hasWindowFocus);
     }
 
-    private void displayNavigationPopup(boolean isForward, View anchorView) {
+    private void displayNavigationPopupForForwardButton(View anchorView) {
         Tab tab = getToolbarDataProvider().getTab();
         if (tab == null || tab.getWebContents() == null) return;
         mNavigationPopup =
@@ -306,9 +303,7 @@ public class ToolbarTablet extends ToolbarLayout
                         tab.getProfile(),
                         getContext(),
                         tab.getWebContents().getNavigationController(),
-                        isForward
-                                ? NavigationPopup.Type.TABLET_FORWARD
-                                : NavigationPopup.Type.TABLET_BACK,
+                        NavigationPopup.Type.TABLET_FORWARD,
                         getToolbarDataProvider()::getTab,
                         mHistoryDelegate);
         mNavigationPopup.show(anchorView);
@@ -319,12 +314,6 @@ public class ToolbarTablet extends ToolbarLayout
         if (mHomeButton == v) {
             recordHomeModuleClickedIfNTPVisible();
             openHomepage();
-        } else if (mBackButton == v) {
-            boolean isEnabled = mBackButton.isEnabled();
-            boolean success = back();
-            assert success && isEnabled
-                    : "Back button should not be enabled if page can no longer be navigated back.";
-            if (success) RecordUserAction.record("MobileToolbarBack");
         } else if (mForwardButton == v) {
             forward();
             RecordUserAction.record("MobileToolbarForward");
@@ -334,7 +323,8 @@ public class ToolbarTablet extends ToolbarLayout
                 RecordUserAction.record("MobileToolbarToggleBookmark");
             }
         } else if (mSaveOfflineButton == v) {
-            mOfflineDownloader.downloadPage(getContext(), getToolbarDataProvider().getTab());
+            mOfflineDownloader.downloadPage(
+                    getContext(), getToolbarDataProvider().getTab(), /* fromAppMenu= */ false);
             RecordUserAction.record("MobileToolbarDownloadPage");
         }
     }
@@ -362,21 +352,15 @@ public class ToolbarTablet extends ToolbarLayout
 
     @Override
     public CaptureReadinessResult isReadyForTextureCapture() {
-        if (ToolbarFeatures.shouldSuppressCaptures()) {
-            if (urlHasFocus()) {
-                return CaptureReadinessResult.notReady(
-                        TopToolbarBlockCaptureReason.URL_BAR_HAS_FOCUS);
-            } else if (mIsInTabSwitcherMode) {
-                return CaptureReadinessResult.notReady(
-                        TopToolbarBlockCaptureReason.TAB_SWITCHER_MODE);
-            } else if (mButtonVisibilityAnimators != null) {
-                return CaptureReadinessResult.notReady(
-                        TopToolbarBlockCaptureReason.TABLET_BUTTON_ANIMATION_IN_PROGRESS);
-            } else {
-                return getReadinessStateWithSuppression();
-            }
+        if (urlHasFocus()) {
+            return CaptureReadinessResult.notReady(TopToolbarBlockCaptureReason.URL_BAR_HAS_FOCUS);
+        } else if (mIsInTabSwitcherMode) {
+            return CaptureReadinessResult.notReady(TopToolbarBlockCaptureReason.TAB_SWITCHER_MODE);
+        } else if (mButtonVisibilityAnimators != null) {
+            return CaptureReadinessResult.notReady(
+                    TopToolbarBlockCaptureReason.TABLET_BUTTON_ANIMATION_IN_PROGRESS);
         } else {
-            return CaptureReadinessResult.unknown(!urlHasFocus());
+            return getReadinessStateWithSuppression();
         }
     }
 
@@ -395,18 +379,13 @@ public class ToolbarTablet extends ToolbarLayout
         UrlBarData urlBarData;
         final @DrawableRes int securityIconResource;
 
-        if (ToolbarFeatures.shouldSuppressCaptures()) {
-            urlBarData = mLocationBar.getUrlBarData();
-            if (urlBarData == null) urlBarData = getToolbarDataProvider().getUrlBarData();
-            StatusCoordinator statusCoordinator = mLocationBar.getStatusCoordinator();
-            securityIconResource =
-                    statusCoordinator == null
-                            ? getToolbarDataProvider().getSecurityIconResource(false)
-                            : statusCoordinator.getSecurityIconResource();
-        } else {
-            urlBarData = getToolbarDataProvider().getUrlBarData();
-            securityIconResource = getToolbarDataProvider().getSecurityIconResource(false);
-        }
+        urlBarData = mLocationBar.getUrlBarData();
+        if (urlBarData == null) urlBarData = getToolbarDataProvider().getUrlBarData();
+        StatusCoordinator statusCoordinator = mLocationBar.getStatusCoordinator();
+        securityIconResource =
+                statusCoordinator == null
+                        ? getToolbarDataProvider().getSecurityIconResource(false)
+                        : statusCoordinator.getSecurityIconResource();
 
         VisibleUrlText visibleUrlText =
                 new VisibleUrlText(
@@ -451,7 +430,6 @@ public class ToolbarTablet extends ToolbarLayout
             ColorStateList activityFocusTint,
             @BrandedColorScheme int brandedColorScheme) {
         ImageViewCompat.setImageTintList(mHomeButton, activityFocusTint);
-        ImageViewCompat.setImageTintList(mBackButton, activityFocusTint);
         ImageViewCompat.setImageTintList(mForwardButton, activityFocusTint);
         // The tint of the |mSaveOfflineButton| should not be affected by an activity focus change.
         ImageViewCompat.setImageTintList(mSaveOfflineButton, tint);
@@ -495,15 +473,14 @@ public class ToolbarTablet extends ToolbarLayout
     private void updateRippleBackground() {
         var toolbarIconRippleId =
                 isIncognitoBranded()
-                        ? R.drawable.toolbar_button_ripple_incognito
-                        : R.drawable.toolbar_button_ripple;
+                        ? R.drawable.default_icon_background_baseline
+                        : R.drawable.default_icon_background;
         var omniboxIconRippleId =
                 isIncognitoBranded()
-                        ? R.drawable.omnibox_button_ripple_incognito
-                        : R.drawable.omnibox_button_ripple;
+                        ? R.drawable.search_box_icon_background_baseline
+                        : R.drawable.search_box_icon_background;
 
         mHomeButton.setBackgroundResource(toolbarIconRippleId);
-        mBackButton.setBackgroundResource(toolbarIconRippleId);
         mForwardButton.setBackgroundResource(toolbarIconRippleId);
         getTabSwitcherButtonCoordinator()
                 .getContainerView()
@@ -675,8 +652,8 @@ public class ToolbarTablet extends ToolbarLayout
         if (buttonData.getButtonSpec().getShouldShowHoverHighlight()) {
             mOptionalButton.setBackgroundResource(
                     isIncognitoBranded()
-                            ? R.drawable.toolbar_button_ripple_incognito
-                            : R.drawable.toolbar_button_ripple);
+                            ? R.drawable.default_icon_background_baseline
+                            : R.drawable.default_icon_background);
         } else {
             TypedValue themeRes = new TypedValue();
             getContext()
@@ -754,6 +731,13 @@ public class ToolbarTablet extends ToolbarLayout
     @Override
     public ImageView getHomeButton() {
         return mHomeButton;
+    }
+
+    @Override
+    public void requestKeyboardFocus() {
+        setFocusOnFirstFocusableDescendant(this);
+        // TODO(crbug.com/360423850): Replace this setFocus(mLocationBar) when omnibox keyboard
+        // behavior is fixed.
     }
 
     private void setIncognitoIndicatorVisibility() {

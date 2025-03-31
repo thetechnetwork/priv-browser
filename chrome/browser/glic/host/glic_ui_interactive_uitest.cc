@@ -11,9 +11,13 @@
 #include "chrome/browser/glic/host/glic.mojom-shared.h"
 #include "chrome/browser/glic/host/glic_ui.h"
 #include "chrome/browser/glic/test_support/interactive_glic_test.h"
+#include "chrome/browser/glic/test_support/interactive_test_util.h"
 #include "chrome/browser/glic/widget/glic_window_controller.h"
+#include "chrome/browser/ui/browser_element_identifiers.h"
 #include "chrome/common/chrome_features.h"
 #include "content/public/test/browser_test.h"
+#include "ui/base/accelerators/accelerator.h"
+#include "ui/base/interaction/element_identifier.h"
 #include "ui/base/interaction/state_observer.h"
 
 namespace glic {
@@ -97,6 +101,9 @@ struct TestParams {
     return params;
   }
 };
+
+const ui::Accelerator escape_key(ui::VKEY_ESCAPE, ui::EF_NONE);
+
 }  // namespace
 
 // Base class that sets up network connection mode and timeouts based on
@@ -139,6 +146,15 @@ class GlicUiInteractiveUiTestBase : public test::InteractiveGlicTest {
     return steps;
   }
 
+  auto CheckEscapeKeyDismisses(const DeepQuery& panel) {
+    return InAnyContext(
+        WaitForShow(test::kGlicHostElementId), CheckElementVisible(panel, true),
+        InSameContext(SendAccelerator(test::kGlicHostElementId, escape_key)
+                          .SetMustRemainVisible(false),
+                      WaitForHide(kGlicViewElementId)),
+        CheckControllerHasWidget(false));
+  }
+
   auto ChangeConnectionState(bool online) {
     return ExecuteJs(test::kGlicHostElementId,
                      base::StringPrintf(R"(
@@ -173,14 +189,28 @@ class GlicUiInteractiveUiTestBase : public test::InteractiveGlicTest {
 };
 
 // Tests the network being connected at startup (as normal).
-class GlicUiConnectedUiTest : public GlicUiInteractiveUiTestBase {
+class GlicUiConnectedUiTest : public GlicUiInteractiveUiTestBase,
+                              public testing::WithParamInterface<bool> {
  public:
   GlicUiConnectedUiTest()
-      : GlicUiInteractiveUiTestBase(TestParams(/*connected=*/true)) {}
+      : GlicUiInteractiveUiTestBase(TestParams(/*connected=*/true)) {
+    if (IsDetachedOnlyModeEnabled()) {
+      feature_list_.InitAndEnableFeature(features::kGlicDetached);
+    } else {
+      feature_list_.InitAndDisableFeature(features::kGlicDetached);
+    }
+  }
   ~GlicUiConnectedUiTest() override = default;
+
+  bool IsDetachedOnlyModeEnabled() const { return GetParam(); }
+
+ private:
+  base::test::ScopedFeatureList feature_list_;
 };
 
-IN_PROC_BROWSER_TEST_F(GlicUiConnectedUiTest, DisconnectedPanelHidden) {
+INSTANTIATE_TEST_SUITE_P(All, GlicUiConnectedUiTest, testing::Bool());
+
+IN_PROC_BROWSER_TEST_P(GlicUiConnectedUiTest, DisconnectedPanelHidden) {
   RunTestSequence(
       ObserveState(kGlicUiStateHistory, &window_controller()),
       OpenGlicWindow(GlicWindowMode::kAttached, GlicInstrumentMode::kHostOnly),
@@ -188,7 +218,7 @@ IN_PROC_BROWSER_TEST_F(GlicUiConnectedUiTest, DisconnectedPanelHidden) {
       CheckElementVisible(kOfflinePanel, false));
 }
 
-IN_PROC_BROWSER_TEST_F(GlicUiConnectedUiTest,
+IN_PROC_BROWSER_TEST_P(GlicUiConnectedUiTest,
                        DoesNotHidePanelWhenReadyButOffline) {
   RunTestSequence(
       ObserveState(kGlicUiStateHistory, &window_controller()),
@@ -198,14 +228,17 @@ IN_PROC_BROWSER_TEST_F(GlicUiConnectedUiTest,
       CheckState(kGlicUiStateHistory, IsCurrently(WebUiState::kReady)));
 }
 
-IN_PROC_BROWSER_TEST_F(GlicUiConnectedUiTest, CanAttachWithBrowserWindow) {
+IN_PROC_BROWSER_TEST_P(GlicUiConnectedUiTest, CanAttachWithBrowserWindow) {
+  if (IsDetachedOnlyModeEnabled()) {
+    GTEST_SKIP();
+  }
   RunTestSequence(OpenGlicWindow(GlicWindowMode::kDetached,
                                  GlicInstrumentMode::kHostAndContents),
                   CheckMockElementChecked({"#canAttachCheckbox"}, true));
 }
 
 // DISABLED: Not reliable yet.
-IN_PROC_BROWSER_TEST_F(GlicUiConnectedUiTest,
+IN_PROC_BROWSER_TEST_P(GlicUiConnectedUiTest,
                        DISABLED_CanNotAttachWithMinimizedBrowser) {
   RunTestSequence(
       OpenGlicWindow(GlicWindowMode::kDetached,
@@ -219,7 +252,7 @@ IN_PROC_BROWSER_TEST_F(GlicUiConnectedUiTest,
       CheckMockElementChecked({"#canAttachCheckbox"}, false));
 }
 
-IN_PROC_BROWSER_TEST_F(GlicUiConnectedUiTest,
+IN_PROC_BROWSER_TEST_P(GlicUiConnectedUiTest,
                        DoesNotNavigateToUnsupportedOrigin) {
   RunTestSequence(
       ObserveState(kGlicUiStateHistory, &window_controller()),
@@ -237,7 +270,7 @@ IN_PROC_BROWSER_TEST_F(GlicUiConnectedUiTest,
   })js")));
 }
 
-IN_PROC_BROWSER_TEST_F(GlicUiConnectedUiTest, DoesNavigateToSupportedOrigin) {
+IN_PROC_BROWSER_TEST_P(GlicUiConnectedUiTest, DoesNavigateToSupportedOrigin) {
   RunTestSequence(
       ObserveState(kGlicUiStateHistory, &window_controller()),
       OpenGlicWindow(GlicWindowMode::kAttached,
@@ -430,6 +463,42 @@ IN_PROC_BROWSER_TEST_F(GlicUiLoadingPanelHoldingTest, Test) {
       OpenGlicWindow(GlicWindowMode::kAttached, GlicInstrumentMode::kHostOnly),
       WaitForState(kGlicUiStateHistory, IsCurrently(WebUiState::kHoldLoading)),
       CheckElementVisible(kLoadingPanel, true));
+}
+
+// Test that the escape key can be used to dismiss the floaty window in various
+// loading and error states.
+
+IN_PROC_BROWSER_TEST_F(GlicUiDisconnectedUiTest, EscapeKeyDismisses) {
+  RunTestSequence(
+      ObserveState(kGlicUiStateHistory, &window_controller()),
+      OpenGlicWindow(GlicWindowMode::kAttached, GlicInstrumentMode::kHostOnly),
+      WaitForState(kGlicUiStateHistory, IsCurrently(WebUiState::kOffline)),
+      CheckEscapeKeyDismisses(kOfflinePanel));
+}
+
+IN_PROC_BROWSER_TEST_F(GlicUiLoadingPanelWaitingTest, EscapeKeyDismisses) {
+  RunTestSequence(
+      ObserveState(kGlicUiStateHistory, &window_controller()),
+      OpenGlicWindow(GlicWindowMode::kAttached, GlicInstrumentMode::kHostOnly),
+      WaitForState(kGlicUiStateHistory,
+                   IsCurrently(WebUiState::kFinishLoading)),
+      CheckEscapeKeyDismisses(kLoadingPanel));
+}
+
+IN_PROC_BROWSER_TEST_F(GlicUiLoadingPanelHoldingTest, EscapeKeyDismisses) {
+  RunTestSequence(
+      ObserveState(kGlicUiStateHistory, &window_controller()),
+      OpenGlicWindow(GlicWindowMode::kAttached, GlicInstrumentMode::kHostOnly),
+      WaitForState(kGlicUiStateHistory, IsCurrently(WebUiState::kHoldLoading)),
+      CheckEscapeKeyDismisses(kLoadingPanel));
+}
+
+IN_PROC_BROWSER_TEST_F(GlicUiFullLoadingSequenceTest, EscapeKeyDismisses) {
+  RunTestSequence(
+      ObserveState(kGlicUiStateHistory, &window_controller()),
+      OpenGlicWindow(GlicWindowMode::kAttached, GlicInstrumentMode::kHostOnly),
+      WaitForState(kGlicUiStateHistory, IsCurrently(WebUiState::kError)),
+      CheckEscapeKeyDismisses(kErrorPanel));
 }
 
 }  // namespace glic

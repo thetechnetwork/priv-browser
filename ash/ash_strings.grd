@@ -1577,6 +1577,9 @@ You can also use the keyboard shortcut. First, highlight text, then press <ph na
       <message name="IDS_ASH_FACEGAZE_CLOSE_BUTTON_TEXT" desc="The text for the close button that is shown in the FaceGaze top bar UI.">
         Turn off Face control
       </message>
+      <message name="IDS_ASH_STATUS_TRAY_FACEGAZE_ACTIVE_TITLE" desc="The title of the notification shown when FaceGaze is active.">
+        Face control active
+      </message>
 
       <!-- Accessibility nudges -->
       <message name="IDS_ASH_ACCESSIBILITY_NUDGE_DICTATION_NO_FOCUSED_TEXT_FIELD" desc="Displayed in a nudge when Dictation is stopped automatically because there is no focused text field.">
@@ -6959,6 +6962,9 @@ Here are some things you can try to get started.
       <message name="IDS_ASH_SCANNER_ACTION_PROGRESS_TITLE_CREATING" desc="The title text on a notification shown to indicate that something is being created, e.g. a new document, a new spreadsheet, or a new contact.">
         Creating...
       </message>
+      <message name="IDS_ASH_SCANNER_ACTION_PROGRESS_TITLE_COPYING" desc="The title text on a notification shown to indicate that text is in the process of being copied to the user's clipboad.">
+        Copying...
+      </message>
       <message name="IDS_ASH_SCANNER_ACTION_NEW_EVENT_SOURCE" desc="The Google Calendar product name, shown on a notification that indicates a new event is in the process of being added to the user's calendar.">
         Google Calendar
       </message>
@@ -6970,6 +6976,9 @@ Here are some things you can try to get started.
       </message>
       <message name="IDS_ASH_SCANNER_ACTION_NEW_GOOGLE_SHEET_SOURCE" desc="The Google Sheets product name, shown on a notification that indicates a new Google Sheet is in the process of being created.">
         Google Sheets
+      </message>
+      <message name="IDS_ASH_SCANNER_ACTION_COPY_TEXT_SOURCE" desc="The display source shown on a notification that indicates text is being copied to the user's clipboard.">
+        Clipboard
       </message>
       <message name="IDS_ASH_SCANNER_ACTION_SUCCESS_TOAST_CREATE_EVENT" desc="The message shown on a toast to indicate that event details were created from the contents of a screenshot and added to the user's calendar.">
         Added to Calendar
@@ -8040,6 +8049,25 @@ New install
       <message name="IDS_LOBSTER_MAGIC_BOOST_DISCLAIMER_PARAGRAPH_FOUR" desc="Text shown as the forth paragraph of the Magic Boost with Image Generation disclaimer view's body.">
         You can turn off these features at any time in Settings. <ph name="LINK_TO_LEARN_MORE">$1<ex>Learn more</ex></ph>
       </message>
+      <message name="IDS_LOBSTER_CONTAINS_PERSON_ERROR_MESSAGE" desc="The error message displayed when image candidates contain people and are filtered out.">
+        Can’t create images of this right now. Try rephrasing your description. Keep in mind you can't create images of people, harmful, or explicit content.
+      </message>
+      <message name="IDS_LOBSTER_NO_INTERNET_ERROR_MESSAGE" desc="The error message displayed when there is no internet connection when trying to get images from Image Generation.">
+        No internet. Connect to the internet and try again.
+      </message>
+      <message name="IDS_LOBSTER_CONTROVERSIAL_RESPONSE_ERROR_MESSAGE" desc="The error message displayed when image candidates are unsafe and filtered out.">
+        Can’t create images of this right now. Try rephrasing your description. Keep in mind you can't create images of people, harmful, or explicit content.
+      </message>
+      <message name="IDS_LOBSTER_OUT_OF_RESOURCE_ERROR_MESSAGE" desc="The error message displayed when server does not have enough resources handle the request, for example, when it is too busy to handle other requests or when the user has reached their allowed quota.">
+        At capacity right now. Come back soon.
+      </message>
+      <message name="IDS_LOBSTER_UNSUPPORTED_LANGUAGE_ERROR_MESSAGE" desc="The error message displayed when the input is in an unsupported language.">
+        This language isn't supported at this time.
+      </message>
+      <message name="IDS_LOBSTER_NO_SERVER_RESPONSE_ERROR_MESSAGE" desc="The error message displayed when server fails to output any response.">
+        Something went wrong.
+      </message>
+
 
       <!-- WM -->
       <message name="IDS_ENTER_PIP_A11Y_NOTIFICATION" is_accessibility_with_no_ui="true" desc="Accessibility text read by chromevox when a window starts picture-in-picture mode.">

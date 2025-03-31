@@ -95,7 +95,6 @@ W <ph name="BEGIN_LINK" />usługach Google<ph name="END_LINK" /> znajdziesz wi�
 <translation id="328933489847748230">{count,plural, =1{Pokazuję 1 okno Chromium}few{Pokazuję {count} okna Chromium}many{Pokazuję {count} okien Chromium}other{Pokazuję {count} okna Chromium}}</translation>
 <translation id="3344973607274501920">Przeglądarce Chromium nie udało się sprawdzić Twoich haseł. Sprawdź połączenie z internetem.</translation>
 <translation id="3366305173356742781">Dane Chromium na Twoim koncie</translation>
-<translation id="33788334537425157">Włącz opcję „Po zamknięciu Chromium blokuj karty incognito”</translation>
 <translation id="3387107508582892610">{THRESHOLD,plural, =1{Dzieje się tak, gdy nie korzystasz z Chromium przez {THRESHOLD} minutę. Może to obejmować historię i autouzupełnianie.}few{Dzieje się tak, gdy nie korzystasz z Chromium przez {THRESHOLD} minuty. Może to obejmować historię i autouzupełnianie.}many{Dzieje się tak, gdy nie korzystasz z Chromium przez {THRESHOLD} minut. Może to obejmować historię i autouzupełnianie.}other{Dzieje się tak, gdy nie korzystasz z Chromium przez {THRESHOLD} minuty. Może to obejmować historię i autouzupełnianie.}}</translation>
 <translation id="3410395242749598859">Niektóre dane z Chromium nie zostały jeszcze zapisane na koncie <ph name="EMAIL" />.
 Zanim przełączysz się na inne konto, odczekaj kilka minut. Jeśli przełączysz się teraz, te dane zostaną usunięte.</translation>
@@ -208,7 +207,6 @@ Pamiętaj, że:
     Jeśli zsynchronizujesz historię przeglądania z kontem Google, dane mogą też zawierać informacje o adresach URL, które odwiedzasz.<ph name="END_INDENT" /></translation>
 <translation id="5932787118589620366">Usuń dane przeglądania w Chromium.</translation>
 <translation id="593808800391107017">Otrzymuj alerty o problemach związanych z prywatnością i bezpieczeństwem, które automatycznie wykrywa Chromium.</translation>
-<translation id="5945387852661427312">Logujesz się na konto, którym zarządza <ph name="DOMAIN" />, i przekazujesz jego administratorowi kontrolę nad Twoimi danymi Chromium. Zostaną one trwale przypisane do tego konta. Gdy się wylogujesz, znikną one z tego urządzenia, ale pozostaną zapisane na Twoim koncie Google.</translation>
 <translation id="5951593919357934226">Wykorzystaj maksymalnie potencjał Chromium.</translation>
 <translation id="5985254578475526217">Aby otrzymywać powiadomienia z Chromium, włącz je w ustawieniach iOS.</translation>
 <translation id="6104024151682120539">Otwórz w Chromium</translation>

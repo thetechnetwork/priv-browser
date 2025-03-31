@@ -44,8 +44,20 @@ class TabEventTracker {
                             TabSelectionType tab_selection_type,
                             int last_tab_id) = 0;
 
+  // Called when a tab will be closed.
+  virtual void WillCloseTab(int tab_id) = 0;
+
+  // Called when a tab closure is undone.
+  virtual void TabClosureUndone(int tab_id) = 0;
+
+  // Called when a tab closure is committed.
+  virtual void TabClosureCommitted(int tab_id) = 0;
+
   // Called when a tab is moved in the window.
   virtual void DidMoveTab(int tab_id, int new_index, int current_index) = 0;
+
+  // Called when page load finishes on any candidate tab.
+  virtual void OnPageLoadFinished(int tab_id) = 0;
 
   // Called when users enter tab switcher.
   virtual void DidEnterTabSwitcher() = 0;

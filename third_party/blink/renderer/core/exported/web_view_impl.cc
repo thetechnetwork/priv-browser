@@ -40,6 +40,7 @@
 #include "base/memory/scoped_refptr.h"
 #include "base/metrics/histogram_macros.h"
 #include "base/observer_list.h"
+#include "base/task/common/task_annotator.h"
 #include "base/time/time.h"
 #include "build/build_config.h"
 #include "cc/layers/picture_layer.h"
@@ -1898,6 +1899,9 @@ void WebView::ApplyWebPreferences(const web_pref::WebPreferences& prefs,
   if (!prefs.strict_mime_type_check_for_worker_scripts_enabled) {
     RuntimeEnabledFeatures::SetStrictMimeTypesForWorkersEnabled(false);
   }
+
+  RuntimeEnabledFeatures::SetPaymentRequestEnabled(
+      prefs.payment_request_enabled);
 }
 
 void WebViewImpl::ThemeChanged() {

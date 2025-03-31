@@ -95,7 +95,6 @@ Se queres ver máis opcións de configuración que usen datos para mellorar a t�
 <translation id="328933489847748230">{count,plural, =1{Mostrando 1 ventá de Chromium}other{Mostrando {count} ventás de Chromium}}</translation>
 <translation id="3344973607274501920">Chromium non puido comprobar os teus contrasinais. Verifica a conexión a Internet.</translation>
 <translation id="3366305173356742781">Datos de Chromium na túa conta</translation>
-<translation id="33788334537425157">Activa Bloquear pestanas do modo de incógnito ao pechar Chromium</translation>
 <translation id="3387107508582892610">{THRESHOLD,plural, =1{Isto ocorre cando Chromium non se utiliza durante {THRESHOLD} minuto. Eses datos poderían incluír o historial e a función de autocompletar.}other{Isto ocorre cando Chromium non se utiliza durante {THRESHOLD} minutos. Eses datos poderían incluír o historial e a función de autocompletar.}}</translation>
 <translation id="3410395242749598859">Algúns dos datos de Chromium aínda non se gardaron en <ph name="EMAIL" />.
 Espera uns minutiños antes de cambiar de conta. Se a cambias agora, eliminaranse eses datos.</translation>
@@ -208,7 +207,6 @@ Cuestións que debes ter en conta:
   • Se sincronizas o historial coa túa Conta de Google, pode que as métricas tamén conteñan información sobre os URL que visites.<ph name="END_INDENT" /></translation>
 <translation id="5932787118589620366">Elimina os datos de navegación en Chromium.</translation>
 <translation id="593808800391107017">Recibe alertas sobre calquera problema de privacidade ou seguranza que detecte Chromium automaticamente.</translation>
-<translation id="5945387852661427312">Estás iniciando sesión cunha conta xestionada por <ph name="DOMAIN" /> e proporcionándolle ao seu administrador o control dos teus datos de Chromium, que quedarán ligados permanentemente a esta conta. Se pechas sesión en Chromium, eliminaranse os teus datos deste dispositivo, pero seguirán almacenados na túa conta de Google.</translation>
 <translation id="5951593919357934226">Tira o máximo proveito de Chromium.</translation>
 <translation id="5985254578475526217">Para recibir notificacións de Chromium, activa as notificacións na configuración de iOS.</translation>
 <translation id="6104024151682120539">Abrir en Chromium</translation>

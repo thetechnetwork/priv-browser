@@ -200,7 +200,7 @@ BASE_FEATURE(kPreventDuplicateImageDecodes,
 
 BASE_FEATURE(kInitImageDecodeLastUseTime,
              "InitImageDecodeLastUseTime",
-             base::FEATURE_DISABLED_BY_DEFAULT);
+             base::FEATURE_ENABLED_BY_DEFAULT);
 
 BASE_FEATURE(kDynamicSafeAreaInsetsSupportedByCC,
              "DynamicSafeAreaInsetsSupportedByCC",
@@ -261,5 +261,9 @@ const base::FeatureParam<int>
     kNumDidNotProduceFrameBeforeInternalBeginFrameSource{
         &kInternalBeginFrameSourceOnManyDidNotProduceFrame,
         "num_did_not_produce_frame_before_internal_begin_frame_source", 4};
+
+BASE_FEATURE(kUseLayerListsByDefault,
+             "UseLayerListsByDefault",
+             base::FEATURE_DISABLED_BY_DEFAULT);
 
 }  // namespace features

@@ -91,11 +91,11 @@
 <translation id="3054480780637153380">เปิดการตั้งค่า Chromium ใน iOS จากนั้นแตะ "แอปเบราว์เซอร์เริ่มต้น" แล้วเลือก Chromium</translation>
 <translation id="3102849287235003384">หากต้องการออกจากระบบบัญชี Google ในเว็บไซต์ทั้งหมด ให้<ph name="BEGIN_LINK" />ออกจากระบบ Chromium<ph name="END_LINK" /></translation>
 <translation id="3115956258722352278">กำหนดให้ Chromium เป็นเบราว์เซอร์เริ่มต้นใช่ไหม</translation>
+<translation id="3180939591219927904">เปิด "ล็อกแท็บที่ไม่ระบุตัวตนเมื่อปิด Chromium"</translation>
 <translation id="3242612358525156339">จากการตั้งค่าของอุปกรณ์ ให้เปิด "<ph name="TEXT_OF_THE_SETTINGS_MENU_ITEM" />" และเลือก "Chromium"</translation>
 <translation id="328933489847748230">{count,plural, =1{กำลังแสดงหน้าต่าง Chromium 1 หน้าต่าง}other{กำลังแสดงหน้าต่าง Chromium {count} หน้าต่าง}}</translation>
 <translation id="3344973607274501920">Chromium ตรวจสอบรหัสผ่านของคุณไม่ได้ โปรดลองตรวจสอบการเชื่อมต่ออินเทอร์เน็ต</translation>
 <translation id="3366305173356742781">ข้อมูล Chromium ในบัญชี</translation>
-<translation id="33788334537425157">เปิด "ล็อกแท็บที่ไม่ระบุตัวตนเมื่อปิด Chromium"</translation>
 <translation id="3387107508582892610">{THRESHOLD,plural, =1{การดำเนินการนี้จะเกิดขึ้นเมื่อไม่ได้ใช้ Chromium เป็นเวลา {THRESHOLD} นาที ซึ่งอาจรวมถึงประวัติการเข้าชมและการป้อนข้อความอัตโนมัติ}other{การดำเนินการนี้จะเกิดขึ้นเมื่อไม่ได้ใช้ Chromium เป็นเวลา {THRESHOLD} นาที ซึ่งอาจรวมถึงประวัติการเข้าชมและการป้อนข้อความอัตโนมัติ}}</translation>
 <translation id="3410395242749598859">ยังไม่ได้บันทึกข้อมูล Chromium บางอย่างของคุณลงใน <ph name="EMAIL" />
 โปรดรอสักครู่ก่อนเปลี่ยนบัญชี หากคุณเปลี่ยนบัญชีตอนนี้ ระบบจะลบข้อมูลนี้</translation>
@@ -208,7 +208,6 @@
   • หากคุณซิงค์ประวัติการเข้าชมกับบัญชี Google เมตริกอาจรวมข้อมูลเกี่ยวกับ URL ที่คุณเข้าชมด้วย<ph name="END_INDENT" /></translation>
 <translation id="5932787118589620366">ลบข้อมูลการท่องเว็บใน Chromium</translation>
 <translation id="593808800391107017">รับการแจ้งเตือนเกี่ยวกับปัญหาความเป็นส่วนตัวหรือความปลอดภัยที่ Chromium ตรวจหาให้คุณโดยอัตโนมัติ</translation>
-<translation id="5945387852661427312">คุณกำลังลงชื่อเข้าใช้ด้วยบัญชีที่จัดการโดย <ph name="DOMAIN" /> และทำให้ผู้ดูแลระบบของโดเมนควบคุมข้อมูล Chromium ของคุณได้ ข้อมูลของคุณจะโยงกับบัญชีนี้อย่างถาวร การออกจากระบบ Chromium จะลบข้อมูลของคุณจากอุปกรณ์เครื่องนี้ แต่ข้อมูลจะยังจัดเก็บอยู่ในบัญชี Google</translation>
 <translation id="5951593919357934226">รับประโยชน์สูงสุดจาก Chromium</translation>
 <translation id="5985254578475526217">เปิดการแจ้งเตือนในการตั้งค่า iOS เพื่อรับการแจ้งเตือนจาก Chromium</translation>
 <translation id="6104024151682120539">เปิดใน Chromium</translation>
@@ -262,6 +261,7 @@
 <translation id="7337881442233988129">Chromium</translation>
 <translation id="7357211569052832586">ระบบได้นำข้อมูลที่เลือกไว้ออกจาก Chromium และอุปกรณ์ที่ซิงค์แล้ว บัญชี Google ของคุณอาจมีประวัติการท่องเว็บในรูปแบบอื่นๆ เช่น การค้นหาและกิจกรรมจากบริการอื่นๆ ของ Google ที่ history.google.com</translation>
 <translation id="7395825497086981028">ระบบจะบันทึกรหัสผ่านไว้ในเครื่องมือจัดการรหัสผ่านสำหรับ <ph name="EMAIL" /></translation>
+<translation id="7504829997542308412">เปิด Chromium</translation>
 <translation id="7531461704633548377">จาก Chromium</translation>
 <translation id="7554983317097061001">เคล็ดลับสำหรับ Chromium: ย้าย Chromium ไปที่แถบแอป</translation>
 <translation id="7576863740961052505">จัดการการตั้งค่า Chromium</translation>

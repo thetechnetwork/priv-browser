@@ -53,13 +53,13 @@ class AccountSelectionProperties {
     /** Properties for an account entry in AccountSelection sheet. */
     static class AccountProperties {
         static class Avatar {
-            // Name is used to create a fallback monogram Icon.
-            final String mName;
+            // Display name is used to create a fallback monogram Icon.
+            final String mDisplayName;
             final Bitmap mAvatar;
             final int mAvatarSize;
 
-            Avatar(String name, @Nullable Bitmap avatar, int avatarSize) {
-                mName = name;
+            Avatar(String displayName, @Nullable Bitmap avatar, int avatarSize) {
+                mDisplayName = displayName;
                 mAvatar = avatar;
                 mAvatarSize = avatarSize;
             }
@@ -100,8 +100,8 @@ class AccountSelectionProperties {
                 new ReadableObjectPropertyKey<>("idp_for_display");
         static final ReadableObjectPropertyKey<String> RP_FOR_DISPLAY =
                 new ReadableObjectPropertyKey<>("rp_for_display");
-        static final ReadableObjectPropertyKey<Bitmap> IDP_BRAND_ICON =
-                new ReadableObjectPropertyKey<>("idp_brand_icon");
+        static final ReadableObjectPropertyKey<Bitmap> HEADER_ICON =
+                new ReadableObjectPropertyKey<>("header_icon");
         static final ReadableObjectPropertyKey<Bitmap> RP_BRAND_ICON =
                 new ReadableObjectPropertyKey<>("rp_brand_icon");
         static final ReadableObjectPropertyKey<HeaderType> TYPE =
@@ -120,7 +120,7 @@ class AccountSelectionProperties {
             CLOSE_ON_CLICK_LISTENER,
             IDP_FOR_DISPLAY,
             RP_FOR_DISPLAY,
-            IDP_BRAND_ICON,
+            HEADER_ICON,
             RP_BRAND_ICON,
             TYPE,
             RP_CONTEXT,
@@ -261,6 +261,8 @@ class AccountSelectionProperties {
                 new WritableObjectPropertyKey<>("account_chip");
         static final WritableBooleanPropertyKey SPINNER_ENABLED =
                 new WritableBooleanPropertyKey("spinner_enabled");
+        static final WritableBooleanPropertyKey DRAGBAR_HANDLE_VISIBLE =
+                new WritableBooleanPropertyKey("dragbar_handle_visible");
 
         static final PropertyKey[] ALL_KEYS = {
             CONTINUE_BUTTON,
@@ -270,7 +272,8 @@ class AccountSelectionProperties {
             ERROR_TEXT,
             ADD_ACCOUNT_BUTTON,
             ACCOUNT_CHIP,
-            SPINNER_ENABLED
+            SPINNER_ENABLED,
+            DRAGBAR_HANDLE_VISIBLE
         };
 
         private ItemProperties() {}

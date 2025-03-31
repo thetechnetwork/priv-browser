@@ -281,6 +281,7 @@
 #define IDC_ADD_TO_COMPARISON_TABLE_MENU 40291
 #define IDC_CREATE_NEW_COMPARISON_TABLE_WITH_TAB 40292
 #define IDC_SHOW_HISTORY_SIDE_PANEL     40293
+#define IDC_OPEN_GLIC  40294
 
 // Spell-check
 // Insert any additional suggestions before _LAST; these have to be consecutive.
@@ -567,6 +568,9 @@
 
 // Glic button context menu and tabstrip context menu
 #define IDC_GLIC_TOGGLE_PIN 53320
+
+// Glic focus navigation
+#define IDC_GLIC_TOGGLE_FOCUS 53325
 
 // NOTE: The last valid command value is 57343 (0xDFFF)
 // See http://msdn.microsoft.com/en-us/library/t2zechd4(VS.71).aspx

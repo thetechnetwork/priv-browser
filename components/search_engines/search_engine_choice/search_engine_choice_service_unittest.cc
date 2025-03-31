@@ -50,20 +50,21 @@
 #include "testing/gtest/include/gtest/gtest.h"
 #include "third_party/search_engines_data/resources/definitions/prepopulated_engines.h"
 
-using search_engines::RepromptResult;
-using search_engines::WipeSearchEngineChoiceReason;
+using ::country_codes::CountryId;
+using ::search_engines::RepromptResult;
+using ::search_engines::WipeSearchEngineChoiceReason;
 using ::testing::NiceMock;
 
 namespace search_engines {
 namespace {
 
-const int kBelgiumCountryId = country_codes::CountryCharsToCountryID('B', 'E');
-const int kUsaCountryId = country_codes::CountryCharsToCountryID('U', 'S');
+const CountryId kBelgiumCountryId = CountryId("BE");
+const CountryId kUsaCountryId = CountryId("US");
 
 // For SearchEngineChoiceServiceTest::InitService();
 struct InitServiceArgs {
-  int variation_country_id = country_codes::kCountryIDUnknown;
-  int client_country_id = country_codes::kCountryIDUnknown;
+  CountryId variation_country_id;
+  CountryId client_country_id;
   bool force_reset = false;
   bool is_profile_eligible_for_dse_guest_propagation = false;
 };
@@ -634,8 +635,7 @@ TEST_F(SearchEngineChoiceServiceTest, RecordChoiceMade) {
   base::CommandLine::ForCurrentProcess()->RemoveSwitch(
       switches::kSearchEngineChoiceCountry);
   base::CommandLine::ForCurrentProcess()->AppendSwitchASCII(
-      switches::kSearchEngineChoiceCountry,
-      country_codes::CountryIDToCountryString(kBelgiumCountryId));
+      switches::kSearchEngineChoiceCountry, kBelgiumCountryId.CountryCode());
 
   // Test that the choice is recorded if it wasn't previously done.
   search_engine_choice_service().RecordChoiceMade(
@@ -685,8 +685,7 @@ TEST_F(SearchEngineChoiceServiceTest, RecordChoiceMade_ByLocation) {
   base::CommandLine::ForCurrentProcess()->RemoveSwitch(
       switches::kSearchEngineChoiceCountry);
   base::CommandLine::ForCurrentProcess()->AppendSwitchASCII(
-      switches::kSearchEngineChoiceCountry,
-      country_codes::CountryIDToCountryString(kBelgiumCountryId));
+      switches::kSearchEngineChoiceCountry, kBelgiumCountryId.CountryCode());
   EXPECT_EQ(template_url_service().GetDefaultSearchProvider()->prepopulate_id(),
             TemplateURLPrepopulateData::google.id);
 
@@ -744,8 +743,7 @@ TEST_F(SearchEngineChoiceServiceTest, RecordChoiceMade_DistributionCustom) {
   base::CommandLine::ForCurrentProcess()->RemoveSwitch(
       switches::kSearchEngineChoiceCountry);
   base::CommandLine::ForCurrentProcess()->AppendSwitchASCII(
-      switches::kSearchEngineChoiceCountry,
-      country_codes::CountryIDToCountryString(kBelgiumCountryId));
+      switches::kSearchEngineChoiceCountry, kBelgiumCountryId.CountryCode());
 
   // Test that the choice is recorded if it wasn't previously done.
   search_engine_choice_service().RecordChoiceMade(
@@ -783,8 +781,7 @@ TEST_F(SearchEngineChoiceServiceTest, RecordChoiceMade_RemovedPrepopulated) {
   base::CommandLine::ForCurrentProcess()->RemoveSwitch(
       switches::kSearchEngineChoiceCountry);
   base::CommandLine::ForCurrentProcess()->AppendSwitchASCII(
-      switches::kSearchEngineChoiceCountry,
-      country_codes::CountryIDToCountryString(kBelgiumCountryId));
+      switches::kSearchEngineChoiceCountry, kBelgiumCountryId.CountryCode());
 
   // Test that the choice is recorded if it wasn't previously done.
   search_engine_choice_service().RecordChoiceMade(
@@ -923,11 +920,10 @@ TEST_F(SearchEngineChoiceServiceTest,
 
   {
     // Unknown country.
-    InitService({.variation_country_id = country_codes::kCountryIDUnknown,
-                 .force_reset = true});
+    InitService({.force_reset = true});
     ChoiceScreenData choice_screen_data(
-        OwnedTemplateURLVectorFromPrepopulatedEngines(engines),
-        country_codes::kCountryIDUnknown, SearchTermsData());
+        OwnedTemplateURLVectorFromPrepopulatedEngines(engines), CountryId(),
+        SearchTermsData());
     ChoiceScreenDisplayState display_state = choice_screen_data.display_state();
     display_state.selected_engine_index = 0;
 
@@ -976,9 +972,8 @@ TEST_F(SearchEngineChoiceServiceTest,
   base::HistogramTester histogram_tester;
 
   // Mismatch between the variations and choice screen data country.
-  InitService(
-      {.variation_country_id = country_codes::CountryStringToCountryID("DE"),
-       .force_reset = true});
+  InitService({.variation_country_id = country_codes::CountryId("DE"),
+               .force_reset = true});
   ChoiceScreenData choice_screen_data(
       OwnedTemplateURLVectorFromPrepopulatedEngines(engines), kBelgiumCountryId,
       SearchTermsData());
@@ -1076,8 +1071,7 @@ TEST_F(SearchEngineChoiceServiceTest,
   search_engines::MarkSearchEngineChoiceCompletedForTesting(*pref_service());
 
   base::HistogramTester histogram_tester;
-  InitService({.variation_country_id = country_codes::kCountryIDUnknown,
-               .force_reset = true});
+  InitService({.force_reset = true});
 
   histogram_tester.ExpectTotalCount(
       base::StringPrintf(
@@ -1116,8 +1110,7 @@ TEST_F(SearchEngineChoiceServiceTest,
       display_state.ToDict());
 
   base::HistogramTester histogram_tester;
-  InitService({.variation_country_id = country_codes::kCountryIDUnknown,
-               .force_reset = true});
+  InitService({.force_reset = true});
 
   histogram_tester.ExpectTotalCount(
       kSearchEngineChoiceScreenShowedEngineAtCountryMismatchHistogram, 0);
@@ -1483,9 +1476,9 @@ TEST_F(SearchEngineChoiceUtilsResourceIdsTest, GetIconResourceId) {
   ASSERT_FALSE(base::CommandLine::ForCurrentProcess()->HasSwitch(
       switches::kSearchEngineChoiceCountry));
 
-  for (int country_id : regional_capabilities::kEeaChoiceCountriesIds) {
+  for (CountryId country_id : regional_capabilities::kEeaChoiceCountriesIds) {
     search_engine_test_environment_.pref_service().SetInteger(
-        country_codes::kCountryIDAtInstall, country_id);
+        country_codes::kCountryIDAtInstall, country_id.Serialize());
     std::vector<std::unique_ptr<TemplateURLData>> urls =
         search_engine_test_environment_.prepopulate_data_resolver()
             .GetPrepopulatedEngines();

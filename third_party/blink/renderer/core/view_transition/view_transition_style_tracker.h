@@ -355,6 +355,8 @@ class ViewTransitionStyleTracker
       PhysicalRect& visual_overflow_rect_in_layout_space,
       std::optional<gfx::RectF>& captured_rect_in_layout_space) const;
 
+  gfx::Transform ComputeViewportTransform(const LayoutObject&) const;
+
   viz::ViewTransitionElementResourceId GenerateResourceId(
       bool for_subframe_snapshot = false) const;
 
@@ -443,6 +445,8 @@ class ViewTransitionStyleTracker
   HashMap<AtomicString, AncestorGroupNames> group_state_map_;
 
   base::Token token_;
+
+  HashMap<AtomicString, AtomicString> id_to_auto_name_map_;
 };
 
 }  // namespace blink

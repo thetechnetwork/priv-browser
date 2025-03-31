@@ -11,6 +11,7 @@
 <translation id="102432830749687801">আপুনি এক্সেছ হেৰুওৱাৰ আগতেই আপোনাৰ বিদ্যালয়ৰ একাউণ্টৰ ডেটা আপোনাৰ ব্যক্তিগত একাউণ্টলৈ নিবলৈ Googleৰ Content Transfer এপ্‌টো ব্যৱহাৰ কৰাটো নিশ্চিত কৰক।</translation>
 <translation id="1026212596705997935">শ্বৰ্টকাটটো "<ph name="CONFLICT_ACCEL_NAME" />"ৰ বাবে ব্যৱহাৰ কৰি থকা হৈছে। এটা নতুন শ্বৰ্টকাটত টিপক। আগৰে পৰা থকা শ্বৰ্টকাটটো সলনি কৰিবলৈ, এই শ্বৰ্টকাটটোত পুনৰ টিপক।</translation>
 <translation id="1030856839388844477">ডেটাৰ ব্যৱহাৰ ৰিছেট কৰক</translation>
+<translation id="1047095725494118091">ডাউনল’ড কৰিব নোৱাৰি। পুনৰ চেষ্টা কৰক বা আপোনাৰ <ph name="DEVICE_TYPE" /> ৰিষ্টাৰ্ট কৰক।</translation>
 <translation id="1047458377670401304"><ph name="CPU_NAME" /> (<ph name="THREAD_COUNT" /> টা থ্ৰেড, <ph name="CPU_MAX_CLOCK_SPEED" /> গিগাহাৰ্টজ)</translation>
 <translation id="1047773237499189053">নতুন সুবিধা উপলব্ধ, অধিক জানিবলৈ উপৰমুৱা কাঁড়চিহ্নৰ কী ব্যৱহাৰ কৰক।</translation>
 <translation id="1049663189809099096">পেষ্টেল হালধীয়া</translation>
@@ -26,6 +27,7 @@
 <translation id="1082009148392559545">স্ক্ৰীন ছেভাৰ ডাউনল’ড হৈ আছে</translation>
 <translation id="1094693127011229778">আইপি ঠিকনাটো উপলব্ধ নহয়</translation>
 <translation id="1100902271996134409">প্ৰতিচ্ছবি সৃষ্টি কৰি থকা হৈছে...</translation>
+<translation id="1107856713690040084"><ph name="DEVICE_TYPE" /> অডিঅ’</translation>
 <translation id="1116694919640316211">ইয়াৰ বিষয়ে</translation>
 <translation id="1118572504348554005">আমি এই ফৰ্মৰ জৰিয়তে দাখিল কৰা মতামত আমাৰ অংশীদাৰসকলৰ সৈতে শ্বেয়াৰ কৰিব পাৰোঁ যাতে আপুনি আমাক অভিযোগ দিয়া বাগ আৰু অন্য সমস্যাসমূহ সমাধান কৰিব পাৰোঁ। পাছৱৰ্ডৰ দৰে সংবেদনশীল তথ্য অন্তৰ্ভুক্ত নকৰিব।</translation>
 <translation id="1119403468619527527">সৰলীকৰণ কৰিবলৈ অতি কমসংখ্যক শব্দ আছে</translation>
@@ -292,6 +294,7 @@
 <translation id="2163937499206714165">গাঢ় ম’ড ম’ডটো অন কৰক</translation>
 <translation id="2164131940279488868">অডিঅ’ ৰেকৰ্ড কৰা আৰম্ভ কৰিবলৈ এটা মাইক সংযোগ হৈ থকাটো নিশ্চিত কৰক</translation>
 <translation id="2173302385160625112">আপোনাৰ ইণ্টাৰনেট সংযোগ পৰীক্ষা কৰক</translation>
+<translation id="2176909213844392588"><ph name="LANGUAGE_NAME" />ৰ ট্ৰেন্সক্ৰিপশ্বনৰ মডেল ডাইনল’ড কৰিব নোৱাৰি। পুনৰ চেষ্টা কৰক বা আপোনাৰ <ph name="DEVICE_TYPE" /> ৰিষ্টাৰ্ট কৰক।</translation>
 <translation id="2180197493692062006">কিবা ভুল হ’ল। এপ্‌টো পুনৰ খুলিবলৈ চেষ্টা কৰক।</translation>
 <translation id="2189104374785738357">এপিএনৰ সবিশেষ সম্পাদনা কৰক</translation>
 <translation id="2195732836444333448">এই মুহূৰ্তত সক্ষমতাত আছে। সোনকালে উভতি আহক।</translation>
@@ -480,6 +483,7 @@
 <translation id="3199982728237701504">নথি ফীডাৰ (দুফাল থকা)</translation>
 <translation id="3201315366910775591">শ্বেয়াৰ কৰা এলবামসমূহ অন্য লোকসকলে আপডে’ট কৰিব পাৰে</translation>
 <translation id="3211671540163313381">কীমেপিং D-পেড</translation>
+<translation id="3217462202230355157">আপোনাৰ মাইকটো সংযুক্ত হৈ থকাটো নিশ্চিত কৰক বা আপোনাৰ <ph name="DEVICE_TYPE" />টো ৰিষ্টাৰ্ট কৰি চাওক</translation>
 <translation id="3226405216343213872">স্কেনাৰ বিচাৰি থকা হৈছে</translation>
 <translation id="3226657629376379887">লে’আউট সম্পৰ্কীয় কাৰ্যৰ মেনু</translation>
 <translation id="3227186760713762082"><ph name="CATEGORY_TEXT" />ৰ মানটোক <ph name="CONVERSION_RATE" />ৰে হৰণ কৰক</translation>
@@ -515,6 +519,7 @@
 <translation id="3383623117265110236">বিশেষ</translation>
 <translation id="3404249063913988450">স্ক্ৰীন ছেভাৰ সক্ষম কৰক</translation>
 <translation id="3413935475507503304">আপডে’টটো কাৰ্যকৰী কৰিবলৈ, পৰৱৰ্তীত টিপক।</translation>
+<translation id="3416709353545797224">আটাইবোৰ <ph name="DEVICE_TYPE" /> অডিঅ’ ৰেকৰ্ড কৰি থকা হৈছে</translation>
 <translation id="3428551088151258685">মুকলি ঠাইত</translation>
 <translation id="3428971106895559033">পেষ্টেল</translation>
 <translation id="3434107140712555581"><ph name="BATTERY_PERCENTAGE" />%</translation>
@@ -678,6 +683,7 @@
 <translation id="4155551848414053977">নিশ্চিত কৰক যে স্কেনাৰটো অন কৰা আছে আৰু আপোনাৰ নেটৱৰ্ক অথবা এটা পোনপটীয়া সংযোগৰ জৰিয়তে উপলব্ধ হৈ আছে</translation>
 <translation id="4159238217853743776">আংশিক</translation>
 <translation id="4159784952369912983">বেঙুনীয়া</translation>
+<translation id="416219735020840807">ট্ৰেন্সক্ৰিপশ্বন মডেল ডাইনল’ড কৰিব নোৱাৰি। পুনৰ চেষ্টা কৰক বা আপোনাৰ <ph name="DEVICE_TYPE" /> ৰিষ্টাৰ্ট কৰক।</translation>
 <translation id="4170180284036919717">এখন ফট’ তোলক</translation>
 <translation id="4170700058716978431">বিফল হৈছে</translation>
 <translation id="4171077696775491955">উজ্জ্বলতা কমাওক</translation>
@@ -698,6 +704,16 @@
 <translation id="4249717042534905822">দেওবাৰে</translation>
 <translation id="4250229828105606438">স্ক্রীণশ্বট</translation>
 <translation id="4251839292699800785">শৈলীপূৰ্ণ অফিছ</translation>
+<translation id="4252261480746798874">আপুনি "আপোনাৰ নিজৰ সৃষ্টি কৰক" বাছনি কৰিলে, আপুনি এটা কাষ্টম লিখিব পাৰে। আপুনি "এটা থীম বাছনি কৰক" বুলিও বাছনি কৰিব পাৰে আৰু তাৰ পাছত আপোনাৰ AI ৱালপেপাৰ ব্যক্তিগতকৃত কৰিবলৈ আণ্ডাৰলাইন কৰা শব্দবোৰ বাছনি কৰিব পাৰে।
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          অধিক অদ্বিতীয় আৰু বৈচিত্ৰময় AI প্ৰতিচ্ছবিৰ বিকল্পসমূহ লাভ কৰিবলৈ "মোক অনুপ্ৰাণিত কৰক" বাছনি কৰক।
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          আপুনি নিজৰ ৱালপেপাৰ সৃষ্টি কৰোঁতে, <ph name="BEGIN_LINK_GOOGLE_PRIVACY_POLICY" />Googleৰ সেৱাৰ চৰ্তাৱলী আৰু গোপনীয়তাৰ নীতি<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" /> অনুসৰি প্ৰতিচ্ছবি সৃষ্টি কৰিবলৈ তথা প্ৰ’ডাক্টটো উন্নত কৰিবলৈ প্ৰম্পট্‌টো Google AI ছাৰ্ভাৰসমূহলৈ পঠিওৱা হয়। যিকোনো ধৰণৰ ব্যক্তিগত, সংবেদনশীল বা গোপন তথ্য অন্তৰ্ভুক্ত নকৰিব।
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          Generative AIএ লোকসকলৰ বিষয়ে তথ্যকে ধৰি ভুল কৰিব পাৰে, সেয়ে ইয়াক পুনৰ পৰীক্ষা কৰক। <ph name="BEGIN_LINK_CREATE_YOUR_OWN_WALLPAPER" />অধিক জানক<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" /></translation>
 <translation id="4258281355379922695">HTTPৰ বিলম্বতা</translation>
 <translation id="4266143281602681663">ঊণ</translation>
 <translation id="4269815121975886860">ষ্টাৰ্টআপৰ অগ্ৰাধিকাৰসমূহ</translation>
@@ -775,7 +791,6 @@
 <translation id="4593212453765072419">প্ৰ’ক্সী বিশ্বাসযোগ্যতাৰ প্ৰমাণীকৰণৰ আৱশ্যক</translation>
 <translation id="4594021849294327751">ট্ৰেন্সক্ৰিপ্ট সৃষ্টি কৰক</translation>
 <translation id="4594541568452132351">ট্ৰেন্সক্ৰিপশ্বনৰ ভাষা আৰু ডাউনল’ডৰ মডেল বাছনি কৰক</translation>
-<translation id="4607282946861182308">ইয়াৰ প্ৰতিচ্ছবি সৃষ্টি কৰিব নোৱাৰি। আন এটা প্ৰম্প্‌ট ব্যৱহাৰ কৰি চাওক।</translation>
 <translation id="4609350030397390689">কীব’ৰ্ডৰ উজ্জ্বলতা ডাউন</translation>
 <translation id="4627232916386272576"><ph name="TOTAL_PAGE_NUMBER" />ৰ ভিতৰত <ph name="DOCUMENT_TITLE" />, <ph name="PRINTER_NAME" />, <ph name="CREATION_TIME" />, <ph name="PRINTED_PAGE_NUMBER" />। প্ৰিণ্টৰ কাৰ্যটো বাতিল কৰিবলৈ এণ্টাৰ টিপক।</translation>
 <translation id="463791356324567266">স্কেন বাতিল কৰি থকা হৈছে…</translation>
@@ -942,6 +957,7 @@
 <translation id="5344619683981067131">বাছনি কৰা পাঠৰ ঠাইত পৰামৰ্শটো ব্যৱহাৰ কৰা হৈছে</translation>
 <translation id="5346687412805619883">স্থানীয় নেটৱৰ্ক</translation>
 <translation id="5358174242040570474">কিবা ভুল হ’ল। পুনৰ এখন ৱালপেপাৰ বাছনি কৰি অথবা পুনৰ এপ্‌টো খুলি চেষ্টা কৰি চাওক।</translation>
+<translation id="5368228070728130240">সাৰাংশ আৰু শিৰোনাম সৃষ্টিৰ বাবে মডেল ডাউনল’ড কৰিব নোৱাৰি। পুনৰ চেষ্টা কৰক বা আপোনাৰ <ph name="DEVICE_TYPE" /> ৰিষ্টাৰ্ট কৰক।</translation>
 <translation id="5372659122375744710">ৱাই-ফাইৰ নেটৱৰ্কটো সুৰক্ষিত নহয়</translation>
 <translation id="5376354385557966694">স্বয়ংক্ৰিয় উজ্জ্বল ম’ড</translation>
 <translation id="5378184552853359930">IPৰ ধৰণ</translation>
@@ -1247,6 +1263,7 @@
 <translation id="6766275201586212568">DNSৰ সমাধান বিফল হৈছে</translation>
 <translation id="6768237774506518020">DNSৰ সমাধান বিফল হোৱাৰ হাৰ উচ্চ</translation>
 <translation id="6786747875388722282">এক্সটেনশ্বনসমূহ</translation>
+<translation id="6789891265243243337"><ph name="DEVICE_TYPE" />ৰ অডিঅ’ অন কৰা থাকিলে, Recorderএ এই ডিভাইচটোত প্লে’ হৈ থকা আটাইবোৰ অডিঅ’ কেপচাৰ কৰে</translation>
 <translation id="6791471867139427246">কীব’ৰ্ডৰ পোহৰৰ ৰং</translation>
 <translation id="6796229976413584781">শ্বৰ্টকাট মচা হ’ল</translation>
 <translation id="6798678288485555829">পাঠ নেভিগেশ্বন</translation>
@@ -1522,6 +1539,7 @@
 <translation id="8010765388850538088">Generative AIৰ বিষয়ে অধিক জানক</translation>
 <translation id="8017679124341497925">শ্বৰ্টকাটত সাল-সলনি কৰা হ’ল</translation>
 <translation id="802154636333426148">ডাউনল’ড কৰিব পৰা নগ’ল</translation>
+<translation id="8027467664787098346">বাছনি কৰা ৱালপেপাৰৰ বিষয়ে অধিক জানক</translation>
 <translation id="8028993641010258682">আকাৰ</translation>
 <translation id="8031884997696620457">HSPAPlus</translation>
 <translation id="80398733265834479">স্বয়ংক্ৰিয় ৰঙৰ ম'ডটো সক্ষম কৰক</translation>
@@ -1640,6 +1658,7 @@
 <translation id="8543574988889671960">টেব পুনৰ ল’ড কৰক</translation>
 <translation id="8550364285433943656">আপোনাৰ কীব’ৰ্ডৰ কীসমূহেৰে খেলিবলৈ গে’মৰ কাৰ্যত নিয়ন্ত্ৰণ ৰাখক</translation>
 <translation id="8557447961879934694">WPA2</translation>
+<translation id="8558521694042102707">Generative AIএ লোকসকলৰ বিষয়ে তথ্যকে ধৰি ভুল কৰিব পাৰে, সেয়ে ইয়াক পুনৰ পৰীক্ষা কৰক।</translation>
 <translation id="8575298406870537639">আপোনাৰ বাহকৰ নেটৱৰ্কৰ সৈতে সংযুক্ত হ’বলৈ সেইটোক এই বিকল্পটোৰ আৱশ্যক হ’ব পাৰে। সবিশেষৰ বাবে আপোনাৰ বাহকৰ সৈতে যোগাযোগ কৰক।</translation>
 <translation id="8576249514688522074">আৰম্ভ কৰা হোৱা নাই</translation>
 <translation id="8584654835905316966"><ph name="DEVICE_NAME" />ৰ <ph name="VERSION" /> সংস্কৰণত ফাৰ্মৱেৰ ইনষ্টল কৰাটো সম্পূৰ্ণ কৰিবলৈ এবাৰ ৰিষ্টাৰ্ট কৰাৰ আৱশ্যক। আপোনাৰ কম্পিউটাৰটো কেইবাবাৰো ৰিবুট কৰা হ’ব পাৰে। এনে আচৰণৰ আশংকা কৰা হৈছে।</translation>
@@ -1654,7 +1673,6 @@
 <translation id="8655295600908251630">চেনেল</translation>
 <translation id="8655828773034788261">URL শ্বেয়াৰ কৰক:</translation>
 <translation id="8660881923941176839">পাউণ্ড</translation>
-<translation id="8670057600920888023">Generative AI সম্পৰীক্ষামূলক আৰু সমল ভুল, বিভ্ৰান্তিকৰ বা আপত্তিজনক হ’ব পাৰে।</translation>
 <translation id="8670574982334489519">সোঁফালে</translation>
 <translation id="8675354002693747642">আগতীয়াকৈ শ্বেয়াৰ কৰা চাবি</translation>
 <translation id="8677859815076891398">কোনো এলবাম নাই। <ph name="LINK_BEGIN" />Google Photos<ph name="LINK_END" />ত এটা এলবাম সৃষ্টি কৰক।</translation>
@@ -1718,6 +1736,7 @@
 <translation id="8930622219860340959">বেতাঁৰ</translation>
 <translation id="8933650076320258356"><ph name="DIRECTION" />ৰ বাবে বাছনি কৰা কীটো <ph name="KEYS" />। <ph name="REASSIGN_INSTRUCTION" /></translation>
 <translation id="8936793075252196307">ক্লায়েণ্টৰ আইপি ঠিকনা</translation>
+<translation id="8938606491880817721">ডাউনল’ড কৰিব নোৱাৰি। পুনৰ চেষ্টা কৰক বা আপোনাৰ <ph name="DEVICE_TYPE" /> ৰিষ্টাৰ্ট কৰক।</translation>
 <translation id="8944651180182756621">লঞ্চাৰৰ ৰং</translation>
 <translation id="8945308580158685341">মৌমাখি</translation>
 <translation id="894617464444543719">ডিভাইচটো এটা ফ’ন।</translation>

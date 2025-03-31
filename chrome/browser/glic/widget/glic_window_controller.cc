@@ -68,16 +68,14 @@ constexpr static int kInitialPositionBuffer = 4;
 
 constexpr static base::TimeDelta kAnimationDuration = base::Milliseconds(300);
 
-constexpr char kHistogramGlicPanelPresentationTime[] =
-    "Glic.PanelPresentationTime";
-
 #if BUILDFLAG(IS_MAC)
 constexpr int kFocusToggleAcceleratorModifiers =
-    ui::EF_ALT_DOWN | ui::EF_SHIFT_DOWN | ui::EF_COMMAND_DOWN;
+    ui::EF_CONTROL_DOWN | ui::EF_COMMAND_DOWN;
 #else
 constexpr int kFocusToggleAcceleratorModifiers =
     ui::EF_ALT_DOWN | ui::EF_SHIFT_DOWN;
 #endif
+constexpr ui::KeyboardCode kFocusToggleAcceleratorKey = ui::VKEY_G;
 
 mojom::PanelState CreatePanelState(bool widget_visible,
                                    Browser* attached_browser) {
@@ -242,13 +240,15 @@ class GlicWindowController::AnchorObserver : public views::ViewObserver,
   raw_ptr<GlicWindowController> controller_;
 };
 
+GlicWindowController::LogInAndOpen::LogInAndOpen() = default;
+GlicWindowController::LogInAndOpen::~LogInAndOpen() = default;
+
 GlicWindowController::GlicWindowController(
     Profile* profile,
     signin::IdentityManager* identity_manager,
     GlicKeyedService* glic_service,
     GlicEnabling* enabling)
     : profile_(profile),
-      log_in_and_open_(std::make_unique<LogInAndOpen>()),
       fre_controller_(
           std::make_unique<GlicFreController>(profile, identity_manager)),
       window_finder_(std::make_unique<WindowFinder>()),
@@ -270,7 +270,7 @@ void GlicWindowController::WebClientInitializeFailed() {
     // now, show the UI anyway, which should be helpful in development.
     LOG(ERROR)
         << "Glic web client failed to initialize, it won't work properly.";
-    show_start_time_ = base::TimeTicks();
+    glic_service_->metrics()->set_show_start_time(base::TimeTicks());
     ShowFinish();
   }
 }
@@ -282,7 +282,7 @@ void GlicWindowController::LoginPageCommitted() {
       !web_client_) {
     // TODO(crbug.com/388328847): Temporarily allow showing the UI when a login
     // page is reached.
-    show_start_time_ = base::TimeTicks();
+    glic_service_->metrics()->set_show_start_time(base::TimeTicks());
     ShowFinish();
   }
 }
@@ -307,7 +307,7 @@ void GlicWindowController::SetWebClient(GlicWebClientAccess* web_client) {
         // WebClientInitializeFailed() call, for example, if the renderer
         // crashes. Determine the correct behavior in this case.
         LOG(ERROR) << "Glic web client disconnected before showing the window.";
-        show_start_time_ = base::TimeTicks();
+        glic_service_->metrics()->set_show_start_time(base::TimeTicks());
         ShowFinish();
       }
       break;
@@ -425,10 +425,10 @@ void GlicWindowController::Toggle(BrowserWindowInterface* bwi,
     return;
   }
   // If floaty is focused or the source is the top button, close it
-  // If floaty is unfocused, focus it
+  // If floaty is unfocused and open, focus it
   if (IsActive() || source == mojom::InvocationSource::kTopChromeButton) {
     maybe_close();
-  } else {
+  } else if (state_ == State::kOpen) {
     // TODO(crbug.com/404601783): Bring focus to the textbox.
     GetGlicWidget()->Activate();
     GetGlicView()->web_view()->GetWebContents()->Focus();
@@ -522,6 +522,13 @@ void GlicWindowController::ToggleWhenNotAlwaysDetached(
   }
 }
 
+void GlicWindowController::FocusIfOpen() {
+  if (IsShowing() && !IsActive()) {
+    GetGlicWidget()->Activate();
+    GetGlicView()->web_view()->GetWebContents()->Focus();
+  }
+}
+
 void GlicWindowController::ShowDetachedForTesting() {
   glic::GlicProfileManager::GetInstance()->SetActiveGlic(glic_service_);
   Show(nullptr, mojom::InvocationSource::kOsHotkey);
@@ -534,6 +541,10 @@ void GlicWindowController::WebUiStateChanged(mojom::WebUiState new_state) {
     webui_state_ = new_state;
     webui_state_observers_.Notify(&WebUiStateObserver::WebUiStateChanged,
                                   webui_state_);
+
+    if (IsWindowOpenAndReady()) {
+      glic_service_->metrics()->OnGlicWindowOpenAndReady();
+    }
   }
 }
 
@@ -543,7 +554,7 @@ bool GlicWindowController::AcceleratorPressed(
     Close();
     return true;
   }
-  if (accelerator.key_code() == ui::VKEY_A &&
+  if (accelerator.key_code() == kFocusToggleAcceleratorKey &&
       accelerator.modifiers() == kFocusToggleAcceleratorModifiers) {
     // Transfer focus back to the browser.
     if (IsAttached()) {
@@ -576,8 +587,8 @@ void GlicWindowController::AddAccelerators() {
   }
 
   glic_view->AddAccelerator(ui::Accelerator(ui::VKEY_ESCAPE, ui::EF_NONE));
-  glic_view->AddAccelerator(
-      ui::Accelerator(ui::VKEY_A, kFocusToggleAcceleratorModifiers));
+  glic_view->AddAccelerator(ui::Accelerator(kFocusToggleAcceleratorKey,
+                                            kFocusToggleAcceleratorModifiers));
 #if BUILDFLAG(IS_WIN)
   glic_view->AddAccelerator(ui::Accelerator(ui::VKEY_SPACE, ui::EF_ALT_DOWN));
 #endif
@@ -588,11 +599,11 @@ void GlicWindowController::Show(Browser* browser,
   // At this point State must be kClosed, and all glic window state must be
   // unset.
   CHECK(!attached_browser_);
-  state_ = State::kOpenAnimation;
+  SetWindowState(State::kOpenAnimation);
   opening_source_ = source;
   glic_service_->metrics()->OnGlicWindowOpen(/*attached=*/browser, source);
 
-  show_start_time_ = base::TimeTicks::Now();
+  glic_service_->metrics()->set_show_start_time(base::TimeTicks::Now());
 
   if (!contents_) {
     CreateContents();
@@ -608,9 +619,9 @@ void GlicWindowController::AuthCheckDoneBeforeShow(
     AuthController::BeforeShowResult result) {
   switch (result) {
     case AuthController::BeforeShowResult::kShowingReauthSigninPage:
-      state_ = State::kClosed;
-      log_in_and_open_->set_state(LogInAndOpen::State::kLogIn);
-      log_in_and_open_->set_attached_browser(browser_for_attachment.get());
+      SetWindowState(State::kClosed);
+      log_in_and_open_.set_state(LogInAndOpen::State::kLogIn);
+      log_in_and_open_.set_attached_browser(browser_for_attachment);
       return;
     case AuthController::BeforeShowResult::kReady:
     case AuthController::BeforeShowResult::kSyncFailed:
@@ -622,7 +633,7 @@ void GlicWindowController::AuthCheckDoneBeforeShow(
   // Since this method is called asynchronously, check that the profile wasn't
   // disabled since the request was made.
   if (!GlicEnabling::IsEnabledForProfile(profile_)) {
-    state_ = State::kClosed;
+    SetWindowState(State::kClosed);
     return;
   }
 
@@ -638,7 +649,7 @@ void GlicWindowController::AuthCheckDoneBeforeShow(
   }
 
   // Immediately hook up the WebView to the WebContents.
-  GetGlicView()->web_view()->SetWebContents(contents_->web_contents());
+  GetGlicView()->SetWebContents(contents_->web_contents());
 
   // Make the web view invisible for now, then fade it in after the open
   // animation finishes.
@@ -787,10 +798,12 @@ void GlicWindowController::WaitForGlicToLoad() {
 void GlicWindowController::GlicLoaded(mojom::OpenPanelInfoPtr open_info) {
   // TODO: Use `starting_mode` to log latency metrics.
   DVLOG(1) << "GlicLoaded with " << open_info->web_client_mode;
-  starting_mode_ = open_info->web_client_mode;
+  glic_service_->metrics()->set_starting_mode(open_info->web_client_mode);
   if (open_info->panelSize.has_value()) {
     Resize(*open_info->panelSize, open_info->resizeDuration, base::DoNothing());
   }
+
+  EnableDragResize(open_info->can_user_resize);
 
   glic_loaded_ = true;
   if (state_ == State::kWaitingForGlicToLoad) {
@@ -800,7 +813,7 @@ void GlicWindowController::GlicLoaded(mojom::OpenPanelInfoPtr open_info) {
 
 void GlicWindowController::OpenAnimationFinished() {
   if (state_ == State::kOpenAnimation) {
-    state_ = State::kWaitingForGlicToLoad;
+    SetWindowState(State::kWaitingForGlicToLoad);
 
     // Note: this logic may never be called if state_ != kOpenAnimation when the
     // open animation is finished (or cancelled).
@@ -819,31 +832,15 @@ void GlicWindowController::ShowFinish() {
     return;
   }
 
+  // Update the background color after fading in the webview so the transition
+  // isn't visible. This will be the widget background color the user sees next
+  // time.
+  GetGlicView()->UpdateBackgroundColor();
+
   // In the case that the open animation was skipped, the web view should still
   // be visible now.
   glic_window_animator_->SetGlicWebViewVisibility(true);
-  state_ = State::kOpen;
-
-  // Record the presentation time of showing the glic panel in an UMA histogram.
-  if (web_client_ && !show_start_time_.is_null()) {
-    std::string input_mode;
-    if (starting_mode_ == mojom::WebClientMode::kText) {
-      input_mode = ".Text";
-    } else if (starting_mode_ == mojom::WebClientMode::kAudio) {
-      input_mode = ".Audio";
-    }
-    base::TimeDelta presentation_time =
-        base::TimeTicks::Now() - show_start_time_;
-    base::UmaHistogramCustomTimes(
-        base::StrCat({kHistogramGlicPanelPresentationTime, ".All"}),
-        presentation_time, base::Milliseconds(1), base::Seconds(60), 50);
-    if (starting_mode_ != mojom::WebClientMode::kUnknown) {
-      base::UmaHistogramCustomTimes(
-          base::StrCat({kHistogramGlicPanelPresentationTime, input_mode}),
-          presentation_time, base::Milliseconds(1), base::Seconds(60), 50);
-    }
-    ResetPresentationTimingState();
-  }
+  SetWindowState(State::kOpen);
 
   // Whenever the glic window is shown, it should have focus. The following line
   // of code appears to be necessary but not sufficient and there are still some
@@ -914,7 +911,7 @@ void GlicWindowController::Detach() {
   if (state_ != State::kOpen || !attached_browser_) {
     return;
   }
-  state_ = State::kDetaching;
+  SetWindowState(State::kDetaching);
   if (!AlwaysDetached()) {
     MaybeCreateHolderWindowAndReparent(AttachChangeReason::kMenu);
   }
@@ -929,7 +926,7 @@ void GlicWindowController::Detach() {
 }
 
 void GlicWindowController::DetachFinished() {
-  state_ = State::kOpen;
+  SetWindowState(State::kOpen);
 }
 
 void GlicWindowController::AttachToBrowser(Browser& browser,
@@ -1007,13 +1004,15 @@ void GlicWindowController::Resize(const gfx::Size& size,
   }
 }
 
-void GlicWindowController::ShouldEnableDragResize(bool enabled) {
+void GlicWindowController::EnableDragResize(bool enabled) {
+  user_resizable_ = enabled;
   if (!GetGlicWidget()) {
     return;
   }
 
   if (base::FeatureList::IsEnabled(features::kGlicUserResize)) {
     GetGlicWidget()->widget_delegate()->SetCanResize(enabled);
+    GetGlicView()->UpdateBackgroundColor();
   }
 }
 
@@ -1062,7 +1061,7 @@ void GlicWindowController::CloseInternal(
   }
 
   if (attached_browser_) {
-    state_ = State::kCloseAnimation;
+    SetWindowState(State::kCloseAnimation);
     GlicButton* glic_button = GetGlicButton(*attached_browser_);
     glic_window_animator_->RunCloseAnimation(
         glic_button,
@@ -1079,13 +1078,12 @@ void GlicWindowController::CloseFinish(
   if (state_ == State::kClosed) {
     return;
   }
-  log_in_and_open_.reset();
   glic_window_animator_.reset();
   glic_service_->metrics()->OnGlicWindowClose();
   base::UmaHistogramEnumeration("Glic.PanelWebUiState.FinishState2",
                                 webui_state_);
 
-  state_ = State::kClosed;
+  SetWindowState(State::kClosed);
   attached_browser_ = nullptr;
   anchor_observer_.reset();
   window_event_observer_.reset();
@@ -1116,7 +1114,7 @@ void GlicWindowController::CloseAndReopenDetached(
     return;
   }
 
-  state_ = State::kClosingToReopenDetached;
+  SetWindowState(State::kClosingToReopenDetached);
   CloseInternal(source);
 }
 
@@ -1399,6 +1397,10 @@ bool GlicWindowController::IsShowing() const {
   return !(state_ == State::kClosed || state_ == State::kCloseAnimation);
 }
 
+bool GlicWindowController::IsPanelOrFreShowing() const {
+  return IsShowing() || fre_controller_->IsShowingDialog();
+}
+
 bool GlicWindowController::IsAttached() const {
   return attached_browser_ != nullptr;
 }
@@ -1419,6 +1421,12 @@ void GlicWindowController::Preload() {
   }
 }
 
+void GlicWindowController::PreloadFre() {
+  if (fre_controller_->ShouldShowFreDialog()) {
+    fre_controller_->TryPreload();
+  }
+}
+
 void GlicWindowController::Reload() {
   if (GetFreWebContents()) {
     GetFreWebContents()->ReloadFocusedFrame();
@@ -1428,7 +1436,7 @@ void GlicWindowController::Reload() {
   }
 }
 
-bool GlicWindowController::IsWarmed() {
+bool GlicWindowController::IsWarmed() const {
   return !!contents_;
 }
 
@@ -1442,11 +1450,6 @@ void GlicWindowController::Shutdown() {
   contents_.reset();
   fre_controller_->Shutdown();
   window_activation_callback_list_.Notify(false);
-}
-
-void GlicWindowController::ResetPresentationTimingState() {
-  show_start_time_ = base::TimeTicks();
-  starting_mode_ = mojom::WebClientMode::kUnknown;
 }
 
 bool GlicWindowController::IsBrowserOccludedAtPoint(Browser* browser,
@@ -1481,9 +1484,9 @@ void GlicWindowController::EnableChanged() {
   // else. In the case where that happens, the widget still opens. Figure out a
   // better way to approach this flow.
   if (enabling_->IsReadyForProfile(profile_) &&
-      log_in_and_open_->state() == LogInAndOpen::State::kLogIn) {
-    log_in_and_open_->set_state(LogInAndOpen::State::kPostLogIn);
-    Show(log_in_and_open_->attached_browser(), opening_source_.value());
+      log_in_and_open_.state() == LogInAndOpen::State::kLogIn) {
+    log_in_and_open_.set_state(LogInAndOpen::State::kPostLogIn);
+    Show(log_in_and_open_.attached_browser(), *opening_source_);
   }
 }
 
@@ -1524,13 +1527,30 @@ void GlicWindowController::MaybeAdjustSizeForDisplay(bool animate) {
 std::unique_ptr<GlicWidget> GlicWindowController::CreateGlicWidget(
     const gfx::Rect& bounds) {
   return GlicWidget::Create(profile_, bounds,
-                            /*accelerator_delegate=*/GetWeakPtr());
+                            /*accelerator_delegate=*/GetWeakPtr(),
+                            user_resizable_);
 }
 
 void GlicWindowController::CreateContents() {
   contents_ = std::make_unique<WebUIContentsContainer>(profile_, this);
   glic::GlicProfileManager::GetInstance()->OnLoadingClientForService(
       glic_service_);
+}
+
+void GlicWindowController::SetWindowState(State new_state) {
+  if (state_ == new_state) {
+    return;
+  }
+  state_ = new_state;
+
+  if (IsWindowOpenAndReady()) {
+    glic_service_->metrics()->OnGlicWindowOpenAndReady();
+  }
+}
+
+bool GlicWindowController::IsWindowOpenAndReady() {
+  return web_client_ && state_ == State::kOpen &&
+         webui_state_ == mojom::WebUiState::kReady;
 }
 
 }  // namespace glic

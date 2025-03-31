@@ -171,8 +171,8 @@ std::optional<PreloadingTriggeringOutcome> TriggeringOutcomeFromStatus(
 }
 
 // Returns true if SetPrefetchStatus(|status|) can be called after a prefetch
-// has already been marked as failed. We ignore such status updates as they
-// may end up overwriting the initial failure reason.
+// has already been marked as failed. We ignore such status updates
+// as they may end up overwriting the initial failure reason.
 bool StatusUpdateIsPossibleAfterFailure(PrefetchStatus status) {
   switch (status) {
     case PrefetchStatus::kPrefetchEvictedAfterCandidateRemoved:
@@ -395,7 +395,8 @@ PrefetchContainer::PrefetchContainer(
           WebContentsImpl::FromRenderFrameHostImpl(&referring_render_frame_host)
               ->GetOrCreateWebPreferences()
               .javascript_enabled,
-          PrefetchContainerDefaultTtlInPrefetchService()) {
+          PrefetchContainerDefaultTtlInPrefetchService(),
+          /*should_append_variations_header=*/true) {
   CHECK(prefetch_type_.IsRendererInitiated());
 }
 
@@ -430,7 +431,8 @@ PrefetchContainer::PrefetchContainer(
           /*Must be empty: additional_headers=*/{},
           /*request_status_listener=*/nullptr,
           referring_web_contents.GetOrCreateWebPreferences().javascript_enabled,
-          PrefetchContainerDefaultTtlInPrefetchService()) {
+          PrefetchContainerDefaultTtlInPrefetchService(),
+          /*should_append_variations_header=*/true) {
   CHECK(!prefetch_type_.IsRendererInitiated());
   CHECK(PrefetchBrowserInitiatedTriggersEnabled());
 }
@@ -446,7 +448,8 @@ PrefetchContainer::PrefetchContainer(
     base::WeakPtr<PreloadingAttempt> attempt,
     const net::HttpRequestHeaders& additional_headers,
     std::unique_ptr<PrefetchRequestStatusListener> request_status_listener,
-    base::TimeDelta ttl_in_sec)
+    base::TimeDelta ttl_in_sec,
+    bool should_append_variations_header)
     : PrefetchContainer(
           GlobalRenderFrameHostId(),
           referring_origin,
@@ -469,7 +472,8 @@ PrefetchContainer::PrefetchContainer(
           additional_headers,
           std::move(request_status_listener),
           javascript_enabled,
-          ttl_in_sec) {
+          ttl_in_sec,
+          should_append_variations_header) {
   CHECK(!prefetch_type_.IsRendererInitiated());
   CHECK(PrefetchBrowserInitiatedTriggersEnabled());
 }
@@ -493,7 +497,8 @@ PrefetchContainer::PrefetchContainer(
     const net::HttpRequestHeaders& additional_headers,
     std::unique_ptr<PrefetchRequestStatusListener> request_status_listener,
     bool is_javascript_enabled,
-    base::TimeDelta ttl_in_sec)
+    base::TimeDelta ttl_in_sec,
+    bool should_append_variations_header)
     : referring_render_frame_host_id_(referring_render_frame_host_id),
       referring_origin_(referring_origin),
       referring_url_hash_(referring_url_hash),
@@ -515,7 +520,8 @@ PrefetchContainer::PrefetchContainer(
       additional_headers_(additional_headers),
       request_status_listener_(std::move(request_status_listener)),
       is_javascript_enabled_(is_javascript_enabled),
-      ttl_in_sec_(ttl_in_sec) {
+      ttl_in_sec_(ttl_in_sec),
+      should_append_variations_header_(should_append_variations_header) {
   is_likely_ahead_of_prerender_ =
       CalculateIsLikelyAheadOfPrerender(*preload_pipeline_info_);
 
@@ -679,15 +685,16 @@ void PrefetchContainer::SetTriggeringOutcomeAndFailureReasonFromStatus(
   }
 
   if (old_prefetch_status &&
-      TriggeringOutcomeFromStatus(old_prefetch_status.value()) ==
-          PreloadingTriggeringOutcome::kFailure) {
+      (TriggeringOutcomeFromStatus(old_prefetch_status.value()) ==
+       PreloadingTriggeringOutcome::kFailure)) {
     if (StatusUpdateIsPossibleAfterFailure(new_prefetch_status)) {
-      // Note that `StatusUpdateIsPossibleAfterFailure()` implies that the
-      // new status is a failure.
+      // Note that `StatusUpdateIsPossibleAfterFailure()` implies that
+      // the new status is a failure.
       CHECK(TriggeringOutcomeFromStatus(new_prefetch_status) ==
             PreloadingTriggeringOutcome::kFailure);
-      // Skip this update if the triggering outcome has already been updated to
-      // kFailure.
+
+      // Skip this update since if the triggering outcome has already been
+      // updated to kFailure, we don't need to overwrite it.
       return;
     } else {
       SCOPED_CRASH_KEY_NUMBER("PrefetchContainer", "prefetch_status_from",
@@ -821,7 +828,14 @@ void PrefetchContainer::SetPrefetchStatusWithoutUpdatingTriggeringOutcome(
 }
 
 void PrefetchContainer::SetPrefetchStatus(PrefetchStatus prefetch_status) {
-  SetTriggeringOutcomeAndFailureReasonFromStatus(prefetch_status);
+  // The concept of `PreloadingAttempt`'s `PreloadingTriggeringOutcome` is to
+  // record the outcomes of started triggers. Therefore, this should
+  // only be called once prefetching has actually started, and not for
+  // ineligible or eligibled but not started triggers (e.g., holdback triggers,
+  // triggers waiting on a queue).
+  if (GetLoadState() == LoadState::kStarted) {
+    SetTriggeringOutcomeAndFailureReasonFromStatus(prefetch_status);
+  }
   SetPrefetchStatusWithoutUpdatingTriggeringOutcome(prefetch_status);
 }
 
@@ -1346,11 +1360,6 @@ void PrefetchContainer::OnPrefetchComplete(
     const network::URLLoaderCompletionStatus& completion_status) {
   DVLOG(1) << *this << "::OnPrefetchComplete";
 
-  if (GetPrefetchResponseCompletedCallbackForTesting()) {
-    GetPrefetchResponseCompletedCallbackForTesting().Run(  // IN-TEST
-        GetWeakPtr());
-  }
-
   UMA_HISTOGRAM_COUNTS_100("PrefetchProxy.Prefetch.RedirectChainSize",
                            redirect_chain_.size());
 
@@ -1421,6 +1430,11 @@ void PrefetchContainer::OnPrefetchComplete(
         request_status_listener_->OnPrefetchResponseError();
         break;
     }
+  }
+
+  if (GetPrefetchResponseCompletedCallbackForTesting()) {
+    GetPrefetchResponseCompletedCallbackForTesting().Run(  // IN-TEST
+        GetWeakPtr());
   }
 }
 
@@ -1787,7 +1801,9 @@ void PrefetchContainer::MakeResourceRequest(
   request->devtools_request_id = RequestId();
 
   AddClientHintsHeaders(origin, &request->headers);
-  AddXClientDataHeader(*request.get());
+  if (should_append_variations_header_) {
+    AddXClientDataHeader(*request.get());
+  }
 
   resource_request_ = std::move(request);
 }

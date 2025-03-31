@@ -461,13 +461,6 @@ void InterestGroupCachingStorage::GetInterestGroupsForUpdate(
       .Then(std::move(callback));
 }
 
-void InterestGroupCachingStorage::GetDebugReportLockout(
-    base::OnceCallback<void(std::optional<DebugReportLockout>)> callback) {
-  return interest_group_storage_
-      .AsyncCall(&InterestGroupStorage::GetDebugReportLockout)
-      .Then(std::move(callback));
-}
-
 void InterestGroupCachingStorage::GetDebugReportLockoutAndCooldowns(
     base::flat_set<url::Origin> origins,
     base::OnceCallback<void(std::optional<DebugReportLockoutAndCooldowns>)>
@@ -475,6 +468,14 @@ void InterestGroupCachingStorage::GetDebugReportLockoutAndCooldowns(
   return interest_group_storage_
       .AsyncCall(&InterestGroupStorage::GetDebugReportLockoutAndCooldowns)
       .WithArgs(std::move(origins))
+      .Then(std::move(callback));
+}
+
+void InterestGroupCachingStorage::GetDebugReportLockoutAndAllCooldowns(
+    base::OnceCallback<void(std::optional<DebugReportLockoutAndCooldowns>)>
+        callback) {
+  return interest_group_storage_
+      .AsyncCall(&InterestGroupStorage::GetDebugReportLockoutAndAllCooldowns)
       .Then(std::move(callback));
 }
 
@@ -558,6 +559,28 @@ void InterestGroupCachingStorage::GetBiddingAndAuctionServerKeys(
   interest_group_storage_
       .AsyncCall(&InterestGroupStorage::GetBiddingAndAuctionServerKeys)
       .WithArgs(coordinator)
+      .Then(std::move(callback));
+}
+
+void InterestGroupCachingStorage::WriteHashedKAnonymityKeysToCache(
+    const std::vector<std::string>& positive_hashed_keys,
+    const std::vector<std::string>& negative_hashed_keys,
+    base::Time time_fetched) {
+  interest_group_storage_
+      .AsyncCall(base::IgnoreResult(
+          &InterestGroupStorage::WriteHashedKAnonymityKeysToCache))
+      .WithArgs(positive_hashed_keys, negative_hashed_keys, time_fetched);
+}
+
+void InterestGroupCachingStorage::LoadPositiveHashedKAnonymityKeysFromCache(
+    const std::vector<std::string>& keys,
+    base::Time min_valid_time,
+    base::OnceCallback<void(InterestGroupStorage::KAnonymityCacheResponse)>
+        callback) {
+  interest_group_storage_
+      .AsyncCall(
+          &InterestGroupStorage::LoadPositiveHashedKAnonymityKeysFromCache)
+      .WithArgs(keys, min_valid_time)
       .Then(std::move(callback));
 }
 

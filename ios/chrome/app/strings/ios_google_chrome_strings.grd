@@ -231,6 +231,12 @@
       <message name="IDS_IOS_BEST_FEATURES_NEVER_FORGET_PASSWORDS_SECOND_STEP" desc="The second step to set up save and autofill passwords">
         Chrome will offer to save your password
       </message>
+      <message name="IDS_IOS_BEST_FEATURES_PASSWORDS_IN_OTHER_APPS_STEP_4_SELECT" desc="The fourth step to enable Passwords in other apps. OS must be below iOS 18.">
+        Select Chrome
+      </message>
+      <message name="IDS_IOS_BEST_FEATURES_PASSWORDS_IN_OTHER_APPS_STEP_4_TOGGLE" desc="The fourth step to enable Passwords in other apps. OS must be iOS 18 or later.">
+        Toggle Chrome
+      </message>
       <message name="IDS_IOS_BEST_FEATURES_PASSWORDS_IN_OTHER_APPS_SUBTITLE" desc="Subtitle for the Passwords in other apps Chrome iOS Best Features Promo">
         To easily get your saved passwords in your other apps, choose Chrome for Autofill
       </message>
@@ -851,6 +857,9 @@ For more settings that use data to improve your Chrome experience, go to <ph nam
       </message>
       <message name="IDS_IOS_RECENT_TABS_OTHER_DEVICES_SYNC_IS_OFF_MESSAGE" desc="To use the Other Devices section of the Recent Tabs view, a user must be signed in and activate Tabs synchronization on multiple devices. This message is shown in this section when the user is signed in, but Tabs synchronization is turned off.">
           To see your tabs from wherever you use Chrome, turn on sync
+      </message>
+      <message name="IDS_IOS_REMINDER_NOTIFICATIONS_ALERT_MESSAGE" desc="Message body for the alert explaining why notifications are needed for the Tab Reminders feature. [iOS only]">
+        To receive Tab Reminders from Chrome, turn on notifications in your iOS Settings.
       </message>
       <message name="IDS_IOS_REMOVE_ACCOUNT_CONFIRMATION_MESSAGE" desc="Dialog message to emphasize the effects of removing an account.">
       This account and any unsaved data will be removed from Chrome and other Google apps on this device.

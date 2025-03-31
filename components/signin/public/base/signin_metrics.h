@@ -247,19 +247,21 @@ enum class AccessPoint : int {
   kCctAccountMismatchNotification = 71,
   // Access point for the Drive file picker on iOS.
   kDriveFilePickerIos = 72,
-  // Access point triggered when a user attempts to share or join a tab group
-  // without being signed in or synced.
-  kCollaborationTabGroup = 73,
+  // Access point triggered when a user attempts to share a tab group without
+  // being signed in or synced.
+  kCollaborationShareTabGroup = 73,
   // Glic launch button on the tab strip.
   kGlicLaunchButton = 74,
   // History sync promo shown on the History page. Should not be visible when
   // the use is not signed-in. Android only.
   kHistoryPage = 75,
-
+  // Access point triggered when a user attempts to join a tab group without
+  // being signed in or synced.
+  kCollaborationJoinTabGroup = 76,
   // Add values above this line with a corresponding label to the
   // "SigninAccessPoint" enum in
   // tools/metrics/histograms/metadata/signin/enums.xml.
-  kMaxValue = kHistoryPage,  // This must be last.
+  kMaxValue = kCollaborationJoinTabGroup,  // This must be last.
 };
 // LINT.ThenChange(/tools/metrics/histograms/metadata/signin/enums.xml)
 
@@ -676,8 +678,6 @@ void RecordRefreshTokenRevokedFromSource(SourceForRefreshTokenOperation source);
 void RecordSignoutConfirmationFromDataLossAlert(
     SignoutDataLossAlertReason reason,
     bool signout_confirmed);
-// Records whether the user chooses to "Clear Data" or "Keep Data" on signout.
-void RecordSignoutForceClearDataChoice(bool force_clear_data);
 #endif  // BUILDFLAG(IS_IOS)
 
 // Records the total number of open tabs at the moment of signin or enabling
@@ -701,9 +701,6 @@ void RecordHistoryOptInStateOnSignin(signin_metrics::AccessPoint access_point,
 
 // Records corresponding sign in user action for an access point.
 void RecordSigninUserActionForAccessPoint(AccessPoint access_point);
-
-// Records corresponding sign out user action.
-void RecordSignoutUserAction(bool force_clear_data);
 
 // Records |Signin_Impression_From*| user action.
 void RecordSigninImpressionUserActionForAccessPoint(AccessPoint access_point);

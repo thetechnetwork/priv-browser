@@ -91,11 +91,11 @@ Si quieres ver más ajustes que usan datos para mejorar tu experiencia con Chrom
 <translation id="3054480780637153380">En iOS, ve a Ajustes, selecciona Chromium, toca App del navegador por omisión, y elige Chromium.</translation>
 <translation id="3102849287235003384">Para cerrar sesión con tu cuenta de Google en todos los sitios web, <ph name="BEGIN_LINK" />cierra sesión en Chromium<ph name="END_LINK" />.</translation>
 <translation id="3115956258722352278">¿Establecer Chromium como navegador predeterminado?</translation>
+<translation id="3180939591219927904">Activa Bloquear las pestañas de Incógnito al cerrar Chromium</translation>
 <translation id="3242612358525156339">En los ajustes de tu dispositivo, abre <ph name="TEXT_OF_THE_SETTINGS_MENU_ITEM" /> y selecciona Chromium</translation>
 <translation id="328933489847748230">{count,plural, =1{Mostrando 1 ventana de Chromium}other{Mostrando {count} ventanas de Chromium}}</translation>
 <translation id="3344973607274501920">Chromium no ha podido comprobar tus contraseñas. Revisa tu conexión a Internet.</translation>
 <translation id="3366305173356742781">Datos de Chromium en tu cuenta</translation>
-<translation id="33788334537425157">Activa Bloquear las pestañas de Incógnito al cerrar Chromium</translation>
 <translation id="3387107508582892610">{THRESHOLD,plural, =1{Ocurre cuando Chromium lleva {THRESHOLD} minuto sin usarse. Esto podría incluir el historial y la función Autocompletar.}other{Ocurre cuando Chromium lleva {THRESHOLD} minutos sin usarse. Esto podría incluir el historial y la función Autocompletar.}}</translation>
 <translation id="3410395242749598859">Algunos de tus datos de Chromium aún no se han guardado en <ph name="EMAIL" />.
 Espera unos minutos antes de cambiar de cuenta. Si cambias de cuenta ahora, estos datos se eliminarán.</translation>
@@ -208,7 +208,6 @@ Notas importantes:
   • Si sincronizas tu historial con tu cuenta de Google, puede que las métricas también incluyan información sobre las URLs que visites.<ph name="END_INDENT" /></translation>
 <translation id="5932787118589620366">Elimina los datos de navegación en Chromium.</translation>
 <translation id="593808800391107017">Recibe alertas sobre los problemas de privacidad o seguridad detectados automáticamente por Chromium.</translation>
-<translation id="5945387852661427312">Estás iniciando sesión con una cuenta gestionada por <ph name="DOMAIN" /> y vas a otorgar a su administrador el control sobre tus datos de Chromium. Tus datos se vincularán de forma permanente a esta cuenta. Al cerrar sesión en Chromium, tus datos se eliminarán de este dispositivo, pero permanecerán almacenados en tu cuenta de Google.</translation>
 <translation id="5951593919357934226">Saca el máximo partido a Chromium.</translation>
 <translation id="5985254578475526217">Para recibir notificaciones de Chromium, actívalas en los ajustes de iOS.</translation>
 <translation id="6104024151682120539">Abrir en Chromium</translation>
@@ -262,6 +261,7 @@ Solo las personas que tengan tu frase de contraseña podrán leer tus datos cifr
 <translation id="7337881442233988129">Chromium</translation>
 <translation id="7357211569052832586">Los datos seleccionados se han eliminado de Chromium y de los dispositivos sincronizados. Es posible que tu cuenta de Google haya registrado otros datos del historial de navegación, como las búsquedas o la actividad en otros servicios de Google, en la página history.google.com.</translation>
 <translation id="7395825497086981028">Tu contraseña se guardará en el gestor de contraseñas de <ph name="EMAIL" />.</translation>
+<translation id="7504829997542308412">Abre Chromium</translation>
 <translation id="7531461704633548377">De Chromium</translation>
 <translation id="7554983317097061001">Consejo de Chromium: mueve Chromium al Dock</translation>
 <translation id="7576863740961052505">Gestionar la configuración de Chromium</translation>

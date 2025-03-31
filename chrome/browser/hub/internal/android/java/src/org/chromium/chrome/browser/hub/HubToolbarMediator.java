@@ -75,6 +75,9 @@ public class HubToolbarMediator {
             new ComponentCallbacks() {
                 @Override
                 public void onConfigurationChanged(@NonNull Configuration configuration) {
+                    Pane focusedPane = mPaneManager.getFocusedPaneSupplier().get();
+                    if (focusedPane == null) return;
+
                     // Only show the search box visuals in the tab switcher and incognito panes.
                     @PaneId
                     int focusedPaneId = mPaneManager.getFocusedPaneSupplier().get().getPaneId();
@@ -290,6 +293,12 @@ public class HubToolbarMediator {
         if (OmniboxFeatures.sAndroidHubSearch.isEnabled()) {
             // Fire an event to determine what is shown.
             mComponentCallbacks.onConfigurationChanged(mContext.getResources().getConfiguration());
+
+            // Reset the enabled state of hub search to the supplier value or true if uninitialized
+            // when toggling panes to account for a potential disabled state from incognito reauth.
+            Boolean hubSearchEnabledState = focusedPane.getHubSearchEnabledStateSupplier().get();
+            boolean enabled = hubSearchEnabledState == null ? true : hubSearchEnabledState;
+            mPropertyModel.set(HUB_SEARCH_ENABLED_STATE, enabled);
         }
 
         mPropertyModel.set(MENU_BUTTON_VISIBLE, focusedPane.getMenuButtonVisible());

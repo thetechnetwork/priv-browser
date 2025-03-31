@@ -487,7 +487,8 @@ void SkiaOutputSurfaceImplOnGpu::FinishPaintCurrentFrame(
                                              /*begin_semaphores=*/nullptr,
                                              /*end_semaphores=*/nullptr);
     bool draw_success = scoped_output_device_paint_->Draw(
-        std::move(graphite_recording), std::move(on_finished));
+        context_state_->graphite_context(), std::move(graphite_recording),
+        std::move(on_finished));
     RecordInsertRenderPassRecording(draw_success);
     if (!draw_success) {
       draw_render_pass_failed_ = true;
@@ -2312,7 +2313,7 @@ void SkiaOutputSurfaceImplOnGpu::SwapBuffersInternal(
   gl::ScopedProgressReporter scoped_process_reporter(
       context_state_->progress_reporter());
   output_device_->Submit(
-      sync_cpu,
+      context_state_, sync_cpu,
       base::BindOnce(&SkiaOutputSurfaceImplOnGpu::PostSubmit,
                      base::Unretained(this), std::move(frame), skip_present));
 }

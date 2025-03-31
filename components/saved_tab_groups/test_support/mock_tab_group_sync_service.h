@@ -66,6 +66,9 @@ class MockTabGroupSyncService : public TabGroupSyncService {
                std::string_view,
                TabGroupSharingCallback));
   MOCK_METHOD(void,
+              MakeTabGroupSharedForTesting,
+              (const LocalTabGroupID&, std::string_view));
+  MOCK_METHOD(void,
               AboutToUnShareTabGroup,
               (const LocalTabGroupID&, base::OnceClosure));
   MOCK_METHOD(void, OnTabGroupUnShareComplete, (const LocalTabGroupID&, bool));
@@ -91,7 +94,7 @@ class MockTabGroupSyncService : public TabGroupSyncService {
               (const CollaborationId&),
               (const));
 
-  MOCK_METHOD(void,
+  MOCK_METHOD(std::optional<LocalTabGroupID>,
               OpenTabGroup,
               (const base::Uuid&, std::unique_ptr<TabGroupActionContext>));
   MOCK_METHOD(void,

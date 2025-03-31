@@ -19,13 +19,11 @@
 #include "chrome/browser/glic/glic_metrics.h"
 #include "chrome/browser/glic/glic_pref_names.h"
 #include "chrome/browser/glic/glic_profile_manager.h"
-#include "chrome/browser/glic/glic_settings_util.h"
 #include "chrome/browser/glic/host/auth_controller.h"
 #include "chrome/browser/glic/host/context/glic_focused_tab_manager.h"
 #include "chrome/browser/glic/host/context/glic_page_context_fetcher.h"
 #include "chrome/browser/glic/host/context/glic_screenshot_capturer.h"
 #include "chrome/browser/glic/host/context/glic_tab_data.h"
-#include "chrome/browser/glic/host/glic.mojom.h"
 #include "chrome/browser/glic/host/glic_actor_controller.h"
 #include "chrome/browser/glic/widget/glic_window_controller.h"
 #include "chrome/browser/profiles/profile.h"
@@ -73,15 +71,23 @@ GlicKeyedService::GlicKeyedService(Profile* profile,
   CHECK(GlicEnabling::IsProfileEligible(Profile::FromBrowserContext(profile)));
   metrics_->SetControllers(window_controller_.get(), &focused_tab_manager_);
 
+  memory_pressure_listener_ = std::make_unique<base::MemoryPressureListener>(
+      FROM_HERE, base::BindRepeating(&GlicKeyedService::OnMemoryPressure,
+                                     weak_ptr_factory_.GetWeakPtr()));
+
   // If `--glic-always-open-fre` is present, unset this pref to ensure the FRE
   // is shown for testing convenience.
   auto* command_line = base::CommandLine::ForCurrentProcess();
   if (command_line->HasSwitch(::switches::kGlicAlwaysOpenFre)) {
-    profile_->GetPrefs()->SetBoolean(prefs::kGlicCompletedFre, false);
+    profile_->GetPrefs()->SetInteger(
+        prefs::kGlicCompletedFre,
+        static_cast<int>(prefs::FreStatus::kNotStarted));
   }
   // If automation is enabled do the opposite.
   if (command_line->HasSwitch(::switches::kGlicAutomation)) {
-    profile_->GetPrefs()->SetBoolean(prefs::kGlicCompletedFre, true);
+    profile_->GetPrefs()->SetInteger(
+        prefs::kGlicCompletedFre,
+        static_cast<int>(prefs::FreStatus::kCompleted));
   }
 
   if (base::FeatureList::IsEnabled(features::kGlicActor)) {
@@ -121,6 +127,10 @@ void GlicKeyedService::ToggleUI(BrowserWindowInterface* bwi,
 void GlicKeyedService::CloseUI() {
   window_controller_->Shutdown();
   SetContextAccessIndicator(false);
+}
+
+void GlicKeyedService::FocusUI() {
+  window_controller_->FocusIfOpen();
 }
 
 void GlicKeyedService::GuestAdded(content::WebContents* guest_contents) {
@@ -216,10 +226,6 @@ void GlicKeyedService::CreateTab(
     tab_data->url = url;
   }
   std::move(callback).Run(std::move(tab_data));
-}
-
-void GlicKeyedService::OpenGlicSettingsPage() {
-  ::glic::OpenGlicSettingsPage(profile_);
 }
 
 void GlicKeyedService::ClosePanel() {
@@ -342,10 +348,8 @@ base::CallbackListSubscription GlicKeyedService::AddWebClientCreatedCallback(
 }
 
 void GlicKeyedService::TryPreload() {
-  CHECK(GlicEnabling::IsEnabledForProfile(profile_));
-  if (!glic_profile_manager_) {
-    return;
-  }
+  CHECK(glic_profile_manager_);
+
   Profile* profile = profile_;
   if (!glic_profile_manager_->ShouldPreloadForProfile(profile)) {
     return;
@@ -354,8 +358,30 @@ void GlicKeyedService::TryPreload() {
   window_controller_->Preload();
 }
 
+void GlicKeyedService::TryPreloadFre() {
+  CHECK(glic_profile_manager_);
+
+  Profile* profile = profile_;
+  if (!glic_profile_manager_->ShouldPreloadFreForProfile(profile)) {
+    return;
+  }
+
+  window_controller_->PreloadFre();
+}
+
 void GlicKeyedService::Reload() {
   window_controller().Reload();
+}
+
+void GlicKeyedService::OnMemoryPressure(
+    base::MemoryPressureListener::MemoryPressureLevel level) {
+  if (level == base::MemoryPressureListener::MemoryPressureLevel::
+                   MEMORY_PRESSURE_LEVEL_NONE ||
+      (this == GlicProfileManager::GetInstance()->GetLastActiveGlic())) {
+    return;
+  }
+
+  CloseUI();
 }
 
 base::WeakPtr<GlicKeyedService> GlicKeyedService::GetWeakPtr() {

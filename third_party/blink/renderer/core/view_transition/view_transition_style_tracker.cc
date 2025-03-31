@@ -196,6 +196,13 @@ const String& AnimationUAStyles() {
   return kAnimationUAStyles;
 }
 
+const String& AnimationUAStylesScoped() {
+  DEFINE_STATIC_LOCAL(String, kAnimationUAStyles,
+                      (UncompressResourceAsASCIIString(
+                          IDR_UASTYLE_TRANSITION_ANIMATIONS_SCOPED_CSS)));
+  return kAnimationUAStyles;
+}
+
 // Computes and returns the start offset for element's painting in horizontal or
 // vertical direction.
 // `start` and `end` denote the offset where the element's ink overflow
@@ -382,43 +389,6 @@ int ComputeMaxCaptureSize(Document& document,
       2 * std::max(snapshot_root_size.width(), snapshot_root_size.height());
 
   return std::min(max_bounds_based_on_viewport, max_texture_size_in_layout);
-}
-
-gfx::Transform ComputeViewportTransform(const LayoutObject& object) {
-  DCHECK(object.HasLayer());
-  DCHECK(!object.IsLayoutView());
-
-  auto& first_fragment = object.FirstFragment();
-  DCHECK(ToRoundedPoint(first_fragment.PaintOffset()).IsOrigin())
-      << first_fragment.PaintOffset();
-  auto paint_properties = first_fragment.LocalBorderBoxProperties();
-
-  auto& root_fragment = object.GetDocument().GetLayoutView()->FirstFragment();
-  const auto& root_properties = root_fragment.LocalBorderBoxProperties();
-
-  auto transform = GeometryMapper::SourceToDestinationProjection(
-      paint_properties.Transform(), root_properties.Transform());
-  if (auto* layout_inline = DynamicTo<LayoutInline>(object)) {
-    // The paint_properties we get from
-    // `first_fragment.LocalBorderBoxProperties()` correspond to the origin of
-    // the inline's container's border-box. So the transform from GeometryMapper
-    // maps a point from the viewport to the container's border-box origin. We
-    // need the extra translation to map from container's border box origin to
-    // inline's border box origin.
-    transform.Translate(
-        gfx::Vector2dF(layout_inline->PhysicalLinesBoundingBox().offset));
-  }
-
-  if (!transform.HasPerspective()) {
-    if (base::FeatureList::IsEnabled(
-            ::features::kViewTransitionFloorTransform)) {
-      transform.Floor2dTranslationComponents();
-    } else {
-      transform.Round2dTranslationComponents();
-    }
-  }
-
-  return transform;
 }
 
 gfx::Transform ConvertFromTopLeftToCenter(
@@ -608,6 +578,11 @@ ViewTransitionStyleTracker::ViewTransitionStyleTracker(
         transition_state.subframe_snapshot_id, /*is_live_content_layer=*/false);
   }
 
+  for (auto& p : transition_state.id_to_auto_name_map) {
+    id_to_auto_name_map_.Set(AtomicString::FromUTF8(p.first),
+                             AtomicString::FromUTF8(p.second));
+  }
+
   // The aim of this flag is to serialize/deserialize SPA state using MPA
   // machinery. The intent is to use SPA tests to test MPA implementation as
   // well. To that end, if the flag is enabled we should invalidate styles and
@@ -745,10 +720,27 @@ AtomicString ViewTransitionStyleTracker::GenerateAutoName(
     bool allow_from_id) {
   // The flag should be checked much earlier than this, in the CSS parser.
   CHECK(RuntimeEnabledFeatures::CSSViewTransitionMatchElementEnabled());
+
+  // For "auto" we generate a random name that is consistent for the same id, so
+  // we store it in a map and look it up first.
   if (allow_from_id && element.HasID() && scope &&
       *scope == element.GetTreeScope()) {
-    return element.GetIdAttribute();
+    AtomicString id_attribute = element.GetIdAttribute();
+    auto it = id_to_auto_name_map_.find(id_attribute);
+    if (it != id_to_auto_name_map_.end()) {
+      return it->value;
+    }
+
+    StringBuilder builder;
+    builder.Append("-ua-auto-");
+    builder.Append(base::Token::CreateRandom().ToString().c_str());
+    AtomicString name = builder.ToAtomicString();
+    id_to_auto_name_map_.Set(id_attribute, name);
+
+    return name;
   }
+
+  // For match-element, use a stable per-element id.
   StringBuilder builder;
   builder.Append("-ua-auto-");
   if (token_.is_zero()) {
@@ -1062,9 +1054,8 @@ void ViewTransitionStyleTracker::SetCaptureRectsFromCompositor(
     // This rect no longer matters.
     element_data->cached_captured_rect_in_layout_space.reset();
 
-    if (auto* pseudo_element =
-            document_->documentElement()->GetStyledPseudoElement(
-                PseudoId::kPseudoIdViewTransitionOld, entry.key)) {
+    if (auto* pseudo_element = OriginatingElement()->GetStyledPseudoElement(
+            PseudoId::kPseudoIdViewTransitionOld, entry.key)) {
       static_cast<ViewTransitionContentElement*>(pseudo_element)
           ->SetIntrinsicSize(rect_from_compositor,
                              element_data->GetReferenceRect(
@@ -1402,16 +1393,17 @@ PseudoElement* ViewTransitionStyleTracker::CreatePseudoElement(
 bool ViewTransitionStyleTracker::RunPostPrePaintSteps() {
   DCHECK_GE(document_->Lifecycle().GetState(),
             DocumentLifecycle::kPrePaintClean);
-  // Abort if the document element is not there.
-  if (!document_->documentElement()) {
+  // Abort if the originating element is not there.
+  Element* scope = OriginatingElement();
+  if (!scope) {
     return false;
   }
 
-  if (!document_->documentElement()->GetLayoutObject()) {
+  if (!scope->GetLayoutObject()) {
     // If we have any view transition elements, while having no
-    // documentElement->GetLayoutObject(), we should abort. Target elements are
+    // scope->GetLayoutObject(), we should abort. Target elements are
     // only set on the current phase of the animation, so it means that the
-    // documentElement's layout object disappeared in this phase.
+    // scope's layout object disappeared in this phase.
     for (auto& entry : element_data_map_) {
       auto& element_data = entry.value;
       if (element_data->target_element) {
@@ -1421,8 +1413,7 @@ bool ViewTransitionStyleTracker::RunPostPrePaintSteps() {
     return true;
   }
 
-  DCHECK(document_->documentElement() &&
-         document_->documentElement()->GetLayoutObject());
+  DCHECK(scope && scope->GetLayoutObject());
   // We don't support changing device pixel ratio, because it's uncommon and
   // textures may have already been captured at a different size.
   if (device_pixel_ratio_ != DevicePixelRatioFromDocument(*document_)) {
@@ -1459,7 +1450,7 @@ bool ViewTransitionStyleTracker::RunPostPrePaintSteps() {
     if (!element_data->target_element)
       continue;
 
-    DCHECK(document_->documentElement());
+    DCHECK(scope);
     auto* layout_object = element_data->target_element->GetLayoutObject();
     if (!layout_object) {
       return false;
@@ -1527,10 +1518,9 @@ bool ViewTransitionStyleTracker::RunPostPrePaintSteps() {
     PseudoId live_content_element = HasLiveNewContent()
                                         ? kPseudoIdViewTransitionNew
                                         : kPseudoIdViewTransitionOld;
-    DCHECK(document_->documentElement());
+    DCHECK(scope);
     if (auto* pseudo_element =
-            document_->documentElement()->GetStyledPseudoElement(
-                live_content_element, entry.key)) {
+            scope->GetStyledPseudoElement(live_content_element, entry.key)) {
       // A pseudo element of type |tansition*content| must be created using
       // ViewTransitionContentElement.
       bool use_cached_data = false;
@@ -1658,6 +1648,44 @@ void ViewTransitionStyleTracker::ComputeLiveElementGeometry(
   container_properties = {
       PhysicalRect(offset_in_css_space, border_box_size_in_css_space),
       snapshot_matrix_in_css_space};
+}
+
+gfx::Transform ViewTransitionStyleTracker::ComputeViewportTransform(
+    const LayoutObject& object) const {
+  DCHECK(object.HasLayer());
+  DCHECK(!object.IsLayoutView());
+
+  auto& first_fragment = object.FirstFragment();
+  DCHECK(ToRoundedPoint(first_fragment.PaintOffset()).IsOrigin())
+      << first_fragment.PaintOffset();
+  auto paint_properties = first_fragment.LocalBorderBoxProperties();
+
+  auto& root_fragment = object.GetDocument().GetLayoutView()->FirstFragment();
+  const auto& root_properties = root_fragment.LocalBorderBoxProperties();
+
+  auto transform = GeometryMapper::SourceToDestinationProjection(
+      paint_properties.Transform(), root_properties.Transform());
+  if (auto* layout_inline = DynamicTo<LayoutInline>(object)) {
+    // The paint_properties we get from
+    // `first_fragment.LocalBorderBoxProperties()` correspond to the origin of
+    // the inline's container's border-box. So the transform from GeometryMapper
+    // maps a point from the viewport to the container's border-box origin. We
+    // need the extra translation to map from container's border box origin to
+    // inline's border box origin.
+    transform.Translate(
+        gfx::Vector2dF(layout_inline->PhysicalLinesBoundingBox().offset));
+  }
+
+  if (!transform.HasPerspective()) {
+    if (base::FeatureList::IsEnabled(
+            ::features::kViewTransitionFloorTransform)) {
+      transform.Floor2dTranslationComponents();
+    } else {
+      transform.Round2dTranslationComponents();
+    }
+  }
+
+  return transform;
 }
 
 bool ViewTransitionStyleTracker::HasActiveAnimations() const {
@@ -1942,6 +1970,13 @@ ViewTransitionState ViewTransitionStyleTracker::GetViewTransitionState() const {
         subframe_snapshot_layer_->ViewTransitionResourceId();
   }
 
+  std::vector<std::pair<std::string, std::string>> id_to_auto_name_list;
+  for (auto& p : id_to_auto_name_map_) {
+    id_to_auto_name_list.emplace_back(p.key.Utf8(), p.value.Utf8());
+  }
+  transition_state.id_to_auto_name_map =
+      base::flat_map<std::string, std::string>(std::move(id_to_auto_name_list));
+
   state_extracted_ = true;
 
   // TODO(khushalsagar): Need to send offsets to retain positioning of
@@ -2043,8 +2078,11 @@ CSSStyleSheet& ViewTransitionStyleTracker::UAStyleSheet() {
   builder.AddUAStyle(RuntimeEnabledFeatures::ScopedViewTransitionsEnabled()
                          ? StaticUAStylesScoped()
                          : StaticUAStyles());
-  if (add_animations)
-    builder.AddUAStyle(AnimationUAStyles());
+  if (add_animations) {
+    builder.AddUAStyle(RuntimeEnabledFeatures::ScopedViewTransitionsEnabled()
+                           ? AnimationUAStylesScoped()
+                           : AnimationUAStyles());
+  }
 
   for (auto& entry : element_data_map_) {
     const auto& view_transition_name = entry.key.GetString();

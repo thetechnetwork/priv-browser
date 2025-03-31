@@ -45,6 +45,7 @@ class AccountSelectionBubbleView : public views::BubbleDialogDelegateView,
   void ShowMultiAccountPicker(
       const std::vector<IdentityRequestAccountPtr>& accounts,
       const std::vector<IdentityProviderDataPtr>& idp_list,
+      const gfx::Image& rp_icon,
       bool show_back_button) override;
   void ShowVerifyingSheet(const IdentityRequestAccountPtr& account,
                           const std::u16string& title) override;
@@ -72,9 +73,8 @@ class AccountSelectionBubbleView : public views::BubbleDialogDelegateView,
   FRIEND_TEST_ALL_PREFIXES(AccountSelectionBubbleViewTest,
                            WebContentsLargeEnoughToFitDialog);
 
-  // Returns a View containing the logo of the identity provider. Creates the
-  // `header_icon_view_` if `has_idp_icon` is true.
-  std::unique_ptr<views::View> CreateHeaderView(bool has_idp_icon);
+  // Returns a View containing the logo of the identity provider.
+  std::unique_ptr<views::View> CreateHeaderView();
 
   // Returns a View for single account chooser. It contains the account
   // information, disclosure text and a button for the user to confirm the
@@ -101,22 +101,26 @@ class AccountSelectionBubbleView : public views::BubbleDialogDelegateView,
   // Returns a view containing a button for the user to login to an IDP for
   // which there was a login status mismatch, to be used in the multiple account
   // chooser case.
-  std::unique_ptr<views::View> CreateIdpLoginRow(
+  std::unique_ptr<views::View> CreateMultiIdpLoginRow(
       const std::u16string& idp_for_display,
       const IdentityProviderDataPtr& idp_data);
 
-  // Creates the "Use other account" button.
-  std::unique_ptr<views::View> CreateUseOtherAccountButton(
+  // Creates the "Use other account" button when showing a dialog with one IDP.
+  std::unique_ptr<views::View> CreateSingleIdpUseOtherAccountButton(
       const content::IdentityProviderMetadata& idp_metadata,
       const std::u16string& title,
       int icon_margin);
 
   // Updates the header title, the header icon visibility and the header back
   // button visibiltiy. `idp_image` is not empty when we need to set a header
-  // image based on the IDP.
+  // image based on the IDP. `should_circle_crop_header_icon` determines whether
+  // the icon passed should be cropped or not. Some icons like the RP icon are
+  // not meant to be cropped, and some icons like the badged account icon are
+  // cropped on the backend, so they should not be cropped here.
   void UpdateHeader(const gfx::Image& idp_image,
                     const std::u16string& title,
-                    bool show_back_button);
+                    bool show_back_button,
+                    bool should_circle_crop_header_icon);
 
   // Removes all children except for `header_view_`.
   void RemoveNonHeaderChildViews();
@@ -144,13 +148,6 @@ class AccountSelectionBubbleView : public views::BubbleDialogDelegateView,
 
   // View containing the bubble title.
   raw_ptr<views::Label> title_label_ = nullptr;
-
-  raw_ptr<views::ScrollView> expandable_account_scroll_view_ = nullptr;
-
-  // Subscription to notify of scrolling events from the expandable accounts
-  // scroller.
-  base::CallbackListSubscription on_contents_scrolled_subscription_;
-  float max_offset_ = 0.f;
 
   // Used to ensure that callbacks are not run if the AccountSelectionBubbleView
   // is destroyed.

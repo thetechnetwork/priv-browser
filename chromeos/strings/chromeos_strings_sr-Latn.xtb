@@ -11,6 +11,7 @@
 <translation id="102432830749687801">Obavezno koristite Google aplikaciju Prenos sadržaja da biste premestili podatke školskog naloga na lični nalog pre nego što izgubite pristup.</translation>
 <translation id="1026212596705997935">Prečica se koristi za „<ph name="CONFLICT_ACCEL_NAME" />“. Pritisnite novu prečicu. Da biste zamenili postojeću prečicu, ponovo pritisnite ovu prečicu.</translation>
 <translation id="1030856839388844477">Resetuj potrošnju podataka</translation>
+<translation id="1047095725494118091">Preuzimanje nije uspelo. Probajte ponovo ili restartujte <ph name="DEVICE_TYPE" />.</translation>
 <translation id="1047458377670401304"><ph name="CPU_NAME" /> (<ph name="THREAD_COUNT" /> niti, <ph name="CPU_MAX_CLOCK_SPEED" /> GHz)</translation>
 <translation id="1047773237499189053">Dostupna je nova funkcija. Koristite taster sa strelicom nagore da biste saznali više.</translation>
 <translation id="1049663189809099096">pastelno žut(a)</translation>
@@ -26,6 +27,7 @@
 <translation id="1082009148392559545">Čuvar ekrana se preuzima</translation>
 <translation id="1094693127011229778">IP adresa nije dostupna</translation>
 <translation id="1100902271996134409">Prave se slike...</translation>
+<translation id="1107856713690040084"><ph name="DEVICE_TYPE" /> zvuk</translation>
 <translation id="1116694919640316211">Osnovni podaci</translation>
 <translation id="1118572504348554005">Sa partnerima možemo da delimo povratne informacije poslate preko ovog obrasca radi otklanjanja grešaka i drugih problema koje nam prijavite. Nemojte da unosite osetljive informacije poput lozinki.</translation>
 <translation id="1119403468619527527">Premalo reči za pojednostavljivanje</translation>
@@ -292,6 +294,7 @@
 <translation id="2163937499206714165">Uključite tamni režim</translation>
 <translation id="2164131940279488868">Proverite da li je mikrofon povezan da biste počeli da snimate zvuk</translation>
 <translation id="2173302385160625112">Proverite internet vezu</translation>
+<translation id="2176909213844392588">Preuzimanje modela transkripcije za <ph name="LANGUAGE_NAME" /> nije uspelo. Probajte ponovo ili restartujte <ph name="DEVICE_TYPE" />.</translation>
 <translation id="2180197493692062006">Došlo je do greške. Probajte da ponovo otvorite aplikaciju.</translation>
 <translation id="2189104374785738357">Izmenite detalje naziva pristupne tačke</translation>
 <translation id="2195732836444333448">Kapacitet je trenutno popunjen. Vratite se brzo.</translation>
@@ -480,6 +483,7 @@
 <translation id="3199982728237701504">Uvlačenje dokumenta (dvostrano)</translation>
 <translation id="3201315366910775591">Drugi ljudi mogu da ažuriraju deljene albume</translation>
 <translation id="3211671540163313381">D-pad za mapiranje tastera</translation>
+<translation id="3217462202230355157">Uverite se da je mikrofon povezan ili probajte da restartujete <ph name="DEVICE_TYPE" /></translation>
 <translation id="3226405216343213872">Traže se skeneri</translation>
 <translation id="3226657629376379887">Meni sa radnjama za raspored</translation>
 <translation id="3227186760713762082">Vrednost (<ph name="CATEGORY_TEXT" />) deli se brojem <ph name="CONVERSION_RATE" /></translation>
@@ -515,6 +519,7 @@
 <translation id="3383623117265110236">Ekskluzivno</translation>
 <translation id="3404249063913988450">Omogućite čuvar ekrana</translation>
 <translation id="3413935475507503304">Da biste nastavili sa ažuriranjem, kliknite na Dalje.</translation>
+<translation id="3416709353545797224">Snimanje svih zvukova na uređaju <ph name="DEVICE_TYPE" /></translation>
 <translation id="3428551088151258685">otvoreni</translation>
 <translation id="3428971106895559033">pastelnim</translation>
 <translation id="3434107140712555581"><ph name="BATTERY_PERCENTAGE" />%</translation>
@@ -678,6 +683,7 @@
 <translation id="4155551848414053977">Proverite da li je skener uključen i dostupan preko mreže ili direktne veze</translation>
 <translation id="4159238217853743776">Delimično</translation>
 <translation id="4159784952369912983">Ljubičasta</translation>
+<translation id="416219735020840807">Preuzimanje modela transkripcije nije uspelo. Probajte ponovo ili restartujte <ph name="DEVICE_TYPE" />.</translation>
 <translation id="4170180284036919717">Slikajte</translation>
 <translation id="4170700058716978431">NIJE USPELO</translation>
 <translation id="4171077696775491955">smanjite osvetljenost</translation>
@@ -698,6 +704,16 @@
 <translation id="4249717042534905822">u nedelju</translation>
 <translation id="4250229828105606438">Snimak ekrana</translation>
 <translation id="4251839292699800785">Moderna kancelarija</translation>
+<translation id="4252261480746798874">Kada izaberete Napravite svoj, možete da napišete prilagođeni upit. Možete i da izaberete Odaberite temu, pa da izaberete podvučene reči da biste personalizovali AI pozadinu.
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          Izaberite Inspiriši me da biste dobili više jedinstvenih i raznovrsnijih opcija za slike koje je generisala veštačka inteligencija.
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          Kada pravite sopstvenu pozadinu, upit se šalje Google serverima radi generisanja slika i poboljšanja proizvoda, u skladu sa <ph name="BEGIN_LINK_GOOGLE_PRIVACY_POLICY" />Google uslovima korišćenja usluge i politikom privatnosti<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" />. Nemojte da navodite nikakve lične, osetljive niti poverljive informacije.
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          Generativna veštačka inteligencija može da prikazuje netačne informacije, uključujući i informacije o ljudima, pa proverite odgovore. <ph name="BEGIN_LINK_CREATE_YOUR_OWN_WALLPAPER" />Saznajte više<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" /></translation>
 <translation id="4258281355379922695">HTTP kašnjenje</translation>
 <translation id="4266143281602681663">pletiva</translation>
 <translation id="4269815121975886860">Početna podešavanja</translation>
@@ -775,7 +791,6 @@
 <translation id="4593212453765072419">Potrebna je potvrda autentičnosti proksija</translation>
 <translation id="4594021849294327751">Napravi transkript</translation>
 <translation id="4594541568452132351">Izaberite jezik transkripcije i model preuzimanja</translation>
-<translation id="4607282946861182308">Ne možemo da napravimo slike na kojima je ovo. Probajte sa drugim upitom.</translation>
 <translation id="4609350030397390689">Smanjite osvetljenost tastature</translation>
 <translation id="4627232916386272576"><ph name="DOCUMENT_TITLE" />, <ph name="PRINTER_NAME" />, <ph name="CREATION_TIME" />, <ph name="PRINTED_PAGE_NUMBER" /> od <ph name="TOTAL_PAGE_NUMBER" />. Pritisnite taster Enter da biste otkazali zadatak štampanja.</translation>
 <translation id="463791356324567266">Otkazuje se skeniranje...</translation>
@@ -942,6 +957,7 @@
 <translation id="5344619683981067131">Izabrani tekst se zamenjuje predlogom</translation>
 <translation id="5346687412805619883">Lokalna mreža</translation>
 <translation id="5358174242040570474">Došlo je do greške. Probajte ponovo da odaberete pozadinu ili otvorite ponovo aplikaciju.</translation>
+<translation id="5368228070728130240">Preuzimanje modela za pravljenje rezimea i naslova nije uspelo. Probajte ponovo ili restartujte <ph name="DEVICE_TYPE" />.</translation>
 <translation id="5372659122375744710">WiFi mreža nije bezbedna</translation>
 <translation id="5376354385557966694">Automatski svetli režim</translation>
 <translation id="5378184552853359930">Tip IP adrese</translation>
@@ -1247,6 +1263,7 @@
 <translation id="6766275201586212568">Neuspešna DNS razrešavanja</translation>
 <translation id="6768237774506518020">Velika stopa neuspeha DNS razrešavanja</translation>
 <translation id="6786747875388722282">Dodaci</translation>
+<translation id="6789891265243243337">Kada je zvuk na uređaju <ph name="DEVICE_TYPE" /> uključen, Snimač zvuka snima sve zvukove koji se puštaju na ovom uređaju</translation>
 <translation id="6791471867139427246">boja osvetljenja tastature</translation>
 <translation id="6796229976413584781">Prečica je izbrisana</translation>
 <translation id="6798678288485555829">Kretanje kroz tekst</translation>
@@ -1522,6 +1539,7 @@ Preuzmite model transkripcije (do 100 MB) da biste preuzeli te transkripcije.</t
 <translation id="8010765388850538088">Saznajte više o generativnoj veštačkoj inteligenciji</translation>
 <translation id="8017679124341497925">Prečica je izmenjena</translation>
 <translation id="802154636333426148">Preuzimanje nije uspelo</translation>
+<translation id="8027467664787098346">Saznajte više o izabranoj pozadini</translation>
 <translation id="8028993641010258682">Veličina</translation>
 <translation id="8031884997696620457">HSPAPlus</translation>
 <translation id="80398733265834479">Omogućite režim autopodešavanja boja</translation>
@@ -1640,6 +1658,7 @@ Preuzmite model transkripcije (do 100 MB) da biste preuzeli te transkripcije.</t
 <translation id="8543574988889671960">Ponovo učitajte karticu</translation>
 <translation id="8550364285433943656">Postavite kontrole za radnje u igri da biste igrali pomoću tastera na tastaturi</translation>
 <translation id="8557447961879934694">WPA2</translation>
+<translation id="8558521694042102707">Generativna veštačka inteligencija može da prikazuje netačne informacije, uključujući i informacije o ljudima, pa proverite odgovore.</translation>
 <translation id="8575298406870537639">Mobilni operater može da zatraži ovu opciju radi povezivanja na mrežu. Obratite se mobilnom operateru za detalje.</translation>
 <translation id="8576249514688522074">Nije pokrenuto</translation>
 <translation id="8584654835905316966">Restartovanje je obavezno da bi se dovršila instalacija firmvera za <ph name="DEVICE_NAME" /> na verziju <ph name="VERSION" />. Može da izgleda kao da se računar restartuje nekoliko puta. Ovo je očekivano ponašanje.</translation>
@@ -1654,7 +1673,6 @@ Preuzmite model transkripcije (do 100 MB) da biste preuzeli te transkripcije.</t
 <translation id="8655295600908251630">Kanal</translation>
 <translation id="8655828773034788261">Deli URL:</translation>
 <translation id="8660881923941176839">funte</translation>
-<translation id="8670057600920888023">Generativna veštačka inteligencija je eksperimentalna i sadržaj može da bude netačan, obmanjujući ili uvredljiv.</translation>
 <translation id="8670574982334489519">desna</translation>
 <translation id="8675354002693747642">Tajni ključ</translation>
 <translation id="8677859815076891398">Nema albuma. Napravite album u <ph name="LINK_BEGIN" />Google slikama<ph name="LINK_END" />.</translation>
@@ -1718,6 +1736,7 @@ Preuzmite model transkripcije (do 100 MB) da biste preuzeli te transkripcije.</t
 <translation id="8930622219860340959">Bežično</translation>
 <translation id="8933650076320258356">Izabrani taster je <ph name="KEYS" /> za <ph name="DIRECTION" />. <ph name="REASSIGN_INSTRUCTION" /></translation>
 <translation id="8936793075252196307">IP adresa klijenta</translation>
+<translation id="8938606491880817721">Preuzimanje nije uspelo. Probajte ponovo ili restartujte <ph name="DEVICE_TYPE" />.</translation>
 <translation id="8944651180182756621">Boja pokretača</translation>
 <translation id="8945308580158685341">pčele</translation>
 <translation id="894617464444543719">Uređaj je telefon.</translation>

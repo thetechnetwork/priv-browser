@@ -377,6 +377,7 @@ if (current_toolchain == default_toolchain) {
       "//chrome/browser/creator/android:java",
       "//chrome/browser/data_sharing:factory_java",
       "//chrome/browser/data_sharing:instant_message_delegate_factory_java",
+      "//google_apis/gaia/android:java",
 
       # TODO(ssid): Decouple dependency on internal library.
       "//chrome/browser/autofill/android:third_party_provider_java",
@@ -388,6 +389,7 @@ if (current_toolchain == default_toolchain) {
       "//chrome/browser/data_sharing:shared_image_tiles_java",
       "//chrome/browser/device:java",
       "//chrome/browser/device_reauth/android:java",
+      "//chrome/browser/devtools/android:java",
       "//chrome/browser/download/android:factory_java",
       "//chrome/browser/download/android:file_provider_java",
       "//chrome/browser/download/android:java",
@@ -759,6 +761,7 @@ if (current_toolchain == default_toolchain) {
       "//third_party/kotlin_stdlib:kotlin_stdlib_java",
       "//third_party/metrics_proto:metrics_proto_java",
       "//ui/accessibility:ax_base_java",
+      "//ui/accessibility:keyboard_focus_java",
       "//ui/android:ui_java",
       "//ui/android:ui_no_recycler_view_java",
       "//ui/base/ime/mojom:mojom_java",
@@ -1085,6 +1088,7 @@ if (current_toolchain == default_toolchain) {
       "//chrome/browser/readaloud/android:junit",
       "//chrome/browser/recent_tabs:junit",
       "//chrome/browser/recent_tabs/internal:junit",
+      "//chrome/browser/safe_browsing/android:junit",
       "//chrome/browser/safety_check/android:junit",
       "//chrome/browser/safety_hub/android:junit",
       "//chrome/browser/search_engines/android:junit",

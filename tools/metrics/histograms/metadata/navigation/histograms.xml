@@ -44,6 +44,11 @@ chromium-metrics-reviews@google.com.
   <variant name=".GestureMode" summary="only gesture nav mode"/>
 </variants>
 
+<variants name="NavigationProcessType">
+  <variant name=".CrossProcess" summary="Cross process navigation."/>
+  <variant name=".SameProcess" summary="Same process navigation."/>
+</variants>
+
 <variants name="NavigationSite">
   <variant name="" summary="for all sites"/>
   <variant name=".GoogleSearch" summary="for Google Search"/>
@@ -80,6 +85,17 @@ chromium-metrics-reviews@google.com.
 </variants>
 
 <!-- LINT.ThenChange(//tools/metrics/histograms/metadata/page/histograms.xml:PagePreloadingTriggerType) -->
+
+<!-- LINT.IfChange(ProcessReuseOnCOOPType) -->
+
+<variants name="ProcessReuseOnCOOPType">
+  <variant name="DifferentSiteInstance"/>
+  <variant name="None"/>
+  <variant name="Prerender"/>
+  <variant name="SameSiteNavigationInSingleWebContents"/>
+</variants>
+
+<!-- LINT.ThenChange(//content/browser/renderer_host/render_frame_host_manager.cc:ProcessReuseOnCOOPType) -->
 
 <variants name="RegularOrMHTMLType">
   <variant name="MHTML"/>
@@ -493,7 +509,6 @@ chromium-metrics-reviews@google.com.
 
 <histogram name="BackForwardCache.MainFrameHasPageshowListenersOnRestore"
     enum="BooleanPresent" expires_after="M82">
-  <owner>altimin@chromium.org</owner>
   <owner>hajimehoshi@chromium.org</owner>
   <owner>bfcache-dev@chromium.org</owner>
   <summary>
@@ -598,7 +613,6 @@ chromium-metrics-reviews@google.com.
 <histogram name="BackForwardCache.Restore.NavigationToFirstPaint" units="ms"
     expires_after="2025-08-03">
   <owner>sreejakshetty@chromium.org</owner>
-  <owner>altimin@chromium.org</owner>
   <owner>bfcache-dev@chromium.org</owner>
   <summary>
     Duration between start of navigation restoring a document from back-forward
@@ -1891,6 +1905,29 @@ chromium-metrics-reviews@google.com.
   <token key="FrameType" variants="FrameTypes"/>
 </histogram>
 
+<histogram name="Navigation.ProcessReuseOnCOOP.{ProcessReuseOnCOOPType}"
+    enum="Boolean" expires_after="2025-06-25">
+  <owner>taiyo@chromium.org</owner>
+  <owner>chrome-loading@google.com</owner>
+  <summary>
+    Records the result of process reuse when swapping Browsing Instances due to
+    COOP mismatches on `RenderFrameHostManager::GetSiteInstanceForNavigation()`.
+
+    The outcomes of reuse successes/failures are recorded once per each reuse
+    attempt categorized by `ProcessReuseOnCOOPType`. Specifically, 1)
+    `DifferentSiteInstance`: Candidate and target SiteInstances differ (e.g.,
+    cross-site navigations with speculative RFH) 2)
+    `SameSiteNavigationInSingleWebContents`: Same-site navigations with single
+    WebContents in the current BrowsingInstance 3) `Prerender`: Prerender's
+    initial navigation with new FrameTree. If none of these strategies match,
+    the type will be `None`, and the result is recorded as always false.
+
+    For more context, please see crbug.com/40254888, crbug.com/41492112,
+    crrev.com/c/6238439/comment/fb22b7bc_c8962d32/.
+  </summary>
+  <token key="ProcessReuseOnCOOPType" variants="ProcessReuseOnCOOPType"/>
+</histogram>
+
 <histogram name="Navigation.QueueTime.{Method}.{FrameType}" units="ms"
     expires_after="2025-08-10">
   <owner>cduvall@chromium.org</owner>
@@ -2268,7 +2305,7 @@ chromium-metrics-reviews@google.com.
   </summary>
 </histogram>
 
-<histogram name="Navigation.StartToCommit" units="ms"
+<histogram name="Navigation.StartToCommit{NavigationProcessType}" units="ms"
     expires_after="2025-08-03">
   <owner>nasko@chromium.org</owner>
   <owner>csharrison@chromium.org</owner>
@@ -2277,8 +2314,11 @@ chromium-metrics-reviews@google.com.
     committed.
 
     Warning: this histogram was expired after M85 and brought back 2021-04-13;
-    data may be missing.
+    data may be missing. {NavigationProcessType}
   </summary>
+  <token key="NavigationProcessType" variants="NavigationProcessType">
+    <variant name=""/>
+  </token>
 </histogram>
 
 <histogram name="Navigation.SuddenTerminationDisabler.{Origins}"
@@ -2509,8 +2549,8 @@ chromium-metrics-reviews@google.com.
   <token key="PreloadingTriggerType" variants="PreloadingTriggerType"/>
 </histogram>
 
-<histogram name="Navigation.TimeToReadyToCommit2" units="ms"
-    expires_after="2025-08-24">
+<histogram name="Navigation.TimeToReadyToCommit2{NavigationProcessType}"
+    units="ms" expires_after="2025-08-24">
   <owner>clamy@chromium.org</owner>
   <owner>nasko@chromium.org</owner>
   <summary>
@@ -2518,8 +2558,11 @@ chromium-metrics-reviews@google.com.
     commit.
 
     Warning: this histogram was expired after M85 and brought back 2021-04-13;
-    data may be missing.
+    data may be missing. {NavigationProcessType}
   </summary>
+  <token key="NavigationProcessType" variants="NavigationProcessType">
+    <variant name=""/>
+  </token>
 </histogram>
 
 <histogram name="Navigation.TpcdMitigations.MetadataCohortDistribution"

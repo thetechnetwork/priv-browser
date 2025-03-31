@@ -644,7 +644,7 @@ chromium-metrics-reviews@google.com.
 </histogram>
 
 <histogram name="Notifications.macOS.AppShimProcess.UptimeOnDisconnect"
-    units="ms" expires_after="2025-03-01">
+    units="ms" expires_after="2025-09-01">
   <owner>mek@chromium.org</owner>
   <owner>pwa-team@google.com</owner>
   <summary>
@@ -656,7 +656,7 @@ chromium-metrics-reviews@google.com.
 
 <histogram
     name="Notifications.macOS.AppShimProcess.UptimeOnUnexpectedDisconnect"
-    units="ms" expires_after="2025-03-01">
+    units="ms" expires_after="2025-09-01">
   <owner>mek@chromium.org</owner>
   <owner>pwa-team@google.com</owner>
   <summary>
@@ -783,7 +783,7 @@ chromium-metrics-reviews@google.com.
 
 <histogram
     name="Notifications.Permissions.UNNotification.{Style}.PermissionRequest"
-    enum="UNNotificationPermissionRequestResult" expires_after="M134">
+    enum="UNNotificationPermissionRequestResult" expires_after="2025-09-01">
   <owner>mek@chromium.org</owner>
   <owner>peter@chromium.org</owner>
   <summary>
@@ -797,7 +797,7 @@ chromium-metrics-reviews@google.com.
 
 <histogram
     name="Notifications.Permissions.UNNotification.{Style}.PermissionStatus"
-    enum="UNNotificationPermissionStatus" expires_after="M134">
+    enum="UNNotificationPermissionStatus" expires_after="2025-09-01">
   <owner>mek@chromium.org</owner>
   <owner>peter@chromium.org</owner>
   <summary>
@@ -810,7 +810,7 @@ chromium-metrics-reviews@google.com.
 </histogram>
 
 <histogram name="Notifications.Permissions.UNNotification.{Style}.Style"
-    enum="UNNotificationStyle" expires_after="M134">
+    enum="UNNotificationStyle" expires_after="2025-09-01">
   <owner>mek@chromium.org</owner>
   <owner>peter@chromium.org</owner>
   <summary>
@@ -900,17 +900,27 @@ chromium-metrics-reviews@google.com.
   </summary>
 </histogram>
 
-<histogram name="Notifications.Scheduler.NotificationLifeCycleEvent"
+<histogram
+    name="Notifications.Scheduler.NotificationLifeCycleEvent{NotificationSchedulerClientType}"
     enum="NotificationSchedulerNotificationLifeCycleEvent"
     expires_after="2023-03-05">
-<!-- Name completed by histogram_suffixes name="NotificationSchedulerClientType" -->
-
   <owner>shaktisahu@chromium.org</owner>
   <owner>nyquist@chromium.org</owner>
   <summary>
     Records life cycle events for a scheduled notification, when notification is
     scheduled, shown or encountering any error.
+    {NotificationSchedulerClientType}
   </summary>
+  <token key="NotificationSchedulerClientType">
+    <variant name=""/>
+    <variant name=".__Test__" summary=""/>
+    <variant name=".ChromeUpdate" summary=""/>
+    <variant name=".FeatureGuide" summary="Deprecated"/>
+    <variant name=".Prefetch" summary=""/>
+    <variant name=".ReadingList" summary=""/>
+    <variant name=".Unknown" summary=""/>
+    <variant name=".WebUI" summary=""/>
+  </token>
 </histogram>
 
 <histogram name="Notifications.UsingSystemNotificationCenter"

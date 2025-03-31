@@ -483,6 +483,8 @@ void FlexLayoutAlgorithm::HandleOutOfFlowPositionedItems(
 
   using InlineEdge = LogicalStaticPosition::InlineEdge;
   using BlockEdge = LogicalStaticPosition::BlockEdge;
+  using LogicalAlignmentDirection =
+      LogicalStaticPosition::LogicalAlignmentDirection;
 
   BoxStrut border_scrollbar_padding = BorderScrollbarPadding();
   border_scrollbar_padding.block_start =
@@ -545,8 +547,12 @@ void FlexLayoutAlgorithm::HandleOutOfFlowPositionedItems(
     // Make the child offset relative to our fragment.
     offset.block_offset -= previous_consumed_block_size;
 
-    container_builder_.AddOutOfFlowChildCandidate(child, offset, inline_edge,
-                                                  block_edge);
+    LogicalAlignmentDirection align_self_direction =
+        is_column_ ? LogicalAlignmentDirection::kInline
+                   : LogicalAlignmentDirection::kBlock;
+
+    container_builder_.AddOutOfFlowChildCandidate(
+        child, offset, inline_edge, block_edge, align_self_direction);
   }
 }
 
@@ -1552,11 +1558,10 @@ LayoutUnit ContentDistributionSpace(const StyleContentAlignmentData& data,
 // To solve this common issue, we merge the two already sorted lists of
 // GapIntersections, and write out the merged list to `merged_intersections`.
 // In this case this would mean merging [X1, X2] and [X3] to get [X1, X3, X2].
-void MergeGapIntersections(
-    bool is_inline,
-    const Vector<GapFragmentData::GapIntersection>& first_list,
-    const Vector<GapFragmentData::GapIntersection>& second_list,
-    Vector<GapFragmentData::GapIntersection>& merged_intersections) {
+void MergeGapIntersections(bool is_inline,
+                           const Vector<GapIntersection>& first_list,
+                           const Vector<GapIntersection>& second_list,
+                           Vector<GapIntersection>& merged_intersections) {
   merged_intersections.reserve(first_list.size() + second_list.size());
   wtf_size_t first_index = 0;
   wtf_size_t second_index = 0;
@@ -1710,11 +1715,9 @@ void FlexLayoutAlgorithm::BuildGapIntersectionPointsForCurrentItem(
     size_t flex_line_index,
     wtf_size_t item_index_in_line,
     LogicalOffset item_offset,
-    Vector<GapFragmentData::GapIntersection>&
-        main_intersections_before_current_line,
-    Vector<GapFragmentData::GapIntersection>&
-        main_intersections_after_current_line,
-    Vector<GapFragmentData::GapIntersectionList>& cross_axis_gaps) {
+    Vector<GapIntersection>& main_intersections_before_current_line,
+    Vector<GapIntersection>& main_intersections_after_current_line,
+    Vector<GapIntersectionList>& cross_axis_gaps) {
   const FlexLine& flex_line = flex_lines[flex_line_index];
 
   // "last" here refers to last in the block direction.
@@ -1729,9 +1732,9 @@ void FlexLayoutAlgorithm::BuildGapIntersectionPointsForCurrentItem(
           flex_line, flex_lines.size(), main_intersections_after_current_line);
     }
   } else {
-    Vector<GapFragmentData::GapIntersection> item_cross_intersections_list;
+    Vector<GapIntersection> item_cross_intersections_list;
     item_cross_intersections_list.ReserveInitialCapacity(2);
-    GapFragmentData::GapIntersection item_cross_intersection;
+    GapIntersection item_cross_intersection;
 
     // Gap offsets for the gap before the current item.
     LayoutUnit cross_axis_gap_start =
@@ -1769,15 +1772,17 @@ void FlexLayoutAlgorithm::PopulateGapIntersectionsForFirstLine(
     const FlexLine& flex_line,
     wtf_size_t num_lines,
     bool is_last_item_in_line,
-    GapFragmentData::GapIntersection& item_cross_intersection,
-    Vector<GapFragmentData::GapIntersection>&
-        main_intersections_after_current_line,
-    Vector<GapFragmentData::GapIntersection>& item_cross_intersections_list) {
+    GapIntersection& item_cross_intersection,
+    Vector<GapIntersection>& main_intersections_after_current_line,
+    Vector<GapIntersection>& item_cross_intersections_list) {
   // This method assumes that the inline offset of the `item_cross_intersection`
   // is already set. If we are in the first flex line, our items will be
   // associated with two potential cross axis gap intersections:
   // 1. The cross axis offset of the line.
   item_cross_intersection.block_offset = flex_line.cross_axis_offset;
+  // Since it is the first line, the cross axis intersection is "blocked" by the
+  // content edge before the line.
+  item_cross_intersection.is_blocked_before = true;
   item_cross_intersections_list.push_back(item_cross_intersection);
 
   // 2. The main and cross intersections of the cross gap with the main
@@ -1788,6 +1793,7 @@ void FlexLayoutAlgorithm::PopulateGapIntersectionsForFirstLine(
   item_cross_intersection.block_offset =
       num_lines > 1 ? (next_main_axis_gap_start + next_main_axis_gap_end) / 2
                     : flex_line.LineCrossEnd();
+  item_cross_intersection.is_blocked_before = false;
   item_cross_intersections_list.push_back(item_cross_intersection);
 
   if (num_lines > 1) {
@@ -1804,8 +1810,7 @@ void FlexLayoutAlgorithm::PopulateGapIntersectionsForFirstLine(
 void FlexLayoutAlgorithm::PopulateMainAxisGapIntersectionsForFirstItem(
     const FlexLine& flex_line,
     wtf_size_t num_lines,
-    Vector<GapFragmentData::GapIntersection>&
-        main_intersections_after_current_line) {
+    Vector<GapIntersection>& main_intersections_after_current_line) {
   if (num_lines < 1) {
     return;
   }
@@ -1821,14 +1826,15 @@ void FlexLayoutAlgorithm::PopulateMainAxisGapIntersectionsForFirstItem(
       (next_main_axis_gap_start + next_main_axis_gap_end) / 2;
   CHECK(main_intersections_after_current_line.empty());
 
-  main_intersections_after_current_line.emplace_back(
-      main_gap_intersection_inline_offset, main_gap_intersection_block_offset);
+  GapIntersection main_gap_intersection(main_gap_intersection_inline_offset,
+                                        main_gap_intersection_block_offset);
+  main_gap_intersection.is_blocked_before = true;
+  main_intersections_after_current_line.push_back(main_gap_intersection);
 }
 
 void FlexLayoutAlgorithm::PopulateMainAxisGapIntersectionsForLastItem(
     LayoutUnit cross_axis_block_offset,
-    Vector<GapFragmentData::GapIntersection>&
-        main_intersections_after_current_line) {
+    Vector<GapIntersection>& main_intersections_after_current_line) {
   // If we are the last item on the line, we add the intersection
   // of the next main gap with the edge of the container to the main axis
   // gap intersections.
@@ -1837,20 +1843,23 @@ void FlexLayoutAlgorithm::PopulateMainAxisGapIntersectionsForLastItem(
                  : BorderScrollbarPadding().inline_end;
   LayoutUnit edge_inline_offset =
       container_builder_.InlineSize() - border_scrollbar_padding;
-  main_intersections_after_current_line.emplace_back(edge_inline_offset,
-                                                     cross_axis_block_offset);
+  GapIntersection main_gap_intersection(edge_inline_offset,
+                                        cross_axis_block_offset);
+
+  // The last intersection of a main gap will be "blocked" by the content edge
+  // at the end of the line.
+  main_gap_intersection.is_blocked_after = true;
+  main_intersections_after_current_line.push_back(main_gap_intersection);
 }
 
 void FlexLayoutAlgorithm::PopulateGapIntersectionsForMiddleItem(
     const HeapVector<FlexLine>& flex_lines,
     bool is_last_item_in_line,
     size_t flex_line_index,
-    GapFragmentData::GapIntersection& item_cross_intersection,
-    Vector<GapFragmentData::GapIntersection>&
-        main_intersections_before_current_line,
-    Vector<GapFragmentData::GapIntersection>&
-        main_intersections_after_current_line,
-    Vector<GapFragmentData::GapIntersection>& item_cross_intersections_list) {
+    GapIntersection& item_cross_intersection,
+    Vector<GapIntersection>& main_intersections_before_current_line,
+    Vector<GapIntersection>& main_intersections_after_current_line,
+    Vector<GapIntersection>& item_cross_intersections_list) {
   const FlexLine& flex_line = flex_lines[flex_line_index];
   // If we are in "middle" lines, our items will be associated with two
   // potential cross gap intersections:
@@ -1883,10 +1892,9 @@ void FlexLayoutAlgorithm::PopulateGapIntersectionsForMiddleItem(
 
 void FlexLayoutAlgorithm::PopulateGapIntersectionsForLastLine(
     const FlexLine& flex_line,
-    GapFragmentData::GapIntersection& item_cross_intersection,
-    Vector<GapFragmentData::GapIntersection>&
-        main_intersections_before_current_line,
-    Vector<GapFragmentData::GapIntersection>& item_cross_intersections_list) {
+    GapIntersection& item_cross_intersection,
+    Vector<GapIntersection>& main_intersections_before_current_line,
+    Vector<GapIntersection>& item_cross_intersections_list) {
   // If we are in the last line, our items will be associated with two
   // potential cross gap intersections:
   // 1. The cross and main intersections of the cross gap with the
@@ -1902,6 +1910,9 @@ void FlexLayoutAlgorithm::PopulateGapIntersectionsForLastLine(
 
   // 2. The cross end of the line.
   item_cross_intersection.block_offset = flex_line.LineCrossEnd();
+  // Since it is the last line, the cross axis intersection is "blocked" by
+  // the content edge after the line.
+  item_cross_intersection.is_blocked_after = true;
   item_cross_intersections_list.push_back(item_cross_intersection);
 }
 
@@ -1982,8 +1993,8 @@ LayoutResult::EStatus FlexLayoutAlgorithm::GiveItemsFinalPositionAndSize(
   BaselineAccumulator baseline_accumulator(style);
   LayoutResult::EStatus status = LayoutResult::kSuccess;
 
-  Vector<Vector<GapFragmentData::GapIntersection>> cross_axis_gaps;
-  Vector<Vector<GapFragmentData::GapIntersection>> main_axis_gaps;
+  Vector<Vector<GapIntersection>> cross_axis_gaps;
+  Vector<Vector<GapIntersection>> main_axis_gaps;
   main_axis_gaps.ReserveInitialCapacity(flex_lines->size());
 
   for (wtf_size_t flex_line_idx = 0; flex_line_idx < flex_lines->size();
@@ -2027,12 +2038,10 @@ LayoutResult::EStatus FlexLayoutAlgorithm::GiveItemsFinalPositionAndSize(
     // TODO(javiercon): Refactor this to keep logic contained in an Accumulator,
     // like `BaselineAccumulator`.
     wtf_size_t item_index_in_line = 0;
-    Vector<GapFragmentData::GapIntersection>
-        main_intersections_after_current_line;
+    Vector<GapIntersection> main_intersections_after_current_line;
     main_intersections_after_current_line.ReserveInitialCapacity(
         flex_line.item_indices.size());
-    Vector<GapFragmentData::GapIntersection>
-        main_intersections_before_current_line;
+    Vector<GapIntersection> main_intersections_before_current_line;
     main_intersections_before_current_line.ReserveInitialCapacity(
         flex_line.item_indices.size());
 
@@ -2233,7 +2242,7 @@ LayoutResult::EStatus FlexLayoutAlgorithm::GiveItemsFinalPositionAndSize(
       // See the comment above the definition for `MergeGapIntersections` for an
       // example of why this is needed.
       if (flex_line_idx > 0) {
-        Vector<GapFragmentData::GapIntersection> merged_intersections;
+        Vector<GapIntersection> merged_intersections;
         MergeGapIntersections(
             !is_column_, main_intersections_before_current_line,
             main_axis_gaps[flex_line_idx - 1], merged_intersections);
@@ -2262,10 +2271,17 @@ LayoutResult::EStatus FlexLayoutAlgorithm::GiveItemsFinalPositionAndSize(
 
   if (RuntimeEnabledFeatures::CSSGapDecorationEnabled() &&
       Style().HasGapRule()) {
-    GapFragmentData::GapGeometry* gap_geometry =
-        MakeGarbageCollected<GapFragmentData::GapGeometry>();
+    GapGeometry* gap_geometry =
+        MakeGarbageCollected<GapGeometry>(GapGeometry::ContainerType::kFlex);
     gap_geometry->SetGapIntersections(kForColumns, std::move(cross_axis_gaps));
     gap_geometry->SetGapIntersections(kForRows, std::move(main_axis_gaps));
+    if (is_column_) {
+      gap_geometry->SetBlockGapSize(gap_between_items_);
+      gap_geometry->SetInlineGapSize(gap_between_lines_);
+    } else {
+      gap_geometry->SetBlockGapSize(gap_between_lines_);
+      gap_geometry->SetInlineGapSize(gap_between_items_);
+    }
     container_builder_.SetGapGeometry(gap_geometry);
   }
 

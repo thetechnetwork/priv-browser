@@ -84,8 +84,10 @@ class GlicWindowController : public views::WidgetObserver,
   // Logs in to the account and then re-opens the glic widget after reauth.
   class LogInAndOpen {
    public:
-    LogInAndOpen() = default;
-    ~LogInAndOpen() = default;
+    LogInAndOpen();
+    ~LogInAndOpen();
+    LogInAndOpen(const LogInAndOpen&) = delete;
+    LogInAndOpen& operator=(const LogInAndOpen&) = delete;
 
     enum class State {
       // Indicates that the user needs to log in.
@@ -98,18 +100,18 @@ class GlicWindowController : public views::WidgetObserver,
 
     State state() { return state_; }
 
-    void set_attached_browser(Browser* browser) { attached_browser_ = browser; }
+    void set_attached_browser(base::WeakPtr<Browser> browser) {
+      attached_browser_ = browser;
+    }
 
-    Browser* attached_browser() { return attached_browser_; }
+    Browser* attached_browser() { return attached_browser_.get(); }
 
    private:
     // The current login status. Defaulted to logged in.
     State state_ = State::kPostLogIn;
 
     // The browser to invoke the widget from (if the glic button was clicked).
-    // Browser destruction will result in this class getting destroyed, so this
-    // cannot result in a UaF.
-    raw_ptr<Browser> attached_browser_ = nullptr;
+    base::WeakPtr<Browser> attached_browser_;
   };
 
   GlicWindowController(const GlicWindowController&) = delete;
@@ -132,6 +134,8 @@ class GlicWindowController : public views::WidgetObserver,
                                    bool prevent_close,
                                    mojom::InvocationSource source);
 
+  void FocusIfOpen();
+
   // Attaches glic to the last focused Chrome window.
   void Attach();
 
@@ -150,8 +154,10 @@ class GlicWindowController : public views::WidgetObserver,
               base::TimeDelta duration,
               base::OnceClosure callback);
 
-  // Allows the user to manually resize the widget by dragging.
-  void ShouldEnableDragResize(bool enabled);
+  // Allows the user to manually resize the widget by dragging. If the widget
+  // hasn't been created yet, apply this setting when it is created. No effect
+  // if the widget doesn't exist or the feature flag is disabled.
+  void EnableDragResize(bool enabled);
 
   // Returns the current size of the glic window.
   gfx::Size GetSize();
@@ -200,6 +206,9 @@ class GlicWindowController : public views::WidgetObserver,
   // Virtual for testing.
   virtual bool IsShowing() const;
 
+  // Returns true if either the glic panel or the FRE are showing.
+  virtual bool IsPanelOrFreShowing() const;
+
   // Returns whether or not the glic window is currently attached to a browser.
   // Virtual for testing.
   virtual bool IsAttached() const;
@@ -217,13 +226,16 @@ class GlicWindowController : public views::WidgetObserver,
   // Warms the glic web contents.
   void Preload();
 
+  // Warms the fre web contents.
+  void PreloadFre();
+
   // Reloads the glic web contents or the FRE's web contents (depending on
   // which is currently visible).
   void Reload();
 
   // Returns whether or not the glic web contents are loaded (this can also be
   // true if `IsActive()` (i.e., if the contents are loaded in the glic window).
-  bool IsWarmed();
+  bool IsWarmed() const;
 
   // Returns a WeakPtr to this instance. It can be destroyed at any time if the
   // profile is deleted or if the browser shuts down.
@@ -282,7 +294,7 @@ class GlicWindowController : public views::WidgetObserver,
 
   GlicWindowAnimator* window_animator() { return glic_window_animator_.get(); }
 
-  LogInAndOpen* log_in_and_open() const { return log_in_and_open_.get(); }
+  LogInAndOpen& log_in_and_open() { return log_in_and_open_; }
 
   Profile* profile() { return profile_; }
 
@@ -396,8 +408,6 @@ class GlicWindowController : public views::WidgetObserver,
   // When the attached browser is closed, this is invoked so we can clean up.
   void AttachedBrowserDidClose(BrowserWindowInterface* browser);
 
-  void ResetPresentationTimingState();
-
   // Returns true if a browser is occluded at point in screen coordinates.
   bool IsBrowserOccludedAtPoint(Browser* browser, gfx::Point point);
 
@@ -419,6 +429,12 @@ class GlicWindowController : public views::WidgetObserver,
 
   // Warms the web client and sets `contents_`.
   void CreateContents();
+
+  // Modifies `state_` to the given new state.
+  void SetWindowState(State new_state);
+
+  // Returns true of the window is showing and the content is loaded.
+  bool IsWindowOpenAndReady();
 
   // Observes the glic widget.
   base::ScopedObservation<views::Widget, views::WidgetObserver>
@@ -453,6 +469,10 @@ class GlicWindowController : public views::WidgetObserver,
   // reset every time glic is closed but is currently cached.
   std::optional<gfx::Size> glic_size_;
 
+  // Whether the widget should be user resizable, kept here in case it's
+  // specified before the widget is created.
+  bool user_resizable_ = true;
+
   // Used to monitor key and mouse events from native window.
   class WindowEventObserver;
   std::unique_ptr<WindowEventObserver> window_event_observer_;
@@ -464,7 +484,7 @@ class GlicWindowController : public views::WidgetObserver,
 
   // This class tracks when the user needs to login and opens the glic widget
   // after logging back in from a paused profile.
-  std::unique_ptr<LogInAndOpen> log_in_and_open_;
+  LogInAndOpen log_in_and_open_;
 
   // True while RunMoveLoop() has been called on a widget.
   bool in_move_loop_ = false;
@@ -475,6 +495,7 @@ class GlicWindowController : public views::WidgetObserver,
 
   raw_ptr<GlicWebClientAccess> web_client_;
 
+  // Modified only by calling `SetWindowState`.
   State state_ = State::kClosed;
 
   // If State != kClosed, then the UI must either be associated with a browser
@@ -488,14 +509,6 @@ class GlicWindowController : public views::WidgetObserver,
 
   mojom::WebUiState webui_state_ = mojom::WebUiState::kUninitialized;
   base::ObserverList<WebUiStateObserver> webui_state_observers_;
-
-  // The following two variables are used together for recording metrics and are
-  // reset together after the panel show is finished.
-
-  // The timestamp when the glic window starts to be shown.
-  base::TimeTicks show_start_time_;
-  // Web client's operation modes.
-  mojom::WebClientMode starting_mode_;
 
   // The invocation source requesting the opening of the web client.
   std::optional<mojom::InvocationSource> opening_source_;

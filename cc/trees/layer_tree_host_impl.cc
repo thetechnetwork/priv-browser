@@ -81,7 +81,6 @@
 #include "cc/paint/display_item_list.h"
 #include "cc/paint/paint_worklet_job.h"
 #include "cc/paint/paint_worklet_layer_painter.h"
-#include "cc/raster/bitmap_raster_buffer_provider.h"
 #include "cc/raster/gpu_raster_buffer_provider.h"
 #include "cc/raster/one_copy_raster_buffer_provider.h"
 #include "cc/raster/raster_buffer_provider.h"
@@ -2194,9 +2193,12 @@ void LayerTreeHostImpl::NotifyTileStateChanged(const Tile* tile) {
 
   layer_impl->NotifyTileStateChanged(tile);
 
-  if (settings_.UseLayerContextForDisplay() && !is_pending_tree) {
-    // Pending tree tile updates are pushed to the display tree after
-    // activation. For active tree tile updates we push immediately.
+  if (settings_.UseLayerContextForDisplay() && !is_pending_tree &&
+      !CommitsToActiveTree()) {
+    // Tiles for the tree currently being committed to (Pending or Active)
+    // are pushed to the display during UpdateDisplayTree. For active tree,
+    // if we're not committing to Active, tiles are pushed immediately via
+    // UpdateDisplayTile.
     layer_context_->UpdateDisplayTile(
         static_cast<PictureLayerImpl&>(*layer_impl), *tile,
         *resource_provider(), *layer_tree_frame_sink_->context_provider());
@@ -4188,7 +4190,8 @@ LayerTreeHostImpl::CreateRasterBufferProvider() {
       layer_tree_frame_sink_->context_provider();
 
   if (!compositor_context_provider) {
-    return std::make_unique<BitmapRasterBufferProvider>(layer_tree_frame_sink_);
+    return std::make_unique<ZeroCopyRasterBufferProvider>(
+        layer_tree_frame_sink_);
   }
 
   const gpu::Capabilities& caps =

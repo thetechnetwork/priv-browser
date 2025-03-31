@@ -508,7 +508,8 @@ class PrefersColorSchemeTest
 #if BUILDFLAG(ENABLE_GLIC)
     feature_list_.InitWithFeatures(
         /*enabled_features=*/{features::kGlic, features::kTabstripComboButton},
-        /*disabled_features=*/{features::kGlicWarming});
+        /*disabled_features=*/{features::kGlicWarming,
+                               features::kGlicFreWarming});
 #endif
   }
   ~PrefersColorSchemeTest() override {
@@ -538,12 +539,8 @@ class PrefersColorSchemeTest
     }
 
     // Pages in regular profiles should follow the browser theme, reflected by
-    // the color mode of the associated ColorProvider, if the feature is
-    // enabled.
-    return base::FeatureList::IsEnabled(
-               features::kContentUsesBrowserThemeColorMode)
-               ? color_provider_color_mode
-               : native_theme_color_mode;
+    // the color mode of the associated ColorProvider.
+    return color_provider_color_mode;
   }
 
   void SetUpOnMainThread() override {

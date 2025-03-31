@@ -16,7 +16,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import static org.chromium.chrome.browser.ui.android.webid.AccountSelectionProperties.HeaderProperties.IDP_BRAND_ICON;
+import static org.chromium.chrome.browser.ui.android.webid.AccountSelectionProperties.HeaderProperties.HEADER_ICON;
 import static org.chromium.chrome.browser.ui.android.webid.AccountSelectionProperties.HeaderProperties.RP_BRAND_ICON;
 import static org.chromium.chrome.browser.ui.android.webid.AccountSelectionProperties.HeaderProperties.TYPE;
 
@@ -64,7 +64,8 @@ public class AccountSelectionWidgetModeControllerTest extends AccountSelectionJU
             assertEquals(1, mSheetAccountItems.size());
             assertEquals(HeaderType.VERIFY, mModel.get(ItemProperties.HEADER).get(TYPE));
             verify(mMockDelegate).onAccountsDisplayed();
-            assertFalse(containsItemOfType(mModel, ItemProperties.SPINNER_ENABLED));
+            assertFalse(mModel.get(ItemProperties.SPINNER_ENABLED));
+            assertFalse(mModel.get(ItemProperties.DRAGBAR_HANDLE_VISIBLE));
         }
     }
 
@@ -86,7 +87,8 @@ public class AccountSelectionWidgetModeControllerTest extends AccountSelectionJU
             assertEquals(
                     HeaderType.VERIFY_AUTO_REAUTHN, mModel.get(ItemProperties.HEADER).get(TYPE));
             verify(mMockDelegate).onAccountsDisplayed();
-            assertFalse(containsItemOfType(mModel, ItemProperties.SPINNER_ENABLED));
+            assertFalse(mModel.get(ItemProperties.SPINNER_ENABLED));
+            assertFalse(mModel.get(ItemProperties.DRAGBAR_HANDLE_VISIBLE));
         }
     }
 
@@ -101,7 +103,7 @@ public class AccountSelectionWidgetModeControllerTest extends AccountSelectionJU
 
         assertNull(mModel.get(ItemProperties.HEADER).get(RP_BRAND_ICON));
         PropertyModel headerModel = mModel.get(ItemProperties.HEADER);
-        assertNull(headerModel.get(IDP_BRAND_ICON));
+        assertNull(headerModel.get(HEADER_ICON));
     }
 
     @Test

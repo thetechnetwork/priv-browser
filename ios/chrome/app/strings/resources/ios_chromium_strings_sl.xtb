@@ -95,7 +95,6 @@ Počakajte nekaj minut, preden se odjavite. Če se odjavite zdaj, bodo ti podatk
 <translation id="328933489847748230">{count,plural, =1{Prikazano je 1 okno Chromiuma}one{Prikazano je {count} okno Chromiuma}two{Prikazani sta {count} okni Chromiuma}few{Prikazana so {count} okna Chromiuma}other{Prikazanih je {count} oken Chromiuma}}</translation>
 <translation id="3344973607274501920">Chromiumu ni uspelo preveriti vaših gesel. Poskusite preveriti internetno povezavo.</translation>
 <translation id="3366305173356742781">Podatki v Chromiumu v vašem računu</translation>
-<translation id="33788334537425157">Vklopite »Zaklepanje anonimnih zavihkov po zaprtju Chromiuma«</translation>
 <translation id="3387107508582892610">{THRESHOLD,plural, =1{To se zgodi, če Chromiuma ne uporabljate {THRESHOLD} minuto. To lahko vključuje zgodovino in samodejno izpolnjevanje.}one{To se zgodi, če Chromiuma ne uporabljate {THRESHOLD} minuto. To lahko vključuje zgodovino in samodejno izpolnjevanje.}two{To se zgodi, če Chromiuma ne uporabljate {THRESHOLD} minuti. To lahko vključuje zgodovino in samodejno izpolnjevanje.}few{To se zgodi, če Chromiuma ne uporabljate {THRESHOLD} minute. To lahko vključuje zgodovino in samodejno izpolnjevanje.}other{To se zgodi, če Chromiuma ne uporabljate {THRESHOLD} minut. To lahko vključuje zgodovino in samodejno izpolnjevanje.}}</translation>
 <translation id="3410395242749598859">Nekateri podatki v Chromiumu še niso shranjeni v računu <ph name="EMAIL" />.
 Počakajte nekaj minut, preden preklopite račun. Če zdaj preklopite med računoma, bodo ti podatki izbrisani.</translation>
@@ -208,7 +207,6 @@ Kaj je treba upoštevati:
   • Če zgodovino sinhronizirate z računom Google, lahko meritve vključujejo tudi podatke o URL-jih, ki jih obiščete.<ph name="END_INDENT" /></translation>
 <translation id="5932787118589620366">Brisanje podatkov brskanja v Chromiumu.</translation>
 <translation id="593808800391107017">Prejemajte opozorila o težavah z zasebnostjo ali varnostjo, ki jih Chromium samodejno zazna.</translation>
-<translation id="5945387852661427312">Prijavljate se z računom, ki ga upravlja <ph name="DOMAIN" />, in nadzor nad podatki v Chromiumu predajate skrbniku. Vaši podatki bodo trajno povezani s tem računom. Če se odjavite iz Chromiuma, boste izbrisali podatke iz te naprave, vendar bodo še naprej shranjeni v Google Računu.</translation>
 <translation id="5951593919357934226">Kar najbolje izkoristite Chromium.</translation>
 <translation id="5985254578475526217">Če želite prejemati Chromiumova obvestila, v nastavitvah sistema iOS vklopite obvestila.</translation>
 <translation id="6104024151682120539">Odpri v Chromiumu</translation>

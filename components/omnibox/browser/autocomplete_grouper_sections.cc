@@ -211,8 +211,10 @@ AndroidNTPZpsSection::AndroidNTPZpsSection(
           30,
           {
               {1, omnibox::GROUP_MOBILE_CLIPBOARD},
-              {15, omnibox::GROUP_PERSONALIZED_ZERO_SUGGEST},
-              {5, omnibox::GROUP_TRENDS},
+              {OmniboxFieldTrial::kOmniboxNumNtpZpsRecentSearches.Get(),
+               omnibox::GROUP_PERSONALIZED_ZERO_SUGGEST},
+              {OmniboxFieldTrial::kOmniboxNumNtpZpsTrendingSearches.Get(),
+               omnibox::GROUP_TRENDS},
           },
           group_configs) {}
 
@@ -222,8 +224,10 @@ AndroidSRPZpsSection::AndroidSRPZpsSection(
                  {
                      {1, omnibox::GROUP_MOBILE_SEARCH_READY_OMNIBOX},
                      {1, omnibox::GROUP_MOBILE_CLIPBOARD},
-                     {15, omnibox::GROUP_PREVIOUS_SEARCH_RELATED},
-                     {15, omnibox::GROUP_PERSONALIZED_ZERO_SUGGEST},
+                     {OmniboxFieldTrial::kOmniboxNumSrpZpsRelatedSearches.Get(),
+                      omnibox::GROUP_PREVIOUS_SEARCH_RELATED},
+                     {OmniboxFieldTrial::kOmniboxNumSrpZpsRecentSearches.Get(),
+                      omnibox::GROUP_PERSONALIZED_ZERO_SUGGEST},
                  },
                  group_configs) {}
 
@@ -234,10 +238,12 @@ AndroidWebZpsSection::AndroidWebZpsSection(
           {
               {1, omnibox::GROUP_MOBILE_SEARCH_READY_OMNIBOX},
               {1, omnibox::GROUP_MOBILE_CLIPBOARD},
-              {kMobileMostVisitedTilesLimit,
+              {OmniboxFieldTrial::kOmniboxNumWebZpsMostVisitedUrls.Get(),
                omnibox::GROUP_MOBILE_MOST_VISITED},
-              {8, omnibox::GROUP_VISITED_DOC_RELATED},
-              {15, omnibox::GROUP_PERSONALIZED_ZERO_SUGGEST},
+              {OmniboxFieldTrial::kOmniboxNumWebZpsRelatedSearches.Get(),
+               omnibox::GROUP_VISITED_DOC_RELATED},
+              {OmniboxFieldTrial::kOmniboxNumWebZpsRecentSearches.Get(),
+               omnibox::GROUP_PERSONALIZED_ZERO_SUGGEST},
           },
           group_configs) {}
 
@@ -304,7 +310,8 @@ DesktopSecondaryNTPZpsSection::DesktopSecondaryNTPZpsSection(
 DesktopSRPZpsSection::DesktopSRPZpsSection(
     omnibox::GroupConfigMap& group_configs,
     size_t max_suggestions,
-    size_t search_limit)
+    size_t search_limit,
+    size_t url_limit)
     : ZpsSection(
           max_suggestions,
           {{
@@ -312,21 +319,21 @@ DesktopSRPZpsSection::DesktopSRPZpsSection(
                {{omnibox::GROUP_PREVIOUS_SEARCH_RELATED, {search_limit}},
                 {omnibox::GROUP_PERSONALIZED_ZERO_SUGGEST, {search_limit}}},
            },
-           {max_suggestions, omnibox::GROUP_MOST_VISITED}},
+           {url_limit, omnibox::GROUP_MOST_VISITED}},
           group_configs) {}
 
 DesktopWebZpsSection::DesktopWebZpsSection(
     omnibox::GroupConfigMap& group_configs,
     size_t max_suggestions,
+    size_t search_limit,
     size_t url_limit)
-    : ZpsSection(
-          max_suggestions,
-          {
-              {url_limit, omnibox::GROUP_MOST_VISITED},
-              {max_suggestions, omnibox::GROUP_VISITED_DOC_RELATED},
-              {max_suggestions, omnibox::GROUP_PERSONALIZED_ZERO_SUGGEST},
-          },
-          group_configs) {}
+    : ZpsSection(max_suggestions,
+                 {
+                     {url_limit, omnibox::GROUP_MOST_VISITED},
+                     {search_limit, omnibox::GROUP_VISITED_DOC_RELATED},
+                     {search_limit, omnibox::GROUP_PERSONALIZED_ZERO_SUGGEST},
+                 },
+                 group_configs) {}
 
 DesktopLensContextualZpsSection::DesktopLensContextualZpsSection(
     omnibox::GroupConfigMap& group_configs)
@@ -410,8 +417,11 @@ void ZpsSectionWithMVTiles::InitFromMatches(ACMatches& matches) {
         return m.suggestion_group_id.value_or(omnibox::GROUP_INVALID) ==
                omnibox::GROUP_MOBILE_MOST_VISITED;
       });
+  const size_t max_most_visited_tiles =
+      is_android ? OmniboxFieldTrial::kOmniboxNumWebZpsMostVisitedUrls.Get()
+                 : kMobileMostVisitedTilesLimit;
   // In the event we find more MV tiles than we can accommodate, trim the limit.
-  limit_ += std::min(tile_count, kMobileMostVisitedTilesLimit);
+  limit_ += std::min(tile_count, max_most_visited_tiles);
   // Note that the horizontal render group takes a single slot in vertical list:
   // we therefore count it as an individual item, meaning this list:
   //     [ URL_WHAT_YOU_TYPED    ]

@@ -91,6 +91,7 @@
 <translation id="1269405891096105529">અતિથિ મોડમાં પેરિફેરલને સપોર્ટ આપવામાં આવતો નથી</translation>
 <translation id="1270290102613614947">ઓન-સ્ક્રીન કીબોર્ડ અક્ષમ કર્યું</translation>
 <translation id="1272079795634619415">રોકો</translation>
+<translation id="12741168609094094">શોધવા, ટેક્સ્ટ કૉપિ કરવા અને તેના જેવી અન્ય વસ્તુઓ કરવા માટે તમારી સ્ક્રીન પર કંઈપણ પસંદ કરો</translation>
 <translation id="1275285675049378717"><ph name="POWER_SOURCE" />ને પાવર સપ્લાય આપી રહ્યું છે</translation>
 <translation id="1275718070701477396">પસંદ કરેલ</translation>
 <translation id="1276975447697633661">ફાઇલ પસંદ કરો, પછી <ph name="KEY" /> દબાવો</translation>
@@ -149,6 +150,7 @@
 <translation id="1455242230282523554">ભાષા સેટિંગ બતાવો</translation>
 <translation id="1459693405370120464">હવામાન</translation>
 <translation id="1460620680449458626">વૉલ્યૂમ મ્યૂટ કરેલું છે.</translation>
+<translation id="1462439140224375968">Google Docsમાં દસ્તાવેજ બનાવ્યો</translation>
 <translation id="14648076227129703">આમ કરવાથી કૅમેરાની પરવાનગી ધરાવતી <ph name="APP1_NAME" />, <ph name="APP2_NAME" /> તથા બધી ઍપ અને વેબસાઇટ માટે, કૅમેરાના ઍક્સેસની મંજૂરી આપવામાં આવે છે</translation>
 <translation id="1467432559032391204">ડાબું</translation>
 <translation id="146902737843070955">તમારા ઍડમિનિસ્ટ્રેટરે આ ફેરફારની વિનંતી કરી છે</translation>
@@ -226,6 +228,7 @@
 <translation id="1720230731642245863">હૉટસ્પૉટ બંધ છે</translation>
 <translation id="1731815243805539470">પાછલા વપરાશકર્તા પર સ્વિચ કરો</translation>
 <translation id="1733996486177697563">ઘેરી અને ઝાંખી થીમ વચ્ચે સ્વિચ કરો. ડેસ્કટૉપ આઇકનને ટચ કરીને થોડીવાર દબાવી રાખો, પછી વૉલપેપર અને સ્ટાઇલ પસંદ કરો.</translation>
+<translation id="1735992454301033090">પસંદ કરેલા વિસ્તારને ખસેડવા માટે ઍરો કીનો ઉપયોગ કરો</translation>
 <translation id="1736898441010944794">બ્લૂટૂથ ચાલુ હોય તેવા ડિવાઇસમાં "<ph name="NAME" />"ને જોઈ શકાય છે.</translation>
 <translation id="1737078180382804488">તમારા ફોનના નોટિફિકેશન જોવાની સુવિધા સેટઅપ કરવાની પ્રક્રિયા છોડી દો</translation>
 <translation id="174102739345480129">માર્કર બંધ છે.</translation>
@@ -493,6 +496,7 @@
 <translation id="2683887737780133806">ગયા અઠવાડિયે <ph name="DAY_OF_WEEK" /></translation>
 <translation id="2687510499067466116">કીબોર્ડ શૉર્ટકટ બદલાઈ ગયો છે</translation>
 <translation id="2689613560355655046">ડેસ્ક 8</translation>
+<translation id="2692092709110488417">ફોકસ કરવા અને પસંદ કરેલા વિસ્તારને ખસેડવા માટે ટૅબ કી દબાવો</translation>
 <translation id="2695305337569143674">વેબ</translation>
 <translation id="2697697418792422688">કીબોર્ડ સેટિંગ બતાવો. <ph name="KEYBOARD_NAME" /> પસંદ કર્યું.</translation>
 <translation id="2699913284398121653">તમારા સ્કૂલ એકાઉન્ટના ડેટાને તમારા વ્યક્તિગત એકાઉન્ટમાં ખસેડવા માટે, કન્ટેન્ટ ટ્રાન્સફર કરવા માટેની ઍપનો ઉપયોગ કરો</translation>
@@ -550,6 +554,7 @@
 <translation id="2872353916818027657">પ્રાથમિક મૉનિટર સ્વેપ કરો</translation>
 <translation id="2872961005593481000">શટ ડાઉન કરો</translation>
 <translation id="2876338922445400217">સ્ક્રીન પર મોટું કરો</translation>
+<translation id="2876760662374103627">ફેસ કન્ટ્રોલ સક્રિય છે</translation>
 <translation id="2878884018241093801">કોઈ તાજેતરની આઇટમ નથી</translation>
 <translation id="2880541185262491188">પિન વડે ઘણા બધા પ્રયાસો. <ph name="TIME_LEFT" /> રાહ જુઓ અને ફરી પ્રયાસ કરો</translation>
 <translation id="2883271196820422439">માઉસ કીની સુવિધા ફરી શરૂ કરો</translation>
@@ -593,6 +598,7 @@
 <translation id="301584155502740476">હૉટસ્પૉટની વિગતો બતાવો. હૉટસ્પૉટ બંધ છે</translation>
 <translation id="3017079585324758401">બૅકગ્રાઉન્ડ</translation>
 <translation id="3018135054368884502">મીડિયાને ફાસ્ટ ફૉરવર્ડ કરો</translation>
+<translation id="3026897869154397692">કૅલેન્ડરમાં ઉમેર્યું</translation>
 <translation id="3033545621352269033">ચાલુ</translation>
 <translation id="3033912566804961911"><ph name="DESK_NAME" /> સાથે જોડો</translation>
 <translation id="3036649622769666520">Files ખોલો</translation>
@@ -726,6 +732,7 @@
 <translation id="346243998268439747">ઝૂમ લેવલ રીસેટ કરો</translation>
 <translation id="3465223694362104965">તમે છેલ્લે સાઇન ઇન કર્યું તે પછી આ ડિવાઇસ સાથે બીજું કીબોર્ડ કનેક્ટ કરવામાં આવ્યું છે. તમે આ કીબોર્ડનો ઉપયોગ કરો તે પહેલાં ખાતરી કરો કે તમને તેના પર વિશ્વાસ છે.</translation>
 <translation id="3465356146291925647">તમારા વ્યવસ્થાપક દ્વારા મેનેજ કરવામાં આવે છે</translation>
+<translation id="3470502288861289375">કૉપિ કરી રહ્યું છે...</translation>
 <translation id="347117769229524881"><ph name="MODIFIER_ONE" />+<ph name="MODIFIER_TWO" />+<ph name="KEY_ONE" /> પછી <ph name="KEY_TWO" /> અથવા <ph name="KEY_THREE" /></translation>
 <translation id="3477079411857374384">Control-Shift-Space</translation>
 <translation id="3485319357743610354"><ph name="SECURITY_STATUS" />, <ph name="CONNECTION_STATUS" />, સિગ્નલની સશક્તતા <ph name="SIGNAL_STRENGTH" /></translation>
@@ -1012,6 +1019,7 @@
 <translation id="4351244548802238354">સંવાદ બંધ કરો</translation>
 <translation id="4356872429719185452">હૉટસ્પૉટની વિગતો બતાવો. હૉટસ્પૉટ ચાલુ કરવામાં આવ્યું છે.</translation>
 <translation id="4364101114148522660"><ph name="DURATION" />  રેકોર્ડિંગ</translation>
+<translation id="4368227575116094370">Google Sheetsમાં કોઈ શીટ બનાવો</translation>
 <translation id="4371348193907997655">કાસ્ટ સેટિંગ</translation>
 <translation id="4371834685492830207">પિનમાં માત્ર માન્ય અક્ષરો હોવા જોઈએ</translation>
 <translation id="4375482231364171368">ઍડ્રેસ બારમાં શોધો</translation>
@@ -1029,6 +1037,7 @@
 <translation id="4412698727486357573">સહાયતા કેન્દ્ર</translation>
 <translation id="4412944820643904175"><ph name="FEATURE_NAME" /> બંધ છે.</translation>
 <translation id="4417647906073317561">ફોકસના સેટિંગ. અનુભૂતિ કરવા માટે ટાઇમર, કામ અને મ્યુઝિક સેટ કરો.</translation>
+<translation id="4418600384772451109">પૅનલ બંધ કરો</translation>
 <translation id="4424159417645388645">ડેસ્ક 5</translation>
 <translation id="4426817706804363424">અદ્દભુત!</translation>
 <translation id="4430019312045809116">વૉલ્યૂમ</translation>
@@ -1481,6 +1490,7 @@
 <translation id="5825969630400862129">કનેક્ટ થયેલા ડિવાઇસના સેટિંગ</translation>
 <translation id="5830180081891717894">વધુ <ph name="WINDOWS" /></translation>
 <translation id="5837036133683224804"><ph name="RECEIVER_NAME" /> પર <ph name="ROUTE_TITLE" />ને રોકો</translation>
+<translation id="5840658767386246331">Google વડે શોધો</translation>
 <translation id="5841296711770970362">આગલા ટ્રૅક પર જાઓ</translation>
 <translation id="5842553299352339114"><ph name="DEVICE_NAME" />નું હૉટસ્પૉટ ચાલુ છે, કોઈ ડિવાઇસ કનેક્ટેડ નથી</translation>
 <translation id="584525477304726060">મોટું કરવા માટે પકડી રાખો</translation>
@@ -1512,6 +1522,7 @@
 <translation id="595202126637698455">ભજવણી ટ્રેસિંગ સક્ષમ</translation>
 <translation id="5955304353782037793">app</translation>
 <translation id="5958529069007801266">નિરીક્ષણ કરેલ વપરાશકર્તા</translation>
+<translation id="596035801491797438">ફેસ કન્ટ્રોલ બંધ કરો</translation>
 <translation id="5960410286721553511">તમારા ફોનના તાજેતરના ફોટા અને મીડિયા જુઓ</translation>
 <translation id="5965524703725988602">ઘેરી થીમ ટૉગલ કરો. <ph name="STATE_TEXT" />.</translation>
 <translation id="5975235751479998104">windows મારફતે આગળની ઍપ પર જવા સાઇકલ ફૉરવર્ડ કરો</translation>
@@ -1894,6 +1905,7 @@
 <translation id="7228968829656641943">મારી સ્ક્રીન પર શોધવા માટે વિસ્તાર પસંદ કરો. કીબોર્ડ નૅવિગેશન માટે tab પછી space દબાવો.</translation>
 <translation id="7229029500464092426"><ph name="AVAILABLE_MEMORY" /> મેમરી | કુલ <ph name="TOTAL_MEMORY" /></translation>
 <translation id="7239814253344511868">માઉસના બન્ને બટન</translation>
+<translation id="7240636904654154599">Google Sheetsમાં શીટ બનાવી</translation>
 <translation id="7244725679040769470"><ph name="PERCENTAGE" />% બૅટરી બાકી છે. તમારા ડિવાઇસને પાવર સૉર્સ સાથે કનેક્ટ કરો.</translation>
 <translation id="7246071203293827765"><ph name="UPDATE_TEXT" />. અપડેટ લાગુ કરવા માટે આ Chromebookને ફરી શરૂ કરવાની જરૂર છે. આમાં 1 મિનિટ જેટલો સમય લાગી શકે છે.</translation>
 <translation id="7256057185598509352">ExpressKey 2</translation>
@@ -2222,6 +2234,7 @@
 <translation id="8287009018010202411">પ્રૉડક્ટિવિટી</translation>
 <translation id="828708037801473432">બંધ</translation>
 <translation id="8297006494302853456">નબળું</translation>
+<translation id="8300451473979404345">પસંદ કરેલા હૅન્ડલને ખસેડવા માટે ઍરો કીનો ઉપયોગ કરો</translation>
 <translation id="8308637677604853869">પાછલું મેનૂ</translation>
 <translation id="830868413617744215">બીટા</translation>
 <translation id="8314772463905284467">Caps Lock ચાલુ છે</translation>
@@ -2282,6 +2295,7 @@
 <translation id="851458219935658693">વર્તમાન ડેસ્કમાંની બધી વિન્ડો બતાવો, રેડિયો બટન પસંદ કર્યું</translation>
 <translation id="851660987304951246">કન્ટેન્ટનો ઝડપથી સારાંશ આપવા માટે કે પ્રશ્નો પૂછવા માટે, 'વાંચવામાં મારી સહાય કરો' સુવિધાનો ઉપયોગ કરો</translation>
 <translation id="8517041960877371778">તમારું <ph name="DEVICE_TYPE" /> ચાલુ હોય ત્યારે તે ચાર્જ ન થાય તેવું બની શકે.</translation>
+<translation id="8519329096920173967">Google Lens વડે મારી સ્ક્રીન શોધો</translation>
 <translation id="8535393432370007982">રંગ મુજબ સૉર્ટ કરવાના ક્રમનો છેલ્લો ફેરફાર રદ કરો</translation>
 <translation id="8536886494750559755">ક્વિક શેરિંગ સેટિંગ બતાવો. <ph name="TIME_REMAINING" /> માટે દરેક વ્યક્તિને દેખાશે</translation>
 <translation id="8539803091108018926">ક્લિપબોર્ડ પર ટેક્સ્ટ કૉપિ કરી</translation>
@@ -2404,6 +2418,7 @@
 <translation id="8921624153894383499">Google Assistant આ ભાષા બોલતું નથી.</translation>
 <translation id="8926951137623668982">શેલ્ફ હંમેશાં છુપાવવામાં આવે છે</translation>
 <translation id="8929566928381252430">Caps Lockનો ઉપયોગ કરવાનો પ્રયાસ કરો છો? ઉપયોગ કરો</translation>
+<translation id="8929623844713377237">સંપર્ક બનાવ્યો</translation>
 <translation id="8934418770423095813">Google Doc બનાવો</translation>
 <translation id="8934926665751933910">{NUM_FILES,plural, =1{1 ફાઇલ}one{# ફાઇલ}other{# ફાઇલ}}</translation>
 <translation id="8936501819958976551">નિષ્ક્રિય કરેલું</translation>

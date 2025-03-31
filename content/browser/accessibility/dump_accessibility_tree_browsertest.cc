@@ -28,6 +28,7 @@
 #include "content/shell/browser/shell.h"
 #include "third_party/blink/public/common/features.h"
 #include "ui/accessibility/accessibility_features.h"
+#include "ui/accessibility/ax_mode.h"
 #include "ui/accessibility/platform/inspect/ax_api_type.h"
 
 #if BUILDFLAG(IS_MAC)
@@ -243,6 +244,9 @@ class CustomizableSelectDisabledDumpAccessibilityTreeTest
   base::test::ScopedFeatureList feature_list_;
 };
 
+class OnScreenModeDumpAccessibilityTreeTest : public DumpAccessibilityTreeTest {
+};
+
 // TODO(crbug.com/40925629): We need to create a way to incrementally
 // enable and create UIA tests.
 INSTANTIATE_TEST_SUITE_P(
@@ -278,6 +282,12 @@ INSTANTIATE_TEST_SUITE_P(
 INSTANTIATE_TEST_SUITE_P(
     All,
     CustomizableSelectDisabledDumpAccessibilityTreeTest,
+    ::testing::ValuesIn(DumpAccessibilityTestBase::TreeTestPasses()),
+    DumpAccessibilityTreeTestPassToString());
+
+INSTANTIATE_TEST_SUITE_P(
+    All,
+    OnScreenModeDumpAccessibilityTreeTest,
     ::testing::ValuesIn(DumpAccessibilityTestBase::TreeTestPasses()),
     DumpAccessibilityTreeTestPassToString());
 
@@ -472,50 +482,38 @@ IN_PROC_BROWSER_TEST_P(DumpAccessibilityTreeTest, AccessibilityCSSLanguage) {
   RunCSSTest(FILE_PATH_LITERAL("language.html"));
 }
 
-IN_PROC_BROWSER_TEST_P(DumpAccessibilityTreeTest,
+IN_PROC_BROWSER_TEST_P(CustomizableSelectEnabledDumpAccessibilityTreeTest,
                        AccessibilityCSSPseudoElementCheckMark) {
-  base::CommandLine::ForCurrentProcess()->AppendSwitch(
-      switches::kEnableExperimentalWebPlatformFeatures);
   RunCSSTest(FILE_PATH_LITERAL("pseudo-element-check-mark.html"));
 }
 
-IN_PROC_BROWSER_TEST_P(DumpAccessibilityTreeTest,
+IN_PROC_BROWSER_TEST_P(CustomizableSelectEnabledDumpAccessibilityTreeTest,
                        AccessibilityCSSPseudoElementCheckMarkOverrideContent) {
-  base::CommandLine::ForCurrentProcess()->AppendSwitch(
-      switches::kEnableExperimentalWebPlatformFeatures);
   RunCSSTest(
       FILE_PATH_LITERAL("pseudo-element-check-mark-override-content.html"));
 }
 
 IN_PROC_BROWSER_TEST_P(
-    DumpAccessibilityTreeTest,
+    CustomizableSelectEnabledDumpAccessibilityTreeTest,
     AccessibilityCSSPseudoElementCheckMarkOverrideContentAlternativeText) {
-  base::CommandLine::ForCurrentProcess()->AppendSwitch(
-      switches::kEnableExperimentalWebPlatformFeatures);
   RunCSSTest(FILE_PATH_LITERAL(
       "pseudo-element-check-mark-override-content-alternative-text.html"));
 }
 
-IN_PROC_BROWSER_TEST_P(DumpAccessibilityTreeTest,
+IN_PROC_BROWSER_TEST_P(CustomizableSelectEnabledDumpAccessibilityTreeTest,
                        AccessibilityCSSPseudoElementPickerIcon) {
-  base::CommandLine::ForCurrentProcess()->AppendSwitch(
-      switches::kEnableExperimentalWebPlatformFeatures);
   RunCSSTest(FILE_PATH_LITERAL("pseudo-element-picker-icon.html"));
 }
 
-IN_PROC_BROWSER_TEST_P(DumpAccessibilityTreeTest,
+IN_PROC_BROWSER_TEST_P(CustomizableSelectEnabledDumpAccessibilityTreeTest,
                        AccessibilityCSSPseudoElementPickerIconOverrideContent) {
-  base::CommandLine::ForCurrentProcess()->AppendSwitch(
-      switches::kEnableExperimentalWebPlatformFeatures);
   RunCSSTest(
       FILE_PATH_LITERAL("pseudo-element-picker-icon-override-content.html"));
 }
 
 IN_PROC_BROWSER_TEST_P(
-    DumpAccessibilityTreeTest,
+    CustomizableSelectEnabledDumpAccessibilityTreeTest,
     AccessibilityCSSPseudoElementPickerIconOverrideContentAlternativeText) {
-  base::CommandLine::ForCurrentProcess()->AppendSwitch(
-      switches::kEnableExperimentalWebPlatformFeatures);
   RunCSSTest(FILE_PATH_LITERAL(
       "pseudo-element-picker-icon-override-content-alternative-text.html"));
 }
@@ -2073,6 +2071,11 @@ IN_PROC_BROWSER_TEST_P(DumpAccessibilityTreeTest, AccessibilityBlockquote) {
   RunHtmlTest(FILE_PATH_LITERAL("blockquote.html"));
 }
 
+IN_PROC_BROWSER_TEST_P(OnScreenModeDumpAccessibilityTreeTest,
+                       AccessibilityOnScreenMode) {
+  RunOnScreenTest(FILE_PATH_LITERAL("on-screen-mode.html"));
+}
+
 IN_PROC_BROWSER_TEST_P(DumpAccessibilityTreeTest,
                        AccessibilityBlockquoteLevels) {
   RunHtmlTest(FILE_PATH_LITERAL("blockquote-levels.html"));
@@ -3592,20 +3595,6 @@ IN_PROC_BROWSER_TEST_P(DumpAccessibilityTreeTest,
 
 IN_PROC_BROWSER_TEST_P(DumpAccessibilityTreeTest,
                        AccessibilityRoleGroupFormControls) {
-  RunFormControlsTest(FILE_PATH_LITERAL("role-group.html"));
-}
-
-IN_PROC_BROWSER_TEST_P(DumpAccessibilityTreeTest,
-                       AccessibilityRoleGroupFormControlsWithInitialFullA11y) {
-  // First turn on full a11y, including screen reader mode.
-  WebContentsImpl* web_contents = GetWebContents();
-  static_cast<WebContentsImpl*>(web_contents)
-      ->AddAccessibilityModeForTesting(ui::kAXModeComplete);
-  BrowserAccessibilityState::GetInstance()->AddAccessibilityModeFlags(
-      ui::kAXModeComplete);
-
-  // Ensure that a form controls test can still set form controls mode even
-  // if incompatible modes were set previously.
   RunFormControlsTest(FILE_PATH_LITERAL("role-group.html"));
 }
 

@@ -2179,7 +2179,8 @@ bool LocalFrameView::UpdateLifecyclePhases(
         observer->DidFinishLifecycleUpdate(frame_view);
     });
     if (frame_->GetWidgetForLocalRoot()) {
-      frame_->GetWidgetForLocalRoot()->UpdateLineBounds();
+      frame_->GetWidgetForLocalRoot()->UpdateCursorAnchorInfo(
+          /*update_requested=*/false);
     }
   }
 
@@ -2990,8 +2991,7 @@ void LocalFrameView::PushPaintArtifactToCompositor(bool repainted) {
     }
   }
 
-  PaintArtifactCompositor::StackScrollTranslationVector
-      scroll_translation_nodes;
+  StackScrollTranslationVector scroll_translation_nodes;
   ForAllNonThrottledLocalFrameViews(
       [&scroll_translation_nodes](LocalFrameView& frame_view) {
         if (RuntimeEnabledFeatures::

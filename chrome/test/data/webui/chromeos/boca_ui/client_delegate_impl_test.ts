@@ -113,6 +113,7 @@ class MockRemoteHandler extends PageHandlerRemote {
           sessionStartTime: null,
           onTaskConfig: {
             isLocked: true,
+            isPaused: true,
             tabs: [
               {
                 tab: {
@@ -182,6 +183,7 @@ class MockRemoteHandler extends PageHandlerRemote {
             }],
             onTaskConfig: {
               isLocked: true,
+              isPaused: true,
               tabs: [
                 {
                   tab: {
@@ -220,6 +222,7 @@ class MockRemoteHandler extends PageHandlerRemote {
     assertDeepEquals(
         {
           isLocked: true,
+          isPaused: true,
           tabs: [
             {
               tab: {
@@ -456,6 +459,7 @@ suite('ClientDelegateTest', function() {
           sessionStartTime: undefined,
           onTaskConfig: {
             isLocked: true,
+            isPaused: true,
             tabs: [
               {
                 tab: {
@@ -512,6 +516,7 @@ suite('ClientDelegateTest', function() {
             accessCode: 'testCode',
             onTaskConfig: {
               isLocked: true,
+              isPaused: true,
               tabs: [
                 {
                   tab: {
@@ -554,7 +559,7 @@ suite('ClientDelegateTest', function() {
           sessionStartTime: new Date(1000000),
           students: [],
           studentsJoinViaCode: [],
-          onTaskConfig: {isLocked: false, tabs: []},
+          onTaskConfig: {isLocked: false, isPaused: false, tabs: []},
           teacher: {
             id: '0',
             name: 'teacher',
@@ -583,6 +588,7 @@ suite('ClientDelegateTest', function() {
               studentsJoinViaCode: [],
               onTaskConfig: {
                 isLocked: false,
+                isPaused: false,
                 tabs: [],
               },
               accessCode: '',
@@ -602,6 +608,7 @@ suite('ClientDelegateTest', function() {
         const result =
             await clientDelegateImpl.getInstance().updateOnTaskConfig({
               isLocked: true,
+              isPaused: true,
               tabs: [
                 {
                   tab: {
@@ -651,12 +658,40 @@ suite('ClientDelegateTest', function() {
     assertTrue(result);
   });
 
-  test(
-      'client delegate should translate data for student activity', () => {
-        const activities = [
+  test('client delegate should translate data for student activity', () => {
+    const activities = [
+      {
+        id: '1',
+        activity: {
+          studentStatusDetail: 3,
+          isActive: true,
+          activeTab: 'google',
+          isCaptionEnabled: false,
+          isHandRaised: false,
+          joinMethod: 0,
+          viewScreenSessionCode: 'abcd',
+        },
+      },
+      {
+        id: '2',
+        activity: {
+          studentStatusDetail: 2,
+          isActive: false,
+          activeTab: 'youtube',
+          isCaptionEnabled: false,
+          isHandRaised: false,
+          joinMethod: 1,
+          viewScreenSessionCode: null,
+        },
+      },
+    ];
+    const result = getStudentActivityMojomToUI(activities);
+    assertDeepEquals(
+        [
           {
             id: '1',
-            activity: {
+            studentActivity: {
+              studentStatusDetail: 3,
               isActive: true,
               activeTab: 'google',
               isCaptionEnabled: false,
@@ -667,44 +702,19 @@ suite('ClientDelegateTest', function() {
           },
           {
             id: '2',
-            activity: {
+            studentActivity: {
+              studentStatusDetail: 2,
               isActive: false,
               activeTab: 'youtube',
               isCaptionEnabled: false,
               isHandRaised: false,
               joinMethod: 1,
-              viewScreenSessionCode: null,
+              viewScreenSessionCode: undefined,
             },
           },
-        ];
-        const result = getStudentActivityMojomToUI(activities);
-        assertDeepEquals(
-            [
-              {
-                id: '1',
-                studentActivity: {
-                  isActive: true,
-                  activeTab: 'google',
-                  isCaptionEnabled: false,
-                  isHandRaised: false,
-                  joinMethod: 0,
-                  viewScreenSessionCode: 'abcd',
-                },
-              },
-              {
-                id: '2',
-                studentActivity: {
-                  isActive: false,
-                  activeTab: 'youtube',
-                  isCaptionEnabled: false,
-                  isHandRaised: false,
-                  joinMethod: 1,
-                  viewScreenSessionCode: undefined,
-                },
-              },
-            ],
-            result);
-      });
+        ],
+        result);
+  });
 
   test('client delegate should translate data for set float', async () => {
     const result = await clientDelegateImpl.getInstance().setFloatMode(true);

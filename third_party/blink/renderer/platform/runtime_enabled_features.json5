@@ -364,6 +364,10 @@
       status: "stable",
     },
     {
+      name: "AllowPreloadingWithCSPMetaTag",
+      status: "experimental",
+    },
+    {
       name: "AllowSameSiteNoneCookiesInSandbox",
       base_feature: "none",
 
@@ -435,7 +439,7 @@
     },
     {
       name: "AriaNotify",
-      status: {"Android": "test", "Win": "test", "Mac": "test", "Linux": "test"},
+      status: {"Android": "experimental", "Win": "experimental", "Mac": "experimental", "Linux": "experimental"},
       implied_by: ["AriaNotifyV2"],
     },
     {
@@ -468,7 +472,7 @@
     },
     {
       name: "AudioContextInterruptedState",
-      status: "test",
+      status: "stable",
     },
     {
       name: "AudioContextOnError",
@@ -764,8 +768,7 @@
     },
     {
       name: "CapturedSurfaceControl",
-      origin_trial_feature_name: "CapturedSurfaceControl",
-      status: {"Android": "", "default": "experimental"},
+      status: {"Android": "", "default": "stable"}
     },
     {
       name: "CapturedSurfaceResolution",
@@ -1186,6 +1189,7 @@
     {
       name: "CSSMasonryLayout",
       status: "test",
+      public: true,
     },
     // https://drafts.csswg.org/css-values-5/#progress
     // media-progress()
@@ -1738,10 +1742,7 @@
     // IncludeJSCallStacksInCrashReports. https://chromestatus.com/feature/4731248572628992
     {
       name: "DocumentPolicyIncludeJSCallStacksInCrashReports",
-      origin_trial_feature_name: "DocumentPolicyIncludeJSCallStacksInCrashReports",
-      status: "experimental",
-      base_feature_status: "enabled",
-      copied_from_base_feature_if: "overridden",
+      status: "stable",
     },
     {
       name: "DocumentPolicyNegotiation",
@@ -1772,10 +1773,6 @@
     },
     {
       name: "DOMPartsAPIMinimal",
-    },
-    {
-      name: "DragImageNoNodeId",
-      status: "stable",
     },
     // Dynamically change the safe area insets based on the bottom browser
     // controls visibility.
@@ -3257,7 +3254,7 @@
     },
     {
       name: "PartitionVisitedLinkDatabaseWithSelfLinks",
-      status: {"iOS": "", "default": "experimental"},
+      status: {"iOS": "", "default": "stable"},
     },
     // This is to add an option to enable the Reveal button on password inputs while waiting ::reveal gets standardized.
     {
@@ -3270,14 +3267,9 @@
     },
     {
       name: "PaymentApp",
-      depends_on: ["PaymentRequest"],
       public: true,
       status: "experimental",
       base_feature: "none",
-    },
-    {
-      name: "PaymentInstruments",
-      depends_on: ["PaymentApp"],
     },
     {
       // https://chromestatus.com/feature/5198846820352000
@@ -3808,6 +3800,11 @@
     // Spec: https://w3c.github.io/webrtc-svc/
     {
       name: "RTCSvcScalabilityMode",
+      status: "stable",
+    },
+    {
+      // crbug.com/402200344
+      name: "RubyFieldsetCrashFix",
       status: "stable",
     },
     {
@@ -4791,8 +4788,7 @@
       name: "WarnOnContentVisibilityRenderAccess",
     },
     {
-      name: "WebAnimationsSVG",
-      status: "experimental",
+      name: "WebAnimationsSVG"
     },
     {
       name: "WebAppInstallation",
@@ -4854,6 +4850,12 @@
     {
       // https://chromestatus.com/feature/5077691662073856
       name: "WebAudioBypassOutputBuffering",
+      status: {
+        "Win": "stable",
+        "ChromeOS": "stable",
+        "Mac": "stable",
+        "Linux": "stable",
+      },
     },
     {
       // https://chromestatus.com/feature/5077691662073856
@@ -5031,6 +5033,10 @@
       name: "WebGLImageChromium",
       base_feature: "none",
       public: true,
+    },
+    {
+      name: "WebGPUAdapterInfoIsFallbackAdapter",
+      status: "stable",
     },
     {
       // WebGPU developer features are deliberately not enabled by experimental

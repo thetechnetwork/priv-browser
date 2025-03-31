@@ -91,6 +91,7 @@
 <translation id="1269405891096105529">پیریفرل مہمان وضع میں تعاون یافتہ نہیں ہے</translation>
 <translation id="1270290102613614947">آن اسکرین کی بورڈ غیر فعال کر دیا گیا</translation>
 <translation id="1272079795634619415">روکیں</translation>
+<translation id="12741168609094094">تلاش کرنے، ٹیکسٹ کاپی کرنے اور مزید بہت کچھ کرنے کے لیے اپنی اسکرین پر کچھ بھی منتخب کریں</translation>
 <translation id="1275285675049378717"><ph name="POWER_SOURCE" /> کو پاور دی جا رہی ہے</translation>
 <translation id="1275718070701477396">منتخب</translation>
 <translation id="1276975447697633661">فائل منتخب کریں پھر <ph name="KEY" /> دبائیں</translation>
@@ -227,6 +228,7 @@
 <translation id="1720230731642245863">ہاٹ اسپاٹ آف ہے</translation>
 <translation id="1731815243805539470">گزشتہ صارف پر سوئچ کریں</translation>
 <translation id="1733996486177697563">گہری اور ہلکی تھیم کے درمیان سوئچ کریں۔ ڈیسک ٹاپ پر ٹچ کریں اور دبائے رکھیں پھر وال پیپر اور اسٹائل منتخب کریں۔</translation>
+<translation id="1735992454301033090">منتخب کردہ ایریا، منتقل کرنے کے لیے تیر والی کلیدوں کا استعمال کریں</translation>
 <translation id="1736898441010944794">"<ph name="NAME" />" بلوٹوتھ آلات کے لیے مرئی ہے۔</translation>
 <translation id="1737078180382804488">اپنے فون کی اطلاعات دیکھنے کے سیٹ اپ کو برخاست کریں</translation>
 <translation id="174102739345480129">مارکر آف ہے۔</translation>
@@ -494,6 +496,7 @@
 <translation id="2683887737780133806"><ph name="DAY_OF_WEEK" /> گزشتہ ہفتے</translation>
 <translation id="2687510499067466116">کی بورڈ شارٹ کٹ تبدیل ہو گیا ہے</translation>
 <translation id="2689613560355655046">ڈیسک 8</translation>
+<translation id="2692092709110488417">فوکس کرنے اور منتخب کردہ علاقے کو منتقل کرنے کے لیے ٹیب دبائیں</translation>
 <translation id="2695305337569143674">ویب</translation>
 <translation id="2697697418792422688">کی بورڈ کی ترتیبات دکھائیں۔ <ph name="KEYBOARD_NAME" /> کو منتخب کیا گیا ہے۔</translation>
 <translation id="2699913284398121653">اپنے اسکول کے اکاؤنٹ ڈیٹا کو اپنے ذاتی اکاؤنٹ میں منتقل کرنے کیلئے، مواد کی منتقلی ایپ کا استعمال کریں</translation>
@@ -551,6 +554,7 @@
 <translation id="2872353916818027657">بنیادی مانیٹر کو سویپ کریں</translation>
 <translation id="2872961005593481000">بند کریں</translation>
 <translation id="2876338922445400217">اسکرین پر زوم ان کریں</translation>
+<translation id="2876760662374103627">چہرے سے کنٹرول فعال ہے</translation>
 <translation id="2878884018241093801">کوئی حالیہ آئٹم نہیں</translation>
 <translation id="2880541185262491188">‏‫PIN کی بہت زیادہ کوششیں۔ <ph name="TIME_LEFT" /> انتظار کریں اور دوبارہ کوشش کریں</translation>
 <translation id="2883271196820422439">ماؤس کنٹرول کرنے کی کلیدیں دوبارہ شروع کریں</translation>
@@ -728,6 +732,7 @@
 <translation id="346243998268439747">زوم کی سطح کو دوبارہ ترتیب دیں</translation>
 <translation id="3465223694362104965">آخری بار آپ کے سائن ان ہونے کے بعد سے اب تک ایک دوسرا کی بورڈ اس آلہ سے منسلک ہو گیا ہے۔ اس کا استعمال کرنے سے پہلے اس بات کو یقینی بنائیں کہ آپ کو اس کی بورڈ پر بھروسہ ہے۔</translation>
 <translation id="3465356146291925647">آپ کے منتظم کے زیر انتظام ہے</translation>
+<translation id="3470502288861289375">کاپی کیے جا رہے ہیں…</translation>
 <translation id="347117769229524881"><ph name="MODIFIER_ONE" /><ph name="MODIFIER_TWO" /><ph name="KEY_ONE" /> پھر <ph name="KEY_TWO" /> یا <ph name="KEY_THREE" /></translation>
 <translation id="3477079411857374384">Control-Shift-Space</translation>
 <translation id="3485319357743610354"><ph name="SECURITY_STATUS" />، <ph name="CONNECTION_STATUS" />، سگنل کی مضبوطی <ph name="SIGNAL_STRENGTH" /></translation>
@@ -1014,6 +1019,7 @@
 <translation id="4351244548802238354">ڈائیلاگ بند کریں</translation>
 <translation id="4356872429719185452">ہاٹ اسپاٹ کی تفصیلات دکھائیں۔ ہاٹ اسپاٹ آن ہو رہا ہے۔</translation>
 <translation id="4364101114148522660"><ph name="DURATION" />  ریکارڈ کیا جا رہا ہے</translation>
+<translation id="4368227575116094370">‏‫Google Sheet تخلیق کریں</translation>
 <translation id="4371348193907997655">کاسٹ کی ترتیبات</translation>
 <translation id="4371834685492830207">‏‫PIN ميں صرف درست حروف ہونے ضروری ہیں</translation>
 <translation id="4375482231364171368">ایڈریس بار میں تلاش کریں</translation>
@@ -1031,6 +1037,7 @@
 <translation id="4412698727486357573">ہیلپ سینٹر</translation>
 <translation id="4412944820643904175"><ph name="FEATURE_NAME" /> آف ہے۔</translation>
 <translation id="4417647906073317561">فوکس کی ترتیبات۔ توجہ مرکوز کرنے کے لیے ٹائمر، ٹاسک اور موسیقی سیٹ کریں۔</translation>
+<translation id="4418600384772451109">پینل بند کریں</translation>
 <translation id="4424159417645388645">ڈیسک 5</translation>
 <translation id="4426817706804363424">بہت خوب!</translation>
 <translation id="4430019312045809116">والیوم</translation>
@@ -1483,6 +1490,7 @@
 <translation id="5825969630400862129">منسلک کردہ آلات کی ترتیبات</translation>
 <translation id="5830180081891717894"><ph name="WINDOWS" /> مزید</translation>
 <translation id="5837036133683224804"><ph name="RECEIVER_NAME" /> پر <ph name="ROUTE_TITLE" /> کو روکیں</translation>
+<translation id="5840658767386246331">‏Google سے تلاش کریں</translation>
 <translation id="5841296711770970362">اگلے ٹریک پر جائیں</translation>
 <translation id="5842553299352339114"><ph name="DEVICE_NAME" /> کا ہاٹ اسپاٹ آن ہے، کوئی آلہ منسلک نہیں ہے</translation>
 <translation id="584525477304726060">بڑا کرنے کیلئے ہولڈ کریں</translation>
@@ -1514,6 +1522,7 @@
 <translation id="595202126637698455">کارکردگی کی ٹریسنگ فعال کر دی گئی</translation>
 <translation id="5955304353782037793">ایپ</translation>
 <translation id="5958529069007801266">تحفظ یافتہ صارف</translation>
+<translation id="596035801491797438">چہرے سے کنٹرول کو آف کریں</translation>
 <translation id="5960410286721553511">اپنے فون کی حالیہ تصاویر اور میڈیا دیکھیں</translation>
 <translation id="5965524703725988602">گہری تھیم کو ٹوگل کریں۔ <ph name="STATE_TEXT" />۔</translation>
 <translation id="5975235751479998104">ونڈوز کے ذریعے سب سے آگے ایپ پر جائیں</translation>
@@ -2224,6 +2233,7 @@
 <translation id="8287009018010202411">پروڈکٹیوٹی</translation>
 <translation id="828708037801473432">آف</translation>
 <translation id="8297006494302853456">کمزور</translation>
+<translation id="8300451473979404345">منتخب کردہ ہینڈل، منتقل کرنے کے لیے تیر والی کلیدوں کا استعمال کریں</translation>
 <translation id="8308637677604853869">پچھلا مینیو</translation>
 <translation id="830868413617744215">بی ٹا</translation>
 <translation id="8314772463905284467">‏Caps Lock آن ہے</translation>
@@ -2284,6 +2294,7 @@
 <translation id="851458219935658693">موجودہ ڈیسک سے ونڈوز دکھائیں، ریڈیو بٹن کا انتخاب کیا گیا</translation>
 <translation id="851660987304951246">مواد کا فوری خلاصہ کرنے یا سوالات پوچھنے کے لیے پڑھنے میں میری مدد کریں کا استعمال کریں</translation>
 <translation id="8517041960877371778">ہو سکتا ہے کہ آپ کا <ph name="DEVICE_TYPE" /> آن ہونے کی صورت میں چارج نہ ہو۔</translation>
+<translation id="8519329096920173967">‏‫Google لینز کے ساتھ میری اسکرین تلاش کریں</translation>
 <translation id="8535393432370007982">رنگ کے لحاظ سے ترتیب کو کالعدم کریں</translation>
 <translation id="8536886494750559755">فوری اشتراک کی ترتیبات دکھائیں۔ <ph name="TIME_REMAINING" /> کی خاطر ہر ایک کیلئے مرئی</translation>
 <translation id="8539803091108018926">ٹیکسٹ کلپ بورڈ میں کاپی ہو گیا</translation>

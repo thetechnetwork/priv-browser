@@ -823,6 +823,7 @@ experimental domain Audits
       ValidationFailedSignatureExpired
       ValidationFailedInvalidLength
       ValidationFailedSignatureMismatch
+      ValidationFailedIntegrityMismatch
 
   # Details for issues around "Attribution Reporting API" usage.
   # Explainer: https://github.com/WICG/attribution-reporting-api
@@ -859,6 +860,7 @@ experimental domain Audits
     properties
       SRIMessageSignatureError error
       string signatureBase
+      array of string integrityAssertions
       AffectedRequest request
 
   type GenericIssueErrorType extends string
@@ -6640,6 +6642,8 @@ domain Network
       PortMismatch
       # The cookie's source scheme value does not match the request origin's scheme.
       SchemeMismatch
+      # Unpartitioned cookie access from an anonymous context was blocked.
+      AnonymousContext
 
   # Types of reasons why a cookie should have been blocked by 3PCD but is exempted for the request.
   experimental type CookieExemptionReason extends string
@@ -10554,30 +10558,32 @@ experimental domain Storage
       bidderTrustedSignals
       sellerTrustedSignals
 
-  # Enum of shared storage access types.
-  type SharedStorageAccessType extends string
+  # Enum of shared storage access scopes.
+  type SharedStorageAccessScope extends string
     enum
-      documentAddModule
-      documentSelectURL
-      documentRun
-      documentSet
-      documentAppend
-      documentDelete
-      documentClear
-      documentGet
-      workletSet
-      workletAppend
-      workletDelete
-      workletClear
-      workletGet
-      workletKeys
-      workletEntries
-      workletLength
-      workletRemainingBudget
-      headerSet
-      headerAppend
-      headerDelete
-      headerClear
+      window
+      sharedStorageWorklet
+      protectedAudienceWorklet
+      header
+
+  # Enum of shared storage access methods.
+  type SharedStorageAccessMethod extends string
+    enum
+      addModule
+      createWorklet
+      selectURL
+      run
+      batchUpdate
+      set
+      append
+      delete
+      clear
+      get
+      keys
+      values
+      entries
+      length
+      remainingBudget
 
   # Struct for a single key-value pair in an origin's shared storage.
   type SharedStorageEntry extends object
@@ -10993,12 +10999,16 @@ experimental domain Storage
     parameters
       # Time of the access.
       Network.TimeSinceEpoch accessTime
+      # Enum value indicating the access scope.
+      SharedStorageAccessScope scope
       # Enum value indicating the Shared Storage API method invoked.
-      SharedStorageAccessType type
+      SharedStorageAccessMethod method
       # DevTools Frame Token for the primary frame tree's root.
       Page.FrameId mainFrameId
-      # Serialized origin for the context that invoked the Shared Storage API.
+      # Serialization of the origin owning the Shared Storage data.
       string ownerOrigin
+      # Serialization of the site owning the Shared Storage data.
+      string ownerSite
       # The sub-parameters wrapped by `params` are all optional and their
       # presence/absence depends on `type`.
       SharedStorageAccessParams params
@@ -13256,6 +13266,19 @@ experimental domain BluetoothEmulation
       integer rssi
       ScanRecord scanRecord
 
+  # Describes the properties of a characteristic. This follows Bluetooth Core
+  # Specification BT 4.2 Vol 3 Part G 3.3.1. Characteristic Properties.
+  type CharacteristicProperties extends object
+    properties
+      optional boolean broadcast
+      optional boolean read
+      optional boolean writeWithoutResponse
+      optional boolean write
+      optional boolean notify
+      optional boolean indicate
+      optional boolean authenticatedSignedWrites
+      optional boolean extendedProperties
+
   # Enable the BluetoothEmulation domain.
   command enable
     parameters
@@ -13296,6 +13319,42 @@ experimental domain BluetoothEmulation
       string address
       GATTOperationType type
       integer code
+
+  # Adds a service with |serviceUuid| to the peripheral with |address|.
+  command addService
+    parameters
+      string address
+      string serviceUuid
+    returns
+      # An identifier that uniquely represents this service.
+      string serviceId
+
+  # Removes the service respresented by |serviceId| from the peripheral with
+  # |address|.
+  command removeService
+    parameters
+      string address
+      string serviceId
+
+  # Adds a characteristic with |characteristicUuid| and |properties| to the
+  # service represented by |serviceId| in the peripheral with |address|.
+  command addCharacteristic
+    parameters
+      string address
+      string serviceId
+      string characteristicUuid
+      CharacteristicProperties properties
+    returns
+      # An identifier that uniquely represents this characteristic.
+      string characteristicId
+
+  # Removes the characteristic respresented by |characteristicId| from the
+  # service respresented by |serviceId| in the peripheral with |address|.
+  command removeCharacteristic
+    parameters
+      string address
+      string serviceId
+      string characteristicId
 
   # Event for when a GATT operation of |type| to the peripheral with |address|
   # happened.

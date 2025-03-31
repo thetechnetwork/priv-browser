@@ -95,7 +95,6 @@ Lai skatītu citus iestatījumus, kuros dati tiek izmantoti Chromium lietošanas
 <translation id="328933489847748230">{count,plural, =1{Tagad tiek rādīts viens Chromium logs}zero{Tagad tiek rādīti {count} Chromium logi}one{Tagad tiek rādīts {count} Chromium logs}other{Tagad tiek rādīti {count} Chromium logi}}</translation>
 <translation id="3344973607274501920">Pārlūkprogrammā Chromium nevarēja pārbaudīt jūsu paroles. Pārbaudiet interneta savienojumu.</translation>
 <translation id="3366305173356742781">Chromium dati jūsu kontā</translation>
-<translation id="33788334537425157">Ieslēdziet iestatījumu “Bloķēt inkognito cilnes, aizverot pārlūku Chromium”.</translation>
 <translation id="3387107508582892610">{THRESHOLD,plural, =1{Tas notiek, ja pārlūks Chromium nav izmantots {THRESHOLD} minūti. Var tikt dzēsta arī vēsture un automātiskās aizpildes dati.}zero{Tas notiek, ja pārlūks Chromium nav izmantots {THRESHOLD} minūtes. Var tikt dzēsta arī vēsture un automātiskās aizpildes dati.}one{Tas notiek, ja pārlūks Chromium nav izmantots {THRESHOLD} minūti. Var tikt dzēsta arī vēsture un automātiskās aizpildes dati.}other{Tas notiek, ja pārlūks Chromium nav izmantots {THRESHOLD} minūtes. Var tikt dzēsta arī vēsture un automātiskās aizpildes dati.}}</translation>
 <translation id="3410395242749598859">Noteikti jūsu Chromium dati vēl nav saglabāti kontā <ph name="EMAIL" />.
 Pirms kontu pārslēgšanas uzgaidiet dažas minūtes. Ja pārslēgsiet kontus tūlīt, šie dati tiks dzēsti.</translation>
@@ -208,7 +207,6 @@ Svarīga informācija
   • Ja sinhronizēsiet vēsturi ar savu Google kontu, metrikā var būt ietverta arī informācija par jūsu apmeklētajiem vietrāžiem URL.<ph name="END_INDENT" /></translation>
 <translation id="5932787118589620366">Dzēst pārlūkošanas datus pārlūkā Chromium.</translation>
 <translation id="593808800391107017">Saņemiet brīdinājumus par visām ar konfidencialitāti vai drošību saistītām problēmām, kas tiek automātiski noteiktas pārlūkā Chromium.</translation>
-<translation id="5945387852661427312">Jūs pierakstāties kontā, kas tiek pārvaldīts domēnā <ph name="DOMAIN" />, un sniedzat tā administratoram kontroli pār saviem Chromium datiem. Jūsu dati tiks neatgriezeniski saistīti ar šo kontu. Izrakstoties no pārlūka Chromium, jūsu dati tiks dzēsti no šīs ierīces, taču tie tiks saglabāti jūsu Google kontā.</translation>
 <translation id="5951593919357934226">Izmantojiet pārlūku Chromium pilnvērtīgi.</translation>
 <translation id="5985254578475526217">Lai saņemtu paziņojumus no pārlūka Chromium, ieslēdziet paziņojumus iOS iestatījumos.</translation>
 <translation id="6104024151682120539">Atvērt pārlūkā Chromium</translation>

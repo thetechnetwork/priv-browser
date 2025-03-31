@@ -127,7 +127,7 @@ BASE_FEATURE(kScrimForBrowserWindowModal,
 // area. This gives user a visual cue that the content area is not interactable.
 BASE_FEATURE(KScrimForTabModal,
              "ScrimForTabModal",
-             base::FEATURE_DISABLED_BY_DEFAULT);
+             base::FEATURE_ENABLED_BY_DEFAULT);
 
 BASE_FEATURE(kSideBySide, "SideBySide", base::FEATURE_DISABLED_BY_DEFAULT);
 
@@ -351,6 +351,8 @@ BASE_FEATURE(kInlineFullscreenPerfExperiment,
 BASE_FEATURE(kPageActionsMigration,
              "PageActionsMigration",
              base::FEATURE_DISABLED_BY_DEFAULT);
+const base::FeatureParam<bool> kPageActionsMigrationEnableAll{
+    &kPageActionsMigration, "enable_all", false};
 const base::FeatureParam<bool> kPageActionsMigrationLensOverlay{
     &kPageActionsMigration, "lens_overlay", false};
 const base::FeatureParam<bool> kPageActionsMigrationMemorySaver{

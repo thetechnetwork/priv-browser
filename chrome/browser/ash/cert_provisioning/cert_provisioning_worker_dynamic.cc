@@ -66,6 +66,8 @@ constexpr char kEcNamedCurve[] = "P-256";
 
 constexpr base::TimeDelta kMinumumTryAgainLaterDelay = base::Seconds(10);
 constexpr base::TimeDelta kMaximumFetchInstructionDelay = base::Hours(8);
+constexpr base::TimeDelta kOnSubscribedFetchInstructionDelay =
+    base::Seconds(30);
 
 const net::BackoffEntry::Policy kBackoffPolicy{
     /*num_errors_to_ignore=*/0,
@@ -88,7 +90,7 @@ const net::BackoffEntry::Policy kFetchInstructionBackoffPolicy{
     /*jitter_factor=*/0.10,
     /*maximum_backoff_ms=*/kMaximumFetchInstructionDelay.InMilliseconds(),
     /*entry_lifetime_ms=*/-1,
-    /*always_use_initial_delay=*/false};
+    /*always_use_initial_delay=*/true};
 
 // The original message of kUserNotManagedError is misleading in case the user
 // is not affiliated. In this case, the error message associated to the error
@@ -439,7 +441,7 @@ void CertProvisioningWorkerDynamic::GenerateKeyForVa() {
           /*will_register_key=*/true, ::attestation::KEY_TYPE_RSA,
           GetKeyName(cert_profile_.profile_id), profile_,
           base::BindOnce(&CertProvisioningWorkerDynamic::OnGenerateKeyForVaDone,
-                         weak_factory_.GetWeakPtr(), base::TimeTicks::Now()),
+                         weak_factory_.GetWeakPtr()),
           /*signals=*/std::nullopt);
       break;
     case KeyType::kEc:
@@ -448,18 +450,14 @@ void CertProvisioningWorkerDynamic::GenerateKeyForVa() {
           /*will_register_key=*/true, ::attestation::KEY_TYPE_ECC,
           GetKeyName(cert_profile_.profile_id), profile_,
           base::BindOnce(&CertProvisioningWorkerDynamic::OnGenerateKeyForVaDone,
-                         weak_factory_.GetWeakPtr(), base::TimeTicks::Now()),
+                         weak_factory_.GetWeakPtr()),
           /*signals=*/std::nullopt);
   }
 }
 
 void CertProvisioningWorkerDynamic::OnGenerateKeyForVaDone(
-    base::TimeTicks start_time,
     const attestation::TpmChallengeKeyResult& result) {
   DCHECK_CALLED_ON_VALID_SEQUENCE(sequence_checker_);
-
-  RecordKeypairGenerationTime(cert_profile_.protocol_version, cert_scope_,
-                              base::TimeTicks::Now() - start_time);
 
   if (result.result_code ==
       attestation::TpmChallengeKeyResultCode::kGetCertificateFailedError) {
@@ -467,8 +465,8 @@ void CertProvisioningWorkerDynamic::OnGenerateKeyForVaDone(
         {"Failed to get certificate for a key", GetLogInfoBlock()});
     request_backoff_.InformOfRequest(false);
     // Next DoStep will retry generating the key.
-    ScheduleNextStep(request_backoff_.GetTimeUntilRelease(),
-                     /*try_provisioning_on_timeout=*/true);
+    ScheduleNextStepAndNotifyStateChange(request_backoff_.GetTimeUntilRelease(),
+                                         /*try_provisioning_on_timeout=*/true);
     return;
   }
 
@@ -490,7 +488,6 @@ void CertProvisioningWorkerDynamic::OnGenerateKeyForVaDone(
 void CertProvisioningWorkerDynamic::Start() {
   DCHECK_CALLED_ON_VALID_SEQUENCE(sequence_checker_);
 
-  // From this point, connection to the DM Server was successful.
   cert_provisioning_client_->Start(
       GetProvisioningProcessForClient(),
       base::BindOnce(&CertProvisioningWorkerDynamic::OnStartResponse,
@@ -511,7 +508,18 @@ void CertProvisioningWorkerDynamic::OnStartResponse(
 
   RETURN_ON_FINAL_STATE(UpdateState(
       FROM_HERE, CertProvisioningWorkerState::kReadyForNextOperation));
-  DoStep();
+
+  if (cert_profile_.is_va_enabled) {
+    // If VA is enabled, then the server is expected to have the next
+    // instruction available from the very beginning.
+    DoStep();
+  } else {
+    // If VA is disabled, then the server will need to wait for an input from
+    // the adapter and is expected to send an invalidation when ready.
+    ScheduleNextStep(
+        fetch_instruction_backoff_.GetTimeUntilRelease(),
+        /*try_provisioning_on_timeout=*/!ShouldOnlyUseInvalidations());
+  }
 }
 
 void CertProvisioningWorkerDynamic::GetNextInstruction() {
@@ -629,17 +637,13 @@ void CertProvisioningWorkerDynamic::BuildVaChallengeResponse() {
       std::move(va_challenge_),
       base::BindOnce(
           &CertProvisioningWorkerDynamic::OnBuildVaChallengeResponseDone,
-          weak_factory_.GetWeakPtr(), base::TimeTicks::Now()));
+          weak_factory_.GetWeakPtr()));
   va_challenge_.clear();
 }
 
 void CertProvisioningWorkerDynamic::OnBuildVaChallengeResponseDone(
-    base::TimeTicks start_time,
     const attestation::TpmChallengeKeyResult& challenge_result) {
   DCHECK_CALLED_ON_VALID_SEQUENCE(sequence_checker_);
-
-  RecordVerifiedAccessTime(cert_profile_.protocol_version, cert_scope_,
-                           base::TimeTicks::Now() - start_time);
 
   if (!challenge_result.IsSuccess()) {
     failure_message_no_pii_ = ConstructFailureMessage(challenge_result);
@@ -772,7 +776,10 @@ void CertProvisioningWorkerDynamic::OnUploadAuthorizationResponse(
 
   RETURN_ON_FINAL_STATE(UpdateState(
       FROM_HERE, CertProvisioningWorkerState::kReadyForNextOperation));
-  DoStep();
+  // Wait for an invalidation or a timeout before doing the next step.
+  ScheduleNextStep(
+      fetch_instruction_backoff_.GetTimeUntilRelease(),
+      /*try_provisioning_on_timeout=*/!ShouldOnlyUseInvalidations());
 }
 
 void CertProvisioningWorkerDynamic::BuildProofOfPossession() {
@@ -794,7 +801,7 @@ void CertProvisioningWorkerDynamic::BuildProofOfPossession() {
           public_key_,
           base::BindRepeating(
               &CertProvisioningWorkerDynamic::OnBuildProofOfPossessionDone,
-              weak_factory_.GetWeakPtr(), base::TimeTicks::Now()));
+              weak_factory_.GetWeakPtr()));
       break;
     case em::CertProvSignatureAlgorithm::SIGNATURE_ALGORITHM_ECDSA_SHA256:
       platform_keys_service_->SignEcdsa(
@@ -802,7 +809,7 @@ void CertProvisioningWorkerDynamic::BuildProofOfPossession() {
           public_key_, chromeos::platform_keys::HASH_ALGORITHM_SHA256,
           base::BindRepeating(
               &CertProvisioningWorkerDynamic::OnBuildProofOfPossessionDone,
-              weak_factory_.GetWeakPtr(), base::TimeTicks::Now()));
+              weak_factory_.GetWeakPtr()));
       break;
     case em::CertProvSignatureAlgorithm::SIGNATURE_ALGORITHM_UNSPECIFIED:
       failure_message_no_pii_ = "Unknown signature algorithm";
@@ -815,13 +822,9 @@ void CertProvisioningWorkerDynamic::BuildProofOfPossession() {
 }
 
 void CertProvisioningWorkerDynamic::OnBuildProofOfPossessionDone(
-    base::TimeTicks start_time,
     std::vector<uint8_t> signature,
     chromeos::platform_keys::Status status) {
   DCHECK_CALLED_ON_VALID_SEQUENCE(sequence_checker_);
-
-  RecordDataSignTime(cert_profile_.protocol_version, cert_scope_,
-                     base::TimeTicks::Now() - start_time);
 
   if (status != chromeos::platform_keys::Status::kSuccess) {
     failure_message_no_pii_ =
@@ -858,7 +861,10 @@ void CertProvisioningWorkerDynamic::OnUploadProofOfPossessionResponse(
 
   RETURN_ON_FINAL_STATE(UpdateState(
       FROM_HERE, CertProvisioningWorkerState::kReadyForNextOperation));
-  DoStep();
+  // Wait for an invalidation or a timeout before doing the next step.
+  ScheduleNextStep(
+      fetch_instruction_backoff_.GetTimeUntilRelease(),
+      /*try_provisioning_on_timeout=*/!ShouldOnlyUseInvalidations());
 }
 
 void CertProvisioningWorkerDynamic::ImportCert() {
@@ -941,8 +947,8 @@ void CertProvisioningWorkerDynamic::ProcessResponseErrors(
     last_backend_server_error_ =
         BackendServerError(status, base::Time::NowFromSystemTime());
     request_backoff_.InformOfRequest(false);
-    ScheduleNextStep(request_backoff_.GetTimeUntilRelease(),
-                     /*try_provisioning_on_timeout=*/true);
+    ScheduleNextStepAndNotifyStateChange(request_backoff_.GetTimeUntilRelease(),
+                                         /*try_provisioning_on_timeout=*/true);
     return;
   }
 
@@ -966,14 +972,14 @@ void CertProvisioningWorkerDynamic::ProcessResponseErrors(
                  << GetLogInfoBlock();
 
     fetch_instruction_backoff_.InformOfRequest(false);
-    if (fetch_instruction_backoff_.failure_count() > 3) {
+    if (fetch_instruction_backoff_.failure_count() > 2) {
       fetch_instruction_backoff_.SetCustomReleaseTime(
           base::TimeTicks::Now() + kMaximumFetchInstructionDelay);
     }
 
     // Don't change state, just retry the operation in this state in a delay (or
     // when an invalidation is triggered).
-    ScheduleNextStep(
+    ScheduleNextStepAndNotifyStateChange(
         fetch_instruction_backoff_.GetTimeUntilRelease(),
         /*try_provisioning_on_timeout=*/!ShouldOnlyUseInvalidations());
     return;
@@ -1028,17 +1034,19 @@ void CertProvisioningWorkerDynamic::ScheduleNextStep(
   }
 
   is_waiting_ = true;
+}
+
+void CertProvisioningWorkerDynamic::ScheduleNextStepAndNotifyStateChange(
+    base::TimeDelta delay,
+    bool try_provisioning_on_timeout) {
+  ScheduleNextStep(delay, try_provisioning_on_timeout);
+
   last_update_time_ = base::Time::NowFromSystemTime();
   state_change_callback_.Run();
 }
 
 void CertProvisioningWorkerDynamic::OnShouldContinue(ContinueReason reason) {
   switch (reason) {
-    case ContinueReason::kSubscribedToInvalidation:
-      RecordEvent(
-          cert_profile_.protocol_version, cert_scope_,
-          CertProvisioningEvent::kSuccessfullySubscribedToInvalidationTopic);
-      break;
     case ContinueReason::kInvalidationReceived:
       RecordEvent(cert_profile_.protocol_version, cert_scope_,
                   CertProvisioningEvent::kInvalidationReceived);
@@ -1257,9 +1265,13 @@ void CertProvisioningWorkerDynamic::OnInvalidationEvent(
   // to monitor for b/307340577 .
   switch (invalidation_event) {
     case InvalidationEvent::kSuccessfullySubscribed:
+      RecordEvent(
+          cert_profile_.protocol_version, cert_scope_,
+          CertProvisioningEvent::kSuccessfullySubscribedToInvalidationTopic);
       LOG(WARNING) << "Successfully subscribed to invalidations"
                    << GetLogInfoBlock();
-      OnShouldContinue(ContinueReason::kSubscribedToInvalidation);
+      ScheduleNextStep(kOnSubscribedFetchInstructionDelay,
+                       /*try_provisioning_on_timeout=*/true);
       break;
     case InvalidationEvent::kInvalidationReceived:
       LOG(WARNING) << "Invalidation received" << GetLogInfoBlock();

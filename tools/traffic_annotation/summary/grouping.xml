@@ -376,6 +376,7 @@ after discussions on the right group.
       <annotation id="chromeos_lens_web_image_search"/>
       <annotation id="chromeos_inline_image_request"/>
       <annotation id="baguette_image_download"/>
+      <annotation id="chromeos_walrus_provider"/>
     </sender>
   </group>
   <group name="Admin Features" hidden="true">
@@ -402,7 +403,6 @@ after discussions on the right group.
     </sender>
     <sender name="Webstore">
       <annotation id="content_hash_verification_job"/>
-      <annotation id="webstore_data_fetcher"/>
       <annotation id="webstore_install_helper"/>
       <annotation id="webstore_installer"/>
     </sender>

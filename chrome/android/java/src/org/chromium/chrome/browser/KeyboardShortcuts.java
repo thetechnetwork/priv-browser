@@ -13,6 +13,7 @@ import androidx.annotation.IntDef;
 
 import org.chromium.base.metrics.RecordHistogram;
 import org.chromium.chrome.R;
+import org.chromium.chrome.browser.bookmarks.bar.BookmarkBarUtils;
 import org.chromium.chrome.browser.flags.ChromeFeatureList;
 import org.chromium.chrome.browser.fullscreen.FullscreenManager;
 import org.chromium.chrome.browser.multiwindow.MultiWindowUtils;
@@ -64,7 +65,7 @@ public class KeyboardShortcuts {
         KeyboardShortcutsSemanticMeaning.NOT_IMPLEMENTED_CLOSE_WINDOW,
         KeyboardShortcutsSemanticMeaning.NOT_IMPLEMENTED_QUIT_CHROME,
         KeyboardShortcutsSemanticMeaning.JUMP_TO_OMNIBOX,
-        KeyboardShortcutsSemanticMeaning.NOT_IMPLEMENTED_JUMP_TO_SEARCH,
+        KeyboardShortcutsSemanticMeaning.JUMP_TO_SEARCH,
         KeyboardShortcutsSemanticMeaning.NOT_IMPLEMENTED_FOCUS_WEB_CONTENTS_PANE,
         KeyboardShortcutsSemanticMeaning.NOT_IMPLEMENTED_SCROLL_DOWN,
         KeyboardShortcutsSemanticMeaning.NOT_IMPLEMENTED_SCROLL_UP,
@@ -81,10 +82,10 @@ public class KeyboardShortcuts {
         KeyboardShortcutsSemanticMeaning.OPEN_BOOKMARKS,
         KeyboardShortcutsSemanticMeaning.BOOKMARK_PAGE,
         KeyboardShortcutsSemanticMeaning.NOT_IMPLEMENTED_BOOKMARK_ALL_TABS,
-        KeyboardShortcutsSemanticMeaning.NOT_IMPLEMENTED_TOGGLE_SHOW_BOOKMARKS_BAR,
+        KeyboardShortcutsSemanticMeaning.TOGGLE_BOOKMARK_BAR,
         KeyboardShortcutsSemanticMeaning.NOT_IMPLEMENTED_TOGGLE_IMMERSIVE,
         KeyboardShortcutsSemanticMeaning.NOT_IMPLEMENTED_EXIT_IMMERSIVE,
-        KeyboardShortcutsSemanticMeaning.NOT_IMPLEMENTED_DEV_TOOLS,
+        KeyboardShortcutsSemanticMeaning.DEV_TOOLS,
         KeyboardShortcutsSemanticMeaning.NOT_IMPLEMENTED_DEV_TOOLS_CONSOLE,
         KeyboardShortcutsSemanticMeaning.NOT_IMPLEMENTED_DEV_TOOLS_INSPECT,
         KeyboardShortcutsSemanticMeaning.NOT_IMPLEMENTED_DEV_TOOLS_TOGGLE,
@@ -138,7 +139,7 @@ public class KeyboardShortcuts {
 
         // Navigation controls.
         int JUMP_TO_OMNIBOX = 16;
-        int NOT_IMPLEMENTED_JUMP_TO_SEARCH = 17;
+        int JUMP_TO_SEARCH = 17;
         int NOT_IMPLEMENTED_FOCUS_WEB_CONTENTS_PANE = 18;
         int NOT_IMPLEMENTED_SCROLL_DOWN = 19;
         int NOT_IMPLEMENTED_SCROLL_UP = 20;
@@ -161,14 +162,14 @@ public class KeyboardShortcuts {
         int OPEN_BOOKMARKS = 31;
         int BOOKMARK_PAGE = 32;
         int NOT_IMPLEMENTED_BOOKMARK_ALL_TABS = 33;
-        int NOT_IMPLEMENTED_TOGGLE_SHOW_BOOKMARKS_BAR = 34;
+        int TOGGLE_BOOKMARK_BAR = 34;
 
         // Fullscreen.
         int NOT_IMPLEMENTED_TOGGLE_IMMERSIVE = 35;
         int NOT_IMPLEMENTED_EXIT_IMMERSIVE = 36;
 
         // Developer tools.
-        int NOT_IMPLEMENTED_DEV_TOOLS = 37;
+        int DEV_TOOLS = 37;
         int NOT_IMPLEMENTED_DEV_TOOLS_CONSOLE = 38;
         int NOT_IMPLEMENTED_DEV_TOOLS_INSPECT = 39;
         int NOT_IMPLEMENTED_DEV_TOOLS_TOGGLE = 40;
@@ -303,9 +304,7 @@ public class KeyboardShortcuts {
             case KeyEvent.KEYCODE_BUTTON_X:
                 return KeyboardShortcutsSemanticMeaning.JUMP_TO_OMNIBOX;
             case CTRL | KeyEvent.KEYCODE_E:
-            case CTRL | KeyEvent.KEYCODE_K:
-                // TODO(crbug.com/402775002): Investigate supporting BROWSER_SEARCH button.
-                return KeyboardShortcutsSemanticMeaning.NOT_IMPLEMENTED_JUMP_TO_SEARCH;
+                return KeyboardShortcutsSemanticMeaning.JUMP_TO_SEARCH;
             case CTRL | KeyEvent.KEYCODE_F6:
                 return KeyboardShortcutsSemanticMeaning.NOT_IMPLEMENTED_FOCUS_WEB_CONTENTS_PANE;
             case KeyEvent.KEYCODE_SPACE:
@@ -355,7 +354,7 @@ public class KeyboardShortcuts {
             case CTRL | SHIFT | KeyEvent.KEYCODE_D:
                 return KeyboardShortcutsSemanticMeaning.NOT_IMPLEMENTED_BOOKMARK_ALL_TABS;
             case CTRL | SHIFT | KeyEvent.KEYCODE_B:
-                return KeyboardShortcutsSemanticMeaning.NOT_IMPLEMENTED_TOGGLE_SHOW_BOOKMARKS_BAR;
+                return KeyboardShortcutsSemanticMeaning.TOGGLE_BOOKMARK_BAR;
 
                 // Fullscreen.
             case KeyEvent.KEYCODE_F11:
@@ -364,7 +363,7 @@ public class KeyboardShortcuts {
 
                 // Developer tools.
             case CTRL | SHIFT | KeyEvent.KEYCODE_I:
-                return KeyboardShortcutsSemanticMeaning.NOT_IMPLEMENTED_DEV_TOOLS;
+                return KeyboardShortcutsSemanticMeaning.DEV_TOOLS;
             case CTRL | SHIFT | KeyEvent.KEYCODE_J:
                 return KeyboardShortcutsSemanticMeaning.NOT_IMPLEMENTED_DEV_TOOLS_CONSOLE;
             case CTRL | SHIFT | KeyEvent.KEYCODE_C:
@@ -596,6 +595,14 @@ public class KeyboardShortcuts {
                 R.string.keyboard_shortcut_open_menu,
                 KeyEvent.KEYCODE_E,
                 KeyEvent.META_ALT_ON);
+        if (BookmarkBarUtils.isFeatureEnabled(context)) {
+            addShortcut(
+                    context,
+                    chromeFeatureShortcutGroup,
+                    R.string.keyboard_shortcut_toggle_bookmark_bar,
+                    KeyEvent.KEYCODE_B,
+                    ctrlShift);
+        }
         addShortcut(
                 context,
                 chromeFeatureShortcutGroup,
@@ -691,14 +698,14 @@ public class KeyboardShortcuts {
     /**
      * This should be called from the Activity's onKeyDown() to handle keyboard shortcuts.
      *
-     * Note: onKeyDown() is called after the active view or web page has had a chance to handle
+     * <p>Note: onKeyDown() is called after the active view or web page has had a chance to handle
      * the key event. So the keys handled here *can* be overridden by any view or web page.
      *
      * @param event The KeyEvent to handle.
      * @param isCurrentTabVisible Whether page-related actions are valid, e.g. reload, zoom in. This
-     *         should be false when in the tab switcher.
+     *     should be false when in the tab switcher.
      * @param tabSwitchingEnabled Whether shortcuts that switch between tabs are enabled (e.g.
-     *         Ctrl+Tab, Ctrl+3).
+     *     Ctrl+Tab, Ctrl+3).
      * @param tabModelSelector The current tab modelSelector.
      * @param menuOrKeyboardActionController Controls keyboard actions.
      * @param toolbarManager Manages the toolbar.
@@ -719,6 +726,7 @@ public class KeyboardShortcuts {
                 && !event.isAltPressed()
                 && keyCode != KeyEvent.KEYCODE_F3
                 && keyCode != KeyEvent.KEYCODE_F5
+                && keyCode != KeyEvent.KEYCODE_F6
                 && keyCode != KeyEvent.KEYCODE_F10
                 && keyCode != KeyEvent.KEYCODE_FORWARD
                 && keyCode != KeyEvent.KEYCODE_REFRESH) {
@@ -762,6 +770,9 @@ public class KeyboardShortcuts {
                 } else {
                     break;
                 }
+            case KeyboardShortcutsSemanticMeaning.DEV_TOOLS:
+                menuOrKeyboardActionController.onMenuOrKeyboardAction(R.id.dev_tools, false);
+                return true;
             case KeyboardShortcutsSemanticMeaning.SAVE_PAGE:
                 menuOrKeyboardActionController.onMenuOrKeyboardAction(R.id.offline_page_id, false);
                 return true;
@@ -775,6 +786,9 @@ public class KeyboardShortcuts {
             case KeyboardShortcutsSemanticMeaning.OPEN_MENU:
                 menuOrKeyboardActionController.onMenuOrKeyboardAction(R.id.show_menu, false);
                 return true;
+            case KeyboardShortcutsSemanticMeaning.TOGGLE_BOOKMARK_BAR:
+                return menuOrKeyboardActionController.onMenuOrKeyboardAction(
+                        R.id.toggle_bookmark_bar, /* fromMenu= */ false);
         }
 
         if (isCurrentTabVisible) {
@@ -830,6 +844,10 @@ public class KeyboardShortcuts {
                     menuOrKeyboardActionController.onMenuOrKeyboardAction(
                             R.id.focus_url_bar, false);
                     return true;
+                case KeyboardShortcutsSemanticMeaning.JUMP_TO_SEARCH:
+                    menuOrKeyboardActionController.onMenuOrKeyboardAction(
+                            R.id.focus_and_clear_url_bar, false);
+                    return true;
                 case KeyboardShortcutsSemanticMeaning.OPEN_BOOKMARKS:
                     menuOrKeyboardActionController.onMenuOrKeyboardAction(
                             R.id.all_bookmarks_menu_id, false);
@@ -880,6 +898,29 @@ public class KeyboardShortcuts {
                 case KeyboardShortcutsSemanticMeaning.OPEN_HELP:
                     menuOrKeyboardActionController.onMenuOrKeyboardAction(R.id.help_id, false);
                     return true;
+                case KeyboardShortcutsSemanticMeaning
+                        .NOT_IMPLEMENTED_KEYBOARD_FOCUS_SWITCH_ROW_OF_TOP_ELEMENTS:
+                    if (ChromeFeatureList.isEnabled(ChromeFeatureList.ANDROID_KEYBOARD_A11Y)) {
+                        // TODO(crbug.com/360423850): Don't allow F6 to be overridden by websites.
+                        return menuOrKeyboardActionController.onMenuOrKeyboardAction(
+                                R.id.switch_keyboard_focus_row, /* fromMenu= */ false);
+                    } else {
+                        return false;
+                    }
+                case KeyboardShortcutsSemanticMeaning.NOT_IMPLEMENTED_KEYBOARD_FOCUS_TOOLBAR:
+                    if (ChromeFeatureList.isEnabled(ChromeFeatureList.ANDROID_KEYBOARD_A11Y)) {
+                        toolbarManager.requestFocus();
+                        return true;
+                    } else {
+                        return false;
+                    }
+                case KeyboardShortcutsSemanticMeaning.NOT_IMPLEMENTED_KEYBOARD_FOCUS_BOOKMARKS:
+                    if (ChromeFeatureList.isEnabled(ChromeFeatureList.ANDROID_KEYBOARD_A11Y)) {
+                        return menuOrKeyboardActionController.onMenuOrKeyboardAction(
+                                R.id.focus_bookmarks, /* fromMenu= */ false);
+                    } else {
+                        return false;
+                    }
             }
         }
 

@@ -95,7 +95,6 @@ Gaan na <ph name="BEGIN_LINK" />Google-dienste<ph name="END_LINK" /> vir meer in
 <translation id="328933489847748230">{count,plural, =1{Wys nou in 1 Chromium-vensters}other{Wys nou in {count} Chromium-vensters}}</translation>
 <translation id="3344973607274501920">Chromium kon nie jou wagwoorde nagaan nie. Probeer jou internetverbinding nagaan.</translation>
 <translation id="3366305173356742781">Chromium-data in jou rekening</translation>
-<translation id="33788334537425157">Skakel “Sluit Incognito-oortjies wanneer jy Chromium toemaak” aan</translation>
 <translation id="3387107508582892610">{THRESHOLD,plural, =1{Dit gebeur wanneer Chromium vir {THRESHOLD} minuut nie gebruik word nie. Dit kan geskiedenis en outovul insluit.}other{Dit gebeur wanneer Chromium vir {THRESHOLD} minute nie gebruik word nie. Dit kan geskiedenis en outovul insluit.}}</translation>
 <translation id="3410395242749598859">Sommige van jou Chromium-data is nog nie in <ph name="EMAIL" /> gestoor nie.
 Probeer om ’n paar minute te wag voordat jy rekeninge wissel. As jy nou rekeninge wissel, sal hierdie data uitgevee word.</translation>
@@ -208,7 +207,6 @@ Dinge om in ag te neem:
    • As jy jou geskiedenis met jou Google-rekening sinkroniseer, kan maatstawwe ook inligting insluit oor URL’e wat jy besoek.<ph name="END_INDENT" /></translation>
 <translation id="5932787118589620366">Vee blaaierdata in Chromium uit.</translation>
 <translation id="593808800391107017">Ontvang waarskuwings oor enige privaatheid- of sekuriteitkwessies wat Chromium outomaties vir jou bespeur.</translation>
-<translation id="5945387852661427312">Jy meld tans aan met 'n rekening wat deur <ph name="DOMAIN" /> bestuur word en gee sy administrateur beheer oor jou Chromium-data. Jou data sal permanent met hierdie rekening verbind word. As jy uit Chromium afmeld, sal jou data van hierdie toestel af uitgevee word, maar dit sal steeds in jou Google-rekening geberg word.</translation>
 <translation id="5951593919357934226">Benut Chromium ten beste.</translation>
 <translation id="5985254578475526217">Skakel kennisgewings in jou iOS-instellings aan om kennisgewings van Chromium af te ontvang.</translation>
 <translation id="6104024151682120539">Maak in Chromium oop</translation>

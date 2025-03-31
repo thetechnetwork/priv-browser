@@ -75,6 +75,9 @@ extern const char kAutofillEnableRankingFormulaAddressProfilesDescription[];
 extern const char kAutofillEnableRankingFormulaCreditCardsName[];
 extern const char kAutofillEnableRankingFormulaCreditCardsDescription[];
 
+extern const char kAutofillEnableSupportForHomeAndWorkName[];
+extern const char kAutofillEnableSupportForHomeAndWorkDescription[];
+
 extern const char kAutofillEnableVerveCardSupportName[];
 extern const char kAutofillEnableVerveCardSupportDescription[];
 
@@ -164,9 +167,6 @@ extern const char kPhoneNumberDescription[];
 
 extern const char kMeasurementsName[];
 extern const char kMeasurementsDescription[];
-
-extern const char kEnableNewParcelTrackingNumberDetectionName[];
-extern const char kEnableNewParcelTrackingNumberDetectionDescription[];
 
 extern const char kEnableExpKitTextClassifierDateName[];
 extern const char kEnableExpKitTextClassifierDateDescription[];
@@ -282,6 +282,9 @@ extern const char kFeedBackgroundRefreshDescription[];
 extern const char kFeedSwipeInProductHelpName[];
 extern const char kFeedSwipeInProductHelpDescription[];
 
+extern const char kFeedbackIncludeVariationsName[];
+extern const char kFeedbackIncludeVariationsDescription[];
+
 extern const char kForceStartupSigninPromoName[];
 extern const char kForceStartupSigninPromoDescription[];
 
@@ -327,9 +330,6 @@ extern const char kIOSBrowserEditMenuMetricsDescription[];
 extern const char kIOSDetectUsernameInUffName[];
 extern const char kIOSDetectUsernameInUffDescription[];
 
-extern const char kIOSDisableParcelTrackingName[];
-extern const char kIOSDisableParcelTrackingDescription[];
-
 extern const char kIOSDockingPromoName[];
 extern const char kIOSDockingPromoDescription[];
 
@@ -359,6 +359,9 @@ extern const char kIOSPasswordBottomSheetAutofocusDescription[];
 
 extern const char kIOSProactivePasswordGenerationBottomSheetName[];
 extern const char kIOSProactivePasswordGenerationBottomSheetDescription[];
+
+extern const char kIOSPromptSearchEngineChoiceAfterDeviceRestoreName[];
+extern const char kIOSPromptSearchEngineChoiceAfterDeviceRestoreDescription[];
 
 extern const char kIOSQuickDeleteName[];
 extern const char kIOSQuickDeleteDescription[];
@@ -466,6 +469,9 @@ extern const char kLensOverlayEnableLocationBarEntrypointOnSRPDescription[];
 
 extern const char kLensOverlayEnableSameTabNavigationName[];
 extern const char kLensOverlayEnableSameTabNavigationDescription[];
+
+extern const char kLensOverlayNavigationHistoryName[];
+extern const char kLensOverlayNavigationHistoryDescription[];
 
 extern const char kLensPrewarmHardStickinessInInputSelectionName[];
 extern const char kLensPrewarmHardStickinessInInputSelectionDescription[];
@@ -612,6 +618,9 @@ extern const char kOptimizationGuidePushNotificationClientDescription[];
 extern const char kOneTapForMapsName[];
 extern const char kOneTapForMapsDescription[];
 
+extern const char kPageActionMenuName[];
+extern const char kPageActionMenuDescription[];
+
 extern const char kPageContentAnnotationsName[];
 extern const char kPageContentAnnotationsDescription[];
 
@@ -657,6 +666,12 @@ extern const char kIPHPriceNotificationsWhileBrowsingDescription[];
 
 extern const char kNotificationSettingsMenuItemName[];
 extern const char kNotificationSettingsMenuItemDescription[];
+
+extern const char kReaderModeDistillerName[];
+extern const char kReaderModeDistillerDescription[];
+
+extern const char kReaderModeDistillerHeuristicName[];
+extern const char kReaderModeDistillerHeuristicDescription[];
 
 // Title and description for the flag to refactor the toolbarsSize.
 extern const char kRefactorToolbarsSizeName[];
@@ -735,6 +750,9 @@ extern const char kShowAutofillTypePredictionsDescription[];
 extern const char kSignInButtonNoAvatarName[];
 extern const char kSignInButtonNoAvatarDescription[];
 
+extern const char kNTPBackgroundCustomizationName[];
+extern const char kNTPBackgroundCustomizationDescription[];
+
 extern const char kSpotlightNeverRetainIndexName[];
 extern const char kSpotlightNeverRetainIndexDescription[];
 
@@ -776,6 +794,9 @@ extern const char kEnableLensViewFinderUnifiedExperienceDescription[];
 
 extern const char kEnableLensContextMenuUnifiedExperienceName[];
 extern const char kEnableLensContextMenuUnifiedExperienceDescription[];
+
+extern const char kExplainGeminiEditMenuName[];
+extern const char kExplainGeminiEditMenuDescription[];
 
 extern const char kTabGridNewTransitionsName[];
 extern const char kTabGridNewTransitionsDescription[];

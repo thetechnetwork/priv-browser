@@ -509,7 +509,6 @@
 <translation id="7787950393032327779">Profiili näyttäisi olevan toisen Google Chrome -prosessin (<ph name="PROCESS_ID" />) käytössä toisella tietokoneella (<ph name="HOST_NAME" />). Chrome on lukinnut profiilin, jotta se ei vioitu. Jos olet varma, että mikään toinen prosessi ei käytä tätä profiilia, voit poistaa profiilin lukituksen ja käynnistää Chromen uudelleen.</translation>
 <translation id="7801699035218095297">Google Chrome yrittää kopioida salasanoja. Salli tämä kirjoittamalla Windows-salasanasi.</translation>
 <translation id="7808348361785373670">Poista Chromesta…</translation>
-<translation id="782480918904119604">Jos haluat käyttää tätä profiilia Glicissä, avaa Chrome ja kirjaudu sisään</translation>
 <translation id="7825851276765848807">Asennus epäonnistui tuntemattoman virheen vuoksi. Lataa Google Chrome uudelleen.</translation>
 <translation id="7845233973568007926">Kiitos asennuksesta. Tietokone pitää käynnistää uudelleen ennen kuin <ph name="BUNDLE_NAME" /> otetaan käyttöön.</translation>
 <translation id="7872446069773932638">Ladataan… <ph name="SECONDS" /> sekuntia jäljellä</translation>
@@ -565,6 +564,7 @@
 <translation id="8516431725144212809">Chromen arvio siitä, mitkä ovat kiinnostuksen kohteitasi</translation>
 <translation id="8521348052903287641">Google Chromen kehittäjäversion saapuvien yhteyksien sääntö, joka sallii mDNS-liikenteen.</translation>
 <translation id="852529348814672339">Näytä Chrome tällä kielellä</translation>
+<translation id="8533056045953418157">Valitse Google Chrome PDF:ien oletuskatseluohjelmaksi</translation>
 <translation id="8550334526674375523">Tämä työprofiili on täysin erillinen henkilökohtaisesta profiilistasi.</translation>
 <translation id="8555465886620020932">Palveluvirhe: <ph name="SERVICE_ERROR" />.</translation>
 <translation id="856656450041460113">Hakukielilista</translation>

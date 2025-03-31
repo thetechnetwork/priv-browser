@@ -9,6 +9,7 @@ found in the LICENSE file.
 <style>
   html {
     height: 100%;
+    background-color: #00ff00;
   }
   body {
     background-color: white;
@@ -34,12 +35,14 @@ found in the LICENSE file.
   }
   .section h1 {
     text-align: center;
-    font-size: 15pt;
+    font-size: 14pt;
     user-select: none;
+    margin: 0.2em;
   }
   .section h2 {
-    font-size: 13pt;
+    font-size: 12pt;
     user-select: none;
+    margin: 0.2em;
   }
   .section {
     background-color: #eee;
@@ -52,13 +55,13 @@ found in the LICENSE file.
   .permission-switch {
     display: flex;
     align-items: center;
-    margin-bottom: 0.5em;
+    margin-bottom: 0.3em;
   }
   .permission-switch label {
     margin-right: 0.5em;
   }
   input[type="text"] {
-    width: 400px;
+    width: 300px;
   }
   img {
     border: thick double black;
@@ -123,6 +126,14 @@ found in the LICENSE file.
     flex-grow: 1;
   }
 
+  *:disabled {
+    pointer-events: none;
+    opacity: 0.6;
+  }
+  fieldset:disabled :is(h1, h2, h3, h4, h5, h6) {
+    text-decoration: line-through;
+  }
+
   /* Dark Mode Styles */
   @media (prefers-color-scheme: dark) {
     body {
@@ -163,55 +174,67 @@ found in the LICENSE file.
   </label>
 </div>
 <div class="section">
-  <h1>Test SetPermissionState() and NotifyPermissionChanged()</h1>
-  <div class="permission-switches">
-    <div class="permission-switch">
-      <label for="microphoneSwitch">Microphone:</label>
-      <input type="checkbox" id="microphoneSwitch" disabled />
-    </div>
-    <div class="permission-switch">
-      <label for="geolocationSwitch">Geolocation:</label>
-      <input type="checkbox" id="geolocationSwitch" disabled />
-    </div>
-    <div class="permission-switch">
-      <label for="tabContextSwitch">Tab Context:</label>
-      <input type="checkbox" id="tabContextSwitch" disabled />
-    </div>
-    <div class="permission-switch">
-      <label for="osGeolocationPermissionSwitch">OS Geolocation:</label>
-      <input type="checkbox" id="osGeolocationPermissionSwitch" disabled />
-    </div>
+  <h1>Chrome Permissions</h1>
+  <div class="permission-switch">
+    <label for="microphoneSwitch">Microphone:</label>
+    <input type="checkbox" id="microphoneSwitch" disabled />
   </div>
-  <div>
-      <button id="getOsMicrophonePermissionButton">Get OS Microphone Permission</button>
-      <span id="osMicrophonePermissionResult"></span>
+  <div class="permission-switch">
+    <label for="geolocationSwitch">Geolocation:</label>
+    <input type="checkbox" id="geolocationSwitch" disabled />
+  </div>
+  <div class="permission-switch">
+    <label for="tabContextSwitch">Tab Context:</label>
+    <input type="checkbox" id="tabContextSwitch" disabled />
+  </div>
+  <select id="permissionSelect">
+    <option value="geolocation">Geolocation</option>
+    <option value="microphone">Microphone</option>
+    <option value="tabContext">Tab Context</option>
+  </select>
+  <select id="enabledSelect">
+    <option value="true">True</option>
+    <option value="false">False</option>
+  </select>
+  <button id="testPermissionSwitch">Simulate External Permission
+    Update</button>
+</div>
+<div class="section">
+  <fieldset id="macOsPermissionsFieldset">
+    <h1>MacOS Permissions</h1>
+    <button id="getOsMicrophonePermissionButton">Get OS Microphone permission state</button>
+    <span id="osMicrophonePermissionResult"></span>
+    <div>
+      <div class="permission-switch">
+        <label for="osGeolocationPermissionSwitch">OS Geolocation:</label>
+        <input type="checkbox" id="osGeolocationPermissionSwitch" disabled />
       </div>
-      <div>
-    <select id="permissionSelect">
-      <option value="geolocation">Geolocation</option>
-      <option value="microphone">Microphone</option>
-      <option value="tabContext">Tab Context</option>
-    </select>
-    <select id="enabledSelect">
-      <option value="true">True</option>
-      <option value="false">False</option>
-    </select>
-    <button id="testPermissionSwitch">Simulate External Permission
-      Update</button>
-    <button id="openSettings">Open Glic Settings</button>
-    <button id="openOsLocationSettings">Open OS Location Settings</button>
-    <button id="openOsMicrophoneSettings">Open OS Microphone Settings</button>
+      <button id="openOsLocationSettings">Open OS Location settings</button>
+      <button id="openOsMicrophoneSettings">Open OS Microphone settings</button>
+    </div>
+  </fieldset>
+</div>
+<div class="section">
+  <h1>Glic Settings</h1>
+  <div>
+    <label for="osGlicHotkey">Current keyboard shortcut:</label>
+    <input type="text" id="osGlicHotkey" name="osGlicHotkey" readonly>
+    <div>
+      <button id="openGlicSettings">Open Glic Settings</button>
+      <br/>
+      <label for="openGlicSettingsHighlight">And highlight field:</label>
+      <select id="openGlicSettingsHighlight">
+        <option value="none">None</option>
+        <option value="osHotkey">Keyboard shortcut</option>
+        <option value="osEntrypointToggle">OS Entrypoint</option>
+      </select>
+    </div>
   </div>
 </div>
 <div class="section">
-  <h1>OS Glic Hotkey</h1>
-  <label for="osGlicHotkey">Hotkey:</label>
-  <input type="text" id="osGlicHotkey" name="osGlicHotkey" readonly>
-  </div>
-  <div class="section">
   <h1>Sizing</h1>
   <button id="enableTestSizingMode">Test Sizing</button>
-  <input id="enableDragResize" type="checkbox">Enable drag resizing</input>
+  <input id="enableDragResizeCheckbox" type="checkbox">Enable drag resizing</input>
 </div>
 <div class="section">
   <h1>State</h1>
@@ -254,16 +277,17 @@ found in the LICENSE file.
   <br />
 </div>
 <div class="section">
-  <h1>Test Panel Controls</h1>
-  <button id="attachpanelbn">Attach Panel</button>
-  <br />
-  <button id="detachpanelbn">Detach Panel</button>
-  <br />
-  <div>
-    <label>Can Attach:
-      <input id="canAttachCheckbox" type="checkbox" disabled>
-    </label>
-  </div>
+  <fieldset id="attachmentControlsFieldset">
+    <h1>Attachment Controls</h1>
+    <div>
+      <label>Can Attach:
+        <input id="canAttachCheckbox" type="checkbox" disabled>
+      </label>
+    </div>
+    <button id="attachpanelbn">Attach Panel</button>
+    &nbsp;
+    <button id="detachpanelbn">Detach Panel</button>
+  </fieldset>
 </div>
 <div class="section">
   <h1>Test getContextFromFocusedTab()</h1>
@@ -271,6 +295,7 @@ found in the LICENSE file.
     <button id="getpagecontext">Get page Context</button>
     <div>
     <label> <input type="checkbox" id="innerTextCheckbox" /> Inner Text </label>
+    <br />
     <label> innerTextBytesLimit: <input id="innerTextBytesLimit" value="100">
     </label>
     </div>
@@ -416,6 +441,20 @@ found in the LICENSE file.
     <p>Microphone access denied by OS. Please enable in OS settings.</p>
     <button id="openOsSettingsButton">Open OS Settings</button>
   </div>
+</div>
+<div class="section">
+  <h1>Test actInFocusedTab()</h1>
+  <div>
+    <button id="executeAction">Execute Action</button>
+    <label> <input type="text" id="actionProtoEncodedText" />
+      Action Proto, base64-encoded from http://shortn/_Iyf96Pob5S
+    </label>
+  </div>
+  <div id="actionUpdatedScreenshot">
+    <img id="actionUpdatedScreenshotImg" />
+  </div>
+  <span id="actionUpdatedContextResult"></span>
+  <span id="actionStatus"></span>
 </div>
 <br />
 <div id="status"></div>

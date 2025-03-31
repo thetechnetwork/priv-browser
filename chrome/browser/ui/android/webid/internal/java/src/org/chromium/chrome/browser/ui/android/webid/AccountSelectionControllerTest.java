@@ -19,7 +19,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import static org.chromium.chrome.browser.ui.android.webid.AccountSelectionProperties.AccountProperties.ACCOUNT;
-import static org.chromium.chrome.browser.ui.android.webid.AccountSelectionProperties.HeaderProperties.IDP_BRAND_ICON;
+import static org.chromium.chrome.browser.ui.android.webid.AccountSelectionProperties.HeaderProperties.HEADER_ICON;
 import static org.chromium.chrome.browser.ui.android.webid.AccountSelectionProperties.HeaderProperties.IDP_FOR_DISPLAY;
 import static org.chromium.chrome.browser.ui.android.webid.AccountSelectionProperties.HeaderProperties.IS_MULTIPLE_ACCOUNT_CHOOSER;
 import static org.chromium.chrome.browser.ui.android.webid.AccountSelectionProperties.HeaderProperties.IS_MULTIPLE_IDPS;
@@ -112,7 +112,7 @@ public class AccountSelectionControllerTest extends AccountSelectionJUnitTestBas
         assertEquals(HeaderType.SIGN_IN, headerModel.get(TYPE));
         assertEquals(mTestEtldPlusOne, headerModel.get(RP_FOR_DISPLAY));
         assertEquals(mTestEtldPlusOne2, headerModel.get(IDP_FOR_DISPLAY));
-        assertNotNull(headerModel.get(IDP_BRAND_ICON));
+        assertNotNull(headerModel.get(HEADER_ICON));
         assertEquals((Integer) mRpMode, headerModel.get(RP_MODE));
         assertFalse(headerModel.get(IS_MULTIPLE_ACCOUNT_CHOOSER));
         assertFalse(headerModel.get(IS_MULTIPLE_IDPS));
@@ -137,7 +137,7 @@ public class AccountSelectionControllerTest extends AccountSelectionJUnitTestBas
         assertEquals(HeaderType.SIGN_IN, headerModel.get(TYPE));
         assertEquals(mTestEtldPlusOne, headerModel.get(RP_FOR_DISPLAY));
         assertEquals(mTestEtldPlusOne2, headerModel.get(IDP_FOR_DISPLAY));
-        assertNotNull(headerModel.get(IDP_BRAND_ICON));
+        assertNotNull(headerModel.get(HEADER_ICON));
         assertEquals((Integer) mRpMode, headerModel.get(RP_MODE));
         assertTrue(headerModel.get(IS_MULTIPLE_ACCOUNT_CHOOSER));
         assertFalse(headerModel.get(IS_MULTIPLE_IDPS));
@@ -168,7 +168,7 @@ public class AccountSelectionControllerTest extends AccountSelectionJUnitTestBas
                 /* newAccounts= */ Collections.EMPTY_LIST);
 
         PropertyModel headerModel = mModel.get(ItemProperties.HEADER);
-        assertNull(headerModel.get(IDP_BRAND_ICON));
+        assertNull(headerModel.get(HEADER_ICON));
     }
 
     @Test
@@ -192,7 +192,9 @@ public class AccountSelectionControllerTest extends AccountSelectionJUnitTestBas
                 Arrays.asList(mIdpData),
                 /* isAutoReauthn= */ false,
                 /* newAccounts= */ Collections.EMPTY_LIST);
-        assertEquals(3, countAllItems()); // Header + two Accounts
+        // Header + two accounts. Also drag handlebar in active mode.
+        int expectedItemCount = mRpMode == RpMode.PASSIVE ? 3 : 4;
+        assertEquals(expectedItemCount, countAllItems());
         assertEquals("Incorrect item sheet count", 2, mSheetAccountItems.size());
     }
 
@@ -204,7 +206,8 @@ public class AccountSelectionControllerTest extends AccountSelectionJUnitTestBas
                 Arrays.asList(mIdpData),
                 /* isAutoReauthn= */ false,
                 /* newAccounts= */ Collections.EMPTY_LIST);
-        assertEquals(3, countAllItems()); // Header + Account + Continue Button
+        // Header + Account + Continue Button. Also drag handlebar in active mode.
+        int expectedItemCount = mRpMode == RpMode.PASSIVE ? 3 : 4;
         assertEquals(1, mSheetAccountItems.size());
         assertEquals(
                 "Incorrect account", mAnaAccount, mSheetAccountItems.get(0).model.get(ACCOUNT));
@@ -216,7 +219,8 @@ public class AccountSelectionControllerTest extends AccountSelectionJUnitTestBas
                 Arrays.asList(mIdpData),
                 /* isAutoReauthn= */ false,
                 /* newAccounts= */ Collections.EMPTY_LIST);
-        assertEquals(3, countAllItems()); // Header + Account + Continue Button
+        // Header + Account + Continue Button. Also drag handlebar in active mode.
+        assertEquals(expectedItemCount, countAllItems());
         assertEquals(1, mSheetAccountItems.size());
         assertEquals(
                 "Incorrect account", mBobAccount, mSheetAccountItems.get(0).model.get(ACCOUNT));
@@ -434,8 +438,10 @@ public class AccountSelectionControllerTest extends AccountSelectionJUnitTestBas
                 Arrays.asList(mIdpData),
                 /* isAutoReauthn= */ false,
                 /* newAccounts= */ Collections.EMPTY_LIST);
-        // For new user we expect header + account + consent text + continue btn
-        assertEquals(4, countAllItems());
+        // For new user we expect header + account + consent text + continue btn. Also drag
+        // handlebar in active mode.
+        int expectedItemCount = mRpMode == RpMode.PASSIVE ? 4 : 5;
+        assertEquals(expectedItemCount, countAllItems());
         assertEquals("Incorrect item sheet count", 1, mSheetAccountItems.size());
         assertTrue(containsItemOfType(mModel, ItemProperties.DATA_SHARING_CONSENT));
 
@@ -466,8 +472,10 @@ public class AccountSelectionControllerTest extends AccountSelectionJUnitTestBas
                 Arrays.asList(mIdpData),
                 /* isAutoReauthn= */ false,
                 /* newAccounts= */ Collections.EMPTY_LIST);
-        // Because disclosureFields are empty, we expect header + account + continue btn
-        assertEquals(3, countAllItems());
+        // Because disclosureFields are empty, we expect header + account + continue btn, and drag
+        // handlebar in active mode.
+        int expectedItemCount = mRpMode == RpMode.PASSIVE ? 3 : 4;
+        assertEquals(expectedItemCount, countAllItems());
         assertEquals("Incorrect item sheet count", 1, mSheetAccountItems.size());
         assertFalse(containsItemOfType(mModel, ItemProperties.DATA_SHARING_CONSENT));
     }
@@ -501,8 +509,10 @@ public class AccountSelectionControllerTest extends AccountSelectionJUnitTestBas
             assertEquals(
                     HeaderType.SIGN_IN_TO_IDP_STATIC, mModel.get(ItemProperties.HEADER).get(TYPE));
             verify(mMockDelegate, never()).onAccountsDisplayed();
-            // For failure dialog, we expect header + IDP sign in text + continue btn
-            assertEquals(3, countAllItems());
+            // For failure dialog, we expect header + IDP sign in text + continue btn, and drag
+            // handlebar in active mode.
+            int expectedItemCount = mRpMode == RpMode.PASSIVE ? 3 : 4;
+            assertEquals(expectedItemCount, countAllItems());
             assertTrue(containsItemOfType(mModel, ItemProperties.IDP_SIGNIN));
 
             String idpEtldPlusOne =
@@ -781,11 +791,14 @@ public class AccountSelectionControllerTest extends AccountSelectionJUnitTestBas
                 /* isAutoReauthn= */ false,
                 /* newAccounts= */ Collections.EMPTY_LIST);
 
+        // Dragbar should be shown when multiple identity providers are shown.
+        assertTrue(mModel.get(ItemProperties.DRAGBAR_HANDLE_VISIBLE));
+
         PropertyModel headerModel = mModel.get(ItemProperties.HEADER);
         assertEquals(HeaderType.SIGN_IN, headerModel.get(TYPE));
         assertEquals(mTestEtldPlusOne, headerModel.get(RP_FOR_DISPLAY));
         assertNull(headerModel.get(IDP_FOR_DISPLAY));
-        assertNull(headerModel.get(IDP_BRAND_ICON));
+        assertNull(headerModel.get(HEADER_ICON));
         assertEquals((Integer) mRpMode, headerModel.get(RP_MODE));
         assertTrue(headerModel.get(IS_MULTIPLE_ACCOUNT_CHOOSER));
         assertTrue(headerModel.get(IS_MULTIPLE_IDPS));
@@ -832,11 +845,14 @@ public class AccountSelectionControllerTest extends AccountSelectionJUnitTestBas
                 .model
                 .get(AccountProperties.ON_CLICK_LISTENER)
                 .onResult(new ButtonData(mNewUserAccount, /* idpMetadata= */ null));
+
+        // Dragbar no longer shown since only one account is being shown!
+        assertFalse(mModel.get(ItemProperties.DRAGBAR_HANDLE_VISIBLE));
         headerModel = mModel.get(ItemProperties.HEADER);
         assertEquals(HeaderType.SIGN_IN, headerModel.get(TYPE));
         assertEquals(mTestEtldPlusOne, headerModel.get(RP_FOR_DISPLAY));
         assertEquals(mTestEtldPlusOne2, headerModel.get(IDP_FOR_DISPLAY));
-        assertNotNull(headerModel.get(IDP_BRAND_ICON));
+        assertNotNull(headerModel.get(HEADER_ICON));
         assertFalse(headerModel.get(IS_MULTIPLE_ACCOUNT_CHOOSER));
         assertFalse(headerModel.get(IS_MULTIPLE_IDPS));
         // Should show continue button with the single account.
@@ -850,11 +866,13 @@ public class AccountSelectionControllerTest extends AccountSelectionJUnitTestBas
         // Go back should show multiple IDP UI again.
         pressBack();
         assertFalse(mMediator.wasDismissed());
+        // Dragbar shown again since we should be back to the multi IDP dialog.
+        assertTrue(mModel.get(ItemProperties.DRAGBAR_HANDLE_VISIBLE));
         headerModel = mModel.get(ItemProperties.HEADER);
         assertEquals(HeaderType.SIGN_IN, headerModel.get(TYPE));
         assertEquals(mTestEtldPlusOne, headerModel.get(RP_FOR_DISPLAY));
         assertNull(headerModel.get(IDP_FOR_DISPLAY));
-        assertNull(headerModel.get(IDP_BRAND_ICON));
+        assertNull(headerModel.get(HEADER_ICON));
         assertTrue(headerModel.get(IS_MULTIPLE_ACCOUNT_CHOOSER));
         assertTrue(headerModel.get(IS_MULTIPLE_IDPS));
         assertEquals("Incorrect item sheet count", 4, mSheetAccountItems.size());

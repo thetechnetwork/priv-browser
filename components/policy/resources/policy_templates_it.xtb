@@ -277,6 +277,7 @@ Per ulteriori informazioni sulla gestione dei dati per le funzionalità di AI ge
 <translation id="1214942205301731697">Non consentire l'utilizzo della modalità sviluppatore nella pagina delle estensioni</translation>
 <translation id="1216919699175573511">Attiva il supporto per Signed HTTP Exchange (SXG)</translation>
 <translation id="1219027971768347970">Utilizza la configurazione predefinita per la sandbox audio</translation>
+<translation id="1219036692926668273">Utilizzo dell'algoritmo <ph name="HAPPY_EYEBALLS_V3" />.</translation>
 <translation id="1221359380862872747">Carica gli URL specificati all'accesso demo</translation>
 <translation id="1221955019309484560">Attiva gli aggiornamenti per tutti i componenti</translation>
 <translation id="1222694988453895594">Consente di impostare un elenco di protocolli, e per ogni protocollo un elenco associato di pattern di origini consentite, che possono lanciare un'applicazione esterna senza chiedere conferma all'utente. Il separatore finale non deve essere incluso nell'elenco di protocolli, quindi usa "skype" anziché "skype:" o "skype://".
@@ -385,15 +386,6 @@ Per ulteriori informazioni sui contesti sicuri, visita il sito Secure Contexts: 
 <translation id="1305400589435476516">Se la policy viene impostata su Attivata, il roaming dei dati è consentito per il dispositivo.
 
       Se viene impostata su Disattivata o se non viene configurata, il roaming dei dati non è disponibile.</translation>
-<translation id="1308526987406924874">Se la policy viene configurata, puoi elencare i pattern URL che specificano i siti che non possono chiedere agli utenti l'autorizzazione di accesso a una porta seriale.
-
-      Se la policy non viene configurata, <ph name="DEFAULT_SERIAL_GUARD_SETTING_POLICY_NAME" /> si applica per tutti i siti, se impostata. In caso contrario, viene applicata l'impostazione personale dell'utente.
-
-      Per i pattern URL che non presentano corrispondenze con la policy <ph name="SERIAL_ASK_FOR_URLS_POLICY_NAME" /> (se una corrispondenza è presente), <ph name="DEFAULT_SERIAL_GUARD_SETTING_POLICY_NAME" /> (se configurata) o le impostazioni personali degli utenti hanno la precedenza in questo ordine.
-
-      I pattern URL non possono essere in conflitto con <ph name="SERIAL_ASK_FOR_URLS_POLICY_NAME" />. Nessuna policy ha la precedenza se un URL presenta corrispondenze con entrambe.
-
-      Per informazioni dettagliate sui pattern <ph name="URL_LABEL" /> validi, visita la pagina https://cloud.google.com/docs/chrome-enterprise/policies/url-patterns. <ph name="WILDCARD_VALUE" /> non è un valore accettato per questa policy.</translation>
 <translation id="1309259005392595570">Disattiva l'accordo chiave post-quantistico per TLS</translation>
 <translation id="1309465583050255779">Se la policy <ph name="DEFAULT_SEARCH_PROVIDER_ENABLED_POLICY_NAME" /> è attiva, l'assegnazione di un valore alla policy <ph name="DEFAULT_SEARCH_PROVIDER_NAME_POLICY_NAME" /> consente di specificare il nome del provider di ricerca predefinito.
 
@@ -611,7 +603,6 @@ la modifica della password, ma può essere applicata in modo forzato anche da de
 <translation id="143649776386947790">Usa il comportamento predefinito</translation>
 <translation id="1438739959477268107">Impostazione generazione di chiavi predefinite</translation>
 <translation id="1440408958042020947">Consente agli utenti che hanno attivato Phone Hub di accedere a foto e video recenti acquisiti sul loro telefono</translation>
-<translation id="1442458649848299896">Attiva il controllo dell'implementazione della riduzione di <ph name="AL_HEADER_NAME" /> mediante prove sul campo</translation>
 <translation id="1443532790824582949">Attiva la tastiera virtuale touch</translation>
 <translation id="1449083855104537880">Se la policy è impostata su True, le opzioni di accessibilità vengono mostrate nel menu della barra delle applicazioni. Se la policy è impostata su False, le opzioni non appaiono nel menu.
 
@@ -852,6 +843,7 @@ Se questa policy non viene configurata, gli utenti potranno aggiungere eccezioni
       Se la policy non viene configurata per un sito, la policy di <ph name="DEFAULT_WINDOW_PLACEMENT_SETTING_POLICY_NAME" /> viene applicata al sito, se configurata, altrimenti l'autorizzazione seguirà le impostazioni predefinite del browser e consentirà agli utenti di scegliere se concedere o meno l'autorizzazione per ciascun sito.</translation>
 <translation id="1574258262373444557">Non usare <ph name="AES_KL_NAME" /> come algoritmo di crittografia per la crittografia dello spazio di archiviazione degli utenti</translation>
 <translation id="1575015449587326319">Policy di configurazione per il connettore OnFileDownloaded di Chrome Enterprise</translation>
+<translation id="1576797364335927541">Disattiva <ph name="ALR_FEATURE_NAME" /></translation>
 <translation id="1577162851453388235">L'API Direct Sockets consente la comunicazione con endpoint arbitrari che utilizzano TCP e UDP.
 Visita la pagina https://github.com/WICG/direct-sockets per informazioni dettagliate.
 
@@ -2305,6 +2297,15 @@ Per ulteriori informazioni sulla gestione dei dati per le funzionalità di AI ge
 <translation id="2608535066974278204">Il periodo di tempo (in minuti) che specifica la durata dell'intervallo di tempo per il riavvio.</translation>
 <translation id="2608887839902987727">Impedisci all'autenticazione captive portal di ignorare le impostazioni del proxy</translation>
 <translation id="2608985885792348429">Impostazione relativa agli appunti predefinita</translation>
+<translation id="2613388238625781546">Per motivi di privacy, è prevista la riduzione dell'intestazione della richiesta HTTP <ph name="AL_HEADER_NAME" /> e del getter <ph name="JS_GETTER_NAME" /> di JavaScript.
+Per semplificare i test e garantire la compatibilità, questo criterio consente di attivare o disattivare la funzionalità <ph name="ALR_FEATURE_NAME" />.
+
+Se questa policy viene impostata su Attivata o se non viene configurata, <ph name="ALR_FEATURE_NAME" /> verrà applicata tramite prove sul campo.
+Se questa policy viene disattivata, le prove sul campo non potranno attivare <ph name="ALR_FEATURE_NAME" />.
+
+Per saperne di più su questa funzionalità, visita la pagina: https://github.com/explainers-by-googlers/reduce-accept-language.
+
+NOTA: le modifiche apportate a questa policy verranno applicate soltanto ai processi del renderer appena avviati mentre il browser è in esecuzione.</translation>
 <translation id="2613493229743687635">L'API <ph name="GET_ALL_SCREENS_MEDIA_NAME" /> consente alle applicazioni web isolate (identificate in base alla loro origine) di acquisire più piattaforme contemporaneamente senza ulteriore autorizzazione dell'utente.
       Se la policy non viene configurata, <ph name="GET_ALL_SCREENS_MEDIA_NAME" /> non è disponibile per alcuna applicazione web.
 Per migliorare la privacy, questa policy non supporterà gli aggiornamenti a metà sessione del valore della policy, pertanto le modifiche verranno applicate solo dopo che l'utente si è disconnesso e ha eseguito nuovamente l'accesso.
@@ -2868,15 +2869,6 @@ Nota: per esempi più dettagliati, consulta la pagina The Chromium Projects (htt
 Questa norma è facoltativa. Se non viene impostata, non verrà effettuata alcuna sostituzione dei termini di ricerca.
 
 Questa norma viene rispettata soltanto se viene attivata la norma "DefaultSearchProviderEnabled".</translation>
-<translation id="3049115011983576556">Se la policy viene configurata, puoi elencare i pattern URL che specificano i siti che possono chiedere agli utenti l'autorizzazione di accesso a una porta seriale.
-
-      Se la policy non viene configurata, <ph name="DEFAULT_SERIAL_GUARD_SETTING_POLICY_NAME" /> si applica per tutti i siti, se impostata. In caso contrario, vengono applicate le impostazioni personali degli utenti.
-
-      Per i pattern URL che non presentano corrispondenze con la policy <ph name="SERIAL_BLOCKED_FOR_URLS_POLICY_NAME" /> (se una corrispondenza è presente), <ph name="DEFAULT_SERIAL_GUARD_SETTING_POLICY_NAME" /> (se configurata) o le impostazioni personali degli utenti hanno la precedenza in questo ordine.
-
-      I pattern URL non devono essere in conflitto con <ph name="SERIAL_BLOCKED_FOR_URLS_POLICY_NAME" />. Nessuna policy ha la precedenza se un URL presenta corrispondenze con entrambe.
-
-      Per informazioni dettagliate sui pattern <ph name="URL_LABEL" /> validi, visita la pagina https://cloud.google.com/docs/chrome-enterprise/policies/url-patterns. <ph name="WILDCARD_VALUE" /> non è un valore accettato per questa policy.</translation>
 <translation id="305106159605171619">Riduzione dello user agent disattivata e non attivata da Field-Trials o Origin-Trials.</translation>
 <translation id="3053265701996417839">Microsoft Windows 7</translation>
 <translation id="3057459316145779761">Non consentire l'utilizzo di Chrome for Testing</translation>
@@ -3301,15 +3293,6 @@ Se viene disattivata, la funzionalità di scrittura predittiva sulla tastiera fi
 <translation id="3387999258705169775">Comportamento predefinito per il blocco nidificato della funzione setTimeout().</translation>
 <translation id="3388628790024977864">Non consentire il flusso <ph name="CLOUD_UPLOAD_NAME" /> per <ph name="GOOGLE_DRIVE_NAME" /> e <ph name="GOOGLE_WORKSPACE_NAME" /></translation>
 <translation id="3389088527709746815">Attiva l'autenticazione Gnubby per l'host di accesso remoto</translation>
-<translation id="3394895899282672754">Per motivi di privacy, è prevista la riduzione dell'intestazione della richiesta HTTP <ph name="AL_HEADER_NAME" /> e del getter <ph name="JS_GETTER_NAME" /> di JavaScript.
-Per semplificare i test e garantire la compatibilità, questa policy consente di attivare o disattivare questa implementazione della riduzione.
-
-Se questa policy viene impostata su Attivata o se non viene configurata, l'implementazione della riduzione di <ph name="AL_HEADER_NAME" /> verrà applicata tramite prove sul campo.
-Se questa policy viene disattivata, le prove sul campo non potranno attivare l'implementazione della riduzione.
-
-Per saperne di più su questa funzionalità, visita la pagina: https://github.com/explainers-by-googlers/reduce-accept-language.
-
-NOTA: le modifiche apportate a questa policy verranno applicate soltanto ai processi del renderer appena avviati mentre il browser è in esecuzione.</translation>
 <translation id="3395744872155955051">Consenti di scegliere i file direttamente da <ph name="GOOGLE_DRIVE_NAME" /></translation>
 <translation id="3397883909301547525">Non mostrare consigli delle app in Avvio app di <ph name="PRODUCT_OS_NAME" /></translation>
 <translation id="3398051852031115795">Comportamento predefinito del sistema (dipende dalle dimensioni dello schermo)</translation>
@@ -4575,6 +4558,27 @@ Se la policy non viene configurata, si applica la policy <ph name="ASK_GEOLOCATI
 <translation id="4311195029067684288">Full</translation>
 <translation id="4311662690937656540">Applica in modo forzato gli accessi online nelle schermate di accesso e di blocco</translation>
 <translation id="4313767483634435271">Indirizzo MAC designato del dock del dispositivo</translation>
+<translation id="4313778862255986189">Questa è una funzionalità beta. Poiché si tratta di una funzionalità in fase di sviluppo, disponibile per i nostri trusted tester, tieni presente che potrebbe subire modifiche e aggiornamenti.
+
+Questa policy consente agli amministratori di impostare un aggregatore di ricerca aziendale designato che fornirà consigli e risultati di ricerca nella barra degli indirizzi quando viene attivato da una parola chiave specifica. Gli utenti possono avviare una ricerca digitando nella barra degli indirizzi la parola chiave specificata nel campo <ph name="SHORTCUT_SEARCH_AGGREGATOR_SETTINGS_FIELD" /> con o senza il prefisso @ (ad es. <ph name="SHORTCUT_EXAMPLE_SEARCH_AGGREGATOR_SETTINGS" />) e premendo la barra spaziatrice o il tasto Tab.
+
+I seguenti campi sono obbligatori: <ph name="NAME_SEARCH_AGGREGATOR_SETTINGS_FIELD" />, <ph name="SHORTCUT_SEARCH_AGGREGATOR_SETTINGS_FIELD" />, <ph name="SEARCH_URL_SEARCH_AGGREGATOR_SETTINGS_FIELD" />, <ph name="SUGGEST_URL_SEARCH_AGGREGATOR_SETTINGS_FIELD" />.
+
+Il campo <ph name="NAME_SEARCH_AGGREGATOR_SETTINGS_FIELD" /> corrisponde al nome del motore di ricerca mostrato all'utente nella barra degli indirizzi.
+
+Il campo <ph name="SHORTCUT_SEARCH_AGGREGATOR_SETTINGS_FIELD" /> corrisponde alla parola chiave inserita dall'utente per attivare la ricerca. La scorciatoia può includere parole e caratteri semplici, ma non può includere spazi o iniziare con il simbolo @. Le scorciatoie devono essere univoche.
+
+Il campo <ph name="SEARCH_URL_SEARCH_AGGREGATOR_SETTINGS_FIELD" /> specifica l'URL in cui cercare. Inserisci l'indirizzo web della pagina dei risultati del motore di ricerca e usa <ph name="SEARCH_TERM_MARKER" /> al posto della query.
+
+Il campo <ph name="SUGGEST_URL_SEARCH_AGGREGATOR_SETTINGS_FIELD" /> specifica l'URL che fornisce suggerimenti di ricerca. Se <ph name="SUGGEST_URL_SEARCH_AGGREGATOR_SETTINGS_FIELD" /> contiene <ph name="SEARCH_TERM_MARKER" />, Chrome otterrà i suggerimenti di ricerca tramite una richiesta GET all'URL sostituendo <ph name="SEARCH_TERM_MARKER" /> con la query di ricerca dell'utente. In caso contrario, verrà eseguita una richiesta POST e la query dell'utente verrà inserita nei parametri POST sotto la chiave <ph name="SEARCH_SUGGEST_POST_PARAMS_QUERY_KEY" />.
+
+Il campo <ph name="ICON_URL_SEARCH_AGGREGATOR_SETTINGS_FIELD" /> specifica l'URL di un'immagine che verrà utilizzata nei suggerimenti di ricerca. Se questo campo non viene impostato, verrà utilizzata un'icona predefinita. Consigliamo di utilizzare una favicon (ad esempio <ph name="ICON_URL_EXAMPLE" />). Formati di file immagine supportati: JPEG, PNG e ICO.
+
+Il campo <ph name="REQUIRE_SHORTCUT_SEARCH_AGGREGATOR_SETTINGS_FIELD" /> specifica se la barra degli indirizzi <ph name="SHORTCUT_SEARCH_AGGREGATOR_SETTINGS_FIELD" /> è obbligatoria per visualizzare i suggerimenti di ricerca. Se questo campo non viene impostato, la barra degli indirizzi <ph name="SHORTCUT_SEARCH_AGGREGATOR_SETTINGS_FIELD" /> non è obbligatoria.
+
+Su <ph name="MS_WIN_NAME" />, questa policy è disponibile soltanto per le istanze che sono aggiunte a un dominio <ph name="MS_AD_NAME" />, aggiunte a <ph name="MS_AAD_NAME" /> o registrate in <ph name="CHROME_ENTERPRISE_CORE_NAME" />.
+
+Su <ph name="MAC_OS_NAME" />, questa policy è disponibile soltanto per le istanze che sono gestite tramite MDM, aggiunte a un dominio tramite MCX o registrate in <ph name="CHROME_ENTERPRISE_CORE_NAME" />.</translation>
 <translation id="4314538398999793073">Disattiva ricerca CNAME durante l'autenticazione Kerberos</translation>
 <translation id="4320592646346933548">Wi-Fi</translation>
 <translation id="43213511254881626">Questa policy consente di stabilire se il gestore delle password integrato può eliminare le password non decifrabili dal relativo database. Questa operazione è necessaria per ripristinare la funzionalità completa del gestore delle password integrato, ma potrebbe comportare la perdita definitiva dei dati. I valori delle password non decifrabili non diventeranno decifrabili da soli e, se è possibile correggerli, in genere sono necessarie azioni complesse da parte dell'utente.
@@ -4642,8 +4646,6 @@ Nota: questa policy comporta il ritiro della policy <ph name="ARC_GLS_POLICY_NAM
 <translation id="4380159792986204036">Consenti a un'app web kiosk di aprire più di una finestra del browser in qualsiasi schermata</translation>
 <translation id="4381227367939912539">Viene disattivato il gioco del dinosauro</translation>
 <translation id="4382413175336720282">Controllo degli URL in tempo reale disattivato.</translation>
-<translation id="4384480363454039240">Se la policy non viene configurata o se viene impostata su Attivata, gli utenti potranno monitorare i propri pacchetti su <ph name="PRODUCT_NAME" /> tramite la pagina Nuova scheda.
-Se viene disattivata, gli utenti non possono monitorare i loro pacchetti su <ph name="PRODUCT_NAME" /> tramite la pagina Nuova scheda.</translation>
 <translation id="4387741272680827493">La configurazione della policy consente di specificare un elenco di nomi host che ignorano gli upgrade HSTS precaricati da http a https.
 
       In questa policy sono consentiti soltanto i nomi host con etichetta singola e questa policy si applica soltanto alle voci HSTS precaricate "statiche" (ad esempio <ph name="EXAMPLE_HSTS_PRELOAD_TLDS" />). Questa policy non impedisce gli upgrade HSTS per i server che hanno richiesto "in modo dinamico" tali upgrade usando un'intestazione della risposta <ph name="HSTS_HEADER_NAME" />.
@@ -4770,27 +4772,6 @@ Questa policy viene sempre applicata per <ph name="PRODUCT_OS_NAME" />.</transla
       Per informazioni dettagliate sui pattern <ph name="URL_LABEL" /> validi, visita la pagina https://cloud.google.com/docs/chrome-enterprise/policies/url-patterns. <ph name="WILDCARD_VALUE" /> non è un valore accettato per questa policy.</translation>
 <translation id="4480694116501920047">Forza SafeSearch</translation>
 <translation id="4481202456143946404">La versione valida dei Termini di servizio recuperata da Google3 CL che ha introdotto la nuova versione dei Termini.</translation>
-<translation id="4481804933320714808">Questa è una funzionalità beta. Poiché si tratta di una funzionalità in fase di sviluppo, disponibile per i nostri trusted tester, tieni presente che potrebbe subire modifiche e aggiornamenti.
-
-Questa policy consente agli amministratori di impostare un aggregatore di ricerca aziendale designato che fornirà consigli e risultati di ricerca nella barra degli indirizzi quando viene attivato da una parola chiave specifica. Gli utenti possono avviare una ricerca digitando nella barra degli indirizzi la parola chiave specificata nel campo <ph name="SHORTCUT_SEARCH_AGGREGATOR_SETTINGS_FIELD" /> con o senza il prefisso @ (ad es. <ph name="SHORTCUT_EXAMPLE_SEARCH_AGGREGATOR_SETTINGS" />) e premendo la barra spaziatrice o il tasto Tab.
-
-I seguenti campi sono obbligatori: <ph name="NAME_SEARCH_AGGREGATOR_SETTINGS_FIELD" />, <ph name="SHORTCUT_SEARCH_AGGREGATOR_SETTINGS_FIELD" />, <ph name="SEARCH_URL_SEARCH_AGGREGATOR_SETTINGS_FIELD" />, <ph name="SUGGEST_URL_SEARCH_AGGREGATOR_SETTINGS_FIELD" />.
-
-Il campo <ph name="NAME_SEARCH_AGGREGATOR_SETTINGS_FIELD" /> corrisponde al nome del motore di ricerca mostrato all'utente nella barra degli indirizzi.
-
-Il campo <ph name="SHORTCUT_SEARCH_AGGREGATOR_SETTINGS_FIELD" /> corrisponde alla parola chiave inserita dall'utente per attivare la ricerca. La scorciatoia può includere parole e caratteri semplici, ma non può includere spazi o iniziare con il simbolo @. Le scorciatoie devono essere univoche.
-
-Il campo <ph name="SEARCH_URL_SEARCH_AGGREGATOR_SETTINGS_FIELD" /> specifica l'URL in cui cercare. Inserisci l'indirizzo web della pagina dei risultati del motore di ricerca e usa <ph name="SEARCH_TERM_MARKER" /> al posto della query.
-
-Il campo <ph name="SUGGEST_URL_SEARCH_AGGREGATOR_SETTINGS_FIELD" /> specifica l'URL che fornisce suggerimenti di ricerca. Se <ph name="SUGGEST_URL_SEARCH_AGGREGATOR_SETTINGS_FIELD" /> contiene <ph name="SEARCH_TERM_MARKER" />, Chrome otterrà i suggerimenti di ricerca tramite una richiesta GET all'URL sostituendo <ph name="SEARCH_TERM_MARKER" /> con la query di ricerca dell'utente. In caso contrario, verrà eseguita una richiesta POST e la query dell'utente verrà inserita nei parametri POST sotto la chiave <ph name="SEARCH_SUGGEST_POST_PARAMS_QUERY_KEY" />.
-
-Il campo <ph name="ICON_URL_SEARCH_AGGREGATOR_SETTINGS_FIELD" /> specifica l'URL di un'immagine che verrà utilizzata nei suggerimenti di ricerca. Se questo campo non viene impostato, verrà utilizzata un'icona predefinita. Consigliamo di utilizzare una favicon (ad esempio <ph name="ICON_URL_EXAMPLE" />).
-
-Il campo <ph name="REQUIRE_SHORTCUT_SEARCH_AGGREGATOR_SETTINGS_FIELD" /> specifica se la barra degli indirizzi <ph name="SHORTCUT_SEARCH_AGGREGATOR_SETTINGS_FIELD" /> è obbligatoria per visualizzare i suggerimenti di ricerca. Se questo campo non viene impostato, la barra degli indirizzi <ph name="SHORTCUT_SEARCH_AGGREGATOR_SETTINGS_FIELD" /> non è obbligatoria.
-
-Su <ph name="MS_WIN_NAME" />, questa policy è disponibile soltanto per le istanze che sono aggiunte a un dominio <ph name="MS_AD_NAME" />, aggiunte a <ph name="MS_AAD_NAME" /> o registrate in <ph name="CHROME_ENTERPRISE_CORE_NAME" />.
-
-Su <ph name="MAC_OS_NAME" />, questa policy è disponibile soltanto per le istanze che sono gestite tramite MDM, aggiunte a un dominio tramite MCX o registrate in <ph name="CHROME_ENTERPRISE_CORE_NAME" />.</translation>
 <translation id="4481952213163895432">Disattiva l'hotword per l'Assistente Google</translation>
 <translation id="4482784169143060077">Attiva gli upgrade a HTTPS automatici</translation>
 <translation id="4483120730995943109">La funzione JavaScript setTimeout() con un timeout di 0 ms non verrà impostata su 1 ms.</translation>
@@ -5838,13 +5819,19 @@ Se questa policy non viene configurata o se l'elenco non contiene riferimenti a 
       Durante questo periodo di tempo l'utente verrà informato più volte della necessità di un aggiornamento. Per quanto riguarda i dispositivi <ph name="PRODUCT_OS_NAME" />, nella barra delle applicazioni viene mostrata una notifica relativa al riavvio in base alla policy <ph name="RELAUNCH_HEADS_UP_PERIOD_POLICY_NAME" />. Per quanto riguarda i browser <ph name="PRODUCT_NAME" />, il menu delle app cambia per indicare che è necessario il riavvio una volta trascorso un terzo del periodo di notifica. Questa notifica cambia colore una volta trascorsi due terzi del periodo di notifica e lo cambia di nuovo al termine dell'intero periodo di notifica. Le notifiche aggiuntive attivate in base alla policy <ph name="RELAUNCH_NOTIFICATION_POLICY_NAME" /> seguono questa stessa pianificazione.
 
       Se la policy non viene impostata, viene usato il periodo predefinito di 604800000 millisecondi (una settimana).</translation>
+<translation id="5212140720192262527">Questa funzionalità consente all'algoritmo <ph name="HAPPY_EYEBALLS_V3" /> di effettuare tentativi di connessione. Per i dettagli, visita la pagina https://datatracker.ietf.org/doc/draft-pauly-happy-happyeyeballs-v3.
+
+Se la policy viene attivata, <ph name="PRODUCT_NAME" /> utilizzerà l'algoritmo <ph name="HAPPY_EYEBALLS_V3" /> per i tentativi di connessione.
+
+Se viene disattivata, l'algoritmo <ph name="HAPPY_EYEBALLS_V3" /> verrà disattivato.
+
+Se non configuri la policy, <ph name="PRODUCT_NAME" /> attiverà o disattiverà l'algoritmo <ph name="HAPPY_EYEBALLS_V3" /> in base all'indirizzo chrome://flags/#happy-eyeballs-v3.
+
+Questa policy supporta l'aggiornamento dinamico.
+
+Si tratta di una misura temporanea e verrà rimossa nelle future versioni di <ph name="PRODUCT_NAME" />.</translation>
 <translation id="5212810195096589189">Specifica l'autorizzazione per l'interfaccia a riga di comando delle macchine virtuali</translation>
 <translation id="5213038356678567351">Siti web che non devono mai attivare il cambio di browser.</translation>
-<translation id="5216520638921067085">Specifica l'età minima della release oltre la quale le notifiche di riavvio sono più aggressive. La durata viene calcolata a partire dall'ultima volta che la versione attualmente in esecuzione è stata pubblicata ai client.
-
-Se è in attesa una nuova versione, è necessario riavviare il browser o il dispositivo e la versione corrente è stata sostituita per più del numero di giorni specificato da questa impostazione, il criterio <ph name="RELAUNCH_NOTIFICATION_PERIOD_POLICY_NAME" /> viene forzato su 2 ore. Se il criterio <ph name="RELAUNCH_NOTIFICATION_POLICY_NAME" /> viene impostato su 1 (obbligatorio), gli utenti saranno costretti a riavviare o ricominciare alla fine del periodo.
-
-Se non viene configurato o se l'età della release non può essere determinata, il criterio <ph name="RELAUNCH_NOTIFICATION_PERIOD_POLICY_NAME" /> verrà utilizzato per tutti gli aggiornamenti.</translation>
 <translation id="5216815237712190041">Configura l'immagine di sfondo a livello di dispositivo da mostrare nella schermata di accesso se ancora nessun utente ha effettuato l'accesso al dispositivo. La policy viene impostata specificando l'URL da cui il dispositivo ChromeOS può scaricare l'immagine di sfondo e un hash crittografico utilizzato per verificare l'integrità del download. L'immagine deve essere in formato JPEG e avere dimensioni non superiori a 16 MB. L'URL deve essere accessibile senza autenticazione. L'immagine di sfondo viene scaricata e memorizzata nella cache. Verrà scaricata nuovamente ogni volta che l'URL o l'hash cambiano.
 
       Se la policy dello sfondo del dispositivo viene configurata, il dispositivo ChromeOS scarica e utilizza l'immagine di sfondo nella schermata di accesso se ancora nessun utente ha effettuato l'accesso al dispositivo. Quando un utente esegue l'accesso, si attiva la policy dello sfondo dell'utente.
@@ -6088,7 +6075,6 @@ A partire dalla versione 92 di <ph name="PRODUCT_NAME" />, questa policy è supp
       <ph name="IMAGE_SEARCH_SOURCE" />,
       <ph name="IMAGE_THUMBNAIL" />,
       <ph name="IMAGE_THUMBNAIL_BASE64" />.</translation>
-<translation id="5368878547690689592">Controlla l'implementazione della riduzione di <ph name="AL_HEADER_NAME" /></translation>
 <translation id="5369937289900051171">Solo stampa a colori</translation>
 <translation id="5370279767682621504">Attiva il supporto HTTP/0.9 sulle porte non predefinite</translation>
 <translation id="5370765433640162225">Se la policy viene impostata su true, la pulizia automatica viene eseguita durante l'accesso per garantire che sia disponibile spazio su disco libero a sufficienza.
@@ -7130,6 +7116,7 @@ Questa policy può essere usata qualora la nostra procedura in corso di eliminaz
 
 NOTA: le modifiche apportate a questa policy verranno applicate soltanto ai processi del renderer appena avviati mentre il browser è in esecuzione.</translation>
 <translation id="6083631234867522991">Windows (client Windows):</translation>
+<translation id="6087413944876892918">Utilizza l'algoritmo <ph name="HAPPY_EYEBALLS_V3" /></translation>
 <translation id="608788685013546076">Imposta un valore percentuale per il limite di consumo della batteria per la variazione dei picchi energetici</translation>
 <translation id="6089679180657323464">Consente di stabilire le impostazioni del controller DTC (Diagnostics and Telemetry Controller) wilco.</translation>
 <translation id="6091233616732024397">Forza gli utenti a eseguire l'accesso per usare il browser</translation>
@@ -8901,6 +8888,18 @@ Le pianificazioni con intervalli che si sovrappongono non sono supportate. Quest
 I dispositivi <ph name="PRODUCT_OS_NAME" /> utilizzeranno il fuso orario del sistema per applicare questi intervalli.
 
 Nota importante: le pianificazioni impostate da questa policy potrebbero non essere eseguite come previsto se entrano in conflitto con altre impostazioni di gestione dell'accensione, ad esempio <ph name="POWER_MANAGEMENT_IDLE_SETTINGS_POLICY_NAME" />. Assicurati che queste impostazioni siano configurate in modo da consentire l'applicazione degli intervalli di sospensione pianificati.</translation>
+<translation id="7196944905905233325">Consente di attivare il provider del framework di accessibilità di <ph name="UIA_NAME" /> in <ph name="PRODUCT_NAME" /> per l'utilizzo da parte degli strumenti di accessibilità.
+
+Questa policy è supportata in <ph name="PRODUCT_NAME" /> per un periodo di transizione di un anno in modo da consentire agli amministratori aziendali di controllare il deployment del provider del framework di accessibilità di <ph name="UIA_NAME" /> del browser. Gli strumenti di accessibilità e gli altri strumenti che utilizzano il framework di accessibilità di <ph name="UIA_NAME" /> per interoperare con il browser potrebbero richiedere aggiornamenti per funzionare correttamente con il provider di <ph name="UIA_NAME" /> del browser. Gli amministratori possono utilizzare questa policy per disattivare temporaneamente il provider di <ph name="UIA_NAME" /> del browser (ripristinando il comportamento precedente) mentre collaborano con i fornitori per fornire aggiornamenti agli strumenti interessati.
+
+Se la policy viene impostata su false, <ph name="PRODUCT_NAME" /> attiva solo il relativo provider <ph name="MSAA_NAME" />. Gli strumenti di accessibilità e gli altri strumenti che utilizzano il framework di accessibilità di <ph name="UIA_NAME" /> più recente per interoperare con il browser comunicheranno con quest'ultimo tramite uno shim di compatibilità in <ph name="MS_WIN_NAME" />.
+
+Se la policy viene impostato su true, <ph name="PRODUCT_NAME" /> attiva il proprio provider di <ph name="UIA_NAME" /> oltre al provider <ph name="MSAA_NAME" />.
+Gli strumenti di accessibilità e gli altri strumenti che utilizzano il framework di accessibilità di <ph name="UIA_NAME" /> più recente per interoperare con il browser comunicano direttamente con quest'ultimo.
+
+Se la policy non viene configurata, il framework delle varianti in <ph name="PRODUCT_NAME" /> viene utilizzato per attivare o disattivare il provider.
+
+Il supporto di questa impostazione delle policy terminerà con <ph name="PRODUCT_NAME" /> 146.</translation>
 <translation id="7198134478421755850">Estensione</translation>
 <translation id="7199304109870655950">Configura le opzioni di accesso remoto nell'host Chrome Remote Desktop.
 
@@ -8912,6 +8911,7 @@ Nota importante: le pianificazioni impostate da questa policy potrebbero non ess
 <translation id="7203243973351251622">Registratore (supportata dalla versione 130)</translation>
 <translation id="7207095846245296855">Forza il filtro SafeSearch di Google</translation>
 <translation id="7211368186050418507">Non rilevare mai automaticamente il fuso orario</translation>
+<translation id="7214815535735080007">Controllo <ph name="ALR_FEATURE_NAME" /></translation>
 <translation id="721617466745658461">Consenti agli utenti di selezionare il programma binario del browser <ph name="LACROS_NAME" /></translation>
 <translation id="7216442368414164495">Consenti agli utenti di attivare i rapporti estesi di Navigazione sicura</translation>
 <translation id="7218238054592349618">Consenti l'ottimizzazione di JavaScript su questi siti</translation>
@@ -9674,6 +9674,7 @@ Se la policy viene impostata su Disattivata o se non viene configurata, il Kerbe
 
       Consente di stabilire l'ID dell'estensione da utilizzare come salvaschermo nella schermata di accesso. L'estensione deve far parte dell'AppPack configurato per il dominio tramite la norma DeviceAppPack.</translation>
 <translation id="7882890448959833986">Elimina l'avviso di sistema operativo non supportato</translation>
+<translation id="7884672714405919225">Non utilizzare l'algoritmo <ph name="HAPPY_EYEBALLS_V3" />.</translation>
 <translation id="788480874436328004">Disattiva il salvataggio delle password utilizzando Gestore delle password</translation>
 <translation id="7891884447851425349">Se la policy <ph name="DEFAULT_SEARCH_PROVIDER_ENABLED_POLICY_NAME" /> è attiva, l'assegnazione di un valore alla policy <ph name="DEFAULT_SEARCH_PROVIDER_SEARCH_URL_POLICY_NAME" /> consente di specificare l'URL del motore di ricerca utilizzato durante una ricerca predefinita. L'URL dovrebbe includere la stringa <ph name="SEARCH_TERM_MARKER" />, sostituita nella query dai termini di ricerca degli utenti.
 
@@ -10925,6 +10926,7 @@ lo schema HTTPS.</translation>
 <translation id="8768528324886802059">La configurazione della policy consente di specificare quale host di messaggistica nativo non è soggetto all'elenco di host non consentiti. Il valore <ph name="WILDCARD_VALUE" /> nell'elenco di host non consentiti comporta il rifiuto di tutti gli host di messaggistica nativi, a meno che non siano consentiti in modo esplicito.
 
       Tutti gli host di messaggistica nativi sono consentiti per impostazione predefinita. Tuttavia, se gli host di messaggistica nativi vengono rifiutati dalla policy, l'amministratore può utilizzare la lista consentita per modificare tale policy.</translation>
+<translation id="8769201477622486852">Attiva <ph name="ALR_FEATURE_NAME" /></translation>
 <translation id="877101880914876353">Intervallo di visualizzazione immagine schermata di accesso dispositivo salvaschermo.</translation>
 <translation id="877557628527387598">Accesso con password</translation>
 <translation id="8777369558049831576">Mostra una casella di controllo "Apri sempre" nella finestra di dialogo relativa ai protocolli esterni</translation>
@@ -11306,7 +11308,6 @@ Nota: al momento verrà presa in considerazione solo la prima voce. Le estension
       Per informazioni dettagliate sui pattern di input validi, visita la pagina https://cloud.google.com/docs/chrome-enterprise/policies/url-patterns. <ph name="WILDCARD_VALUE" /> non è un valore accettato per questa policy. Questa policy ha corrispondenze basate soltanto sull'origine, pertanto qualsiasi percorso nel pattern URL viene ignorato.</translation>
 <translation id="9010080992450148617">Attiva invio download a Google per scansione approfondita per utenti iscritti al programma di protezione avanzata</translation>
 <translation id="9012101302849557459">Estendi il supporto delle app di Chrome su <ph name="MS_WIN_NAME" />, <ph name="MAC_OS_NAME" /> e <ph name="LINUX_OS_NAME" /></translation>
-<translation id="9013629280364842072">Disattiva il controllo dell'implementazione della riduzione di <ph name="AL_HEADER_NAME" /> mediante prove sul campo</translation>
 <translation id="9013875414788074110">Durante l'accesso, <ph name="PRODUCT_OS_NAME" /> può eseguire l'autenticazione con un server (online) o utilizzando una password memorizzata nella cache (offline).
 
       Quando la norma è impostata sul valore -1, l'utente può eseguire per sempre l'autenticazione offline. Quando la norma è impostata su qualsiasi altro valore, questo specifica il periodo di tempo trascorso dall'ultima autenticazione online, dopo il quale l'utente dovrà eseguire nuovamente l'autenticazione.

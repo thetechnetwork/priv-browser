@@ -137,13 +137,16 @@ class CONTENT_EXPORT InterestGroupManagerImpl : public InterestGroupManager {
   // InterestGroupManager overrides:
   void GetAllInterestGroupJoiningOrigins(
       base::OnceCallback<void(std::vector<url::Origin>)> callback) override;
-
   void GetAllInterestGroupDataKeys(
       base::OnceCallback<void(std::vector<InterestGroupDataKey>)> callback)
       override;
-
   void RemoveInterestGroupsByDataKey(InterestGroupDataKey data_key,
                                      base::OnceClosure callback) override;
+  void AddTrustedServerKeysDebugOverride(
+      TrustedServerAPIType api,
+      const url::Origin& coordinator,
+      std::string serialized_keys,
+      base::OnceCallback<void(std::optional<std::string>)> callback) override;
 
   /******** Proxy function calls to InterestGroupsStorage **********/
 
@@ -388,19 +391,6 @@ class CONTENT_EXPORT InterestGroupManagerImpl : public InterestGroupManager {
                                       std::string serialized_keys,
                                       base::Time expiration);
 
-  // Add a debugging override for B&A keys. Unlike with
-  // `SetBiddingAndAuctionServerKeys` the keys set will not affect the state of
-  // the database, but will affect `GetTrustedServerKey` while the current
-  // process is running. The callback will be invoked with nullopt on
-  // success, an error string on failure. Failures include being called when
-  // a configuration for `coordinator` already exists, including from a previous
-  // code to this method.
-  void AddTrustedServerKeysDebugOverride(
-      TrustedServerAPIType api,
-      const url::Origin& coordinator,
-      std::string serialized_keys,
-      base::OnceCallback<void(std::optional<std::string>)> callback);
-
   // Load stored B&A server keys for a coordinator along with the keys'
   // expiration.
   void GetBiddingAndAuctionServerKeys(
@@ -498,9 +488,15 @@ class CONTENT_EXPORT InterestGroupManagerImpl : public InterestGroupManager {
                         const base::Time update_time,
                         bool initial_update);
 
-  // Gets lockout and cooldown for sending forDebuggingOnly reports.
+  // Gets lockout and cooldowns of `origins` for sending forDebuggingOnly
+  // reports.
   void GetDebugReportLockoutAndCooldowns(
       base::flat_set<url::Origin> origins,
+      base::OnceCallback<void(std::optional<DebugReportLockoutAndCooldowns>)>
+          callback);
+
+  // Gets lockout and all cooldowns for sending forDebuggingOnly reports.
+  void GetDebugReportLockoutAndAllCooldowns(
       base::OnceCallback<void(std::optional<DebugReportLockoutAndCooldowns>)>
           callback);
 
@@ -516,6 +512,7 @@ class CONTENT_EXPORT InterestGroupManagerImpl : public InterestGroupManager {
       base::Uuid generation_id,
       base::Time timestamp,
       blink::mojom::AuctionDataConfigPtr config,
+      std::vector<url::Origin> sellers,
       base::OnceCallback<void(BiddingAndAuctionData)> callback);
 
   // Get the public key to use for the auction data. The `callback` may be
@@ -602,6 +599,7 @@ class CONTENT_EXPORT InterestGroupManagerImpl : public InterestGroupManager {
     ~AdAuctionDataLoaderState();
     AdAuctionDataLoaderState(AdAuctionDataLoaderState&& state);
     BiddingAndAuctionSerializer serializer;
+    std::vector<url::Origin> sellers;
     base::OnceCallback<void(BiddingAndAuctionData)> callback;
     base::TimeTicks start_time;
   };
@@ -721,10 +719,11 @@ class CONTENT_EXPORT InterestGroupManagerImpl : public InterestGroupManager {
   // `OnAdAuctionDataLoadComplete()` directly.
   void OnInterestGroupAdAuctionDataLoadComplete(AdAuctionDataLoaderState state);
 
-  // Constructs the AuctionAdata when the load is complete and calls the
+  // Constructs the AdAuctionData when the load is complete and calls the
   // provided callback.
-  void OnAdAuctionDataLoadComplete(AdAuctionDataLoaderState state,
-                                   std::optional<DebugReportLockout> lockout);
+  void OnAdAuctionDataLoadComplete(
+      AdAuctionDataLoaderState state,
+      std::optional<DebugReportLockoutAndCooldowns> lockout);
 
   // Helper to that returns bound NotifyInterestGroupAccessed() callbacks to
   // allow notifications to be sent after a database update.

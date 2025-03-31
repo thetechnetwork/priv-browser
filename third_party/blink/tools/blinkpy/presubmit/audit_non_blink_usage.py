@@ -1027,6 +1027,7 @@ _CONFIG = [
             'third_party/blink/common/messaging/accelerated_static_bitmap_image_mojom_traits.cc'
         ],
         'allowed': [
+            'gfx::ColorSpace',
             'gfx::Size',
             'gfx::SizeToSkISize',
             'gpu::ExportedSharedImage',
@@ -1459,6 +1460,7 @@ _CONFIG = [
             'third_party/blink/renderer/core/inspector',
             'third_party/blink/renderer/controller/dev_tools_frontend_impl.h',
             'third_party/blink/renderer/controller/dev_tools_frontend_impl.cc',
+            'third_party/blink/renderer/modules/credentialmanagement/digital_identity_credential.cc',
             'third_party/blink/renderer/modules/filesystem/dev_tools_host_file_system.cc'
         ],
         'allowed': [
@@ -2204,6 +2206,13 @@ _CONFIG = [
             'third_party/blink/renderer/core/view_transition/',
         ],
         'allowed': ['base::flat_map', 'cc::ScopedPauseRendering'],
+    },
+    {
+        'paths': [
+            'third_party/blink/public/common/frame/view_transition_state_mojom_traits.h',
+            'third_party/blink/public/common/frame/view_transition_state.h',
+        ],
+        'allowed': ['base::flat_map'],
     },
     {
         'paths': [

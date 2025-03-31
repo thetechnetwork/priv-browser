@@ -65,6 +65,8 @@ class ChromeContextMenuItem {
         Item.REMOVE_HIGHLIGHT,
         Item.LEARN_MORE,
         Item.SAVE_PAGE,
+        Item.SHARE_PAGE,
+        Item.PRINT_PAGE,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Item {
@@ -114,8 +116,10 @@ class ChromeContextMenuItem {
         int LEARN_MORE = 34;
         // Page Group
         int SAVE_PAGE = 35;
+        int SHARE_PAGE = 36;
+        int PRINT_PAGE = 37;
         // ALWAYS UPDATE!
-        int NUM_ENTRIES = 36;
+        int NUM_ENTRIES = 38;
     }
 
     /** Mapping from {@link Item} to the ID found in the ids.xml. */
@@ -156,6 +160,8 @@ class ChromeContextMenuItem {
         R.id.contextmenu_remove_highlight, // Item.REMOVE_HIGHLIGHT
         R.id.contextmenu_learn_more, // Item.LEARN_MORE
         R.id.contextmenu_save_page, // Item.SAVE_PAGE
+        R.id.contextmenu_share_page, // Item.SHARE_PAGE
+        R.id.contextmenu_print_page, // Item.PRINT_PAGE
     };
 
     /** Mapping from {@link Item} to the ID of the string that describes the action of the item. */
@@ -196,6 +202,8 @@ class ChromeContextMenuItem {
         R.string.contextmenu_remove_highlight, // Item.REMOVE_HIGHLIGHT
         R.string.contextmenu_learn_more, // Item.LEARN_MORE
         R.string.contextmenu_save_page, // Item.SAVE_PAGE
+        R.string.contextmenu_share_page, // Item.SHARE_PAGE
+        R.string.contextmenu_print_page, // Item.PRINT_PAGE
     };
 
     /**

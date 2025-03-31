@@ -10,17 +10,9 @@ import unittest
 class AggregationTest(unittest.TestCase):
 
   def testDefaults(self):
-    self.assertEqual(GetAggregationDetails({}),
-                     AggregationDetails(AggregationKind.NONE, None, True, {}))
-
-  def testGenerateOldStyleArray(self):
     self.assertEqual(
-        GetAggregationDetails({
-            "elements": {},
-            "generate_array": {
-                "array_name": "TestArray"
-            }
-        }), AggregationDetails(AggregationKind.ARRAY, "TestArray", True, {}))
+        GetAggregationDetails({}),
+        AggregationDetails(AggregationKind.NONE, None, True, {}, None))
 
   def testGenerateArray(self):
     self.assertEqual(
@@ -30,7 +22,8 @@ class AggregationTest(unittest.TestCase):
                 "type": "array",
                 "name": "TestArray"
             }
-        }), AggregationDetails(AggregationKind.ARRAY, "TestArray", True, {}))
+        }),
+        AggregationDetails(AggregationKind.ARRAY, "TestArray", True, {}, None))
 
   def testGenerateArrayAndHideElements(self):
     self.assertEqual(
@@ -41,9 +34,10 @@ class AggregationTest(unittest.TestCase):
                 "name": "TestArray",
                 "export_items": False
             }
-        }), AggregationDetails(AggregationKind.ARRAY, "TestArray", False, {}))
+        }),
+        AggregationDetails(AggregationKind.ARRAY, "TestArray", False, {}, None))
 
-  def testGenerateMap(self):
+  def testGenerateMapWithDefaultKeyType(self):
     self.assertEqual(
         GetAggregationDetails({
             "elements": {},
@@ -51,7 +45,22 @@ class AggregationTest(unittest.TestCase):
                 "type": "map",
                 "name": "TestMap"
             }
-        }), AggregationDetails(AggregationKind.MAP, "TestMap", True, {}))
+        }),
+        AggregationDetails(AggregationKind.MAP, "TestMap", True, {},
+                           "std::string_view"))
+
+  def testGenerateMapWithSuppliedKeyType(self):
+    self.assertEqual(
+        GetAggregationDetails({
+            "elements": {},
+            "aggregation": {
+                "type": "map",
+                "name": "TestMap",
+                "map_key_type": "chrome::CustomKey"
+            }
+        }),
+        AggregationDetails(AggregationKind.MAP, "TestMap", True, {},
+                           "chrome::CustomKey"))
 
   def testGenerateMapAndHideElements(self):
     self.assertEqual(
@@ -62,7 +71,9 @@ class AggregationTest(unittest.TestCase):
                 "name": "TestMap",
                 "export_items": False
             }
-        }), AggregationDetails(AggregationKind.MAP, "TestMap", False, {}))
+        }),
+        AggregationDetails(AggregationKind.MAP, "TestMap", False, {},
+                           "std::string_view"))
 
   def testGetSortedArrayElements(self):
     aggregation = GetAggregationDetails({

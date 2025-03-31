@@ -29,6 +29,7 @@
 #import "ios/chrome/browser/favicon/model/favicon_service_factory.h"
 #import "ios/chrome/browser/favicon/model/ios_chrome_favicon_loader_factory.h"
 #import "ios/chrome/browser/favicon/model/ios_chrome_large_icon_service_factory.h"
+#import "ios/chrome/browser/feature_engagement/model/tracker_factory.h"
 #import "ios/chrome/browser/fullscreen/ui_bundled/fullscreen_controller.h"
 #import "ios/chrome/browser/history/model/history_service_factory.h"
 #import "ios/chrome/browser/incognito_reauth/ui_bundled/incognito_reauth_commands.h"
@@ -38,6 +39,7 @@
 #import "ios/chrome/browser/ntp/ui_bundled/new_tab_page_component_factory.h"
 #import "ios/chrome/browser/ntp/ui_bundled/new_tab_page_coordinator.h"
 #import "ios/chrome/browser/omnibox/model/omnibox_position/omnibox_position_browser_agent.h"
+#import "ios/chrome/browser/popup_menu/ui_bundled/popup_menu_coordinator.h"
 #import "ios/chrome/browser/search_engines/model/template_url_service_factory.h"
 #import "ios/chrome/browser/segmentation_platform/model/segmentation_platform_service_factory.h"
 #import "ios/chrome/browser/sessions/model/ios_chrome_tab_restore_service_factory.h"
@@ -72,7 +74,6 @@
 #import "ios/chrome/browser/tabs/ui_bundled/foreground_tab_animation_view.h"
 #import "ios/chrome/browser/tips_manager/model/tips_manager_ios_factory.h"
 #import "ios/chrome/browser/toolbar/ui_bundled/toolbar_coordinator.h"
-#import "ios/chrome/browser/ui/popup_menu/popup_menu_coordinator.h"
 #import "ios/chrome/browser/url_loading/model/new_tab_animation_tab_helper.h"
 #import "ios/chrome/browser/url_loading/model/url_loading_notifier_browser_agent.h"
 #import "ios/chrome/browser/web/model/page_placeholder_browser_agent.h"
@@ -140,6 +141,9 @@ class BrowserViewControllerTest : public BlockCleanupTest {
     test_profile_builder.AddTestingFactory(
         TipsManagerIOSFactory::GetInstance(),
         TipsManagerIOSFactory::GetDefaultFactory());
+    test_profile_builder.AddTestingFactory(
+        feature_engagement::TrackerFactory::GetInstance(),
+        feature_engagement::TrackerFactory::GetDefaultFactory());
 
     profile_ =
         profile_manager_.AddProfileWithBuilder(std::move(test_profile_builder));
@@ -303,7 +307,9 @@ class BrowserViewControllerTest : public BlockCleanupTest {
     tab_events_mediator_ = [[TabEventsMediator alloc]
         initWithWebStateList:browser_.get()->GetWebStateList()
               ntpCoordinator:NTPCoordinator_
-                     profile:GetProfile()
+                     tracker:feature_engagement::TrackerFactory::GetForProfile(
+                                 GetProfile())
+                   incognito:NO
              loadingNotifier:url_loading_notifier];
     tab_events_mediator_.consumer = bvc_;
 

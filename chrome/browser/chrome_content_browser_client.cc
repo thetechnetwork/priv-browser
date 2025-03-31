@@ -741,7 +741,6 @@
 
 #if BUILDFLAG(SAFE_BROWSING_AVAILABLE)
 #include "chrome/browser/enterprise/connectors/connectors_service.h"
-#include "chrome/browser/safe_browsing/chrome_enterprise_url_lookup_service.h"
 #include "chrome/browser/safe_browsing/chrome_enterprise_url_lookup_service_factory.h"
 #include "chrome/browser/safe_browsing/chrome_password_protection_service.h"
 #include "chrome/browser/safe_browsing/chrome_ping_manager_factory.h"
@@ -750,6 +749,7 @@
 #include "chrome/browser/safe_browsing/safe_browsing_service.h"
 #include "chrome/browser/safe_browsing/url_lookup_service_factory.h"
 #include "components/safe_browsing/content/browser/safe_browsing_navigation_throttle.h"
+#include "components/safe_browsing/core/browser/realtime/chrome_enterprise_url_lookup_service.h"
 #endif
 
 #if BUILDFLAG(ENABLE_OFFLINE_PAGES)
@@ -3776,6 +3776,11 @@ ChromeContentBrowserClient::GetSystemNetworkContext() {
 }
 
 std::string ChromeContentBrowserClient::GetGeolocationApiKey() {
+#if BUILDFLAG(IS_CHROMEOS)
+  if (ash::features::IsCrosSeparateGeoApiKeyEnabled()) {
+    return google_apis::GetCrosChromeGeoAPIKey();
+  }
+#endif
   return google_apis::GetAPIKey();
 }
 
@@ -3981,9 +3986,6 @@ bool UpdatePreferredColorScheme(WebPreferences* web_prefs,
         web_prefs->preferred_color_scheme;
   }
 #else
-  // Update based on native theme scheme.
-  web_prefs->preferred_color_scheme =
-      ToBlinkPreferredColorScheme(native_theme->GetPreferredColorScheme());
 
   Profile* profile =
       Profile::FromBrowserContext(web_contents->GetBrowserContext());
@@ -4000,20 +4002,13 @@ bool UpdatePreferredColorScheme(WebPreferences* web_prefs,
 #endif  // BUILDFLAG(IS_ANDROID)
 
 #if !BUILDFLAG(IS_ANDROID)
-  // TODO(crbug.com/359577226): merge the branches for WebUI and non-WebUI
-  // contents after kContentUsesBrowserThemeColorMode is launched.
-  if (content::HasWebUIScheme(url)) {
-    // If color scheme is not forced, WebUI should track the color mode of the
-    // ColorProvider associated with `web_contents`.
+  // Incognito contents follow the device color mode.
+  if (profile->IsIncognitoProfile() && !content::HasWebUIScheme(url)) {
     web_prefs->preferred_color_scheme =
-        web_contents->GetColorMode() == ui::ColorProviderKey::ColorMode::kLight
-            ? blink::mojom::PreferredColorScheme::kLight
-            : blink::mojom::PreferredColorScheme::kDark;
-  } else if (base::FeatureList::IsEnabled(
-                 features::kContentUsesBrowserThemeColorMode) &&
-             !profile->IsIncognitoProfile()) {
-    // Track the browser theme's color mode in contents.
-    // Incognito contents are not affected by the browser theme.
+      ToBlinkPreferredColorScheme(native_theme->GetPreferredColorScheme());
+  } else {
+    // WebUI and regular pages follow the browser theme color mode, provided by
+    // the color provider.
     web_prefs->preferred_color_scheme =
         web_contents->GetColorMode() == ui::ColorProviderKey::ColorMode::kLight
             ? blink::mojom::PreferredColorScheme::kLight

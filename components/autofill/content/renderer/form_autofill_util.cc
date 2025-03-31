@@ -46,6 +46,7 @@
 #include "components/autofill/core/common/field_data_manager.h"
 #include "components/autofill/core/common/form_data.h"
 #include "components/autofill/core/common/form_field_data.h"
+#include "components/autofill/core/common/metrics_enums.h"
 #include "components/autofill/core/common/mojom/autofill_types.mojom-shared.h"
 #include "components/autofill/core/common/unique_ids.h"
 #include "components/password_manager/core/common/password_manager_features.h"
@@ -2041,6 +2042,11 @@ void WebFormControlElementToFormField(
     if (extract_options.contains(ExtractOption::kDatalist) ||
         base::FeatureList::IsEnabled(
             features::kAutofillOptimizeFormExtraction)) {
+      // TODO(crbug.com/316143236): Remove this metric once debugging is
+      // complete.
+      base::UmaHistogramEnumeration(
+          "Autofill.DataList.Events",
+          AutofillDataListEvents::kDataListOptionsParsed);
       field->set_datalist_options(GetDataListOptions(input_element));
     }
   } else if (IsTextAreaElement(element)) {
@@ -2093,6 +2099,7 @@ std::optional<FormData> ExtractFormDataWithFieldsAndFrames(
     const WebDocument& document,
     const WebFormElement& form_element,
     const FieldDataManager& field_data_manager,
+    ButtonTitlesCache* button_titles_cache,
     DenseSet<ExtractOption> extract_options) {
   if (form_element && !form_element.IsConnected()) {
     return std::nullopt;
@@ -2233,6 +2240,7 @@ std::optional<FormData> ExtractFormDataWithFieldsAndFrames(
   }
   form.set_fields(std::move(fields));
   form.set_child_frames(std::move(child_frames));
+  form.set_button_titles(GetButtonTitles(form_element, button_titles_cache));
   // `likely_contains_captcha` is only needed for Android for the autosubmission
   // after filling credentials from TTF bottom sheet.
 #if BUILDFLAG(IS_ANDROID)
@@ -2281,10 +2289,12 @@ std::optional<FormData> ExtractFormData(
     const WebFormElement& form_element,
     const FieldDataManager& field_data_manager,
     const CallTimerState& timer_state,
+    ButtonTitlesCache* button_titles_cache,
     DenseSet<ExtractOption> extract_options) {
   ScopedCallTimer timer("ExtractFormData", timer_state);
   return ExtractFormDataWithFieldsAndFrames(
-      document, form_element, field_data_manager, extract_options);
+      document, form_element, field_data_manager, button_titles_cache,
+      extract_options);
 }
 
 GURL GetCanonicalActionForForm(const WebFormElement& form) {
@@ -2436,6 +2446,7 @@ FindFormAndFieldForFormControlElement(
     const WebFormControlElement& element,
     const FieldDataManager& field_data_manager,
     const CallTimerState& timer_state,
+    form_util::ButtonTitlesCache* button_titles_cache,
     DenseSet<ExtractOption> extract_options,
     const SynchronousFormCache& form_cache) {
   DCHECK(element);
@@ -2447,7 +2458,8 @@ FindFormAndFieldForFormControlElement(
   WebDocument document = element.GetDocument();
   WebFormElement owning_form = element.GetOwningFormForAutofill();
   std::optional<FormData> form = form_cache.GetOrExtractForm(
-      document, owning_form, field_data_manager, timer_state, extract_options);
+      document, owning_form, field_data_manager, timer_state,
+      button_titles_cache, extract_options);
   const bool extract_form_data_succeeded = form.has_value();
 
   if (!form) {

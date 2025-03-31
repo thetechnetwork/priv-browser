@@ -9,7 +9,6 @@ import static org.chromium.android_webview.test.AwActivityTestRule.SCALED_WAIT_T
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.CancellationSignal;
-import android.view.View;
 import android.webkit.JavascriptInterface;
 
 import androidx.annotation.Nullable;
@@ -47,6 +46,7 @@ import org.chromium.base.test.util.HistogramWatcher;
 import org.chromium.base.test.util.UrlUtils;
 import org.chromium.blink_public.common.BlinkFeatures;
 import org.chromium.components.embedder_support.util.WebResourceResponseInfo;
+import org.chromium.content_public.browser.Visibility;
 import org.chromium.content_public.browser.test.util.TestCallbackHelperContainer.OnPageStartedHelper;
 import org.chromium.content_public.common.ContentSwitches;
 import org.chromium.net.test.ServerCertificate;
@@ -131,12 +131,6 @@ public class AwPrerenderTest extends AwParameterizedTest {
         mActivityTestRule.startBrowserProcess();
         mTestContainerView = mActivityTestRule.createAwTestContainerViewOnMainSync(mContentsClient);
         mAwContents = mTestContainerView.getAwContents();
-
-        // Ensure that the view is visible, as prerendering cannot start in background.
-        ThreadUtils.runOnUiThreadBlocking(
-                () -> {
-                    mAwContents.onWindowVisibilityChanged(View.VISIBLE);
-                });
 
         AwActivityTestRule.enableJavaScriptOnUiThread(mAwContents);
 
@@ -240,6 +234,7 @@ public class AwPrerenderTest extends AwParameterizedTest {
                       window.localStorage.clear();
                       window.addEventListener("storage", event => {
                         if (event.key === "pageStarted") {
+                          window.localStorage.clear();
                           awPrerenderLifecycleMessagePort.postMessage(event.newValue);
                         }
                       });
@@ -267,6 +262,8 @@ public class AwPrerenderTest extends AwParameterizedTest {
         // Start prerendering from the initial page.
         ThreadUtils.runOnUiThreadBlocking(
                 () -> {
+                    // Ensure that the view is visible, as prerendering cannot start in background.
+                    mAwContents.getWebContents().updateWebContentsVisibility(Visibility.VISIBLE);
                     mAwContents.evaluateJavaScript(speculationRules, null);
                 });
     }
@@ -294,6 +291,8 @@ public class AwPrerenderTest extends AwParameterizedTest {
         Executor callbackExecutor = (Runnable r) -> r.run();
         ThreadUtils.runOnUiThreadBlocking(
                 () -> {
+                    // Ensure that the view is visible, as prerendering cannot start in background.
+                    mAwContents.getWebContents().updateWebContentsVisibility(Visibility.VISIBLE);
                     mAwContents.startPrerendering(
                             url,
                             prefetchParameters,
@@ -807,7 +806,7 @@ public class AwPrerenderTest extends AwParameterizedTest {
         AwWebResourceRequest mainRequest =
                 shouldInterceptRequestHelper.getRequestsForUrl(mPrerenderingUrl);
         Assert.assertNotNull(mainRequest);
-        HashMap<String, String> mainHeaders = mainRequest.requestHeaders;
+        Map<String, String> mainHeaders = mainRequest.requestHeaders;
         Assert.assertNotNull(mainHeaders);
         Assert.assertEquals("1", mainHeaders.get("Test-Header1"));
         Assert.assertEquals("2", mainHeaders.get("Test-Header2"));
@@ -817,7 +816,7 @@ public class AwPrerenderTest extends AwParameterizedTest {
         AwWebResourceRequest scriptRequest =
                 shouldInterceptRequestHelper.getRequestsForUrl(scriptUrl);
         Assert.assertNotNull(scriptRequest);
-        HashMap<String, String> scriptHeaders = scriptRequest.requestHeaders;
+        Map<String, String> scriptHeaders = scriptRequest.requestHeaders;
         Assert.assertNotNull(scriptHeaders);
         Assert.assertNull(scriptHeaders.get("Test-Header1"));
         Assert.assertNull(scriptHeaders.get("Test-Header2"));
@@ -1161,7 +1160,7 @@ public class AwPrerenderTest extends AwParameterizedTest {
         AwWebResourceRequest request =
                 shouldInterceptRequestHelper.getRequestsForUrl(mPrerenderingUrl);
         Assert.assertNotNull(request);
-        HashMap<String, String> requestHeaders = request.requestHeaders;
+        Map<String, String> requestHeaders = request.requestHeaders;
         Assert.assertNotNull(requestHeaders);
         Assert.assertEquals("prefetch;prerender", requestHeaders.get("Sec-Purpose"));
 
@@ -1212,7 +1211,7 @@ public class AwPrerenderTest extends AwParameterizedTest {
         AwWebResourceRequest request =
                 shouldInterceptRequestHelper.getRequestsForUrl(prerenderingUrl);
         Assert.assertNotNull(request);
-        HashMap<String, String> requestHeaders = request.requestHeaders;
+        Map<String, String> requestHeaders = request.requestHeaders;
         Assert.assertNotNull(requestHeaders);
         Assert.assertEquals("prefetch;prerender", requestHeaders.get("Sec-Purpose"));
 
@@ -1220,7 +1219,7 @@ public class AwPrerenderTest extends AwParameterizedTest {
         AwWebResourceRequest beaconRequest =
                 shouldInterceptRequestHelper.getRequestsForUrl(beaconUrl);
         Assert.assertNotNull(beaconRequest);
-        HashMap<String, String> beaconRequestHeaders = beaconRequest.requestHeaders;
+        Map<String, String> beaconRequestHeaders = beaconRequest.requestHeaders;
         Assert.assertNotNull(beaconRequestHeaders);
         Assert.assertEquals("prefetch;prerender", beaconRequestHeaders.get("Sec-Purpose"));
 
@@ -1237,7 +1236,7 @@ public class AwPrerenderTest extends AwParameterizedTest {
         AwWebResourceRequest beaconRequest2 =
                 shouldInterceptRequestHelper.getRequestsForUrl(beaconUrl2);
         Assert.assertNotNull(beaconRequest2);
-        HashMap<String, String> beaconRequestHeaders2 = beaconRequest2.requestHeaders;
+        Map<String, String> beaconRequestHeaders2 = beaconRequest2.requestHeaders;
         Assert.assertNotNull(beaconRequestHeaders2);
         Assert.assertFalse(beaconRequestHeaders2.containsKey("Sec-Purpose"));
     }
@@ -1315,7 +1314,7 @@ public class AwPrerenderTest extends AwParameterizedTest {
         shouldOverrideUrlLoadingHelper.waitForCallback(currentShouldOverrideUrlLoadingCallCount);
         Assert.assertEquals(
                 shouldOverrideUrlLoadingHelper.getShouldOverrideUrlLoadingUrl(), mPrerenderingUrl);
-        HashMap<String, String> requestHeadersOnShouldOverride =
+        Map<String, String> requestHeadersOnShouldOverride =
                 shouldOverrideUrlLoadingHelper.requestHeaders();
         Assert.assertNotNull(requestHeadersOnShouldOverride);
         Assert.assertEquals(
@@ -1326,9 +1325,9 @@ public class AwPrerenderTest extends AwParameterizedTest {
         shouldOverrideUrlLoadingHelper.waitForCallback(currentShouldOverrideUrlLoadingCallCount);
         Assert.assertEquals(
                 shouldOverrideUrlLoadingHelper.getShouldOverrideUrlLoadingUrl(), mPrerenderingUrl);
-        Assert.assertNull(
-                "activation naivgation should have null requestHeaders.",
-                shouldOverrideUrlLoadingHelper.requestHeaders());
+        Assert.assertTrue(
+                "activation navigation should have empty requestHeaders.",
+                shouldOverrideUrlLoadingHelper.requestHeaders().isEmpty());
     }
 
     // Tests ShouldOverrideUrlLoading interaction with prerendering that is redirected.
@@ -1361,7 +1360,7 @@ public class AwPrerenderTest extends AwParameterizedTest {
                 shouldOverrideUrlLoadingHelper.getShouldOverrideUrlLoadingUrl(),
                 initialPrerenderingUrl);
         Assert.assertFalse(shouldOverrideUrlLoadingHelper.isRedirect());
-        HashMap<String, String> requestHeadersOnShouldOverride =
+        Map<String, String> requestHeadersOnShouldOverride =
                 shouldOverrideUrlLoadingHelper.requestHeaders();
         Assert.assertNotNull(requestHeadersOnShouldOverride);
         Assert.assertEquals(
@@ -1388,9 +1387,9 @@ public class AwPrerenderTest extends AwParameterizedTest {
         Assert.assertEquals(
                 shouldOverrideUrlLoadingHelper.getShouldOverrideUrlLoadingUrl(),
                 initialPrerenderingUrl);
-        Assert.assertNull(
-                "activation naivgation should have null requestHeaders.",
-                shouldOverrideUrlLoadingHelper.requestHeaders());
+        Assert.assertTrue(
+                "activation navigation should have empty requestHeaders.",
+                shouldOverrideUrlLoadingHelper.requestHeaders().isEmpty());
     }
 
     // Tests that subframe navigation of prerendered page emits shouldInterceptRequest with
@@ -1870,6 +1869,124 @@ public class AwPrerenderTest extends AwParameterizedTest {
         activationCallbackHelper2.waitForNext();
         histogramWatcher.pollInstrumentationThreadUntilSatisfied();
         Assert.assertEquals(1, mTestServer.getRequestCountForUrl(PRERENDER_URL));
+    }
+
+    // Tests the case where prerendering is triggered for the same URL but different No-Vary-Search
+    // hint. The first attempt should be canceled in favor of the second attempt, so the request
+    // should be sent twice.
+    @Test
+    @LargeTest
+    @Feature({"AndroidWebView"})
+    @Features.DisableFeatures({BlinkFeatures.PRERENDER2_MEMORY_CONTROLS})
+    @CommandLineFlags.Add({ContentSwitches.HOST_RESOLVER_RULES + "=MAP * 127.0.0.1"})
+    public void testDuplicatePrerender_SameUrlButDifferentNoVarySearchHint() throws Throwable {
+        loadInitialPage();
+
+        // Expect kActivated(0) and kTriggerDestroyed(16).
+        var histogramWatcher = createFinalStatusHistogramWatcher(new int[] {0, 16});
+
+        var activationCallbackHelper1 = new ActivationCallbackHelper();
+        var activationCallbackHelper2 = new ActivationCallbackHelper();
+        var errorCallbackHelper1 = new PrerenderErrorCallbackHelper();
+        var errorCallbackHelper2 = new PrerenderErrorCallbackHelper();
+
+        startPrerenderingAndWait(
+                mPrerenderingUrl,
+                /* prefetchParameters= */ null,
+                /* cancellationSignal= */ null,
+                activationCallbackHelper1.getCallback(),
+                errorCallbackHelper1.getCallback());
+
+        String[] ignoredQueryParameters = {"a"};
+        AwNoVarySearchData noVarySearchData =
+                new AwNoVarySearchData(true, true, ignoredQueryParameters, null);
+        AwPrefetchParameters prefetchParameters =
+                new AwPrefetchParameters(
+                        /* additionalHeaders= */ null,
+                        noVarySearchData,
+                        /* isJavascriptEnabled= */ true);
+
+        startPrerenderingAndWait(
+                mPrerenderingUrl,
+                prefetchParameters,
+                /* cancellationSignal= */ null,
+                activationCallbackHelper2.getCallback(),
+                errorCallbackHelper2.getCallback());
+
+        activatePage(mPrerenderingUrl, ActivationBy.LOAD_URL);
+
+        // Wait until the navigation activates the prerendered page. The second attempt should be
+        // activated.
+        activationCallbackHelper2.waitForNext();
+        Assert.assertEquals(0, activationCallbackHelper1.getCallCount());
+
+        // Both the attempts have the same URL but different No-Vary-Search hints, so they should
+        // send the request separately.
+        Assert.assertEquals(2, mTestServer.getRequestCountForUrl(PRERENDER_URL));
+
+        histogramWatcher.pollInstrumentationThreadUntilSatisfied();
+    }
+
+    // Tests the case where prerendering is triggered for different URLs but the same No-Vary-Search
+    // hint that can cover both the URLs. The second attempt should be deduped.
+    @Test
+    @LargeTest
+    @Feature({"AndroidWebView"})
+    @Features.DisableFeatures({BlinkFeatures.PRERENDER2_MEMORY_CONTROLS})
+    @CommandLineFlags.Add({ContentSwitches.HOST_RESOLVER_RULES + "=MAP * 127.0.0.1"})
+    public void testDuplicatePrerender_DifferentUrlButSameNoVarySearchHint() throws Throwable {
+        loadInitialPage();
+
+        var histogramWatcher = createFinalStatusHistogramWatcher(/*kActivate*/ 0);
+
+        String url1 = getUrl(PRERENDER_URL.concat("?a=1"));
+        String url2 = getUrl(PRERENDER_URL.concat("?a=2"));
+
+        var activationCallbackHelper1 = new ActivationCallbackHelper();
+        var activationCallbackHelper2 = new ActivationCallbackHelper();
+        var errorCallbackHelper1 = new PrerenderErrorCallbackHelper();
+        var errorCallbackHelper2 = new PrerenderErrorCallbackHelper();
+
+        String[] ignoredQueryParameters = {"a"};
+        AwNoVarySearchData noVarySearchData =
+                new AwNoVarySearchData(true, true, ignoredQueryParameters, null);
+        AwPrefetchParameters prefetchParameters =
+                new AwPrefetchParameters(
+                        /* additionalHeaders= */ null,
+                        noVarySearchData,
+                        /* isJavascriptEnabled= */ true);
+
+        startPrerendering(
+                url1,
+                prefetchParameters,
+                /* cancellationSignal= */ null,
+                activationCallbackHelper1.getCallback(),
+                errorCallbackHelper1.getCallback());
+
+        startPrerendering(
+                url2,
+                prefetchParameters,
+                /* cancellationSignal= */ null,
+                activationCallbackHelper2.getCallback(),
+                errorCallbackHelper2.getCallback());
+
+        // Wait until the prerendered page is loaded.
+        mPrerenderLifecycleWebMessageListener.waitForOnPostMessage();
+
+        // Activate `mPrerenderingUrl` that matches both `url1` and `url2` with the No-Vary-Search
+        // hint.
+        activatePage(mPrerenderingUrl, ActivationBy.LOAD_URL);
+
+        // Wait until the navigation activates the prerendered page. Both the activation callbacks
+        // should be called.
+        activationCallbackHelper1.waitForNext();
+        activationCallbackHelper2.waitForNext();
+
+        // The second attempt should be deduped, so the request should be sent only to `url1`.
+        Assert.assertEquals(1, mTestServer.getRequestCountForUrl(PRERENDER_URL.concat("?a=1")));
+        Assert.assertEquals(0, mTestServer.getRequestCountForUrl(PRERENDER_URL.concat("?a=2")));
+
+        histogramWatcher.pollInstrumentationThreadUntilSatisfied();
     }
 
     // Tests the case where prerendering is triggered for the same URL multiple times and then

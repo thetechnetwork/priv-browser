@@ -95,7 +95,6 @@ Chromium-en erabilera hobetzeko datuak erabiltzen dituzten ezarpen gehiago ikust
 <translation id="328933489847748230">{count,plural, =1{Chromium-eko leiho bat dago ikusgai}other{Chromium-eko {count} leiho daude ikusgai}}</translation>
 <translation id="3344973607274501920">Chromium-ek ezin izan ditu egiaztatu pasahitzak. Egiaztatu Internetera konektatuta zaudela.</translation>
 <translation id="3366305173356742781">Kontuan dauden Chromium-eko datuak</translation>
-<translation id="33788334537425157">Aktibatu "Blokeatu ezkutuko moduko fitxak Chromium ixten duzunean"</translation>
 <translation id="3387107508582892610">{THRESHOLD,plural, =1{Chromium {THRESHOLD} minutuz erabiltzen ez denean gertatzen da hori. Baliteke historia eta betetze automatikoa barnean sartzea.}other{Chromium {THRESHOLD} minutuz erabiltzen ez denean gertatzen da hori. Baliteke historia eta betetze automatikoa barnean sartzea.}}</translation>
 <translation id="3410395242749598859">Chromium-eko datu batzuk ez dira gorde <ph name="EMAIL" /> kontuan oraindik.
 Kontua aldatu aurretik, itxaron minutu batzuk. Kontua orain aldatzen baduzu, datuak ezabatu egingo dira.</translation>
@@ -208,7 +207,6 @@ Kontuan hartu beharrekoak:
   • Zure historia Google-ko kontuarekin sinkronizatuz gero, baliteke neurketek bisitatzen dituzun URLei buruzko informazioa edukitzea.<ph name="END_INDENT" /></translation>
 <translation id="5932787118589620366">Ezabatu Chromium-eko arakatze-datuak.</translation>
 <translation id="593808800391107017">Jaso Chromium-ek zuretzat automatikoki hautematen dituen pribatutasun- edo segurtasun-arazoei buruzko alertak.</translation>
-<translation id="5945387852661427312"><ph name="DOMAIN" /> domeinuak kudeatutako kontu batekin hasi duzu saioa eta administratzaileari eman diozu Chromium datuen kontrola. Datuak betiko lotuko dira kontu honekin. Saioa amaitzen baduzu, Chromium datuak ezabatu egingo dira gailutik, baina Google-ko kontuan izango dituzu gordeta.</translation>
 <translation id="5951593919357934226">Atera ahalik eta etekin handiena Chromium-i.</translation>
 <translation id="5985254578475526217">Chromium-en jakinarazpenak jasotzeko, aktibatu jakinarazpenak iOS-en ezarpenetan.</translation>
 <translation id="6104024151682120539">Ireki Chromium-en</translation>

@@ -22,6 +22,7 @@
 #include "cc/animation/keyframe_effect.h"
 #include "cc/debug/rendering_stats_instrumentation.h"
 #include "cc/layers/layer_impl.h"
+#include "cc/layers/mirror_layer_impl.h"
 #include "cc/layers/solid_color_layer_impl.h"
 #include "cc/layers/surface_layer_impl.h"
 #include "cc/layers/tile_display_layer_impl.h"
@@ -59,6 +60,9 @@ std::unique_ptr<cc::LayerImpl> CreateLayer(LayerContextImpl& context,
   switch (type) {
     case cc::mojom::LayerType::kLayer:
       return cc::LayerImpl::Create(&tree, id);
+
+    case cc::mojom::LayerType::kMirror:
+      return cc::MirrorLayerImpl::Create(&tree, id);
 
     case cc::mojom::LayerType::kSurface:
       // TODO(394137303): handle |update_submission_state_callback|.
@@ -196,11 +200,15 @@ base::expected<void, std::string> UpdatePropertyTreeNode(
   }
 
   node.surface_contents_scale = wire.surface_contents_scale;
+  node.subtree_capture_id = wire.subtree_capture_id;
+  node.subtree_size = wire.subtree_size;
+
   if (wire.blend_mode > static_cast<uint32_t>(SkBlendMode::kLastMode)) {
     return base::unexpected("Invalid blend_mode for effect node");
   }
   node.blend_mode = static_cast<SkBlendMode>(wire.blend_mode);
   node.target_id = wire.target_id;
+  node.filters = wire.filters;
   node.backdrop_filters = wire.backdrop_filters;
   node.backdrop_filter_bounds = wire.backdrop_filter_bounds;
   node.backdrop_filter_quality = wire.backdrop_filter_quality;
@@ -356,6 +364,11 @@ base::expected<void, std::string> UpdateTransformTreeProperties(
   return base::ok();
 }
 
+void UpdateMirrorLayerExtra(const mojom::MirrorLayerExtraPtr& extra,
+                            cc::MirrorLayerImpl& layer) {
+  layer.SetMirroredLayerId(extra->mirrored_layer_id);
+}
+
 void UpdateSurfaceLayerExtra(const mojom::SurfaceLayerExtraPtr& extra,
                              cc::SurfaceLayerImpl& layer) {
   layer.SetRange(extra->surface_range, extra->deadline_in_frames);
@@ -423,6 +436,10 @@ base::expected<void, std::string> UpdateLayer(const mojom::Layer& wire,
   layer.SetScrollTreeIndex(wire.scroll_tree_index);
 
   switch (wire.type) {
+    case cc::mojom::LayerType::kMirror:
+      UpdateMirrorLayerExtra(wire.layer_extra->get_mirror_layer_extra(),
+                             static_cast<cc::MirrorLayerImpl&>(layer));
+      break;
     case cc::mojom::LayerType::kSurface:
       UpdateSurfaceLayerExtra(wire.layer_extra->get_surface_layer_extra(),
                               static_cast<cc::SurfaceLayerImpl&>(layer));
@@ -1180,6 +1197,20 @@ base::expected<void, std::string> LayerContextImpl::DoUpdateDisplayTree(
   layers.set_trace_id(
       cc::BeginMainFrameTraceId::FromUnsafeValue(update->trace_id));
   layers.SetDeviceViewportRect(update->device_viewport);
+
+  if (update->page_scale_factor <= 0 || update->min_page_scale_factor <= 0 ||
+      update->max_page_scale_factor <= 0) {
+    return base::unexpected("Invalid page scale factors");
+  }
+  layers.SetPageScaleFactorAndLimitsForDisplayTree(
+      update->page_scale_factor, update->min_page_scale_factor,
+      update->max_page_scale_factor);
+
+  if (update->external_page_scale_factor <= 0) {
+    return base::unexpected("Invalid external page scale factor");
+  }
+  layers.SetExternalPageScaleFactor(update->external_page_scale_factor);
+
   if (update->device_scale_factor <= 0) {
     return base::unexpected("Invalid device scale factor");
   }

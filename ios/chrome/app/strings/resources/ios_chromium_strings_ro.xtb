@@ -95,7 +95,6 @@ Pentru mai multe setări care folosesc date pentru a-ți îmbunătăți experien
 <translation id="328933489847748230">{count,plural, =1{Se afișează o fereastră Chromium}few{Se afișează {count} ferestre Chromium}other{Se afișează {count} de ferestre Chromium}}</translation>
 <translation id="3344973607274501920">Chromium nu a putut verifica parolele. Verifică-ți conexiunea la internet.</translation>
 <translation id="3366305173356742781">Datele Chromium din cont</translation>
-<translation id="33788334537425157">Activează Blochează filele incognito când închizi Chromium</translation>
 <translation id="3387107508582892610">{THRESHOLD,plural, =1{Acest lucru se întâmplă când Chromium nu este folosit timp de {THRESHOLD} minut. Aici pot fi incluse istoricul și completarea automată.}few{Acest lucru se întâmplă când Chromium nu este folosit timp de {THRESHOLD} minute. Aici pot fi incluse istoricul și completarea automată.}other{Acest lucru se întâmplă când Chromium nu este folosit timp de {THRESHOLD} de minute. Aici pot fi incluse istoricul și completarea automată.}}</translation>
 <translation id="3410395242749598859">Unele date Chromium nu s-au salvat încă în <ph name="EMAIL" />.
 Așteaptă câteva minute înainte să schimbi contul. Dacă schimbi conturile acum, aceste date se vor șterge.</translation>
@@ -208,7 +207,6 @@ De reținut:
   • dacă sincronizezi istoricul cu Contul Google, valorile pot să includă și informații despre adresele URL pe care le accesezi.<ph name="END_INDENT" /></translation>
 <translation id="5932787118589620366">Șterge datele de navigare din Chromium.</translation>
 <translation id="593808800391107017">Primește alerte cu privire la orice probleme de confidențialitate sau de securitate pe care Chromium le detectează automat pentru tine.</translation>
-<translation id="5945387852661427312">Te conectezi cu un cont gestionat de <ph name="DOMAIN" /> și acorzi administratorului acestuia controlul asupra datelor Chromium. Datele vor fi asociate definitiv acestui cont. Dacă te deconectezi de la Chromium, datele vor fi șterse de pe acest dispozitiv, dar vor rămâne stocate în Contul Google.</translation>
 <translation id="5951593919357934226">Profită din plin de Chromium.</translation>
 <translation id="5985254578475526217">Pentru a primi notificări de la Chromium, activează notificările din Setările iOS.</translation>
 <translation id="6104024151682120539">Deschide în Chromium</translation>

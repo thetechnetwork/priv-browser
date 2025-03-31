@@ -91,6 +91,7 @@
 <translation id="1269405891096105529">Периферниот уред не е поддржан во режим на гостин</translation>
 <translation id="1270290102613614947">Тастатурата на екранот е оневозможена</translation>
 <translation id="1272079795634619415">Запри</translation>
+<translation id="12741168609094094">Изберете што било на екранот за да пребарате, да копирате текст и друго</translation>
 <translation id="1275285675049378717">Се напојува <ph name="POWER_SOURCE" /></translation>
 <translation id="1275718070701477396">Избран</translation>
 <translation id="1276975447697633661">Изберете ја датотеката, а потоа притиснете <ph name="KEY" /></translation>
@@ -149,6 +150,7 @@
 <translation id="1455242230282523554">Прикажи ги поставките за јазикот</translation>
 <translation id="1459693405370120464">Време</translation>
 <translation id="1460620680449458626">Звукот е исклучен.</translation>
+<translation id="1462439140224375968">Создаден е документ на Docs</translation>
 <translation id="14648076227129703">Ова дозволува пристап до камерата за <ph name="APP1_NAME" />, <ph name="APP2_NAME" /> и сите апликации и веб-сајтови со дозвола за камерата</translation>
 <translation id="1467432559032391204">Лево</translation>
 <translation id="146902737843070955">Администраторот ја побара променава</translation>
@@ -226,6 +228,7 @@
 <translation id="1720230731642245863">Точката на пристап е исклучена</translation>
 <translation id="1731815243805539470">Префрлете на претходниот корисник</translation>
 <translation id="1733996486177697563">Сменете на темна и светла тема. Допрете и задржете на работната површина, а потоа изберете „Тапети и стил“.</translation>
+<translation id="1735992454301033090">Избрана е област, користете ги копчињата со стрелки за да ја преместувате</translation>
 <translation id="1736898441010944794">„<ph name="NAME" />“ е видлив за уреди со Bluetooth.</translation>
 <translation id="1737078180382804488">Отфрлете го поставувањето прегледување на известувањата на телефонот</translation>
 <translation id="174102739345480129">Означувачот е исклучен.</translation>
@@ -493,6 +496,7 @@
 <translation id="2683887737780133806"><ph name="DAY_OF_WEEK" /> минатата седмица</translation>
 <translation id="2687510499067466116">Кратенката од тастатура е променета</translation>
 <translation id="2689613560355655046">Работна површина 8</translation>
+<translation id="2692092709110488417">Притиснете Tab за да ја фокусирате и да ја преместувате избраната област</translation>
 <translation id="2695305337569143674">веб</translation>
 <translation id="2697697418792422688">Прикажете ги поставките за тастатура. Избрано е <ph name="KEYBOARD_NAME" />.</translation>
 <translation id="2699913284398121653">Користете ја апликацијата „Префрлање содржини“ за да ги префрлите податоците од вашата училишна сметка во вашата лична сметка</translation>
@@ -550,6 +554,7 @@
 <translation id="2872353916818027657">Замени примарен монитор</translation>
 <translation id="2872961005593481000">Исклучи</translation>
 <translation id="2876338922445400217">Зумирање на екранот</translation>
+<translation id="2876760662374103627">„Контрола со лик“ е активна</translation>
 <translation id="2878884018241093801">Нема неодамнешни ставки</translation>
 <translation id="2880541185262491188">Премногу обиди за автентикација со PIN. Почекајте <ph name="TIME_LEFT" /> и обидете се повторно</translation>
 <translation id="2883271196820422439">Продолжи ја „Копчиња за глувче“</translation>
@@ -593,6 +598,7 @@
 <translation id="301584155502740476">Прикажи детали за точката на пристап. Точката на пристап е исклучена.</translation>
 <translation id="3017079585324758401">Заднина</translation>
 <translation id="3018135054368884502">Премотување аудиовизуелни содржини нанапред</translation>
+<translation id="3026897869154397692">Додадено во „Календар“</translation>
 <translation id="3033545621352269033">Вклучено</translation>
 <translation id="3033912566804961911">Комбинирајте со <ph name="DESK_NAME" /></translation>
 <translation id="3036649622769666520">Отвори датотеки</translation>
@@ -726,6 +732,7 @@
 <translation id="346243998268439747">Ресетирајте го нивото на зумирање</translation>
 <translation id="3465223694362104965">Друга тастатура се поврзала со уредов од вашето последно најавување. Проверете дали ѝ верувате на тастатурава пред да ја користите.</translation>
 <translation id="3465356146291925647">Управувана од администраторот</translation>
+<translation id="3470502288861289375">Се копира...</translation>
 <translation id="347117769229524881"><ph name="MODIFIER_ONE" /><ph name="MODIFIER_TWO" /><ph name="KEY_ONE" />, а потоа <ph name="KEY_TWO" /> или <ph name="KEY_THREE" /></translation>
 <translation id="3477079411857374384">Control-Shift-Space</translation>
 <translation id="3485319357743610354"><ph name="SECURITY_STATUS" />, <ph name="CONNECTION_STATUS" />, јачина на сигналот: <ph name="SIGNAL_STRENGTH" /></translation>
@@ -1013,6 +1020,7 @@
 <translation id="4351244548802238354">Затвори дијалог</translation>
 <translation id="4356872429719185452">Прикажи детали за точката на пристап. Точката на пристап се вклучува.</translation>
 <translation id="4364101114148522660">Се снима: <ph name="DURATION" /></translation>
+<translation id="4368227575116094370">Создај табела на Sheets</translation>
 <translation id="4371348193907997655">Поставки за Cast</translation>
 <translation id="4371834685492830207">PIN-кодот мора да содржи само важечки знаци</translation>
 <translation id="4375482231364171368">Пребарува во лентата за адреси</translation>
@@ -1030,6 +1038,7 @@
 <translation id="4412698727486357573">Центар за помош</translation>
 <translation id="4412944820643904175"><ph name="FEATURE_NAME" /> е исклучено.</translation>
 <translation id="4417647906073317561">Поставки за „Режим за концентрација“. Поставете тајмер, задача и музика за да влезете во текот.</translation>
+<translation id="4418600384772451109">Затвори ја таблата</translation>
 <translation id="4424159417645388645">Работна површина 5</translation>
 <translation id="4426817706804363424">Одлично!</translation>
 <translation id="4430019312045809116">Гласност</translation>
@@ -1482,6 +1491,7 @@
 <translation id="5825969630400862129">Поставки за поврзани уреди</translation>
 <translation id="5830180081891717894">уште <ph name="WINDOWS" /></translation>
 <translation id="5837036133683224804">Престани со емитување на <ph name="ROUTE_TITLE" /> на <ph name="RECEIVER_NAME" /></translation>
+<translation id="5840658767386246331">Пребарувајте со Google</translation>
 <translation id="5841296711770970362">Одење на следната песна</translation>
 <translation id="5842553299352339114">Точката на пристап на <ph name="DEVICE_NAME" /> е вклучена, нема поврзани уреди</translation>
 <translation id="584525477304726060">Задржете за максимирање</translation>
@@ -1513,6 +1523,7 @@
 <translation id="595202126637698455">Овозможено е следење на изведбата</translation>
 <translation id="5955304353782037793">апликација</translation>
 <translation id="5958529069007801266">Надгледуван корисник</translation>
+<translation id="596035801491797438">Исклучи „Контрола со лик“</translation>
 <translation id="5960410286721553511">Прегледувајте ги неодамнешните фотографии и аудиовизуелните содржини од телефонот</translation>
 <translation id="5965524703725988602">Вклучете/исклучете ја темната тема. <ph name="STATE_TEXT" />.</translation>
 <translation id="5975235751479998104">Движете се нанапред низ прозорците</translation>
@@ -1895,6 +1906,7 @@
 <translation id="7228968829656641943">Изберете да го пребарување својот екран. Притиснете Tab, па Space за навигација со тастатурата.</translation>
 <translation id="7229029500464092426">Меморија: <ph name="AVAILABLE_MEMORY" /> | вкупно: <ph name="TOTAL_MEMORY" /></translation>
 <translation id="7239814253344511868">Двете копчиња на глувчето</translation>
+<translation id="7240636904654154599">Создадена е табела на Sheets</translation>
 <translation id="7244725679040769470">Престануваат уште <ph name="PERCENTAGE" /> % од батеријата. Приклучете го уредот во струја.</translation>
 <translation id="7246071203293827765"><ph name="UPDATE_TEXT" />. Треба да го рестартирате овој Chromebook за да се примени ажурирањето. Ова може да потрае 1 минута.</translation>
 <translation id="7256057185598509352">ExpressKey 2</translation>
@@ -2223,6 +2235,7 @@
 <translation id="8287009018010202411">Продуктивност</translation>
 <translation id="828708037801473432">Исклучено</translation>
 <translation id="8297006494302853456">Слаб</translation>
+<translation id="8300451473979404345">Избрана е рачка, користете ги копчињата со стрелки за да ја преместувате</translation>
 <translation id="8308637677604853869">Претходно мени</translation>
 <translation id="830868413617744215">Бета</translation>
 <translation id="8314772463905284467">Вклучено е Caps Lock</translation>
@@ -2283,6 +2296,7 @@
 <translation id="851458219935658693">Прикажувај прозорци од тековната работна површина, избрано е тркалезно копче</translation>
 <translation id="851660987304951246">Користете „Помош при читање“ за брзо резимирање содржини или поставување прашања</translation>
 <translation id="8517041960877371778"><ph name="DEVICE_TYPE" /> може да не се полни додека е вклучен.</translation>
+<translation id="8519329096920173967">Пребарај го мојот екран со Google Lens</translation>
 <translation id="8535393432370007982">Поништете го редоследот на подредувањето по боја</translation>
 <translation id="8536886494750559755">Прикажувај ги поставките за „Брзо споделување“. Видливо за сите <ph name="TIME_REMAINING" /></translation>
 <translation id="8539803091108018926">Текстот е копиран во привремената меморија.</translation>
@@ -2405,6 +2419,7 @@
 <translation id="8921624153894383499">„Помошникот на Google“ не зборува на овој јазик.</translation>
 <translation id="8926951137623668982">Полицата е секогаш скриена</translation>
 <translation id="8929566928381252430">Се обидувате да го искористите копчето Caps Lock? Користете</translation>
+<translation id="8929623844713377237">Создаден е контакт</translation>
 <translation id="8934418770423095813">Создај документ на Google</translation>
 <translation id="8934926665751933910">{NUM_FILES,plural, =1{1 датотека}one{# датотека}other{# датотеки}}</translation>
 <translation id="8936501819958976551">деактивирано</translation>

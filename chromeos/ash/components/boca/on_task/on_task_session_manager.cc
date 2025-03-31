@@ -7,6 +7,7 @@
 #include <memory>
 #include <optional>
 
+#include "ash/constants/ash_features.h"
 #include "ash/constants/notifier_catalogs.h"
 #include "base/functional/bind.h"
 #include "base/functional/callback_helpers.h"
@@ -43,6 +44,9 @@ constexpr base::TimeDelta kRemoveTabRetryDelay = base::Seconds(1);
 // Delay in seconds before we attempt to pin or unpin the active SWA window.
 constexpr base::TimeDelta kSetPinnedStateDelay = base::Seconds(3);
 
+// Delay in seconds before we attempt to pause or unpause the active SWA window.
+constexpr base::TimeDelta kSetPausedStateDelay = base::Seconds(3);
+
 }  // namespace
 
 OnTaskSessionManager::OnTaskSessionManager(
@@ -55,7 +59,12 @@ OnTaskSessionManager::OnTaskSessionManager(
               system_web_app_manager_.get(),
               std::vector<boca::BocaWindowObserver*>{&active_tab_tracker_,
                                                      this})),
-      notifications_manager_(OnTaskNotificationsManager::Create()) {}
+      notifications_manager_(OnTaskNotificationsManager::Create()) {
+  notification_countdown_duration_ =
+      features::IsBocaLockedModeCustomCountdownDurationEnabled()
+          ? ash::features::kBocaLockedModeCountdownDurationInSeconds.Get()
+          : kDefaultOnTaskNotificationCountdownDuration;
+}
 
 OnTaskSessionManager::~OnTaskSessionManager() = default;
 
@@ -182,7 +191,8 @@ void OnTaskSessionManager::OnBundleUpdated(const ::boca::Bundle& bundle) {
     }
   }
 
-  LockOrUnlockWindow(bundle.locked(), kOnTaskNotificationCountdownDuration);
+  LockOrUnlockWindow(bundle.locked());
+  PauseOrUnpauseApp(bundle.lock_to_app_home());
 
   // Show relevant notifications if content was added or deleted.
   if (has_new_content) {
@@ -265,12 +275,12 @@ void OnTaskSessionManager::OnAppReloaded() {
   }
 
   // Also lock window if necessary.
-  LockOrUnlockWindow(should_lock_window_, kOnTaskNotificationCountdownDuration);
+  LockOrUnlockWindow(should_lock_window_);
 }
 
-void OnTaskSessionManager::LockOrUnlockWindow(bool lock_window,
-                                              base::TimeDelta countdown) {
+void OnTaskSessionManager::LockOrUnlockWindow(bool lock_window) {
   DCHECK_CALLED_ON_VALID_SEQUENCE(sequence_checker_);
+  lock_in_progress_ = lock_window;
   bool locked_mode_state_changed = (should_lock_window_ != lock_window);
   should_lock_window_ = lock_window;
   notifications_manager_->ConfigureForLockedMode(should_lock_window_);
@@ -279,12 +289,10 @@ void OnTaskSessionManager::LockOrUnlockWindow(bool lock_window,
     extensions_manager_->DisableExtensions();
     if (locked_mode_state_changed) {
       // Show notification before locking the window.
-      // TODO (crbug.com/402014591): Only show countdown or non-countdown
-      // notifications once we have a decision.
       int message_id =
-          (countdown == base::Seconds(1))
-              ? IDS_ON_TASK_ENTER_LOCKED_MODE_NOTIFICATION_MESSAGE
-              : IDS_ON_TASK_ENTER_LOCKED_MODE_COUNTDOWN_NOTIFICATION_MESSAGE;
+          (features::IsBocaLockedModeCustomCountdownDurationEnabled())
+              ? IDS_ON_TASK_ENTER_LOCKED_MODE_COUNTDOWN_NOTIFICATION_MESSAGE
+              : IDS_ON_TASK_ENTER_LOCKED_MODE_NOTIFICATION_MESSAGE;
 
       OnTaskNotificationsManager::NotificationCreateParams
           notification_create_params(
@@ -297,11 +305,9 @@ void OnTaskSessionManager::LockOrUnlockWindow(bool lock_window,
                          ash::NotificationCatalogName::kOnTaskEnterLockedMode),
               base::BindRepeating(&OnTaskSessionManager::EnterLockedMode,
                                   weak_ptr_factory_.GetWeakPtr()),
-              countdown);
-
-      if (countdown != base::Seconds(1)) {
-        notification_create_params.is_counting_down = true;
-      }
+              notification_countdown_duration_,
+              /*is_counting_down=*/
+              features::IsBocaLockedModeCustomCountdownDurationEnabled());
 
       notifications_manager_->CreateNotification(
           std::move(notification_create_params));
@@ -328,6 +334,7 @@ void OnTaskSessionManager::LockOrUnlockWindow(bool lock_window,
 void OnTaskSessionManager::EnterLockedMode() {
   // If the Boca SWA is closed during the countdown, we launch it again so we
   // can pin the SWA window.
+  DCHECK_CALLED_ON_VALID_SEQUENCE(sequence_checker_);
   if (const SessionID window_id =
           system_web_app_manager_->GetActiveSystemWebAppWindowID();
       !window_id.is_valid()) {
@@ -337,6 +344,24 @@ void OnTaskSessionManager::EnterLockedMode() {
       /*pinned=*/true,
       base::BindRepeating(&OnTaskSessionManager::OnSetPinStateOnBocaSWAWindow,
                           weak_ptr_factory_.GetWeakPtr()));
+}
+
+void OnTaskSessionManager::PauseOrUnpauseApp(bool pause_app) {
+  DCHECK_CALLED_ON_VALID_SEQUENCE(sequence_checker_);
+  if (lock_in_progress_) {
+    base::SequencedTaskRunner::GetCurrentDefault()->PostDelayedTask(
+        FROM_HERE,
+        base::BindOnce(&OnTaskSessionManager::PauseOrUnpauseApp,
+                       weak_ptr_factory_.GetWeakPtr(), pause_app),
+        kSetPausedStateDelay);
+    return;
+  }
+  if (const SessionID window_id =
+          system_web_app_manager_->GetActiveSystemWebAppWindowID();
+      window_id.is_valid()) {
+    system_web_app_manager_->SetPauseStateForSystemWebAppWindow(pause_app,
+                                                                window_id);
+  }
 }
 
 void OnTaskSessionManager::OnTabAdded(const SessionID active_tab_id,
@@ -537,6 +562,8 @@ void OnTaskSessionManager::OnBundleTabRemoved(GURL url) {
 }
 
 void OnTaskSessionManager::OnSetPinStateOnBocaSWAWindow() {
+  DCHECK_CALLED_ON_VALID_SEQUENCE(sequence_checker_);
+  lock_in_progress_ = false;
   // TODO (b/370871395): Move `SetWindowTrackerForSystemWebAppWindow` to
   // `OnTaskSystemWebAppManager` eliminating the need for this callback.
   if (const SessionID window_id =

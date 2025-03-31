@@ -95,7 +95,6 @@ For more settings that use data to improve your Chromium experience, go to <ph n
 <translation id="328933489847748230">{count,plural, =1{Now showing 1 Chromium window}other{Now showing {count} Chromium windows}}</translation>
 <translation id="3344973607274501920">Chromium couldn't check your passwords. Try checking your Internet connection.</translation>
 <translation id="3366305173356742781">Chromium data in your account</translation>
-<translation id="33788334537425157">Turn on 'Lock Incognito tabs when you close Chromium'</translation>
 <translation id="3387107508582892610">{THRESHOLD,plural, =1{This happens when Chromium isn't used for {THRESHOLD} minute. This could include history and autofill.}other{This happens when Chromium isn't used for {THRESHOLD} minutes. This could include history and autofill.}}</translation>
 <translation id="3410395242749598859">Some of your Chromium data hasn't been saved in <ph name="EMAIL" /> yet.
 Try waiting a few minutes before switching accounts. If you switch accounts now, this data will be deleted.</translation>
@@ -208,7 +207,6 @@ Things to consider:
   • If you sync your history to your Google Account, metrics may also include info about URLs you visit.<ph name="END_INDENT" /></translation>
 <translation id="5932787118589620366">Delete browsing data in Chromium.</translation>
 <translation id="593808800391107017">Receive alerts on any privacy or security issues that Chromium automatically detects for you.</translation>
-<translation id="5945387852661427312">You are signing in with an account managed by <ph name="DOMAIN" /> and giving its administrator control over your Chromium data. Your data will become permanently tied to this account. Signing out of Chromium will delete your data from this device, but it will remain stored in your Google Account.</translation>
 <translation id="5951593919357934226">Get the most out of Chromium.</translation>
 <translation id="5985254578475526217">To receive notifications from Chromium, turn on notifications in your iOS settings.</translation>
 <translation id="6104024151682120539">Open in Chromium</translation>

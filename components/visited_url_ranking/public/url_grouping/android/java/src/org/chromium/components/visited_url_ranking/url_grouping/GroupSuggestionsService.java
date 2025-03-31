@@ -30,8 +30,20 @@ public interface GroupSuggestionsService {
     /** Gets called when a tab is selected. */
     void didSelectTab(int tabId, int tabSelectionType, int lastTabId);
 
+    /** Gets called when a tab will be closed. */
+    void willCloseTab(int tabId);
+
+    /** Gets called when a tab closure will be undone. */
+    void tabClosureUndone(int tabId);
+
+    /** Gets called when a tab closure is committed. */
+    void tabClosureCommitted(int tabId);
+
     /** Gets called when user enters tab switcher. */
     void didEnterTabSwitcher();
+
+    /** Gets called when page load finishes on any candidate tab. */
+    void onPageLoadFinished(int tabId);
 
     /** Registers a delegate to receive backend suggestions. */
     void registerDelegate(Delegate delegate, int windowId);

@@ -11,6 +11,7 @@
 <translation id="102432830749687801">आफ्नो विद्यालयको खाताको एक्सेस गुम्नुअघि नै सो खातामा भएको जानकारी आफ्नो व्यक्तिगत खातामा सार्न Google ले बनाएको कन्टेन्ट ट्रान्स्फर एप प्रयोग गर्नुहोस्।</translation>
 <translation id="1026212596705997935">यो सर्टकट "<ph name="CONFLICT_ACCEL_NAME" />" का निम्ति प्रयोग भइरहेको छ। नयाँ सर्टकट थिच्नुहोस्। मूल सर्टकट बदल्न यो सर्टकट फेरि थिच्नुहोस्।</translation>
 <translation id="1030856839388844477">डेटा प्रयोग रिसेट गर्नुहोस्</translation>
+<translation id="1047095725494118091">डाउनलोड गर्न सकिएन। फेरि प्रयास गर्नुहोस् वा आफ्नो <ph name="DEVICE_TYPE" /> रिस्टार्ट गर्नुहोस्।</translation>
 <translation id="1047458377670401304"><ph name="CPU_NAME" /> (<ph name="THREAD_COUNT" /> वटा थ्रेड, <ph name="CPU_MAX_CLOCK_SPEED" />GHz)</translation>
 <translation id="1047773237499189053">नयाँ सुविधा उपलब्ध छ, थप जान्न अप एरो की प्रयोग गर्नुहोस्।</translation>
 <translation id="1049663189809099096">प्यास्टेल पहेँलो</translation>
@@ -26,6 +27,7 @@
 <translation id="1082009148392559545">स्क्रिन सेभर डाउनलोड गरिँदै छ</translation>
 <translation id="1094693127011229778">IP ठेगाना उपलब्ध छैन</translation>
 <translation id="1100902271996134409">थम्बनेलहरू लोड हुँदै छन्…</translation>
+<translation id="1107856713690040084"><ph name="DEVICE_TYPE" /> को अडियो</translation>
 <translation id="1116694919640316211">बारेमा</translation>
 <translation id="1118572504348554005">हामी यो फाराममार्फत पेस गरिएका प्रतिक्रिया त्रुटि सच्याउने र तपाईंले हामीलाई जानकारी गराउने अन्य समस्याहरू निवारण गर्ने प्रयोजनका लागि हाम्रा साझेदारसँग सेयर गर्न सक्छौँ। आफ्नो पासवर्ड जस्ता संवेदनशील जानकारी समावेश नगर्नुहोस्।</translation>
 <translation id="1119403468619527527">एकदमै थोरै शब्द भएकाले सरल बनाउन सकिँदैन</translation>
@@ -292,6 +294,7 @@
 <translation id="2163937499206714165">अँध्यारो मोड अन गर्नुहोस्</translation>
 <translation id="2164131940279488868">अडियो रेकर्ड गर्न थाल्न माइक कनेक्ट गरिएको छ भन्ने कुरा सुनिश्चित गर्नुहोस्</translation>
 <translation id="2173302385160625112">आफ्नो इन्टरनेट जडानको जाँच गर्नुहोस्</translation>
+<translation id="2176909213844392588"><ph name="LANGUAGE_NAME" /> भाषाको ट्रान्स्क्रिप्सन मोडेल डाउनलोड गर्न सकिएन। फेरि प्रयास गर्नुहोस् वा आफ्नो <ph name="DEVICE_TYPE" /> रिस्टार्ट गर्नुहोस्।</translation>
 <translation id="2180197493692062006">कुनै समस्या आयो। यो एप फेरि खोली हेर्नुहोस्।</translation>
 <translation id="2189104374785738357">APN सम्बन्धी विवरणहरू परिवर्तन गर्नुहोस्</translation>
 <translation id="2195732836444333448">अहिले तपाईंलाई मद्दत गर्न सक्दैनौँ। चाँडै फर्केर आउनुहोस्।</translation>
@@ -480,6 +483,7 @@
 <translation id="3199982728237701504">डकुमेन्ट फिडर (दुईतर्फी)</translation>
 <translation id="3201315366910775591">अन्य मान्छेहरू साझा एल्बममा भएका फोटोहरू परिवर्तन गर्न सक्छन्</translation>
 <translation id="3211671540163313381">D-pad किम्याप गरिँदै छ</translation>
+<translation id="3217462202230355157">तपाईंको माइक कनेक्ट गरिएको छ भन्ने कुरा सुनिश्चित गर्नुहोस् वा <ph name="DEVICE_TYPE" /> रिस्टार्ट गरी हेर्नुहोस्</translation>
 <translation id="3226405216343213872">स्क्यानरहरू खोजिँदै छ</translation>
 <translation id="3226657629376379887">लेआउट एक्सन मेनु</translation>
 <translation id="3227186760713762082"><ph name="CONVERSION_RATE" /> ले <ph name="CATEGORY_TEXT" /> लाई भाग गर्नुहोस्</translation>
@@ -515,6 +519,7 @@
 <translation id="3383623117265110236">विशेष</translation>
 <translation id="3404249063913988450">स्क्रिन सेभर सक्षम पार्नुहोस्</translation>
 <translation id="3413935475507503304">तपाईं यो अपडेट प्राप्त गर्न चाहनुहुन्छ भने अर्को नामक बटन क्लिक गर्नुहोस्।</translation>
+<translation id="3416709353545797224"><ph name="DEVICE_TYPE" /> का सबै अडियो रेकर्ड गरिँदै छन्</translation>
 <translation id="3428551088151258685">बाहिर</translation>
 <translation id="3428971106895559033">प्यास्टेल</translation>
 <translation id="3434107140712555581"><ph name="BATTERY_PERCENTAGE" />%</translation>
@@ -678,6 +683,7 @@
 <translation id="4155551848414053977">स्क्यानर अन छ र उक्त स्क्यानर तपाईंको नेटवर्क वा कुनै डाइरेक्ट कनेक्सनमार्फत प्रयोग गर्न मिल्छ भन्ने कुरा सुनिश्चित गर्नुहोस्</translation>
 <translation id="4159238217853743776">पार्सियल बटन</translation>
 <translation id="4159784952369912983">बैजनी</translation>
+<translation id="416219735020840807">ट्रान्स्क्रिप्सन मोडेल डाउनलोड गर्न सकिएन। फेरि प्रयास गर्नुहोस् वा आफ्नो <ph name="DEVICE_TYPE" /> रिस्टार्ट गर्नुहोस्।</translation>
 <translation id="4170180284036919717">फोटो खिच्नुहोस्</translation>
 <translation id="4170700058716978431">असफल भयो</translation>
 <translation id="4171077696775491955">"चमक घटाउनुहोस्" जनाउने आइकन</translation>
@@ -785,7 +791,6 @@
 <translation id="4593212453765072419">प्रोक्सी प्रमाणित गर्नु पर्ने हुन्छ</translation>
 <translation id="4594021849294327751">ट्रान्सक्रिप्ट बनाउनुहोस्</translation>
 <translation id="4594541568452132351">ट्रान्स्क्रिप्सनको भाषा चयन गर्नुहोस् र मोडेल डाउनलोड गर्नुहोस्</translation>
-<translation id="4607282946861182308">यो प्रम्प्टअनुसारका फोटोहरू बनाउन सकिएन। अर्कै प्रम्प्ट प्रयोग गरी हेर्नुहोस्।</translation>
 <translation id="4609350030397390689">किबोर्डको चमक घटाउने की</translation>
 <translation id="4627232916386272576"><ph name="DOCUMENT_TITLE" />, <ph name="PRINTER_NAME" />, <ph name="CREATION_TIME" />, <ph name="TOTAL_PAGE_NUMBER" /> मध्ये <ph name="PRINTED_PAGE_NUMBER" />। प्रिन्ट गर्ने कार्य रद्द गर्न enter थिच्नुहोस्।</translation>
 <translation id="463791356324567266">स्क्यान गर्ने कार्य रद्द गरिँदै छ...</translation>
@@ -952,6 +957,7 @@
 <translation id="5344619683981067131">चयन गरिएको टेक्स्टको ठाउँमा सुझाव दिइएको टेक्स्ट हालिँदै छ</translation>
 <translation id="5346687412805619883">स्थानीय नेटवर्क</translation>
 <translation id="5358174242040570474">कुनै समस्या आयो। फेरि कुनै वालपेपर छनौट गरी हेर्नुहोस् वा यो एप पुनः खोल्नुहोस्।</translation>
+<translation id="5368228070728130240">सारांश तथा शीर्षक बनाउने मोडेल डाउनलोड गर्न सकिएन। फेरि प्रयास गर्नुहोस् वा आफ्नो <ph name="DEVICE_TYPE" /> रिस्टार्ट गर्नुहोस्।</translation>
 <translation id="5372659122375744710">WiFi नेटवर्क सुरक्षित छैन</translation>
 <translation id="5376354385557966694">स्वचालित उज्यालो मोड</translation>
 <translation id="5378184552853359930">IP को प्रकार</translation>
@@ -1257,6 +1263,7 @@
 <translation id="6766275201586212568">DNS रिजोल्युसन पूरा हुन सकेनन्</translation>
 <translation id="6768237774506518020">DNS रिजोल्युसन पूरा हुन नसक्ने दर उच्च छ</translation>
 <translation id="6786747875388722282">विस्तारहरू</translation>
+<translation id="6789891265243243337"><ph name="DEVICE_TYPE" /> को अडियो अन भएका बेला रेकर्डरले यो डिभाइसमा प्ले गरिने सबै अडियो रेकर्ड गर्छ</translation>
 <translation id="6791471867139427246">किबोर्डको प्रकाशको रङ</translation>
 <translation id="6796229976413584781">सर्टकट मेटाइयो</translation>
 <translation id="6798678288485555829">टेक्स्ट नेभिगेसन</translation>
@@ -1532,6 +1539,7 @@
 <translation id="8010765388850538088">जेनेरेटिभ AI का बारेमा थप जान्नुहोस्</translation>
 <translation id="8017679124341497925">सर्टकट सम्पादन गरियो</translation>
 <translation id="802154636333426148">डाउनलोड गर्न सकिएन</translation>
+<translation id="8027467664787098346">चयन गरिएको वालपेपरका बारेमा थप जान्नुहोस्</translation>
 <translation id="8028993641010258682">आकार</translation>
 <translation id="8031884997696620457">HSPAPlus</translation>
 <translation id="80398733265834479">स्वतः रङ समायोजन गर्ने मोड अन गर्नुहोस्</translation>
@@ -1650,6 +1658,7 @@
 <translation id="8543574988889671960">ट्याब रिलोड गर्नुहोस्</translation>
 <translation id="8550364285433943656">किबोर्डका कीहरू प्रयोग गरेर गेम खेल्न गेममा कन्ट्रोलहरू सेट गर्नुहोस्</translation>
 <translation id="8557447961879934694">WPA2</translation>
+<translation id="8558521694042102707">जेनेरेटिभ AI ले मान्छे तथा अन्य कुराका बारेमा गलत जानकारी देखाउन सक्छ। त्यसैले यसले दिने जवाफ सही छ कि छैन फेरि जाँच्नुहोस्।</translation>
 <translation id="8575298406870537639">तपाईंको मोबाइल सेवा प्रदायकले सो सेवा प्रदायकको नेटवर्कमा कनेक्ट गर्न सकोस् भन्नाका लागि तपाईंले यो विकल्प अन गर्नु पर्ने हुन सक्छ। यससम्बन्धी थप जानकारी प्राप्त गर्न आफ्नो मोबाइल सेवा प्रदायकलाई सम्पर्क गर्नुहोस्।</translation>
 <translation id="8576249514688522074">सुरु गरिएको छैन</translation>
 <translation id="8584654835905316966"><ph name="DEVICE_NAME" /> को फर्मवेयर अपग्रेड गरी संस्करण <ph name="VERSION" /> इन्स्टल गर्ने प्रक्रिया पूरा गर्न कम्प्युटर रिस्टार्ट गर्नु पर्ने हुन्छ। तपाईंको कम्प्युटर धेरै पटक रिबुट हुन सक्छ। धेरै पटक रिबुट हुन अपेक्षा गरिएको छ।</translation>
@@ -1664,7 +1673,6 @@
 <translation id="8655295600908251630">च्यानल</translation>
 <translation id="8655828773034788261">URL सेयर गर्नुहोस्:</translation>
 <translation id="8660881923941176839">पाउन्ड</translation>
-<translation id="8670057600920888023">जेनेरेटिभ AI परीक्षणका क्रममा भएकाले सामग्री गलत, भ्रामक वा आपत्तिजनक हुन सक्छ।</translation>
 <translation id="8670574982334489519">दायाँ</translation>
 <translation id="8675354002693747642">पहिलै साझा गरिएको साँचो</translation>
 <translation id="8677859815076891398">कुनै पनि एल्बम छैन। <ph name="LINK_BEGIN" />Google Photos<ph name="LINK_END" /> मा गई एउटा एल्बम बनाउनुहोस्।</translation>
@@ -1728,6 +1736,7 @@
 <translation id="8930622219860340959">वायरलेस</translation>
 <translation id="8933650076320258356"><ph name="DIRECTION" /> का लागि <ph name="KEYS" /> की चयन गरिएको छ। <ph name="REASSIGN_INSTRUCTION" /></translation>
 <translation id="8936793075252196307">क्लाइन्टको IP ठेगाना</translation>
+<translation id="8938606491880817721">डाउनलोड गर्न सकिएन। फेरि प्रयास गर्नुहोस् वा आफ्नो <ph name="DEVICE_TYPE" /> रिस्टार्ट गर्नुहोस्।</translation>
 <translation id="8944651180182756621">लन्चरको रङ</translation>
 <translation id="8945308580158685341">मौरीहरू</translation>
 <translation id="894617464444543719">यो डिभाइस फोन हो।</translation>

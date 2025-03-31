@@ -890,6 +890,9 @@
   <message name="IDS_AUTOFILL_CARD_BNPL_SELECT_PROVIDER_TITLE" desc="Title of the BNPL select provider screen that prompts the user to choose a pay over time provider.">
     Choose a pay over time provider
   </message>
+  <message name="IDS_AUTOFILL_CARD_BNPL_LINKED_ISSUER_PILL_LABEL" desc="Label for the linked issuer pill view, which may be displayed on the BNPL select provider screen that prompts the user to choose a pay over time provider. If this label is present, it indicates that the user has previously associated this BNPL provider with their Google account.">
+    Linked
+  </message>
   <message name="IDS_AUTOFILL_CARD_INFO_RETRIEVAL_SUGGESTION_IPH_BUBBLE_FALLBACK_LABEL" desc="Text shown in the `In-Product Help(IPH)` bubble for card info retrieval suggestions on Chrome Android when the issuer_id is not present in the card. It is specifically for card info retrieval enrolled card. Card info will be copied after the user clicks the suggestion.">
       You can autofill this card because your account is linked to Google Pay
   </message>
@@ -999,10 +1002,7 @@
     Virtual card for <ph name="BNPL_ISSUER_NAME">$1<ex>PayLater</ex></ph> filled
   </message>
   <message name="IDS_AUTOFILL_BNPL_FILLED_CARD_INFORMATION_BUBBLE_EDUCATIONAL_BODY_LABEL" desc="The description label shown in body of the Autofill filled card information bubble for the Buy Now Pay Later flow.">
-    When you pay over time, a one-time virtual card number is filled. This number is only for this purchase. <ph name="IDS_AUTOFILL_BNPL_FILLED_CARD_INFORMATION_BUBBLE_LEARN_MORE_LINK_LABEL">$1<ex>Learn more about PayLater</ex></ph>
-  </message>
-  <message name="IDS_AUTOFILL_BNPL_FILLED_CARD_INFORMATION_BUBBLE_LEARN_MORE_LINK_LABEL" desc="Link text for the learn more link for a Buy Now Pay Later provider. Added to the end of the explanatory message of the Autofill filled card information bubble in IDS_AUTOFILL_BNPL_FILLED_CARD_INFORMATION_BUBBLE_EDUCATIONAL_BODY_LABEL.">
-    Learn more about <ph name="BNPL_ISSUER_NAME">$1<ex>PayLater</ex></ph>
+    When you pay over time, a one-time virtual card number is filled. This number is only for this purchase.
   </message>
   <message name="IDS_AUTOFILL_BNPL_TOS_OK_BUTTON_LABEL" desc="The OK button label of the Buy-Now-Pay-Later Terms of Service dialog. If the user accepts this dialog, a new window will be shown to the user to complete the transaction on the BNPL issuer's website.">
     Continue

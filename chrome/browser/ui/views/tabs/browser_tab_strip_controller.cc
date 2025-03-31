@@ -942,9 +942,17 @@ void BrowserTabStripController::OnSplitTabCreated(
     tabs::SplitTabLayout tab_layout) {
   for (const auto& tab_pair : tabs) {
     int index = tab_pair.second;
-    // TODO(agale): Splits should ultimately have ids so the tab strip can keep
-    // track of multiple splits.
-    tabstrip_->AddTabToSplit(index);
+    tabstrip_->SetSplit(index, split_id);
+  }
+}
+
+void BrowserTabStripController::OnSplitTabRemoved(
+    std::vector<std::pair<tabs::TabInterface*, int>> tabs,
+    split_tabs::SplitTabId split_id,
+    SplitTabRemoveReason reason) {
+  for (const auto& tab_pair : tabs) {
+    int index = tab_pair.second;
+    tabstrip_->SetSplit(index, std::nullopt);
   }
 }
 

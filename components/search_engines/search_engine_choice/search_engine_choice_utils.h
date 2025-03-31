@@ -11,6 +11,7 @@
 
 #include "base/memory/raw_ptr.h"
 #include "build/build_config.h"
+#include "components/country_codes/country_codes.h"
 #include "components/search_engines/choice_made_location.h"
 #include "components/search_engines/search_engine_type.h"
 #include "components/search_engines/template_url.h"
@@ -18,6 +19,10 @@
 class PrefService;
 class SearchTermsData;
 struct TemplateURLData;
+
+namespace base {
+class Time;
+}  // namespace base
 
 namespace search_engines {
 
@@ -145,8 +150,9 @@ enum class WipeSearchEngineChoiceReason {
   kInvalidChoiceVersion = 2,
   kReprompt = 3,
   kCommandLineFlag = 4,
+  kDeviceRestored = 5,
 
-  kMaxValue = kCommandLineFlag,
+  kMaxValue = kDeviceRestored,
 };
 
 // Exposed for testing.
@@ -179,7 +185,7 @@ struct ChoiceScreenDisplayState {
  public:
   ChoiceScreenDisplayState(
       std::vector<SearchEngineType> search_engines,
-      int country_id,
+      country_codes::CountryId country_id,
       std::optional<int> selected_engine_index = std::nullopt);
   ChoiceScreenDisplayState(const ChoiceScreenDisplayState& other);
   ~ChoiceScreenDisplayState();
@@ -203,7 +209,7 @@ struct ChoiceScreenDisplayState {
   // The country used when generating the list. It should be the country
   // used to determine the set of search engines to show for the current
   // profile.
-  const int country_id;
+  const country_codes::CountryId country_id;
 };
 
 // Contains basic information about the search engine choice screen, notably
@@ -212,7 +218,7 @@ struct ChoiceScreenDisplayState {
 class ChoiceScreenData {
  public:
   ChoiceScreenData(TemplateURL::OwnedTemplateURLVector owned_template_urls,
-                   int country_id,
+                   country_codes::CountryId country_id,
                    const SearchTermsData& search_terms_data);
 
   ChoiceScreenData(const ChoiceScreenData&) = delete;
@@ -279,6 +285,11 @@ void RecordUnexpectedSearchProvider(const TemplateURLData& data);
 void WipeSearchEngineChoicePrefs(PrefService& profile_prefs,
                                  WipeSearchEngineChoiceReason reason);
 
+// Returns the timestamp of search engine choice screen. No value if no choice
+// has been made.
+std::optional<base::Time> GetChoiceScreenCompletionTimestamp(
+    PrefService& prefs);
+
 #if !BUILDFLAG(IS_ANDROID)
 // Returns the engine marketing snippet string resource id or -1 if the snippet
 // was not found.
@@ -298,7 +309,7 @@ std::u16string GetMarketingSnippetString(
 // `generated_search_engine_resource_ids.cc`.
 int GetIconResourceId(const std::u16string& engine_keyword);
 
-#endif
+#endif  // !BUILDFLAG(IS_ANDROID)
 
 }  // namespace search_engines
 

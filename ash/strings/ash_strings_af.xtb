@@ -91,6 +91,7 @@ Hier is 'n paar dinge wat jy kan probeer om aan die gang te kom.</translation>
 <translation id="1269405891096105529">Randtoestel word nie in Gasmodus gesteun nie</translation>
 <translation id="1270290102613614947">Opskerm-sleutelbord gedeaktiveer</translation>
 <translation id="1272079795634619415">Stop</translation>
+<translation id="12741168609094094">Kies enigiets op jou skerm om te soek, teks te kopieer en meer</translation>
 <translation id="1275285675049378717">Gee tans krag aan <ph name="POWER_SOURCE" /></translation>
 <translation id="1275718070701477396">Gekies</translation>
 <translation id="1276975447697633661">Kies die lêer en druk <ph name="KEY" /></translation>
@@ -149,6 +150,7 @@ Hier is 'n paar dinge wat jy kan probeer om aan die gang te kom.</translation>
 <translation id="1455242230282523554">Wys taalinstellings</translation>
 <translation id="1459693405370120464">Weer</translation>
 <translation id="1460620680449458626">Volume is gedemp.</translation>
+<translation id="1462439140224375968">Google-dokument is geskep</translation>
 <translation id="14648076227129703">Dit gee kameratoegang vir <ph name="APP1_NAME" />, <ph name="APP2_NAME" /> en alle apps en webwerwe met die kameratoestemming</translation>
 <translation id="1467432559032391204">Links</translation>
 <translation id="146902737843070955">Jou administrateur het hierdie verandering versoek</translation>
@@ -226,6 +228,7 @@ Hier is 'n paar dinge wat jy kan probeer om aan die gang te kom.</translation>
 <translation id="1720230731642245863">Warmkol is af</translation>
 <translation id="1731815243805539470">Skakel oor na vorige gebruiker</translation>
 <translation id="1733996486177697563">Wissel tussen donker- en ligtema. Raak en hou op die werkskerm en kies dan Muurpapier en Styl.</translation>
+<translation id="1735992454301033090">Area is gekies, gebruik pylsleutels om te beweeg</translation>
 <translation id="1736898441010944794">"<ph name="NAME" />" is sigbaar vir Bluetooth-toestelle.</translation>
 <translation id="1737078180382804488">Maak die opstelling toe vir die bekyk van jou foon se kennisgewings</translation>
 <translation id="174102739345480129">Merker is af.</translation>
@@ -493,6 +496,7 @@ Hier is 'n paar dinge wat jy kan probeer om aan die gang te kom.</translation>
 <translation id="2683887737780133806">Verlede week <ph name="DAY_OF_WEEK" /></translation>
 <translation id="2687510499067466116">Kortpadsleutels het verander</translation>
 <translation id="2689613560355655046">Lessenaar 8</translation>
+<translation id="2692092709110488417">Druk tab om die gekose area te fokus en te beweeg</translation>
 <translation id="2695305337569143674">web</translation>
 <translation id="2697697418792422688">Wys sleutelbordinstellings. <ph name="KEYBOARD_NAME" /> is gekies.</translation>
 <translation id="2699913284398121653">Gebruik die Inhoudoordragapp om jou skoolrekeningdata na jou persoonlike rekening toe te skuif</translation>
@@ -550,6 +554,7 @@ Anders sal die ingeboude raakpaneel binne <ph name="TIMEOUT_SECONDS" /> geherakt
 <translation id="2872353916818027657">Ruil primêre monitor</translation>
 <translation id="2872961005593481000">Skakel af</translation>
 <translation id="2876338922445400217">Zoem in op skerm</translation>
+<translation id="2876760662374103627">Gesigbeheer is aktief</translation>
 <translation id="2878884018241093801">Geen onlangse items nie</translation>
 <translation id="2880541185262491188">Te veel PIN-pogings. Wag <ph name="TIME_LEFT" /> en probeer weer</translation>
 <translation id="2883271196820422439">Hervat muissleutels</translation>
@@ -593,6 +598,7 @@ Anders sal die ingeboude raakpaneel binne <ph name="TIMEOUT_SECONDS" /> geherakt
 <translation id="301584155502740476">Wys warmkolbesonderhede. Warmkol is af.</translation>
 <translation id="3017079585324758401">Agtergrond</translation>
 <translation id="3018135054368884502">Spoel media vinnig vorentoe</translation>
+<translation id="3026897869154397692">By Kalender gevoeg</translation>
 <translation id="3033545621352269033">Aan</translation>
 <translation id="3033912566804961911">Kombineer met <ph name="DESK_NAME" /></translation>
 <translation id="3036649622769666520">Maak lêers oop</translation>
@@ -726,6 +732,7 @@ Anders sal die ingeboude raakpaneel binne <ph name="TIMEOUT_SECONDS" /> geherakt
 <translation id="346243998268439747">Stel zoemvlak terug</translation>
 <translation id="3465223694362104965">Nog 'n sleutelbord is aan hierdie toestel gekoppel vandat jy laas aangemeld het. Maak seker jy vertrou hierdie sleutelbord voordat jy dit gebruik.</translation>
 <translation id="3465356146291925647">Deur jou administrateur bestuur</translation>
+<translation id="3470502288861289375">Kopieer tans …</translation>
 <translation id="347117769229524881"><ph name="MODIFIER_ONE" /><ph name="MODIFIER_TWO" /><ph name="KEY_ONE" /> dan <ph name="KEY_TWO" /> of <ph name="KEY_THREE" /></translation>
 <translation id="3477079411857374384">Control-Shift-Space</translation>
 <translation id="3485319357743610354"><ph name="SECURITY_STATUS" />, <ph name="CONNECTION_STATUS" />, seinsterkte <ph name="SIGNAL_STRENGTH" /></translation>
@@ -1013,6 +1020,7 @@ Sommige kenmerke is beperk om die batterylewe te verleng.</translation>
 <translation id="4351244548802238354">Maak dialoog toe</translation>
 <translation id="4356872429719185452">Wys warmkolbesonderhede. Warmkol skakel tans aan.</translation>
 <translation id="4364101114148522660"><ph name="DURATION" />  opname</translation>
+<translation id="4368227575116094370">Skep Google-sigblad</translation>
 <translation id="4371348193907997655">Uitsaai-instellings</translation>
 <translation id="4371834685492830207">PIN moet net geldige karakters bevat</translation>
 <translation id="4375482231364171368">Soek in adresbalk</translation>
@@ -1030,6 +1038,7 @@ Sommige kenmerke is beperk om die batterylewe te verleng.</translation>
 <translation id="4412698727486357573">Hulpsentrum</translation>
 <translation id="4412944820643904175"><ph name="FEATURE_NAME" /> is af.</translation>
 <translation id="4417647906073317561">Fokusinstellings Stel ’n afteller, taak en musiek om aan die gang te kom.</translation>
+<translation id="4418600384772451109">Maak paneel toe</translation>
 <translation id="4424159417645388645">Lessenaar 5</translation>
 <translation id="4426817706804363424">Goeie werk!</translation>
 <translation id="4430019312045809116">Volume</translation>
@@ -1482,6 +1491,7 @@ Geen toestelle is gekoppel nie.</translation>
 <translation id="5825969630400862129">Instellings vir gekoppelde toestelle</translation>
 <translation id="5830180081891717894">Nog <ph name="WINDOWS" /></translation>
 <translation id="5837036133683224804">Stop <ph name="ROUTE_TITLE" /> op <ph name="RECEIVER_NAME" /></translation>
+<translation id="5840658767386246331">Soek met Google</translation>
 <translation id="5841296711770970362">Gaan na volgende snit</translation>
 <translation id="5842553299352339114"><ph name="DEVICE_NAME" />-warmkol is aan; geen toestelle is gekoppel nie</translation>
 <translation id="584525477304726060">Hou om groot te maak</translation>
@@ -1513,6 +1523,7 @@ Geen toestelle is gekoppel nie.</translation>
 <translation id="595202126637698455">Prestasie-nasporing geaktiveer</translation>
 <translation id="5955304353782037793">program</translation>
 <translation id="5958529069007801266">Gebruiker onder toesig</translation>
+<translation id="596035801491797438">Skakel gesigbeheer af</translation>
 <translation id="5960410286721553511">Bekyk jou foon se onlangse foto's en media</translation>
 <translation id="5965524703725988602">Wissel Donkertema. <ph name="STATE_TEXT" />.</translation>
 <translation id="5975235751479998104">Beweeg vorentoe deur vensters</translation>
@@ -1895,6 +1906,7 @@ Nuwe installasie</translation>
 <translation id="7228968829656641943">Kies om op my skerm te soek. Druk tab en dan spasie vir sleutelbordnavigasie.</translation>
 <translation id="7229029500464092426">Geheue <ph name="AVAILABLE_MEMORY" /> | <ph name="TOTAL_MEMORY" /> totaal</translation>
 <translation id="7239814253344511868">Albei muisknoppies</translation>
+<translation id="7240636904654154599">Google-sigblad is geskep</translation>
 <translation id="7244725679040769470"><ph name="PERCENTAGE" />% batterykrag oor. Koppel jou toestel aan krag.</translation>
 <translation id="7246071203293827765"><ph name="UPDATE_TEXT" />. Hierdie Chromebook moet herbegin om 'n opdatering toe te pas. Dit kan tot 1 minuut neem.</translation>
 <translation id="7256057185598509352">ExpressKey 2</translation>
@@ -2223,6 +2235,7 @@ Druk en hou weer die aan/af-skakelaar op die toestel om dit af te skakel.</trans
 <translation id="8287009018010202411">Produktiwiteit</translation>
 <translation id="828708037801473432">Af</translation>
 <translation id="8297006494302853456">Swak</translation>
+<translation id="8300451473979404345">Kies handvatsel, gebruik pylsleutels om te beweeg</translation>
 <translation id="8308637677604853869">Vorige kieslys</translation>
 <translation id="830868413617744215">Beta</translation>
 <translation id="8314772463905284467">Hoofletterslot is aan</translation>
@@ -2283,6 +2296,7 @@ Druk en hou weer die aan/af-skakelaar op die toestel om dit af te skakel.</trans
 <translation id="851458219935658693">Wys vensters van die huidige lessenaar af; radioknoppie is gekies</translation>
 <translation id="851660987304951246">Gebruik Help My Lees om inhoud vinnig op te som of om vrae te vra</translation>
 <translation id="8517041960877371778">Jou <ph name="DEVICE_TYPE" /> mag nie laai terwyl dit aangeskakel is nie.</translation>
+<translation id="8519329096920173967">Deursoek my skerm met Google Lens</translation>
 <translation id="8535393432370007982">Ontdoen sorteervolgorde volgens kleur</translation>
 <translation id="8536886494750559755">Wys Kitsdeel-instellings. Visible to everyone for <ph name="TIME_REMAINING" /></translation>
 <translation id="8539803091108018926">Teks is na knipbord gekopieer</translation>
@@ -2405,6 +2419,7 @@ Druk en hou weer die aan/af-skakelaar op die toestel om dit af te skakel.</trans
 <translation id="8921624153894383499">Die Google Assistent praat nie hierdie taal nie.</translation>
 <translation id="8926951137623668982">Rak is altyd versteek</translation>
 <translation id="8929566928381252430">Probeer jy om Caps Lock te gebruik? Gebruik</translation>
+<translation id="8929623844713377237">Kontak is geskep</translation>
 <translation id="8934418770423095813">Skep Google Dokument</translation>
 <translation id="8934926665751933910">{NUM_FILES,plural, =1{1 lêer}other{# lêers}}</translation>
 <translation id="8936501819958976551">gedeaktiveer</translation>

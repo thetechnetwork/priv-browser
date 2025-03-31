@@ -1644,6 +1644,15 @@ targets.tests.gtest_test(
 )
 
 targets.tests.gtest_test(
+    name = "layer_list_mode_cc_unittests",
+    args = [
+        "--test-launcher-filter-file=../../testing/buildbot/filters/layer_list_mode.cc_unittests.filter",
+        "--enable-features=UseLayerListsByDefault",
+    ],
+    binary = "cc_unittests",
+)
+
+targets.tests.gtest_test(
     name = "latency_unittests",
 )
 
@@ -1966,19 +1975,6 @@ targets.tests.gtest_test(
         "--enable-pixel-output-in-tests",
         "--test-launcher-filter-file=../../testing/buildbot/filters/pixel_tests.filter",
         "--test-launcher-jobs=1",
-    ],
-    binary = "browser_tests",
-)
-
-targets.tests.gtest_test(
-    name = "pixel_experimental_browser_tests",
-    mixins = [
-        "skia_gold_test",
-    ],
-    args = [
-        "--browser-ui-tests-verify-pixels",
-        "--enable-pixel-output-in-tests",
-        "--test-launcher-filter-file=../../testing/buildbot/filters/linux-chromeos.browser_tests.pixel_tests.filter",
     ],
     binary = "browser_tests",
 )

@@ -6,7 +6,6 @@
 <translation id="1143896152279775643">Aðgangsorðið verður vistað í aðgangsorðastjórnun Google fyrir <ph name="EMAIL" />.</translation>
 <translation id="1146503048444965320">Opna nýjan flipa í Chrome</translation>
 <translation id="1166460004393506534">Eyða vefskoðunargögnum í Chrome</translation>
-<translation id="1171255741903316750">Kveiktu á „Læsa huliðsflipum þegar þú lokar Chrome“.</translation>
 <translation id="1179527450541388808">Hafðu greiðan aðgang að Chrome af stikunni á heimaskjánum í iPad.</translation>
 <translation id="1180362651362502943">Haltu áfram að nota Chrome-gögnin á Google-reikningnum þínum.</translation>
 <translation id="1200396280085622191">Notaðu Chrome þegar þú ýtir á tengla í skilaboðum og öðrum forritum.</translation>
@@ -178,6 +177,7 @@ Prófaðu að bíða í nokkrar mínútur áður en þú skráir þig út. Ef þ
 <translation id="5716154293141027663">Opna Chrome hvenær sem þú ýtir á tengil í öðrum forritum</translation>
 <translation id="5752489513673657785">Sérsniðinn straumur sem Google bjó til fyrir þig</translation>
 <translation id="5772407442571703917">Sæktu Chrome hér.</translation>
+<translation id="5777468213129569553">Opna Chrome</translation>
 <translation id="5779767936254214055">Læstu huliðsflipum þegar þú lokar Chrome eða skiptir yfir í annað forrit.</translation>
 <translation id="5808435672482059465">Skoða Chrome ferilinn þinn</translation>
 <translation id="5833027901704861726">Einhver Chrome-gögn hafa ekki enn verið vistuð á <ph name="EMAIL" /> þínum.
@@ -213,7 +213,6 @@ Gögnin þín eru dulkóðuð með aðgangsorði. Sláðu það inn til að nota
 <translation id="6636941099779251629">Fyrirtækið þitt krefst þess að þú skráir þig inn til að nota Chrome. <ph name="BEGIN_LINK" />Nánar<ph name="END_LINK" /></translation>
 <translation id="6646696210740573446">Sendir ruglaðan hluta vefslóðarinnar til Google í gegnum traustan þjón sem felur IP-töluna þína. Ef vefsvæði reynir að stela aðgangsorðinu þínu, eða ef þú sækir skaðlega skrá, gæti Chrome einnig sent vefslóðir til Google, þar á meðal hluta af efni síðna.</translation>
 <translation id="6647304104688527905">Opnar nýjan flipa í Chrome.</translation>
-<translation id="6648150602980899529">Þú ert að skrá þig út af reikningi sem stýrt er af <ph name="DOMAIN" /> og veitir í leiðinni stjórnanda lénsins umsjón með Chrome gögnunum þínum. Gögnin þín verða tengd við þennan reikning til frambúðar. Ef þú skráir þig út af Chrome verður gögnunum þínum á þessu tæki eytt, en þau verða áfram geymd á Google reikningnum þínum.</translation>
 <translation id="6684809838922667136">Bættu Chrome</translation>
 <translation id="6695698548122852044">{THRESHOLD,plural, =1{Þetta gerist þegar Chrome er ekki í notkun í {THRESHOLD} mínútu. Gögnum sem voru eingöngu vistuð í þessu tæki á meðan þú varst skráð(ur) inn verður eytt. Það gæti m.a. átt við um feril og aðgangsorð.}one{Þetta gerist þegar Chrome er ekki í notkun í {THRESHOLD} mínútu. Gögnum sem voru eingöngu vistuð í þessu tæki á meðan þú varst skráð(ur) inn verður eytt. Það gæti m.a. átt við um feril og aðgangsorð.}other{Þetta gerist þegar Chrome er ekki í notkun í {THRESHOLD} mínútur. Gögnum sem voru eingöngu vistuð í þessu tæki á meðan þú varst skráð(ur) inn verður eytt. Það gæti m.a. átt við um feril og aðgangsorð.}}</translation>
 <translation id="6709398533399187136">Aðgangsorðið þitt var afhjúpað vegna öryggisbrots. Aðgangsorðastjórnun Google mælir með að þú breytir því núna.</translation>

@@ -183,16 +183,6 @@ chromium-metrics-reviews@google.com.
   </summary>
 </histogram>
 
-<histogram name="Glic.OsEntrypoint.Settings.Toggle" enum="BooleanEnabled"
-    expires_after="2026-01-15">
-  <owner>agale@chromium.org</owner>
-  <owner>chrome-performance-ui-sea@google.com</owner>
-  <summary>
-    After the user interacts with the toggle to turn on/off the OS launcher
-    entrypoint, logs a boolean that reflects whether the entrypoint is enabled.
-  </summary>
-</histogram>
-
 <histogram name="Glic.PageContextFetcher.GetAnnotatedPageContent" units="ms"
     expires_after="2026-01-15">
   <owner>carlosk@chromium.org</owner>
@@ -248,12 +238,28 @@ chromium-metrics-reviews@google.com.
 </histogram>
 
 <histogram name="Glic.PanelPresentationTime.{InputMode}" units="ms"
-    expires_after="2026-01-15">
+    expires_after="2025-04-30">
   <owner>dewittj@google.com</owner>
   <owner>iwells@google.com</owner>
   <summary>
     After glic is triggered, measure how long it takes to show the glic panel
     using the {InputMode} mode. Desktop Chrome only (Windows and Mac).
+  </summary>
+  <token key="InputMode">
+    <variant name="All"/>
+    <variant name="Audio"/>
+    <variant name="Text"/>
+  </token>
+</histogram>
+
+<histogram name="Glic.PanelPresentationTime2.{InputMode}" units="ms"
+    expires_after="2026-01-15">
+  <owner>dewittj@google.com</owner>
+  <owner>iwells@google.com</owner>
+  <summary>
+    After glic is triggered, measure how long it takes to show the glic panel
+    using the {InputMode} mode excluding the cases that require
+    re-authentication. Desktop Chrome only (Windows and Mac).
   </summary>
   <token key="InputMode">
     <variant name="All"/>

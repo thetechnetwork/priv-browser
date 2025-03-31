@@ -6,7 +6,6 @@
 <translation id="1143896152279775643">Kata laluan anda akan disimpan pada Pengurus Kata Laluan Google untuk <ph name="EMAIL" />.</translation>
 <translation id="1146503048444965320">Buka tab baharu dalam Chrome</translation>
 <translation id="1166460004393506534">Padamkan data semakan imbas dalam Chrome</translation>
-<translation id="1171255741903316750">Hidupkan "Kunci tab Inkognito apabila anda menutup Chrome"</translation>
 <translation id="1179527450541388808">Akses Chrome dengan lebih pantas daripada dok skrin utama iPad anda.</translation>
 <translation id="1180362651362502943">Kekal menggunakan data Chrome dalam Google Account anda.</translation>
 <translation id="1200396280085622191">Gunakan Chrome pada bila-bila masa anda mengetik pautan dalam mesej dan apl lain.</translation>
@@ -128,6 +127,7 @@ Tunggu beberapa minit sebelum log keluar. Jika anda log keluar sekarang, data in
 <translation id="4430797724889237570">Buka pautan daripada Gmail, Maps, YouTube dan apl lain dalam Chrome</translation>
 <translation id="447252321002412580">Bantu meningkatkan ciri dan prestasi Chrome</translation>
 <translation id="4523886039239821078">Beberapa tambahan menyebabkan Chrome ranap. Sila nyahpasang:</translation>
+<translation id="4574806550936185355">Hidupkan "Kunci tab Inkognito apabila anda menutup Chrome"</translation>
 <translation id="4633328489441962921">Chrome tidak dapat menyemak kemas kini</translation>
 <translation id="4636900170638246267">Log masuk ke laman ini dan Chrome.</translation>
 <translation id="4647910807533196601">Buka tab terbaharu saya dalam Chrome.</translation>
@@ -178,6 +178,7 @@ Tunggu beberapa minit sebelum log keluar. Jika anda log keluar sekarang, data in
 <translation id="5716154293141027663">Buka Chrome pada bila-bila masa anda mengetik pautan dalam apl lain</translation>
 <translation id="5752489513673657785">Suapan tersuai yang dibuat untuk anda oleh Google</translation>
 <translation id="5772407442571703917">Muat turun Chrome di sini.</translation>
+<translation id="5777468213129569553">Buka Chrome</translation>
 <translation id="5779767936254214055">Kunci tab Inkognito anda semasa anda keluar daripada Chrome atau beralih kepada apl lain.</translation>
 <translation id="5808435672482059465">Lihat Sejarah Chrome Anda</translation>
 <translation id="5833027901704861726">Sesetengah data Chrome anda belum disimpan dalam <ph name="EMAIL" />.
@@ -213,7 +214,6 @@ Data anda telah disulitkan dengan ungkapan laluan anda. Masukkan ungkapan laluan
 <translation id="6636941099779251629">Organisasi anda menghendaki anda log masuk untuk menggunakan Chrome. <ph name="BEGIN_LINK" />Ketahui lebih lanjut<ph name="END_LINK" /></translation>
 <translation id="6646696210740573446">Menghantar bahagian pengeliruan URL kepada Google melalui pelayan privasi yang menyembunyikan alamat IP anda. Jika laman cuba mencuri kata laluan anda atau apabila anda memuat turun fail yang berbahaya, Chrome juga mungkin menghantar URL, termasuk sedikit kandungan halaman, kepada Google.</translation>
 <translation id="6647304104688527905">Membuka tab baharu dalam Chrome.</translation>
-<translation id="6648150602980899529">Anda log masuk dengan akaun yang diurus oleh <ph name="DOMAIN" /> dan memberi kawalan terhadap data Chrome anda kepada  pentadbirnya. Data anda akan terikat secara kekal kepada akaun ini. Tindakan log keluar daripada Chrome akan memadamkan data anda daripada peranti ini, tetapi data itu akan kekal disimpan dalam Google Account anda.</translation>
 <translation id="6684809838922667136">Jadikan Chrome lebih baik</translation>
 <translation id="6695698548122852044">{THRESHOLD,plural, =1{Perkara ini berlaku apabila Chrome tidak digunakan selama {THRESHOLD} minit. Data yang disimpan hanya pada peranti ini semasa anda log masuk akan dipadamkan. Data ini boleh termasuk sejarah dan kata laluan.}other{Perkara ini berlaku apabila Chrome tidak digunakan selama {THRESHOLD} minit. Data yang disimpan hanya pada peranti ini semasa anda log masuk akan dipadamkan. Data ini boleh termasuk sejarah dan kata laluan.}}</translation>
 <translation id="6709398533399187136">Kata laluan anda terdedah dalam suatu pelanggaran data. Pengurus Kata Laluan Google mengesyorkan agar anda menukarnya sekarang.</translation>

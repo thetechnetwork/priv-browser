@@ -56,6 +56,7 @@
 #import "components/policy/core/common/policy_loader_ios_constants.h"
 #import "components/policy/policy_constants.h"
 #import "components/safe_browsing/core/common/features.h"
+#import "components/search_engines/search_engines_switches.h"
 #import "components/segmentation_platform/embedder/home_modules/constants.h"
 #import "components/segmentation_platform/public/constants.h"
 #import "components/segmentation_platform/public/features.h"
@@ -71,6 +72,7 @@
 #import "components/sync/base/pref_names.h"
 #import "components/translate/core/browser/translate_prefs.h"
 #import "components/translate/core/common/translate_util.h"
+#import "components/variations/net/variations_command_line.h"
 #import "components/webui/flags/feature_entry.h"
 #import "components/webui/flags/feature_entry_macros.h"
 #import "components/webui/flags/flags_storage.h"
@@ -94,10 +96,11 @@
 #import "ios/chrome/browser/ntp/ui_bundled/new_tab_page_feature.h"
 #import "ios/chrome/browser/omnibox/public/omnibox_ui_features.h"
 #import "ios/chrome/browser/page_info/ui_bundled/features.h"
-#import "ios/chrome/browser/parcel_tracking/features.h"
 #import "ios/chrome/browser/policy/model/policy_util.h"
+#import "ios/chrome/browser/popup_menu/ui_bundled/overflow_menu/feature_flags.h"
 #import "ios/chrome/browser/price_insights/model/price_insights_feature.h"
 #import "ios/chrome/browser/promos_manager/model/features.h"
+#import "ios/chrome/browser/reader_mode/model/features.h"
 #import "ios/chrome/browser/screen_time/model/screen_time_buildflags.h"
 #import "ios/chrome/browser/settings/ui_bundled/clear_browsing_data/features.h"
 #import "ios/chrome/browser/settings/ui_bundled/google_services/features.h"
@@ -108,7 +111,6 @@
 #import "ios/chrome/browser/start_surface/ui_bundled/start_surface_features.h"
 #import "ios/chrome/browser/text_selection/model/text_selection_util.h"
 #import "ios/chrome/browser/toolbar/ui_bundled/tab_groups/tab_group_indicator_features_utils.h"
-#import "ios/chrome/browser/ui/popup_menu/overflow_menu/feature_flags.h"
 #import "ios/chrome/browser/web/model/features.h"
 #import "ios/chrome/browser/whats_new/coordinator/whats_new_util.h"
 #import "ios/chrome/grit/ios_strings.h"
@@ -1382,6 +1384,28 @@ const FeatureEntry::FeatureVariation kFeedSwipeInProductHelpVariations[] = {
     {"- Animated IPH", kFeedSwipeInProductHelpAnimated,
      std::size(kFeedSwipeInProductHelpAnimated), nullptr}};
 
+constexpr flags_ui::FeatureEntry::FeatureParam
+    kReaderModeDistillerPageLoadHeuristicAlwaysEnabledParam[] = {
+        {kReaderModeDistillerPageLoadProbabilityName, "1"},
+        {kReaderModeDistillerPageLoadDelayDurationStringName, "0"}};
+const FeatureEntry::FeatureVariation kReaderModeDistillerHeuristicOptions[] = {
+    {"no sampling with no delay",
+     kReaderModeDistillerPageLoadHeuristicAlwaysEnabledParam,
+     std::size(kReaderModeDistillerPageLoadHeuristicAlwaysEnabledParam),
+     nullptr},
+};
+
+const FeatureEntry::FeatureParam kBeforeSearchExplainGeminiEditMenu[] = {
+    {kExplainGeminiEditMenuParams, "1"}};
+const FeatureEntry::FeatureParam kAfterSearchExplainGeminiEditMenu[] = {
+    {kExplainGeminiEditMenuParams, "2"}};
+
+const FeatureEntry::FeatureVariation kExplainGeminiEditMenuVariations[] = {
+    {"Before Search Gemini Edit Menu", kBeforeSearchExplainGeminiEditMenu,
+     std::size(kBeforeSearchExplainGeminiEditMenu), nullptr},
+    {"After Search Gemini Edit Menu", kAfterSearchExplainGeminiEditMenu,
+     std::size(kAfterSearchExplainGeminiEditMenu), nullptr}};
+
 // To add a new entry, add to the end of kFeatureEntries. There are four
 // distinct types of entries:
 // . ENABLE_DISABLE_VALUE: entry is either enabled, disabled, or uses the
@@ -1439,6 +1463,10 @@ const flags_ui::FeatureEntry kFeatureEntries[] = {
     {"sign-in-button-no-avatar", flag_descriptions::kSignInButtonNoAvatarName,
      flag_descriptions::kSignInButtonNoAvatarDescription, flags_ui::kOsIos,
      FEATURE_VALUE_TYPE(kSignInButtonNoAvatar)},
+    {"ntp-background-customization",
+     flag_descriptions::kNTPBackgroundCustomizationName,
+     flag_descriptions::kNTPBackgroundCustomizationDescription,
+     flags_ui::kOsIos, FEATURE_VALUE_TYPE(kNTPBackgroundCustomization)},
     {"fullscreen-promos-manager-skip-internal-limits",
      flag_descriptions::kFullscreenPromosManagerSkipInternalLimitsName,
      flag_descriptions::kFullscreenPromosManagerSkipInternalLimitsDescription,
@@ -1521,6 +1549,13 @@ const flags_ui::FeatureEntry kFeatureEntries[] = {
      FEATURE_WITH_PARAMS_VALUE_TYPE(kIOSReactivationNotifications,
                                     kIOSReactivationNotificationsVariations,
                                     "IOSReactivationNotifications")},
+    {"ios-prompt-search-engine-choice-after-device-restore",
+     flag_descriptions::kIOSPromptSearchEngineChoiceAfterDeviceRestoreName,
+     flag_descriptions::
+         kIOSPromptSearchEngineChoiceAfterDeviceRestoreDescription,
+     flags_ui::kOsIos,
+     FEATURE_VALUE_TYPE(
+         switches::kIOSPromptSearchEngineChoiceAfterDeviceRestore)},
     {"ios-provides-app-notification-settings",
      flag_descriptions::kIOSProvidesAppNotificationSettingsName,
      flag_descriptions::kIOSProvidesAppNotificationSettingsDescription,
@@ -1624,12 +1659,6 @@ const flags_ui::FeatureEntry kFeatureEntries[] = {
     {"intents-on-measurements", flag_descriptions::kMeasurementsName,
      flag_descriptions::kMeasurementsDescription, flags_ui::kOsIos,
      FEATURE_VALUE_TYPE(web::features::kEnableMeasurements)},
-    {"improve-parcel-detection",
-     flag_descriptions::kEnableNewParcelTrackingNumberDetectionName,
-     flag_descriptions::kEnableNewParcelTrackingNumberDetectionDescription,
-     flags_ui::kOsIos,
-     FEATURE_VALUE_TYPE(
-         web::features::kEnableNewParcelTrackingNumberDetection)},
     {"enable-expkit-text-classifier-date",
      flag_descriptions::kEnableExpKitTextClassifierDateName,
      flag_descriptions::kEnableExpKitTextClassifierDateDescription,
@@ -2319,10 +2348,6 @@ const flags_ui::FeatureEntry kFeatureEntries[] = {
      FEATURE_WITH_PARAMS_VALUE_TYPE(kNewFeedPositioning,
                                     kNewFeedPositioningVariations,
                                     "IOSNewFeedPositioningStudy")},
-    {"ios-disable-parcel-tracking",
-     flag_descriptions::kIOSDisableParcelTrackingName,
-     flag_descriptions::kIOSDisableParcelTrackingDescription, flags_ui::kOsIos,
-     FEATURE_VALUE_TYPE(kIOSDisableParcelTracking)},
     {"autofill-payments-sheet-v2",
      flag_descriptions::kAutofillPaymentsSheetV2Name,
      flag_descriptions::kAutofillPaymentsSheetV2Description, flags_ui::kOsIos,
@@ -2556,6 +2581,39 @@ const flags_ui::FeatureEntry kFeatureEntries[] = {
      flag_descriptions::kIOSOneTapMiniMapRemoveSectionBreaksDescription,
      flags_ui::kOsIos,
      FEATURE_VALUE_TYPE(kIOSOneTapMiniMapRemoveSectionsBreaks)},
+    {"autofill-enable-support-for-home-and-work",
+     flag_descriptions::kAutofillEnableSupportForHomeAndWorkName,
+     flag_descriptions::kAutofillEnableSupportForHomeAndWorkDescription,
+     flags_ui::kOsIos,
+     FEATURE_VALUE_TYPE(
+         autofill::features::kAutofillEnableSupportForHomeAndWork)},
+    {"reader-mode-distiller-heuristic-enabled",
+     flag_descriptions::kReaderModeDistillerHeuristicName,
+     flag_descriptions::kReaderModeDistillerHeuristicDescription,
+     flags_ui::kOsIos,
+     FEATURE_WITH_PARAMS_VALUE_TYPE(kEnableReaderModeDistillerHeuristic,
+                                    kReaderModeDistillerHeuristicOptions,
+                                    "ReaderModeHeuristicSampling")},
+    {"reader-mode-distiller-enabled",
+     flag_descriptions::kReaderModeDistillerName,
+     flag_descriptions::kReaderModeDistillerDescription, flags_ui::kOsIos,
+     FEATURE_VALUE_TYPE(kEnableReaderModeDistiller)},
+    {"lens-overlay-navigation-history",
+     flag_descriptions::kLensOverlayNavigationHistoryName,
+     flag_descriptions::kLensOverlayNavigationHistoryDescription,
+     flags_ui::kOsIos, FEATURE_VALUE_TYPE(kLensOverlayNavigationHistory)},
+    {"page-action-menu", flag_descriptions::kPageActionMenuName,
+     flag_descriptions::kPageActionMenuDescription, flags_ui::kOsIos,
+     FEATURE_VALUE_TYPE(kPageActionMenu)},
+    {"feedback-include-variations",
+     flag_descriptions::kFeedbackIncludeVariationsName,
+     flag_descriptions::kFeedbackIncludeVariationsDescription, flags_ui::kOsIos,
+     FEATURE_VALUE_TYPE(variations::kFeedbackIncludeVariations)},
+    {"explain-gemini-edit-menu", flag_descriptions::kExplainGeminiEditMenuName,
+     flag_descriptions::kExplainGeminiEditMenuDescription, flags_ui::kOsIos,
+     FEATURE_WITH_PARAMS_VALUE_TYPE(kExplainGeminiEditMenu,
+                                    kExplainGeminiEditMenuVariations,
+                                    "IOSExplainGeminiEditMenu")},
 };
 
 bool SkipConditionalFeatureEntry(const flags_ui::FeatureEntry& entry) {

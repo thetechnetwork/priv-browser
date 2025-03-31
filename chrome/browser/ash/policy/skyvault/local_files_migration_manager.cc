@@ -290,6 +290,10 @@ void LocalFilesMigrationManager::RemoveObserver(Observer* observer) {
   observers_.RemoveObserver(observer);
 }
 
+base::Time LocalFilesMigrationManager::GetMigrationStartTime() const {
+  return migration_start_time_;
+}
+
 void LocalFilesMigrationManager::SetNotificationManagerForTesting(
     MigrationNotificationManager* notification_manager) {
   CHECK_IS_TEST();
@@ -707,7 +711,7 @@ void LocalFilesMigrationManager::OnCleanupDone(
   if (migration_destination_ == MigrationDestination::kDelete) {
     // Notify to remove folders after deletion.
     NotifySuccess();
-    // TODO(402074193): Show deletion completed notification.
+    notification_manager_->ShowDeletionCompletedNotification();
   }
   SetState(State::kCompleted);
 }

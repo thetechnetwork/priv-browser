@@ -91,11 +91,11 @@
 <translation id="3054480780637153380">iOSમાં Chromium સેટિંગ ખોલો, પછી "ડિફૉલ્ટ બ્રાઉઝર ઍપ" પર ટૅપ કરો અને Chromium પસંદ કરો.</translation>
 <translation id="3102849287235003384">બધી વેબસાઇટ પર તમારા Google એકાઉન્ટમાંથી સાઇન આઉટ કરવા માટે, <ph name="BEGIN_LINK" />Chromiumમાંથી સાઇન આઉટ કરો<ph name="END_LINK" />.</translation>
 <translation id="3115956258722352278">Chromiumને તમારું ડિફૉલ્ટ બ્રાઉઝર બનાવીએ?</translation>
+<translation id="3180939591219927904">“જ્યારે તમે Chromium બંધ કરો, ત્યારે છૂપા ટૅબ લૉક કરો” ચાલુ કરો</translation>
 <translation id="3242612358525156339">તમારા ડિવાઇસના સેટિંગમાંથી, "<ph name="TEXT_OF_THE_SETTINGS_MENU_ITEM" />" ખોલો અને "Chromium" પસંદ કરો</translation>
 <translation id="328933489847748230">{count,plural, =1{હવે 1 Chromium વિન્ડો બતાવી રહી છે}one{હવે {count} Chromium વિન્ડો બતાવી રહી છે}other{હવે {count} Chromium વિન્ડો બતાવી રહી છે}}</translation>
 <translation id="3344973607274501920">Chromium તમારા પાસવર્ડ ચેક કરી શક્યું નથી. તમારું ઇન્ટરનેટ કનેક્શન ચેક કરવાનો પ્રયાસ કરો.</translation>
 <translation id="3366305173356742781">તમારા એકાઉન્ટમાંનો Chromium ડેટા</translation>
-<translation id="33788334537425157">“જ્યારે તમે Chromium બંધ કરો, ત્યારે છૂપા ટૅબ લૉક કરો” ચાલુ કરો</translation>
 <translation id="3387107508582892610">{THRESHOLD,plural, =1{જ્યારે {THRESHOLD} મિનિટ સુધી Chromiumનો ઉપયોગ ન કરવામાં આવે, ત્યારે આવું થાય છે. આમાં ઇતિહાસ અને ઑટોમૅટિક રીતે ભરવાની સુવિધા શામેલ હોઈ શકે છે.}one{જ્યારે {THRESHOLD} મિનિટ સુધી Chromiumનો ઉપયોગ ન કરવામાં આવે, ત્યારે આવું થાય છે. આમાં ઇતિહાસ અને ઑટોમૅટિક રીતે ભરવાની સુવિધા શામેલ હોઈ શકે છે.}other{જ્યારે {THRESHOLD} મિનિટ સુધી Chromiumનો ઉપયોગ ન કરવામાં આવે, ત્યારે આવું થાય છે. આમાં ઇતિહાસ અને ઑટોમૅટિક રીતે ભરવાની સુવિધા શામેલ હોઈ શકે છે.}}</translation>
 <translation id="3410395242749598859">Chromiumનો તમારો અમુક ડેટા હજી સુધી <ph name="EMAIL" />માં સાચવવામાં આવ્યો નથી.
 એકાઉન્ટ સ્વિચ કરતા પહેલાં થોડી મિનિટ રાહ જોવાનો પ્રયાસ કરી જુઓ. જો તમે હમણાં એકાઉન્ટ સ્વિચ કરશો, તો આ ડેટા ડિલીટ કરવામાં આવશે.</translation>
@@ -208,7 +208,6 @@
   • જો તમે તમારા ઇતિહાસને તમારા Google એકાઉન્ટ સાથે સિંક કરો, તો મેટ્રિકમાં તમે જે URLsની મુલાકાત લીધી હોય, તેની માહિતીનો પણ સમાવેશ થઈ શકે છે.<ph name="END_INDENT" /></translation>
 <translation id="5932787118589620366">Chromiumમાં બ્રાઉઝિંગ ડેટા ડિલીટ કરો.</translation>
 <translation id="593808800391107017">તમારા માટે Chromium ઑટોમૅટિક રીતે ભાળ મેળવે તેવી પ્રાઇવસી કે સુરક્ષા સંબંધિત કોઈપણ સમસ્યાઓ માટે અલર્ટ મેળવો.</translation>
-<translation id="5945387852661427312">તમે <ph name="DOMAIN" /> દ્વારા મેનેજ એકાઉન્ટમાં સાઇન ઇન કરી રહ્યાં છો અને તમારા Chromium ડેટા પર એનું એડમિન નિયંત્રણ આપી રહ્યાં છો. તમારો ડેટા આ એકાઉન્ટ સાથે કાયમીરૂપે જોડાયેલું રહેશે. Chromiumમાંથી સાઇન આઉટ કરવું આ ડિવાઇસ પરથી તમારો ડેટા ડિલીટ કરશે, પરંતુ એ તમારા Google એકાઉન્ટમાં સ્ટોર રહેશે.</translation>
 <translation id="5951593919357934226">Chromiumનો વધુમાં વધુ લાભ મેળવો.</translation>
 <translation id="5985254578475526217">Chromium તરફથી નોટિફિકેશન મેળવવા માટે, તમારા iOS સેટિંગમાં નોટિફિકેશન ચાલુ કરો.</translation>
 <translation id="6104024151682120539">Chromiumમાં ખોલો</translation>
@@ -262,6 +261,7 @@
 <translation id="7337881442233988129">Chromium</translation>
 <translation id="7357211569052832586">પસંદ કરેલ ડેટા Chromium અને સિંક કરેલ ડિવાઇસમાંથી દૂર કરવામાં આવ્યો છે. તમારા Google એકાઉન્ટમાં બ્રાઉઝિંગ ઇતિહાસના બીજા સ્વરૂપો જેમ કે શોધ અને history.google.com પરની બીજા Google સેવાઓમાંની પ્રવૃત્તિ હોય શકે છે.</translation>
 <translation id="7395825497086981028">તમારો પાસવર્ડ <ph name="EMAIL" /> માટેના પાસવર્ડ મેનેજરમાં સાચવવામાં આવશે.</translation>
+<translation id="7504829997542308412">Chromium ખોલો</translation>
 <translation id="7531461704633548377">Chromiumમાંથી</translation>
 <translation id="7554983317097061001">Chromium વિશે ટિપ: Chromiumને ડૉક પર ખસેડો</translation>
 <translation id="7576863740961052505">Chromiumના સેટિંગ મેનેજ કરો</translation>

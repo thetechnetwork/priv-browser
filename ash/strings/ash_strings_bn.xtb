@@ -91,6 +91,7 @@
 <translation id="1269405891096105529">গেস্ট মোডে পেরিফেরাল কাজ করে না</translation>
 <translation id="1270290102613614947">অন-স্ক্রিন কীবোর্ড অক্ষম করা রয়েছে</translation>
 <translation id="1272079795634619415">বন্ধ</translation>
+<translation id="12741168609094094">সার্চ, টেক্সট কপি এবং আরও অনেক কিছু করতে আপনার স্ক্রিনে যেকোনও কিছু বেছে নিন</translation>
 <translation id="1275285675049378717"><ph name="POWER_SOURCE" /> চার্জ করা হচ্ছে</translation>
 <translation id="1275718070701477396">নির্বাচিত</translation>
 <translation id="1276975447697633661">ফাইল বেছে নিন, তারপর <ph name="KEY" /> প্রেস করুন</translation>
@@ -149,6 +150,7 @@
 <translation id="1455242230282523554">ভাষার সেটিংস দেখুন</translation>
 <translation id="1459693405370120464">আবহাওয়া</translation>
 <translation id="1460620680449458626">ভলিউম মিউট করা আছে।</translation>
+<translation id="1462439140224375968">Google Doc তৈরি করা হয়েছে</translation>
 <translation id="14648076227129703">ক্যামেরা সম্পর্কিত অনুমতির মাধ্যমে এটি <ph name="APP1_NAME" />, <ph name="APP2_NAME" /> ও সব অ্যাপ এবং ওয়েবসাইটের জন্য ক্যামেরা অ্যাক্সেস করার অনুমতি দেয়</translation>
 <translation id="1467432559032391204">বামে</translation>
 <translation id="146902737843070955">আপনার অ্যাডমিনিস্ট্রেটর এই পরিবর্তন করার জন্য অনুরোধ করেছেন</translation>
@@ -226,6 +228,7 @@
 <translation id="1720230731642245863">হটস্পট বন্ধ আছে</translation>
 <translation id="1731815243805539470">আগের ব্যবহারকারীতে সুইচ করুন</translation>
 <translation id="1733996486177697563">ডার্ক ও লাইট থিমের মধ্যে বদল করুন। ডেস্কটপে টাচ করে ধরে থাকুন, তারপরে ওয়ালপেপার ও স্টাইল বেছে নিন।</translation>
+<translation id="1735992454301033090">বেছে নেওয়া অংশ, সরানোর জন্য তীরচিহ্ন 'কী' ব্যবহার করুন</translation>
 <translation id="1736898441010944794">ব্লুটুথ ডিভাইসে "<ph name="NAME" />" দেখা যায়।</translation>
 <translation id="1737078180382804488">আপনার ফোনের বিজ্ঞপ্তি দেখা সংক্রান্ত সেট-আপের পদ্ধতি বাতিল করুন</translation>
 <translation id="174102739345480129">মার্কার বন্ধ আছে।</translation>
@@ -243,7 +246,7 @@
 <translation id="1756833229520115364">টেমপ্লেট সেভ করা যাচ্ছে না। অনেক বেশি উইন্ডো বা ট্যাব।</translation>
 <translation id="1757857692711134412">সূর্যাস্ত পর্যন্ত বন্ধ আছে</translation>
 <translation id="1763084151787818322">অন্যান্য অ্যাকশন</translation>
-<translation id="1768138163688567246">'আমার স্ক্রিনে সার্চ করুন' মোড বন্ধ করুন</translation>
+<translation id="1768138163688567246">'আমার স্ক্রিন সার্চ করো' মোড বন্ধ করুন</translation>
 <translation id="1768366657309696705"><ph name="LAUNCHER_KEY_NAME" /> + পিরিয়ড কীবোর্ড শর্টকাট পরিবর্তিত হয়েছে। Insert বোতাম ব্যবহার করার জন্য, <ph name="LAUNCHER_KEY_NAME" /> বোতাম + Shift + Backspace প্রেস করুন।</translation>
 <translation id="1770726142253415363"><ph name="ROW_NUMBER" /> নম্বর সারির <ph name="COLUMN_NUMBER" /> নম্বর কলামে সরানো হয়েছে।</translation>
 <translation id="1771761307086386028">ডান দিকে স্ক্রল করুন</translation>
@@ -493,6 +496,7 @@
 <translation id="2683887737780133806">গত সপ্তাহের <ph name="DAY_OF_WEEK" /></translation>
 <translation id="2687510499067466116">কীবোর্ড শর্টকাট পরিবর্তন করা হয়েছে</translation>
 <translation id="2689613560355655046">ডেস্ক ৮</translation>
+<translation id="2692092709110488417">বেছে নেওয়া অংশে ফোকাস করতে ও তা সরিয়ে দিতে ট্যাব প্রেস করুন</translation>
 <translation id="2695305337569143674">ওয়েব</translation>
 <translation id="2697697418792422688">কীবোর্ড সেটিংস দেখান। <ph name="KEYBOARD_NAME" /> বেছে নেওয়া হয়েছে।</translation>
 <translation id="2699913284398121653">আপনার স্কুল অ্যাকাউন্টের ডেটা ব্যক্তিগত অ্যাকাউন্টে সরাতে কন্টেন্ট ট্রান্সফার অ্যাপ ব্যবহার করুন</translation>
@@ -550,6 +554,7 @@
 <translation id="2872353916818027657">প্রাথমিক মনিটর অদলবদল করুন</translation>
 <translation id="2872961005593481000">বন্ধ করুন</translation>
 <translation id="2876338922445400217">স্ক্রিনে জুম-ইন করুন</translation>
+<translation id="2876760662374103627">ফেস কন্ট্রোল চালু</translation>
 <translation id="2878884018241093801">কোনও সাম্প্রতিক আইটেম নেই</translation>
 <translation id="2880541185262491188">অনেকবার ভুল পিন লিখেছেন। <ph name="TIME_LEFT" /> অপেক্ষা করে আবার চেষ্টা করুন</translation>
 <translation id="2883271196820422439">মাউস কী আবার চালু করুন</translation>
@@ -593,6 +598,7 @@
 <translation id="301584155502740476">হটস্পটের বিবরণ দেখুন। হটস্পট বন্ধ করা আছে।</translation>
 <translation id="3017079585324758401">ব্যাকগ্রাউন্ড</translation>
 <translation id="3018135054368884502">মিডিয়া ফাস্ট ফরওয়ার্ড করুন</translation>
+<translation id="3026897869154397692">ক্যালেন্ডারে যোগ করা হয়েছে</translation>
 <translation id="3033545621352269033">চালু করা আছে</translation>
 <translation id="3033912566804961911"><ph name="DESK_NAME" />-এর সাথে যুক্ত করুন</translation>
 <translation id="3036649622769666520">ফাইল খুলুন</translation>
@@ -726,6 +732,7 @@
 <translation id="346243998268439747">জুম লেভেল রিসেট করুন</translation>
 <translation id="3465223694362104965">আপনি শেষবার সাইন-ইন করার পরে আরেকটি কীবোর্ড এই ডিভাইসে কানেক্ট করা হয়েছে। এটি ব্যবহার করার আগে কীবোর্ডটিকে আপনি নিরাপদ বলে মনে করেন কিনা তা দেখে নিন।</translation>
 <translation id="3465356146291925647">আপনার অ্যাডমিনিস্ট্রেটর ম্যানেজ করে</translation>
+<translation id="3470502288861289375">অনুলিপি করা হচ্ছে...</translation>
 <translation id="347117769229524881"><ph name="MODIFIER_ONE" /><ph name="MODIFIER_TWO" /><ph name="KEY_ONE" /> তারপর <ph name="KEY_TWO" /> বা <ph name="KEY_THREE" /></translation>
 <translation id="3477079411857374384">Control-Shift-Space</translation>
 <translation id="3485319357743610354"><ph name="SECURITY_STATUS" />, <ph name="CONNECTION_STATUS" />, সিগন্যাল: <ph name="SIGNAL_STRENGTH" /></translation>
@@ -1012,6 +1019,7 @@
 <translation id="4351244548802238354">ডায়ালগ বন্ধ করুন</translation>
 <translation id="4356872429719185452">হটস্পটের বিবরণ দেখুন। হটস্পট চালু করা হচ্ছে।</translation>
 <translation id="4364101114148522660"><ph name="DURATION" />  রেকর্ডিং</translation>
+<translation id="4368227575116094370">Google Sheet তৈরি করুন</translation>
 <translation id="4371348193907997655">কাস্ট সেটিংস</translation>
 <translation id="4371834685492830207">পিনে অবশ্যই শুধুমাত্র সঠিক অক্ষর থাকতে হবে</translation>
 <translation id="4375482231364171368">অ্যাড্রেস বারে সার্চ করুন</translation>
@@ -1029,6 +1037,7 @@
 <translation id="4412698727486357573">সহায়তা কেন্দ্র</translation>
 <translation id="4412944820643904175"><ph name="FEATURE_NAME" /> বন্ধ আছে।</translation>
 <translation id="4417647906073317561">ফোকাস মোড সংক্রান্ত সেটিংস। এটি ব্যবহার করতে, টাইমার, টাস্ক ও মিউজিক সেট করুন।</translation>
+<translation id="4418600384772451109">প্যানেল বন্ধ করুন</translation>
 <translation id="4424159417645388645">ডেস্ক ৫</translation>
 <translation id="4426817706804363424">এগিয়ে যান!</translation>
 <translation id="4430019312045809116">ভলিউম</translation>
@@ -1481,6 +1490,7 @@
 <translation id="5825969630400862129">কানেক্ট করা ডিভাইসের সেটিংস</translation>
 <translation id="5830180081891717894">আরও <ph name="WINDOWS" />টি</translation>
 <translation id="5837036133683224804"><ph name="RECEIVER_NAME" />-এ <ph name="ROUTE_TITLE" /> বন্ধ করুন</translation>
+<translation id="5840658767386246331">Google-এ সার্চ করুন</translation>
 <translation id="5841296711770970362">পরবর্তী ট্র্যাকে যান</translation>
 <translation id="5842553299352339114"><ph name="DEVICE_NAME" />-এর হটস্পট চালু আছে, কোনও ডিভাইস কানেক্ট করা নেই</translation>
 <translation id="584525477304726060">বড় করে দেখার জন্য ধরে থাকুন</translation>
@@ -1512,6 +1522,7 @@
 <translation id="595202126637698455">কার্য-সম্পাদনা ট্রেস করা সক্ষম রয়েছে</translation>
 <translation id="5955304353782037793">অ্যাপ</translation>
 <translation id="5958529069007801266">তত্ত্বাবধানে থাকা ব্যবহারকারী</translation>
+<translation id="596035801491797438">ফেস কন্ট্রোল বন্ধ করুন</translation>
 <translation id="5960410286721553511">আপনার ফোনের সাম্প্রতিক ফটো এবং মিডিয়া দেখুন</translation>
 <translation id="5965524703725988602">ডার্ক থিম টগল করুন। <ph name="STATE_TEXT" />।</translation>
 <translation id="5975235751479998104">উইন্ডোর মাধ্যমে পরের উইন্ডোতে যান</translation>
@@ -1894,6 +1905,7 @@
 <translation id="7228968829656641943">আমার স্ক্রিনে সার্চ করার জন্য একটি অংশ বেছে নিন। কীবোর্ড নেভিগেশনের জন্য ট্যাব, তারপর স্পেস বারে প্রেস করুন</translation>
 <translation id="7229029500464092426"><ph name="AVAILABLE_MEMORY" /> মেমরি | মোট <ph name="TOTAL_MEMORY" /></translation>
 <translation id="7239814253344511868">মাউসের দুদিকের বোতাম</translation>
+<translation id="7240636904654154599">Google Sheet তৈরি করা হয়েছে</translation>
 <translation id="7244725679040769470"><ph name="PERCENTAGE" />% ব্যাটারির চার্জ রয়েছে।
 ডিভাইসটি চার্জে বসান।</translation>
 <translation id="7246071203293827765"><ph name="UPDATE_TEXT" />। একটি আপডেট প্রয়োগ করতে Chromebook রিস্টার্ট করতে হবে। এতে ১ মিনিট পর্যন্ত সময় লাগতে পারে।</translation>
@@ -2223,6 +2235,7 @@
 <translation id="8287009018010202411">প্রোডাক্টিভিটি</translation>
 <translation id="828708037801473432">বন্ধ করা আছে</translation>
 <translation id="8297006494302853456">দুর্বল</translation>
+<translation id="8300451473979404345">বেছে নেওয়া হ্যান্ডেল, সরানোর জন্য তীরচিহ্ন 'কী' ব্যবহার করুন</translation>
 <translation id="8308637677604853869">পূর্ববর্তী মেনু</translation>
 <translation id="830868413617744215">বিটা</translation>
 <translation id="8314772463905284467">Caps Lock চালু</translation>
@@ -2283,6 +2296,7 @@
 <translation id="851458219935658693">বর্তমান ডেস্ক থেকে উইন্ডো দেখুন, রেডিও বোতাম বেছে নেওয়া হয়েছে</translation>
 <translation id="851660987304951246">দ্রুত কন্টেন্টের সারাংশ তৈরি করতে বা প্রশ্ন করতে 'আমাকে পড়তে সাহায্য করো' ফিচার ব্যবহার করুন</translation>
 <translation id="8517041960877371778">আপনার <ph name="DEVICE_TYPE" /> চালু থাকা অবস্থায় চার্জ নাও হতে পারে।</translation>
+<translation id="8519329096920173967">Google Lens ব্যবহার করে আমার স্ক্রিন সার্চ করো</translation>
 <translation id="8535393432370007982">রঙ অনুযায়ী বেছে নেওয়ার সেটিং থেকে বেরিয়ে আগের অবস্থায় ফেরানো হয়েছে</translation>
 <translation id="8536886494750559755">দ্রুত শেয়ার সেটিংস দেখুন। <ph name="TIME_REMAINING" />-এর জন্য সকলেই দেখতে পাবে</translation>
 <translation id="8539803091108018926">ক্লিপবোর্ডে টেক্সট কপি করা হয়েছে</translation>
@@ -2405,6 +2419,7 @@
 <translation id="8921624153894383499">Google অ্যাসিস্ট্যান্ট এই ভাষায় কথা বলে না।</translation>
 <translation id="8926951137623668982">শেল্ফ সবসময় লুকানো থাকবে</translation>
 <translation id="8929566928381252430">ক্যাপস লক কী ব্যবহার করতে চাইছেন? এটি ব্যবহার করুন</translation>
+<translation id="8929623844713377237">পরিচিতি তৈরি করা হয়েছে</translation>
 <translation id="8934418770423095813">Google Doc তৈরি করুন</translation>
 <translation id="8934926665751933910">{NUM_FILES,plural, =1{১টি ফাইল}one{#টি ফাইল}other{#টি ফাইল}}</translation>
 <translation id="8936501819958976551">বন্ধ আছে</translation>

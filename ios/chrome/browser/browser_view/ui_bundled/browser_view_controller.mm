@@ -25,12 +25,14 @@
 #import "ios/chrome/browser/browser_view/ui_bundled/browser_view_visibility_consumer.h"
 #import "ios/chrome/browser/browser_view/ui_bundled/key_commands_provider.h"
 #import "ios/chrome/browser/browser_view/ui_bundled/safe_area_provider.h"
+#import "ios/chrome/browser/content_suggestions/ui_bundled/ntp_home_constant.h"
 #import "ios/chrome/browser/crash_report/model/crash_keys_helper.h"
 #import "ios/chrome/browser/default_promo/ui_bundled/default_promo_non_modal_presentation_delegate.h"
 #import "ios/chrome/browser/discover_feed/model/feed_constants.h"
 #import "ios/chrome/browser/find_in_page/model/util.h"
 #import "ios/chrome/browser/first_run/ui_bundled/first_run_util.h"
 #import "ios/chrome/browser/fullscreen/ui_bundled/fullscreen_animator.h"
+#import "ios/chrome/browser/fullscreen/ui_bundled/fullscreen_reason.h"
 #import "ios/chrome/browser/fullscreen/ui_bundled/fullscreen_ui_element.h"
 #import "ios/chrome/browser/fullscreen/ui_bundled/fullscreen_ui_updater.h"
 #import "ios/chrome/browser/incognito_reauth/ui_bundled/features.h"
@@ -47,6 +49,8 @@
 #import "ios/chrome/browser/ntp/model/new_tab_page_util.h"
 #import "ios/chrome/browser/ntp/ui_bundled/new_tab_page_coordinator.h"
 #import "ios/chrome/browser/omnibox/public/omnibox_ui_features.h"
+#import "ios/chrome/browser/popup_menu/ui_bundled/overflow_menu/feature_flags.h"
+#import "ios/chrome/browser/popup_menu/ui_bundled/popup_menu_coordinator.h"
 #import "ios/chrome/browser/reading_list/model/reading_list_browser_agent.h"
 #import "ios/chrome/browser/shared/model/application_context/application_context.h"
 #import "ios/chrome/browser/shared/model/url/chrome_url_constants.h"
@@ -81,9 +85,6 @@
 #import "ios/chrome/browser/toolbar/ui_bundled/fullscreen/toolbars_size.h"
 #import "ios/chrome/browser/toolbar/ui_bundled/fullscreen/toolbars_size_broadcasting_util.h"
 #import "ios/chrome/browser/toolbar/ui_bundled/toolbar_coordinator.h"
-#import "ios/chrome/browser/ui/content_suggestions/ntp_home_constant.h"
-#import "ios/chrome/browser/ui/popup_menu/overflow_menu/feature_flags.h"
-#import "ios/chrome/browser/ui/popup_menu/popup_menu_coordinator.h"
 #import "ios/chrome/browser/url_loading/model/url_loading_browser_agent.h"
 #import "ios/chrome/browser/url_loading/model/url_loading_params.h"
 #import "ios/chrome/browser/web/model/page_placeholder_browser_agent.h"
@@ -761,7 +762,8 @@ enum HeaderBehaviour {
   } else {
     self.inNewTabAnimation = YES;
     // Exit fullscreen if needed.
-    self.fullscreenController->ExitFullscreen();
+    self.fullscreenController->ExitFullscreen(
+        FullscreenExitReason::kForcedByCode);
     const CGFloat kAnimatedViewSize = 50;
     BackgroundTabAnimationView* animatedView =
         [[BackgroundTabAnimationView alloc]

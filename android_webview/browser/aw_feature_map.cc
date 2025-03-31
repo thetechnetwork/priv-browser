@@ -28,7 +28,6 @@ namespace {
 const base::Feature* const kFeaturesExposedToJava[] = {
     &features::kWebViewBackForwardCache,
     &features::kWebViewFileSystemAccess,
-    &::features::kWebViewFrameRateHints,
     &features::kWebViewInvokeZoomPickerOnGSU,
     &features::kWebViewLazyFetchHandWritingIcon,
     &features::kWebViewMixedContentAutoupgrades,
@@ -36,7 +35,6 @@ const base::Feature* const kFeaturesExposedToJava[] = {
     &features::kWebViewUseMetricsUploadService,
     &features::kWebViewUseMetricsUploadServiceOnlySdkRuntime,
     &features::kWebViewXRequestedWithHeaderControl,
-    &features::kWebViewRestrictSensitiveContent,
     &metrics::kAndroidMetricsAsyncMetricLogging,
     &safe_browsing::kHashPrefixRealTimeLookups,
     &features::kWebViewSupervisedUserSiteBlock,

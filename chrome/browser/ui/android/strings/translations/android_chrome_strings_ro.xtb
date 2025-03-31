@@ -250,6 +250,7 @@ Numai un utilizator care deține expresia ta de acces îți poate citi datele cr
 <translation id="2172905120685242547">Închizi fereastra?</translation>
 <translation id="2173302385160625112">Verifică-ți conexiunea la internet</translation>
 <translation id="2175927920773552910">Cod QR</translation>
+<translation id="2181097965834437145">Afișează sau ascunde bara de marcaje</translation>
 <translation id="2184272387334793084">Conectează-te pentru a-ți accesa parolele și alte date de pe toate dispozitivele</translation>
 <translation id="218608176142494674">Trimitere</translation>
 <translation id="219283042927675668">File în grup</translation>
@@ -324,7 +325,6 @@ Numai un utilizator care deține expresia ta de acces îți poate citi datele cr
 <translation id="2527209463677295330">Dacă incluzi mai mult din textul paginii, ai putea vedea rezultate mai bune</translation>
 <translation id="2527779675047087889">Ascunde conținutul clipboardului</translation>
 <translation id="2532336938189706096">Vizualizare pe web</translation>
-<translation id="2534155362429831547">Elemente șterse: <ph name="NUMBER_OF_ITEMS" /></translation>
 <translation id="253498598929009420">Site-ul va putea să vadă conținutul ecranului</translation>
 <translation id="2536728043171574184">Se afișează o versiune offline a acestei pagini</translation>
 <translation id="2542548955756682219"><ph name="TAB_TITLE" />, filă</translation>
@@ -364,7 +364,6 @@ Numai un utilizator care deține expresia ta de acces îți poate citi datele cr
 <translation id="2677748264148917807">Ieși</translation>
 <translation id="2687009626279857299">Nu mai funcționează pe acest dispozitiv</translation>
 <translation id="2702516483241149200">Nou: distribuie un link care derulează la acest text</translation>
-<translation id="2705073298859543115">Creează un rezumat</translation>
 <translation id="2708051474374549906">Protecție proactivă în timp real împotriva site-urilor, descărcărilor și extensiilor periculoase, pe baza datelor de navigare trimise la Google</translation>
 <translation id="2708226184420201102">Deschide în browserul <ph name="PRODUCT_NAME" /></translation>
 <translation id="271033894570825754">Nou</translation>
@@ -459,7 +458,6 @@ Numai un utilizator care deține expresia ta de acces îți poate citi datele cr
 <translation id="3114507951000454849">Citește știrile de azi <ph name="NEWS_ICON" /></translation>
 <translation id="3122883569442693641">Mai multe detalii</translation>
 <translation id="3123734510202723619">Anunțuri</translation>
-<translation id="3131961580615093332"><ph name="GIVEN_NAME" /> a modificat fila <ph name="TAB_NAME" /></translation>
 <translation id="3148237711805373460">Accesează</translation>
 <translation id="314939179385989105">Pagina de pornire Chrome</translation>
 <translation id="3158667104057012316">Se sortează după ordinea manuală</translation>
@@ -677,6 +675,7 @@ Numai un utilizator care deține expresia ta de acces îți poate citi datele cr
 <translation id="4195643157523330669">Deschide în filă nouă</translation>
 <translation id="4197828496439691735">{NUM_TABS,plural, =1{O filă pe acest dispozitiv}few{# file pe acest dispozitiv}other{# de file pe acest dispozitiv}}</translation>
 <translation id="4198423547019359126">Nu există locații de descărcare disponibile</translation>
+<translation id="4209029522667123437"><ph name="IDENTITY_PROVIDER_ETLD_PLUS_ONE" /> • Folosit pe acest site</translation>
 <translation id="4214315110991671325">Dacă permiți cookie-uri, Chrome le va folosi probabil pentru preîncărcare.</translation>
 <translation id="4216511743389425832">Ascultă pagina</translation>
 <translation id="4225725533026049334">Urmărești</translation>
@@ -821,6 +820,7 @@ Contul Google poate să ofere alte forme ale istoricului de navigare, cum ar fi 
 <translation id="483742037940503070">{TAB_COUNT,plural, =1{Restabilește grupul de <ph name="TAB_COUNT_ONE" /> filă de culoare <ph name="COLOR_NAME" /> ca pe un nou grup de file din fundal.}few{Restabilește grupul de <ph name="TAB_COUNT_MANY" /> file de culoare <ph name="COLOR_NAME" /> ca pe un nou grup de file din fundal.}other{Restabilește grupul de <ph name="TAB_COUNT_MANY" /> de file de culoare <ph name="COLOR_NAME" /> ca pe un nou grup de file din fundal.}}</translation>
 <translation id="4837753911714442426">Deschide opțiunile pentru a printa pagina</translation>
 <translation id="4844633725025837809">Pentru siguranță suplimentară, criptează parolele pe dispozitiv înainte să se salveze în Managerul de parole Google</translation>
+<translation id="4849731766219625109">Folosește-ți contul <ph name="IDENTITY_PROVIDER_ETLD_PLUS_ONE" /></translation>
 <translation id="4850886885716139402">Afișează</translation>
 <translation id="4852014461738377247">Se conectează\u2026</translation>
 <translation id="4860895144060829044">Apelează</translation>
@@ -840,14 +840,12 @@ Contul Google poate să ofere alte forme ale istoricului de navigare, cum ar fi 
 <translation id="4910889077668685004">Aplicații pentru plăți</translation>
 <translation id="4912413785358399818">Mută fila</translation>
 <translation id="4913169188695071480">Oprește actualizarea</translation>
-<translation id="4918086044614829423">Acceptă</translation>
 <translation id="4925120120285606924">Captură de ecran <ph name="CURRENT_DATE_ISO" /></translation>
 <translation id="49268022542405662">Parolele vor fi exportate și descărcate ca fișier text. Acestea vor fi vizibile pentru oricine și pentru orice aplicație care are acces la dosarul de destinație.</translation>
 <translation id="4926901776383726965">Poți să salvezi imagini și fișiere ca să le vezi offline sau să le trimiți în alte aplicații</translation>
 <translation id="4932247056774066048">Întrucât te deconectezi de la un cont gestionat de <ph name="DOMAIN_NAME" />, datele Chrome vor fi șterse de pe dispozitiv. Acestea vor fi păstrate în Contul tău Google.</translation>
 <translation id="4943703118917034429">Realitate virtuală</translation>
 <translation id="4943872375798546930">Nu există rezultate</translation>
-<translation id="4953833914914492602">Grupul de file <ph name="TAB_GROUP_NAME" /> nu mai este disponibil</translation>
 <translation id="4957722034734105353">Aflați mai multe...</translation>
 <translation id="4961107849584082341">Tradu această pagină în orice limbă</translation>
 <translation id="4964614743143953889">Chrome te avertizează cu privire la site-urile și descărcările nesigure</translation>
@@ -966,7 +964,6 @@ Contul Google poate să ofere alte forme ale istoricului de navigare, cum ar fi 
 <translation id="5526281268548144413">Nu pot fi închise în mai multe ferestre</translation>
 <translation id="5528925345478618296">{MINUTES,plural, =1{Acum # minut}few{Acum # minute}other{Acum # de minute}}</translation>
 <translation id="5548606607480005320">Verificare de siguranță</translation>
-<translation id="5551564597369878730"><ph name="GIVEN_NAME" /> s-a alăturat grupului de file <ph name="TAB_GROUP_NAME" /></translation>
 <translation id="5554520618550346933">Când folosești o parolă, Chrome te avertizează dacă a fost publicată online. Când face acest lucru, parolele și numele tale de utilizator sunt criptate, astfel încât să nu fie descifrate de nimeni, nici măcar de Google.</translation>
 <translation id="5555525474779371165">Alege protecția prin Navigarea sigură</translation>
 <translation id="5556459405103347317">Reîncarcă</translation>
@@ -1183,7 +1180,6 @@ De exemplu, unele site-uri pot răspunde la această solicitare afișând anunț
 <translation id="6481963882741794338">Conectează Chrome și alte servicii Google pentru personalizare și alte scopuri</translation>
 <translation id="6482749332252372425">Descărcarea fișierului <ph name="FILE_NAME" /> nu a reușit din cauza spațiului de stocare insuficient.</translation>
 <translation id="6486420406192123355">Acest fișier PDF provine de la un site care folosește o conexiune nesecurizată</translation>
-<translation id="6495590690749880440">Deschizi grupul de file?</translation>
 <translation id="650224091954855786">{FILE_COUNT,plural, =1{Fișierul a fost descărcat}few{# descărcări finalizate}other{# de descărcări finalizate}}</translation>
 <translation id="6508722015517270189">repornește Chrome;</translation>
 <translation id="6518133107902771759">Confirmați</translation>
@@ -1201,7 +1197,6 @@ De exemplu, unele site-uri pot răspunde la această solicitare afișând anunț
 <translation id="6564820424018738527">Dispozitivul tău Android poate avea o setare similară. În cazul în care cuantificarea anunțurilor este activată în Chrome și pe dispozitivul Android, o companie poate măsura eficiența unui anunț pe site-urile pe care le accesezi și în aplicațiile pe care le folosești.</translation>
 <translation id="6565959834589222080">Conexiunea Wi-Fi este folosită când este disponibilă</translation>
 <translation id="6569373978618239158">Acum vei vedea articole de la <ph name="SITE_NAME" /> când deschizi o filă nouă. Site-urile pe care le urmărești sunt salvate în contul tău Google. Le poți gestiona din setările Discover.</translation>
-<translation id="6570116402456758630">Rezumatul paginii</translation>
 <translation id="657177046675873214">Pentru a accesa marcajele de pe toate dispozitivele, activează Marcaje în setări</translation>
 <translation id="6573096386450695060">Permite întotdeauna</translation>
 <translation id="6573431926118603307">Filele deschise în Chrome pe alte dispozitive vor apărea aici.</translation>
@@ -1562,6 +1557,7 @@ Pentru a modifica această setare, <ph name="BEGIN_LINK" />șterge datele Chrome
 <translation id="8073388330009372546">Vezi imaginea în filă nouă</translation>
 <translation id="8076492880354921740">File</translation>
 <translation id="8078096376109663956">Trimite numai text</translation>
+<translation id="8078348702936632821">Fixează comanda rapidă</translation>
 <translation id="8084114998886531721">Parolă salvată</translation>
 <translation id="8084285576995584326">Gestionează datele din Contul Google</translation>
 <translation id="8084864785646838999">Este posibil ca o parte a istoricului să nu se afișeze aici. Pentru a vedea tot istoricul Chrome, deschide istoricul Chrome complet. În plus, Contul Google poate să ofere alte forme ale istoricului de navigare la <ph name="BEGIN_LINK" />myactivity.google.com<ph name="END_LINK" />.</translation>
@@ -1617,7 +1613,6 @@ Pentru a modifica această setare, <ph name="BEGIN_LINK" />șterge datele Chrome
 <translation id="8282297628636750033">Aplică tema întunecată pe site-uri dacă e posibil</translation>
 <translation id="8282950411412455249">Accesează setările de securitate</translation>
 <translation id="8306751933352925837">În curând, parolele nu vor mai funcționa pe acest dispozitiv. Pentru a folosi în continuare parolele, actualizează serviciile Google Play. <ph name="BEGIN_LINK" />Află mai multe<ph name="END_LINK" /></translation>
-<translation id="8307517230426267469"><ph name="GIVEN_NAME" /> a eliminat fila <ph name="TAB_NAME" /></translation>
 <translation id="8310451567823644042">În curând, parolele nu vor mai funcționa</translation>
 <translation id="831192587911042850">Adaugă site-ul actual la lista de site-uri pe care le urmărești.</translation>
 <translation id="8320212361750431956">Activitate recentă</translation>

@@ -427,7 +427,7 @@
 <translation id="2873483161362553159">Navigasi penyemak imbas</translation>
 <translation id="2874939134665556319">Lagu sebelumnya</translation>
 <translation id="2875812231449496375">Hidupkan tetapan ini untuk mendapatkan hasil terbaik dengan hiasan latar ini. Anda boleh mematikan tetapan ini pada bila-bila masa.</translation>
-<translation id="2878126681324394319">Muat turun model ringkasan dan ciptaan tajuk</translation>
+<translation id="2878126681324394319">Muat turun model penciptaan ringkasan dan tajuk</translation>
 <translation id="2878387241690264070">Dinyahcas <ph name="RATE" /> dalam masa <ph name="NUM_SECONDS" /> saat.</translation>
 <translation id="2880569433548999039">Penyelamat skrin aliran awan</translation>
 <translation id="2882230315487799269">Sesuaikan gesaan AI</translation>
@@ -501,7 +501,7 @@
 <translation id="3303855915957856445">Tiada hasil carian ditemui</translation>
 <translation id="3305294846493618482">lagi</translation>
 <translation id="3310640316857623290">Kependaman DNS ternyata melebihi ambang yang dibenarkan</translation>
-<translation id="3316495615885967552">Muat turun model ringkasan dan ciptaan nama selesai</translation>
+<translation id="3316495615885967552">Proses muat turun model penciptaan ringkasan dan tajuk selesai</translation>
 <translation id="3321030238473337787">Kelajuan main balik</translation>
 <translation id="3327613592010997943">Anda akan dapat menggunakan peranti lagi pada <ph name="DAY" /> pukul <ph name="TIME" />.</translation>
 <translation id="3328783797891415197">Ujian sedang berjalan</translation>
@@ -663,7 +663,7 @@
 <translation id="4093865285251893588">Imej profil</translation>
 <translation id="409427325554347132">Simpan butiran ujian</translation>
 <translation id="409469431304488632">Percubaan</translation>
-<translation id="4095155732125588500">Muat turun model ringkasan dan ciptaan tajuk sedang dijalankan</translation>
+<translation id="4095155732125588500">Proses muat turun model penciptaan ringkasan dan tajuk sedang berlangsung</translation>
 <translation id="4095829376260267438">WPA2WPA3</translation>
 <translation id="4110686435123617899">Pilih album <ph name="TITLE" /> <ph name="DESC" /></translation>
 <translation id="4111761024568264522">Pad sentuh USB</translation>
@@ -791,7 +791,6 @@
 <translation id="4593212453765072419">Pengesahan proksi diperlukan</translation>
 <translation id="4594021849294327751">Buat transkrip</translation>
 <translation id="4594541568452132351">Pilih bahasa transkripsi dan model muat turun</translation>
-<translation id="4607282946861182308">Tidak dapat membuat imej ini. Cuba gesaan lain.</translation>
 <translation id="4609350030397390689">Mengurangkan kecerahan papan kekunci</translation>
 <translation id="4627232916386272576"><ph name="DOCUMENT_TITLE" />, <ph name="PRINTER_NAME" />, <ph name="CREATION_TIME" />, <ph name="PRINTED_PAGE_NUMBER" /> daripada <ph name="TOTAL_PAGE_NUMBER" />. Tekan enter untuk membatalkan tugas cetak.</translation>
 <translation id="463791356324567266">Membatalkan pengimbasan...</translation>
@@ -983,7 +982,7 @@
 <translation id="550600468576850160">padang rumput</translation>
 <translation id="551689408806449779">Peranti telah diputuskan sambungan. Cuba sambung semula untuk menguji</translation>
 <translation id="5519195206574732858">LTE</translation>
-<translation id="552644173505433109">Ketahui ringkasan dan ciptaan tajuk dengan lebih lanjut</translation>
+<translation id="552644173505433109">Ketahui penciptaan ringkasan dan tajuk dengan lebih lanjut</translation>
 <translation id="5527146180235316490">Pilihan mikrofon</translation>
 <translation id="5534900277405737921">Rupa bumi</translation>
 <translation id="554067135846762198">merjan dan perang</translation>
@@ -1540,6 +1539,7 @@ Muat turun model transkripsi (hingga 100MB) untuk mendapatkan transkripsi ini.</
 <translation id="8010765388850538088">Ketahui tentang AI Generatif dengan lebih lanjut</translation>
 <translation id="8017679124341497925">Pintasan diedit</translation>
 <translation id="802154636333426148">Muat turun gagal</translation>
+<translation id="8027467664787098346">Ketahui hiasan latar yang dipilih dengan lebih lanjut</translation>
 <translation id="8028993641010258682">Saiz</translation>
 <translation id="8031884997696620457">HSPAPlus</translation>
 <translation id="80398733265834479">Dayakan mod warna automatik</translation>
@@ -1600,7 +1600,7 @@ Muat turun model transkripsi (hingga 100MB) untuk mendapatkan transkripsi ini.</
 <translation id="8308787307410010965">Tetapan kandungan laman</translation>
 <translation id="8312330582793120272">mainkan media</translation>
 <translation id="8318753676953949627">Tiada Imej</translation>
-<translation id="8319809980370328428">Merakam ringkasan dan ciptaan tajuk</translation>
+<translation id="8319809980370328428">Penciptaan ringkasan dan tajuk rakaman</translation>
 <translation id="8320910311642849813">hutan</translation>
 <translation id="8322464149031882595">Klik untuk maju</translation>
 <translation id="8329018942023753850">apl kalkulator</translation>
@@ -1658,6 +1658,7 @@ Muat turun model transkripsi (hingga 100MB) untuk mendapatkan transkripsi ini.</
 <translation id="8543574988889671960">Muatkan semula tab</translation>
 <translation id="8550364285433943656">Letakkan kawalan pada tindakan permainan untuk bermain dengan kekunci papan kekunci</translation>
 <translation id="8557447961879934694">WPA2</translation>
+<translation id="8558521694042102707">AI generatif boleh membuat kesilapan, termasuk tentang orang, maka semak semula respons.</translation>
 <translation id="8575298406870537639">Pembawa anda mungkin memerlukan pilihan ini untuk menyambung kepada rangkaian mereka. Hubungi pembawa anda untuk mendapatkan butiran.</translation>
 <translation id="8576249514688522074">Tidak diasalkan</translation>
 <translation id="8584654835905316966">Pemulaan semula perlu dilakukan untuk melengkapkan proses pemasangan perisian tegar untuk <ph name="DEVICE_NAME" /> kepada versi <ph name="VERSION" />. Komputer anda mungkin akan dibut semula beberapa kali. Gelagat ini dijangkakan.</translation>
@@ -1672,7 +1673,6 @@ Muat turun model transkripsi (hingga 100MB) untuk mendapatkan transkripsi ini.</
 <translation id="8655295600908251630">Saluran</translation>
 <translation id="8655828773034788261">Kongsi URL:</translation>
 <translation id="8660881923941176839">paun</translation>
-<translation id="8670057600920888023">AI generatif ialah ciri eksperimen dan kandungan ciri ini mungkin tidak tepat, mengelirukan atau menyinggung.</translation>
 <translation id="8670574982334489519">kanan</translation>
 <translation id="8675354002693747642">Kekunci prakongsi</translation>
 <translation id="8677859815076891398">Tiada album. Buat album dalam <ph name="LINK_BEGIN" />Google Photos<ph name="LINK_END" />.</translation>

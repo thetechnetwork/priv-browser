@@ -62,8 +62,8 @@ import org.chromium.chrome.browser.user_education.UserEducationHelper;
 import org.chromium.chrome.browser.util.BrowserUiUtils;
 import org.chromium.chrome.browser.util.BrowserUiUtils.ModuleTypeOnStartAndNtp;
 import org.chromium.components.feature_engagement.Tracker;
-import org.chromium.ui.MotionEventUtils;
 import org.chromium.ui.base.ViewUtils;
+import org.chromium.ui.util.MotionEventUtils;
 import org.chromium.ui.util.TokenHolder;
 import org.chromium.url.GURL;
 
@@ -724,16 +724,8 @@ public abstract class ToolbarLayout extends FrameLayout
     public abstract LocationBar getLocationBar();
 
     /**
-     * Navigates the current Tab back.
-     * @return Whether or not the current Tab did go back.
-     */
-    boolean back() {
-        maybeUnfocusUrlBar();
-        return mToolbarTabController != null && mToolbarTabController.back();
-    }
-
-    /**
      * Navigates the current Tab forward.
+     *
      * @return Whether or not the current Tab did go forward.
      */
     boolean forward() {
@@ -908,4 +900,7 @@ public abstract class ToolbarLayout extends FrameLayout
             BrowserUiUtils.recordModuleClickHistogram(ModuleTypeOnStartAndNtp.HOME_BUTTON);
         }
     }
+
+    /** Requests keyboard focus on the toolbar row. */
+    public abstract void requestKeyboardFocus();
 }

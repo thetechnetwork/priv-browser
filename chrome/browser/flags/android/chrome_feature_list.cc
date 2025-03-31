@@ -172,7 +172,6 @@ const base::Feature* const kFeaturesExposedToJava[] = {
     &history_clusters::internal::kOmniboxAction,
     &kAdaptiveButtonInTopToolbarCustomizationV2,
     &kAdaptiveButtonInTopToolbarPageSummary,
-    &kRedirectExplicitCTAIntentsToExistingActivity,
     &kAllowNewIncognitoTabIntents,
     &kAndroidAppIntegration,
     &kAndroidAppIntegrationV2,
@@ -292,6 +291,7 @@ const base::Feature* const kFeaturesExposedToJava[] = {
     &kNativePageTransitionHardwareCapture,
     &kNavBarColorAnimation,
     &kNavBarColorMatchesTabBackground,
+    &kNavigationCaptureRefactorAndroid,
     &kNewTabSearchEngineUrlAndroid,
     &kNewTabPageAndroidTriggerForPrerender2,
     &kNotificationPermissionVariant,
@@ -322,6 +322,7 @@ const base::Feature* const kFeaturesExposedToJava[] = {
     &kReengagementNotification,
     &kRelatedSearchesAllLanguage,
     &kRelatedSearchesSwitch,
+    &kRemoveTabFocusOnShowingAndSelect,
     &kReportParentalControlSitesChild,
     &kRightEdgeGoesForwardGestureNav,
     &kSearchInCCT,
@@ -331,8 +332,8 @@ const base::Feature* const kFeaturesExposedToJava[] = {
     &kShareCustomActionsInCCT,
     &kSkipIsolatedSplitPreload,
     &kSmallerTabStripTitleLimit,
-    &kSuppressToolbarCaptures,
     &kSuppressToolbarCapturesAtGestureEnd,
+    &kTabGroupEntryPointsAndroid,
     &kTabGroupParityBottomSheetAndroid,
     &kToolbarPhoneCleanup,
     &kTabResumptionModuleAndroid,
@@ -345,7 +346,6 @@ const base::Feature* const kFeaturesExposedToJava[] = {
     &kTabStripLayoutOptimization,
     &kTabStripTransitionInDesktopWindow,
     &kTabSwitcherColorBlendAnimate,
-    &kTabSwitcherContextMenuAndroid,
     &kTabSwitcherForeignFaviconSupport,
     &kTabWindowManagerReportIndicesMismatch,
     &kTestDefaultDisabled,
@@ -944,6 +944,10 @@ BASE_FEATURE(kNavBarColorMatchesTabBackground,
              "NavBarColorMatchesTabBackground",
              base::FEATURE_ENABLED_BY_DEFAULT);
 
+BASE_FEATURE(kNavigationCaptureRefactorAndroid,
+             "NavigationCaptureRefactorAndroid",
+             base::FEATURE_DISABLED_BY_DEFAULT);
+
 BASE_FEATURE(kNewTabSearchEngineUrlAndroid,
              "NewTabSearchEngineUrlAndroid",
              base::FEATURE_ENABLED_BY_DEFAULT);
@@ -974,7 +978,7 @@ BASE_FEATURE(kPageContentProvider,
 
 BASE_FEATURE(kPowerSavingModeBroadcastReceiverInBackground,
              "PowerSavingModeBroadcastReceiverInBackground",
-             base::FEATURE_ENABLED_BY_DEFAULT);
+             base::FEATURE_DISABLED_BY_DEFAULT);
 
 BASE_FEATURE(kPreconnectOnTabCreation,
              "PreconnectOnTabCreation",
@@ -1052,10 +1056,6 @@ BASE_FEATURE(kRecordSuppressionMetrics,
              "RecordSuppressionMetrics",
              base::FEATURE_ENABLED_BY_DEFAULT);
 
-BASE_FEATURE(kRedirectExplicitCTAIntentsToExistingActivity,
-             "RedirectExplicitCTAIntentsToExistingActivity",
-             base::FEATURE_ENABLED_BY_DEFAULT);
-
 BASE_FEATURE(kReengagementNotification,
              "ReengagementNotification",
              base::FEATURE_DISABLED_BY_DEFAULT);
@@ -1066,6 +1066,10 @@ BASE_FEATURE(kRelatedSearchesAllLanguage,
 
 BASE_FEATURE(kRelatedSearchesSwitch,
              "RelatedSearchesSwitch",
+             base::FEATURE_ENABLED_BY_DEFAULT);
+
+BASE_FEATURE(kRemoveTabFocusOnShowingAndSelect,
+             "RemoveTabFocusOnShowingAndSelect",
              base::FEATURE_ENABLED_BY_DEFAULT);
 
 BASE_FEATURE(kReportParentalControlSitesChild,
@@ -1092,13 +1096,13 @@ BASE_FEATURE(kSmallerTabStripTitleLimit,
              "SmallerTabStripTitleLimit",
              base::FEATURE_ENABLED_BY_DEFAULT);
 
-BASE_FEATURE(kSuppressToolbarCaptures,
-             "SuppressToolbarCaptures",
-             base::FEATURE_ENABLED_BY_DEFAULT);
-
 BASE_FEATURE(kSuppressToolbarCapturesAtGestureEnd,
              "SuppressToolbarCapturesAtGestureEnd",
              base::FEATURE_ENABLED_BY_DEFAULT);
+
+BASE_FEATURE(kTabGroupEntryPointsAndroid,
+             "TabGroupEntryPointsAndroid",
+             base::FEATURE_DISABLED_BY_DEFAULT);
 
 BASE_FEATURE(kTabGroupParityBottomSheetAndroid,
              "TabGroupParityBottomSheetAndroid",
@@ -1143,10 +1147,6 @@ BASE_FEATURE(kTabStripIncognitoMigration,
 BASE_FEATURE(kTabSwitcherColorBlendAnimate,
              "TabSwitcherColorBlendAnimate",
              base::FEATURE_ENABLED_BY_DEFAULT);
-
-BASE_FEATURE(kTabSwitcherContextMenuAndroid,
-             "TabSwitcherContextMenuAndroid",
-             base::FEATURE_DISABLED_BY_DEFAULT);
 
 BASE_FEATURE(kTabSwitcherForeignFaviconSupport,
              "TabSwitcherForeignFaviconSupport",

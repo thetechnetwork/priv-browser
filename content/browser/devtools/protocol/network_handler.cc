@@ -1004,6 +1004,11 @@ GetProtocolBlockedCookieReason(net::CookieInclusionStatus status) {
                                     EXCLUDE_SCHEME_MISMATCH)) {
     blockedReasons->push_back(Network::CookieBlockedReasonEnum::SchemeMismatch);
   }
+  if (status.HasExclusionReason(net::CookieInclusionStatus::ExclusionReason::
+                                    EXCLUDE_ANONYMOUS_CONTEXT)) {
+    blockedReasons->push_back(
+        Network::CookieBlockedReasonEnum::AnonymousContext);
+  }
   return blockedReasons;
 }
 
@@ -2865,7 +2870,7 @@ void NetworkHandler::OnSignedExchangeReceived(
             .SetExpires(sig.expires)
             .Build();
     if (sig.cert_sha256) {
-      signature->SetCertSha256(base::HexEncode(sig.cert_sha256->data));
+      signature->SetCertSha256(base::HexEncode(*sig.cert_sha256));
     }
     if (certificate) {
       auto encoded_certificates = std::make_unique<protocol::Array<String>>();

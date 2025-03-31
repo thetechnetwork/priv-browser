@@ -655,8 +655,6 @@ void Tab::MaybeUpdateHoverStatus(const ui::MouseEvent& event) {
 
   mouse_hovered_ = true;
   controller_->ShowHover(this, TabStyle::ShowHoverStyle::kSubtle);
-  UpdateForegroundColors();
-  DeprecatedLayoutImmediately();
   if (g_show_hover_card_on_mouse_hover) {
     controller_->UpdateHoverCard(
         this, TabSlotController::HoverCardUpdateType::kHover);
@@ -669,8 +667,6 @@ void Tab::OnMouseExited(const ui::MouseEvent& event) {
   }
   mouse_hovered_ = false;
   controller_->HideHover(this, TabStyle::HideHoverStyle::kGradual);
-  UpdateForegroundColors();
-  DeprecatedLayoutImmediately();
 }
 
 void Tab::OnGestureEvent(ui::GestureEvent* event) {
@@ -716,6 +712,18 @@ void Tab::OnGestureEvent(ui::GestureEvent* event) {
       break;
   }
   event->SetHandled();
+}
+
+void Tab::ShowHover(TabStyle::ShowHoverStyle style) {
+  tab_style_views()->ShowHover(style);
+  UpdateForegroundColors();
+  DeprecatedLayoutImmediately();
+}
+
+void Tab::HideHover(TabStyle::HideHoverStyle style) {
+  tab_style_views()->HideHover(style);
+  UpdateForegroundColors();
+  DeprecatedLayoutImmediately();
 }
 
 // This function updates the accessible name for the tab whenever any of the
@@ -810,8 +818,8 @@ TabSlotView::ViewType Tab::GetTabSlotViewType() const {
 TabSizeInfo Tab::GetTabSizeInfo() const {
   return {tab_style()->GetPinnedWidth(), tab_style()->GetMinimumActiveWidth(),
           tab_style()->GetMinimumInactiveWidth(),
-          split() ? tab_style()->GetStandardSplitWidth()
-                  : tab_style()->GetStandardWidth()};
+          split().has_value() ? tab_style()->GetStandardSplitWidth()
+                              : tab_style()->GetStandardWidth()};
 }
 
 void Tab::SetClosing(bool closing) {
@@ -886,7 +894,14 @@ ui::ColorId Tab::GetAlertIndicatorColor(TabAlertState state) const {
 }
 
 bool Tab::IsActive() const {
-  return controller_->IsActiveTab(this);
+  if (split()) {
+    return std::ranges::any_of(controller()->GetTabsInSplit(this),
+                               [this](const Tab* split_tab) {
+                                 return controller_->IsActiveTab(split_tab);
+                               });
+  } else {
+    return controller_->IsActiveTab(this);
+  }
 }
 
 void Tab::ActiveStateChanged() {

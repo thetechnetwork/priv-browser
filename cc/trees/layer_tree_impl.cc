@@ -1295,6 +1295,20 @@ void LayerTreeImpl::PushPageScaleFromMainThread(float page_scale_factor,
                                max_page_scale_factor);
 }
 
+void LayerTreeImpl::SetPageScaleFactorAndLimitsForDisplayTree(
+    float page_scale_factor,
+    float min_page_scale_factor,
+    float max_page_scale_factor) {
+  DCHECK(settings().is_display_tree);
+  bool changed_page_scale = page_scale_factor_->SetCurrent(page_scale_factor);
+  changed_page_scale |=
+      SetPageScaleFactorLimits(min_page_scale_factor, max_page_scale_factor);
+
+  if (changed_page_scale) {
+    DidUpdatePageScale();
+  }
+}
+
 void LayerTreeImpl::PushPageScaleFactorAndLimits(const float* page_scale_factor,
                                                  float min_page_scale_factor,
                                                  float max_page_scale_factor) {
@@ -3023,6 +3037,9 @@ void LayerTreeImpl::AddViewTransitionRequest(
 
 std::vector<std::unique_ptr<ViewTransitionRequest>>
 LayerTreeImpl::TakeViewTransitionRequests() {
+  if (HasViewTransitionRequests()) {
+    set_needs_update_draw_properties();
+  }
   return std::move(view_transition_requests_);
 }
 

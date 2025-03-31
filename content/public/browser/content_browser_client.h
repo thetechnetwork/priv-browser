@@ -365,6 +365,10 @@ class CONTENT_EXPORT ContentBrowserClient {
   // PostAfterStartupTask() API instead.
   virtual bool IsBrowserStartupComplete();
 
+  // Allows the embedder to control when to enable native ui task execution.
+  virtual void OnUiTaskRunnerReady(
+      base::OnceClosure enable_native_ui_task_execution_callback);
+
   // Allows the embedder to handle a request from unit tests running in the
   // content layer to consider startup complete (for the sake of
   // PostAfterStartupTask()).
@@ -2265,6 +2269,22 @@ class CONTENT_EXPORT ContentBrowserClient {
                                         ui::PageTransition transition,
                                         bool* ignore_navigation);
 #endif
+
+  // Returns true if navigation can synchronously continue if the frame being
+  // navigated (and all child frames) do not have beforeunload handlers.
+  //
+  // Synchronously continuing with navigation can lead to trying to start
+  // another navigation synchronously while the first navigation is still being
+  // processed on the stack. This results in re-entrancy which is unsafe and
+  // triggers a CHECK.
+  //
+  // If this returns false, PostTask() is used to instead asynchronously
+  // continue the navigation to avoid the re-entrancy issue.
+  //
+  // Embedders like Android WebView have to set this to false because they
+  // cannot guarantee that this would never occur - in particular, there are
+  // existing Android WebView apps that do the problematic sync navigation.
+  virtual bool SupportsAvoidUnnecessaryBeforeUnloadCheckSync();
 
   // Whether same-site RenderFrameHost swaps due to RenderDocument is allowed
   // for navigations from `rfh`. Embedders can choose to disallow this if there

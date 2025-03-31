@@ -104,9 +104,6 @@ class ExtensionBrowserTest : public ExtensionPlatformBrowserTest {
   const Extension* LoadExtension(const base::FilePath& path,
                                  const LoadOptions& options);
 
-  void DisableExtension(const ExtensionId& extension_id,
-                        const DisableReasonSet& disable_reasons);
-
   // Loads unpacked extension from |path| with manifest |manifest_relative_path|
   // and imitates that it is a component extension.
   // |manifest_relative_path| is relative to |path|.
@@ -203,14 +200,6 @@ class ExtensionBrowserTest : public ExtensionPlatformBrowserTest {
   }
 
   void ReloadExtension(const extensions::ExtensionId& extension_id);
-
-  void UnloadExtension(const extensions::ExtensionId& extension_id);
-
-  void UninstallExtension(const extensions::ExtensionId& extension_id);
-
-  void DisableExtension(const extensions::ExtensionId& extension_id);
-
-  void EnableExtension(const extensions::ExtensionId& extension_id);
 
   // Wait for the number of visible page actions to change to |count|.
   bool WaitForPageActionVisibilityChangeTo(int count);

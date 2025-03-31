@@ -84,22 +84,28 @@ TaskManagerView* g_task_manager_view = nullptr;
 
 }  // namespace
 
-const auto kTabDefinitions = std::to_array<TaskManagerView::FilterTab>(
-    {{
-         .associated_category = DisplayCategory::kTabsAndExtensions,
-         .title_id = IDS_TASK_MANAGER_CATEGORY_TABS_AND_EXTENSIONS_NAME,
-         .icon = &views::kNewTabIcon,
-     },
-     {
-         .associated_category = DisplayCategory::kSystem,
+const auto kTabDefinitions = std::to_array<TaskManagerView::FilterTab>({
+    {
+        .associated_category = DisplayCategory::kTabsAndExtensions,
+        .title_id = IDS_TASK_MANAGER_CATEGORY_TABS_AND_EXTENSIONS_NAME,
+        .icon = &views::kNewTabIcon,
+    },
+    {
+        .associated_category = DisplayCategory::kSystem,
 #if BUILDFLAG(IS_CHROMEOS)
-         .title_id = IDS_TASK_MANAGER_CATEGORY_SYSTEM_NAME,
-         .icon = &kLaptopIcon,
+        .title_id = IDS_TASK_MANAGER_CATEGORY_SYSTEM_NAME,
+        .icon = &kLaptopIcon,
 #else
-         .title_id = IDS_TASK_MANAGER_CATEGORY_BROWSER_NAME,
-         .icon = &kBrowserLogoIcon,
+        .title_id = IDS_TASK_MANAGER_CATEGORY_BROWSER_NAME,
+        .icon = &kBrowserLogoIcon,
 #endif
-     }});
+    },
+    {
+        .associated_category = DisplayCategory::kAll,
+        .title_id = IDS_TASK_MANAGER_CATEGORY_ALL_NAME,
+        .icon = &kViewListIcon,
+    },
+});
 
 TaskManagerView::~TaskManagerView() {
   // Delete child views now, while our table model still exists.
@@ -208,15 +214,6 @@ void TaskManagerView::SetSortDescriptor(const TableSortDescriptor& descriptor) {
   }
 
   tab_table_->SetSortDescriptors(descriptor_list);
-}
-
-void TaskManagerView::MaybeHighlightActiveTask() {
-  if (table_model_ && tab_table_->selection_model().empty()) {
-    std::optional<size_t> row = table_model_->GetRowForActiveTask();
-    if (row.has_value()) {
-      tab_table_->Select(row.value());
-    }
-  }
 }
 
 gfx::Size TaskManagerView::CalculatePreferredSize(
@@ -350,13 +347,9 @@ void TaskManagerView::MenuClosed(ui::SimpleMenuModel* source) {
 }
 
 void TaskManagerView::SearchBarOnInputChanged(std::u16string_view query) {
-  const auto selected_category =
-      query.empty()
-          ? kTabDefinitions[tabs_->GetSelectedTabIndex()].associated_category
-          : DisplayCategory::kAll;
-
-  tabs_->SetEnabled(query.empty());
-  PerformFilter(selected_category, query);
+  search_terms_ = query;
+  PerformFilter(
+      kTabDefinitions[tabs_->GetSelectedTabIndex()].associated_category);
 }
 
 TaskManagerView::TaskManagerView(StartAction start_action)
@@ -482,8 +475,9 @@ std::unique_ptr<views::View> TaskManagerView::CreateHeaderSeparatorUnderlay(
   return separator_container;
 }
 
-void TaskManagerView::PerformFilter(DisplayCategory category,
-                                    std::u16string_view search_term) {
+void TaskManagerView::PerformFilter(DisplayCategory category) {
+  SaveCategoryToLocalState(category);
+
   // When `select_on_remove_` is enabled, the selection will automatically jump
   // to some next/previous row if available. However, this setting needs to be
   // temporarily disabled during model updates to achieve the desired selection
@@ -496,7 +490,7 @@ void TaskManagerView::PerformFilter(DisplayCategory category,
   // no other selection should be applied (a.k.a the selection should clear).
 
   tab_table_->SetSelectOnRemove(false);
-  if (table_model_->UpdateModel(category, search_term)) {
+  if (table_model_->UpdateModel(category, search_terms_)) {
     // Model row count may differ, leading to off-screen row rendering.
     // Recompute scroll position.
     tab_table_->InvalidateLayout();
@@ -698,6 +692,10 @@ void TaskManagerView::Init() {
   table_model_->RetrieveSavedColumnsSettingsAndUpdateTable(
       table_config_.sort_on_cpu_by_default);
 
+  if (table_config_.layout_refresh) {
+    RestoreSavedCategory();
+  }
+
   AddAccelerator(ui::Accelerator(ui::VKEY_W, ui::EF_CONTROL_DOWN));
   AddAccelerator(
       ui::Accelerator(ui::VKEY_W, ui::EF_CONTROL_DOWN | ui::EF_SHIFT_DOWN));
@@ -735,6 +733,51 @@ void TaskManagerView::RetrieveSavedAlwaysOnTopState() {
   const base::Value::Dict& dictionary =
       g_browser_process->local_state()->GetDict(GetWindowName());
   is_always_on_top_ = dictionary.FindBool("always_on_top").value_or(false);
+}
+
+void TaskManagerView::RestoreSavedCategory() {
+  if (!g_browser_process->local_state()) {
+    return;
+  }
+
+  int category =
+      g_browser_process->local_state()->GetInteger(prefs::kTaskManagerCategory);
+  int max = static_cast<int>(DisplayCategory::kMax);
+
+  // Bounds check the retrieved pref.
+  if (category < 0 || category > max) {
+    category = static_cast<int>(TaskManagerTableModel::kDefaultCategory);
+  }
+
+  const auto parsed_category = static_cast<DisplayCategory>(category);
+
+  // Finds the tab index of the category to restore, or does nothing if the
+  // category no longer exists as a tab.
+  for (size_t i = 0; i < kTabDefinitions.size(); ++i) {
+    if (kTabDefinitions[i].associated_category == parsed_category) {
+      tabs_->SelectTab(tabs_->GetTabAtIndex(i), /*animate=*/false);
+      break;
+    }
+  }
+}
+
+void TaskManagerView::SaveCategoryToLocalState(DisplayCategory category) {
+  PrefService* local_state = g_browser_process->local_state();
+  if (!local_state) {
+    return;
+  }
+
+  // Stores the current tab to be restored again at startup.
+  int category_to_save = static_cast<int>(category);
+  int max = static_cast<int>(DisplayCategory::kMax);
+  int default_category =
+      static_cast<int>(TaskManagerTableModel::kDefaultCategory);
+
+  // Bounds check to ensure that the category is set appropriately.
+  if (category_to_save < 0 || category_to_save > max) {
+    category_to_save = default_category;
+  }
+  local_state->SetInteger(prefs::kTaskManagerCategory, category_to_save);
 }
 
 void TaskManagerView::EndSelectedProcess() {

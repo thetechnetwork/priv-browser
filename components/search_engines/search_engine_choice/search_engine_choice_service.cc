@@ -49,6 +49,8 @@
 #include "components/variations/service/variations_service.h"  // nogncheck
 #endif
 
+using ::country_codes::CountryId;
+
 namespace search_engines {
 namespace {
 
@@ -117,17 +119,6 @@ void MarkSearchEngineChoiceCompleted(PrefService& prefs) {
                   version_info::GetVersionNumber());
 }
 
-std::optional<base::Time> GetChoiceScreenCompletionTimestamp(
-    PrefService& prefs) {
-  if (!prefs.HasPrefPath(
-          prefs::kDefaultSearchProviderChoiceScreenCompletionTimestamp)) {
-    return std::nullopt;
-  }
-
-  return base::Time::FromDeltaSinceWindowsEpoch(base::Seconds(prefs.GetInt64(
-      prefs::kDefaultSearchProviderChoiceScreenCompletionTimestamp)));
-}
-
 // Returns true if the version is valid and can be compared to the current
 // Chrome version.
 bool IsValidVersionFormat(const base::Version& version) {
@@ -162,16 +153,16 @@ void LogSearchRepromptKeyHistograms(RepromptResult result, bool is_wildcard) {
   }
 }
 
-int GetVariationsCountryId(variations::VariationsService* variations_service) {
+CountryId GetVariationsCountryId(
+    variations::VariationsService* variations_service) {
 #if BUILDFLAG(IS_FUCHSIA)
   // We can't add a dependency from Fuchsia to
   // `//components/variations/service`.
-  return country_codes::kCountryIDUnknown;
+  return CountryId();
 #else
-  return variations_service
-             ? country_codes::CountryStringToCountryID(
-                   base::ToUpperASCII(variations_service->GetLatestCountry()))
-             : country_codes::kCountryIDUnknown;
+  return variations_service ? CountryId(base::ToUpperASCII(
+                                  variations_service->GetLatestCountry()))
+                            : CountryId();
 #endif
 }
 
@@ -183,7 +174,7 @@ SearchEngineChoiceService::SearchEngineChoiceService(
     regional_capabilities::RegionalCapabilitiesService& regional_capabilities,
     TemplateURLPrepopulateData::Resolver& prepopulate_data_resolver,
     bool is_profile_eligbile_for_dse_guest_propagation,
-    int variations_country_id)
+    CountryId variations_country_id)
     : profile_prefs_(profile_prefs),
       local_state_(local_state),
       regional_capabilities_service_(regional_capabilities),
@@ -516,7 +507,7 @@ void SearchEngineChoiceService::PreprocessPrefsForReprompt() {
   }
 
   const base::Version& current_version = version_info::GetVersion();
-  regional_capabilities::CountryId country_id =
+  CountryId country_id =
       regional_capabilities_service_->GetCountryId().GetRestricted(
           regional_capabilities::CountryAccessKey(
               regional_capabilities::CountryAccessReason::
@@ -524,7 +515,7 @@ void SearchEngineChoiceService::PreprocessPrefsForReprompt() {
   const std::string wildcard_string("*");
   // Explicit country key takes precedence over the wildcard.
   for (const std::string& key :
-       {country_codes::CountryIDToCountryString(country_id), wildcard_string}) {
+       {std::string(country_id.CountryCode()), wildcard_string}) {
     bool is_wildcard = key == wildcard_string;
     const std::string* reprompt_version_string =
         reprompt_params_json->FindString(key);

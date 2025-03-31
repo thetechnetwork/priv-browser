@@ -90,6 +90,11 @@
 #import "ios/chrome/browser/bookmarks/ui_bundled/bookmark_mediator.h"
 #import "ios/chrome/browser/bookmarks/ui_bundled/bookmark_path_cache.h"
 #import "ios/chrome/browser/bookmarks/ui_bundled/home/bookmarks_home_mediator.h"
+#import "ios/chrome/browser/content_suggestions/ui_bundled/content_suggestions_mediator.h"
+#import "ios/chrome/browser/content_suggestions/ui_bundled/price_tracking_promo/price_tracking_promo_prefs.h"
+#import "ios/chrome/browser/content_suggestions/ui_bundled/safety_check/safety_check_prefs.h"
+#import "ios/chrome/browser/content_suggestions/ui_bundled/shop_card/shop_card_prefs.h"
+#import "ios/chrome/browser/content_suggestions/ui_bundled/tips/tips_prefs.h"
 #import "ios/chrome/browser/download/model/auto_deletion/auto_deletion_service.h"
 #import "ios/chrome/browser/drive/model/drive_policy.h"
 #import "ios/chrome/browser/first_run/model/first_run.h"
@@ -100,7 +105,6 @@
 #import "ios/chrome/browser/ntp/model/set_up_list_prefs.h"
 #import "ios/chrome/browser/ntp/shared/metrics/feed_metrics_constants.h"
 #import "ios/chrome/browser/ntp_tiles/model/tab_resumption/tab_resumption_prefs.h"
-#import "ios/chrome/browser/parcel_tracking/parcel_tracking_opt_in_status.h"
 #import "ios/chrome/browser/parcel_tracking/parcel_tracking_prefs.h"
 #import "ios/chrome/browser/photos/model/photos_policy.h"
 #import "ios/chrome/browser/policy/model/policy_util.h"
@@ -114,11 +118,6 @@
 #import "ios/chrome/browser/shared/model/profile/profile_attributes_storage_ios.h"
 #import "ios/chrome/browser/shared/public/features/features.h"
 #import "ios/chrome/browser/tips_notifications/model/tips_notification_client.h"
-#import "ios/chrome/browser/ui/content_suggestions/content_suggestions_mediator.h"
-#import "ios/chrome/browser/ui/content_suggestions/price_tracking_promo/price_tracking_promo_prefs.h"
-#import "ios/chrome/browser/ui/content_suggestions/safety_check/safety_check_prefs.h"
-#import "ios/chrome/browser/ui/content_suggestions/shop_card/shop_card_prefs.h"
-#import "ios/chrome/browser/ui/content_suggestions/tips/tips_prefs.h"
 #import "ios/chrome/browser/upgrade/model/upgrade_constants.h"
 #import "ios/chrome/browser/voice/model/voice_search_prefs_registration.h"
 #import "ios/chrome/browser/web/model/annotations/annotations_util.h"
@@ -175,6 +174,16 @@ inline constexpr char kPageContentCollectionEnabled[] =
 // Deprecated 02/2025.
 inline constexpr char kNumberOfProfiles[] = "profile.profiles_created";
 inline constexpr char kLastActiveProfiles[] = "profile.last_active_profiles";
+
+// Deprecated 03/2025.
+inline constexpr char kIosParcelTrackingOptInPromptDisplayLimitMet[] =
+    "ios.parcel_tracking.opt_in_prompt_displayed";
+inline constexpr char kIosParcelTrackingOptInStatus[] =
+    "ios.parcel_tracking.opt_in_status";
+inline constexpr char kIosParcelTrackingOptInPromptSwipedDown[] =
+    "ios.parcel_tracking.opt_in_prompt_swiped_down";
+inline constexpr char kIosParcelTrackingPolicyEnabled[] =
+    "ios.parcel_tracking.policy_enabled";
 
 // Helper function migrating the preference `pref_name` of type "int" from
 // `defaults` to `pref_service`.
@@ -470,7 +479,7 @@ void RegisterLocalStatePrefs(PrefRegistrySimple* registry) {
   registry->RegisterIntegerPref(prefs::kBrowserSigninPolicy,
                                 static_cast<int>(BrowserSigninMode::kEnabled));
   registry->RegisterBooleanPref(prefs::kAppStoreRatingPolicyEnabled, true);
-  registry->RegisterBooleanPref(prefs::kIosParcelTrackingPolicyEnabled, true);
+  registry->RegisterBooleanPref(kIosParcelTrackingPolicyEnabled, true);
 
   registry->RegisterBooleanPref(prefs::kLensCameraAssistedSearchPolicyAllowed,
                                 true);
@@ -829,13 +838,11 @@ void RegisterProfilePrefs(user_prefs::PrefRegistrySyncable* registry) {
   registry->RegisterIntegerPref(policy::policy_prefs::kDownloadRestrictions, 0);
 
   // Preferences related to parcel tracking.
-  registry->RegisterBooleanPref(
-      prefs::kIosParcelTrackingOptInPromptDisplayLimitMet, false);
-  registry->RegisterIntegerPref(
-      prefs::kIosParcelTrackingOptInStatus,
-      static_cast<int>(IOSParcelTrackingOptInStatus::kStatusNotSet));
-  registry->RegisterBooleanPref(prefs::kIosParcelTrackingOptInPromptSwipedDown,
+  // Deprecated 03/2025.
+  registry->RegisterBooleanPref(kIosParcelTrackingOptInPromptDisplayLimitMet,
                                 false);
+  registry->RegisterIntegerPref(kIosParcelTrackingOptInStatus, -1);
+  registry->RegisterBooleanPref(kIosParcelTrackingOptInPromptSwipedDown, false);
 
   // Register prefs used to skip too frequent History Sync Opt-In prompt.
   history_sync::RegisterProfilePrefs(registry);
@@ -1067,6 +1074,12 @@ void MigrateObsoleteLocalStatePrefs(PrefService* prefs) {
   // Added 02/2025
   prefs->ClearPref(
       prefs::kIosMagicStackSegmentationParcelTrackingImpressionsSinceFreshness);
+
+  // Added 02/2025.
+  prefs->ClearPref(set_up_list_prefs::kDisabled);
+
+  // Added 03/2025.
+  prefs->ClearPref(kIosParcelTrackingPolicyEnabled);
 }
 
 // This method should be periodically pruned of year+ old migrations.
@@ -1226,6 +1239,11 @@ void MigrateObsoleteProfilePrefs(PrefService* prefs) {
   // Added 03/2025.
   MigrateIntegerPrefFromLocalStatePrefsToProfilePrefs(
       prefs::kHomeCustomizationMagicStackSafetyCheckIssuesCount, prefs);
+
+  // Added 03/2025.
+  prefs->ClearPref(kIosParcelTrackingOptInPromptDisplayLimitMet);
+  prefs->ClearPref(kIosParcelTrackingOptInStatus);
+  prefs->ClearPref(kIosParcelTrackingOptInPromptSwipedDown);
 }
 
 void MigrateObsoleteUserDefault() {

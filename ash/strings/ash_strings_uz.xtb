@@ -91,6 +91,7 @@ Quyidagi narsalardan boshlashingiz mumkin.</translation>
 <translation id="1269405891096105529">Mehmon rejimida tashqi qurilmalar ishlamaydi</translation>
 <translation id="1270290102613614947">Ekran klaviaturasi o‘chirib qo‘yilgan</translation>
 <translation id="1272079795634619415">To‘xtatish</translation>
+<translation id="12741168609094094">Qidirish, matn nusxalash va boshqa amallar uchun ekrandagi istalgan obyektni tanlang</translation>
 <translation id="1275285675049378717"><ph name="POWER_SOURCE" /> quvvatlanmoqda</translation>
 <translation id="1275718070701477396">Tanlandi</translation>
 <translation id="1276975447697633661">Faylni tanlab, <ph name="KEY" /> tugmasini bosing</translation>
@@ -149,6 +150,7 @@ Quyidagi narsalardan boshlashingiz mumkin.</translation>
 <translation id="1455242230282523554">Til sozlamalarini ochish</translation>
 <translation id="1459693405370120464">Ob-havo</translation>
 <translation id="1460620680449458626">Ovozsiz</translation>
+<translation id="1462439140224375968">Google Docs hujjati yaratildi</translation>
 <translation id="14648076227129703">Bunda kameraga ruxsat beriladi. <ph name="APP1_NAME" />, <ph name="APP2_NAME" /> va barcha ilovalar va saytlar kameradan foydalana oladi</translation>
 <translation id="1467432559032391204">Chapga</translation>
 <translation id="146902737843070955">Administrator bu oʻzgartirishni talab qilmoqda</translation>
@@ -226,6 +228,7 @@ Quyidagi narsalardan boshlashingiz mumkin.</translation>
 <translation id="1720230731642245863">Hotspot oʻchiq</translation>
 <translation id="1731815243805539470">Oldingi foydalanuvchiga almashish</translation>
 <translation id="1733996486177697563">Tungi va kunduzni mavzularni almashtirish. Ish stolini bosib turib, Fon rasmi va uslub bandini tanlang.</translation>
+<translation id="1735992454301033090">Hudud belgilandi, chegarasini tomon strelkalari yordamida suring</translation>
 <translation id="1736898441010944794">“<ph name="NAME" />” Bluetooth qurilmalariga koʻrinadi.</translation>
 <translation id="1737078180382804488">Telefondagi bildirishnomalarni koʻrishni sozlash oynasini yopish</translation>
 <translation id="174102739345480129">Marker oʻchiq.</translation>
@@ -493,6 +496,7 @@ Quyidagi narsalardan boshlashingiz mumkin.</translation>
 <translation id="2683887737780133806">Oʻtgan hafta <ph name="DAY_OF_WEEK" /></translation>
 <translation id="2687510499067466116">Tezkor tugma oʻzgardi</translation>
 <translation id="2689613560355655046">Desk 8</translation>
+<translation id="2692092709110488417">Tab tugmasini bosib, fokuslang va belgilangan hududni suring</translation>
 <translation id="2695305337569143674">veb</translation>
 <translation id="2697697418792422688">Klaviatura sozlamalarini ochish. <ph name="KEYBOARD_NAME" /> tanlandi.</translation>
 <translation id="2699913284398121653">Maktab hisobingizdagi maʼlumotlarni shaxsiy hisobingizga koʻchirish uchun Kontent uzatish ilovasidan foydalaning</translation>
@@ -550,6 +554,7 @@ Bekor qilinsa, <ph name="TIMEOUT_SECONDS" />dan keyin sensorli panel qayta yoqil
 <translation id="2872353916818027657">Asosiy monitorni almashtirish</translation>
 <translation id="2872961005593481000">Ishni tamomlash</translation>
 <translation id="2876338922445400217">Ekranda kattalashtirish</translation>
+<translation id="2876760662374103627">Yuz bilan boshqaruv yoniq</translation>
 <translation id="2878884018241093801">Hozircha hech narsa yo‘q</translation>
 <translation id="2880541185262491188">PIN kod juda koʻp marta kiritildi. <ph name="TIME_LEFT" /> kuting, keyin qaytadan urining</translation>
 <translation id="2883271196820422439">Sichqoncha tugmalarini tiklash</translation>
@@ -593,6 +598,7 @@ Bekor qilinsa, <ph name="TIMEOUT_SECONDS" />dan keyin sensorli panel qayta yoqil
 <translation id="301584155502740476">Hotspot axborotini ochish. Hotspot oʻchiq.</translation>
 <translation id="3017079585324758401">Orqa fon</translation>
 <translation id="3018135054368884502">Mediani oldinga oʻtkazish</translation>
+<translation id="3026897869154397692">Taqvimga kiritildi</translation>
 <translation id="3033545621352269033">Yoniq</translation>
 <translation id="3033912566804961911"><ph name="DESK_NAME" /> bilan birlashtirish</translation>
 <translation id="3036649622769666520">Ochiq fayllar</translation>
@@ -726,6 +732,7 @@ Bekor qilinsa, <ph name="TIMEOUT_SECONDS" />dan keyin sensorli panel qayta yoqil
 <translation id="346243998268439747">Masshtabni tiklash</translation>
 <translation id="3465223694362104965">Oxirgi kirishingizdan keyin bu qurilmaga boshqa klaviatura ulangan. Foydalanishdan oldin bu klaviatura ishonchliligini tekshiring.</translation>
 <translation id="3465356146291925647">Administrator boshqaruvida</translation>
+<translation id="3470502288861289375">Nusxa olinmoqda...</translation>
 <translation id="347117769229524881"><ph name="MODIFIER_ONE" /><ph name="MODIFIER_TWO" /><ph name="KEY_ONE" />, keyin <ph name="KEY_TWO" /> yoki <ph name="KEY_THREE" /></translation>
 <translation id="3477079411857374384">Ctrl + Shift + BO‘SHLIQ</translation>
 <translation id="3485319357743610354">Himoya: <ph name="SECURITY_STATUS" />, Ulanish: <ph name="CONNECTION_STATUS" />, Signal darajasi:<ph name="SIGNAL_STRENGTH" /></translation>
@@ -1012,6 +1019,7 @@ Quvvatni tejash uchun ayrim funksiyalar ishlashi cheklandi.</translation>
 <translation id="4351244548802238354">Oynani yopish</translation>
 <translation id="4356872429719185452">Hotspot axborotini ochish. Hotspot yoqilmoqda.</translation>
 <translation id="4364101114148522660"><ph name="DURATION" />  Yozib olinmoqda…</translation>
+<translation id="4368227575116094370">Google Sheet jadvalini yaratish</translation>
 <translation id="4371348193907997655">Translatsiya sozlamalari</translation>
 <translation id="4371834685492830207">PIN kod ruxsat etilgan belgilardan iborat boʻlsin</translation>
 <translation id="4375482231364171368">Manzillar qatoridan qidirish</translation>
@@ -1029,6 +1037,7 @@ Quvvatni tejash uchun ayrim funksiyalar ishlashi cheklandi.</translation>
 <translation id="4412698727486357573">Yordam markazi</translation>
 <translation id="4412944820643904175"><ph name="FEATURE_NAME" /> yoqilmagan</translation>
 <translation id="4417647906073317561">Fokus sozlamalari. Oqimga kirish uchun taymer, vazifa va musiqani sozlang.</translation>
+<translation id="4418600384772451109">Panelni yopish</translation>
 <translation id="4424159417645388645">Desk 5</translation>
 <translation id="4426817706804363424">Qoyil!</translation>
 <translation id="4430019312045809116">Hajmi</translation>
@@ -1481,6 +1490,7 @@ Hech qanday qurilma ulanmagan.</translation>
 <translation id="5825969630400862129">Ulangan qurilmalar sozlamalari</translation>
 <translation id="5830180081891717894">Yana <ph name="WINDOWS" /> ta</translation>
 <translation id="5837036133683224804"><ph name="ROUTE_TITLE" /> <ph name="RECEIVER_NAME" /> qurilmasiga translatsiya qilinishi to‘xtatilsin</translation>
+<translation id="5840658767386246331">Google orqali qidirish</translation>
 <translation id="5841296711770970362">Keyingi trekka oʻtish</translation>
 <translation id="5842553299352339114"><ph name="DEVICE_NAME" /> hotspoti yoniq, hech qanday qurilma ulanmagan</translation>
 <translation id="584525477304726060">Butunlay yoyish uchun bosib turing</translation>
@@ -1512,6 +1522,7 @@ Hech qanday qurilma ulanmagan.</translation>
 <translation id="595202126637698455">Unumdorlik kuzatuvi yoniq</translation>
 <translation id="5955304353782037793">app</translation>
 <translation id="5958529069007801266">Boshqariladigan profil</translation>
+<translation id="596035801491797438">Yuz bilan boshqaruvni oʻchirish</translation>
 <translation id="5960410286721553511">Telefoningizdagi oxirgi mediafayl va suratlarni oching</translation>
 <translation id="5965524703725988602">Tungi mavzuni yoqish/oʻchirish <ph name="STATE_TEXT" />.</translation>
 <translation id="5975235751479998104">Oynalar sahifasini oldinga oʻtkazish</translation>
@@ -1894,6 +1905,7 @@ yangi oʻrnatilgan</translation>
 <translation id="7228968829656641943">Ekrandan qidirish hududini belgilang. Keyin klaviatura yordamida harakatlanish uchun avval Tab, keyin Boʻshliq tugmalarini bosing.</translation>
 <translation id="7229029500464092426">Xotira: <ph name="AVAILABLE_MEMORY" /> | jami: <ph name="TOTAL_MEMORY" /></translation>
 <translation id="7239814253344511868">Sichqonchaning ikkala tugmasi</translation>
+<translation id="7240636904654154599">Google Sheets jadvali yaratildi</translation>
 <translation id="7244725679040769470">Batareyada <ph name="PERCENTAGE" />% quvvat qoldi. Qurilmani quvvat manbaiga ulang.</translation>
 <translation id="7246071203293827765"><ph name="UPDATE_TEXT" />. Yangilanish amalga oshishi uchun Chromebook qayta ishga tushirilishi lozim. Bu 1 daqiqacha vaqt olishi mumkin.</translation>
 <translation id="7256057185598509352">ExpressKey 2</translation>
@@ -2222,6 +2234,7 @@ Qurilmani oʻchirish uchun uning quvvat tugmasini biroz bosib turing.</translati
 <translation id="8287009018010202411">Unumdorlik</translation>
 <translation id="828708037801473432">Oʻchiq</translation>
 <translation id="8297006494302853456">Zaif</translation>
+<translation id="8300451473979404345">Hudud dastasi belgilandi, tomon strelkalari yordamida suring</translation>
 <translation id="8308637677604853869">Avvalgi menyu</translation>
 <translation id="830868413617744215">Beta</translation>
 <translation id="8314772463905284467">Caps Lock yoniq</translation>
@@ -2282,6 +2295,7 @@ Qurilmani oʻchirish uchun uning quvvat tugmasini biroz bosib turing.</translati
 <translation id="851458219935658693">Joriy ish stoli oynalarini chiqarish, radio tugma tanlandi</translation>
 <translation id="851660987304951246">Kontentni tez xulosalash yoki savol berish uchun Oʻqishda yordam funksiyasidan foydalaning</translation>
 <translation id="8517041960877371778"><ph name="DEVICE_TYPE" /> qurilmasi yoniqligida uni quvvatlab bo‘lmaydi.</translation>
+<translation id="8519329096920173967">Ekrandan Google Lens yordamida qidirish</translation>
 <translation id="8535393432370007982">Rangi asosida saralanishini bekor qilish</translation>
 <translation id="8536886494750559755">Tezkor ulashuv sozlamalarini ochish. Hammaga <ph name="TIME_REMAINING" /> koʻrinadi</translation>
 <translation id="8539803091108018926">Matn vaqtinchalik xotiraga nusxalandi</translation>
@@ -2404,6 +2418,7 @@ Qurilmani oʻchirish uchun uning quvvat tugmasini biroz bosib turing.</translati
 <translation id="8921624153894383499">Google Assistent hozircha bu tilda gapirmaydi.</translation>
 <translation id="8926951137623668982">Javon doim berk</translation>
 <translation id="8929566928381252430">Caps Lock bosish kerakmi? Buni ishlating:</translation>
+<translation id="8929623844713377237">Kontakt yaratildi</translation>
 <translation id="8934418770423095813">Google Doc hujjatini yaratish</translation>
 <translation id="8934926665751933910">{NUM_FILES,plural, =1{1 ta fayl}other{# ta fayl}}</translation>
 <translation id="8936501819958976551">faolsizlantirildi</translation>

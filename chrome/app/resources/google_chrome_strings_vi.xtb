@@ -513,7 +513,6 @@ Một số tính năng có thể không khả dụng. Vui lòng chỉ định th
 <translation id="7787950393032327779">Dường như cấu hình này đang được quy trình Google Chrome khác (<ph name="PROCESS_ID" />) trên máy tính khác (<ph name="HOST_NAME" />) sử dụng. Chrome đã khóa cấu hình này để cấu hình không bị lỗi. Nếu bạn chắc chắn không có quy trình nào khác đang sử dụng cấu hình này, bạn có thể mở khóa cấu hình và chạy lại Chrome.</translation>
 <translation id="7801699035218095297">Google Chrome đang cố gắng sao chép mật khẩu. Hãy nhập mật khẩu Windows của bạn để cho phép việc này.</translation>
 <translation id="7808348361785373670">Xóa khỏi Chrome...</translation>
-<translation id="782480918904119604">Để sử dụng hồ sơ này với Glic, hãy mở Chrome rồi đăng nhập</translation>
 <translation id="7825851276765848807">Không thể cài đặt do lỗi không xác định. Hãy tải xuống lại Google Chrome.</translation>
 <translation id="7845233973568007926">Cảm ơn bạn đã cài đặt. Bạn phải khởi động lại máy tính trước khi sử dụng <ph name="BUNDLE_NAME" />.</translation>
 <translation id="7872446069773932638">Đang tải xuống... Còn <ph name="SECONDS" /> giây</translation>
@@ -569,6 +568,7 @@ Một số tính năng có thể không khả dụng. Vui lòng chỉ định th
 <translation id="8516431725144212809">Mối quan tâm của bạn theo ước đoán của Chrome</translation>
 <translation id="8521348052903287641">Quy tắc kết nối để Google Chrome Dev cho phép lưu lượng truy cập mDNS.</translation>
 <translation id="852529348814672339">Hiển thị Chrome bằng ngôn ngữ này</translation>
+<translation id="8533056045953418157">Đặt Google Chrome làm trình xem PDF mặc định</translation>
 <translation id="8550334526674375523">Hồ sơ công việc này hoàn toàn riêng biệt với hồ sơ cá nhân của bạn.</translation>
 <translation id="8555465886620020932">Lỗi dịch vụ: <ph name="SERVICE_ERROR" />.</translation>
 <translation id="856656450041460113">Tìm kiếm trong danh sách ngôn ngữ</translation>

@@ -194,6 +194,8 @@
   /* Intent Picker colors. */ \
   E_CPONLY(kColorIntentPickerItemBackgroundHovered) \
   E_CPONLY(kColorIntentPickerItemBackgroundSelected) \
+  /* Glic colors */ \
+  E_CPONLY(kColorGlicBackground) \
   /* Hover Button colors */ \
   E_CPONLY(kColorHoverButtonBackgroundHovered) \
   /* Lens overlay colors. */ \
@@ -211,6 +213,9 @@
   /* Media router colors. */ \
   E_CPONLY(kColorMediaRouterIconActive) \
   E_CPONLY(kColorMediaRouterIconWarning) \
+  /* Multi contents view colors. */ \
+  E_CPONLY(kColorMulitContentsViewActiveContentOutline) \
+  E_CPONLY(kColorMulitContentsViewInactiveContentOutline) \
   /* New tab button colors. */ \
   E_CPONLY(kColorNewTabButtonForegroundFrameActive) \
   E_CPONLY(kColorNewTabButtonForegroundFrameInactive) \

@@ -7,7 +7,10 @@
 #include "base/check.h"
 #include "base/functional/bind.h"
 #include "chrome/browser/accessibility/tree_fixing/internal/ax_tree_fixing_screen_ai_service.h"
+#include "chrome/browser/accessibility/tree_fixing/pref_names.h"
 #include "chrome/browser/profiles/profile.h"
+#include "components/prefs/pref_service.h"
+#include "content/public/browser/browser_accessibility_state.h"
 #include "content/public/browser/render_view_host.h"
 #include "content/public/browser/render_widget_host.h"
 #include "content/public/browser/render_widget_host_iterator.h"
@@ -39,6 +42,11 @@ void AXTreeFixingServicesRouter::WebContentsObserver::
 AXTreeFixingServicesRouter::AXTreeFixingServicesRouter(Profile* profile)
     : profile_(profile) {
   CHECK(profile_);
+  pref_change_registrar_.Init(profile_->GetPrefs());
+  pref_change_registrar_.Add(
+      prefs::kAccessibilityAXTreeFixingEnabled,
+      base::BindRepeating(&AXTreeFixingServicesRouter::ToggleEnabledState,
+                          weak_factory_.GetWeakPtr()));
 #if BUILDFLAG(IS_CHROMEOS)
   if (auto* const accessibility_manager = ash::AccessibilityManager::Get();
       accessibility_manager) {
@@ -50,7 +58,7 @@ AXTreeFixingServicesRouter::AXTreeFixingServicesRouter(Profile* profile)
 #else
   ax_mode_observation_.Observe(&ui::AXPlatform::GetInstance());
 #endif  // BUILDFLAG(IS_CHROMEOS)
-  ToggleAccessibilityState();
+  ToggleEnabledState();
 }
 
 AXTreeFixingServicesRouter::~AXTreeFixingServicesRouter() = default;
@@ -81,12 +89,10 @@ void AXTreeFixingServicesRouter::IdentifyMainNode(
 
 #if !BUILDFLAG(IS_CHROMEOS)
 void AXTreeFixingServicesRouter::OnAXModeAdded(ui::AXMode mode) {
-  if ((!current_ax_mode_.has_mode(ui::AXMode::kExtendedProperties) &&
-       mode.has_mode(ui::AXMode::kExtendedProperties)) ||
-      (current_ax_mode_.has_mode(ui::AXMode::kExtendedProperties) &&
-       !mode.has_mode(ui::AXMode::kExtendedProperties))) {
+  if (current_ax_mode_.has_mode(ui::AXMode::kExtendedProperties) !=
+      mode.has_mode(ui::AXMode::kExtendedProperties)) {
     current_ax_mode_ = mode;
-    ToggleAccessibilityState();
+    ToggleEnabledState();
   }
 }
 #endif  // !BUILDFLAG(IS_CHROMEOS)
@@ -117,10 +123,18 @@ void AXTreeFixingServicesRouter::OnServiceStateChanged(bool service_ready) {
   // queued requests (if a queue exists)? Should a signal be sent to clients?
 }
 
-void AXTreeFixingServicesRouter::ToggleAccessibilityState() {
+void AXTreeFixingServicesRouter::ToggleEnabledState() {
   // TODO(crbug.com/401308988): Downstream service instances such as
   // screen_ai_service_ need to be cleared when accessibility (or user pref) is
   // disabled.
+  web_contents_observers_.clear();
+  if (!profile_->GetPrefs()->GetBoolean(
+          prefs::kAccessibilityAXTreeFixingEnabled) ||
+      !content::BrowserAccessibilityState::GetInstance()
+           ->GetAccessibilityModeForBrowserContext(profile_)
+           .has_mode(ui::AXMode::kExtendedProperties)) {
+    return;
+  }
   std::unique_ptr<content::RenderWidgetHostIterator> widgets(
       content::RenderWidgetHost::GetRenderWidgetHosts());
   while (content::RenderWidgetHost* rwh = widgets->GetNextHost()) {
@@ -130,24 +144,14 @@ void AXTreeFixingServicesRouter::ToggleAccessibilityState() {
     }
     content::WebContents* web_contents =
         content::WebContents::FromRenderViewHost(rvh);
-    if (!web_contents) {
+    if (!web_contents || web_contents->IsBeingDestroyed()) {
       continue;
     }
     if (web_contents->GetPrimaryMainFrame()->GetRenderViewHost() != rvh) {
       continue;
     }
-    if (web_contents->GetAccessibilityMode().has_mode(
-            ui::AXMode::kExtendedProperties)) {
-      web_contents_observers_.AddObserver(
-          new WebContentsObserver(*web_contents));
-    } else {
-      for (const WebContentsObserver& observer : web_contents_observers_) {
-        if (observer.web_contents() == web_contents) {
-          web_contents_observers_.RemoveObserver(&observer);
-          break;
-        }
-      }
-    }
+    web_contents_observers_.push_back(
+        std::make_unique<WebContentsObserver>(*web_contents));
   }
 }
 
@@ -160,7 +164,7 @@ void AXTreeFixingServicesRouter::OnAccessibilityStatusEvent(
           ash::AccessibilityNotificationType::kToggleSpokenFeedback ||
       details.notification_type ==
           ash::AccessibilityNotificationType::kToggleSelectToSpeak) {
-    ToggleAccessibilityState();
+    ToggleEnabledState();
   }
 }
 #endif  // BUILDFLAG(IS_CHROMEOS)

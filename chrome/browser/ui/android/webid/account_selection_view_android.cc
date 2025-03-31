@@ -64,7 +64,8 @@ ScopedJavaLocalRef<jobject> ConvertToJavaAccount(
             .AsBitmap());
   }
   return Java_Account_Constructor(
-      env, account->id, account->email, account->name, account->given_name,
+      env, account->id, account->display_identifier, account->display_name,
+      account->given_name,
       is_multi_idp ? std::make_optional<std::string>(
                          account->identity_provider->idp_for_display)
                    : std::nullopt,
@@ -237,7 +238,7 @@ AccountSelectionViewAndroid::~AccountSelectionViewAndroid() {
 }
 
 bool AccountSelectionViewAndroid::Show(
-    const std::string& rp_for_display,
+    const content::RelyingPartyData& rp_data,
     const std::vector<IdentityProviderDataPtr>& idp_list,
     const std::vector<IdentityRequestAccountPtr>& accounts,
     Account::SignInMode sign_in_mode,
@@ -271,7 +272,7 @@ bool AccountSelectionViewAndroid::Show(
       ConvertToJavaIdentityProvidersList(env, identity_providers_map);
 
   return Java_AccountSelectionBridge_showAccounts(
-      env, java_object_internal_, rp_for_display, accounts_obj,
+      env, java_object_internal_, rp_data.rp_for_display, accounts_obj,
       identity_providers_list, sign_in_mode == Account::SignInMode::kAuto,
       new_accounts_obj);
 }

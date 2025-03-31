@@ -91,6 +91,7 @@
 <translation id="1269405891096105529">Зочны горимд нэмэлтийг дэмждэггүй</translation>
 <translation id="1270290102613614947">Дэлгэцэн дээрх гарыг идэвхгүй болгосон байна</translation>
 <translation id="1272079795634619415">Зогс</translation>
+<translation id="12741168609094094">Хайх, текст хуулах болон илүү ихийг хийхийн тулд дэлгэц дээрх дурын зүйлийг сонгоно уу</translation>
 <translation id="1275285675049378717"><ph name="POWER_SOURCE" />-г цэнэглэж байна</translation>
 <translation id="1275718070701477396">Сонгогдсон</translation>
 <translation id="1276975447697633661">Файлаа сонгоод дараа нь <ph name="KEY" />-г дарна уу</translation>
@@ -227,6 +228,7 @@
 <translation id="1720230731642245863">Сүлжээний цэг унтраалттай байна</translation>
 <translation id="1731815243805539470">Өмнөх хэрэглэгч рүү сэлгэх</translation>
 <translation id="1733996486177697563">Бараан болон цайвар загварын хооронд сэлгэнэ үү. Дэлгэц дээр хүрээд удаан дарж, дараа нь Дэлгэцийн зураг &amp; стилийг сонгоно уу.</translation>
+<translation id="1735992454301033090">Бүс сонгосон, зөөхөд суман товчийг ашиглана уу</translation>
 <translation id="1736898441010944794">"<ph name="NAME" />" нь Bluetooth төхөөрөмжүүдэд харагдана.</translation>
 <translation id="1737078180382804488">Утасныхаа мэдэгдлүүдийг харахыг тохируулахыг үл хэрэгсэх</translation>
 <translation id="174102739345480129">Тэмдэглэгч унтраалттай байна.</translation>
@@ -494,6 +496,7 @@
 <translation id="2683887737780133806">Өнгөрсөн долоо хоногийн <ph name="DAY_OF_WEEK" /></translation>
 <translation id="2687510499067466116">Товчлуурын шууд холбоос өөрчлөгдсөн</translation>
 <translation id="2689613560355655046">Дэлгэц 8</translation>
+<translation id="2692092709110488417">Сонгосон бүсэд төвлөрөх, зөөхийн тулд tab дээр дарна уу</translation>
 <translation id="2695305337569143674">веб</translation>
 <translation id="2697697418792422688">Гарын тохиргоог харуулна уу. <ph name="KEYBOARD_NAME" />-г сонгосон байна.</translation>
 <translation id="2699913284398121653">Сургуулийн бүртгэлийнхээ өгөгдлийг хувийн бүртгэл рүүгээ зөөхөд Контент шилжүүлэх аппыг ашиглана уу</translation>
@@ -551,6 +554,7 @@
 <translation id="2872353916818027657">Анхдагч дэлгэц рүү шилжих</translation>
 <translation id="2872961005593481000">Унтраах</translation>
 <translation id="2876338922445400217">Дэлгэцэд томруулах</translation>
+<translation id="2876760662374103627">Царайн хяналт идэвхтэй байна</translation>
 <translation id="2878884018241093801">Сүүлийн үеийн зүйл байхгүй</translation>
 <translation id="2880541185262491188">ПИН-г оруулахаар хэт олон удаа оролдсон. <ph name="TIME_LEFT" /> хүлээгээд, дахин оролдоно уу</translation>
 <translation id="2883271196820422439">Хулганын товчийг үргэлжлүүлэх</translation>
@@ -728,6 +732,7 @@
 <translation id="346243998268439747">Томруулах түвшинг шинэчлэх</translation>
 <translation id="3465223694362104965">Таныг сүүлд нэвтэрснээс хойш энэ төхөөрөмжид өөр гар холбогдсон байна. Энэ гарыг ашиглахаасаа өмнө та итгэж болох эсэхээ шалгана уу.</translation>
 <translation id="3465356146291925647">Таны администратор удирддаг</translation>
+<translation id="3470502288861289375">Хуулж байна ...</translation>
 <translation id="347117769229524881"><ph name="MODIFIER_ONE" /><ph name="MODIFIER_TWO" /><ph name="KEY_ONE" /> дараа нь <ph name="KEY_TWO" /> эсвэл <ph name="KEY_THREE" /></translation>
 <translation id="3477079411857374384">Control-Shift-Space</translation>
 <translation id="3485319357743610354"><ph name="SECURITY_STATUS" />, <ph name="CONNECTION_STATUS" />, дохионы хүч <ph name="SIGNAL_STRENGTH" /></translation>
@@ -1015,6 +1020,7 @@
 <translation id="4351244548802238354">Харилцах цонхыг хаах</translation>
 <translation id="4356872429719185452">Сүлжээний цэгийн дэлгэрэнгүйг харуулна уу. Сүлжээний цэгийг асааж байна.</translation>
 <translation id="4364101114148522660"><ph name="DURATION" />  Бичиж байна</translation>
+<translation id="4368227575116094370">Google Хүснэгт үүсгэх</translation>
 <translation id="4371348193907997655">Дамжуулах тохиргоо</translation>
 <translation id="4371834685492830207">ПИН зөвхөн хүчинтэй тэмдэгт агуулсан байх ёстой</translation>
 <translation id="4375482231364171368">Хаяг оруулах хэсгээс хайх</translation>
@@ -1032,6 +1038,7 @@
 <translation id="4412698727486357573">Тусламжийн төв</translation>
 <translation id="4412944820643904175"><ph name="FEATURE_NAME" /> унтраалттай байна.</translation>
 <translation id="4417647906073317561">Төвлөрөх горимын тохиргоо. Төвлөрч эхлэхийн тулд цаг хэмжигч, ажил, хөгжим тохируулна уу.</translation>
+<translation id="4418600384772451109">Түр зуурын самбарыг хаах</translation>
 <translation id="4424159417645388645">Дэлгэц 5</translation>
 <translation id="4426817706804363424">Маш сайн байна!</translation>
 <translation id="4430019312045809116">Хэмжээ</translation>
@@ -1484,6 +1491,7 @@
 <translation id="5825969630400862129">Холбогдсон төхөөрөмжүүдийн тохиргоо</translation>
 <translation id="5830180081891717894">Бусад <ph name="WINDOWS" /></translation>
 <translation id="5837036133683224804"><ph name="RECEIVER_NAME" />-г <ph name="ROUTE_TITLE" />-д дамжуулахаа зогсоох</translation>
+<translation id="5840658767386246331">Google-р хайх</translation>
 <translation id="5841296711770970362">Дараагийн дууны зам руу очих</translation>
 <translation id="5842553299352339114"><ph name="DEVICE_NAME" />-н сүлжээний цэг асаалттай бөгөөд холбогдсон ямар ч төхөөрөмж байхгүй</translation>
 <translation id="584525477304726060">Томруулахын тулд удаан дарна уу</translation>
@@ -1515,6 +1523,7 @@
 <translation id="595202126637698455">Гүйцэтгэлийн ажиглалтыг идэвхжүүлсэн</translation>
 <translation id="5955304353782037793">аппликейшн</translation>
 <translation id="5958529069007801266">Хяналттай хэрэглэгч</translation>
+<translation id="596035801491797438">Царайн хяналтыг унтраах</translation>
 <translation id="5960410286721553511">Утасныхаа саяхны зураг болон медиаг харна уу</translation>
 <translation id="5965524703725988602">Бараан загварыг асаана уу/унтраана уу. <ph name="STATE_TEXT" />.</translation>
 <translation id="5975235751479998104">Цонхнуудаар урагш гүйлгэх</translation>
@@ -2226,6 +2235,7 @@
 <translation id="8287009018010202411">Бүтээмж</translation>
 <translation id="828708037801473432">Унтраалттай</translation>
 <translation id="8297006494302853456">Сул</translation>
+<translation id="8300451473979404345">Бариул сонгосон, зөөхөд суман товчийг ашиглана уу</translation>
 <translation id="8308637677604853869">Өмнөх цэс</translation>
 <translation id="830868413617744215">Бета</translation>
 <translation id="8314772463905284467">Caps Lock асаалттай байна</translation>
@@ -2287,6 +2297,7 @@
 <translation id="851458219935658693">Одоогийн дэлгэцээс цонхыг харуулах, радио товчлуурыг сонгосон</translation>
 <translation id="851660987304951246">Контентыг шуурхай хураангуйлах эсвэл асуулт асуухын тулд Надад уншихад тусал онцлогийг ашиглана уу</translation>
 <translation id="8517041960877371778">Таны <ph name="DEVICE_TYPE" /> асаалттай үед цэнэглэхгүй.</translation>
+<translation id="8519329096920173967">Google Lens-г ашиглан дэлгэцээсээ хайх</translation>
 <translation id="8535393432370007982">Өнгөөр эрэмбэлэх дарааллыг болих</translation>
 <translation id="8536886494750559755">Түргэн хуваалцах тохиргоог харуулна уу. <ph name="TIME_REMAINING" />-н турш хүн бүрд харагдана</translation>
 <translation id="8539803091108018926">Түр санах ойд текстийг хуулсан</translation>

@@ -91,6 +91,7 @@ Det här är några saker du kan testa för att komma igång.</translation>
 <translation id="1269405891096105529">Kringutrustningen stöds inte i gästläget</translation>
 <translation id="1270290102613614947">Skärmen på tangentbordet har inaktiverats</translation>
 <translation id="1272079795634619415">Stopp</translation>
+<translation id="12741168609094094">Markera något på skärmen för att söka, kopiera text med mera</translation>
 <translation id="1275285675049378717">Laddar <ph name="POWER_SOURCE" /></translation>
 <translation id="1275718070701477396">Markerad</translation>
 <translation id="1276975447697633661">Välj en fil och tryck på <ph name="KEY" /></translation>
@@ -227,6 +228,7 @@ Det här är några saker du kan testa för att komma igång.</translation>
 <translation id="1720230731642245863">Surfzonen är inaktiverad</translation>
 <translation id="1731815243805539470">Byt till föregående användare</translation>
 <translation id="1733996486177697563">Byt mellan ljust och mörkt tema. Tryck länge på skrivbordet och välj sedan Bakgrund och stil.</translation>
+<translation id="1735992454301033090">Markerat område, använd piltangenterna för att flytta</translation>
 <translation id="1736898441010944794"><ph name="NAME" /> är synlig för Bluetooth-enheter.</translation>
 <translation id="1737078180382804488">Ignorera att ställa in visning av telefonens aviseringar</translation>
 <translation id="174102739345480129">Märkpennan är inaktiverad.</translation>
@@ -494,6 +496,7 @@ Det här är några saker du kan testa för att komma igång.</translation>
 <translation id="2683887737780133806"><ph name="DAY_OF_WEEK" /> förra veckan</translation>
 <translation id="2687510499067466116">Kortkommandot har ändrats</translation>
 <translation id="2689613560355655046">Skrivbord 8</translation>
+<translation id="2692092709110488417">Tryck på tabb för att fokusera och flytta det valda området</translation>
 <translation id="2695305337569143674">webb</translation>
 <translation id="2697697418792422688">Visa tangentbordsinställningar. <ph name="KEYBOARD_NAME" /> har markerats.</translation>
 <translation id="2699913284398121653">Använd appen Innehållsöverföring för att flytta data från ditt skolkonto till ditt personliga konto</translation>
@@ -551,6 +554,7 @@ Annars aktiveras den inbyggda styrplattan igen om <ph name="TIMEOUT_SECONDS" />.
 <translation id="2872353916818027657">Byt primär bildskärm</translation>
 <translation id="2872961005593481000">Stäng av</translation>
 <translation id="2876338922445400217">Zooma in på skärmen</translation>
+<translation id="2876760662374103627">Ansiktsstyrning är aktivt</translation>
 <translation id="2878884018241093801">Listan är tom</translation>
 <translation id="2880541185262491188">För många försök att ange pinkod. Vänta <ph name="TIME_LEFT" /> och försök igen</translation>
 <translation id="2883271196820422439">Återuppta mustangenter</translation>
@@ -728,6 +732,7 @@ Annars aktiveras den inbyggda styrplattan igen om <ph name="TIMEOUT_SECONDS" />.
 <translation id="346243998268439747">Återställ zoomnivån</translation>
 <translation id="3465223694362104965">Ett annat tangentbord har anslutits till den här enheten sedan du loggade in senast. Försäkra dig om att det är ett tangentbord du litar på innan du använder det.</translation>
 <translation id="3465356146291925647">Hanteras av administratören</translation>
+<translation id="3470502288861289375">Kopierar ...</translation>
 <translation id="347117769229524881"><ph name="MODIFIER_ONE" /><ph name="MODIFIER_TWO" /><ph name="KEY_ONE" /> följt av <ph name="KEY_TWO" /> eller <ph name="KEY_THREE" /></translation>
 <translation id="3477079411857374384">Ctrl-Skift-Mellanslag</translation>
 <translation id="3485319357743610354"><ph name="SECURITY_STATUS" />, <ph name="CONNECTION_STATUS" />, signalstyrka <ph name="SIGNAL_STRENGTH" /></translation>
@@ -1014,6 +1019,7 @@ Vissa funktioner är begränsade för att förlänga batteritiden.</translation>
 <translation id="4351244548802238354">Stäng dialogrutan</translation>
 <translation id="4356872429719185452">Visa information om surfzon. Surfzonen aktiveras.</translation>
 <translation id="4364101114148522660"><ph name="DURATION" />  Spelar in</translation>
+<translation id="4368227575116094370">Skapa ett Google-kalkylark</translation>
 <translation id="4371348193907997655">Inställningar för att casta</translation>
 <translation id="4371834685492830207">Pinkoden får bara innehålla giltiga tecken</translation>
 <translation id="4375482231364171368">Sök i adressfältet</translation>
@@ -1031,6 +1037,7 @@ Vissa funktioner är begränsade för att förlänga batteritiden.</translation>
 <translation id="4412698727486357573">Hjälpcenter</translation>
 <translation id="4412944820643904175"><ph name="FEATURE_NAME" /> är av.</translation>
 <translation id="4417647906073317561">Fokusinställningar. Ställ in en timer, uppgift och musik för att komma igång.</translation>
+<translation id="4418600384772451109">Stäng panel</translation>
 <translation id="4424159417645388645">Skrivbord 5</translation>
 <translation id="4426817706804363424">Snyggt jobbat!</translation>
 <translation id="4430019312045809116">Volym</translation>
@@ -1483,6 +1490,7 @@ Inga enheter är anslutna.</translation>
 <translation id="5825969630400862129">Inställningar för anslutna enheter</translation>
 <translation id="5830180081891717894"><ph name="WINDOWS" /> till</translation>
 <translation id="5837036133683224804">Sluta casta <ph name="ROUTE_TITLE" /> till <ph name="RECEIVER_NAME" /></translation>
+<translation id="5840658767386246331">Sök med Google</translation>
 <translation id="5841296711770970362">Öppna nästa spår</translation>
 <translation id="5842553299352339114"><ph name="DEVICE_NAME" />-surfzonen är aktiverad men inga enheter är anslutna</translation>
 <translation id="584525477304726060">Tryck och håll kvar för att maximera</translation>
@@ -1514,6 +1522,7 @@ Inga enheter är anslutna.</translation>
 <translation id="595202126637698455">Resultatspårning aktiverat</translation>
 <translation id="5955304353782037793">app</translation>
 <translation id="5958529069007801266">Kontrollerad användare</translation>
+<translation id="596035801491797438">Inaktivera ansiktsstyrning</translation>
 <translation id="5960410286721553511">Visa de senaste bilderna och mediefilerna från telefonen</translation>
 <translation id="5965524703725988602">Aktivera och inaktivera Mörkt tema. <ph name="STATE_TEXT" />.</translation>
 <translation id="5975235751479998104">Bläddra framåt bland fönster</translation>
@@ -2225,6 +2234,7 @@ Stäng av enheten genom att hålla av/på-knappen nedtryckt igen.</translation>
 <translation id="8287009018010202411">Produktivitet</translation>
 <translation id="828708037801473432">Av</translation>
 <translation id="8297006494302853456">Svag</translation>
+<translation id="8300451473979404345">Markerat handtag, använd piltangenterna för att flytta</translation>
 <translation id="8308637677604853869">Föregående meny</translation>
 <translation id="830868413617744215">Beta</translation>
 <translation id="8314772463905284467">Caps Lock är på</translation>
@@ -2285,6 +2295,7 @@ Stäng av enheten genom att hålla av/på-knappen nedtryckt igen.</translation>
 <translation id="851458219935658693">Visa fönster från det aktuella skrivbordet, alternativknapp har markerats</translation>
 <translation id="851660987304951246">Använd Help me read för att snabbt sammanfatta innehåll eller ställa frågor</translation>
 <translation id="8517041960877371778">Din <ph name="DEVICE_TYPE" /> laddas eventuellt inte så länge den är på.</translation>
+<translation id="8519329096920173967">Sök på skärmen med Google Lens</translation>
 <translation id="8535393432370007982">Ångra sortering efter färg</translation>
 <translation id="8536886494750559755">Visa inställningar för Snabbdelning. Synligt för alla i <ph name="TIME_REMAINING" /></translation>
 <translation id="8539803091108018926">Texten har kopierats till Urklipp</translation>

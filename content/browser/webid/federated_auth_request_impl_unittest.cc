@@ -43,6 +43,7 @@
 #include "net/http/http_status_code.h"
 #include "services/metrics/public/cpp/ukm_builders.h"
 #include "testing/gtest/include/gtest/gtest.h"
+#include "third_party/blink/public/common/webid/login_status_account.h"
 #include "third_party/blink/public/common/webid/login_status_options.h"
 #include "ui/base/page_transition_types.h"
 #include "ui/gfx/image/image_unittest_util.h"
@@ -617,7 +618,7 @@ class TestDialogController
   }
 
   bool ShowAccountsDialog(
-      const std::string& rp_for_display,
+      content::RelyingPartyData rp_data,
       const std::vector<IdentityProviderDataPtr>& idp_list,
       const std::vector<IdentityRequestAccountPtr>& accounts,
       IdentityRequestAccount::SignInMode sign_in_mode,
@@ -837,6 +838,8 @@ class TestApiPermissionDelegate : public MockApiPermissionDelegate {
 class TestPermissionDelegate : public NiceMock<MockPermissionDelegate> {
  public:
   std::map<url::Origin, std::optional<bool>> idp_signin_statuses_;
+  std::map<url::Origin, std::vector<IdentityRequestAccountPtr>>
+      idp_account_profiles_;
 
   TestPermissionDelegate() = default;
   ~TestPermissionDelegate() override = default;
@@ -856,9 +859,24 @@ class TestPermissionDelegate : public NiceMock<MockPermissionDelegate> {
       base::optional_ref<const blink::common::webid::LoginStatusOptions>
           options) override {
     idp_signin_statuses_[idp_origin] = idp_signin_status;
+
     // Call parent so that EXPECT_CALL() works.
     NiceMock<MockPermissionDelegate>::SetIdpSigninStatus(
         idp_origin, idp_signin_status, std::nullopt);
+  }
+
+  void SetIdpAccounts(
+      const url::Origin& idp_origin,
+      std::vector<IdentityRequestAccountPtr>& request_accounts) {
+    idp_account_profiles_[idp_origin] = std::move(request_accounts);
+  }
+
+  std::vector<IdentityRequestAccountPtr> GetAccounts(
+      const url::Origin& identity_provider) override {
+    auto it = idp_account_profiles_.find(identity_provider);
+    return (it != idp_account_profiles_.end())
+               ? it->second
+               : std::vector<IdentityRequestAccountPtr>();
   }
 };
 
@@ -1206,7 +1224,9 @@ class FederatedAuthRequestImplTest : public RenderViewHostImplTestHarness {
 
     if (expectation.return_status == RequestTokenStatus::kSuccess) {
       EXPECT_TRUE(DidFetchWellKnownAndConfig());
-      EXPECT_TRUE(DidFetch(FetchedEndpoint::ACCOUNTS));
+      if (!base::FeatureList::IsEnabled(features::kFedCmLightweightMode)) {
+        EXPECT_TRUE(DidFetch(FetchedEndpoint::ACCOUNTS));
+      }
       EXPECT_TRUE(DidFetch(FetchedEndpoint::TOKEN));
       // FetchedEndpoint::CLIENT_METADATA is optional.
 
@@ -1813,6 +1833,33 @@ TEST_F(FederatedAuthRequestImplTest, SuccessfulRequest) {
   // expectation does not check that the client metadata was fetched because
   // client metadata is optional.
   EXPECT_TRUE(DidFetch(FetchedEndpoint::CLIENT_METADATA));
+}
+
+TEST_F(FederatedAuthRequestImplTest, SuccessfulLightweightRequest) {
+  base::test::ScopedFeatureList list;
+  list.InitAndEnableFeature(features::kFedCmLightweightMode);
+
+  // Use IdpNetworkRequestManagerParamChecker to validate passed-in parameters
+  // to IdpNetworkRequestManager methods.
+  std::unique_ptr<IdpNetworkRequestManagerParamChecker> checker =
+      std::make_unique<IdpNetworkRequestManagerParamChecker>();
+  checker->SetExpectations(kClientId, kAccountId);
+  SetNetworkRequestManager(std::move(checker));
+
+  MockConfiguration configuration = kConfigurationValid;
+  MockIdpInfo& provider = configuration.idp_info[kProviderUrlFull];
+  // Remove the accounts and client metadata endpoints.
+  provider.config.accounts_endpoint = "";
+  provider.config.client_metadata_endpoint = "";
+
+  // Take the accounts that would've been returned by the accounts endpoint and
+  // instead have them stored in the permissions service
+  test_permission_delegate_->SetIdpAccounts(OriginFromString(kProviderUrlFull),
+                                            provider.accounts);
+  provider.accounts = {};
+
+  RunAuthTest(kDefaultRequestParameters, kExpectationSuccess, configuration);
+  EXPECT_FALSE(DidFetch(FetchedEndpoint::ACCOUNTS));
 }
 
 // Test successful well-known fetching.
@@ -3507,7 +3554,7 @@ class DisableApiWhenDialogShownDialogController : public TestDialogController {
       DisableApiWhenDialogShownDialogController&) = delete;
 
   bool ShowAccountsDialog(
-      const std::string& rp_for_display,
+      content::RelyingPartyData rp_data,
       const std::vector<IdentityProviderDataPtr>& idp_list,
       const std::vector<IdentityRequestAccountPtr>& accounts,
       SignInMode sign_in_mode,
@@ -3524,8 +3571,8 @@ class DisableApiWhenDialogShownDialogController : public TestDialogController {
 
     // Call parent class method in order to store callback parameters.
     return TestDialogController::ShowAccountsDialog(
-        rp_for_display, idp_list, accounts, sign_in_mode, rp_mode, new_accounts,
-        std::move(on_selected), std::move(on_add_account),
+        std::move(rp_data), idp_list, accounts, sign_in_mode, rp_mode,
+        new_accounts, std::move(on_selected), std::move(on_add_account),
         std::move(dismiss_callback), std::move(accounts_displayed_callback));
   }
 
@@ -4402,6 +4449,8 @@ TEST_F(FederatedAuthRequestImplTest,
 
   histogram_tester_.ExpectUniqueSample("Blink.FedCm.IdentityProvidersCount", 2,
                                        1);
+  ExpectUKMCount("IdentityProvidersCount", FedCmEntry::kEntryName, 1);
+  ExpectUkmValueInEntry("IdentityProvidersCount", FedCmEntry::kEntryName, 2);
 }
 
 // Test successful multi IDP FedCM request.
@@ -4438,6 +4487,8 @@ TEST_F(FederatedAuthRequestImplTest,
   ExpectUkmValue("NumIdpsMismatch", 0);
   histogram_tester_.ExpectUniqueSample("Blink.FedCm.IdentityProvidersCount", 2,
                                        1);
+  ExpectUKMCount("IdentityProvidersCount", FedCmEntry::kEntryName, 1);
+  ExpectUkmValueInEntry("IdentityProvidersCount", FedCmEntry::kEntryName, 2);
 }
 
 // Test fetching information for the 1st IdP failing, and succeeding for the
@@ -4469,6 +4520,8 @@ TEST_F(FederatedAuthRequestImplTest, FirstIdpWellKnownInvalid) {
   histogram_tester_.ExpectTotalCount("Blink.FedCm.AccountsRequestSent", 1);
   histogram_tester_.ExpectUniqueSample("Blink.FedCm.IdentityProvidersCount", 2,
                                        1);
+  ExpectUKMCount("IdentityProvidersCount", FedCmEntry::kEntryName, 1);
+  ExpectUkmValueInEntry("IdentityProvidersCount", FedCmEntry::kEntryName, 2);
 }
 
 // Test fetching information for the 1st IdP succeeding, and failing for the
@@ -4500,6 +4553,8 @@ TEST_F(FederatedAuthRequestImplTest, SecondIdpWellKnownInvalid) {
   histogram_tester_.ExpectTotalCount("Blink.FedCm.AccountsRequestSent", 1);
   histogram_tester_.ExpectUniqueSample("Blink.FedCm.IdentityProvidersCount", 2,
                                        1);
+  ExpectUKMCount("IdentityProvidersCount", FedCmEntry::kEntryName, 1);
+  ExpectUkmValueInEntry("IdentityProvidersCount", FedCmEntry::kEntryName, 2);
 }
 
 // Test fetching information for all of the IdPs failing.
@@ -4530,6 +4585,8 @@ TEST_F(FederatedAuthRequestImplTest, AllWellKnownsInvalid) {
   histogram_tester_.ExpectTotalCount("Blink.FedCm.AccountsRequestSent", 0);
   histogram_tester_.ExpectUniqueSample("Blink.FedCm.IdentityProvidersCount", 2,
                                        1);
+  ExpectUKMCount("IdentityProvidersCount", FedCmEntry::kEntryName, 1);
+  ExpectUkmValueInEntry("IdentityProvidersCount", FedCmEntry::kEntryName, 2);
 }
 
 // Test multi IDP FedCM request with duplicate IDPs should throw an error.
@@ -4553,6 +4610,7 @@ TEST_F(FederatedAuthRequestImplTest, DuplicateIdpMultiIdpRequest) {
   EXPECT_FALSE(did_show_accounts_dialog());
 
   histogram_tester_.ExpectTotalCount("Blink.FedCm.IdentityProvidersCount", 0);
+  ExpectUKMCount("IdentityProvidersCount", FedCmEntry::kEntryName, 0);
 }
 
 // Test that API can succeed with multiple IdPs, if one IdP is signed out but
@@ -7671,7 +7729,7 @@ class TestDialogControllerWithImmediateDismiss : public TestDialogController {
       TestDialogControllerWithImmediateDismiss&) = delete;
 
   bool ShowAccountsDialog(
-      const std::string& rp_for_display,
+      content::RelyingPartyData rp_data,
       const std::vector<IdentityProviderDataPtr>& idp_list,
       const std::vector<IdentityRequestAccountPtr>& accounts,
       IdentityRequestAccount::SignInMode sign_in_mode,

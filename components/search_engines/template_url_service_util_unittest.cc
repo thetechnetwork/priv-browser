@@ -32,7 +32,7 @@
 #include "components/webdata/common/webdata_constants.h"
 #include "testing/gmock/include/gmock/gmock.h"
 #include "testing/gtest/include/gtest/gtest.h"
-#include "third_party/search_engines_data/resources/definitions/prepopulated_engines.h"
+#include "third_party/search_engines_data/resources/definitions/regional_settings.h"
 
 namespace {
 
@@ -284,7 +284,8 @@ class TemplateURLServiceUtilLoadTest : public testing::Test {
                                     const KeywordTestMetadata& m) {
       return out << "{data_version=" << m.data_version << ", country="
                  << (m.country.has_value()
-                         ? base::NumberToString(m.country->GetForTesting())
+                         ? base::NumberToString(
+                               m.country->GetForTesting().Serialize())
                          : "<null>")
                  << ", keyword_engines_count=" << m.keyword_engines_count
                  << "}";
@@ -303,11 +304,11 @@ class TemplateURLServiceUtilLoadTest : public testing::Test {
   // For country samples, using Belgium and France for EEA, and the United
   // States for non-EEA.
   const CountryIdHolder kEeaCountryId =
-      CountryIdHolder(country_codes::CountryStringToCountryID("BE"));
+      CountryIdHolder(country_codes::CountryId("BE"));
   const CountryIdHolder kOtherEeaCountryId =
-      CountryIdHolder(country_codes::CountryStringToCountryID("FR"));
+      CountryIdHolder(country_codes::CountryId("FR"));
   const CountryIdHolder kNonEeaCountryId =
-      CountryIdHolder(country_codes::CountryStringToCountryID("US"));
+      CountryIdHolder(country_codes::CountryId("US"));
 
   // Simulates how the search providers are loaded during Chrome init by
   // calling `GetSearchProvidersUsingLoadedEngines()`.
@@ -353,7 +354,7 @@ TEST_F(TemplateURLServiceUtilLoadTest,
        GetSearchProvidersUsingLoadedEngines_OutOfEea) {
   search_engine_choice_service().ClearCountryIdCacheForTesting();
   prefs().SetInteger(country_codes::kCountryIDAtInstall,
-                     kNonEeaCountryId.GetForTesting());
+                     kNonEeaCountryId.GetForTesting().Serialize());
 
   const KeywordTestMetadata kDefaultUpdatedState = {
       .data_version = kCurrentDataVersion,
@@ -397,11 +398,11 @@ TEST_F(TemplateURLServiceUtilLoadTest,
        GetSearchProvidersUsingLoadedEngines_InEea) {
   search_engine_choice_service().ClearCountryIdCacheForTesting();
   prefs().SetInteger(country_codes::kCountryIDAtInstall,
-                     kEeaCountryId.GetForTesting());
+                     kEeaCountryId.GetForTesting().Serialize());
   const size_t kEeaKeywordEnginesCount =
-      TemplateURLPrepopulateData::GetPrepopulationSetFromCountryIDForTesting(
-          kEeaCountryId.GetForTesting())
-          .size();
+      TemplateURLPrepopulateData::kRegionalSettings
+          .find(kEeaCountryId.GetForTesting())
+          ->second->search_engines.size();
 
   const KeywordTestMetadata kDefaultUpdatedState = {
       .data_version = kCurrentDataVersion,

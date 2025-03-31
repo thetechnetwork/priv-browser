@@ -11,6 +11,7 @@
 <translation id="102432830749687801">Pastikan untuk menggunakan aplikasi Transfer konten dari Google untuk memindahkan data akun sekolah ke akun pribadi Anda sebelum Anda kehilangan akses.</translation>
 <translation id="1026212596705997935">Pintasan digunakan untuk "<ph name="CONFLICT_ACCEL_NAME" />". Tekan pintasan baru. Untuk mengganti pintasan lama, tekan lagi pintasan ini.</translation>
 <translation id="1030856839388844477">Reset penggunaan data</translation>
+<translation id="1047095725494118091">Tidak dapat mendownload. Coba lagi atau mulai ulang <ph name="DEVICE_TYPE" />.</translation>
 <translation id="1047458377670401304"><ph name="CPU_NAME" /> (<ph name="THREAD_COUNT" /> thread, <ph name="CPU_MAX_CLOCK_SPEED" /> GHz)</translation>
 <translation id="1047773237499189053">Fitur baru tersedia, gunakan tombol Panah atas untuk mempelajari lebih lanjut.</translation>
 <translation id="1049663189809099096">kuning pastel</translation>
@@ -26,6 +27,7 @@
 <translation id="1082009148392559545">Mendownload screensaver</translation>
 <translation id="1094693127011229778">Alamat IP tidak tersedia</translation>
 <translation id="1100902271996134409">Membuat gambar...</translation>
+<translation id="1107856713690040084">Audio <ph name="DEVICE_TYPE" /></translation>
 <translation id="1116694919640316211">Tentang</translation>
 <translation id="1118572504348554005">Kami mungkin membagikan masukan yang dikirim melalui formulir ini kepada partner kami untuk memecahkan masalah bug dan masalah lain yang Anda laporkan kepada kami. Jangan sertakan informasi sensitif seperti sandi.</translation>
 <translation id="1119403468619527527">Terlalu sedikit kata untuk disederhanakan</translation>
@@ -292,6 +294,7 @@
 <translation id="2163937499206714165">Aktifkan mode gelap</translation>
 <translation id="2164131940279488868">Pastikan mikrofon terhubung untuk mulai merekam audio</translation>
 <translation id="2173302385160625112">Periksa koneksi internet Anda</translation>
+<translation id="2176909213844392588">Tidak dapat mendownload model transkripsi <ph name="LANGUAGE_NAME" />. Coba lagi atau mulai ulang <ph name="DEVICE_TYPE" />.</translation>
 <translation id="2180197493692062006">Terjadi error. Coba buka aplikasi kembali.</translation>
 <translation id="2189104374785738357">Edit detail APN</translation>
 <translation id="2195732836444333448">Saat ini sudah mencapai batas kapasitas. Coba lagi nanti.</translation>
@@ -480,6 +483,7 @@
 <translation id="3199982728237701504">Pengumpan Dokumen (Dua Sisi)</translation>
 <translation id="3201315366910775591">Album bersama dapat diperbarui oleh pengguna lain</translation>
 <translation id="3211671540163313381">D-pad konfigurasi tombol</translation>
+<translation id="3217462202230355157">Pastikan mikrofon terhubung atau coba mulai ulang <ph name="DEVICE_TYPE" /></translation>
 <translation id="3226405216343213872">Mencari pemindai</translation>
 <translation id="3226657629376379887">Menu tindakan tata letak</translation>
 <translation id="3227186760713762082">Bagi nilai <ph name="CATEGORY_TEXT" /> dengan <ph name="CONVERSION_RATE" /></translation>
@@ -515,6 +519,7 @@
 <translation id="3383623117265110236">Eksklusif</translation>
 <translation id="3404249063913988450">Aktifkan screen saver</translation>
 <translation id="3413935475507503304">Untuk melanjutkan update, klik Berikutnya.</translation>
+<translation id="3416709353545797224">Merekam semua audio <ph name="DEVICE_TYPE" /></translation>
 <translation id="3428551088151258685">luar ruangan</translation>
 <translation id="3428971106895559033">pastel</translation>
 <translation id="3434107140712555581"><ph name="BATTERY_PERCENTAGE" />%</translation>
@@ -678,6 +683,7 @@
 <translation id="4155551848414053977">Pastikan pemindai dinyalakan dan tersedia melalui jaringan Anda atau koneksi langsung</translation>
 <translation id="4159238217853743776">Sebagian</translation>
 <translation id="4159784952369912983">Ungu</translation>
+<translation id="416219735020840807">Tidak dapat mendownload model transkripsi. Coba lagi atau mulai ulang <ph name="DEVICE_TYPE" />.</translation>
 <translation id="4170180284036919717">Ambil foto</translation>
 <translation id="4170700058716978431">GAGAL</translation>
 <translation id="4171077696775491955">kurangi kecerahan</translation>
@@ -698,6 +704,16 @@
 <translation id="4249717042534905822">pada hari Minggu</translation>
 <translation id="4250229828105606438">Screenshot</translation>
 <translation id="4251839292699800785">Kantor trendi</translation>
+<translation id="4252261480746798874">Saat memilih "Buat sendiri", Anda dapat menulis perintah kustom. Anda juga dapat memilih "Pilih tema", lalu memilih kata yang digarisbawahi untuk mempersonalisasi wallpaper AI Anda.
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          Pilih "Beri saya inspirasi" untuk mendapatkan opsi gambar AI yang lebih unik dan beragam.
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          Saat Anda membuat wallpaper sendiri, perintah akan dikirim ke server Google untuk membuat gambar dan meningkatkan kualitas produk, yang tunduk pada <ph name="BEGIN_LINK_GOOGLE_PRIVACY_POLICY" />Persyaratan Layanan dan Kebijakan Privasi Google<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" />. Jangan menyertakan informasi apa pun yang bersifat pribadi, sensitif, atau rahasia.
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          AI generatif dapat membuat kesalahan, termasuk tentang orang. Jadi, harap periksa kembali responsnya. <ph name="BEGIN_LINK_CREATE_YOUR_OWN_WALLPAPER" />Pelajari lebih lanjut<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" /></translation>
 <translation id="4258281355379922695">Latensi HTTP</translation>
 <translation id="4266143281602681663">benang</translation>
 <translation id="4269815121975886860">Preferensi sistem dimulai</translation>
@@ -775,7 +791,6 @@
 <translation id="4593212453765072419">Autentikasi Proxy dibutuhkan</translation>
 <translation id="4594021849294327751">Buat transkrip</translation>
 <translation id="4594541568452132351">Pilih bahasa transkripsi dan download model</translation>
-<translation id="4607282946861182308">Tidak dapat membuat gambar ini. Coba perintah lain.</translation>
 <translation id="4609350030397390689">Kurangi kecerahan keyboard</translation>
 <translation id="4627232916386272576"><ph name="DOCUMENT_TITLE" />, <ph name="PRINTER_NAME" />, <ph name="CREATION_TIME" />, <ph name="PRINTED_PAGE_NUMBER" /> dari <ph name="TOTAL_PAGE_NUMBER" />. Tekan enter untuk membatalkan tugas pencetakan.</translation>
 <translation id="463791356324567266">Membatalkan pemindaian ...</translation>
@@ -942,6 +957,7 @@
 <translation id="5344619683981067131">Mengganti teks yang dipilih dengan saran</translation>
 <translation id="5346687412805619883">Jaringan Lokal</translation>
 <translation id="5358174242040570474">Terjadi error. Coba pilih wallpaper lagi atau buka aplikasi lagi.</translation>
+<translation id="5368228070728130240">Tidak dapat mendownload model untuk pembuatan judul dan ringkasan. Coba lagi atau mulai ulang <ph name="DEVICE_TYPE" />.</translation>
 <translation id="5372659122375744710">Jaringan Wi-Fi tidak aman</translation>
 <translation id="5376354385557966694">Mode terang otomatis</translation>
 <translation id="5378184552853359930">Jenis IP</translation>
@@ -1247,6 +1263,7 @@
 <translation id="6766275201586212568">Resolusi DNS gagal</translation>
 <translation id="6768237774506518020">Tingkat kegagalan resolusi DNS tinggi</translation>
 <translation id="6786747875388722282">Ekstensi</translation>
+<translation id="6789891265243243337">Saat audio <ph name="DEVICE_TYPE" /> aktif, Perekam Suara akan merekam semua audio yang diputar di perangkat ini</translation>
 <translation id="6791471867139427246">warna lampu keyboard</translation>
 <translation id="6796229976413584781">Pintasan dihapus</translation>
 <translation id="6798678288485555829">Navigasi teks</translation>
@@ -1522,6 +1539,7 @@ Download model transkripsi (hingga 100 MB) untuk mendapatkan transkripsi ini.</t
 <translation id="8010765388850538088">Pelajari lebih lanjut AI Generatif</translation>
 <translation id="8017679124341497925">Pintasan diedit</translation>
 <translation id="802154636333426148">Download gagal</translation>
+<translation id="8027467664787098346">Pelajari lebih lanjut wallpaper yang dipilih</translation>
 <translation id="8028993641010258682">Ukuran</translation>
 <translation id="8031884997696620457">HSPAPlus</translation>
 <translation id="80398733265834479">Aktifkan mode warna otomatis</translation>
@@ -1640,6 +1658,7 @@ Download model transkripsi (hingga 100 MB) untuk mendapatkan transkripsi ini.</t
 <translation id="8543574988889671960">Muat ulang tab</translation>
 <translation id="8550364285433943656">Tetapkan kontrol tindakan game untuk bermain dengan tombol keyboard</translation>
 <translation id="8557447961879934694">WPA2</translation>
+<translation id="8558521694042102707">AI generatif dapat membuat kesalahan, termasuk tentang orang. Jadi, harap periksa kembali responsnya.</translation>
 <translation id="8575298406870537639">Operator Anda mungkin memerlukan opsi ini untuk terhubung ke jaringan. Hubungi operator untuk mengetahui detailnya.</translation>
 <translation id="8576249514688522074">Tidak diinisialisasi</translation>
 <translation id="8584654835905316966">Perangkat harus dimulai ulang untuk menyelesaikan penginstalan firmware untuk <ph name="DEVICE_NAME" /> ke versi <ph name="VERSION" />. Komputer Anda mungkin terlihat dimulai ulang beberapa kali. Namun, perilaku ini normal.</translation>
@@ -1654,7 +1673,6 @@ Download model transkripsi (hingga 100 MB) untuk mendapatkan transkripsi ini.</t
 <translation id="8655295600908251630">Saluran</translation>
 <translation id="8655828773034788261">Bagikan URL:</translation>
 <translation id="8660881923941176839">pound</translation>
-<translation id="8670057600920888023">AI generatif bersifat eksperimental dan kontennya mungkin tidak akurat, menyesatkan, atau menyinggung.</translation>
 <translation id="8670574982334489519">kanan</translation>
 <translation id="8675354002693747642">Pre-shared key</translation>
 <translation id="8677859815076891398">Tidak ada album. Buat album di <ph name="LINK_BEGIN" />Google Foto<ph name="LINK_END" />.</translation>
@@ -1718,6 +1736,7 @@ Download model transkripsi (hingga 100 MB) untuk mendapatkan transkripsi ini.</t
 <translation id="8930622219860340959">Nirkabel</translation>
 <translation id="8933650076320258356">Tombol yang dipilih adalah <ph name="KEYS" /> untuk <ph name="DIRECTION" />. <ph name="REASSIGN_INSTRUCTION" /></translation>
 <translation id="8936793075252196307">Alamat IP klien</translation>
+<translation id="8938606491880817721">Tidak dapat mendownload. Coba lagi atau mulai ulang <ph name="DEVICE_TYPE" />.</translation>
 <translation id="8944651180182756621">Warna peluncur</translation>
 <translation id="8945308580158685341">lebah</translation>
 <translation id="894617464444543719">Perangkat adalah ponsel.</translation>

@@ -29,6 +29,8 @@ typedef NS_ENUM(NSUInteger, SigninCoordinatorResult) {
   // Only triggered by `SceneController` when processing a ShowSigninCommand
   // and when the UI is not ready to present any signin coordinator.
   SigninCoordinatorUINotAvailable,
+  // Sign-in coordinator is stopped because of a change in profile.
+  SigninCoordinatorProfileSwitch,
 };
 
 // Called when the sign-in dialog is closed.
@@ -36,14 +38,6 @@ typedef NS_ENUM(NSUInteger, SigninCoordinatorResult) {
 // `signinCompletionIdentity` the identity that was used if any.
 using SigninCoordinatorCompletionCallback =
     void (^)(SigninCoordinatorResult result, id<SystemIdentity> identity);
-
-// User's signed-in state as defined by AuthenticationService.
-// TODO(crbug.com/40066949): Revisit after phase 3 migration of syncing users.
-typedef NS_ENUM(NSUInteger, IdentitySigninState) {
-  IdentitySigninStateSignedOut,
-  IdentitySigninStateSignedInWithSyncDisabled,
-  IdentitySigninStateSignedInWithSyncEnabled,
-};
 
 // Name of accessibility identifier for the skip sign-in button.
 extern NSString* const kSkipSigninAccessibilityIdentifier;

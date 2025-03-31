@@ -398,6 +398,8 @@ chromium-metrics-reviews@google.com.
       summary="the Autofill password suggestions on iOS"/>
   <variant name="IPH_PasswordsWebAppProfileSwitch"
       summary="profile switch in Password Manager web app"/>
+  <variant name="IPH_PdfPageDownload"
+      summary="educating users about the pdf download option in the app menu"/>
   <variant name="IPH_PdfSearchifyFeature"
       summary="educating users about PDF searchify feature"/>
   <variant name="IPH_PerformanceInterventionDialog"
@@ -607,6 +609,9 @@ chromium-metrics-reviews@google.com.
   <variant name="IPH_TabOrganizationSuccess"
       summary="tab organization success"/>
   <variant name="IPH_TabSearch" summary="tab search discovery"/>
+  <variant name="IPH_TabSearchToolbarButton"
+      summary="IPH for the first time a user opens Chrome with tab search
+               moved to a toolbar button"/>
   <variant name="IPH_TabSwitcherButton" summary="tab switcher button"/>
   <variant name="IPH_TabSwitcherButtonSwitchIncognito"
       summary="Switch to incognito via tab switcher button"/>

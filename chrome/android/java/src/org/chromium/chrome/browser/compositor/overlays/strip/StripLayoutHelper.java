@@ -82,6 +82,7 @@ import org.chromium.chrome.browser.flags.ChromeFeatureList;
 import org.chromium.chrome.browser.layouts.animation.CompositorAnimationHandler;
 import org.chromium.chrome.browser.layouts.animation.CompositorAnimator;
 import org.chromium.chrome.browser.layouts.components.VirtualView;
+import org.chromium.chrome.browser.multiwindow.MultiInstanceManager;
 import org.chromium.chrome.browser.profiles.Profile;
 import org.chromium.chrome.browser.share.ShareDelegate;
 import org.chromium.chrome.browser.tab.Tab;
@@ -118,11 +119,11 @@ import org.chromium.components.tab_group_sync.SavedTabGroup;
 import org.chromium.components.tab_group_sync.TabGroupSyncService;
 import org.chromium.components.tab_group_sync.TriggerSource;
 import org.chromium.components.tab_groups.TabGroupColorId;
-import org.chromium.ui.MotionEventUtils;
 import org.chromium.ui.base.LocalizationUtils;
 import org.chromium.ui.base.WindowAndroid;
 import org.chromium.ui.modaldialog.ModalDialogManager;
 import org.chromium.ui.util.ColorUtils;
+import org.chromium.ui.util.MotionEventUtils;
 import org.chromium.ui.widget.RectProvider;
 
 import java.util.ArrayList;
@@ -503,6 +504,7 @@ public class StripLayoutHelper
     // Tab context menu.
     @Nullable private TabContextMenuCoordinator mTabContextMenuCoordinator;
     @Nullable private TabGroupListBottomSheetCoordinator mTabGroupListBottomSheetCoordinator;
+    @NonNull private MultiInstanceManager mMultiInstanceManager;
 
     // Tab group share.
     @NonNull private DataSharingService mDataSharingService;
@@ -543,6 +545,8 @@ public class StripLayoutHelper
      *     visible. The tab strip can be hidden due to the tab switcher being displayed or the
      *     window width is less than 600dp.
      * @param bottomSheetController The {@link BottomSheetController} used to show bottom sheets.
+     * @param multiInstanceManager The {@link MultiInstanceManager} used to move tabs to other
+     *     windows.
      * @param shareDelegateSupplier Supplies {@link ShareDelegate} to share tab URLs.
      */
     public StripLayoutHelper(
@@ -560,6 +564,7 @@ public class StripLayoutHelper
             DataSharingTabManager dataSharingTabManager,
             Supplier<Boolean> tabStripVisibleSupplier,
             @NonNull BottomSheetController bottomSheetController,
+            @NonNull MultiInstanceManager multiInstanceManager,
             @NonNull Supplier<ShareDelegate> shareDelegateSupplier) {
         mGroupTitleDrawXOffset = TAB_OVERLAP_WIDTH_DP - FOLIO_FOOT_LENGTH_DP;
         mGroupTitleOverlapWidth = FOLIO_FOOT_LENGTH_DP - mGroupTitleDrawXOffset;
@@ -573,6 +578,7 @@ public class StripLayoutHelper
         mDataSharingTabManager = dataSharingTabManager;
         mModalDialogManager = modalDialogManager;
         mBottomSheetController = bottomSheetController;
+        mMultiInstanceManager = multiInstanceManager;
         mShareDelegateSupplier = shareDelegateSupplier;
         mScrollDelegate = new ScrollDelegate(context);
 
@@ -2105,13 +2111,15 @@ public class StripLayoutHelper
                                 },
                                 mTabGroupModelFilter,
                                 mBottomSheetController,
-                                /* showNewGroupRow= */ true);
+                                /* showNewGroupRow= */ true,
+                                /* destroyOnHide= */ true);
             }
             mTabContextMenuCoordinator =
                     TabContextMenuCoordinator.createContextMenuCoordinator(
                             () -> mModel,
                             mTabGroupModelFilter,
                             mTabGroupListBottomSheetCoordinator,
+                            mMultiInstanceManager,
                             mShareDelegateSupplier,
                             mWindowAndroid);
         }
@@ -2665,6 +2673,7 @@ public class StripLayoutHelper
             mTabCreator.launchNtp();
         }
         mIsStripScrollInProgress = false;
+        resetDelayedReorderState();
     }
 
     /** Handle view click * */
@@ -4515,8 +4524,25 @@ public class StripLayoutHelper
         }
     }
 
-    public void maybeMergeToGroupOnDrop(int draggedTabId, int index) {
-        mReorderDelegate.handleTabDropForExternalView(mStripGroupTitles, draggedTabId, index);
+    /**
+     * Handles merging a group of tabs into an existing tab group on drop and expands them if the
+     * dropped group was collapsed.
+     *
+     * @param tabIds The list of tab IDs to merge into an existing group.
+     * @param index The index to insert the tabs.
+     * @param isCollapsed Whether the dropped group was collapsed before the drop.
+     */
+    public void maybeMergeToGroupOnDrop(List<Integer> tabIds, int index, boolean isCollapsed) {
+        boolean mergeToGroup =
+                mReorderDelegate.handleDropForExternalView(mStripGroupTitles, tabIds, index);
+
+        // Expand strip tabs if needed.
+        if (mergeToGroup && isCollapsed) {
+            // Selects the first tab in the collapsed group. For expanded groups, the correct tab
+            // should be selected during tab creation.
+            TabModelUtils.setIndex(mModel, index);
+            resizeTabStrip(/* animate= */ true, /* delay= */ false, /* deferAnimations= */ false);
+        }
     }
 
     public void stopReorderMode() {

@@ -887,7 +887,7 @@ chromium-metrics-reviews@google.com.
 </histogram>
 
 <histogram name="PasswordManager.AutoSignin" enum="BooleanEnabled"
-    expires_after="2025-05-08">
+    expires_after="2025-10-08">
   <owner>vasilii@chromium.org</owner>
   <owner>chrome-password-manager-metrics-alerts@google.com</owner>
   <summary>
@@ -1934,6 +1934,16 @@ chromium-metrics-reviews@google.com.
   </summary>
 </histogram>
 
+<histogram name="PasswordManager.iOS.FillDataRetrievalStatus"
+    enum="FillDataRetrievalStatusIOS" expires_after="2026-02-10">
+  <owner>vincb@google.com</owner>
+  <owner>bling-transactions@google.com</owner>
+  <summary>
+    Tracks the status of retrieving fill data for filling. Recorded when filling
+    a suggestion from the KA or the bottom sheet.
+  </summary>
+</histogram>
+
 <histogram name="PasswordManager.iOS.HandleFormSubmitEvent"
     enum="HandleSubmittedFormStatus" expires_after="2025-08-24">
   <owner>vincb@google.com</owner>
@@ -2870,6 +2880,16 @@ useful for Chirp alerts (go/crca-alerts). -->
   <summary>
     Logs whether the password dropdown has the option to use another device for
     a passkey sign in. This is emitted when the dropdown is displayed.
+  </summary>
+</histogram>
+
+<histogram name="PasswordManager.PasswordFilling.ReauthPromo"
+    enum="PasswordFillingReauthPromoShown" expires_after="2026-03-28">
+  <owner>droger@chromium.org</owner>
+  <owner>mlbipin@google.com</owner>
+  <summary>
+    Logs whether the reauth promo is shown as part of password filling
+    suggestions. Recorded when some suggestions are shown.
   </summary>
 </histogram>
 
@@ -4548,6 +4568,30 @@ useful for Chirp alerts (go/crca-alerts). -->
     in Chrome. Acceptance of the dialog leads the user to Google Play Store to
     update Google Play Services. Android only.
   </summary>
+</histogram>
+
+<histogram name="PasswordManager.UPM.{DialogType}.DownloadCsvFlowLastStep"
+    enum="DownloadCsvFlowStep" expires_after="2025-07-01">
+  <owner>ioanap@chromium.org</owner>
+  <owner>atsvirchkova@google.com</owner>
+  <summary>
+    Records the last step in the flow allowing the user to download the
+    auto-exported CSV out of Chrome to a chosen location. A successful flow
+    looks as follows: a dialog is shown, the user selects to export passwords, a
+    reauthentication prompt is presented, the user selects the download
+    location, the CSV is copied from Chrome to the selected location. This
+    histogram is recorded when the flow ends, and it records the reason why the
+    flow ended. Recorded for the {DialogType}. Android only.
+  </summary>
+  <token key="DialogType">
+    <variant name="FullUpmSupportGms"
+        summary="dialog shown when Google Play Services offers full UPM
+                 support"/>
+    <variant name="NoGms"
+        summary="dialog shown when Google Play Services is unavailable"/>
+    <variant name="OldGms"
+        summary="dialog shown when Google Play Services is too old"/>
+  </token>
 </histogram>
 
 <histogram name="PasswordManager.UPMUpdateSignInCredentialsSucces"

@@ -128,6 +128,7 @@
 <translation id="2721354645805494590">Logout untuk menghapus Akun Google Anda dari Chromium</translation>
 <translation id="2738871930057338499">Tidak dapat terhubung ke internet. HTTP 403 Terlarang. Periksa konfigurasi proxy Anda.</translation>
 <translation id="2753623023919742414">Klik untuk menelusuri</translation>
+<translation id="2768103863314748511">Setel Chromium sebagai penampil PDF default Anda</translation>
 <translation id="2770231113462710648">Ubah browser default ke:</translation>
 <translation id="2785438272836277133">Ekstensi ini berisi malware dan tidak aman. Hapus dari Chromium agar ekstensi ini tidak dapat lagi melihat dan mengubah data Anda di situs yang Anda kunjungi, termasuk info pribadi Anda.</translation>
 <translation id="2799223571221894425">Luncurkan Ulang</translation>
@@ -364,7 +365,6 @@
 <translation id="6174920971222007286">File ini mungkin berbahaya<ph name="LINE_BREAK" />Chromium dapat memeriksa hasil download ini untuk Anda jika Anda memberikan sandi. Info tentang file ini akan dikirim ke Google Safe Browsing, tetapi konten dan sandi file tidak dikirim ke luar perangkat Anda.</translation>
 <translation id="6182736845697986886">Penginstalan gagal karena server update mengalami error internal.</translation>
 <translation id="6183079672144801177">Pastikan Anda login ke Chromium di <ph name="TARGET_DEVICE_NAME" /> Anda, lalu coba kirimkan lagi.</translation>
-<translation id="6196339736238974634">Untuk menggunakan profil ini dengan Glic, buka Chromium dan login</translation>
 <translation id="6212496753309875659">Komputer ini sudah memiliki versi Chromium yang lebih baru. Jika software tidak bekerja, harap coba uninstal Chromium, lalu cobalah kembali.</translation>
 <translation id="6219195342503754812">{0,plural, =0{Chromium akan diluncurkan ulang sekarang}=1{Chromium akan diluncurkan ulang dalam 1 detik}other{Chromium akan diluncurkan ulang dalam # detik}}</translation>
 <translation id="6241367896540709610">Chromium memerlukan izin akses penyimpanan untuk mendownload file</translation>

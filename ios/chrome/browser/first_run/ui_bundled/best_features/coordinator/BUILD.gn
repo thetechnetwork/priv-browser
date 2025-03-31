@@ -6,6 +6,8 @@ source_set("coordinator") {
   sources = [
     "best_features_screen_coordinator.h",
     "best_features_screen_coordinator.mm",
+    "best_features_screen_detail_coordinator.h",
+    "best_features_screen_detail_coordinator.mm",
     "best_features_screen_mediator.h",
     "best_features_screen_mediator.mm",
   ]
@@ -15,6 +17,7 @@ source_set("coordinator") {
     "//components/password_manager/core/browser",
     "//components/segmentation_platform/public",
     "//ios/chrome/browser/commerce/model:shopping_service",
+    "//ios/chrome/browser/first_run/model",
     "//ios/chrome/browser/first_run/ui_bundled:features",
     "//ios/chrome/browser/first_run/ui_bundled:screen_delegate",
     "//ios/chrome/browser/first_run/ui_bundled/best_features/ui",
@@ -25,6 +28,8 @@ source_set("coordinator") {
     "//ios/chrome/browser/shared/model/profile",
     "//ios/chrome/browser/shared/public/features:system_flags",
     "//ios/chrome/browser/signin/model",
+    "//ios/chrome/common/ui/confirmation_alert",
+    "//ios/chrome/common/ui/instruction_view:instructions_half_sheet",
     "//ios/chrome/common/ui/promo_style",
   ]
   frameworks = [ "UIKit.framework" ]

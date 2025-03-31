@@ -194,6 +194,7 @@ class InterestGroupStorageTest : public testing::Test {
         case 30:
         case 32:
         case 34:
+        case 35:
           *version_changed_ig_fields = false;
           break;
         default:
@@ -226,6 +227,10 @@ class InterestGroupStorageTest : public testing::Test {
     // instance.
 
     switch (version_number) {
+      case 35:
+        // Added `cached_k_anonymity_hashes` table, but introduced no new
+        // `interest_group` table fields.
+        [[fallthrough]];
       case 34:
         // Added `view_and_click_events` table, but introduced no new
         // `interest_group` table fields.
@@ -461,8 +466,8 @@ TEST_F(InterestGroupStorageTest, DatabaseInitialized_CreateDatabase) {
     // [interest_groups], [join_history], [bid_history], [win_history],
     // [joined_k_anon], [meta], [lockout_debugging_only_report],
     // [cooldown_debugging_only_report], [bidding_and_auction_server_keys],
-    // [view_and_click_events].
-    EXPECT_EQ(10u, sql::test::CountSQLTables(&raw_db)) << raw_db.GetSchema();
+    // [view_and_click_events], [cached_k_anonymity_hashes].
+    EXPECT_EQ(11u, sql::test::CountSQLTables(&raw_db)) << raw_db.GetSchema();
   }
 }
 
@@ -499,8 +504,8 @@ TEST_F(InterestGroupStorageTest, DatabaseRazesOldVersion) {
     // [interest_groups], [join_history], [bid_history], [win_history],
     // [joined_k_anon], [meta], [lockout_debugging_only_report],
     // [cooldown_debugging_only_report], [bidding_and_auction_server_keys],
-    // [view_and_click_events].
-    EXPECT_EQ(10u, sql::test::CountSQLTables(&raw_db)) << raw_db.GetSchema();
+    // [view_and_click_events], [cached_k_anonymity_hashes].
+    EXPECT_EQ(11u, sql::test::CountSQLTables(&raw_db)) << raw_db.GetSchema();
   }
 }
 
@@ -537,8 +542,8 @@ TEST_F(InterestGroupStorageTest, DatabaseRazesNewVersion) {
     // [interest_groups], [join_history], [bid_history], [win_history],
     // [joined_k_anon], [meta], [lockout_debugging_only_report],
     // [cooldown_debugging_only_report], [bidding_and_auction_server_keys],
-    // [view_and_click_events].
-    EXPECT_EQ(10u, sql::test::CountSQLTables(&raw_db)) << raw_db.GetSchema();
+    // [view_and_click_events], [cached_k_anonymity_hashes].
+    EXPECT_EQ(11u, sql::test::CountSQLTables(&raw_db)) << raw_db.GetSchema();
   }
 }
 
@@ -1007,6 +1012,62 @@ TEST_F(InterestGroupStorageTest,
   }
 }
 
+TEST_F(InterestGroupStorageTest,
+       GetInterestGroupTruncatesSelectableReportingIdsBeyondKAnonLimit) {
+  std::unique_ptr<InterestGroupStorage> storage = CreateStorage();
+
+  url::Origin test_origin =
+      url::Origin::Create(GURL("https://owner.example.com"));
+  GURL ad1_url = GURL("https://owner.example.com/ad1");
+  GURL ad2_url = GURL("https://owner.example.com/ad2");
+  GURL ad3_url = GURL("https://owner.example.com/ad3");
+
+  InterestGroup g = NewInterestGroup(test_origin, "name");
+  blink::InterestGroupKey group_key(g.owner, g.name);
+  g.ads.emplace();
+  g.ads->emplace_back(
+      ad1_url, "metadata1",
+      /*size_group=*/std::nullopt,
+      /*buyer_reporting_id=*/"brid1",
+      /*buyer_and_seller_reporting_id=*/"shrid1",
+      /*selectable_buyer_and_seller_reporting_ids=*/
+      std::vector<std::string>{"selectable_id1", "selectable_id2"});
+  storage->JoinInterestGroup(g, test_origin.GetURL());
+
+  // Validate the interest groups's 'next_update_after' field, and that all of
+  // the `selectableBuyerAndSellerReportingIds` were loaded.
+  {
+    std::vector<StorageInterestGroup> interest_groups =
+        storage->GetInterestGroupsForOwner(test_origin);
+    ASSERT_THAT(interest_groups, testing::SizeIs(1u));
+    ASSERT_TRUE(interest_groups[0].interest_group.ads.has_value());
+    const InterestGroup::Ad& ad = interest_groups[0].interest_group.ads->at(0);
+    ASSERT_TRUE(ad.selectable_buyer_and_seller_reporting_ids.has_value());
+    EXPECT_THAT(*ad.selectable_buyer_and_seller_reporting_ids,
+                testing::ElementsAre("selectable_id1", "selectable_id2"));
+  }
+
+  // With the 'TruncateToKAnonLimit' parameter set to true, this time we only
+  // get the `selectableBuyerAndSellerReportingIds` within that limit.
+  {
+    base::test::ScopedFeatureList scoped_feature_to_enforce_limit;
+    scoped_feature_to_enforce_limit.InitAndEnableFeatureWithParameters(
+        features::
+            kFledgeLimitSelectableBuyerAndSellerReportingIdsFetchedFromKAnon,
+        {{"SelectableBuyerAndSellerReportingIdsFetchedFromKAnonLimit", "1"},
+         {"SelectableBuyerAndSellerReportingIdsTruncateToKAnonLimit", "true"}});
+
+    std::vector<StorageInterestGroup> interest_groups =
+        storage->GetInterestGroupsForOwner(test_origin);
+    ASSERT_THAT(interest_groups, testing::SizeIs(1u));
+    ASSERT_TRUE(interest_groups[0].interest_group.ads.has_value());
+    const InterestGroup::Ad& ad = interest_groups[0].interest_group.ads->at(0);
+    ASSERT_TRUE(ad.selectable_buyer_and_seller_reporting_ids.has_value());
+    EXPECT_THAT(*ad.selectable_buyer_and_seller_reporting_ids,
+                testing::ElementsAre("selectable_id1"));
+  }
+}
+
 TEST_F(InterestGroupStorageTest, ValidateInterestGroupOnUpdate) {
   std::unique_ptr<InterestGroupStorage> storage = CreateStorage();
 
@@ -1456,9 +1517,6 @@ TEST_F(InterestGroupStorageTest, RecordsDebugReportLockoutAndCooldown) {
   EXPECT_FALSE(cooldowns->lockout.has_value());
   EXPECT_TRUE(cooldowns->debug_report_cooldown_map.empty());
 
-  std::optional<DebugReportLockout> lockout = storage->GetDebugReportLockout();
-  ASSERT_FALSE(lockout.has_value());
-
   base::Time time = base::Time::Now();
   base::Time expected_time = base::Time::FromDeltaSinceWindowsEpoch(
       time.ToDeltaSinceWindowsEpoch().CeilToMultiple(base::Hours(1)));
@@ -1471,11 +1529,6 @@ TEST_F(InterestGroupStorageTest, RecordsDebugReportLockoutAndCooldown) {
   EXPECT_EQ(blink::features::kFledgeDebugReportLockout.Get(),
             cooldowns->lockout->duration);
   EXPECT_TRUE(cooldowns->debug_report_cooldown_map.empty());
-  lockout = storage->GetDebugReportLockout();
-  ASSERT_TRUE(lockout.has_value());
-  EXPECT_EQ(expected_time, lockout->starting_time);
-  EXPECT_EQ(blink::features::kFledgeDebugReportLockout.Get(),
-            lockout->duration);
 
   storage->RecordDebugReportCooldown(test_origin, time,
                                      DebugReportCooldownType::kShortCooldown);
@@ -1541,22 +1594,28 @@ TEST_F(InterestGroupStorageTest, SetDebugReportLockoutUntilIGExpires) {
                                  .Build(),
                              kOrigin.GetURL());
 
-  std::optional<DebugReportLockout> lockout = storage->GetDebugReportLockout();
-  ASSERT_FALSE(lockout.has_value());
+  std::optional<DebugReportLockoutAndCooldowns> lockout_and_cooldowns =
+      storage->GetDebugReportLockoutAndAllCooldowns();
+  ASSERT_TRUE(lockout_and_cooldowns.has_value());
+  ASSERT_FALSE(lockout_and_cooldowns->lockout.has_value());
 
   storage->SetDebugReportLockoutUntilIGExpires();
-  lockout = storage->GetDebugReportLockout();
-  ASSERT_TRUE(lockout.has_value());
+  lockout_and_cooldowns = storage->GetDebugReportLockoutAndAllCooldowns();
+  ASSERT_TRUE(lockout_and_cooldowns.has_value());
+  ASSERT_TRUE(lockout_and_cooldowns->lockout.has_value());
   base::Time expected_starting_time = base::Time::FromDeltaSinceWindowsEpoch(
       start.ToDeltaSinceWindowsEpoch().CeilToMultiple(base::Hours(1)));
-  EXPECT_EQ(expected_starting_time, lockout->starting_time);
-  EXPECT_EQ(even_later - expected_starting_time, lockout->duration);
+  EXPECT_EQ(expected_starting_time,
+            lockout_and_cooldowns->lockout->starting_time);
+  EXPECT_EQ(even_later - expected_starting_time,
+            lockout_and_cooldowns->lockout->duration);
 
   // All IGs joined before has already expired.
   task_environment().FastForwardBy(base::Days(3));
   storage->SetDebugReportLockoutUntilIGExpires();
-  lockout = storage->GetDebugReportLockout();
-  ASSERT_FALSE(lockout.has_value());
+  lockout_and_cooldowns = storage->GetDebugReportLockoutAndAllCooldowns();
+  ASSERT_TRUE(lockout_and_cooldowns.has_value());
+  ASSERT_FALSE(lockout_and_cooldowns->lockout.has_value());
 }
 
 TEST_F(InterestGroupStorageTest, DeleteExpiredDebugReportCooldown) {
@@ -2531,6 +2590,232 @@ TEST_P(InterestGroupStorageDualLifetimeTest,
   EXPECT_EQ(1, view_and_click_counts->click_counts->past_30_days);
   EXPECT_EQ(GetParam() == GroupLifetime::k90Day ? 1 : 0,
             view_and_click_counts->click_counts->past_90_days);
+}
+
+TEST_P(InterestGroupStorageDualLifetimeTest,
+       ViewClickStoreRetrieve_RateLimited) {
+  // Max of 10 views, 10 clicks, every 20 seconds, per (providing origin,
+  // eligible origin).
+  constexpr int kMaxEvents = 10;
+  constexpr base::TimeDelta kMaxEventsDelta = base::Seconds(20);
+
+  AdAuctionEventRecord record_view;
+  record_view.type = AdAuctionEventRecord::Type::kView;
+  record_view.providing_origin = kViewClickProviderOrigin1;
+  record_view.eligible_origins = {kViewClickEligibleOrigin1};
+  ASSERT_TRUE(record_view.IsValid());
+
+  AdAuctionEventRecord record_click;
+  record_click.type = AdAuctionEventRecord::Type::kClick;
+  record_click.providing_origin = kViewClickProviderOrigin1;
+  record_click.eligible_origins = {kViewClickEligibleOrigin1};
+  ASSERT_TRUE(record_click.IsValid());
+
+  AdAuctionEventRecord record_view_other_provider;
+  record_view_other_provider.type = AdAuctionEventRecord::Type::kView;
+  record_view_other_provider.providing_origin = kViewClickProviderOrigin2;
+  record_view_other_provider.eligible_origins = {kViewClickEligibleOrigin1};
+  ASSERT_TRUE(record_view_other_provider.IsValid());
+
+  AdAuctionEventRecord record_click_other_eligible_origin;
+  record_click_other_eligible_origin.type = AdAuctionEventRecord::Type::kClick;
+  record_click_other_eligible_origin.providing_origin =
+      kViewClickProviderOrigin1;
+  record_click_other_eligible_origin.eligible_origins = {
+      kViewClickEligibleOrigin2};
+  ASSERT_TRUE(record_click_other_eligible_origin.IsValid());
+
+  // Which gets rate limited first, views, or clicks. Checking what happens in
+  // each scenario ensures that one of views and clicks getting rate limited
+  // doesn't mean the other one will be rate limited.
+  enum class Scenario {
+    kViewFirst = 0,
+    kClickFirst,
+  };
+  for (Scenario scenario : {Scenario::kViewFirst, Scenario::kClickFirst}) {
+    SCOPED_TRACE(static_cast<int>(scenario));
+
+    // First, create the storage, and join an interest group.
+    std::unique_ptr<InterestGroupStorage> storage = CreateStorage();
+
+    InterestGroup g1 = NewInterestGroup(kViewClickEligibleOrigin1, "cars");
+    g1.view_and_click_counts_providers = {
+        {kViewClickProviderOrigin1, kViewClickProviderOrigin2}};
+    g1.expiry = base::Time::Now() + base::Days(90);
+    storage->JoinInterestGroup(g1, GURL("https://joining-site.test"));
+
+    InterestGroup g2 = NewInterestGroup(kViewClickEligibleOrigin2, "shoes");
+    g2.view_and_click_counts_providers = {{kViewClickProviderOrigin1}};
+    g2.expiry = base::Time::Now() + base::Days(90);
+    storage->JoinInterestGroup(g2, GURL("https://joining-site.test"));
+
+    // Now record kMaxEvents + 1 events of the first type. Only kMaxEvents get
+    // recorded.
+    for (int i = 0; i < kMaxEvents + 1; i++) {
+      switch (scenario) {
+        case Scenario::kViewFirst:
+          storage->RecordViewClick(record_view);
+          break;
+        case Scenario::kClickFirst:
+          storage->RecordViewClick(record_click);
+          break;
+      }
+    }
+
+    {
+      std::vector<StorageInterestGroup> groups =
+          storage->GetInterestGroupsForOwner(kViewClickEligibleOrigin1);
+      ASSERT_EQ(1u, groups.size());
+
+      blink::mojom::ViewAndClickCountsPtr& view_and_click_counts =
+          groups[0].bidding_browser_signals->view_and_click_counts;
+
+      int view_count = 0;
+      int click_count = 0;
+      switch (scenario) {
+        case Scenario::kViewFirst:
+          view_count = kMaxEvents;
+          break;
+        case Scenario::kClickFirst:
+          click_count = kMaxEvents;
+          break;
+      }
+
+      EXPECT_EQ(view_count, view_and_click_counts->view_counts->past_hour);
+      EXPECT_EQ(view_count, view_and_click_counts->view_counts->past_day);
+      EXPECT_EQ(view_count, view_and_click_counts->view_counts->past_week);
+      EXPECT_EQ(view_count, view_and_click_counts->view_counts->past_30_days);
+      EXPECT_EQ(GetParam() == GroupLifetime::k90Day ? view_count : 0,
+                view_and_click_counts->view_counts->past_90_days);
+      EXPECT_EQ(click_count, view_and_click_counts->click_counts->past_hour);
+      EXPECT_EQ(click_count, view_and_click_counts->click_counts->past_day);
+      EXPECT_EQ(click_count, view_and_click_counts->click_counts->past_week);
+      EXPECT_EQ(click_count, view_and_click_counts->click_counts->past_30_days);
+      EXPECT_EQ(GetParam() == GroupLifetime::k90Day ? click_count : 0,
+                view_and_click_counts->click_counts->past_90_days);
+    }
+
+    // Now record kMaxEvents + 1 events of the second type. Only kMaxEvents get
+    // recorded.
+    for (int i = 0; i < kMaxEvents + 1; i++) {
+      switch (scenario) {
+        case Scenario::kViewFirst:
+          storage->RecordViewClick(record_click);
+          break;
+        case Scenario::kClickFirst:
+          storage->RecordViewClick(record_view);
+          break;
+      }
+    }
+
+    {
+      std::vector<StorageInterestGroup> groups =
+          storage->GetInterestGroupsForOwner(kViewClickEligibleOrigin1);
+      ASSERT_EQ(1u, groups.size());
+
+      blink::mojom::ViewAndClickCountsPtr& view_and_click_counts =
+          groups[0].bidding_browser_signals->view_and_click_counts;
+
+      EXPECT_EQ(kMaxEvents, view_and_click_counts->view_counts->past_hour);
+      EXPECT_EQ(kMaxEvents, view_and_click_counts->view_counts->past_day);
+      EXPECT_EQ(kMaxEvents, view_and_click_counts->view_counts->past_week);
+      EXPECT_EQ(kMaxEvents, view_and_click_counts->view_counts->past_30_days);
+      EXPECT_EQ(GetParam() == GroupLifetime::k90Day ? kMaxEvents : 0,
+                view_and_click_counts->view_counts->past_90_days);
+      EXPECT_EQ(kMaxEvents, view_and_click_counts->click_counts->past_hour);
+      EXPECT_EQ(kMaxEvents, view_and_click_counts->click_counts->past_day);
+      EXPECT_EQ(kMaxEvents, view_and_click_counts->click_counts->past_week);
+      EXPECT_EQ(kMaxEvents, view_and_click_counts->click_counts->past_30_days);
+      EXPECT_EQ(GetParam() == GroupLifetime::k90Day ? kMaxEvents : 0,
+                view_and_click_counts->click_counts->past_90_days);
+    }
+
+    // (kViewClickEligibleOrigin1, kViewClickProviderOrigin1)'s currently rate
+    // limited, but events for other eligible origins and providers should
+    // be counted.
+    storage->RecordViewClick(record_view_other_provider);
+    storage->RecordViewClick(record_click_other_eligible_origin);
+
+    {
+      std::vector<StorageInterestGroup> groups =
+          storage->GetInterestGroupsForOwner(kViewClickEligibleOrigin1);
+      ASSERT_EQ(1u, groups.size());
+
+      blink::mojom::ViewAndClickCountsPtr& view_and_click_counts =
+          groups[0].bidding_browser_signals->view_and_click_counts;
+
+      EXPECT_EQ(kMaxEvents + 1, view_and_click_counts->view_counts->past_hour);
+      EXPECT_EQ(kMaxEvents + 1, view_and_click_counts->view_counts->past_day);
+      EXPECT_EQ(kMaxEvents + 1, view_and_click_counts->view_counts->past_week);
+      EXPECT_EQ(kMaxEvents + 1,
+                view_and_click_counts->view_counts->past_30_days);
+      EXPECT_EQ(GetParam() == GroupLifetime::k90Day ? kMaxEvents + 1 : 0,
+                view_and_click_counts->view_counts->past_90_days);
+      EXPECT_EQ(kMaxEvents, view_and_click_counts->click_counts->past_hour);
+      EXPECT_EQ(kMaxEvents, view_and_click_counts->click_counts->past_day);
+      EXPECT_EQ(kMaxEvents, view_and_click_counts->click_counts->past_week);
+      EXPECT_EQ(kMaxEvents, view_and_click_counts->click_counts->past_30_days);
+      EXPECT_EQ(GetParam() == GroupLifetime::k90Day ? kMaxEvents : 0,
+                view_and_click_counts->click_counts->past_90_days);
+    }
+
+    {
+      std::vector<StorageInterestGroup> groups =
+          storage->GetInterestGroupsForOwner(kViewClickEligibleOrigin2);
+      ASSERT_EQ(1u, groups.size());
+
+      blink::mojom::ViewAndClickCountsPtr& view_and_click_counts =
+          groups[0].bidding_browser_signals->view_and_click_counts;
+
+      EXPECT_EQ(0, view_and_click_counts->view_counts->past_hour);
+      EXPECT_EQ(0, view_and_click_counts->view_counts->past_day);
+      EXPECT_EQ(0, view_and_click_counts->view_counts->past_week);
+      EXPECT_EQ(0, view_and_click_counts->view_counts->past_30_days);
+      EXPECT_EQ(0, view_and_click_counts->view_counts->past_90_days);
+      EXPECT_EQ(1, view_and_click_counts->click_counts->past_hour);
+      EXPECT_EQ(1, view_and_click_counts->click_counts->past_day);
+      EXPECT_EQ(1, view_and_click_counts->click_counts->past_week);
+      EXPECT_EQ(1, view_and_click_counts->click_counts->past_30_days);
+      EXPECT_EQ(GetParam() == GroupLifetime::k90Day ? 1 : 0,
+                view_and_click_counts->click_counts->past_90_days);
+    }
+
+    // Finally advance time. (kViewClickProviderOrigin1,
+    // kViewClickEligibleOrigin1) should no longer be rate-limited.
+    task_environment().FastForwardBy(kMaxEventsDelta + base::Microseconds(1));
+
+    storage->RecordViewClick(record_view);
+    storage->RecordViewClick(record_click);
+
+    {
+      std::vector<StorageInterestGroup> groups =
+          storage->GetInterestGroupsForOwner(kViewClickEligibleOrigin1);
+      ASSERT_EQ(1u, groups.size());
+
+      blink::mojom::ViewAndClickCountsPtr& view_and_click_counts =
+          groups[0].bidding_browser_signals->view_and_click_counts;
+
+      EXPECT_EQ(kMaxEvents + 2, view_and_click_counts->view_counts->past_hour);
+      EXPECT_EQ(kMaxEvents + 2, view_and_click_counts->view_counts->past_day);
+      EXPECT_EQ(kMaxEvents + 2, view_and_click_counts->view_counts->past_week);
+      EXPECT_EQ(kMaxEvents + 2,
+                view_and_click_counts->view_counts->past_30_days);
+      EXPECT_EQ(GetParam() == GroupLifetime::k90Day ? kMaxEvents + 2 : 0,
+                view_and_click_counts->view_counts->past_90_days);
+      EXPECT_EQ(kMaxEvents + 1, view_and_click_counts->click_counts->past_hour);
+      EXPECT_EQ(kMaxEvents + 1, view_and_click_counts->click_counts->past_day);
+      EXPECT_EQ(kMaxEvents + 1, view_and_click_counts->click_counts->past_week);
+      EXPECT_EQ(kMaxEvents + 1,
+                view_and_click_counts->click_counts->past_30_days);
+      EXPECT_EQ(GetParam() == GroupLifetime::k90Day ? kMaxEvents + 1 : 0,
+                view_and_click_counts->click_counts->past_90_days);
+    }
+
+    // Delete the database in case we loop again, creating the database from
+    // another .sql file.
+    storage.reset();
+    base::DeleteFile(db_path());
+  }
 }
 
 TEST_P(InterestGroupStorageDualLifetimeTest,
@@ -4126,10 +4411,13 @@ TEST_F(InterestGroupStorageTest, UpgradeFromV31) {
       base::Time::Now().ToDeltaSinceWindowsEpoch().CeilToMultiple(
           base::Hours(1)));
   storage->RecordDebugReportLockout(now_nearest_next_hour, base::Days(90));
-  std::optional<DebugReportLockout> lockout = storage->GetDebugReportLockout();
-  ASSERT_TRUE(lockout.has_value());
-  EXPECT_EQ(now_nearest_next_hour, lockout->starting_time);
-  EXPECT_EQ(base::Days(90), lockout->duration);
+  std::optional<DebugReportLockoutAndCooldowns> lockout_and_cooldowns =
+      storage->GetDebugReportLockoutAndAllCooldowns();
+  ASSERT_TRUE(lockout_and_cooldowns.has_value());
+  ASSERT_TRUE(lockout_and_cooldowns->lockout.has_value());
+  EXPECT_EQ(now_nearest_next_hour,
+            lockout_and_cooldowns->lockout->starting_time);
+  EXPECT_EQ(base::Days(90), lockout_and_cooldowns->lockout->duration);
 }
 
 TEST_F(InterestGroupStorageTest, MultiVersionUpgradeTest) {
@@ -4810,6 +5098,199 @@ TEST_F(InterestGroupStorageTest, SetGetBiddingAndAuctionKeys) {
   EXPECT_EQ(a_loaded_keys, a_keys);
   EXPECT_EQ(expiration, a_expiration);
   EXPECT_TRUE(b_loaded_keys.empty());
+}
+
+TEST_F(InterestGroupStorageTest, WriteAndLoadCachedKAnonKeys) {
+  std::unique_ptr<InterestGroupStorage> storage = CreateStorage();
+
+  constexpr std::string kKey1 = "key1";
+  constexpr std::string kKey2 = "key2";
+  constexpr std::string kKey3 = "key3";
+  constexpr std::string kKey4 = "key4";
+
+  base::test::ScopedFeatureList scoped_feature_to_enforce_limit;
+  scoped_feature_to_enforce_limit.InitAndEnableFeatureWithParameters(
+      features::kFledgeCacheKAnonHashedKeys,
+      {{"CacheKAnonHashedKeysTtl", "1h"}});
+
+  base::Time now = base::Time::Now();
+
+  // No keys are cached before any are written.
+  {
+    base::HistogramTester histograms;
+    InterestGroupStorage::KAnonymityCacheResponse cache_repsonse =
+        storage->LoadPositiveHashedKAnonymityKeysFromCache(
+            {kKey1, kKey2, kKey3, kKey4}, /*check_time=*/now);
+    EXPECT_THAT(cache_repsonse.positive_hashed_keys_from_cache,
+                testing::IsEmpty());
+    EXPECT_THAT(cache_repsonse.ids_to_query_from_server,
+                testing::ElementsAre(kKey1, kKey2, kKey3, kKey4));
+    histograms.ExpectUniqueSample(
+        "Storage.InterestGroup.KAnonymityKeysCacheHitRate", 0, 1);
+  }
+
+  // Cached values should be reused.
+  EXPECT_TRUE(storage->WriteHashedKAnonymityKeysToCache(
+      /*positive_hashed_keys=*/{kKey1},
+      /*negative_hashed_keys=*/{kKey2},
+      /*fetch_time=*/now));
+  {
+    base::HistogramTester histograms;
+    InterestGroupStorage::KAnonymityCacheResponse cache_repsonse =
+        storage->LoadPositiveHashedKAnonymityKeysFromCache(
+            {kKey1, kKey2, kKey3, kKey4}, /*check_time=*/now);
+    EXPECT_THAT(cache_repsonse.positive_hashed_keys_from_cache,
+                testing::ElementsAre(kKey1));
+    EXPECT_THAT(cache_repsonse.ids_to_query_from_server,
+                testing::ElementsAre(kKey3, kKey4));
+    histograms.ExpectUniqueSample(
+        "Storage.InterestGroup.KAnonymityKeysCacheHitRate", 50, 1);
+  }
+
+  // Move forward by 30 minutes (half of the TTL); everything's still valid.
+  now += base::Minutes(30);
+  {
+    base::HistogramTester histograms;
+    InterestGroupStorage::KAnonymityCacheResponse cache_repsonse =
+        storage->LoadPositiveHashedKAnonymityKeysFromCache(
+            {kKey1, kKey2, kKey3, kKey4}, /*check_time=*/now);
+    EXPECT_THAT(cache_repsonse.positive_hashed_keys_from_cache,
+                testing::ElementsAre(kKey1));
+    EXPECT_THAT(cache_repsonse.ids_to_query_from_server,
+                testing::ElementsAre(kKey3, kKey4));
+    histograms.ExpectUniqueSample(
+        "Storage.InterestGroup.KAnonymityKeysCacheHitRate", 50, 1);
+  }
+
+  // Cached entries can be overwritten. We make key2 k-anon now. (This wouldn't
+  // happen in production, because we wouldn't fetch keys from the k-anonymity
+  // server if they're found in the cache.) We also add key3 to the cache as not
+  // k-anonymous.
+  EXPECT_TRUE(storage->WriteHashedKAnonymityKeysToCache(
+      /*positive_hashed_keys=*/{kKey2},
+      /*negative_hashed_keys=*/{kKey3},
+      /*fetch_time=*/now));
+  {
+    base::HistogramTester histograms;
+    InterestGroupStorage::KAnonymityCacheResponse cache_repsonse =
+        storage->LoadPositiveHashedKAnonymityKeysFromCache(
+            {kKey1, kKey2, kKey3, kKey4}, /*check_time=*/now);
+    EXPECT_THAT(cache_repsonse.positive_hashed_keys_from_cache,
+                testing::ElementsAre(kKey1, kKey2));
+    EXPECT_THAT(cache_repsonse.ids_to_query_from_server,
+                testing::ElementsAre(kKey4));
+    histograms.ExpectUniqueSample(
+        "Storage.InterestGroup.KAnonymityKeysCacheHitRate", 75, 1);
+  }
+
+  // Move forward by 30 minutes (half of the TTL); everything's still valid
+  // because cache entries are still valid right at the TTL.
+  now += base::Minutes(30);
+  {
+    base::HistogramTester histograms;
+    InterestGroupStorage::KAnonymityCacheResponse cache_repsonse =
+        storage->LoadPositiveHashedKAnonymityKeysFromCache(
+            {kKey1, kKey2, kKey3, kKey4}, /*check_time=*/now);
+    EXPECT_THAT(cache_repsonse.positive_hashed_keys_from_cache,
+                testing::ElementsAre(kKey1, kKey2));
+    EXPECT_THAT(cache_repsonse.ids_to_query_from_server,
+                testing::ElementsAre(kKey4));
+    histograms.ExpectUniqueSample(
+        "Storage.InterestGroup.KAnonymityKeysCacheHitRate", 75, 1);
+  }
+
+  // One minute later, key1, which was written 61 minutes ago (> than the TTL),
+  // is no longer in the cache.
+  now += base::Minutes(1);
+  {
+    base::HistogramTester histograms;
+    InterestGroupStorage::KAnonymityCacheResponse cache_repsonse =
+        storage->LoadPositiveHashedKAnonymityKeysFromCache(
+            {kKey1, kKey2, kKey3, kKey4}, /*check_time=*/now);
+    EXPECT_THAT(cache_repsonse.positive_hashed_keys_from_cache,
+                testing::ElementsAre(kKey2));
+    EXPECT_THAT(cache_repsonse.ids_to_query_from_server,
+                testing::ElementsAre(kKey1, kKey4));
+    histograms.ExpectUniqueSample(
+        "Storage.InterestGroup.KAnonymityKeysCacheHitRate", 50, 1);
+  }
+
+  // And finally, 60 minutes after that, all keys are expired.
+  now += base::Hours(1);
+  {
+    base::HistogramTester histograms;
+    InterestGroupStorage::KAnonymityCacheResponse cache_repsonse =
+        storage->LoadPositiveHashedKAnonymityKeysFromCache(
+            {kKey1, kKey2, kKey3, kKey4}, /*check_time=*/now);
+    EXPECT_THAT(cache_repsonse.positive_hashed_keys_from_cache,
+                testing::IsEmpty());
+    EXPECT_THAT(cache_repsonse.ids_to_query_from_server,
+                testing::ElementsAre(kKey1, kKey2, kKey3, kKey4));
+    histograms.ExpectUniqueSample(
+        "Storage.InterestGroup.KAnonymityKeysCacheHitRate", 0, 1);
+  }
+}
+
+// Loads a large number of keys to ensure that the batched lookups work.
+TEST_F(InterestGroupStorageTest, WriteAndLoadCachedKAnonKeys_BatchedLookups) {
+  std::unique_ptr<InterestGroupStorage> storage = CreateStorage();
+
+  std::vector<std::string> all_keys;
+  for (size_t i = 0; i < 234; ++i) {
+    all_keys.push_back(base::NumberToString(i));
+  }
+
+  base::test::ScopedFeatureList scoped_feature_to_enforce_limit;
+  scoped_feature_to_enforce_limit.InitAndEnableFeatureWithParameters(
+      features::kFledgeCacheKAnonHashedKeys,
+      {{"CacheKAnonHashedKeysTtl", "1h"}});
+
+  base::Time now = base::Time::Now();
+
+  // No keys are cached before any are written.
+  {
+    base::HistogramTester histograms;
+    InterestGroupStorage::KAnonymityCacheResponse cache_repsonse =
+        storage->LoadPositiveHashedKAnonymityKeysFromCache(all_keys,
+                                                           /*check_time=*/now);
+    EXPECT_THAT(cache_repsonse.positive_hashed_keys_from_cache,
+                testing::IsEmpty());
+    EXPECT_THAT(cache_repsonse.ids_to_query_from_server,
+                testing::ElementsAreArray(all_keys));
+    histograms.ExpectUniqueSample(
+        "Storage.InterestGroup.KAnonymityKeysCacheHitRate", 0, 1);
+  }
+
+  std::vector<std::string> positive_keys;
+  std::vector<std::string> negative_keys;
+  std::vector<std::string> other_keys;
+  for (size_t i = 0; i < 234; ++i) {
+    if (i % 4 == 0) {
+      positive_keys.push_back(base::NumberToString(i));
+    } else if (i % 2 == 0) {
+      negative_keys.push_back(base::NumberToString(i));
+    } else {
+      other_keys.push_back(base::NumberToString(i));
+    }
+  }
+
+  // Cached values should be reused.
+  EXPECT_TRUE(storage->WriteHashedKAnonymityKeysToCache(
+      /*positive_hashed_keys=*/positive_keys,
+      /*negative_hashed_keys=*/negative_keys,
+      /*fetch_time=*/now));
+  {
+    base::HistogramTester histograms;
+    InterestGroupStorage::KAnonymityCacheResponse cache_repsonse =
+        storage->LoadPositiveHashedKAnonymityKeysFromCache(all_keys,
+                                                           /*check_time=*/now);
+    EXPECT_THAT(cache_repsonse.positive_hashed_keys_from_cache,
+                testing::ElementsAreArray(positive_keys));
+    EXPECT_THAT(cache_repsonse.ids_to_query_from_server,
+                testing::ElementsAreArray(other_keys));
+    histograms.ExpectUniqueSample(
+        "Storage.InterestGroup.KAnonymityKeysCacheHitRate", 50, 1);
+  }
 }
 
 }  // namespace

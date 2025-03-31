@@ -11,6 +11,7 @@
 <translation id="102432830749687801">请务必在失去访问权限之前，使用 Google 的 Content Transfer 应用将学校账号数据转移到个人账号。</translation>
 <translation id="1026212596705997935">此快捷键已用于“<ph name="CONFLICT_ACCEL_NAME" />”。请按新的快捷键。如要替换现有的快捷键，请再次按这个快捷键。</translation>
 <translation id="1030856839388844477">重置流量使用情况</translation>
+<translation id="1047095725494118091">无法下载。请重试或重启 <ph name="DEVICE_TYPE" />。</translation>
 <translation id="1047458377670401304"><ph name="CPU_NAME" />（<ph name="THREAD_COUNT" /> 个线程，<ph name="CPU_MAX_CLOCK_SPEED" />GHz）</translation>
 <translation id="1047773237499189053">有可用的新功能，使用向上键即可了解详情。</translation>
 <translation id="1049663189809099096">粉黄色</translation>
@@ -26,6 +27,7 @@
 <translation id="1082009148392559545">正在下载屏保</translation>
 <translation id="1094693127011229778">IP 地址缺失</translation>
 <translation id="1100902271996134409">正在生成图像…</translation>
+<translation id="1107856713690040084"><ph name="DEVICE_TYPE" /> 音频</translation>
 <translation id="1116694919640316211">关于</translation>
 <translation id="1118572504348554005">我们可能会与合作伙伴分享通过本表单提交的反馈，以便排查您向我们报告的错误和其他问题。请勿包含密码等敏感信息。</translation>
 <translation id="1119403468619527527">字词过少，无法简化</translation>
@@ -292,6 +294,7 @@
 <translation id="2163937499206714165">开启深色模式</translation>
 <translation id="2164131940279488868">请确保已连接麦克风，以便开始录制音频</translation>
 <translation id="2173302385160625112">请检查您的互联网连接是否正常</translation>
+<translation id="2176909213844392588">无法下载<ph name="LANGUAGE_NAME" />转写模型。请重试或重启 <ph name="DEVICE_TYPE" />。</translation>
 <translation id="2180197493692062006">出了点问题。请尝试重新打开此应用。</translation>
 <translation id="2189104374785738357">修改 APN 详细信息</translation>
 <translation id="2195732836444333448">目前已达到资源上限。请稍后再试。</translation>
@@ -480,6 +483,7 @@
 <translation id="3199982728237701504">文件馈送器（双面）</translation>
 <translation id="3201315366910775591">他人可以更新共享相册</translation>
 <translation id="3211671540163313381">按键映射方向键</translation>
+<translation id="3217462202230355157">请确保麦克风已连接，或尝试重启 <ph name="DEVICE_TYPE" /></translation>
 <translation id="3226405216343213872">正在搜寻扫描器</translation>
 <translation id="3226657629376379887">布局操作菜单</translation>
 <translation id="3227186760713762082"><ph name="CATEGORY_TEXT" />值除以 <ph name="CONVERSION_RATE" /></translation>
@@ -515,6 +519,7 @@
 <translation id="3383623117265110236">专有</translation>
 <translation id="3404249063913988450">启用屏保功能</translation>
 <translation id="3413935475507503304">若要继续更新，请点击“下一步”。</translation>
+<translation id="3416709353545797224">录制所有 <ph name="DEVICE_TYPE" /> 音频</translation>
 <translation id="3428551088151258685">室外</translation>
 <translation id="3428971106895559033">柔和</translation>
 <translation id="3434107140712555581"><ph name="BATTERY_PERCENTAGE" />%</translation>
@@ -678,6 +683,7 @@
 <translation id="4155551848414053977">请确保扫描仪已开机，且已直接或通过网络连接到设备</translation>
 <translation id="4159238217853743776">局部</translation>
 <translation id="4159784952369912983">紫色</translation>
+<translation id="416219735020840807">无法下载转写模型。请重试或重启 <ph name="DEVICE_TYPE" />。</translation>
 <translation id="4170180284036919717">拍照</translation>
 <translation id="4170700058716978431">失败</translation>
 <translation id="4171077696775491955">调低亮度</translation>
@@ -698,6 +704,16 @@
 <translation id="4249717042534905822">在周日</translation>
 <translation id="4250229828105606438">屏幕截图</translation>
 <translation id="4251839292699800785">时尚办公室</translation>
+<translation id="4252261480746798874">如果选择“创建您自己的壁纸”，您可以撰写自定义提示。您还可以选择“选择主题”，然后选择带下划线的字词，打造个性化的 AI 壁纸。
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          选择“给我灵感”，获得更多独特而多样的 AI 图片选项。
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          当您创建自己的壁纸时，系统会将提示发送到 Google 服务器，以根据 <ph name="BEGIN_LINK_GOOGLE_PRIVACY_POLICY" />Google 的《服务条款》和《隐私权政策》<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" />生成图片并改进产品。请勿包含任何个人、敏感或机密信息。
+          <ph name="LINE_BREAK" />
+          <ph name="LINE_BREAK" />
+          生成式 AI 的回答（包括与人有关的信息）未必正确无误，请务必核查。<ph name="BEGIN_LINK_CREATE_YOUR_OWN_WALLPAPER" />了解详情<ph name="END_LINK_GOOGLE_PRIVACY_POLICY" /></translation>
 <translation id="4258281355379922695">HTTP 延迟时间</translation>
 <translation id="4266143281602681663">纱线</translation>
 <translation id="4269815121975886860">启动页使用偏好</translation>
@@ -775,7 +791,6 @@
 <translation id="4593212453765072419">需要验证代理身份</translation>
 <translation id="4594021849294327751">创建转写文本</translation>
 <translation id="4594541568452132351">选择转写语言并下载模型</translation>
-<translation id="4607282946861182308">无法创建这样的图片。请试试其他提示。</translation>
 <translation id="4609350030397390689">调低键盘亮度</translation>
 <translation id="4627232916386272576"><ph name="DOCUMENT_TITLE" />，<ph name="PRINTER_NAME" />，<ph name="CREATION_TIME" />，已打印 <ph name="PRINTED_PAGE_NUMBER" /> 页，共 <ph name="TOTAL_PAGE_NUMBER" /> 页。按 Enter 键即可取消这项打印任务。</translation>
 <translation id="463791356324567266">正在取消扫描…</translation>
@@ -942,6 +957,7 @@
 <translation id="5344619683981067131">将所选文本替换为建议内容</translation>
 <translation id="5346687412805619883">本地网络</translation>
 <translation id="5358174242040570474">出了点问题。请再次尝试选择一种壁纸，或者重新打开该应用。</translation>
+<translation id="5368228070728130240">无法下载摘要和标题创建模型。请重试或重启 <ph name="DEVICE_TYPE" />。</translation>
 <translation id="5372659122375744710">Wi-Fi 网络不安全</translation>
 <translation id="5376354385557966694">自动浅色模式</translation>
 <translation id="5378184552853359930">IP 类型</translation>
@@ -1247,6 +1263,7 @@
 <translation id="6766275201586212568">DNS 解析失败</translation>
 <translation id="6768237774506518020">DNS 解析失败比率较高</translation>
 <translation id="6786747875388722282">扩展程序</translation>
+<translation id="6789891265243243337">当 <ph name="DEVICE_TYPE" /> 音频处于开启状态时，录音机会录制此设备上播放的所有音频</translation>
 <translation id="6791471867139427246">键盘背光颜色</translation>
 <translation id="6796229976413584781">快捷键已删除</translation>
 <translation id="6798678288485555829">文字导航</translation>
@@ -1522,6 +1539,7 @@
 <translation id="8010765388850538088">详细了解生成式 AI</translation>
 <translation id="8017679124341497925">已修改快捷方式</translation>
 <translation id="802154636333426148">下载失败</translation>
+<translation id="8027467664787098346">详细了解所选壁纸</translation>
 <translation id="8028993641010258682">大小</translation>
 <translation id="8031884997696620457">HSPAPlus</translation>
 <translation id="80398733265834479">启用自动颜色模式</translation>
@@ -1640,6 +1658,7 @@
 <translation id="8543574988889671960">重新加载标签页</translation>
 <translation id="8550364285433943656">使用键盘按键控制游戏操作</translation>
 <translation id="8557447961879934694">WPA2</translation>
+<translation id="8558521694042102707">生成式 AI 可能会输出错误信息，包括与人有关的信息，因此请务必核查回答内容。</translation>
 <translation id="8575298406870537639">您的运营商可能会要求您启用此选项以连接到其网络。如需了解详情，请联系您的运营商。</translation>
 <translation id="8576249514688522074">未初始化</translation>
 <translation id="8584654835905316966">必须重启，才能完成<ph name="DEVICE_NAME" />固件安装操作，并更新至版本 <ph name="VERSION" />。电脑可能会重启几次。这是正常现象。</translation>
@@ -1654,7 +1673,6 @@
 <translation id="8655295600908251630">版本</translation>
 <translation id="8655828773034788261">分享网址：</translation>
 <translation id="8660881923941176839">磅</translation>
-<translation id="8670057600920888023">生成式 AI 尚处于实验阶段，生成的内容可能不准确、具有误导性或冒犯性。</translation>
 <translation id="8670574982334489519">右侧</translation>
 <translation id="8675354002693747642">预共享密钥</translation>
 <translation id="8677859815076891398">无任何相册。请在 <ph name="LINK_BEGIN" />Google 相册<ph name="LINK_END" />中创建一个相册。</translation>
@@ -1718,6 +1736,7 @@
 <translation id="8930622219860340959">无线</translation>
 <translation id="8933650076320258356">所选按键为表示<ph name="DIRECTION" />的 <ph name="KEYS" />。<ph name="REASSIGN_INSTRUCTION" /></translation>
 <translation id="8936793075252196307">客户端 IP 地址</translation>
+<translation id="8938606491880817721">无法下载。请重试或重启 <ph name="DEVICE_TYPE" />。</translation>
 <translation id="8944651180182756621">启动器颜色</translation>
 <translation id="8945308580158685341">蜜蜂</translation>
 <translation id="894617464444543719">设备类型是手机。</translation>

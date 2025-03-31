@@ -127,6 +127,7 @@
 <translation id="2721354645805494590">Chromium から Google アカウントを削除するには、ログアウトしてください</translation>
 <translation id="2738871930057338499">インターネットに接続できません。HTTP 403 アクセス不可エラーが発生しました。プロキシ設定をご確認ください。</translation>
 <translation id="2753623023919742414">クリックして検索</translation>
+<translation id="2768103863314748511">Chromium をデフォルトの PDF ビューアに設定する</translation>
 <translation id="2770231113462710648">既定のブラウザを変更:</translation>
 <translation id="2785438272836277133">この拡張機能にはマルウェアが含まれており、安全ではありません。アクセスしたサイトでユーザーデータ（個人情報を含む）が参照、変更されないように、Chromium からこの拡張機能を削除してください。</translation>
 <translation id="2799223571221894425">再起動</translation>
@@ -363,7 +364,6 @@
 <translation id="6174920971222007286">このファイルは危険な可能性があります<ph name="LINE_BREAK" />パスワードを入力すると、Chromium でダウンロードを確認します。ファイルに関する情報は Google セーフ ブラウジングに送信されますが、ファイルのコンテンツとパスワードはデバイスで保持されます。</translation>
 <translation id="6182736845697986886">更新サーバーの内部エラーが発生したため、インストールできませんでした。</translation>
 <translation id="6183079672144801177"><ph name="TARGET_DEVICE_NAME" /> で Chromium にログインしていることを確認してから、もう一度送信してください。</translation>
-<translation id="6196339736238974634">このプロファイルを Glic で使用するには、Chromium を開いてログインしてください</translation>
 <translation id="6212496753309875659">新しいバージョンの Chromium が既にインストールされています。ソフトウェアが動作しない場合は、Chromium をアンインストールしてからもう一度お試しください。</translation>
 <translation id="6219195342503754812">{0,plural, =0{Chromium は今すぐ再起動されます}=1{Chromium は 1 秒後に再起動されます}other{Chromium は # 秒後に再起動されます}}</translation>
 <translation id="6241367896540709610">ファイルをダウンロードするには、Chromium でストレージへのアクセスを許可する必要があります</translation>

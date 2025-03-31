@@ -164,6 +164,8 @@ struct WebClientInitialState {
   // Whether to enable the OpenOsPermissionSettingsMenu API for the client.
   // Depends on platform. Currently only allowed for Mac.
   bool open_os_settings_api_is_allowed;
+  // Reflects the enabling state of always-detached mode.
+  bool always_detached_mode;
 };
 
 // Options for getting tab context.
@@ -192,6 +194,11 @@ struct ScrollToParams {
 
   // Whether to highlight the selected content.
   bool highlight;
+
+  // The document targeted by this operation. When specified, it verifies
+  // that the document in the primary main frame of the currently focused tab
+  // matches the ID (and fails the operation if it doesn't).
+  string? document_id;
 };
 
 // Used to select content in a page to scroll to and highlight.
@@ -236,6 +243,12 @@ enum ScrollToErrorReason {
   // The currently focused tab changed or navigated while processing the
   // ScrollTo() call.
   [MinVersion=1] kFocusedTabChangedOrNavigated,
+
+  // The document_id provided doesn't match the active document in the primary
+  // main frame of the currently focused tab. The document may have been
+  // navigated away, may not currently be in focus, or may not be in a primary
+  // main frame (we don't currently support iframes).
+  [MinVersion=2] kNoMatchingDocument,
 };
 
 // Access to the browser from the web client by proxy through the WebUI.
@@ -263,7 +276,7 @@ interface WebClientHandler {
       => (TabData? tab_data);
 
   // Opens the glic settings page.
-  OpenGlicSettingsPage();
+  OpenGlicSettingsPage(OpenSettingsOptions options);
 
   // Closes the Glic panel.
   ClosePanel();
@@ -299,7 +312,9 @@ interface WebClientHandler {
   // when it's created later.
   ResizeWidget(gfx.mojom.Size size, mojo_base.mojom.TimeDelta duration) => ();
 
-  // Allows the panel hosting the WebUI be manually resizable by user-dragging.
+  // Set whether the panel can be manually resized, or if the panel hasn't been
+  // created yet, whether it should be resizable when created. No effect if the
+  // GlicUserResize feature flag is disabled.
   EnableDragResize(bool enabled);
 
   // Returns the screenshot result or error reason. 'screenshot' is null when an
@@ -481,6 +496,9 @@ struct OpenPanelInfo {
   gfx.mojom.Size? panelSize;
   // Resize animation duration.
   mojo_base.mojom.TimeDelta resizeDuration;
+  // Whether the panel should start out user-resizable. No effect if the GlicUserResize feature
+  // flag is disabled.
+  bool can_user_resize;
 };
 
 // Access from the browser to the Glic web client by proxy of the WebUI page.
@@ -690,27 +708,19 @@ enum WebClientSizingMode {
   kFitWindow,
 };
 
-//
-// TODO(harringtond): Delete these unused enums.
-//
-
+// Fields of interest from the Glic settings page.
 [Stable, Extensible]
-enum InvalidCandidateError {
-  [Default] kUnknown = 0,
-  kUnsupportedUrl = 1,
+enum SettingsPageField {
+  [Default] kNone = 0,
+  // The OS hotkey configuration field.
+  kOsHotkey,
+  // The OS entrypoint enabling field.
+  kOsEntrypointToggle,
 };
 
-[Stable, Extensible]
-enum NoCandidateTabError {
-  [Default] kUnknown = 0,
-  kNoFocusableTabs = 1,
-};
-
-[Stable, Extensible]
-enum GetTabContextErrorReason {
-  [ Default] kUnknown = 0 ,
-  [ MinVersion=1 ] kWebContentsChanged = 1,
-  [ MinVersion=1 ] kPermissionDenied = 2,
-  [ MinVersion=1 ] kUnsupportedUrl = 3,
-  [ MinVersion=1 ] kNoFocusableTabs = 4,
+// Optional parameters for the openGlicSettingsPage function.
+struct OpenSettingsOptions {
+  // Optionally select a field to be highlighted while opening the Glic settings
+  // page.
+  SettingsPageField highlightField;
 };

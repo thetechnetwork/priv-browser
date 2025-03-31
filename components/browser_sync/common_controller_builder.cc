@@ -29,8 +29,8 @@
 #include "components/autofill/core/browser/webdata/payments/autofill_wallet_offer_sync_bridge.h"
 #include "components/autofill/core/browser/webdata/payments/autofill_wallet_sync_bridge.h"
 #include "components/autofill/core/browser/webdata/payments/autofill_wallet_usage_data_sync_bridge.h"
-#include "components/autofill/core/browser/webdata/valuables/loyalty_card_data_type_controller.h"
-#include "components/autofill/core/browser/webdata/valuables/loyalty_card_sync_bridge.h"
+#include "components/autofill/core/browser/webdata/valuables/valuable_data_type_controller.h"
+#include "components/autofill/core/browser/webdata/valuables/valuable_sync_bridge.h"
 #include "components/commerce/core/commerce_feature_list.h"
 #include "components/commerce/core/product_specifications/product_specifications_service.h"
 #include "components/consent_auditor/consent_auditor.h"
@@ -112,7 +112,7 @@ AutocompleteDelegateFromDataService(autofill::AutofillWebDataService* service) {
 base::WeakPtr<syncer::DataTypeControllerDelegate>
 AutofillLoyaltyCardDelegateFromDataService(
     autofill::AutofillWebDataService* service) {
-  return autofill::LoyaltyCardSyncBridge::FromWebDataService(service)
+  return autofill::ValuableSyncBridge::FromWebDataService(service)
       ->change_processor()
       ->GetControllerDelegate();
 }
@@ -764,13 +764,8 @@ CommonControllerBuilder::Build(syncer::DataTypeSet disabled_types,
             delegate)));
   }
 
-  // TODO(crbug.com/381505059): Check if the collab service status should be
-  // used.
   bool data_sharing_enabled =
-      base::FeatureList::IsEnabled(
-          data_sharing::features::kDataSharingFeature) ||
-      base::FeatureList::IsEnabled(
-          data_sharing::features::kDataSharingJoinOnly);
+      data_sharing::features::IsDataSharingFunctionalityEnabled();
   if (!disabled_types.Has(syncer::SHARED_TAB_GROUP_DATA) &&
       tab_group_sync_service_.value() && data_sharing_enabled) {
     syncer::DataTypeControllerDelegate* delegate =
@@ -891,7 +886,7 @@ CommonControllerBuilder::Build(syncer::DataTypeSet disabled_types,
   if (!disabled_types.Has(syncer::AUTOFILL_LOYALTY_CARD) &&
       base::FeatureList::IsEnabled(syncer::kSyncAutofillLoyaltyCard)) {
     controllers.push_back(
-        std::make_unique<autofill::AutofillLoyaltyCardDataTypeController>(
+        std::make_unique<autofill::AutofillValuableDataTypeController>(
             syncer::AUTOFILL_LOYALTY_CARD,
             std::make_unique<syncer::ProxyDataTypeControllerDelegate>(
                 account_autofill_web_data_service_.value()->GetDBTaskRunner(),
@@ -925,8 +920,6 @@ CommonControllerBuilder::Build(syncer::DataTypeSet disabled_types,
             std::make_unique<syncer::ForwardingDataTypeControllerDelegate>(
                 delegate),
             sync_service, identity_manager_.value()));
-
-    // In CLs #5, #6, ..., implement the bridge and keep adding unit tests.
   }
 
 #if !BUILDFLAG(IS_ANDROID)

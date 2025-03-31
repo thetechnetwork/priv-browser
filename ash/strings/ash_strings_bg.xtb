@@ -91,6 +91,7 @@
 <translation id="1269405891096105529">Периферното устройство не се поддържа в режим на гост</translation>
 <translation id="1270290102613614947">Екранната клавиатура е деактивирана</translation>
 <translation id="1272079795634619415">Стоп</translation>
+<translation id="12741168609094094">Изберете нещо на екрана, за да търсите, копирате текст и др.</translation>
 <translation id="1275285675049378717">Захранва се <ph name="POWER_SOURCE" /></translation>
 <translation id="1275718070701477396">Избрано</translation>
 <translation id="1276975447697633661">Изберете файла и натиснете <ph name="KEY" /></translation>
@@ -149,6 +150,7 @@
 <translation id="1455242230282523554">Показване на езиковите настройки</translation>
 <translation id="1459693405370120464">Времето</translation>
 <translation id="1460620680449458626">Звукът е спрян.</translation>
+<translation id="1462439140224375968">Създаден е документ в Google Документи</translation>
 <translation id="14648076227129703">Това разрешава достъп до камерата за <ph name="APP1_NAME" />, <ph name="APP2_NAME" /> и всички приложения и уебсайтове, които имат съответното разрешение</translation>
 <translation id="1467432559032391204">Наляво</translation>
 <translation id="146902737843070955">Администраторът ви заяви тази промяна</translation>
@@ -226,6 +228,7 @@
 <translation id="1720230731642245863">Точката за достъп е изключена</translation>
 <translation id="1731815243805539470">Превключване към предишния потребител</translation>
 <translation id="1733996486177697563">Превключвайте между тъмната и светлата тема. Докоснете и задръжте работния плот, след което изберете „Тапет и стил“.</translation>
+<translation id="1735992454301033090">Избрана област, използвайте клавишите със стрелки, за да я преместите</translation>
 <translation id="1736898441010944794">Устройството <ph name="NAME" /> е видимо за устройства с Bluetooth.</translation>
 <translation id="1737078180382804488">Отхвърляне на настройването на прегледа на известията на телефона ви</translation>
 <translation id="174102739345480129">Маркерът е изключен.</translation>
@@ -493,6 +496,7 @@
 <translation id="2683887737780133806"><ph name="DAY_OF_WEEK" /> миналата седмица</translation>
 <translation id="2687510499067466116">Клавишната комбинация е променена</translation>
 <translation id="2689613560355655046">Работен кът 8</translation>
+<translation id="2692092709110488417">Натиснете Tab, за да поставите фокуса върху избраната област и да я преместите</translation>
 <translation id="2695305337569143674">мрежа</translation>
 <translation id="2697697418792422688">Показване на настройките на клавиатурата. Избрахте <ph name="KEYBOARD_NAME" />.</translation>
 <translation id="2699913284398121653">Използвайте приложението „Прехвърляне на съдържание“, за да преместите в личния си профил данните от училищния</translation>
@@ -550,6 +554,7 @@
 <translation id="2872353916818027657">Размяна на основния монитор</translation>
 <translation id="2872961005593481000">Изключване</translation>
 <translation id="2876338922445400217">Приближаване на екрана</translation>
+<translation id="2876760662374103627">Управлението с лице е активно</translation>
 <translation id="2878884018241093801">Няма скорошни елементи</translation>
 <translation id="2880541185262491188">Твърде много опити за въвеждане на ПИН кода. Изчакайте <ph name="TIME_LEFT" /> и опитайте отново</translation>
 <translation id="2883271196820422439">Възобвяване на функцията за клавиши за мишката</translation>
@@ -593,6 +598,7 @@
 <translation id="301584155502740476">Показване на подробностите за точката за достъп. Тя е изключена.</translation>
 <translation id="3017079585324758401">Фон</translation>
 <translation id="3018135054368884502">Превъртане напред на мултимедия</translation>
+<translation id="3026897869154397692">Добавено към календара</translation>
 <translation id="3033545621352269033">Включено</translation>
 <translation id="3033912566804961911">Комбиниране с(ъс) <ph name="DESK_NAME" /></translation>
 <translation id="3036649622769666520">Отваряне на файлове</translation>
@@ -726,6 +732,7 @@
 <translation id="346243998268439747">Повторно задаване на мащаба на страницата</translation>
 <translation id="3465223694362104965">След последното ви влизане в профила на това устройство към него е свързана друга клавиатура. Преди да я използвате, проверете дали й имате доверие.</translation>
 <translation id="3465356146291925647">Управлява се от администратора ви</translation>
+<translation id="3470502288861289375">Копира се...</translation>
 <translation id="347117769229524881"><ph name="MODIFIER_ONE" /> + <ph name="MODIFIER_TWO" /> + <ph name="KEY_ONE" />, след което <ph name="KEY_TWO" /> или <ph name="KEY_THREE" /></translation>
 <translation id="3477079411857374384">Control-Shift-Space</translation>
 <translation id="3485319357743610354"><ph name="SECURITY_STATUS" />, <ph name="CONNECTION_STATUS" />, сила на сигнала <ph name="SIGNAL_STRENGTH" /></translation>
@@ -1012,6 +1019,7 @@
 <translation id="4351244548802238354">Затваряне на диалоговия прозорец</translation>
 <translation id="4356872429719185452">Показване на подробностите за точката за достъп. Точката за достъп се включва.</translation>
 <translation id="4364101114148522660">Запис: <ph name="DURATION" /></translation>
+<translation id="4368227575116094370">Създаване на таблица в Google Таблици</translation>
 <translation id="4371348193907997655">Настройки за предаване</translation>
 <translation id="4371834685492830207">ПИН кодът трябва да съдържа само валидни знаци</translation>
 <translation id="4375482231364171368">Търсене в адресната лента</translation>
@@ -1029,6 +1037,7 @@
 <translation id="4412698727486357573">Помощен център</translation>
 <translation id="4412944820643904175">„<ph name="FEATURE_NAME" />“ е изключено.</translation>
 <translation id="4417647906073317561">Настройки за режима за концентрация. Задайте таймер, задача и музика, за да се фокусирате.</translation>
+<translation id="4418600384772451109">Затваряне на панела</translation>
 <translation id="4424159417645388645">Работен кът 5</translation>
 <translation id="4426817706804363424">Отлично!</translation>
 <translation id="4430019312045809116">Звук</translation>
@@ -1481,6 +1490,7 @@
 <translation id="5825969630400862129">Настройки за свързани устройства</translation>
 <translation id="5830180081891717894">Още <ph name="WINDOWS" /></translation>
 <translation id="5837036133683224804">Спиране на предаването на <ph name="ROUTE_TITLE" /> към „<ph name="RECEIVER_NAME" />“</translation>
+<translation id="5840658767386246331">Търсене с Google</translation>
 <translation id="5841296711770970362">Към следващия запис</translation>
 <translation id="5842553299352339114">Точката за достъп от <ph name="DEVICE_NAME" /> е включена – няма свързани устройства</translation>
 <translation id="584525477304726060">Задръжте за увеличаване</translation>
@@ -1512,6 +1522,7 @@
 <translation id="595202126637698455">Проследяването на ефективността е активирано</translation>
 <translation id="5955304353782037793">приложение</translation>
 <translation id="5958529069007801266">Контролиран потребител</translation>
+<translation id="596035801491797438">Изключване на управлението с лице</translation>
 <translation id="5960410286721553511">Преглед на скорошните снимки и мултимедийни файлове на телефона ви</translation>
 <translation id="5965524703725988602">Превключване на тъмната тема. <ph name="STATE_TEXT" />.</translation>
 <translation id="5975235751479998104">Циклично придвижване напред през прозорците</translation>
@@ -1894,6 +1905,7 @@
 <translation id="7228968829656641943">Изберете за търсене на екрана ми. Натиснете Tab и след това клавиша за интервал за навигиране с клавиатурата.</translation>
 <translation id="7229029500464092426">Използвана памет: <ph name="AVAILABLE_MEMORY" /> | общо: <ph name="TOTAL_MEMORY" /></translation>
 <translation id="7239814253344511868">И двата бутона на мишката</translation>
+<translation id="7240636904654154599">Създадена е таблица в Google Таблици</translation>
 <translation id="7244725679040769470">Оставащият заряд на батерията е <ph name="PERCENTAGE" />%. Включете устройството си в захранването.</translation>
 <translation id="7246071203293827765"><ph name="UPDATE_TEXT" />. Този Chromebook трябва да бъде рестартиран, за да се приложи актуализация. Това може да отнеме до минута.</translation>
 <translation id="7256057185598509352">ExpressKey 2</translation>
@@ -2222,6 +2234,7 @@
 <translation id="8287009018010202411">Продуктивност</translation>
 <translation id="828708037801473432">Изключено</translation>
 <translation id="8297006494302853456">Слаб</translation>
+<translation id="8300451473979404345">Избран манипулатор, използвайте клавишите със стрелки, за да го преместите</translation>
 <translation id="8308637677604853869">Предишно меню</translation>
 <translation id="830868413617744215">Бета</translation>
 <translation id="8314772463905284467">„Caps Lock“ е включен</translation>
@@ -2282,6 +2295,7 @@
 <translation id="851458219935658693">Показват се прозорците от текущия работен кът, активиран е бутон за избор</translation>
 <translation id="851660987304951246">Използвайте функцията за помощ при четене с цел бързо обобщаване на съдържание или задаване на въпроси</translation>
 <translation id="8517041960877371778">Възможно е вашият <ph name="DEVICE_TYPE" /> да не се зарежда, докато е включен.</translation>
+<translation id="8519329096920173967">Търсене в екрана ми с Google Обектив</translation>
 <translation id="8535393432370007982">Отмяна на сортирането по цвят</translation>
 <translation id="8536886494750559755">Показване на настройките за „Бързо споделяне“. Устройството е видимо за всички в продължение на <ph name="TIME_REMAINING" /></translation>
 <translation id="8539803091108018926">Текстът е копиран в буферната памет</translation>
@@ -2404,6 +2418,7 @@
 <translation id="8921624153894383499">Google Асистент не поддържа този език.</translation>
 <translation id="8926951137623668982">Лавицата е винаги скрита</translation>
 <translation id="8929566928381252430">Опитвате се да използвате клавиша Caps Lock? Натиснете</translation>
+<translation id="8929623844713377237">Създаден е контакт</translation>
 <translation id="8934418770423095813">Създаване на документ в Google Документи</translation>
 <translation id="8934926665751933910">{NUM_FILES,plural, =1{1 файл}other{# файла}}</translation>
 <translation id="8936501819958976551">деактивирана</translation>

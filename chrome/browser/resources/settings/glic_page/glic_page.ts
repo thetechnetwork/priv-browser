@@ -57,11 +57,6 @@ export class SettingsGlicPageElement extends SettingsGlicPageElementBase {
 
   static get properties() {
     return {
-      prefs: {
-        type: Object,
-        notify: true,
-      },
-
       registeredShortcut_: {
         type: String,
         value: '',
@@ -133,8 +128,9 @@ export class SettingsGlicPageElement extends SettingsGlicPageElementBase {
   private onLauncherToggleChange_(event: Event) {
     const enabled = (event.target as SettingsToggleButtonElement).checked;
     this.browserProxy_.setGlicOsLauncherEnabled(enabled);
-    this.metricsBrowserProxy_.recordBooleanHistogram(
-        'Glic.OsEntrypoint.Settings.Toggle', enabled);
+    this.metricsBrowserProxy_.recordAction(
+        'Glic.OsEntrypoint.Settings.Toggle' +
+        (enabled ? '.Enabled' : '.Disabled'));
     this.hideHelpBubble(OS_WIDGET_TOGGLE_ELEMENT_ID);
   }
 
@@ -165,13 +161,17 @@ export class SettingsGlicPageElement extends SettingsGlicPageElementBase {
 
   // Records whether the shortcut enablement state transitioned from disabled to
   // enabled or vice versa.
+  // TODO(crbug.com/406848612): Record these in the browser process instead.
   private recordShortcutEnablement() {
-    if (!!this.shortcutInput_ && !this.removedShortcut_) {
+    if (this.shortcutInput_ && !this.removedShortcut_) {
       this.metricsBrowserProxy_.recordAction(
           'GlicOsEntrypoint.Settings.ShortcutEnabled');
     } else if (!this.shortcutInput_ && this.removedShortcut_) {
       this.metricsBrowserProxy_.recordAction(
           'GlicOsEntrypoint.Settings.ShortcutDisabled');
+    } else {
+      this.metricsBrowserProxy_.recordAction(
+          'GlicOsEntrypoint.Settings.ShortcutEdited');
     }
   }
 

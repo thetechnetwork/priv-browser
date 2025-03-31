@@ -517,7 +517,6 @@ Google Chrome таны тохируулгыг дахин сэргээх боло
 <translation id="7787950393032327779">Энэхүү профайлыг өөр компьютер дээр (<ph name="HOST_NAME" />) өөр Google Chrome-ийн процесс (<ph name="PROCESS_ID" />) ашиглаж байна. Chrome энэ профайлыг гэмтэхээс хамгаалах үүднээс түгжсэн. Хэрэв та өөр ямар нэгэн процесс энэхүү профайлыг хэрэглэхгүй байгаа талаар итгэлтэй байгаа бол түгжээг гаргаад Chrome-ийг дахин эхлүүл.</translation>
 <translation id="7801699035218095297">Google Chrome нь нууц үгс хуулахыг оролдож байна. Үүнийг зөвшөөрөхийн тулд Windows-н нууц үгээ бичнэ үү.</translation>
 <translation id="7808348361785373670">Кромоос хасах</translation>
-<translation id="782480918904119604">Энэ профайлыг Glic-р ашиглахын тулд Chrome-г нээж, нэвтэрнэ үү</translation>
 <translation id="7825851276765848807">Тодорхой бус шалтгаанаар суурьлуулалт амжилтгүй боллоо. Google Chrome-ыг дахин татаж авна уу.</translation>
 <translation id="7845233973568007926">Суулгасанд баярлалаа. Та <ph name="BUNDLE_NAME" />-г ашиглахаасаа өмнө компьютероо дахин эхлүүлэх ёстой.</translation>
 <translation id="7872446069773932638">Татаж байна... <ph name="SECONDS" /> секунд үлдсэн</translation>
@@ -573,6 +572,7 @@ Google Chrome таны тохируулгыг дахин сэргээх боло
 <translation id="8516431725144212809">Chrome-с тооцоолсон таны сонирхол</translation>
 <translation id="8521348052903287641">mDNS урсгалыг зөвшөөрөх Google Chrome-н дотоод дүрэм.</translation>
 <translation id="852529348814672339">Chrome-г энэ хэлээр үзүүлэх</translation>
+<translation id="8533056045953418157">Google Chrome-г өгөгдмөл PDF үзэгчээрээ тохируулах</translation>
 <translation id="8550334526674375523">Энэ ажлын профайл нь таны хувийн профайлаас бүрэн тусдаа байна.</translation>
 <translation id="8555465886620020932">Үйлчилгээний алдаа: <ph name="SERVICE_ERROR" />.</translation>
 <translation id="856656450041460113">Хэлний жагсаалтаас хайх</translation>

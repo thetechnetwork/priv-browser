@@ -1387,12 +1387,15 @@ This is emitted for two scenarios when a worker may be unregistered:
 </histogram>
 
 <histogram name="Extensions.DeveloperModeStatusEnabled" enum="Boolean"
-    expires_after="2025-04-01">
-  <owner>richche@google.com</owner>
+    expires_after="2026-03-22">
+  <owner>richche@chromium.org</owner>
   <owner>chrome-counter-abuse-alerts@google.com</owner>
   <summary>
     The current developer mode status of the main profile. Recorded for all UMA
     logs at upload time by the ExtensionsMetricsProvider.
+
+    This is also used as the &quot;Extensions Developer Mode Status&quot; filter
+    in the UMA dashboard.
   </summary>
 </histogram>
 
@@ -3823,8 +3826,6 @@ This is emitted for two scenarios when a worker may be unregistered:
   <summary>
     The number of converted user scripts loaded at profile open.
 
-
-
     Histogram is in the process of being removed in favor of its incremented
     version that emits only on profile open for &quot;user&quot; profiles
     (profiles where people can install extensions, specifically profiles that
@@ -3869,8 +3870,6 @@ This is emitted for two scenarios when a worker may be unregistered:
   <owner>rdevlin.cronin@chromium.org</owner>
   <summary>
     The manifest version of each loaded extension.
-
-
 
     Histogram is in the process of being removed in favor of its incremented
     version that emits only on profile open for &quot;user&quot; profiles

@@ -55,15 +55,12 @@ import org.robolectric.Robolectric;
 import org.chromium.base.Callback;
 import org.chromium.base.supplier.ObservableSupplierImpl;
 import org.chromium.base.test.BaseRobolectricTestRunner;
-import org.chromium.base.test.util.Features.DisableFeatures;
-import org.chromium.base.test.util.Features.EnableFeatures;
 import org.chromium.base.test.util.HistogramWatcher;
 import org.chromium.chrome.browser.hub.HubToolbarMediator.HubSearchEntrypoint;
 import org.chromium.chrome.browser.hub.HubToolbarProperties.PaneButtonLookup;
 import org.chromium.chrome.browser.ui.searchactivityutils.SearchActivityClient;
 import org.chromium.chrome.browser.ui.searchactivityutils.SearchActivityClient.IntentBuilder;
 import org.chromium.components.feature_engagement.Tracker;
-import org.chromium.components.omnibox.OmniboxFeatureList;
 import org.chromium.ui.base.DeviceFormFactor;
 import org.chromium.ui.modelutil.PropertyKey;
 import org.chromium.ui.modelutil.PropertyModel;
@@ -74,7 +71,6 @@ import java.util.List;
 
 /** Tests for {@link HubToolbarMediator}. */
 @RunWith(BaseRobolectricTestRunner.class)
-@DisableFeatures(OmniboxFeatureList.ANDROID_HUB_SEARCH)
 public class HubToolbarMediatorUnitTest {
     private static final int NARROW_SCREEN_WIDTH_DP = 300;
     private static final int WIDE_SCREEN_WIDTH_DP = DeviceFormFactor.MINIMUM_TABLET_WIDTH_DP;
@@ -104,7 +100,9 @@ public class HubToolbarMediatorUnitTest {
     private ObservableSupplierImpl<FullButtonData> mActionButtonSupplier;
     private ObservableSupplierImpl<Pane> mFocusedPaneSupplier;
     private ObservableSupplierImpl<DisplayButtonData> mTabSwitcherReferenceButtonDataSupplier1;
-    private ObservableSupplierImpl<Boolean> mHubSearchEnabledStateSupplier;
+    private ObservableSupplierImpl<Boolean> mRegularHubSearchEnabledStateSupplier;
+    private ObservableSupplierImpl<Boolean> mIncognitoHubSearchEnabledStateSupplier;
+    private ObservableSupplierImpl<Boolean> mGroupsHubSearchEnabledStateSupplier;
     private ObservableSupplierImpl<DisplayButtonData>
             mIncognitoTabSwitcherReferenceButtonDataSupplier2;
     private PropertyModel mModel;
@@ -115,7 +113,9 @@ public class HubToolbarMediatorUnitTest {
         mFocusedPaneSupplier = new ObservableSupplierImpl<>();
         mTabSwitcherReferenceButtonDataSupplier1 = new ObservableSupplierImpl<>();
         mIncognitoTabSwitcherReferenceButtonDataSupplier2 = new ObservableSupplierImpl<>();
-        mHubSearchEnabledStateSupplier = new ObservableSupplierImpl<>();
+        mRegularHubSearchEnabledStateSupplier = new ObservableSupplierImpl<>();
+        mIncognitoHubSearchEnabledStateSupplier = new ObservableSupplierImpl<>();
+        mGroupsHubSearchEnabledStateSupplier = new ObservableSupplierImpl<>();
         mFocusedPaneSupplier = new ObservableSupplierImpl<>();
         mModel =
                 new PropertyModel.Builder(HubToolbarProperties.ALL_KEYS)
@@ -138,13 +138,11 @@ public class HubToolbarMediatorUnitTest {
         when(mPaneManager.getPaneForId(PaneId.BOOKMARKS)).thenReturn(mBookmarksPane);
 
         when(mTabSwitcherPane.getHubSearchEnabledStateSupplier())
-                .thenReturn(mHubSearchEnabledStateSupplier);
+                .thenReturn(mRegularHubSearchEnabledStateSupplier);
         when(mIncognitoTabSwitcherPane.getHubSearchEnabledStateSupplier())
-                .thenReturn(mHubSearchEnabledStateSupplier);
+                .thenReturn(mIncognitoHubSearchEnabledStateSupplier);
         when(mTabGroupsPane.getHubSearchEnabledStateSupplier())
-                .thenReturn(mHubSearchEnabledStateSupplier);
-        when(mBookmarksPane.getHubSearchEnabledStateSupplier())
-                .thenReturn(mHubSearchEnabledStateSupplier);
+                .thenReturn(mGroupsHubSearchEnabledStateSupplier);
 
         when(mTabSwitcherPane.getReferenceButtonDataSupplier())
                 .thenReturn(mTabSwitcherReferenceButtonDataSupplier1);
@@ -184,9 +182,8 @@ public class HubToolbarMediatorUnitTest {
 
     @Test
     @SmallTest
-    @EnableFeatures(OmniboxFeatureList.ANDROID_HUB_SEARCH)
     public void testHubSearchEnabledStateSupplier() {
-        assertFalse(mHubSearchEnabledStateSupplier.hasObservers());
+        assertFalse(mRegularHubSearchEnabledStateSupplier.hasObservers());
 
         when(mPaneOrderController.getPaneOrder())
                 .thenReturn(ImmutableSet.of(PaneId.TAB_SWITCHER, PaneId.INCOGNITO_TAB_SWITCHER));
@@ -194,15 +191,38 @@ public class HubToolbarMediatorUnitTest {
         HubToolbarMediator mediator =
                 new HubToolbarMediator(
                         mActivity, mModel, mPaneManager, mTracker, mSearchActivityClient);
-        assertTrue(mHubSearchEnabledStateSupplier.hasObservers());
+        assertTrue(mRegularHubSearchEnabledStateSupplier.hasObservers());
 
-        mHubSearchEnabledStateSupplier.set(false);
+        mRegularHubSearchEnabledStateSupplier.set(false);
         assertFalse(mModel.get(HUB_SEARCH_ENABLED_STATE));
-        mHubSearchEnabledStateSupplier.set(true);
+        mRegularHubSearchEnabledStateSupplier.set(true);
         assertTrue(mModel.get(HUB_SEARCH_ENABLED_STATE));
 
         mediator.destroy();
-        assertFalse(mHubSearchEnabledStateSupplier.hasObservers());
+        assertFalse(mRegularHubSearchEnabledStateSupplier.hasObservers());
+    }
+
+    @Test
+    @SmallTest
+    public void testHubSearchEnabledStateSupplier_TogglePanesIncognitoReauth() {
+        when(mPaneOrderController.getPaneOrder())
+                .thenReturn(ImmutableSet.of(PaneId.TAB_SWITCHER, PaneId.INCOGNITO_TAB_SWITCHER));
+        mFocusedPaneSupplier.set(mTabSwitcherPane);
+        new HubToolbarMediator(mActivity, mModel, mPaneManager, mTracker, mSearchActivityClient);
+
+        // Mimic incognito reauth pending
+        mFocusedPaneSupplier.set(mIncognitoTabSwitcherPane);
+        assertTrue(mModel.get(HUB_SEARCH_ENABLED_STATE));
+
+        // Toggle panes back to the tab switcher
+        mIncognitoHubSearchEnabledStateSupplier.set(false);
+        assertFalse(mModel.get(HUB_SEARCH_ENABLED_STATE));
+        mFocusedPaneSupplier.set(mTabSwitcherPane);
+        assertTrue(mModel.get(HUB_SEARCH_ENABLED_STATE));
+
+        // TOggle panes back to the incognito tab switcher
+        mFocusedPaneSupplier.set(mIncognitoTabSwitcherPane);
+        assertFalse(mModel.get(HUB_SEARCH_ENABLED_STATE));
     }
 
     @Test
@@ -358,8 +378,7 @@ public class HubToolbarMediatorUnitTest {
 
     @Test
     @SmallTest
-    @EnableFeatures(OmniboxFeatureList.ANDROID_HUB_SEARCH)
-    public void testSearchBoxSetup_FlagEnabled() {
+    public void testSearchBoxSetup() {
         when(mTabSwitcherPane.getPaneId()).thenReturn(PaneId.TAB_SWITCHER);
         mFocusedPaneSupplier.set(mTabSwitcherPane);
         new HubToolbarMediator(
@@ -375,8 +394,7 @@ public class HubToolbarMediatorUnitTest {
 
     @Test
     @SmallTest
-    @EnableFeatures(OmniboxFeatureList.ANDROID_HUB_SEARCH)
-    public void testSearchBoxSetup_FlagEnabled_Tablet() {
+    public void testSearchBoxSetup_Tablet() {
         mConfiguration.screenWidthDp = WIDE_SCREEN_WIDTH_DP;
 
         when(mTabSwitcherPane.getPaneId()).thenReturn(PaneId.TAB_SWITCHER);
@@ -389,17 +407,6 @@ public class HubToolbarMediatorUnitTest {
 
     @Test
     @SmallTest
-    @DisableFeatures(OmniboxFeatureList.ANDROID_HUB_SEARCH)
-    public void testSearchBoxSetup_FlagNotEnabled() {
-        new HubToolbarMediator(mActivity, mModel, mPaneManager, mTracker, mSearchActivityClient);
-        assertFalse(mModel.get(SEARCH_BOX_VISIBLE));
-        assertFalse(mModel.get(SEARCH_LOUPE_VISIBLE));
-        assertNull(mModel.get(SEARCH_LISTENER));
-    }
-
-    @Test
-    @SmallTest
-    @EnableFeatures(OmniboxFeatureList.ANDROID_HUB_SEARCH)
     public void testSearchBox_TogglePanesSearchBoxVisibility_Phone() {
         when(mTabSwitcherPane.getPaneId()).thenReturn(PaneId.TAB_SWITCHER);
         mFocusedPaneSupplier.set(mTabSwitcherPane);
@@ -428,7 +435,6 @@ public class HubToolbarMediatorUnitTest {
 
     @Test
     @SmallTest
-    @EnableFeatures(OmniboxFeatureList.ANDROID_HUB_SEARCH)
     public void testSearchBox_TogglePanesSearchBoxVisibility_Tablet() {
         mConfiguration.screenWidthDp = WIDE_SCREEN_WIDTH_DP;
 
@@ -451,7 +457,6 @@ public class HubToolbarMediatorUnitTest {
 
     @Test
     @SmallTest
-    @EnableFeatures(OmniboxFeatureList.ANDROID_HUB_SEARCH)
     public void testSearchBox_ClickListener_Phone() {
         mFocusedPaneSupplier.set(mTabSwitcherPane);
         new HubToolbarMediator(
@@ -487,7 +492,6 @@ public class HubToolbarMediatorUnitTest {
 
     @Test
     @SmallTest
-    @EnableFeatures(OmniboxFeatureList.ANDROID_HUB_SEARCH)
     public void testSearchBox_ClickListener_Tablet() {
         mConfiguration.screenWidthDp = WIDE_SCREEN_WIDTH_DP;
         mFocusedPaneSupplier.set(mTabSwitcherPane);

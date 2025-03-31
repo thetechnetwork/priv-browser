@@ -1676,6 +1676,37 @@ chromium-metrics-reviews@google.com.
   </summary>
 </histogram>
 
+<histogram name="IOS.FirstRun.BestFeatures.MainScreen.Action"
+    enum="IOSBestFeaturesMainScreenActionType" expires_after="2025-10-26">
+  <owner>hiramahmood@google.com</owner>
+  <owner>bling-get-set-up@google.com</owner>
+  <summary>
+    Type of action user took on the initial/main screen of the Best Features
+    Experience in the FRE.
+  </summary>
+</histogram>
+
+<histogram name="IOS.FirstRun.BestFeatures.{FeatureName}.Action"
+    enum="IOSBestFeaturesDetailScreenActionType" expires_after="2025-10-26">
+  <owner>hiramahmood@google.com</owner>
+  <owner>bling-get-set-up@google.com</owner>
+  <summary>
+    Type of action user took on the {FeatureName} detail screen of the Best
+    Features Experience in the FRE.
+  </summary>
+  <token key="FeatureName">
+    <variant name="EnhancedSafeBrowsing" summary="Enhanced Safe Browsing"/>
+    <variant name="Lens"/>
+    <variant name="LockedIncognitoTabs" summary="Locked Incognito Tabs"/>
+    <variant name="PasswordsInOtherApps" summary="Passwords In Other Apps"/>
+    <variant name="PriceTracking" summary="Price Tracking"/>
+    <variant name="SaveAutofillPasswords"
+        summary="Save and Autofill Passwords"/>
+    <variant name="SharePasswords" summary="Share Passwords"/>
+    <variant name="TabGroups" summary="Tab Groups"/>
+  </token>
+</histogram>
+
 <histogram name="IOS.Frame.FirstContentfulPaint.MainFrame" units="ms"
     expires_after="2025-07-27">
   <owner>danieltwhite@chromium.org</owner>
@@ -1803,6 +1834,17 @@ chromium-metrics-reviews@google.com.
     bottom of the page is successfully reached. Pages where toolbars can not be
     collapsed due to size constraints are omitted.
   </summary>
+</histogram>
+
+<histogram name="IOS.Fullscreen.TransitionReason.{Toggle}"
+    enum="FullscreenModeTransitionReason" expires_after="2025-10-31">
+  <owner>alionadangla@chromium.org</owner>
+  <owner>prasanaa@google.com</owner>
+  <summary>The action that leads to {Toggle} fullscreen.</summary>
+  <token key="Toggle">
+    <variant name="Enter" summary="enter"/>
+    <variant name="Exit" summary="exit"/>
+  </token>
 </histogram>
 
 <histogram name="IOS.GoogleOne.Outcome.{EntryPoint}" enum="GoogleOneOutcome"
@@ -4041,6 +4083,42 @@ chromium-metrics-reviews@google.com.
   </summary>
 </histogram>
 
+<histogram name="IOS.ReaderMode.Distiller.Amp"
+    enum="ReaderModeAmpClassification" expires_after="2025-11-24">
+  <owner>fernandex@google.com</owner>
+  <owner>bling-squid-squad@google.com</owner>
+  <summary>
+    Logs the comparison between the distillability of the web page and the type
+    of page (specifically the use of AMP). Sampled on a subset of user page
+    loads based on page load probability configuration which will be dependent
+    on the milestone and channel for iOS.
+  </summary>
+</histogram>
+
+<histogram name="IOS.ReaderMode.Distiller.Latency" units="ms"
+    expires_after="2025-11-24">
+  <owner>fernandex@google.com</owner>
+  <owner>bling-squid-squad@google.com</owner>
+  <summary>
+    Logs the latency of distilling the web page content for Reader Mode from
+    when the JavaScript is executed until the result is processed. Sampled on a
+    subset of user page loads based on page load probability configuration which
+    will be dependent on the milestone and channel for iOS.
+  </summary>
+</histogram>
+
+<histogram name="IOS.ReaderMode.Heuristic.Classification"
+    enum="ReaderModeHeuristicClassification" expires_after="2025-11-24">
+  <owner>fernandex@google.com</owner>
+  <owner>bling-squid-squad@google.com</owner>
+  <summary>
+    Compares the result of the triggering heuristic for Reader Mode with the
+    result from the distillation technique. Sampled on a subset of user page
+    loads based on page load probability configuration which will be dependent
+    on the milestone and channel for iOS.
+  </summary>
+</histogram>
+
 <histogram name="IOS.ReaderMode.Heuristic.Latency" units="ms"
     expires_after="2025-11-24">
   <owner>fernandex@google.com</owner>
@@ -4054,7 +4132,7 @@ chromium-metrics-reviews@google.com.
 </histogram>
 
 <histogram name="IOS.ReaderMode.Heuristic.Result"
-    enum="ReaderModeHeuristicState" expires_after="2025-11-24">
+    enum="ReaderModeHeuristicResult" expires_after="2025-11-24">
   <owner>fernandex@google.com</owner>
   <owner>bling-squid-squad@google.com</owner>
   <summary>

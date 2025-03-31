@@ -1463,10 +1463,6 @@ inline constexpr char kOverscrollHistoryNavigationEnabled[] =
     "settings.a11y.overscroll_history_navigation";
 #endif
 
-// Whether AX tree fixing is enabled.
-inline constexpr char kAccessibilityAXTreeFixingEnabled[] =
-    "settings.a11y.enable_ax_tree_fixing";
-
 // Whether main node annotations are enabled.
 inline constexpr char kAccessibilityMainNodeAnnotationsEnabled[] =
     "settings.a11y.enable_main_node_annotations";
@@ -2111,6 +2107,10 @@ inline constexpr char kTaskManagerWindowPlacement[] =
 // restored on startup.
 inline constexpr char kTaskManagerColumnVisibility[] =
     "task_manager.column_visibility";
+
+// The most recent stored tab in the task manager window to be restored on
+// startup.
+inline constexpr char kTaskManagerCategory[] = "task_manager.category";
 
 // A boolean indicating if ending processes are enabled or disabled by policy.
 inline constexpr char kTaskManagerEndProcessEnabled[] =
@@ -4117,6 +4117,9 @@ inline constexpr char kReadAloudVoiceSettings[] = "readaloud.voices";
 // Double indicating Read Aloud playback speed. Default is 1.0, double speed
 // is 2.0, etc.
 inline constexpr char kReadAloudSpeed[] = "readaloud.speed";
+
+// Integer indicating Read Aloud playback mode (enum). Default is 0 (UNSPECIFIED).
+inline constexpr char kReadAloudPlaybackMode[] = "readaloud.playback_mode";
 
 // Boolean that specifies whether Read Aloud highlights words on the page during
 // playback and scrolls the page to match the playback position.

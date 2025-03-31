@@ -12,7 +12,7 @@ import type {SimplifiedTextLayerElement} from 'chrome-untrusted://lens-overlay/s
 import {WritingDirection} from 'chrome-untrusted://lens-overlay/text.mojom-webui.js';
 import type {TextCopyCallback} from 'chrome-untrusted://lens-overlay/text_layer_base.js';
 import {loadTimeData} from 'chrome-untrusted://resources/js/load_time_data.js';
-import {assertDeepEquals, assertEquals, assertTrue} from 'chrome-untrusted://webui-test/chai_assert.js';
+import {assertDeepEquals, assertEquals, assertFalse, assertTrue} from 'chrome-untrusted://webui-test/chai_assert.js';
 import {flushTasks, waitAfterNextRender} from 'chrome-untrusted://webui-test/polymer_test_util.js';
 import {eventToPromise} from 'chrome-untrusted://webui-test/test_util.js';
 
@@ -138,7 +138,7 @@ suite('SimplifiedSelection', function() {
     translateTextTimeoutFunction();
   }
 
-  async function dispatchDetextTextInRegionEvent() {
+  async function dispatchDetectTextInRegionEvent() {
     const centerRotatedBox = {
       box: {x: 0.2, y: 0.2, width: 0.4, height: 0.4},
       rotation: 0,
@@ -158,7 +158,7 @@ suite('SimplifiedSelection', function() {
 
     const hideSelectedRegionContextMenuEventPromise =
         eventToPromise('hide-selected-region-context-menu', document.body);
-    await dispatchDetextTextInRegionEvent();
+    await dispatchDetectTextInRegionEvent();
     await hideSelectedRegionContextMenuEventPromise;
   });
 
@@ -178,7 +178,7 @@ suite('SimplifiedSelection', function() {
     const showSelectedRegionContextMenuEventPromise =
         eventToPromise('show-selected-region-context-menu', document.body);
 
-    await dispatchDetextTextInRegionEvent();
+    await dispatchDetectTextInRegionEvent();
 
     const showSelectedRegionContextMenuEvent =
         await showSelectedRegionContextMenuEventPromise;
@@ -188,10 +188,42 @@ suite('SimplifiedSelection', function() {
         showSelectedRegionContextMenuEvent.detail.selectionEndIndex, -1);
   });
 
+  test('HasActionedTextResetsAfterNewSelection', async () => {
+    await addEmptyTextToPage(callbackRouterRemote);
+    assertFalse(textLayerElement.getHasActionedTextForTesting());
+
+    // Simulate a new selection being created.
+    textLayerElement.onSelectionStart();
+    textLayerElement.onSelectionFinish();
+    await addGenericWordsToPageNormalized(callbackRouterRemote);
+
+    // Simulate an action.
+    textLayerElement.onCopyDetectedText(/*startIndex=*/ 0,
+                                        /*endIndex=*/ 2,
+                                        /*callback=*/ () => {});
+    assertTrue(textLayerElement.getHasActionedTextForTesting());
+
+    // Simulate another selection being created.
+    textLayerElement.onSelectionStart();
+    assertFalse(textLayerElement.getHasActionedTextForTesting());
+    textLayerElement.onSelectionFinish();
+    await addGenericWordsToPageNormalized(callbackRouterRemote);
+
+    // Simulate an action.
+    textLayerElement.selectAndTranslateWords(/*startIndex=*/ 0,
+                                             /*endIndex=*/ 2);
+    assertTrue(textLayerElement.getHasActionedTextForTesting());
+
+    // Simulate another selection being created.
+    textLayerElement.onSelectionStart();
+    assertFalse(textLayerElement.getHasActionedTextForTesting());
+    textLayerElement.onSelectionFinish();
+  });
+
   test('HideContextMenuTimeoutOngoingNoText', async () => {
     const hideSelectedRegionContextMenuEventPromise =
         eventToPromise('hide-selected-region-context-menu', document.body);
-    await dispatchDetextTextInRegionEvent();
+    await dispatchDetectTextInRegionEvent();
     // If the timeout has not elapsed, the selected region context menu will be
     // called to be hidden instead.
     await hideSelectedRegionContextMenuEventPromise;
@@ -211,7 +243,7 @@ suite('SimplifiedSelection', function() {
         // should be shown without any detected text.
         const showSelectedRegionContextMenuEventPromise =
             eventToPromise('show-selected-region-context-menu', document.body);
-        await dispatchDetextTextInRegionEvent();
+        await dispatchDetectTextInRegionEvent();
         const showSelectedRegionContextMenuEvent =
             await showSelectedRegionContextMenuEventPromise;
         assertEquals(
@@ -248,7 +280,7 @@ suite('SimplifiedSelection', function() {
     // be shown without any detected text.
     const showSelectedRegionContextMenuEventPromise =
         eventToPromise('show-selected-region-context-menu', document.body);
-    await dispatchDetextTextInRegionEvent();
+    await dispatchDetectTextInRegionEvent();
     const showSelectedRegionContextMenuEvent =
         await showSelectedRegionContextMenuEventPromise;
     assertEquals(
@@ -264,7 +296,7 @@ suite('SimplifiedSelection', function() {
     // be shown without any detected text.
     const showSelectedRegionContextMenuEventPromise =
         eventToPromise('show-selected-region-context-menu', document.body);
-    await dispatchDetextTextInRegionEvent();
+    await dispatchDetectTextInRegionEvent();
     const showSelectedRegionContextMenuEvent =
         await showSelectedRegionContextMenuEventPromise;
     assertEquals(
@@ -289,7 +321,7 @@ suite('SimplifiedSelection', function() {
     // be shown without any detected text.
     const showSelectedRegionContextMenuEventPromise =
         eventToPromise('show-selected-region-context-menu', document.body);
-    await dispatchDetextTextInRegionEvent();
+    await dispatchDetectTextInRegionEvent();
     const showSelectedRegionContextMenuEvent =
         await showSelectedRegionContextMenuEventPromise;
     assertEquals(
@@ -348,6 +380,7 @@ suite('SimplifiedSelection', function() {
     assertEquals(expectedStartIndex, 0);
     assertEquals(expectedEndIndex, 2);
     assertEquals(expectedText, 'hello there\r\ntest');
+    assertTrue(textLayerElement.getHasActionedTextForTesting());
   });
 
   test('TranslateRegionWordsFromFullTextResponse', async () => {
@@ -359,6 +392,7 @@ suite('SimplifiedSelection', function() {
     const textQuery = await testBrowserProxy.handler.whenCalled(
         'issueTranslateSelectionRequest');
     assertDeepEquals('hello there test', textQuery);
+    assertTrue(textLayerElement.getHasActionedTextForTesting());
   });
 
   test('TranslateRegionWordsFromRegionTextResponse', async () => {
@@ -372,6 +406,7 @@ suite('SimplifiedSelection', function() {
     const textQuery = await testBrowserProxy.handler.whenCalled(
         'issueTranslateSelectionRequest');
     assertDeepEquals('hello there test', textQuery);
+    assertTrue(textLayerElement.getHasActionedTextForTesting());
   });
 
   test('ShowHighlightedRegionText', async () => {
@@ -415,6 +450,7 @@ suite('SimplifiedSelection', function() {
     assertWithinThreshold(
         (expectedLine2.y - expectedLine2.height / 2),
         secondRect.top / bodyRect.height, threshold);
+    assertFalse(textLayerElement.getHasActionedTextForTesting());
   });
 
   test('NewRegionTextClearsHighlights', async () => {
@@ -528,5 +564,123 @@ suite('SimplifiedSelection', function() {
     assertWithinThreshold(
         (expectedLine2.y - expectedLine2.height / 2),
         secondRect.top / bodyRect.height, threshold);
+  });
+
+  test('IgnoreTextReceivedWhileSelectingRegion', async () => {
+    await addEmptyTextToPage(callbackRouterRemote);
+    // There should no highlighted lines.
+    await waitAfterNextRender(textLayerElement);
+    assertEquals(
+        0,
+        textLayerElement.shadowRoot.querySelectorAll('.highlighted-line')
+            .length);
+
+    // Receiving text mid-selection should not be used.
+    textLayerElement.onSelectionStart();
+    await addGenericWordsToPageNormalized(callbackRouterRemote);
+    textLayerElement.onSelectionFinish();
+
+    // There should still be no highlighted lines.
+    await waitAfterNextRender(textLayerElement);
+    assertEquals(
+        0,
+        textLayerElement.shadowRoot.querySelectorAll('.highlighted-line')
+            .length);
+
+    // Text receievd now should render highlighted lines on the overlay.
+    await addGenericWordsToPageNormalized(callbackRouterRemote);
+    await waitAfterNextRender(textLayerElement);
+    assertEquals(
+        2,
+        textLayerElement.shadowRoot.querySelectorAll('.highlighted-line')
+            .length);
+  });
+
+  test('UpdateContextMenuIfAlreadyShown', async () => {
+    await addEmptyTextToPage(callbackRouterRemote);
+    // Simulate a new selection being created.
+    textLayerElement.onSelectionStart();
+    textLayerElement.onSelectionFinish();
+
+    // Add 3 words to the region text response.
+    await addGenericWordsToPageNormalized(callbackRouterRemote);
+    await waitAfterNextRender(textLayerElement);
+
+    const showSelectedRegionContextMenuEvent =
+        eventToPromise('show-selected-region-context-menu', document.body);
+    await dispatchDetectTextInRegionEvent();
+    await showSelectedRegionContextMenuEvent;
+
+    const updateSelectedRegionContextMenuEventPromise =
+        eventToPromise('update-selected-region-context-menu', document.body);
+    await dispatchDetectTextInRegionEvent();
+    await updateSelectedRegionContextMenuEventPromise;
+
+    // Simulate another selection being created.
+    textLayerElement.onSelectionStart();
+    textLayerElement.onSelectionFinish();
+
+    const showSelectedRegionContextMenuEvent2 =
+        eventToPromise('show-selected-region-context-menu', document.body);
+    await dispatchDetectTextInRegionEvent();
+    await showSelectedRegionContextMenuEvent2;
+  });
+
+  test('ClearAllSelectionsClearsHighlightedLines', async () => {
+    await addEmptyTextToPage(callbackRouterRemote);
+    // Add 3 words to the region text response.
+    await addGenericWordsToPageNormalized(callbackRouterRemote);
+    await waitAfterNextRender(textLayerElement);
+
+    assertFalse(textLayerElement.getHasActionedTextForTesting());
+    assertEquals(
+        2,
+        textLayerElement.shadowRoot.querySelectorAll('.highlighted-line')
+            .length);
+
+    // Simulate an action.
+    textLayerElement.onCopyDetectedText(/*startIndex=*/ 0,
+                                        /*endIndex=*/ 2,
+                                        /*callback=*/ () => {});
+    assertTrue(textLayerElement.getHasActionedTextForTesting());
+
+    callbackRouterRemote.clearAllSelections();
+    await flushTasks();
+    await waitAfterNextRender(textLayerElement);
+
+    assertFalse(textLayerElement.getHasActionedTextForTesting());
+    assertEquals(
+        0,
+        textLayerElement.shadowRoot.querySelectorAll('.highlighted-line')
+            .length);
+  });
+
+  test('ClearRegionSelectionClearsHighlightedLines', async () => {
+    await addEmptyTextToPage(callbackRouterRemote);
+    // Add 3 words to the region text response.
+    await addGenericWordsToPageNormalized(callbackRouterRemote);
+    await waitAfterNextRender(textLayerElement);
+
+    assertFalse(textLayerElement.getHasActionedTextForTesting());
+    assertEquals(
+        2,
+        textLayerElement.shadowRoot.querySelectorAll('.highlighted-line')
+            .length);
+
+    // Simulate an action.
+    textLayerElement.onCopyDetectedText(/*startIndex=*/ 0,
+                                        /*endIndex=*/ 2,
+                                        /*callback=*/ () => {});
+    assertTrue(textLayerElement.getHasActionedTextForTesting());
+
+    callbackRouterRemote.clearRegionSelection();
+    await flushTasks();
+    await waitAfterNextRender(textLayerElement);
+
+    assertFalse(textLayerElement.getHasActionedTextForTesting());
+    assertEquals(
+        0,
+        textLayerElement.shadowRoot.querySelectorAll('.highlighted-line')
+            .length);
   });
 });

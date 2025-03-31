@@ -47,6 +47,7 @@
 #include "chrome/browser/optimization_guide/optimization_guide_keyed_service.h"
 #include "chrome/browser/optimization_guide/optimization_guide_keyed_service_factory.h"
 #include "chrome/browser/platform_util.h"
+#include "chrome/browser/privacy_sandbox/privacy_sandbox_queue_manager.h"
 #include "chrome/browser/privacy_sandbox/privacy_sandbox_service.h"
 #include "chrome/browser/privacy_sandbox/privacy_sandbox_service_factory.h"
 #include "chrome/browser/profiles/profile.h"
@@ -96,6 +97,8 @@
 #include "chrome/browser/ui/tabs/tab_utils.h"
 #include "chrome/browser/ui/toolbar/app_menu_model.h"
 #include "chrome/browser/ui/toolbar/chrome_labs/chrome_labs_utils.h"
+#include "chrome/browser/ui/toolbar/pinned_toolbar/tab_search_toolbar_button_controller.h"
+#include "chrome/browser/ui/toolbar/toolbar_pref_names.h"
 #include "chrome/browser/ui/ui_features.h"
 #include "chrome/browser/ui/user_education/browser_user_education_interface.h"
 #include "chrome/browser/ui/view_ids.h"
@@ -977,8 +980,8 @@ BrowserView::BrowserView(std::unique_ptr<Browser> browser)
 #if !BUILDFLAG(IS_ANDROID)
   if (auto* privacy_sandbox_service =
           PrivacySandboxServiceFactory::GetForProfile(browser_->profile())) {
-    privacy_sandbox_service->MaybeQueueNotice(
-        PrivacySandboxService::NoticeQueueState::kQueueOnStartup);
+    privacy_sandbox_service->GetPrivacySandboxNoticeQueueManager()
+        .MaybeQueueNotice();
   }
 #endif  // !BUILDFLAG(IS_ANDROID)
 
@@ -1167,6 +1170,15 @@ BrowserView::~BrowserView() {
   // other cleanups that destroy views referenced in the layout manager.
   SetLayoutManager(nullptr);
 
+  auto* tab_search_toolbar_button_controller =
+      browser_->GetFeatures().tab_search_toolbar_button_controller();
+  if (tab_search_toolbar_button_controller) {
+    tab_search_bubble_host_->RemoveObserver(
+        tab_search_toolbar_button_controller);
+  }
+
+  tab_search_bubble_host_.reset();
+
   // Destroy the top controls slide controller first as it depends on the
   // tabstrip model and the browser frame.
   top_controls_slide_controller_.reset();
@@ -1336,10 +1348,7 @@ bool BrowserView::UsesImmersiveFullscreenTabbedMode() const {
 #endif
 
 TabSearchBubbleHost* BrowserView::GetTabSearchBubbleHost() {
-  if (auto* tab_search_button = tab_strip_region_view_->GetTabSearchButton()) {
-    return tab_search_button->tab_search_bubble_host();
-  }
-  return nullptr;
+  return tab_search_bubble_host_.get();
 }
 
 bool BrowserView::GetTabStripVisible() const {
@@ -1471,13 +1480,18 @@ int BrowserView::GetInactiveSplitTabIndex() {
   // TODO(crbug.com/392951786): Use the Collections API for accessing the tabs
   // in a split view, rather than searching by index.
   int active_index = browser_->tab_strip_model()->active_index();
+  std::optional<split_tabs::SplitTabId> active_split_id =
+      browser_->tab_strip_model()->GetTabAtIndex(active_index)->GetSplit();
   const std::vector<int> potential_split_indices = {active_index - 1,
                                                     active_index + 1};
   for (int index : potential_split_indices) {
     if (index < 0 || index >= browser_->tab_strip_model()->GetTabCount()) {
       continue;
     }
-    if (browser_->tab_strip_model()->GetTabAtIndex(index)->IsSplit()) {
+    auto* potential_split_tab =
+        browser_->tab_strip_model()->GetTabAtIndex(index);
+    if (potential_split_tab->IsSplit() &&
+        potential_split_tab->GetSplit() == active_split_id) {
       return index;
     }
   }
@@ -3164,6 +3178,20 @@ void BrowserView::MaybeShowExperimentalAIIPH() {
   }
 }
 
+void BrowserView::MaybeShowTabStripToolbarButtonIPH() {
+  if (!browser()->is_type_normal()) {
+    return;
+  }
+  bool should_show =
+      features::HasTabSearchToolbarButton() &&
+      toolbar_->pinned_toolbar_actions_container()->IsActionPinned(
+          kActionTabSearch);
+  if (should_show) {
+    MaybeShowFeaturePromo(
+        feature_engagement::kIPHTabSearchToolbarButtonFeature);
+  }
+}
+
 void BrowserView::DestroyBrowser() {
   // After this returns other parts of Chrome are going to be shutdown. Close
   // the window now so that we are deleted immediately and aren't left holding
@@ -3777,6 +3805,20 @@ void BrowserView::OnSplitTabCreated(
       browser_->tab_strip_model()->GetActiveTab();
   if (active_tab->IsSplit()) {
     ShowSplitView();
+  }
+}
+
+void BrowserView::OnSplitTabRemoved(
+    std::vector<std::pair<tabs::TabInterface*, int>> tabs,
+    split_tabs::SplitTabId split_id,
+    SplitTabRemoveReason reason) {
+  const bool is_split_active = std::any_of(
+      tabs.begin(), tabs.end(), [](std::pair<tabs::TabInterface*, int>& tab) {
+        return tab.first->IsActivated();
+      });
+
+  if (is_split_active) {
+    HideSplitView();
   }
 }
 
@@ -5027,6 +5069,20 @@ void BrowserView::AddedToWidget() {
 
   toolbar_->Init();
 
+  if (GetIsNormalType()) {
+    if (features::HasTabSearchToolbarButton()) {
+      tab_search_bubble_host_ = std::make_unique<TabSearchBubbleHost>(
+          toolbar_->tab_search_button(), browser_.get(),
+          tabstrip_->AsWeakPtr());
+      tab_search_bubble_host_->AddObserver(
+          browser_->GetFeatures().tab_search_toolbar_button_controller());
+    } else {
+      tab_search_bubble_host_ = std::make_unique<TabSearchBubbleHost>(
+          tab_strip_region_view_->GetTabSearchButton(), browser_.get(),
+          tabstrip_->AsWeakPtr());
+    }
+  }
+
   // TODO(pbos): Investigate whether the side panels should be creatable when
   // the ToolbarView does not create a button for them. This specifically seems
   // to hit web apps. See https://crbug.com/1267781.
@@ -5088,6 +5144,7 @@ void BrowserView::AddedToWidget() {
 
   MaybeInitializeWebUITabStrip();
   MaybeShowWebUITabStripIPH();
+  MaybeShowTabStripToolbarButtonIPH();
 
   // Want to show this promo, but not right at startup.
   base::SequencedTaskRunner::GetCurrentDefault()->PostDelayedTask(

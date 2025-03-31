@@ -62,6 +62,8 @@ import org.chromium.ui.dragdrop.DragDropMetricUtils.DragDropType;
 import org.chromium.ui.util.XrUtils;
 import org.chromium.ui.widget.Toast;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -219,6 +221,7 @@ public class TabDragSource implements View.OnDragListener {
      *
      * @param dragSourceView View used to create the drag shadow.
      * @param tabGroupId The dragged group's ID.
+     * @param isGroupShared Whether the dragged group is shared with other collaborators.
      * @param startPoint Position of the drag start point in view coordinates.
      * @param positionX The horizontal position of the dragged group title in view coordinates.
      * @param widthDp Width of the group title in dp.
@@ -227,6 +230,7 @@ public class TabDragSource implements View.OnDragListener {
     public boolean startGroupDragAction(
             @NonNull View dragSourceView,
             @NonNull Token tabGroupId,
+            boolean isGroupShared,
             @NonNull PointF startPoint,
             float positionX,
             float widthDp) {
@@ -244,7 +248,6 @@ public class TabDragSource implements View.OnDragListener {
 
         // TODO(crbug.com/380327012): Block drag for last group when homepage enabled and is set to
         //  a custom url.
-
         // Allow drag to create new instance based on feature checks / current instance count.
         allowDragToCreateInstance =
                 allowDragToCreateInstance
@@ -257,7 +260,7 @@ public class TabDragSource implements View.OnDragListener {
         int windowId = TabWindowManagerSingleton.getInstance().getIdForWindow(getActivity());
         TabGroupMetadata metadata =
                 TabGroupMetadataExtractor.extractTabGroupMetadata(
-                        groupedTabs, windowId, mTabModelSelector.getCurrentTabId());
+                        groupedTabs, windowId, mTabModelSelector.getCurrentTabId(), isGroupShared);
 
         // Build shared state with all info.
         ChromeDropDataAndroid dropData =
@@ -514,7 +517,10 @@ public class TabDragSource implements View.OnDragListener {
             // Reparent tab at drop index and merge to group on destination if needed.
             int tabIndex = helper.getTabIndexForTabDrop(dropEvent.getX() * mPxToDp);
             mMultiInstanceManager.moveTabToWindow(getActivity(), tabBeingDragged, tabIndex);
-            helper.maybeMergeToGroupOnDrop(tabBeingDragged.getId(), tabIndex);
+            helper.maybeMergeToGroupOnDrop(
+                    Collections.singletonList(tabBeingDragged.getId()),
+                    tabIndex,
+                    /* isCollapsed= */ false);
         }
         DragDropMetricUtils.recordTabDragDropType(
                 DragDropType.TAB_STRIP_TO_TAB_STRIP,
@@ -532,6 +538,12 @@ public class TabDragSource implements View.OnDragListener {
         if (tabGroupMetadata == null) {
             return false;
         }
+
+        if (disallowDragWithMhtmlTab(
+                mWindowAndroid.getContext().get(), tabGroupMetadata.mhtmlTabTitle)) {
+            return false;
+        }
+
         boolean tabGroupDraggedBelongToCurrentModel =
                 doesBelongToCurrentModel(tabGroupMetadata.isIncognito);
 
@@ -540,13 +552,25 @@ public class TabDragSource implements View.OnDragListener {
             mMultiInstanceManager.moveTabGroupToWindow(
                     getActivity(),
                     tabGroupMetadata,
-                    mTabModelSelector.getModel(tabGroupMetadata.isIncognito).getCount());
+                    mTabModelSelector.getModel(tabGroupMetadata.isIncognito).getCount(),
+                    /* onFinishedRunnable= */ null);
             showDroppedDifferentModelToast(mWindowAndroid.getContext().get());
         } else {
             // Reparent tab group at drop index and merge to group on destination if needed.
-            // TODO(crbug.com/384978938) Handle merge to group.
             int tabIndex = helper.getTabIndexForTabDrop(dropEvent.getX() * mPxToDp);
-            mMultiInstanceManager.moveTabGroupToWindow(getActivity(), tabGroupMetadata, tabIndex);
+            ArrayList<Integer> tabIds = new ArrayList<>(tabGroupMetadata.tabIdsToUrls.keySet());
+
+            // Do not merge a collaboration group into another group.
+            @Nullable Runnable maybeMergeToGroupOnDrop = null;
+            if (!tabGroupMetadata.isGroupShared) {
+                maybeMergeToGroupOnDrop =
+                        () -> {
+                            helper.maybeMergeToGroupOnDrop(
+                                    tabIds, tabIndex, tabGroupMetadata.tabGroupCollapsed);
+                        };
+            }
+            mMultiInstanceManager.moveTabGroupToWindow(
+                    getActivity(), tabGroupMetadata, tabIndex, maybeMergeToGroupOnDrop);
         }
         return true;
     }
@@ -695,6 +719,22 @@ public class TabDragSource implements View.OnDragListener {
         Toast.makeText(context, R.string.tab_dropped_different_model, Toast.LENGTH_LONG).show();
     }
 
+    /**
+     * Checks if the dragged group contains an MHTML tab (identified via a non-null tab title) and
+     * shows a toast message to inform the user that the tab cannot be moved.
+     *
+     * @param context The context to use for showing the toast.
+     * @param tabTitle The title of the tab that cannot be moved. If null, no toast is shown.
+     * @return {@code true} if the toast was shown, {@code false} otherwise.
+     */
+    // TODO(crbug.com/384979079): Record metrics.
+    private boolean disallowDragWithMhtmlTab(Context context, @Nullable String tabTitle) {
+        if (tabTitle == null) return false;
+        String text = context.getString(R.string.tab_cannot_be_moved, tabTitle);
+        Toast.makeText(context, text, Toast.LENGTH_LONG).show();
+        return true;
+    }
+
     private boolean doesBelongToCurrentModel(boolean draggedIncognito) {
         return mTabModelSelector.getCurrentModel().isIncognitoBranded() == draggedIncognito;
     }
@@ -781,7 +821,7 @@ public class TabDragSource implements View.OnDragListener {
         int groupSize = mCurrentTabGroupModelFilterSupplier.get().getTabCountForGroup(groupId);
 
         return mTabModelSelector.getTotalTabCount() > groupSize
-                && TabUiFeatureUtilities.doesOemSupportDragToCreateInstance();
+                && TabUiFeatureUtilities.isTabDragToCreateInstanceSupported();
     }
 
     private boolean shouldAllowTabDragToCreateInstance() {

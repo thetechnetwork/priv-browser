@@ -2,132 +2,12 @@ This test documents all interface attributes and methods on the global window ob
 [INTERFACES]
 interface AI
     attribute @@toStringTag
-    getter languageDetector
-    getter languageModel
-    getter rewriter
-    getter summarizer
-    getter translator
-    getter writer
     method constructor
 interface AICreateMonitor : EventTarget
     attribute @@toStringTag
     getter ondownloadprogress
     method constructor
     setter ondownloadprogress
-interface AILanguageDetector
-    attribute @@toStringTag
-    getter inputQuota
-    method constructor
-    method destroy
-    method detect
-    method measureInputUsage
-interface AILanguageDetectorFactory
-    attribute @@toStringTag
-    method availability
-    method constructor
-    method create
-interface AILanguageModel : EventTarget
-    attribute @@toStringTag
-    getter inputQuota
-    getter inputUsage
-    getter onquotaoverflow
-    getter temperature
-    getter topK
-    method clone
-    method constructor
-    method destroy
-    method measureInputUsage
-    method prompt
-    method promptStreaming
-    setter onquotaoverflow
-interface AILanguageModelFactory
-    attribute @@toStringTag
-    method availability
-    method constructor
-    method create
-    method params
-interface AILanguageModelParams
-    attribute @@toStringTag
-    getter defaultTemperature
-    getter defaultTopK
-    getter maxTemperature
-    getter maxTopK
-    method constructor
-interface AIRewriter
-    attribute @@toStringTag
-    getter expectedContextLanguages
-    getter expectedInputLanguages
-    getter format
-    getter inputQuota
-    getter length
-    getter outputLanguage
-    getter sharedContext
-    getter tone
-    method constructor
-    method destroy
-    method measureInputUsage
-    method rewrite
-    method rewriteStreaming
-interface AIRewriterFactory
-    attribute @@toStringTag
-    method availability
-    method constructor
-    method create
-interface AISummarizer
-    attribute @@toStringTag
-    getter expectedContextLanguages
-    getter expectedInputLanguages
-    getter format
-    getter inputQuota
-    getter length
-    getter outputLanguage
-    getter sharedContext
-    getter type
-    method constructor
-    method destroy
-    method measureInputUsage
-    method summarize
-    method summarizeStreaming
-interface AISummarizerFactory
-    attribute @@toStringTag
-    method availability
-    method constructor
-    method create
-interface AITranslator
-    attribute @@toStringTag
-    getter inputQuota
-    getter sourceLanguage
-    getter targetLanguage
-    method constructor
-    method destroy
-    method measureInputUsage
-    method translate
-    method translateStreaming
-interface AITranslatorFactory
-    attribute @@toStringTag
-    method availability
-    method constructor
-    method create
-interface AIWriter
-    attribute @@toStringTag
-    getter expectedContextLanguages
-    getter expectedInputLanguages
-    getter format
-    getter inputQuota
-    getter length
-    getter outputLanguage
-    getter sharedContext
-    getter tone
-    method constructor
-    method destroy
-    method measureInputUsage
-    method write
-    method writeStreaming
-interface AIWriterFactory
-    attribute @@toStringTag
-    method availability
-    method constructor
-    method create
 interface AbortController
     attribute @@toStringTag
     getter signal
@@ -5598,6 +5478,46 @@ interface KeyframeEffect : AnimationEffect
     setter composite
     setter pseudoElement
     setter target
+interface LanguageDetector
+    static method availability
+    static method create
+    attribute @@toStringTag
+    getter expectedInputLanguages
+    getter inputQuota
+    method constructor
+    method destroy
+    method detect
+    method measureInputUsage
+interface LanguageModel : EventTarget
+    static method availability
+    static method create
+    static method params
+    attribute @@toStringTag
+    getter inputQuota
+    getter inputUsage
+    getter onquotaoverflow
+    getter temperature
+    getter topK
+    method clone
+    method constructor
+    method destroy
+    method measureInputUsage
+    method prompt
+    method promptStreaming
+    setter onquotaoverflow
+interface LanguageModelFactory
+    attribute @@toStringTag
+    method availability
+    method constructor
+    method create
+    method params
+interface LanguageModelParams
+    attribute @@toStringTag
+    getter defaultTemperature
+    getter defaultTopK
+    getter maxTemperature
+    getter maxTopK
+    method constructor
 interface LargestContentfulPaint : PerformanceEntry
     attribute @@toStringTag
     getter element
@@ -6401,10 +6321,8 @@ interface NavigateEvent : Event
     getter signal
     getter sourceElement
     getter userInitiated
-    method commit
     method constructor
     method intercept
-    method redirect
     method scroll
 interface Navigation : EventTarget
     attribute @@toStringTag
@@ -6460,6 +6378,10 @@ interface NavigationHistoryEntry : EventTarget
     method constructor
     method getState
     setter ondispose
+interface NavigationPrecommitController
+    attribute @@toStringTag
+    method constructor
+    method redirect
 interface NavigationPreloadManager
     attribute @@toStringTag
     method constructor
@@ -7754,6 +7676,23 @@ interface Response
     method formData
     method json
     method text
+interface Rewriter
+    static method availability
+    static method create
+    attribute @@toStringTag
+    getter expectedContextLanguages
+    getter expectedInputLanguages
+    getter format
+    getter inputQuota
+    getter length
+    getter outputLanguage
+    getter sharedContext
+    getter tone
+    method constructor
+    method destroy
+    method measureInputUsage
+    method rewrite
+    method rewriteStreaming
 interface SVGAElement : SVGGraphicsElement
     attribute @@toStringTag
     getter href
@@ -9352,6 +9291,23 @@ interface SubtleCrypto
     method unwrapKey
     method verify
     method wrapKey
+interface Summarizer
+    static method availability
+    static method create
+    attribute @@toStringTag
+    getter expectedContextLanguages
+    getter expectedInputLanguages
+    getter format
+    getter inputQuota
+    getter length
+    getter outputLanguage
+    getter sharedContext
+    getter type
+    method constructor
+    method destroy
+    method measureInputUsage
+    method summarize
+    method summarizeStreaming
 interface SuppressedError : Error
     attribute message
     attribute name
@@ -9609,6 +9565,18 @@ interface TransitionEvent : Event
     getter propertyName
     getter pseudoElement
     method constructor
+interface Translator
+    static method availability
+    static method create
+    attribute @@toStringTag
+    getter inputQuota
+    getter sourceLanguage
+    getter targetLanguage
+    method constructor
+    method destroy
+    method measureInputUsage
+    method translate
+    method translateStreaming
 interface TreeWalker
     attribute @@toStringTag
     getter currentNode
@@ -11465,6 +11433,23 @@ interface WritableStreamDefaultWriter
     method constructor
     method releaseLock
     method write
+interface Writer
+    static method availability
+    static method create
+    attribute @@toStringTag
+    getter expectedContextLanguages
+    getter expectedInputLanguages
+    getter format
+    getter inputQuota
+    getter length
+    getter outputLanguage
+    getter sharedContext
+    getter tone
+    method constructor
+    method destroy
+    method measureInputUsage
+    method write
+    method writeStreaming
 interface XMLDocument : Document
     attribute @@toStringTag
     method constructor

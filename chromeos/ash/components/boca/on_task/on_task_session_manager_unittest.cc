@@ -9,6 +9,7 @@
 #include <set>
 #include <utility>
 
+#include "ash/constants/ash_features.h"
 #include "ash/public/cpp/system/toast_data.h"
 #include "base/containers/flat_map.h"
 #include "base/functional/callback.h"
@@ -63,6 +64,10 @@ class OnTaskSystemWebAppManagerMock : public OnTaskSystemWebAppManager {
   MOCK_METHOD(void,
               SetPinStateForSystemWebAppWindow,
               (bool pinned, SessionID window_id),
+              (override));
+  MOCK_METHOD(void,
+              SetPauseStateForSystemWebAppWindow,
+              (bool paused, SessionID window_id),
               (override));
   MOCK_METHOD(void,
               SetWindowTrackerForSystemWebAppWindow,
@@ -414,8 +419,9 @@ TEST_F(OnTaskSessionManagerTest,
   task_environment_.FastForwardBy(kOnTaskNotificationCountdownInterval);
   EXPECT_TRUE(fake_notifications_delegate_ptr_->WasNotificationShown(
       kOnTaskEnterLockedModeNotificationId));
-  task_environment_.FastForwardBy(kOnTaskNotificationCountdownDuration +
-                                  kOnTaskNotificationCountdownInterval);
+  task_environment_.FastForwardBy(
+      ash::features::kBocaLockedModeCountdownDurationInSeconds.Get() +
+      kOnTaskNotificationCountdownInterval);
 }
 
 TEST_F(OnTaskSessionManagerTest,
@@ -476,8 +482,9 @@ TEST_F(OnTaskSessionManagerTest,
   task_environment_.FastForwardBy(kOnTaskNotificationCountdownInterval);
   EXPECT_TRUE(fake_notifications_delegate_ptr_->WasNotificationShown(
       kOnTaskEnterLockedModeNotificationId));
-  task_environment_.FastForwardBy(kOnTaskNotificationCountdownDuration +
-                                  kOnTaskNotificationCountdownInterval);
+  task_environment_.FastForwardBy(
+      ash::features::kBocaLockedModeCountdownDurationInSeconds.Get() +
+      kOnTaskNotificationCountdownInterval);
 }
 
 TEST_F(OnTaskSessionManagerTest, ShouldAddTabsWhenAdditionalTabsFoundInBundle) {
@@ -637,8 +644,9 @@ TEST_F(OnTaskSessionManagerTest, ShouldDisableExtensionsOnLock) {
   task_environment_.FastForwardBy(kOnTaskNotificationCountdownInterval);
   EXPECT_TRUE(fake_notifications_delegate_ptr_->WasNotificationShown(
       kOnTaskEnterLockedModeNotificationId));
-  task_environment_.FastForwardBy(kOnTaskNotificationCountdownDuration +
-                                  kOnTaskNotificationCountdownInterval);
+  task_environment_.FastForwardBy(
+      ash::features::kBocaLockedModeCountdownDurationInSeconds.Get() +
+      kOnTaskNotificationCountdownInterval);
 }
 
 TEST_F(OnTaskSessionManagerTest, ShouldReEnableExtensionsOnUnlock) {

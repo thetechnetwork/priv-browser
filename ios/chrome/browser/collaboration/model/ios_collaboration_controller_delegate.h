@@ -41,7 +41,7 @@ class IOSCollaborationControllerDelegate
                      ResultCallback result) override;
   void ShowError(const ErrorInfo& error, ResultCallback result) override;
   void Cancel(ResultCallback result) override;
-  void ShowAuthenticationUi(ResultCallback result) override;
+  void ShowAuthenticationUi(FlowType flow_type, ResultCallback result) override;
   void NotifySignInAndSyncStatusChange() override;
   void ShowJoinDialog(const data_sharing::GroupToken& token,
                       const data_sharing::SharedDataPreview& preview_data,
@@ -71,6 +71,15 @@ class IOSCollaborationControllerDelegate
   // but the tab group hasn't been sync'ed yet. `dismiss_join_screen` needs to
   // be called to dismiss the join screen.
   void OnCollaborationJoinSuccess(ProceduralBlock dismiss_join_screen);
+
+  // Called when a group is about to be unshared. The unsharing is blocked until
+  // `continuation_block` is called.
+  void WillUnshareGroup(std::optional<tab_groups::LocalTabGroupID> local_id,
+                        void (^continuation_block)(BOOL));
+
+  // Called when the collaboration group is deleted, making the group unshared.
+  void DidUnshareGroup(std::optional<tab_groups::LocalTabGroupID> local_id,
+                       NSError* error);
 
   // Callback called when the user acknowledge the error.
   void ErrorAccepted(ResultCallback result);

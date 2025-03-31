@@ -130,6 +130,7 @@ DEFINE_VARIATION_PARAM(kIPHMicToolbarFeature, "IPH_MicToolbar");
 DEFINE_VARIATION_PARAM(kIPHPageInfoFeature, "IPH_PageInfo");
 DEFINE_VARIATION_PARAM(kIPHPageInfoStoreInfoFeature, "IPH_PageInfoStoreInfo");
 DEFINE_VARIATION_PARAM(kIPHPageZoomFeature, "IPH_PageZoom");
+DEFINE_VARIATION_PARAM(kIPHPdfPageDownloadFeature, "IPH_PdfPageDownload");
 DEFINE_VARIATION_PARAM(kIPHPreviewsOmniboxUIFeature, "IPH_PreviewsOmniboxUI");
 DEFINE_VARIATION_PARAM(kIPHReadAloudAppMenuFeature,
                        "IPH_ReadAloudAppMenuFeature");
@@ -402,6 +403,8 @@ DEFINE_VARIATION_PARAM(kIPHTabAudioMutingFeature, "IPH_TabAudioMuting");
 DEFINE_VARIATION_PARAM(kIPHTabOrganizationSuccessFeature,
                        "IPH_TabOrganizationSuccess");
 DEFINE_VARIATION_PARAM(kIPHTabSearchFeature, "IPH_TabSearch");
+DEFINE_VARIATION_PARAM(kIPHTabSearchToolbarButtonFeature,
+                       "IPH_TabSearchToolbarButton");
 DEFINE_VARIATION_PARAM(kIPHWebUITabStripFeature, "IPH_WebUITabStrip");
 DEFINE_VARIATION_PARAM(kIPHDesktopPwaInstallFeature, "IPH_DesktopPwaInstall");
 DEFINE_VARIATION_PARAM(kIPHProfileSwitchFeature, "IPH_ProfileSwitch");
@@ -597,6 +600,7 @@ inline constexpr flags_ui::FeatureEntry::FeatureVariation
         VARIATION_ENTRY(kIPHPageInfoFeature),
         VARIATION_ENTRY(kIPHPageInfoStoreInfoFeature),
         VARIATION_ENTRY(kIPHPageZoomFeature),
+        VARIATION_ENTRY(kIPHPdfPageDownloadFeature),
         VARIATION_ENTRY(kIPHPreviewsOmniboxUIFeature),
         VARIATION_ENTRY(kIPHReadAloudAppMenuFeature),
         VARIATION_ENTRY(kIPHReadAloudExpandedPlayerFeature),
@@ -740,6 +744,7 @@ inline constexpr flags_ui::FeatureEntry::FeatureVariation
         VARIATION_ENTRY(kIPHSignoutWebInterceptFeature),
         VARIATION_ENTRY(kIPHTabAudioMutingFeature),
         VARIATION_ENTRY(kIPHTabSearchFeature),
+        VARIATION_ENTRY(kIPHTabSearchToolbarButtonFeature),
         VARIATION_ENTRY(kIPHTabGroupsSharedTabChangedFeature),
         VARIATION_ENTRY(kIPHTabGroupsSharedTabFeedbackFeature),
         VARIATION_ENTRY(kIPHTabOrganizationSuccessFeature),

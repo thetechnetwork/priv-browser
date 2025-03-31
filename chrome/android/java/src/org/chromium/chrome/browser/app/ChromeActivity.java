@@ -93,6 +93,7 @@ import org.chromium.chrome.browser.compositor.layouts.SceneChangeObserver;
 import org.chromium.chrome.browser.compositor.layouts.content.TabContentManagerHandler;
 import org.chromium.chrome.browser.contextualsearch.ContextualSearchManager;
 import org.chromium.chrome.browser.device.DeviceClassManager;
+import org.chromium.chrome.browser.devtools.DevToolsWindowAndroid;
 import org.chromium.chrome.browser.dom_distiller.DomDistillerUiUtils;
 import org.chromium.chrome.browser.download.DownloadManagerService;
 import org.chromium.chrome.browser.download.DownloadUtils;
@@ -443,6 +444,13 @@ public abstract class ChromeActivity extends AsyncInitializationActivity
     protected void onPostCreate() {
         incrementCounter(ChromePreferenceKeys.UMA_ON_POSTCREATE_COUNTER);
         super.onPostCreate();
+
+        // WindowAndroid is created in #onCreateInternal, happened before onPostCreate.
+        if (getWindowAndroid() != null) {
+            // EdgeToEdgeStateProvider is created in #onCreate.
+            assert getEdgeToEdgeStateProvider() != null;
+            getEdgeToEdgeStateProvider().attach(getWindowAndroid());
+        }
     }
 
     @Override
@@ -1651,6 +1659,10 @@ public abstract class ChromeActivity extends AsyncInitializationActivity
             mBottomContainer = null;
         }
 
+        if (getEdgeToEdgeStateProvider() != null) {
+            getEdgeToEdgeStateProvider().detach();
+        }
+
         WindowAndroid windowAndroid = getWindowAndroid();
         if (windowAndroid != null) {
             if (mDisplayAndroidObserver != null) {
@@ -2478,13 +2490,13 @@ public abstract class ChromeActivity extends AsyncInitializationActivity
         }
 
         if (id == R.id.offline_page_id) {
-            DownloadUtils.downloadOfflinePage(this, currentTab);
+            DownloadUtils.downloadOfflinePage(this, currentTab, /* fromAppMenu= */ true);
             RecordUserAction.record("MobileMenuDownloadPage");
             return true;
         }
 
         if (id == R.id.download_page_id) {
-            DownloadUtils.downloadOfflinePage(this, currentTab);
+            DownloadUtils.downloadOfflinePage(this, currentTab, /* fromAppMenu= */ true);
             RecordUserAction.record("MobileMenuItemDownloadPage");
             return true;
         }
@@ -2591,6 +2603,11 @@ public abstract class ChromeActivity extends AsyncInitializationActivity
 
         if (id == R.id.managed_by_menu_id) {
             openChromeManagementPage();
+            return true;
+        }
+
+        if (id == R.id.dev_tools && DeviceFormFactor.isDesktop()) {
+            DevToolsWindowAndroid.openDevTools(currentTab.getWebContents());
             return true;
         }
 

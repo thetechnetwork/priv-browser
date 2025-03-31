@@ -42,7 +42,6 @@ import java.util.concurrent.TimeUnit;
 
 /** This class provides information for the auxiliary search. */
 public class AuxiliarySearchProvider {
-
     /** The version of tab donation's metadata. */
     @IntDef({MetaDataVersion.V1, MetaDataVersion.MULTI_TYPE_V2, MetaDataVersion.NUM_ENTRIES})
     @Retention(RetentionPolicy.SOURCE)
@@ -50,6 +49,20 @@ public class AuxiliarySearchProvider {
         int V1 = 0;
         int MULTI_TYPE_V2 = 1;
         int NUM_ENTRIES = 2;
+    }
+
+    /** An interface to handle events in {@link MostVisitedSites}. */
+    interface Observer {
+        /** This is called when the list of most visited URLs is initially available or updated. */
+        void onSiteSuggestionsAvailable(@Nullable List<AuxiliarySearchDataEntry> entries);
+
+        /**
+         * This is called when a previously uncached icon has been fetched. Parameters guaranteed to
+         * be non-null.
+         *
+         * @param siteUrl URL of site with newly-cached icon.
+         */
+        void onIconMadeAvailable(GURL siteUrl);
     }
 
     /* Only donate the recent 7 days accessed tabs.*/
@@ -108,6 +121,15 @@ public class AuxiliarySearchProvider {
         mAuxiliarySearchBridge.getNonSensitiveHistoryData(callback);
     }
 
+    /**
+     * Sets an observer and immediately fetches the current most visited sites suggestions.
+     *
+     * @param observer The observer to receive suggestions when they are ready.
+     */
+    public void setObserver(AuxiliarySearchProvider.Observer observer) {
+        mAuxiliarySearchBridge.setObserver(observer);
+    }
+
     @VisibleForTesting
     static @Nullable AuxiliarySearchEntry createAuxiliarySearchEntry(
             int id, @NonNull String title, @NonNull String url, long timestamp) {
@@ -163,6 +185,8 @@ public class AuxiliarySearchProvider {
                         } else {
                             if (type == AuxiliarySearchEntryType.CUSTOM_TAB) {
                                 stream.writeUTF(dataEntry.appId);
+                            } else if (type == AuxiliarySearchEntryType.TOP_SITE) {
+                                stream.writeInt(dataEntry.score);
                             }
                             stream.writeInt(dataEntry.visitId);
                         }
@@ -210,11 +234,14 @@ public class AuxiliarySearchProvider {
                 int id = Tab.INVALID_TAB_ID;
                 String appId = null;
                 int visitId = Tab.INVALID_TAB_ID;
+                int score = -1;
                 if (type == AuxiliarySearchEntryType.TAB) {
                     id = stream.readInt();
                 } else {
                     if (type == AuxiliarySearchEntryType.CUSTOM_TAB) {
                         appId = stream.readUTF();
+                    } else if (type == AuxiliarySearchEntryType.TOP_SITE) {
+                        score = stream.readInt();
                     }
                     visitId = stream.readInt();
                 }
@@ -224,7 +251,14 @@ public class AuxiliarySearchProvider {
                 entry =
                         (T)
                                 new AuxiliarySearchDataEntry(
-                                        type, new GURL(url), title, timeStamp, id, appId, visitId);
+                                        type,
+                                        new GURL(url),
+                                        title,
+                                        timeStamp,
+                                        id,
+                                        appId,
+                                        visitId,
+                                        score);
             }
             if (entry != null) {
                 entryList.add(entry);

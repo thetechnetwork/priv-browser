@@ -4,6 +4,7 @@
 
 #include "chrome/browser/ui/browser_window/test/mock_browser_window_interface.h"
 #include "chrome/browser/ui/tabs/split_tab_collection.h"
+#include "chrome/browser/ui/tabs/split_tab_data.h"
 #include "chrome/browser/ui/tabs/tab_group_tab_collection.h"
 #include "chrome/browser/ui/tabs/tab_strip_model_observer.h"
 #include "components/commerce/core/commerce_utils.h"
@@ -1819,6 +1820,36 @@ TEST_F(TabStripModelTest, CommandAddToSplit) {
   EXPECT_TRUE(tabstrip.empty());
 }
 
+TEST_F(TabStripModelTest, CommandRemoveSplit) {
+  scoped_feature_list()->InitAndEnableFeature(features::kSideBySide);
+  TestTabStripModelDelegate delegate;
+  TabStripModel tabstrip(&delegate, profile());
+  EXPECT_TRUE(tabstrip.empty());
+
+  // Create four tabs, select the second.
+  ASSERT_NO_FATAL_FAILURE(
+      PrepareTabstripForSelectionTest(&tabstrip, 4, 0, "1"));
+  tabstrip.ActivateTabAt(1,
+                         TabStripUserGestureDetails(
+                             TabStripUserGestureDetails::GestureType::kOther));
+  EXPECT_TRUE(tabstrip.IsContextMenuCommandEnabled(
+      3, TabStripModel::CommandAddToSplit));
+  tabstrip.ExecuteContextMenuCommand(3, TabStripModel::CommandAddToSplit);
+
+  EXPECT_EQ("0 1s 3s 2", GetTabStripStateString(tabstrip));
+  EXPECT_TRUE(tabstrip.IsContextMenuCommandEnabled(
+      1, TabStripModel::CommandRemoveSplit));
+  EXPECT_TRUE(tabstrip.IsContextMenuCommandEnabled(
+      3, TabStripModel::CommandRemoveSplit));
+  tabstrip.ExecuteContextMenuCommand(1, TabStripModel::CommandRemoveSplit);
+
+  // The two tabs in the split will now be unsplit retaining their indexes.
+  EXPECT_EQ("0 1 3 2", GetTabStripStateString(tabstrip));
+
+  tabstrip.CloseAllTabs();
+  EXPECT_TRUE(tabstrip.empty());
+}
+
 TEST_F(TabStripModelTest, AddToSplitInGroup) {
   scoped_feature_list()->InitAndEnableFeature(features::kSideBySide);
   TestTabStripModelDelegate delegate;
@@ -1892,6 +1923,66 @@ TEST_F(TabStripModelTest, UnsplitOperation) {
 
   tabstrip.RemoveSplit(split_tab_id);
   EXPECT_EQ("0p 3p 1p 2 4", GetTabStripStateString(tabstrip));
+
+  tabstrip.CloseAllTabs();
+  EXPECT_TRUE(tabstrip.empty());
+}
+
+TEST_F(TabStripModelTest, SplitLayoutTest) {
+  scoped_feature_list()->InitAndEnableFeature(features::kSideBySide);
+  TestTabStripModelDelegate delegate;
+  TabStripModel tabstrip(&delegate, profile());
+  EXPECT_TRUE(tabstrip.empty());
+
+  // Create five tabs with two pinned, select the last.
+  ASSERT_NO_FATAL_FAILURE(
+      PrepareTabstripForSelectionTest(&tabstrip, 5, 2, "2"));
+
+  // Add tab at index 4 to a group.
+  tabstrip.AddToNewGroup({4});
+  tabstrip.ActivateTabAt(0,
+                         TabStripUserGestureDetails(
+                             TabStripUserGestureDetails::GestureType::kOther));
+
+  split_tabs::SplitTabId split_tab_id =
+      tabstrip.AddToNewSplit({3}, tabs::SplitTabLayout::kHorizontal);
+
+  EXPECT_EQ("0ps 3ps 1p 2 4", GetTabStripStateString(tabstrip));
+  EXPECT_EQ(tabstrip.GetSplitData(split_tab_id)->split_layout(),
+            tabs::SplitTabLayout::kHorizontal);
+
+  tabstrip.UpdateSplitLayout(split_tab_id, tabs::SplitTabLayout::kVertical);
+  EXPECT_EQ(tabstrip.GetSplitData(split_tab_id)->split_layout(),
+            tabs::SplitTabLayout::kVertical);
+
+  tabstrip.CloseAllTabs();
+  EXPECT_TRUE(tabstrip.empty());
+}
+
+TEST_F(TabStripModelTest, SwapTabsInSplit) {
+  scoped_feature_list()->InitAndEnableFeature(features::kSideBySide);
+  TestTabStripModelDelegate delegate;
+  TabStripModel tabstrip(&delegate, profile());
+  EXPECT_TRUE(tabstrip.empty());
+
+  // Create five tabs with two pinned, select the last.
+  ASSERT_NO_FATAL_FAILURE(
+      PrepareTabstripForSelectionTest(&tabstrip, 5, 2, "2"));
+
+  // Add tab at index 4 to a group.
+  tabstrip.AddToNewGroup({4});
+  tabstrip.ActivateTabAt(0,
+                         TabStripUserGestureDetails(
+                             TabStripUserGestureDetails::GestureType::kOther));
+
+  split_tabs::SplitTabId split_tab_id =
+      tabstrip.AddToNewSplit({3}, tabs::SplitTabLayout::kHorizontal);
+
+  EXPECT_EQ("0ps 3ps 1p 2 4", GetTabStripStateString(tabstrip));
+
+  tabstrip.SwapTabsInSplit(split_tab_id);
+
+  EXPECT_EQ("3ps 0ps 1p 2 4", GetTabStripStateString(tabstrip));
 
   tabstrip.CloseAllTabs();
   EXPECT_TRUE(tabstrip.empty());

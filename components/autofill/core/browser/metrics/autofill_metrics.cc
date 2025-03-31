@@ -38,6 +38,7 @@
 #include "components/autofill/core/common/autofill_prefs.h"
 #include "components/autofill/core/common/form_data.h"
 #include "components/autofill/core/common/form_interactions_flow.h"
+#include "components/autofill/core/common/metrics_enums.h"
 #include "components/language/core/browser/language_usage_metrics.h"
 #include "services/metrics/public/cpp/metrics_utils.h"
 #include "services/metrics/public/cpp/ukm_builders.h"
@@ -1272,9 +1273,9 @@ void AutofillMetrics::LogAutofillFieldInfoAfterSubmission(
     ukm::builders::Autofill2_FieldInfoAfterSubmission builder(source_id);
     builder
         .SetFormSessionIdentifier(
-            AutofillMetrics::FormGlobalIdToHash64Bit(form.global_id()))
+            autofill_metrics::FormGlobalIdToHash64Bit(form.global_id()))
         .SetFieldSessionIdentifier(
-            AutofillMetrics::FieldGlobalIdToHash64Bit(field->global_id()));
+            autofill_metrics::FieldGlobalIdToHash64Bit(field->global_id()));
 
     const FieldTypeSet& type_set = field->possible_types();
     if (!type_set.empty()) {
@@ -1540,19 +1541,24 @@ void AutofillMetrics::LogDeleteAddressProfileFromKeyboardAccessory() {
 }
 
 // static
-uint64_t AutofillMetrics::FormGlobalIdToHash64Bit(
-    const FormGlobalId& form_global_id) {
-  return StrToHash64Bit(
-      base::NumberToString(form_global_id.renderer_id.value()) +
-      form_global_id.frame_token.ToString());
+void AutofillMetrics::LogDataListSuggestionsShown() {
+  base::UmaHistogramEnumeration(
+      "Autofill.DataList.Events",
+      AutofillDataListEvents::kDataListSuggestionsShown);
 }
 
 // static
-uint64_t AutofillMetrics::FieldGlobalIdToHash64Bit(
-    const FieldGlobalId& field_global_id) {
-  return StrToHash64Bit(
-      base::NumberToString(field_global_id.renderer_id.value()) +
-      field_global_id.frame_token.ToString());
+void AutofillMetrics::LogDataListSuggestionsUpdated() {
+  base::UmaHistogramEnumeration(
+      "Autofill.DataList.Events",
+      AutofillDataListEvents::kDataListSuggestionsUpdated);
+}
+
+// static
+void AutofillMetrics::LogDataListSuggestionsInserted() {
+  base::UmaHistogramEnumeration(
+      "Autofill.DataList.Events",
+      AutofillDataListEvents::kDataListSuggestionsInserted);
 }
 
 }  // namespace autofill

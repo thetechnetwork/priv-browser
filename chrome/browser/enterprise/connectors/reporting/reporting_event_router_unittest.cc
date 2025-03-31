@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "chrome/browser/enterprise/connectors/reporting/reporting_event_router.h"
+#include "components/enterprise/connectors/core/reporting_event_router.h"
 
 #include "chrome/browser/enterprise/connectors/reporting/realtime_reporting_client_factory.h"
 #include "chrome/browser/enterprise/connectors/test/deep_scanning_test_utils.h"
@@ -67,7 +67,8 @@ class ReportingEventRouterTest : public testing::Test {
         profile_)
         ->SetBrowserCloudPolicyClientForTesting(client_.get());
 
-    reporting_event_router_ = std::make_unique<ReportingEventRouter>(profile_);
+    reporting_event_router_ = std::make_unique<ReportingEventRouter>(
+        RealtimeReportingClientFactory::GetForProfile(profile_));
 
     enterprise_connectors::RealtimeReportingClientFactory::GetForProfile(
         profile_)

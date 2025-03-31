@@ -7,6 +7,7 @@
 #include "base/feature_list.h"
 #include "base/metrics/field_trial_params.h"
 #include "build/build_config.h"
+#include "components/data_sharing/public/features.h"
 
 namespace tab_groups {
 
@@ -63,11 +64,6 @@ BASE_FEATURE(kRestrictDownloadOnSyncedTabs,
              "RestrictDownloadOnSyncedTabs",
              base::FEATURE_ENABLED_BY_DEFAULT);
 
-// Feature flag to defer media load on background tab.
-BASE_FEATURE(kDeferMediaLoadInBackgroundTab,
-             "DeferMediaLoadInBackgroundTab",
-             base::FEATURE_DISABLED_BY_DEFAULT);
-
 // Feature flag to determine whether an alternate illustration should be used on
 // the history sync consent screen. This feature should be used independent of
 // any other features in this file.
@@ -81,11 +77,6 @@ BASE_FEATURE(kForceRemoveClosedTabGroupsOnStartup,
              "ForceRemoveClosedTabGroupsOnStartup",
              base::FEATURE_DISABLED_BY_DEFAULT);
 
-// Enables sanitization of the tab title.
-BASE_FEATURE(kEnableTabTitleSanitization,
-             "EnableTabTitleSanitization",
-             base::FEATURE_DISABLED_BY_DEFAULT);
-
 // Enables checking for URLs before syncing them to remote devices.
 BASE_FEATURE(kEnableUrlRestriction,
              "EnableUrlRestriction",
@@ -97,7 +88,8 @@ BASE_FEATURE(kEnableOriginatingSavedGroupCleanUp,
              base::FEATURE_ENABLED_BY_DEFAULT);
 
 bool IsTabGroupSyncServiceDesktopMigrationEnabled() {
-  return base::FeatureList::IsEnabled(kTabGroupSyncServiceDesktopMigration);
+  return (base::FeatureList::IsEnabled(kTabGroupSyncServiceDesktopMigration) ||
+          data_sharing::features::IsDataSharingFunctionalityEnabled());
 }
 
 bool IsTabGroupSyncDelegateAndroidEnabled() {
@@ -117,7 +109,7 @@ bool RestrictDownloadOnSyncedTabs() {
 }
 
 bool DeferMediaLoadInBackgroundTab() {
-  return base::FeatureList::IsEnabled(kDeferMediaLoadInBackgroundTab);
+  return data_sharing::features::IsDataSharingFunctionalityEnabled();
 }
 
 bool ShouldForceRemoveClosedTabGroupsOnStartup() {
@@ -129,7 +121,7 @@ bool ShouldForceRemoveClosedTabGroupsOnStartup() {
 }
 
 bool IsTabTitleSanitizationEnabled() {
-  return base::FeatureList::IsEnabled(kEnableTabTitleSanitization);
+  return data_sharing::features::IsDataSharingFunctionalityEnabled();
 }
 
 bool IsUrlRestrictionEnabled() {

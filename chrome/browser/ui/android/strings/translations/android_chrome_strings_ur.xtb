@@ -250,6 +250,7 @@
 <translation id="2172905120685242547">ونڈو کو بند کر دیں؟</translation>
 <translation id="2173302385160625112">اپنا انٹرنیٹ کنکشن چیک کریں</translation>
 <translation id="2175927920773552910">‏QR کوڈ</translation>
+<translation id="2181097965834437145">بُک مارکس بار دکھائیں یا چھپائیں</translation>
 <translation id="2184272387334793084">اپنے تمام آلات پر اپنے پاس ورڈز وغیرہ حاصل کرنے کے لیے سائن ان کریں</translation>
 <translation id="218608176142494674">اشتراک</translation>
 <translation id="219283042927675668">گروپ میں موجود ٹیبز</translation>
@@ -306,6 +307,7 @@
 <translation id="2453860139492968684">مکمل کریں</translation>
 <translation id="2461378706168271257">اپنے ٹیبز تلاش کریں</translation>
 <translation id="2461822463642141190">حالیہ</translation>
+<translation id="2463770278804271243">صفحہ</translation>
 <translation id="2468444275314013497">آپ کا براؤزر صحیح لگ رہا ہے</translation>
 <translation id="2472163211318554013">‏Chrome سے زیادہ سے زیادہ فائدہ اٹھانے کے لیے سائن ان کریں</translation>
 <translation id="247737702124049222">تصویر کی تفصیلات آن ہیں</translation>
@@ -324,7 +326,6 @@
 <translation id="2527209463677295330">صفحے کے مزید متن کو شامل کرنے سے، آپ بہتر نتائج دیکھ سکتے ہیں</translation>
 <translation id="2527779675047087889">کلپ بورڈ مواد چھپائیں</translation>
 <translation id="2532336938189706096">ویب منظر</translation>
-<translation id="2534155362429831547"><ph name="NUMBER_OF_ITEMS" /> آئٹمز حذف ہو گئے</translation>
 <translation id="253498598929009420">سائٹ آپ کی اسکرین کے مواد کو دیکھ سکے گی</translation>
 <translation id="2536728043171574184">اس صفحہ کی ایک آف لائن کاپی دیکھی جا رہی ہے</translation>
 <translation id="2542548955756682219"><ph name="TAB_TITLE" />، ٹیب</translation>
@@ -364,7 +365,6 @@
 <translation id="2677748264148917807">چھوڑیں</translation>
 <translation id="2687009626279857299">اس آلے پر کام کرنا بند کر دیا</translation>
 <translation id="2702516483241149200">نیا: اس ٹیکسٹ کو اسکرول کرنے والے لنک کا اشتراک کریں</translation>
-<translation id="2705073298859543115">خلاصہ تخليق کريں</translation>
 <translation id="2708051474374549906">‏ریئل ٹائم، خطرناک سائٹس، ڈاؤن لوڈز اور ایکسٹینشنز کے خلاف فعال تحفظ جو آپ کے براؤزنگ ڈیٹا کی بنیاد پر Google کو بھیجے جا رہے ہیں</translation>
 <translation id="2708226184420201102"><ph name="PRODUCT_NAME" /> براؤزر میں کھولیں</translation>
 <translation id="271033894570825754">نیا</translation>
@@ -459,7 +459,6 @@
 <translation id="3114507951000454849">آج کی خبریں پڑھیں <ph name="NEWS_ICON" /></translation>
 <translation id="3122883569442693641">مزید تفصیلات</translation>
 <translation id="3123734510202723619">اعلانات</translation>
-<translation id="3131961580615093332"><ph name="GIVEN_NAME" /> نے ٹیب "<ph name="TAB_NAME" />" کو تبدیل کر دیا ہے</translation>
 <translation id="3148237711805373460">مجھے وہاں لے جائیں</translation>
 <translation id="314939179385989105">‏Chrome کا ہوم پیج</translation>
 <translation id="3158667104057012316">دستی ترتیب کے لحاظ سے ترتیب دیا جا رہا ہے</translation>
@@ -677,6 +676,7 @@
 <translation id="4195643157523330669">نئے ٹیب میں کھولیں</translation>
 <translation id="4197828496439691735">{NUM_TABS,plural, =1{اس آلہ پر 1 ٹیب}other{اس آلہ پر # ٹیبز}}</translation>
 <translation id="4198423547019359126">ڈاؤن لوڈ کیلئے کوئی مقام دستیاب نہیں ہے</translation>
+<translation id="4209029522667123437">‫<ph name="IDENTITY_PROVIDER_ETLD_PLUS_ONE" /> • آپ نے اس سائٹ پر استعمال کیا</translation>
 <translation id="4214315110991671325">‏اگر آپ کوکیز کی اجازت دیتے ہیں تو Chrome پیشگی لوڈنگ کے لیے ان کا استعمال کر سکتا ہے۔</translation>
 <translation id="4216511743389425832">اس صفحے کو سنیں</translation>
 <translation id="4225725533026049334">پیروی ہو رہی ہے</translation>
@@ -821,6 +821,7 @@
 <translation id="483742037940503070">{TAB_COUNT,plural, =1{<ph name="COLOR_NAME" /> رنگ کے <ph name="TAB_COUNT_ONE" /> ٹیب کے ٹیب گروپ کو پس منظر کے ایک نئے ٹیب گروپ کے بطور بحال کریں۔}other{<ph name="COLOR_NAME" /> رنگ کے <ph name="TAB_COUNT_MANY" /> ٹیبز کے ٹیب گروپ کو پس منظر کے ایک نئے ٹیب گروپ کے بطور بحال کریں۔}}</translation>
 <translation id="4837753911714442426">صفحہ پرنٹ کرنے کیلئے اختیارات کھولیں</translation>
 <translation id="4844633725025837809">‏اضافی حفاظت کے لیے، پاس ورڈز کو Google پاس ورڈ مینیجر میں محفوظ کرنے سے پہلے اپنے آلے پر مرموز کریں</translation>
+<translation id="4849731766219625109">اپنا <ph name="IDENTITY_PROVIDER_ETLD_PLUS_ONE" /> اکاؤنٹ استعمال کریں</translation>
 <translation id="4850886885716139402">دیکھیں</translation>
 <translation id="4852014461738377247">‏سائن ان کیا جا رہا ہے\u2026</translation>
 <translation id="4860895144060829044">کال کریں</translation>
@@ -840,14 +841,12 @@
 <translation id="4910889077668685004">ادائیگی ایپس</translation>
 <translation id="4912413785358399818">ٹیب کو منتقل کریں</translation>
 <translation id="4913169188695071480">ریفریش کرنا بند کریں</translation>
-<translation id="4918086044614829423">قبول کریں</translation>
 <translation id="4925120120285606924">اسکرین شاٹ <ph name="CURRENT_DATE_ISO" /></translation>
 <translation id="49268022542405662">آپ کے پاس ورڈز کو برآمد اور ٹیکسٹ فائل کے بطور ڈاؤن لوڈ کیا جائے گا۔ وہ منزل والے فولڈر تک رسائی کے ساتھ کسی بھی شخص اور ایپ کے لیے مرئی ہوں گے۔</translation>
 <translation id="4926901776383726965">آپ تصاویر اور فائلز کو آف لائن دیکھنے یا دیگر ایپس میں ان کا اشتراک کرنے کے لیے محفوظ کر سکتے ہیں۔</translation>
 <translation id="4932247056774066048">‏چونکہ آپ <ph name="DOMAIN_NAME" /> کے زیر نظم اکاؤنٹ سے سائن آؤٹ ہو رہے ہیں اسلئے آپ کا Chrome ڈیٹا اس آلہ سے حذف کردیا جائے گا۔ یہ آپ کے Google اکاؤنٹ میں باقی رہے گا۔</translation>
 <translation id="4943703118917034429">ورچوئل رئیلٹی</translation>
 <translation id="4943872375798546930">کوئی نتائج نہیں ہیں</translation>
-<translation id="4953833914914492602">اب "<ph name="TAB_GROUP_NAME" />" ٹیب گروپ دستیاب نہیں ہے</translation>
 <translation id="4957722034734105353">مزید جانیں…</translation>
 <translation id="4961107849584082341">اس صفحہ کا کسی بھی زبان میں ترجمہ کریں</translation>
 <translation id="4964614743143953889">‏‫Chrome آپ کو غیر محفوظ سائٹس اور ڈاؤن لوڈز کے بارے میں خبردار کرتا ہے</translation>
@@ -966,7 +965,6 @@
 <translation id="5526281268548144413">متعدد ونڈوز میں بند نہیں کیا جا سکتا</translation>
 <translation id="5528925345478618296">{MINUTES,plural, =1{# منٹ پہلے}other{# منٹ پہلے}}</translation>
 <translation id="5548606607480005320">سیفٹی چیک</translation>
-<translation id="5551564597369878730"><ph name="GIVEN_NAME" /> نے "<ph name="TAB_GROUP_NAME" />" ٹیب گروپ میں شمولیت اختیار کی ہے</translation>
 <translation id="5554520618550346933">‏آپ کے پاس ورڈ استعمال کرنے پر، Chrome آپ کو پاس ورڈ آن لائن شائع ہونے پر متنبہ کرتا ہے۔ ایسا کرتے وقت، آپ کے پاس ورڈز اور صارف نام مرموز ہوتے ہیں، تاکہ Google سمیت کوئی بھی انہیں پڑھ نہ سکے۔</translation>
 <translation id="5555525474779371165">اپنا محفوظ براؤزنگ کا تحفظ منتخب کریں</translation>
 <translation id="5556459405103347317">دوبارہ لوڈ کریں</translation>
@@ -1183,7 +1181,6 @@
 <translation id="6481963882741794338">‏ذاتی نوعیت سازی اور دیگر مقاصد کے لیے Chrome اور دیگر Google سروسز کو لنک کریں</translation>
 <translation id="6482749332252372425">اسٹوریج کی جگہ کم ہونے کی وجہ سے <ph name="FILE_NAME" /> کو ڈاؤن لوڈ کرنا ناکام ہوگیا۔</translation>
 <translation id="6486420406192123355">‏یہ PDF فائل ایک ایسی سائٹ سے ہے جو ایک غیر محفوظ کنکشن کا استعمال کر رہی ہے</translation>
-<translation id="6495590690749880440">ٹیب گروپ کھولیں؟</translation>
 <translation id="650224091954855786">{FILE_COUNT,plural, =1{فائل ڈاؤن لوڈ ہو گئی}other{# ڈاؤن لوڈز مکمل ہو گئے}}</translation>
 <translation id="6508722015517270189">‏Chrome کو دوبارہ شروع کریں</translation>
 <translation id="6518133107902771759">توثیق کریں</translation>
@@ -1201,7 +1198,6 @@
 <translation id="6564820424018738527">‏آپ کے Android آلے میں ملتی جلتی ترتیب شامل ہو سکتی ہے۔ اگر اشتہار کی کارکردگی کی پیمائش Chrome میں اور آپ کے Android آلے پر آن ہو تو کمپنی آپ کی ملاحظہ کردہ ویب سائٹس اور آپ کی استعمال کردہ ایپس پر اشتہار کی اثر انگیزی پیمائش کر سکتی ہے۔</translation>
 <translation id="6565959834589222080">‏دستیاب ہونے پر Wi-Fi کا استعمال کیا جاتا ہے</translation>
 <translation id="6569373978618239158">‏نیا ٹیب کھولنے پر اب آپ کو <ph name="SITE_NAME" /> سے کہانیاں دکھائی دیں گی۔ آپ جن سائٹس کی پیروی کرتے ہیں انہیں آپ کے Google اکاؤنٹ میں محفوظ کیا جاتا ہے۔ آپ Discover کی ترتیبات میں ان کا نظم کر سکتے ہیں۔</translation>
-<translation id="6570116402456758630">صفحہ کا خلاصہ</translation>
 <translation id="657177046675873214">اپنے تمام آلات پر اپنے بُک مارکس حاصل کرنے کے لیے، ترتیبات میں "بُک مارکس" کو آن کریں</translation>
 <translation id="6573096386450695060">ہمیشہ اجازت دیں</translation>
 <translation id="6573431926118603307">‏اپنے دیگر آلات پر Chrome میں آپ نے جو ٹیبز کھولے ہیں وہ یہاں ظاہر ہوں گے۔</translation>
@@ -1562,6 +1558,7 @@
 <translation id="8073388330009372546">تصویر نئے ٹیب میں کھولیں</translation>
 <translation id="8076492880354921740">ٹیبز</translation>
 <translation id="8078096376109663956">صرف ٹیکسٹ کا اشتراک کریں</translation>
+<translation id="8078348702936632821">اس شارٹ کٹ کو پن کریں</translation>
 <translation id="8084114998886531721">محفوظ کیا گیا پاس ورڈ</translation>
 <translation id="8084285576995584326">‏اپنے Google اکاؤنٹ کے ڈیٹا کو کنٹرول کریں</translation>
 <translation id="8084864785646838999">‏ہو سکتا ہے آپ کی کچھ سرگزشت یہاں ظاہر نہ ہو۔ اپنی تمام Chrome کی سرگزشت دیکھنے کیلئے، Chrome کی مکمل سرگزشت کھولیں۔ نیز، ممکن ہے کہ <ph name="BEGIN_LINK" />myactivity.google.com<ph name="END_LINK" /> پر آپ کے Google اکاؤنٹ میں براؤزنگ کی سرگزشت کی دیگر شکلیں موجود ہوں۔</translation>
@@ -1617,7 +1614,6 @@
 <translation id="8282297628636750033">ممکن ہو تو سائٹس پر گہری تھیم لاگو کریں</translation>
 <translation id="8282950411412455249">سیکیورٹی کی ترتیبات پر جائیں</translation>
 <translation id="8306751933352925837">‏پاس ورڈز جلد ہی اس آلہ پر کام کرنا بند کر دیں گے۔ اپنے پاس ورڈز کا استعمال جاری رکھنے کے لیے، Google Play سروسز کو اپ ڈیٹ کریں۔ <ph name="BEGIN_LINK" />مزید جانیں<ph name="END_LINK" /></translation>
-<translation id="8307517230426267469"><ph name="GIVEN_NAME" /> نے ٹیب "<ph name="TAB_NAME" />" کو ہٹا دیا ہے</translation>
 <translation id="8310451567823644042">پاس ورڈز جلد ہی کام کرنا بند کر دیں گے</translation>
 <translation id="831192587911042850">موجودہ ویب سائٹ کو ان ویب سائٹس کی فہرست میں شامل کرتا ہے جن کی آپ پیروی کر رہے ہیں۔</translation>
 <translation id="8320212361750431956">حالیہ سرگرمی</translation>

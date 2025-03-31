@@ -94,7 +94,6 @@
 <translation id="328933489847748230">{count,plural, =1{አሁን 1 Chromium መስኮትን በማሳየት ላይ}one{አሁን {count} Chromium መስኮቶችን በማሳየት ላይ}other{አሁን {count} Chromium መስኮቶችን በማሳየት ላይ}}</translation>
 <translation id="3344973607274501920">Chromium የእርስዎን የይለፍ ቃላት መፈተሽ አይችልም። የበይነመረብ ግንኙነትዎን ለመፈተሽ ይሞክሩ።</translation>
 <translation id="3366305173356742781">በመለያዎ ውስጥ ያለው የChromium ውሂብ</translation>
-<translation id="33788334537425157">Chromium በሚዘጉበት ጊዜ «ማንነት የማያሳውቁ ትሮችን ይቆልፉ» የሚለውን ያብሩ</translation>
 <translation id="3387107508582892610">{THRESHOLD,plural, =1{ይህ የሚሆነው Chromium ለ{THRESHOLD} ደቂቃ ጥቅም ላይ ሳይውል ሲቀር ነው። ይህ ታሪክን እና ራስ-ሙላን ሊያካትት ይችላል።}one{ይህ የሚሆነው Chromium ለ{THRESHOLD} ደቂቃዎች ጥቅም ላይ ሳይውል ሲቀር ነው። ይህ ታሪክን እና ራስ-ሙላን ሊያካትት ይችላል።}other{ይህ የሚሆነው Chromium ለ{THRESHOLD} ደቂቃዎች ጥቅም ላይ ሳይውል ሲቀር ነው። ይህ ታሪክን እና ራስ-ሙላን ሊያካትት ይችላል።}}</translation>
 <translation id="3410395242749598859">አንዳንድ የChromium ውሂብዎ <ph name="EMAIL" /> ውስጥ ገና አልተቀመጠም።
 መለያ ከመቀየር በፊት ጥቂት ደቂቃዎች ለመጠበቅ ይሞክሩ። አሁን መለያዎችን ከቀየሩ ይህ ውሂብ ይሰረዛል።</translation>
@@ -207,7 +206,6 @@
   • የእርስዎን ታሪክ ከGoogle መለያዎ ጋር ካሰመሩ እንዲሁም መለኪያዎች ስለሚጎበኟቸው ዩአርኤሎች መረጃ ሊያካትቱ ይችላሉ።<ph name="END_INDENT" /></translation>
 <translation id="5932787118589620366">በChromium ውስጥ የአሰሳ ውሂብን ሰርዝ</translation>
 <translation id="593808800391107017">Chromium ለእርስዎ በራስ-ሰር በሚያገኛቸው ማናቸውም የግላዊነት ወይም የደህንነት ችግሮች ላይ ማንቂያዎችን ይቀበሉ።</translation>
-<translation id="5945387852661427312">በ<ph name="DOMAIN" /> ከሚተዳደር መለያ ዘግተው እየወጡና ለአስተዳዳሪው ሙሉውን በChromium ውሂብዎ ቁጥጥር እየሰጡ ነው። የእርስዎ ውሂብ እስከመጨረሻው ከዚህ መለያ ጋር ይተሳሰራል። ከChromium ዘግቶ መውጣት ውሂብዎን ከዚህ መሣሪያ ይሰርዘዋል፣ ነገር ግን በእርስዎ Google መለያ ላይ እንደተከማቸ ይቆያል።</translation>
 <translation id="5951593919357934226">ከChromium ምርጡን ያግኙ።</translation>
 <translation id="5985254578475526217">ከChromium ማሳወቂያዎችን ለመቀበል በiOS ቅንብሮችዎ ውስጥ ማሳወቂያዎችን ያብሩ።</translation>
 <translation id="6104024151682120539">በChromium ይክፈቱ</translation>

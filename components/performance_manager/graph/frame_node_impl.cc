@@ -492,7 +492,12 @@ void FrameNodeImpl::SetViewportIntersection(
       case blink::mojom::FrameVisibility::kNotRendered:
         return false;
       case blink::mojom::FrameVisibility::kRenderedOutOfViewport:
-        return features::kRenderedOutOfViewIsNotVisible.Get();
+        if (!features::kRenderedOutOfViewIsNotVisible.Get()) {
+          // Old, seemingly incorrect behavior. Treat an out of view frame as
+          // intersecting with the viewport.
+          return true;
+        }
+        return false;
       case blink::mojom::FrameVisibility::kRenderedInViewport:
         // Since we don't know if this frame is intersecting with a large area
         // of the viewport, it'll be inherited from the parent.
@@ -850,12 +855,10 @@ void FrameNodeImpl::SeverPageRelationshipsAndMaybeReparent() {
   NodeSet embedded_page_nodes_copy = embedded_page_nodes_;
   for (const Node* embedded_page_node : embedded_page_nodes_copy) {
     PageNodeImpl* embedded_page = PageNodeImpl::FromNode(embedded_page_node);
-    auto embedding_type = embedded_page->GetEmbeddingType();
     if (parent_frame_node_) {
-      embedded_page->SetEmbedderFrameNodeAndEmbeddingType(parent_frame_node_,
-                                                          embedding_type);
+      embedded_page->SetEmbedderFrameNode(parent_frame_node_);
     } else {
-      embedded_page->ClearEmbedderFrameNodeAndEmbeddingType();
+      embedded_page->ClearEmbedderFrameNode();
     }
   }
 

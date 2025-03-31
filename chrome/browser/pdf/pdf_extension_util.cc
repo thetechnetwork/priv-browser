@@ -170,6 +170,7 @@ void AddPdfViewerStrings(base::Value::Dict* dict) {
 #endif  // BUILDFLAG(IS_CHROMEOS) || BUILDFLAG(ENABLE_PDF_INK2)
 #if BUILDFLAG(ENABLE_PDF_INK2)
       {"ink2Draw", IDS_PDF_INK2_DRAW},
+      {"ink2Tool", IDS_PDF_INK2_ANNOTATION_TOOL},
       {"ink2Size", IDS_PDF_INK2_ANNOTATION_SIZE},
       {"ink2Color", IDS_PDF_INK2_ANNOTATION_COLOR},
       {"ink2BrushSizeExtraThin", IDS_PDF_INK2_ANNOTATION_SIZE_EXTRA_THIN},
@@ -260,6 +261,9 @@ void AddAdditionalData(bool enable_printing,
     annotations_enabled = enable_annotations;
   }
   dict->Set("pdfInk2Enabled", use_ink2);
+  bool text_annotations_enabled =
+      use_ink2 && chrome_pdf::features::kPdfInk2TextAnnotations.Get();
+  dict->Set("pdfTextAnnotationsEnabled", text_annotations_enabled);
 #endif  // BUILDFLAG(ENABLE_PDF_INK2)
   dict->Set("printingEnabled", printing_enabled);
   dict->Set("pdfAnnotationsEnabled", annotations_enabled);

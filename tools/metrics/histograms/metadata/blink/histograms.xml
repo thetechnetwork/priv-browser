@@ -3033,38 +3033,6 @@ chromium-metrics-reviews@google.com.
   </summary>
 </histogram>
 
-<histogram
-    name="Blink.Layout.InlineNode.ShapeText.MaxTime.InOutermostMainFrame3"
-    units="microseconds" expires_after="2025-08-24">
-  <owner>chikamune@chromium.org</owner>
-  <owner>
-    src/third_party/blink/renderer/core/lcp_critical_path_predictor/OWNERS
-  </owner>
-  <summary>
-    Measures the maximum elapsed time it takes to run InlineNode::ShapeText()
-    while loading the outermost main frame document until finishing parsing.
-    Logged on each loading of the outermost main frame document.
-
-    This histogram only records metrics on machines with high-resolution clocks.
-  </summary>
-</histogram>
-
-<histogram
-    name="Blink.Layout.InlineNode.ShapeText.TotalTime.InOutermostMainFrame3"
-    units="microseconds" expires_after="2025-08-17">
-  <owner>chikamune@chromium.org</owner>
-  <owner>
-    src/third_party/blink/renderer/core/lcp_critical_path_predictor/OWNERS
-  </owner>
-  <summary>
-    Measures the total elapsed time it takes to run InlineNode::ShapeText()
-    while loading the outermost main frame document until finishing parsing.
-    Logged on each loading of the outermost main frame document.
-
-    This histogram only records metrics on machines with high-resolution clocks.
-  </summary>
-</histogram>
-
 <histogram name="Blink.Layout.SVGImage.Count.InOutermostMainFrame"
     units="count" expires_after="2025-12-01">
   <owner>chikamune@chromium.org</owner>
@@ -5311,6 +5279,25 @@ chromium-metrics-reviews@google.com.
 
     Not recorded if the page is prerendered and cancelled.
   </summary>
+</histogram>
+
+<histogram name="Blink.UseCounter.TotalTakenTimeForReporting.{Timing}"
+    units="ms" expires_after="2026-03-09">
+  <owner>sisidovski@chromium.org</owner>
+  <owner>chrome-loading@google.com</owner>
+  <summary>
+    Measures the accumulated time taken by recording the feautre usage in the
+    renderer, at the timing of {Timing}.
+
+    This metrics is recorded only when the frame is outer-most main frame, the
+    document is not the initial empty document, and the URL is HTTP or HTTPS.
+
+    This is triggered at the {Timing} phase.
+  </summary>
+  <token key="Timing">
+    <variant name="DidCommitLoad"/>
+    <variant name="FinishedParsing"/>
+  </token>
 </histogram>
 
 <histogram name="Blink.UseCounter.WebDXFeatures" enum="WebDXFeatureObserver"

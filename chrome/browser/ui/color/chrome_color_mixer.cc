@@ -242,6 +242,9 @@ void AddChromeColorMixer(ui::ColorProvider* provider,
       ui::GetColorWithMaxContrast({ui::kColorFrameActive});
   mixer[kColorFrameCaptionInactive] =
       ui::GetColorWithMaxContrast({ui::kColorFrameInactive});
+
+  mixer[kColorGlicBackground] = {ui::kColorBubbleBackground};
+
   mixer[kColorInfoBarBackground] = {kColorToolbar};
   mixer[kColorInfoBarButtonIcon] = {kColorToolbarButtonIcon};
   mixer[kColorInfoBarButtonIconDisabled] = {kColorToolbarButtonIconDisabled};
@@ -279,6 +282,10 @@ void AddChromeColorMixer(ui::ColorProvider* provider,
       PickGoogleColor(ui::kColorAccent, kColorToolbar,
                       color_utils::kMinimumVisibleContrastRatio);
   mixer[kColorMediaRouterIconWarning] = {ui::kColorAlertMediumSeverityIcon};
+  mixer[kColorMulitContentsViewActiveContentOutline] = {
+      ui::kColorSysOnSurfacePrimary};
+  mixer[kColorMulitContentsViewInactiveContentOutline] = {
+      ui::kColorSysNeutralOutline};
   mixer[kColorOmniboxChipBackground] = {kColorTabBackgroundActiveFrameActive};
   mixer[kColorOmniboxChipBlockedActivityIndicatorBackground] = {
       kColorInfoBarBackground};

@@ -48,6 +48,7 @@
 #include "components/autofill/core/browser/metrics/autofill_metrics.h"
 #include "components/autofill/core/browser/metrics/log_event.h"
 #include "components/autofill/core/browser/metrics/suggestions_list_metrics.h"
+#include "components/autofill/core/browser/payments/credit_card_access_manager.h"
 #include "components/autofill/core/browser/payments/mock_iban_access_manager.h"
 #include "components/autofill/core/browser/payments/payments_autofill_client.h"
 #include "components/autofill/core/browser/payments/test/mock_bnpl_manager.h"
@@ -60,6 +61,7 @@
 #include "components/autofill/core/browser/suggestions/suggestion_type.h"
 #include "components/autofill/core/browser/test_utils/autofill_form_test_utils.h"
 #include "components/autofill/core/browser/test_utils/autofill_test_utils.h"
+#include "components/autofill/core/browser/test_utils/valuables_data_test_utils.h"
 #include "components/autofill/core/browser/ui/suggestion_button_action.h"
 #include "components/autofill/core/browser/webdata/autofill_ai/entity_table.h"
 #include "components/autofill/core/browser/webdata/autofill_webdata_service_test_helper.h"
@@ -243,10 +245,22 @@ class MockAutofillClient : public TestAutofillClient {
 #endif
 };
 
+class TestCreditCardAccessManager : public CreditCardAccessManager {
+ public:
+  using CreditCardAccessManager::CreditCardAccessManager;
+  void PrepareToFetchCreditCard() override {
+    // Do nothing for testing.
+  }
+};
+
 class MockBrowserAutofillManager : public TestBrowserAutofillManager {
  public:
   explicit MockBrowserAutofillManager(AutofillDriver* driver)
-      : TestBrowserAutofillManager(driver) {}
+      : TestBrowserAutofillManager(driver) {
+    test_api(*this).set_credit_card_access_manager(
+        std::make_unique<TestCreditCardAccessManager>(
+            this, test_api(*this).credit_card_form_event_logger()));
+  }
   MockBrowserAutofillManager(const MockBrowserAutofillManager&) = delete;
   MockBrowserAutofillManager& operator=(const MockBrowserAutofillManager&) =
       delete;
@@ -256,12 +270,6 @@ class MockBrowserAutofillManager : public TestBrowserAutofillManager {
       const FieldGlobalId& field_id,
       AutofillSuggestionTriggerSource trigger_source) const override {
     return should_show_cards_from_account_option_;
-  }
-
-  void DidShowSuggestions(DenseSet<SuggestionType> shown_suggestion_types,
-                          const FormData& form,
-                          const FieldGlobalId& field_id) override {
-    // Do nothing for testing.
   }
 
   void ShowCardsFromAccountOption() {
@@ -992,7 +1000,7 @@ TEST_F(AutofillExternalDelegateTest,
 
 // Test that the Autofill delegate allows previewing `kLoyaltyCardEntry`
 // suggestions.
-TEST_F(AutofillExternalDelegateTest, ExternalDelegatePreviewsLoyalyCardEntry) {
+TEST_F(AutofillExternalDelegateTest, ExternalDelegatePreviewsLoyaltyCardEntry) {
   IssueOnQuery();
 
   EXPECT_CALL(client(),
@@ -1015,6 +1023,57 @@ TEST_F(AutofillExternalDelegateTest, ExternalDelegatePreviewsLoyalyCardEntry) {
                          loyalty_card_value, SuggestionType::kLoyaltyCardEntry,
                          std::optional(LOYALTY_MEMBERSHIP_ID)));
   external_delegate().DidSelectSuggestion(suggestions[0]);
+}
+
+// Test that the Autofill delegate allows filling `kLoyaltyCardEntry`
+// suggestions.
+TEST_F(AutofillExternalDelegateTest, ExternalDelegateFillsLoyaltyCardEntry) {
+  IssueOnQuery();
+
+  EXPECT_CALL(client(),
+              ShowAutofillSuggestions(PopupOpenArgsAre(SuggestionVectorIdsAre(
+                                          SuggestionType::kLoyaltyCardEntry)),
+                                      _));
+  LoyaltyCard loyalty_card = test::CreateLoyaltyCard();
+  std::vector<Suggestion> suggestions;
+  const std::u16string masked_loyalty_card_value = u"**********1234";
+  suggestions.emplace_back(/*main_text=*/masked_loyalty_card_value,
+                           SuggestionType::kLoyaltyCardEntry);
+  suggestions[0].main_text.value = masked_loyalty_card_value;
+  suggestions[0].payload = Suggestion::Guid(loyalty_card.id().value());
+  OnSuggestionsReturned(queried_field().global_id(), suggestions);
+
+  EXPECT_CALL(driver(), RendererShouldClearPreviewedForm());
+  EXPECT_CALL(manager(),
+              FillOrPreviewField(mojom::ActionPersistence::kPreview,
+                                 mojom::FieldActionType::kReplaceAll,
+                                 HasQueriedFormId(), HasQueriedFieldId(),
+                                 masked_loyalty_card_value,
+                                 SuggestionType::kLoyaltyCardEntry,
+                                 std::optional(LOYALTY_MEMBERSHIP_ID)));
+  external_delegate().DidSelectSuggestion(suggestions[0]);
+
+  const std::u16string full_loyalty_card_value = u"LOYALTYCARD1234";
+  EXPECT_CALL(client(), HideAutofillSuggestions(
+                            SuggestionHidingReason::kAcceptSuggestion));
+  EXPECT_CALL(manager(),
+              FillOrPreviewField(mojom::ActionPersistence::kFill,
+                                 mojom::FieldActionType::kReplaceAll,
+                                 HasQueriedFormId(), HasQueriedFieldId(),
+                                 full_loyalty_card_value,
+                                 SuggestionType::kLoyaltyCardEntry,
+                                 std::optional(LOYALTY_MEMBERSHIP_ID)));
+
+  ON_CALL(*client().GetValuableManager(), FetchValue)
+      .WillByDefault([full_loyalty_card_value](
+                         ValuableId valuable_id,
+                         MockValuableManager::OnValuableFetchedCallback
+                             on_valuable_fetched) {
+        std::move(on_valuable_fetched).Run(full_loyalty_card_value);
+      });
+
+  external_delegate().DidAcceptSuggestion(suggestions[0],
+                                          SuggestionPosition{.row = 0});
 }
 
 // Test that the Autofill delegate routes the merchant promo code suggestions

@@ -1,4 +1,5 @@
-<style include="cr-shared-style settings-shared settings-columned-section">
+<style include="cr-shared-style settings-shared settings-columned-section
+    passwords-shared">
   .flex {
     flex: 1;
   }
@@ -6,6 +7,10 @@
   .list-item {
     padding-top: 8px;
     padding-bottom: 8px;
+  }
+
+  .start {
+    overflow: hidden;
   }
 
   #entries {
@@ -26,15 +31,16 @@
       <h3 class="description-header">$i18n{columnHeadingWhenOn}</h3>
       <ul class="icon-bulleted-list">
         <li>
-          <cr-icon icon="settings20:sync-saved-locally"></cr-icon>
+          <cr-icon icon="settings20:sync-saved-locally" aria-hidden="true">
+          </cr-icon>
           <div class="cr-secondary-text">
             $i18n{autofillAiWhenOnSavedInfo}
           </div>
         </li>
         <li>
-          <cr-icon icon="settings20:text-analysis"></cr-icon>
+          <cr-icon icon="settings20:text-analysis" aria-hidden="true"></cr-icon>
           <div class="cr-secondary-text">
-            $i18n{autofillAiUseToFill}
+            $i18n{autofillAiWhenOnUseToFill}
           </div>
         </li>
       </ul>
@@ -45,27 +51,15 @@
       </h3>
       <ul class="icon-bulleted-list">
         <li>
-          <cr-icon icon="settings20:psychiatry"></cr-icon>
-          <div class="cr-secondary-text">
-            $i18n{autofillAiNewFeature}
-          </div>
-        </li>
-        <li>
-          <cr-icon icon="settings20:googleg"></cr-icon>
+          <cr-icon icon="settings20:googleg" aria-hidden="true"></cr-icon>
           <div class="cr-secondary-text">
             $i18n{autofillAiToConsiderDataUsage}
           </div>
         </li>
         <li>
-          <cr-icon icon="settings20:file-save"></cr-icon>
+          <cr-icon icon="settings20:file-save" aria-hidden="true"></cr-icon>
           <div class="cr-secondary-text">
             $i18n{autofillAiToConsiderDataStorage}
-          </div>
-        </li>
-        <li>
-          <cr-icon icon="settings20:account-box"></cr-icon>
-          <div class="cr-secondary-text">
-            $i18n{autofillAiToConsiderDataImprovement}
           </div>
         </li>
       </ul>
@@ -91,8 +85,12 @@
   <template is="dom-repeat" items="[[entityInstances_]]">
     <li class="list-item">
       <div class="start">
-        [[item.entityInstanceLabel]]
-        <div class="cr-secondary-text">[[item.entityInstanceSubLabel]]</div>
+        <div class="ellipses">
+          [[item.entityInstanceLabel]]
+        </div>
+        <div class="ellipses cr-secondary-text">
+          [[item.entityInstanceSubLabel]]
+        </div>
       </div>
       <cr-icon-button id="moreButton" class="icon-more-vert"
           on-click="onMoreButtonClick_" title="[[getMoreButtonTitle_(

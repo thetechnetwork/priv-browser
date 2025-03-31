@@ -534,6 +534,9 @@ BASE_FEATURE(kTabGroupIndicator,
              base::FEATURE_DISABLED_BY_DEFAULT);
 
 bool IsTabGroupIndicatorEnabled() {
+  if (ui::GetDeviceFormFactor() != ui::DEVICE_FORM_FACTOR_TABLET) {
+    return true;
+  }
   return IsTabGroupInGridEnabled() &&
          base::FeatureList::IsEnabled(kTabGroupIndicator);
 }
@@ -637,7 +640,7 @@ bool IsWebChannelsEnabled() {
   }
   std::string launched_countries[6] = {"AU", "CA", "GB", "NZ", "US", "ZA"};
   if (base::Contains(launched_countries,
-                     country_codes::GetCurrentCountryCode())) {
+                     country_codes::GetCurrentCountryID().CountryCode())) {
     return true;
   }
   return base::FeatureList::IsEnabled(kEnableWebChannels);
@@ -732,7 +735,7 @@ bool IsFeedAblationEnabled() {
 bool IsFollowUIUpdateEnabled() {
   std::string launched_countries[1] = {"US"};
   if (base::Contains(launched_countries,
-                     country_codes::GetCurrentCountryCode())) {
+                     country_codes::GetCurrentCountryID().CountryCode())) {
     return true;
   }
   return base::FeatureList::IsEnabled(kEnableFollowUIUpdate);
@@ -973,7 +976,7 @@ bool IsSaveToPhotosAccountPickerImprovementEnabled() {
 
 BASE_FEATURE(kHomeCustomization,
              "HomeCustomization",
-             base::FEATURE_DISABLED_BY_DEFAULT);
+             base::FEATURE_ENABLED_BY_DEFAULT);
 
 bool IsHomeCustomizationEnabled() {
   return base::FeatureList::IsEnabled(kHomeCustomization);
@@ -1041,7 +1044,7 @@ bool IsBlueDotOnToolsMenuButtoneEnabled() {
 
 BASE_FEATURE(kUseAccountListFromIdentityManager,
              "UseAccountListFromIdentityManager",
-             base::FEATURE_DISABLED_BY_DEFAULT);
+             base::FEATURE_ENABLED_BY_DEFAULT);
 
 bool IsUseAccountListFromIdentityManagerEnabled() {
   return base::FeatureList::IsEnabled(kUseAccountListFromIdentityManager);
@@ -1229,6 +1232,9 @@ const char kIPHGestureRecognitionPanAblation[] =
     "IPHGestureRecognitionPanAblation";
 const char kIPHGestureRecognitionSwipeAblation[] =
     "IPHGestureRecognitionSwipeAblation";
+const char kCancelTouchesInViewForIPH[] = "CancelTouchesInViewForIPH";
+const char kIPHGestureRecognitionImprovement[] =
+    "IPHGestureRecognitionImprovement";
 
 bool IsIPHGestureRecognitionInsideTapAblationEnabled() {
   return base::GetFieldTrialParamByFeatureAsBool(
@@ -1251,6 +1257,16 @@ bool IsIPHGestureRecognitionSwipeAblationEnabled() {
   return base::GetFieldTrialParamByFeatureAsBool(
       kIPHGestureRecognitionAblation, kIPHGestureRecognitionSwipeAblation,
       false);
+}
+
+bool ShouldCancelTouchesInViewForIPH() {
+  return base::GetFieldTrialParamByFeatureAsBool(
+      kIPHGestureRecognitionAblation, kCancelTouchesInViewForIPH, false);
+}
+
+bool IsIPHGestureRecognitionImprovementEnabled() {
+  return base::GetFieldTrialParamByFeatureAsBool(
+      kIPHGestureRecognitionAblation, kIPHGestureRecognitionImprovement, false);
 }
 
 BASE_FEATURE(kNonModalSignInPromo,
@@ -1328,4 +1344,12 @@ BASE_FEATURE(kSignInButtonNoAvatar,
 
 bool IsSignInButtonNoAvatarEnabled() {
   return base::FeatureList::IsEnabled(kSignInButtonNoAvatar);
+}
+
+BASE_FEATURE(kNTPBackgroundCustomization,
+             "NTPBackgroundCustomization",
+             base::FEATURE_DISABLED_BY_DEFAULT);
+
+bool IsNTPBackgroundCustomizationEnabled() {
+  return base::FeatureList::IsEnabled(kNTPBackgroundCustomization);
 }

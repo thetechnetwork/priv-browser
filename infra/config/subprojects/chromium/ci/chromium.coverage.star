@@ -102,6 +102,7 @@ coverage_builder(
                 "mb",
             ],
             build_config = builder_config.build_config.RELEASE,
+            target_arch = builder_config.target_arch.ARM,
             target_bits = 64,
             target_platform = builder_config.target_platform.ANDROID,
         ),
@@ -128,6 +129,7 @@ coverage_builder(
         targets = [
             "android_pie_coverage_instrumentation_tests",
             "chromium_junit_tests_scripts",
+            "gtests_once",
         ],
         mixins = [
             "chromium_pixel_2_pie",
@@ -167,6 +169,7 @@ coverage_webview_builder(
                 "mb",
             ],
             build_config = builder_config.build_config.RELEASE,
+            target_arch = builder_config.target_arch.ARM,
             target_bits = 64,
             target_platform = builder_config.target_platform.ANDROID,
         ),
@@ -231,6 +234,7 @@ coverage_builder(
         chromium_config = builder_config.chromium_config(
             config = "x86_builder_mb",
             build_config = builder_config.build_config.RELEASE,
+            target_arch = builder_config.target_arch.INTEL,
             target_bits = 32,
             target_platform = builder_config.target_platform.ANDROID,
         ),
@@ -267,6 +271,7 @@ coverage_builder(
                 ),
             ),
             "chromium_android_scripts",
+            "gtests_once",
         ],
         additional_compile_targets = [
             "chrome_nocompile_tests",
@@ -433,6 +438,7 @@ coverage_builder(
                 "mb",
             ],
             build_config = builder_config.build_config.RELEASE,
+            target_arch = builder_config.target_arch.ARM,
             target_bits = 64,
             target_platform = builder_config.target_platform.ANDROID,
         ),
@@ -459,6 +465,7 @@ coverage_builder(
     targets = targets.bundle(
         targets = [
             "chromium_android_gtests",
+            "gtests_once",
         ],
         mixins = [
             "chromium_pixel_2_pie",
@@ -570,6 +577,7 @@ coverage_webview_builder(
                 "mb",
             ],
             build_config = builder_config.build_config.RELEASE,
+            target_arch = builder_config.target_arch.ARM,
             target_bits = 64,
             target_platform = builder_config.target_platform.ANDROID,
         ),
@@ -652,6 +660,7 @@ coverage_builder(
                 "mb",
             ],
             build_config = builder_config.build_config.DEBUG,
+            target_arch = builder_config.target_arch.INTEL,
             target_bits = 64,
             target_platform = builder_config.target_platform.ANDROID,
         ),
@@ -718,6 +727,7 @@ coverage_builder(
                 "mb",
             ],
             build_config = builder_config.build_config.DEBUG,
+            target_arch = builder_config.target_arch.INTEL,
             target_bits = 64,
             target_platform = builder_config.target_platform.ANDROID,
         ),
@@ -801,6 +811,7 @@ coverage_builder(
     targets = targets.bundle(
         targets = [
             "fuchsia_gtests",
+            "gtests_once",
             targets.bundle(
                 targets = "gpu_angle_fuchsia_unittests_isolated_scripts",
                 mixins = "expand-as-isolated-script",
@@ -1013,6 +1024,7 @@ coverage_builder(
     targets = targets.bundle(
         targets = [
             "linux_chromeos_gtests",
+            "gtests_once",
         ],
         additional_compile_targets = [
             "gn_all",
@@ -1351,6 +1363,7 @@ coverage_builder(
             "chromium_linux_gtests",
             "chromium_linux_rel_isolated_scripts_code_coverage",
             "gpu_dawn_webgpu_cts",
+            "gtests_once",
             "chromium_linux_scripts",
         ],
         mixins = [
@@ -1482,6 +1495,7 @@ coverage_builder(
             "chromium_mac_gtests",
             "chromium_mac_rel_isolated_scripts_code_coverage",
             # TODO(crbug.com/40249801): Enable gpu_dawn_webgpu_cts
+            "gtests_once",
         ],
         mixins = [
             "isolate_profile_data",
@@ -1557,6 +1571,7 @@ coverage_builder(
             "chromium_win_gtests",
             "chromium_win_rel_isolated_scripts_code_coverage",
             "gpu_dawn_webgpu_cts",
+            "gtests_once",
         ],
         mixins = [
             "isolate_profile_data",

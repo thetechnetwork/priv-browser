@@ -5,6 +5,7 @@
 #include "ash/constants/ash_features.h"
 
 #include "ash/constants/ash_switches.h"
+#include "ash_features.h"
 #include "base/feature_list.h"
 #include "base/metrics/field_trial_params.h"
 #include "build/branding_buildflags.h"
@@ -226,6 +227,18 @@ BASE_FEATURE(kBocaOnTaskPod,
              "BocaOnTaskPod",
              base::FEATURE_DISABLED_BY_DEFAULT);
 
+// Enables or disables Boca OnTask enter locked mode countdown duration on
+// ChromeOS.
+BASE_FEATURE(kBocaLockedModeCustomCountdownDuration,
+             "BocaLockedModeCustomCountdownDuration",
+             base::FEATURE_ENABLED_BY_DEFAULT);
+
+// Time duration for entering locked mode countdown.
+constexpr base::FeatureParam<base::TimeDelta>
+    kBocaLockedModeCountdownDurationInSeconds{
+        &kBocaLockedModeCustomCountdownDuration,
+        "BocaLockedModeCountdownDurationInSeconds", base::Seconds(5)};
+
 // Enables or disables Boca sending student heartbeat requests on ChromeOS.
 BASE_FEATURE(kBocaStudentHeartbeat,
              "BocaStudentHeartbeat",
@@ -419,7 +432,7 @@ BASE_FEATURE(kConch, "Conch", base::FEATURE_DISABLED_BY_DEFAULT);
 // choose.
 BASE_FEATURE(kConchExpandTranscriptionLanguage,
              "ConchExpandTranscriptionLanguage",
-             base::FEATURE_ENABLED_BY_DEFAULT);
+             base::FEATURE_DISABLED_BY_DEFAULT);
 
 // If enabled, conch will provide available GenAI features.
 BASE_FEATURE(kConchGenAi, "ConchGenAi", base::FEATURE_ENABLED_BY_DEFAULT);
@@ -564,6 +577,12 @@ BASE_FEATURE(kDemoModeSignIn,
 BASE_FEATURE(kDemoModeWallpaperUpdate,
              "DemoModeWallpaperUpdate",
              base::FEATURE_DISABLED_BY_DEFAULT);
+
+// Controls whether clean up local files between shopper session when demo mode
+// sign in is enable. No-op if demo mode sign in is disabled.
+BASE_FEATURE(kDemoModeSignInFileCleanup,
+             "DemoModeSignInFileCleanup",
+             base::FEATURE_ENABLED_BY_DEFAULT);
 
 // Toggle different display features based on user setting and power state
 BASE_FEATURE(kDisplayPerformanceMode,
@@ -1625,7 +1644,7 @@ BASE_FEATURE(kInternalServerSideSpeechRecognitionByFinch,
 // S3 USM_RNNT model.
 BASE_FEATURE(kInternalServerSideSpeechRecognitionUSMModelFinch,
              "InternalServerSideSpeechRecognitionUSMModelFinch",
-             base::FEATURE_DISABLED_BY_DEFAULT);
+             base::FEATURE_ENABLED_BY_DEFAULT);
 
 // Enables sending `client-info` values to IPP printers on ChromeOS.
 BASE_FEATURE(kIppClientInfo, "IppClientInfo", base::FEATURE_ENABLED_BY_DEFAULT);
@@ -1723,7 +1742,7 @@ BASE_FEATURE(kFeatureManagementLocalImageSearch,
              base::FEATURE_DISABLED_BY_DEFAULT);
 
 // Enables lobster feature.
-BASE_FEATURE(kLobster, "Lobster", base::FEATURE_ENABLED_BY_DEFAULT);
+BASE_FEATURE(kLobster, "Lobster", base::FEATURE_DISABLED_BY_DEFAULT);
 
 // Enabling this testing flag will force the Lobster disclaimer screen to be
 // shown every time Lobster is triggered, even if users have previously approved
@@ -1752,6 +1771,16 @@ BASE_FEATURE(kLobsterFeedback,
 // Enables lobster feedback form.
 BASE_FEATURE(kLobsterFileNamingImprovement,
              "LobsterFileNamingImprovement",
+             base::FEATURE_ENABLED_BY_DEFAULT);
+
+// Enables lobster restriction based on the current active IME.
+BASE_FEATURE(kLobsterDisabledByInvalidIME,
+             "LobsterDisabledByInvalidIME",
+             base::FEATURE_ENABLED_BY_DEFAULT);
+
+// Controls lobster availability on managed accounts.
+BASE_FEATURE(kLobsterForManagedUsers,
+             "LobsterForManagedUsers",
              base::FEATURE_ENABLED_BY_DEFAULT);
 
 // Enables lobster entry point in quick insert zero state.
@@ -1841,7 +1870,7 @@ BASE_FEATURE(kMediaAppImageMantisModel,
 // Enables the Reimagine feature of Mantis
 BASE_FEATURE(kMediaAppImageMantisReimagine,
              "MediaAppImageMantisReimagine",
-             base::FEATURE_ENABLED_BY_DEFAULT);
+             base::FEATURE_DISABLED_BY_DEFAULT);
 
 // Enables the Remove Background feature of Mantis
 BASE_FEATURE(kMediaAppImageMantisRemoveBackground,
@@ -2456,7 +2485,7 @@ BASE_FEATURE(kProjectorV2, "ProjectorV2", base::FEATURE_ENABLED_BY_DEFAULT);
 // Controls whether to use USM for serverside speech recognition for projector.
 BASE_FEATURE(kProjectorUseUSMForS3,
              "ProjectorUseUSMForS3",
-             base::FEATURE_DISABLED_BY_DEFAULT);
+             base::FEATURE_ENABLED_BY_DEFAULT);
 
 // controls whether projector uses dynamic colors.
 BASE_FEATURE(kProjectorDynamicColors,
@@ -2470,7 +2499,7 @@ BASE_FEATURE(kProjectorGm3, "ProjectorGm3", base::FEATURE_ENABLED_BY_DEFAULT);
 // playback urls.
 BASE_FEATURE(kProjectorUseDVSPlaybackEndpoint,
              "ProjectorUseDVSPlaybackEndpoint",
-             base::FEATURE_DISABLED_BY_DEFAULT);
+             base::FEATURE_ENABLED_BY_DEFAULT);
 
 // Controls whether to show promise icons during app installations.
 BASE_FEATURE(kPromiseIcons, "PromiseIcons", base::FEATURE_ENABLED_BY_DEFAULT);
@@ -2602,6 +2631,11 @@ BASE_FEATURE(kSeaPenTextInput,
              "SeaPenTextInput",
              base::FEATURE_DISABLED_BY_DEFAULT);
 
+// Enables sea pen text input translation feature.
+BASE_FEATURE(kSeaPenTextInputTranslation,
+             "SeaPenTextInputTranslation",
+             base::FEATURE_DISABLED_BY_DEFAULT);
+
 // Enables sea pen feature for ChromeOS demo mode.
 BASE_FEATURE(kSeaPenDemoMode,
              "SeaPenDemoMode",
@@ -2610,7 +2644,7 @@ BASE_FEATURE(kSeaPenDemoMode,
 // Enables sea pen prompt rewrite feature.
 BASE_FEATURE(kSeaPenQueryRewrite,
              "SeaPenQueryRewrite",
-             base::FEATURE_DISABLED_BY_DEFAULT);
+             base::FEATURE_ENABLED_BY_DEFAULT);
 
 // Enables sea pen feature with next templates.
 BASE_FEATURE(kSeaPenUseExptTemplate,
@@ -2750,13 +2784,13 @@ BASE_FEATURE(kSunfishFeature,
 // Chromnient-like query.
 BASE_FEATURE(kSunfishLensWeb,
              "SunfishLensWeb",
-             base::FEATURE_DISABLED_BY_DEFAULT);
+             base::FEATURE_ENABLED_BY_DEFAULT);
 
 // Changes the Sunfish copy text functionality to use the Lens Web API instead
 // of the Chromnient-like query.
 BASE_FEATURE(kSunfishLensWebCopyText,
              "SunfishLensWebCopyText",
-             base::FEATURE_DISABLED_BY_DEFAULT);
+             base::FEATURE_ENABLED_BY_DEFAULT);
 
 // Enable the suspend state machine to better handle suspend accelerators.
 BASE_FEATURE(kSuspendStateMachine,
@@ -2900,6 +2934,12 @@ BASE_FEATURE(kUseAnnotatedAccountId,
 BASE_FEATURE(kUseAuthPanelInSession,
              "UseAuthPanelInSession",
              base::FEATURE_ENABLED_BY_DEFAULT);
+
+// This features toggles `AuthHub` is used as authentication backend by
+// `AuthPanel` on ChromeOS.
+BASE_FEATURE(kAuthPanelUsingAuthHub,
+             "AuthPanelUsingAuthHub",
+             base::FEATURE_DISABLED_BY_DEFAULT);
 
 // This feature toggles which dhcpcd version is used for IPv4 provisioning.
 // If it is enabled, the legacy dhcpcd7 is used, otherwise the latest dhcpcd is
@@ -3405,6 +3445,10 @@ bool IsBocaOnTaskPodEnabled() {
   return base::FeatureList::IsEnabled(kBocaOnTaskPod);
 }
 
+bool IsBocaLockedModeCustomCountdownDurationEnabled() {
+  return base::FeatureList::IsEnabled(kBocaLockedModeCustomCountdownDuration);
+}
+
 bool IsBocaStudentHeartbeatEnabled() {
   return base::FeatureList::IsEnabled(kBocaStudentHeartbeat);
 }
@@ -3499,6 +3543,10 @@ bool IsDemoModeSignInEnabled() {
 
 bool IsDemoModeWallpaperUpdateEnabled() {
   return base::FeatureList::IsEnabled(kDemoModeWallpaperUpdate);
+}
+
+bool IsDemoModeSignInFileCleanupEnabled() {
+  return base::FeatureList::IsEnabled(kDemoModeSignInFileCleanup);
 }
 
 bool IsDeskTemplateSyncEnabled() {
@@ -3974,12 +4022,20 @@ bool IsLobsterEnabled() {
           base::FeatureList::IsEnabled(kFeatureManagementLobster));
 }
 
+bool IsLobsterDisabledByInvalidIME() {
+  return base::FeatureList::IsEnabled(kLobsterDisabledByInvalidIME);
+}
+
 bool IsLobsterUseRewrittenQuery() {
   return base::FeatureList::IsEnabled(kLobsterUseRewrittenQuery);
 }
 
 bool IsLobsterAlwaysShowDisclaimerForTesting() {
   return base::FeatureList::IsEnabled(kLobsterAlwaysShowDisclaimerForTesting);
+}
+
+bool IsLobsterEnabledForManagedUsers() {
+  return base::FeatureList::IsEnabled(kLobsterForManagedUsers);
 }
 
 bool IsLockScreenHideSensitiveNotificationsSupported() {
@@ -4396,6 +4452,11 @@ bool IsSeaPenTextInputEnabled() {
   return IsSeaPenEnabled() && base::FeatureList::IsEnabled(kSeaPenTextInput);
 }
 
+bool IsSeaPenTextInputTranslationEnabled() {
+  return IsSeaPenTextInputEnabled() &&
+         base::FeatureList::IsEnabled(kSeaPenTextInputTranslation);
+}
+
 bool IsSeaPenUseExptTemplateEnabled() {
   return IsSeaPenEnabled() &&
          base::FeatureList::IsEnabled(kSeaPenUseExptTemplate);
@@ -4681,6 +4742,10 @@ bool ShouldUseKcerClientCertStore() {
 
 bool IsUseAuthPanelInSessionEnabled() {
   return base::FeatureList::IsEnabled(kUseAuthPanelInSession);
+}
+
+bool IsAuthPanelUsingAuthHub() {
+  return base::FeatureList::IsEnabled(kAuthPanelUsingAuthHub);
 }
 
 bool IsAllowPasswordlessSetupEnabled() {

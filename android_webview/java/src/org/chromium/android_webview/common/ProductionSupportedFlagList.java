@@ -182,9 +182,6 @@ public final class ProductionSupportedFlagList {
                 VizFeatures.WEBVIEW_ENABLE_ADPF_RENDERER_MAIN,
                 "Include Renderer Main into ADPF session"),
         Flag.baseFeature(
-                VizFeatures.WEBVIEW_FRAME_RATE_HINTS,
-                "Provide frame rate hints to View system if supported by OS"),
-        Flag.baseFeature(
                 VizFeatures.ALLOW_UNDAMAGED_NONROOT_RENDER_PASS_TO_SKIP,
                 "Enable optimization for skipping undamaged nonroot render passes."),
         Flag.baseFeature(
@@ -459,10 +456,6 @@ public final class ProductionSupportedFlagList {
                 BlinkFeatures.CHECK_HTML_PARSER_BUDGET_LESS_OFTEN,
                 "If enabled, avoids calling the clock for every token in the HTML parser."),
         Flag.baseFeature(BaseFeatures.ALIGN_WAKE_UPS, "Align delayed wake ups at 125 Hz"),
-        Flag.baseFeature(
-                BlinkFeatures.THREADED_SCROLL_PREVENT_RENDERING_STARVATION,
-                "Enable rendering starvation-prevention during threaded scrolling."
-                        + " See https://crbug.com/40833407."),
         Flag.baseFeature(
                 BlinkFeatures.VIEW_TRANSITION_ON_NAVIGATION,
                 "Enables the experimental View Transitions API for navigations."
@@ -750,6 +743,9 @@ public final class ProductionSupportedFlagList {
                 BlinkFeatures.INCREMENT_LOCAL_SURFACE_ID_FOR_MAINFRAME_SAME_DOC_NAVIGATION,
                 "When enabled, every mainframe same-doc navigation will increment the"
                         + " `viz::LocalSurfaceId` from the impl thread."),
+        Flag.baseFeature(
+                BaseFeatures.BACKGROUND_NOT_PERCEPTIBLE_BINDING,
+                "If enabled, not perceptible binding put processes to the background cpu cgroup"),
         Flag.baseFeature(
                 BaseFeatures.PARTITION_ALLOC_SCHEDULER_LOOP_QUARANTINE,
                 "Enables PartitionAlloc's FreeFlags::kSchedulerLoopQuarantine"),
@@ -1074,6 +1070,10 @@ public final class ProductionSupportedFlagList {
                         + " background thread. Otherwise runs startup synchronously.\n"
                         + " - caches any chromium startup exception and rethrows it if startup is"
                         + " retried without a restart."),
+        Flag.baseFeature(
+                CcFeatures.EXPORT_FRAME_TIMING_AFTER_FRAME_DONE,
+                "When enabled, moves the layer tree client's metric export call for from beginning"
+                        + " of the subsequent frame to the end of the subsequent frame."),
         // Add new commandline switches and features above. The final entry should have a
         // trailing comma for cleaner diffs.
     };

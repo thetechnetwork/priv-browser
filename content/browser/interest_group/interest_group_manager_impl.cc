@@ -307,6 +307,7 @@ InterestGroupManagerImpl::InterestGroupManagerImpl(
       update_manager_(this, url_loader_factory),
       k_anonymity_manager_(std::make_unique<InterestGroupKAnonymityManager>(
           this,
+          &caching_storage_,
           std::move(k_anonymity_service_callback))),
       max_active_report_requests_(kMaxActiveReportRequests),
       max_report_queue_length_(kMaxReportQueueLength),
@@ -337,6 +338,15 @@ void InterestGroupManagerImpl::RemoveInterestGroupsByDataKey(
     base::OnceClosure callback) {
   caching_storage_.RemoveInterestGroupsMatchingOwnerAndJoiner(
       data_key.owner, data_key.joining_origin, std::move(callback));
+}
+
+void InterestGroupManagerImpl::AddTrustedServerKeysDebugOverride(
+    TrustedServerAPIType api,
+    const url::Origin& coordinator,
+    std::string serialized_keys,
+    base::OnceCallback<void(std::optional<std::string>)> callback) {
+  ba_key_fetcher_.AddKeysDebugOverride(
+      api, coordinator, std::move(serialized_keys), std::move(callback));
 }
 
 void InterestGroupManagerImpl::CheckPermissionsAndJoinInterestGroup(
@@ -749,15 +759,6 @@ void InterestGroupManagerImpl::SetBiddingAndAuctionServerKeys(
       coordinator, std::move(serialized_keys), expiration);
 }
 
-void InterestGroupManagerImpl::AddTrustedServerKeysDebugOverride(
-    TrustedServerAPIType api,
-    const url::Origin& coordinator,
-    std::string serialized_keys,
-    base::OnceCallback<void(std::optional<std::string>)> callback) {
-  ba_key_fetcher_.AddKeysDebugOverride(
-      api, coordinator, std::move(serialized_keys), std::move(callback));
-}
-
 void InterestGroupManagerImpl::GetBiddingAndAuctionServerKeys(
     const url::Origin& coordinator,
     base::OnceCallback<void(std::pair<base::Time, std::string>)> callback) {
@@ -808,11 +809,13 @@ void InterestGroupManagerImpl::GetInterestGroupAdAuctionData(
     base::Uuid generation_id,
     base::Time timestamp,
     blink::mojom::AuctionDataConfigPtr config,
+    std::vector<url::Origin> sellers,
     base::OnceCallback<void(BiddingAndAuctionData)> callback) {
   AdAuctionDataLoaderState state;
   state.serializer.SetPublisher(top_level_origin.host());
   state.serializer.SetGenerationId(std::move(generation_id));
   state.serializer.SetTimestamp(timestamp);
+  state.sellers = std::move(sellers);
   state.callback = std::move(callback);
   if (config->per_buyer_configs.size() == 0) {
     state.serializer.SetConfig(std::move(config));
@@ -895,7 +898,7 @@ void InterestGroupManagerImpl::OnInterestGroupAdAuctionDataLoadComplete(
     AdAuctionDataLoaderState state) {
   if (blink::features::kFledgeEnableFilteringDebugReportStartingFrom.Get() !=
       base::Milliseconds(0)) {
-    caching_storage_.GetDebugReportLockout(
+    caching_storage_.GetDebugReportLockoutAndAllCooldowns(
         base::BindOnce(&InterestGroupManagerImpl::OnAdAuctionDataLoadComplete,
                        weak_factory_.GetWeakPtr(), std::move(state)));
   } else {
@@ -905,14 +908,39 @@ void InterestGroupManagerImpl::OnInterestGroupAdAuctionDataLoadComplete(
 
 void InterestGroupManagerImpl::OnAdAuctionDataLoadComplete(
     AdAuctionDataLoaderState state,
-    std::optional<DebugReportLockout> lockout) {
-  state.serializer.SetDebugReportInLockout(
-      IsInDebugReportLockout(lockout, base::Time::Now()));
-  BiddingAndAuctionData data = state.serializer.Build();
+    std::optional<DebugReportLockoutAndCooldowns> lockoutAndCooldowns) {
+  base::Time now = base::Time::Now();
+  bool in_debug_report_lockout = false;
+  if (lockoutAndCooldowns.has_value()) {
+    in_debug_report_lockout =
+        IsInDebugReportLockout(lockoutAndCooldowns->lockout, now);
+    state.serializer.SetDebugReportInLockout(in_debug_report_lockout);
+    state.serializer.SetDebugReportCooldownsMap(
+        lockoutAndCooldowns->debug_report_cooldown_map);
+  }
+
+  std::optional<BiddingAndAuctionData> data = state.serializer.Build();
+  if (data.has_value()) {
+    for (const auto& seller : state.sellers) {
+      std::optional<std::vector<uint8_t>> request =
+          state.serializer.BuildRequestFromMessage(seller, now);
+      if (request.has_value()) {
+        data->requests[seller] = std::move(*request);
+      } else {
+        data = std::nullopt;
+        break;
+      }
+    }
+  }
+
   base::UmaHistogramTimes(
       "Ads.InterestGroup.ServerAuction.AdAuctionDataLoadTime",
       base::TimeTicks::Now() - state.start_time);
-  std::move(state.callback).Run(std::move(data));
+  if (data.has_value()) {
+    std::move(state.callback).Run(*std::move(data));
+  } else {
+    std::move(state.callback).Run({});
+  }
 }
 
 void InterestGroupManagerImpl::GetTrustedServerKey(
@@ -1020,6 +1048,12 @@ void InterestGroupManagerImpl::GetDebugReportLockoutAndCooldowns(
         callback) {
   caching_storage_.GetDebugReportLockoutAndCooldowns(std::move(origins),
                                                      std::move(callback));
+}
+
+void InterestGroupManagerImpl::GetDebugReportLockoutAndAllCooldowns(
+    base::OnceCallback<void(std::optional<DebugReportLockoutAndCooldowns>)>
+        callback) {
+  caching_storage_.GetDebugReportLockoutAndAllCooldowns(std::move(callback));
 }
 
 void InterestGroupManagerImpl::UpdateInterestGroup(

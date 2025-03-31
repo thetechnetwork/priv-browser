@@ -3622,6 +3622,10 @@ const blink::web_pref::WebPreferences WebContentsImpl::ComputeWebPreferences(
   if (command_line.HasSwitch(switches::kHideScrollbars)) {
     prefs.hide_scrollbars = true;
   }
+
+  prefs.payment_request_enabled =
+      base::FeatureList::IsEnabled(features::kWebPayments);
+
   GetContentClient()->browser()->OverrideWebPreferences(
       this, *main_frame->GetSiteInstance(), &prefs);
   return prefs;
@@ -3638,6 +3642,7 @@ void WebContentsImpl::OnWebPreferencesChanged() {
   }
   updating_web_preferences_ = true;
   SetWebPreferences(ComputeWebPreferences(GetPrimaryMainFrame()));
+
 #if BUILDFLAG(IS_ANDROID)
   const bool force_enable_zoom_changed =
       (force_enable_zoom_ != web_preferences_->force_enable_zoom);
@@ -3659,6 +3664,12 @@ void WebContentsImpl::OnWebPreferencesChanged() {
     }
   }
 #endif
+
+  // Update inner WebContents.
+  for (WebContents* inner : GetInnerWebContents()) {
+    static_cast<WebContentsImpl*>(inner)->OnWebPreferencesChanged();
+  }
+
   updating_web_preferences_ = false;
 }
 
@@ -7141,6 +7152,8 @@ void WebContentsImpl::DidFinishNavigation(NavigationHandle* navigation_handle) {
     // |max_loaded_frame_count_| is not necessarily 1 if the navigation was
     // served from BackForwardCache.
     max_loaded_frame_count_ = GetFrameTreeSize(&primary_frame_tree_);
+
+    BrowserAccessibilityStateImpl::GetInstance()->OnPageNavigationComplete();
   }
 
   // TODO(crbug.com/40202416): MPArch GuestView: We might need to look up the
@@ -11780,9 +11793,9 @@ std::unique_ptr<PrerenderHandle> WebContentsImpl::StartPrerendering(
         prerender_navigation_handle_callback) {
   PrerenderAttributes attributes(
       prerendering_url, trigger_type, embedder_histogram_suffix,
-      /*target_hint=*/std::nullopt, content::Referrer(),
-      /*eagerness=*/std::nullopt, std::move(no_vary_search_hint),
-      /*initiato_render_frame_host=*/nullptr, GetWeakPtr(), page_transition,
+      /*speculation_rules_params=*/std::nullopt, content::Referrer(),
+      no_vary_search_hint,
+      /*initiator_render_frame_host=*/nullptr, GetWeakPtr(), page_transition,
       should_warm_up_compositor, should_prepare_paint_tree,
       std::move(url_match_predicate),
       std::move(prerender_navigation_handle_callback),
@@ -11803,7 +11816,7 @@ std::unique_ptr<PrerenderHandle> WebContentsImpl::StartPrerendering(
   if (frame_tree_node_id) {
     return std::make_unique<PrerenderHandleImpl>(
         GetPrerenderHostRegistry()->GetWeakPtr(), frame_tree_node_id,
-        prerendering_url);
+        prerendering_url, std::move(no_vary_search_hint));
   }
   return nullptr;
 }

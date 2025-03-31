@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import type {FocusedTabData, GlicBrowserHost, GlicWebClient, Observable, OpenPanelInfo, PanelOpeningData, PanelState, TabData, WebClientInitializeError} from '/glic/glic_api/glic_api.js';
-import {WebClientInitializeErrorReason, WebClientMode} from '/glic/glic_api/glic_api.js';
+import type {FocusedTabData, GlicBrowserHost, GlicWebClient, Observable, OpenPanelInfo, OpenSettingsOptions, PanelOpeningData, PanelState, TabData, WebClientInitializeError} from '/glic/glic_api/glic_api.js';
+import {SettingsPageField, WebClientInitializeErrorReason, WebClientMode} from '/glic/glic_api/glic_api.js';
 
 import {createGlicHostRegistryOnLoad} from '../api_boot.js';
 
@@ -28,7 +28,8 @@ interface PageElementTypes {
   getUserProfileInfoImg: HTMLImageElement;
   changeProfileBn: HTMLButtonElement;
   testPermissionSwitch: HTMLButtonElement;
-  openSettings: HTMLButtonElement;
+  openGlicSettings: HTMLButtonElement;
+  openGlicSettingsHighlight: HTMLSelectElement;
   microphoneSwitch: HTMLInputElement;
   geolocationSwitch: HTMLInputElement;
   tabContextSwitch: HTMLInputElement;
@@ -90,7 +91,7 @@ interface PageElementTypes {
   contentSizingTest: HTMLElement;
   enableTestSizingMode: HTMLButtonElement;
   disableTestSizingMode: HTMLButtonElement;
-  enableDragResize: HTMLInputElement;
+  enableDragResizeCheckbox: HTMLInputElement;
   growHeight: HTMLButtonElement;
   resetHeight: HTMLButtonElement;
   dump: HTMLElement;
@@ -106,6 +107,13 @@ interface PageElementTypes {
   getOsMicrophonePermissionButton: HTMLButtonElement;
   osMicrophonePermissionResult: HTMLSpanElement;
   osGlicHotkey: HTMLInputElement;
+  executeAction: HTMLButtonElement;
+  actionProtoEncodedText: HTMLInputElement;
+  actionStatus: HTMLSpanElement;
+  actionUpdatedContextResult: HTMLSpanElement;
+  actionUpdatedScreenshotImg: HTMLImageElement;
+  macOsPermissionsFieldset: HTMLFieldSetElement;
+  attachmentControlsFieldset: HTMLFieldSetElement;
 }
 
 const $: PageElementTypes = new Proxy({}, {
@@ -146,7 +154,15 @@ class WebClient implements GlicWebClient {
     logMessage('initialize called');
     $.pageHeader!.classList.add('connected');
 
-
+    // Disable sections with unavailable functionality.
+    if (this.browser.openOsPermissionSettingsMenu === undefined) {
+      logMessage('OS permissions are disabled');
+      $.macOsPermissionsFieldset.disabled = true;
+    }
+    if (this.browser.attachPanel === undefined) {
+      logMessage('Attachment controls are disabled (detached-only mode)');
+      $.attachmentControlsFieldset.disabled = true;
+    }
 
     const ver = await browser.getChromeVersion();
     logMessage(`Chrome version: ${JSON.stringify(ver)}`);
@@ -188,6 +204,8 @@ class WebClient implements GlicWebClient {
     } else {
       logMessage('getOsHotkeyState not available');
     }
+    $.enableDragResizeCheckbox.disabled =
+        browser.enableDragResize === undefined;
   }
 
   async notifyPanelWillOpen(panelOpeningData: PanelOpeningData&PanelState):
@@ -328,8 +346,8 @@ $.disableTestSizingMode.addEventListener('click', () => {
   updateSizingMode(false);
 });
 
-$.enableDragResize.addEventListener('change', () => {
-  getBrowser()!.enableDragResize!($.enableDragResize.checked);
+$.enableDragResizeCheckbox.addEventListener('change', () => {
+  getBrowser()!.enableDragResize!($.enableDragResizeCheckbox.checked);
 });
 
 $.growHeight.addEventListener('click', () => {
@@ -405,8 +423,16 @@ $.testPermissionSwitch.addEventListener('click', () => {
   );
 });
 
-$.openSettings.addEventListener('click', () => {
-  getBrowser()!.openGlicSettingsPage!();
+$.openGlicSettings.addEventListener('click', () => {
+  const selectedHighlight = $.openGlicSettingsHighlight.value;
+  logMessage(`Opening settings. Will highlight field: ${selectedHighlight}`);
+  const options: OpenSettingsOptions = {};
+  if (selectedHighlight === 'osHotkey') {
+    options.highlightField = SettingsPageField.OS_HOTKEY;
+  } else if (selectedHighlight === 'osEntrypointToggle') {
+    options.highlightField = SettingsPageField.OS_ENTRYPOINT_TOGGLE;
+  }
+  getBrowser()!.openGlicSettingsPage!(options);
 });
 
 $.syncCookiesBn.addEventListener('click', async () => {
@@ -484,7 +510,7 @@ $.getpagecontext.addEventListener('click', async () => {
     options.innerTextBytesLimit = textLimit;
   }
   if ($.viewportScreenshotCheckbox.checked) {
-    options.viewportScreenshot = {};
+    options.viewportScreenshot = true;
   }
   if ($.pdfDataCheckbox.checked) {
     options.pdfData = true;
@@ -536,6 +562,52 @@ $.getpagecontext.addEventListener('click', async () => {
     $.getPageContextStatus.innerText = `Error getting page context: ${error}`;
   }
 });
+
+$.executeAction.addEventListener('click', async () => {
+  logMessage('Starting Execute Action');
+
+  // The action proto is expected to be a BrowserAction proto, which is binary
+  // serialized and then base64 encoded.
+  const protoByteString = atob($.actionProtoEncodedText.value);
+  const protoBytes = new Uint8Array(protoByteString.length);
+  for (let i = 0; i < protoByteString.length; i++) {
+    protoBytes[i] = protoByteString.charCodeAt(i);
+  }
+
+  const params: any = {
+    actionProto: protoBytes.buffer,
+    tabContextOptions: {annotatedPageContent: true, viewportScreenshot: true},
+  };
+
+  $.actionUpdatedContextResult.innerText = '';
+  $.actionUpdatedScreenshotImg.src = '';
+  try {
+    const actionResult = await client!.browser!.actInFocusedTab!(params);
+    const pageContent = actionResult.tabContextResult;
+    if (pageContent) {
+      if (pageContent.viewportScreenshot) {
+        const blob = new Blob(
+            [pageContent.viewportScreenshot.data], {type: 'image/jpeg'});
+        $.actionUpdatedScreenshotImg.src = URL.createObjectURL(blob);
+      }
+      if (pageContent.annotatedPageData &&
+          pageContent.annotatedPageData.annotatedPageContent) {
+        const annotatedPageDataSize =
+            (await readStream(
+                 pageContent.annotatedPageData.annotatedPageContent))
+                .length;
+        $.actionUpdatedContextResult.innerText =
+            `Annotated page content data length: ${annotatedPageDataSize}`;
+      }
+    }
+    $.actionStatus.innerText = 'Finished Execute Action.';
+    $.actionUpdatedContextResult.innerText +=
+        `Returned data: ${JSON.stringify(pageContent, null, 2)}`;
+  } catch (error) {
+    $.actionStatus.innerText = `Error in Execute Action: ${error}`;
+  }
+});
+
 $.getlocation.addEventListener('click', async () => {
   if (navigator.geolocation) {
     try {
@@ -845,7 +917,6 @@ window.addEventListener('load', () => {
     $.osMicrophonePermissionResult.textContent =
         `OS Microphone Permission: ${permission}`;
   });
-  $.enableDragResize.disabled = getBrowser()!.enableDragResize !== undefined;
 });
 
 function readStream(stream: ReadableStream<Uint8Array>): Promise<Uint8Array> {

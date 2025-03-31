@@ -22,17 +22,17 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.app.Activity;
 import android.app.PendingIntent;
 import android.app.PendingIntent.CanceledException;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.os.Bundle;
-import android.view.ContextThemeWrapper;
 import android.view.View;
 import android.widget.TextView;
 
 import androidx.fragment.app.FragmentActivity;
-import androidx.test.core.app.ApplicationProvider;
+import androidx.test.core.app.ActivityScenario;
 import androidx.test.core.content.pm.PackageInfoBuilder;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -82,12 +82,13 @@ import org.chromium.components.browser_ui.test.BrowserUiDummyFragmentActivity;
 import org.chromium.components.prefs.PrefService;
 import org.chromium.components.signin.base.CoreAccountInfo;
 import org.chromium.components.signin.base.GaiaId;
-import org.chromium.components.signin.base.GoogleServiceAuthError;
 import org.chromium.components.sync.DataType;
 import org.chromium.components.sync.SyncService;
 import org.chromium.components.sync.UserSelectableType;
 import org.chromium.components.user_prefs.UserPrefs;
 import org.chromium.components.user_prefs.UserPrefsJni;
+import org.chromium.google_apis.gaia.GoogleServiceAuthError;
+import org.chromium.google_apis.gaia.GoogleServiceAuthErrorState;
 import org.chromium.ui.modaldialog.ModalDialogManager;
 import org.chromium.ui.modaldialog.ModalDialogProperties;
 import org.chromium.ui.modelutil.PropertyModel;
@@ -147,10 +148,6 @@ public class PasswordManagerHelperTest {
 
     private PasswordManagerHelper mPasswordManagerHelper;
 
-    private final Context mContext =
-            new ContextThemeWrapper(
-                    ApplicationProvider.getApplicationContext(), R.style.Theme_BrowserUI_DayNight);
-
     @Before
     public void setUp() throws CredentialManagerBackendException {
         // TODO(crbug.com/40940922): Parametrise the tests for local and account.
@@ -162,7 +159,8 @@ public class PasswordManagerHelperTest {
                 .thenReturn(false);
         SyncServiceFactory.setInstanceForTesting(mSyncServiceMock);
         when(mSyncServiceMock.isEngineInitialized()).thenReturn(true);
-        when(mSyncServiceMock.getAuthError()).thenReturn(GoogleServiceAuthError.State.NONE);
+        when(mSyncServiceMock.getAuthError())
+                .thenReturn(new GoogleServiceAuthError(GoogleServiceAuthErrorState.NONE));
         when(mLoadingModalDialogCoordinator.getState())
                 .thenReturn(LoadingModalDialogCoordinator.State.PENDING);
         mModalDialogManager =
@@ -259,7 +257,9 @@ public class PasswordManagerHelperTest {
         when(mSyncServiceMock.isEngineInitialized()).thenReturn(true);
         when(mSyncServiceMock.hasSyncConsent()).thenReturn(true);
         when(mSyncServiceMock.getAuthError())
-                .thenReturn(GoogleServiceAuthError.State.INVALID_GAIA_CREDENTIALS);
+                .thenReturn(
+                        new GoogleServiceAuthError(
+                                GoogleServiceAuthErrorState.INVALID_GAIA_CREDENTIALS));
 
         assertFalse(mPasswordManagerHelper.canUseUpm());
     }
@@ -1181,13 +1181,19 @@ public class PasswordManagerHelperTest {
         when(mPasswordManagerUtilBridgeJniMock.getPasswordAccessLossWarningType(mPrefService))
                 .thenReturn(PasswordAccessLossWarningType.NO_UPM);
 
-        mPasswordManagerHelper.showPasswordSettings(
-                mContext,
-                ManagePasswordsReferrer.CHROME_SETTINGS,
-                mModalDialogManagerSupplier,
-                /* managePasskeys= */ false,
-                TEST_NO_EMAIL_ADDRESS,
-                mSettingsCustomTabLauncher);
+        // PasswordAccessLossDialog requires an Activity Context.
+        try (ActivityScenario<Activity> scenario = ActivityScenario.launch(Activity.class)) {
+            scenario.onActivity(
+                    activity -> {
+                        mPasswordManagerHelper.showPasswordSettings(
+                                activity,
+                                ManagePasswordsReferrer.CHROME_SETTINGS,
+                                mModalDialogManagerSupplier,
+                                /* managePasskeys= */ false,
+                                TEST_NO_EMAIL_ADDRESS,
+                                mSettingsCustomTabLauncher);
+                    });
+        }
 
         PropertyModel dialogModel = mModalDialogManager.getCurrentDialogForTest();
         View customView = dialogModel.get(ModalDialogProperties.CUSTOM_VIEW);
@@ -1207,13 +1213,19 @@ public class PasswordManagerHelperTest {
         chooseToSyncPasswords();
         when(mBackendSupportHelperMock.isBackendPresent()).thenReturn(true);
 
-        mPasswordManagerHelper.showPasswordSettings(
-                mContext,
-                ManagePasswordsReferrer.CHROME_SETTINGS,
-                mModalDialogManagerSupplier,
-                /* managePasskeys= */ false,
-                TEST_NO_EMAIL_ADDRESS,
-                mSettingsCustomTabLauncher);
+        // PasswordAccessLossDialog requires an Activity Context.
+        try (ActivityScenario<Activity> scenario = ActivityScenario.launch(Activity.class)) {
+            scenario.onActivity(
+                    activity -> {
+                        mPasswordManagerHelper.showPasswordSettings(
+                                activity,
+                                ManagePasswordsReferrer.CHROME_SETTINGS,
+                                mModalDialogManagerSupplier,
+                                /* managePasskeys= */ false,
+                                TEST_NO_EMAIL_ADDRESS,
+                                mSettingsCustomTabLauncher);
+                    });
+        }
 
         assertNull(mModalDialogManager.getCurrentDialogForTest());
     }
@@ -1245,7 +1257,11 @@ public class PasswordManagerHelperTest {
 
         verify(mockController)
                 .showDialogAndStartFlow(
-                        eq(testActivity), eq(mProfile), eq(true), eq(mSettingsCustomTabLauncher));
+                        eq(testActivity),
+                        eq(mProfile),
+                        /* isGooglePlayServicesAvailable= */ eq(true),
+                        /* isPasswordManagerAvailable= */ eq(false),
+                        eq(mSettingsCustomTabLauncher));
     }
 
     @Test
@@ -1274,7 +1290,11 @@ public class PasswordManagerHelperTest {
 
         verify(mockController)
                 .showDialogAndStartFlow(
-                        eq(testActivity), eq(mProfile), eq(true), eq(mSettingsCustomTabLauncher));
+                        eq(testActivity),
+                        eq(mProfile),
+                        /* isGooglePlayServicesAvailable= */ eq(true),
+                        /* isPasswordManagerAvailable= */ eq(true),
+                        eq(mSettingsCustomTabLauncher));
     }
 
     @Test
@@ -1303,7 +1323,11 @@ public class PasswordManagerHelperTest {
 
         verify(mockController)
                 .showDialogAndStartFlow(
-                        eq(testActivity), eq(mProfile), eq(false), eq(mSettingsCustomTabLauncher));
+                        eq(testActivity),
+                        eq(mProfile),
+                        /* isGooglePlayServicesAvailable= */ eq(false),
+                        /* isPasswordManagerAvailable= */ eq(false),
+                        eq(mSettingsCustomTabLauncher));
     }
 
     @Test
@@ -1390,7 +1414,8 @@ public class PasswordManagerHelperTest {
                 mock(PasswordCsvDownloadFlowController.class);
         PasswordCsvDownloadFlowControllerFactory.setControllerForTesting(mockController);
         verify(mockController, never())
-                .showDialogAndStartFlow(any(), any(), anyBoolean(), eq(mSettingsCustomTabLauncher));
+                .showDialogAndStartFlow(
+                        any(), any(), anyBoolean(), anyBoolean(), eq(mSettingsCustomTabLauncher));
 
         // Check that the management UI is not shown (the pwm is unavailable).
         verify(mCredentialManagerLauncherMock, never())

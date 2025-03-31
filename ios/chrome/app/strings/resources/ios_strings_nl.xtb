@@ -40,6 +40,7 @@
 <translation id="1147031633655575115">Ingelogd als <ph name="USER" /></translation>
 <translation id="1149401351239820326">Vervalmaand</translation>
 <translation id="1150989369772528668">Agenda</translation>
+<translation id="1161663161838091892">Tabbladen en geschiedenis synchroniseren om door te gaan</translation>
 <translation id="1164891049599601209">Ingevoerd op misleidende site</translation>
 <translation id="1165039591588034296">Fout</translation>
 <translation id="1172898394251786223">Volgend veld</translation>
@@ -47,7 +48,6 @@
 <translation id="1181037720776840403">Verwijderen</translation>
 <translation id="1190609913194133056">Meldingscentrum</translation>
 <translation id="1201402288615127009">Volgende</translation>
-<translation id="1202892408424955784">Gevolgde producten</translation>
 <translation id="1204075260022434100">{count,plural, =1{Bookmark opgeslagen in {title} in je account {email}}other{{count} bookmarks opgeslagen in {title} in je account {email}}}</translation>
 <translation id="120431140543679678">Volgen</translation>
 <translation id="1207493287814084192">17:30</translation>
@@ -133,6 +133,7 @@
 <translation id="1513858653616922153">Wachtwoord verwijderen</translation>
 <translation id="1517166097004694782">Doorgaan met dit tabblad verbergen</translation>
 <translation id="1520027731907768768">Krijg meldingen over prijsdalingen voor producten die je volgt.</translation>
+<translation id="1521366073263497277">Naar het tabbladraster</translation>
 <translation id="1521774566618522728">Vandaag actief</translation>
 <translation id="1524563461097350801">Nee, bedankt</translation>
 <translation id="1531038290222364269">Tabbladen tonen</translation>
@@ -181,6 +182,7 @@
 <translation id="1732468323901456775">Meldingen voor <ph name="MODULE_NAME" /> aanzetten</translation>
 <translation id="1740468249224277719">Dubbeltik om te installeren.</translation>
 <translation id="1740650426894359238">Van profiel wisselen</translation>
+<translation id="1741219894094057085">Smartwatch</translation>
 <translation id="1743244221910283364">Niet opslaan</translation>
 <translation id="174998178145075354">{count,plural, =1{{count} optie voor adres beschikbaar boven je toetsenbord.}other{{count} opties voor adressen beschikbaar boven je toetsenbord.}}</translation>
 <translation id="1750238553597293878">Blijf de wachtwoorden in je Google-account gebruiken</translation>
@@ -261,7 +263,6 @@
 <translation id="20485545164632846">nieuw item</translation>
 <translation id="2049727122989709386"><ph name="COUNT" /> accounts gebruiken hetzelfde wachtwoord</translation>
 <translation id="2059166748188874810">Gemeente</translation>
-<translation id="2060114494785549741">Verwijderen over 1 maand</translation>
 <translation id="2060638295449304809">Dit adres wordt alleen opgeslagen op dit apparaat. Als je het wilt gebruiken op je andere apparaten, sla je het op in je Google-account, <ph name="USER_EMAIL" />.</translation>
 <translation id="20638360198452347">Kiezer voor type eenheid</translation>
 <translation id="2067852168641682340">Altijd opslaan in dit account</translation>
@@ -295,8 +296,8 @@
 <translation id="2202084845446535117">Geen e-mailaccounts</translation>
 <translation id="2214453882118345682">Winkel, vertaal en identificeer wat je ziet met je camera.</translation>
 <translation id="2215819824168709130">Kaart Prijs volgen verbergen</translation>
+<translation id="2216366330550244277">Ga naar de pagina van een product</translation>
 <translation id="2220529011494928058">Een probleem melden</translation>
-<translation id="2220887224562128152">Nadat een bestand is gepland voor verwijdering, kan het niet worden hersteld.</translation>
 <translation id="2223461067862937305">Een QR-code maken</translation>
 <translation id="2229345671837147090">Raster voor tabbladen op afstand</translation>
 <translation id="2230173723195178503">Webpagina geladen</translation>
@@ -476,7 +477,6 @@ Je zoekmachine is <ph name="DSE_NAME" />. Bekijk de instructies van de zoekmachi
 <translation id="2989523299700148168">Onlangs bezocht</translation>
 <translation id="2989805286512600854">Openen op nieuw tabblad</translation>
 <translation id="2996291259634659425">Wachtwoordzin maken</translation>
-<translation id="3000900718786961632">{COUNT,plural, =1{Nieuw pakket gevolgd}other{Nieuwe pakketten gevolgd}}</translation>
 <translation id="3010025794097054078">Laat je beschermen tegen onder andere gegevenslekken en onveilige websites.</translation>
 <translation id="301080557829842765">Privacygids</translation>
 <translation id="3012310354105716927">Sommige gegevens zijn nog niet opgeslagen</translation>
@@ -490,7 +490,6 @@ Je zoekmachine is <ph name="DSE_NAME" />. Bekijk de instructies van de zoekmachi
 <translation id="3059270601560379555">Nieuwe zoekopdracht</translation>
 <translation id="3064547930554042309">Downloads beheren</translation>
 <translation id="3072279342064724558">Wachtwoord bestaat al</translation>
-<translation id="3074862506644936708">Automatisch verwijderen aanzetten</translation>
 <translation id="3076846064362030967">Je wordt niet uitgelogd van je Google-account. Er kunnen <ph name="BEGIN_LINK" />andere vormen van activiteit<ph name="END_LINK" /> worden opgeslagen op je Google-account als je bent ingelogd. Je kunt ze wanneer je wilt verwijderen.
 
 
@@ -534,6 +533,7 @@ Bekijk de instructies van je zoekmachine voor het verwijderen van je zoekgeschie
 <translation id="3245429137663807393">Als je ook Chrome-gebruiksrapporten deelt, bevatten die rapporten de URL's die je bezoekt</translation>
 <translation id="3245744387817103524">De wijziging kan niet worden opgeslagen.</translation>
 <translation id="3254806613790954367">Je laatst geopende tabblad op al je apparaten</translation>
+<translation id="325717987950204592">Tik op Privacy en beveiliging</translation>
 <translation id="3272527697863656322">Annuleren</translation>
 <translation id="3273510436356991673">Je startscherm aanpassen</translation>
 <translation id="3277021493514034324">Siteadres gekopieerd</translation>
@@ -556,7 +556,6 @@ Bekijk de instructies van je zoekmachine voor het verwijderen van je zoekgeschie
 <translation id="3380352560400387991">Deze site probeert een app te openen. Hiermee verlaat je de incognitomodus.</translation>
 <translation id="3392923070107623576">Houd alles overzichtelijk door tabbladgroepen te maken</translation>
 <translation id="3404232721752787413">Opslaan in Google Foto's</translation>
-<translation id="3404744938087714423">Als je uitlogt, wordt synchronisatie uitgezet.</translation>
 <translation id="3406506285180498376">Pagina delen…</translation>
 <translation id="340669334496430859">Laatst gewijzigd</translation>
 <translation id="3409785640040772790">Maps</translation>
@@ -567,6 +566,7 @@ Bekijk de instructies van je zoekmachine voor het verwijderen van je zoekgeschie
 <translation id="3445288400492335833"><ph name="MINUTES" /> min.</translation>
 <translation id="344589138074534176">Meer informatie over Google Lens</translation>
 <translation id="3447332786336558089">Nadat je bent uitgelogd, worden tabbladen gesloten en worden niet-opgeslagen accountgegevens van dit apparaat verwijderd. Dit kunnen onder andere wachtwoorden en geschiedenis zijn.</translation>
+<translation id="3449029510150690417">Maak een nieuwe tabbladgroep door deze een naam en kleur te geven</translation>
 <translation id="345348365500626747">Adres gevonden</translation>
 <translation id="3464194322481586217">Kan de prijs niet volgen.</translation>
 <translation id="3469117812148449995">Opties om een wachtwoord op te slaan</translation>
@@ -648,6 +648,7 @@ Bekijk de instructies van je zoekmachine voor het verwijderen van je zoekgeschie
 <translation id="3838691874161539578">Check je opgeslagen wachtwoorden om je beveiliging te verbeteren en veiliger te internetten</translation>
 <translation id="3838985624086228724">Prijsdaling voor je gevolgde product, van <ph name="PREVIOUS_PRICE" /> naar <ph name="PRICE" />, <ph name="PRODUCT_NAME" />, <ph name="DOMAIN" /></translation>
 <translation id="385051799172605136">Terug</translation>
+<translation id="3850952228519377137">Prijzen volgen op je tabbladen verbergen</translation>
 <translation id="3851938967634752633">Wachtwoorden voor <ph name="WEBSITE" />, <ph name="SECOND_WEBSITE" /> en <ph name="NUMBER_OF_ACCOUNTS" /> andere accounts worden verwijderd. Je accounts zelf worden niet verwijderd.</translation>
 <translation id="3858860766373142691">Naam</translation>
 <translation id="3868495844258915202">Volledige URL tonen</translation>
@@ -699,6 +700,7 @@ Bekijk de instructies van je zoekmachine voor het verwijderen van je zoekgeschie
 <translation id="4038354071007134711">Geen app op dit apparaat kan het bestand openen.</translation>
 <translation id="4042870976416480368">Zoeken op pagina</translation>
 <translation id="4045648459118332842">Gebruik met één tik je opgeslagen wachtwoorden in elke app</translation>
+<translation id="4047337302138771011">Je wachtwoorden delen</translation>
 <translation id="4049419681095579435">Pakket al gevolgd</translation>
 <translation id="4049507953662678203">Zorg ervoor dat je beschikt over een netwerkverbinding en probeer het opnieuw.</translation>
 <translation id="4054572406751135230">Blijf op de hoogte van onder meer nieuws en sport.</translation>
@@ -773,7 +775,6 @@ Bekijk de instructies van je zoekmachine voor het verwijderen van je zoekgeschie
 <translation id="4334428914252001502">1 ongelezen artikel.</translation>
 <translation id="4338258232580025606">Inloggen lukt niet</translation>
 <translation id="4338650699862464074">Verzendt de URL's van pagina's die je bezoekt naar Google.</translation>
-<translation id="4342054591427973606">{count,plural, =1{Dit adres wordt verwijderd van dit apparaat en je andere ingelogde apparaten.}other{Deze adressen worden verwijderd van dit apparaat en je andere ingelogde apparaten.}}</translation>
 <translation id="4342946437867096381">Je hebt al een wachtwoord voor deze site opgeslagen in je Google-account. Google kan het meest recente wachtwoord voor je kiezen.</translation>
 <translation id="4365121137632832185">Tabbladgroep. Uitgevouwen.</translation>
 <translation id="4367971618859387374">Weergavenaam</translation>
@@ -907,6 +908,7 @@ Bekijk de instructies van je zoekmachine voor het verwijderen van je zoekgeschie
 <translation id="4896467949657706481">Tabbladen zijn gesloten en je bent uitgelogd</translation>
 <translation id="4913626501929406101">Je kunt een kopie van je wachtwoord beveiligd delen met iemand in je gezinsgroep. <ph name="BEGIN_LINK" />Meer informatie<ph name="END_LINK" /></translation>
 <translation id="4918086044614829423">Accepteren</translation>
+<translation id="4930714375720679147">Aanzetten</translation>
 <translation id="4932733599132424254">Datum</translation>
 <translation id="4936354130727646074">Nooit verplaatsen</translation>
 <translation id="4937410517508563815">Wachtwoorden opslaan in account</translation>
@@ -950,6 +952,7 @@ Bekijk de instructies van je zoekmachine voor het verwijderen van je zoekgeschie
 <translation id="5118462200606189584">Account toevoegen…</translation>
 <translation id="5118713593561876160">Interesses</translation>
 <translation id="5118764316110575523">Uit</translation>
+<translation id="5119329531859909472">Tik op Volgen om het product te volgen</translation>
 <translation id="5121618895923301719">Je volgt dit product al. Deze pagina is opgeslagen in <ph name="BEGIN_LINK" />Mobiele bookmarks<ph name="END_LINK" />.</translation>
 <translation id="512533434554095351">Je hebt verschillende wachtwoordproblemen.</translation>
 <translation id="5127538504377457572"><ph name="DAYS" /> dagen geleden actief</translation>
@@ -1012,6 +1015,7 @@ Bekijk de instructies van je zoekmachine voor het verwijderen van je zoekgeschie
 <translation id="5414763847370083940">Je krijgt een melding als de prijs op een site daalt.</translation>
 <translation id="5415289094036440596">Toegangssleutels kunnen niet worden gedeeld</translation>
 <translation id="5416455648658732408">Verplaatsen naar tabbladgroep</translation>
+<translation id="5423269318075950257">Prijs volgen</translation>
 <translation id="542659109038405424">Naar</translation>
 <translation id="5429624150850059322">Als je terugkomt, zijn de tabbladen vervaagd totdat je tikt om door te gaan</translation>
 <translation id="5431239785743546285">Pagina's die je hebt gelezen</translation>
@@ -1102,6 +1106,7 @@ Handoff moet ook aanstaan in het gedeelte Algemeen van Instellingen en je appara
 <translation id="5737974891429562743">De inloggegevens voor het account zijn verouderd. Voer een update uit om te synchroniseren.</translation>
 <translation id="5738385766833540397">Beheren hoe je meldingen over prijsdalingen krijgt voor producten die je volgt</translation>
 <translation id="5738887413654608789">Hiermee kun je relevante webpagina's vinden op basis van je omgeving.</translation>
+<translation id="573974402615125334">Als je tabbladgroepen wilt delen, eraan wilt deelnemen en eraan wilt samenwerken, synchroniseer je je geschiedenis en tabbladen</translation>
 <translation id="5740123193752401435">Tabbladen doorzoeken…</translation>
 <translation id="5744274077973758795">Meldingen van <ph name="FEATURE_NAME" /> staan aan</translation>
 <translation id="574762237186762643">Afspraken</translation>
@@ -1129,6 +1134,7 @@ Handoff moet ook aanstaan in het gedeelte Algemeen van Instellingen en je appara
 <translation id="5860491529813859533">Aanzetten</translation>
 <translation id="5868644772996939262">Wachtwoorden en toegangssleutels automatisch invullen</translation>
 <translation id="5869522115854928033">Opgeslagen wachtwoorden</translation>
+<translation id="5873179562631407582">Houd je vinger op een geopend tabblad</translation>
 <translation id="5878899964490256268"><ph name="EMAIL" />. Beheerd door je organisatie.</translation>
 <translation id="5888889603768021126">Ingelogd met</translation>
 <translation id="5889333064153755823">Browsegegevens verwijderen</translation>
@@ -1138,7 +1144,6 @@ Handoff moet ook aanstaan in het gedeelte Algemeen van Instellingen en je appara
 <translation id="5899314093904173337">Als je wilt delen met mensen in de buurt, laat je ze deze QR-code scannen met hun camera of een QR-scannerapp.</translation>
 <translation id="5902752768726620872">{count,plural, =1{{count} nieuw tabblad}other{{count} nieuwe tabbladen}}</translation>
 <translation id="5911030830365207728">Google Translate</translation>
-<translation id="5917913282764181683">Je downloads automatisch verwijderen</translation>
 <translation id="5922999516621365983">Sleep het tabblad hier naartoe om het vast te zetten.</translation>
 <translation id="5936006948844852401">Opslagruimte beheren</translation>
 <translation id="5936065461722368675">Hele pagina vertalen</translation>
@@ -1277,7 +1282,6 @@ Handoff moet ook aanstaan in het gedeelte Algemeen van Instellingen en je appara
 <translation id="6447842834002726250">Cookies</translation>
 <translation id="6449554712554071184">Hiermee wordt de groep definitief van je apparaat verwijderd.</translation>
 <translation id="6452534462676960500">Nieuwe activiteit</translation>
-<translation id="6459307836338400162">Bekijk <ph name="BEGIN_LINK" />Synchronisatie<ph name="END_LINK" /> en <ph name="BEGIN_LINK" />Google-services<ph name="END_LINK" /> voor meer instellingen over privacy, beveiliging en gegevensverzameling.</translation>
 <translation id="6459411599807878608">Gegevens verborgen</translation>
 <translation id="646394917185284261">Bestanden</translation>
 <translation id="6464397691496239022">Sites mogen cookies gebruiken om de browsefunctionaliteit te verbeteren, bijvoorbeeld door je ingelogd te houden of door artikelen in je winkelwagen te onthouden.
@@ -1314,6 +1318,7 @@ Sites mogen geen cookies gebruiken om je browse-activiteit op verschillende site
 <translation id="6583087784430677195">Open <ph name="BEGIN_LINK" />Instellingen<ph name="END_LINK" /> en ga naar Wachtwoorden automatisch invullen om dit uit te zetten.</translation>
 <translation id="6585048665672348661">Browsegegevens verwijderen…</translation>
 <translation id="6585618849026997638">Je kunt terugkeren naar een pagina die belangrijk voor je is door een bookmark toe te voegen</translation>
+<translation id="659407965921887085">Deze kaart toont prijsdalingen op het web voor producten die je op dit moment volgt</translation>
 <translation id="6596481460663245319">Afbeelding zoeken met Google</translation>
 <translation id="6598432073497341323">{COUNT,plural, =1{1 wachtwoord}other{# wachtwoorden}}</translation>
 <translation id="6601302169302852717">Afbeelding in Google Foto's opgeslagen voor <ph name="USER_EMAIL" /></translation>
@@ -1351,6 +1356,7 @@ Als je de incognitomodus gebruikt, kunnen sites geen cookies gebruiken om je bro
 <translation id="6680416467695217368">Menu aanpassen</translation>
 <translation id="6681586159478273915">Gesproken zoekopdracht</translation>
 <translation id="6681791404926413601">{count,plural, =1{{count} optie voor betaalmethode beschikbaar boven je toetsenbord.}other{{count} opties voor betaalmethoden beschikbaar boven je toetsenbord.}}</translation>
+<translation id="6684262542644248484">Log in bij een website</translation>
 <translation id="6685259053455152195">Snelkoppelingen om snel instellingen te wijzigen en functies te gebruiken via de adresbalk.</translation>
 <translation id="6689685206615181381">Alleen de incognitomodus is beschikbaar</translation>
 <translation id="6708501134077648845">Wachtwoordopties</translation>
@@ -1369,6 +1375,7 @@ Als je de incognitomodus gebruikt, kunnen sites geen cookies gebruiken om je bro
 <translation id="6761393919622941301">Audio</translation>
 <translation id="6779455296366983087">Je browsegegevens worden verwijderd</translation>
 <translation id="6790502149545262384">Binnenkort zie je artikelen van <ph name="CHANNEL_NAME" /> als je een nieuw tabblad opent.</translation>
+<translation id="6791425686608802741">Tik op Tabblad toevoegen aan nieuwe groep</translation>
 <translation id="6794476726485507147">Kies een datum en tijd waarop je een herinneringsmelding wilt krijgen om deze pagina opnieuw te bezoeken</translation>
 <translation id="6807287147325542056">Wachtwoorden in andere apps</translation>
 <translation id="681368974849482173">Item gemaakt</translation>
@@ -1436,6 +1443,7 @@ Als je de incognitomodus gebruikt, kunnen sites geen cookies gebruiken om je bro
 <translation id="7080806333218412752">Stuurt URL's naar Safe Browsing om deze te checken. Stuurt ook een klein gedeelte pagina's, downloads, extensie-activiteit en systeeminformatie om nieuwe dreigingen te kunnen detecteren. Koppelt deze gegevens tijdelijk aan je Google-account als je bent ingelogd om je te beschermen binnen de Google-apps.</translation>
 <translation id="7082853213442715471">Als deze optie aanstaat, worden bepaalde webtechnologieën geblokkeerd. Hierdoor kunnen sommige websites trager worden geladen of niet goed werken.</translation>
 <translation id="7095110968493193530">In Google Wachtwoordmanager voor <ph name="EMAIL" /></translation>
+<translation id="7097046145876891318">Tik in de adresbalk op Prijsgeschiedenis om prijswijzigingen in de loop van de tijd te bekijken</translation>
 <translation id="7101580180124131336">Je ziet nu content van en over <ph name="CHANNEL_NAME" /> in Je volgt.</translation>
 <translation id="7102005569666697658">Downloaden… <ph name="FILE_SIZE" /></translation>
 <translation id="7104701424653979232">Menu → Instellingen → Betaalmethoden</translation>
@@ -1494,7 +1502,6 @@ Als je de incognitomodus gebruikt, kunnen sites geen cookies gebruiken om je bro
 <translation id="741204030948306876">Ja, aanzetten</translation>
 <translation id="7417689656810783109">Naam van groep wijzigen</translation>
 <translation id="7419565702166471774">Altijd beveiligde verbindingen gebruiken</translation>
-<translation id="742001653298797675">Plan dat al je downloads na één maand worden verwijderd om ruimte op je telefoon te besparen en je privacy te beschermen.</translation>
 <translation id="7425053386765766120">Betaalmethode toevoegen…</translation>
 <translation id="7425346204213733349">Wijzigingen in je bookmarks, geschiedenis, wachtwoorden en andere instellingen worden niet meer gesynchroniseerd met je Google-account. Je bestaande gegevens blijven echter opgeslagen in je Google-account.</translation>
 <translation id="742664698522525515">Groep behouden?</translation>
@@ -1556,6 +1563,7 @@ Als je de incognitomodus gebruikt, kunnen sites geen cookies gebruiken om je bro
 <translation id="7646772052135772216">Wachtwoordsynchronisatie werkt niet</translation>
 <translation id="764827086632467055">Tik op Standaard browser-app</translation>
 <translation id="7649070708921625228">Hulp</translation>
+<translation id="765631330137769217">Tik op Opslaan om dit wachtwoord makkelijk te vinden als je de volgende keer inlogt</translation>
 <translation id="7658239707568436148">Annuleren</translation>
 <translation id="7662316065255305764">Site-informatie</translation>
 <translation id="7665369617277396874">Account toevoegen</translation>
@@ -1622,7 +1630,6 @@ Als je de incognitomodus gebruikt, kunnen sites geen cookies gebruiken om je bro
 <translation id="7933880123415105005">Zoeken via <ph name="SEARCH_PROVIDER" /></translation>
 <translation id="7938254975914653459">FaceTime</translation>
 <translation id="7941578031639087549">{count,plural, =1{Pagina toegevoegd aan je leeslijst in je account, {email}}other{{count} pagina's toegevoegd aan je leeslijst in je account, {email}}}</translation>
-<translation id="7947953824732555851">Accepteren en inloggen</translation>
 <translation id="7952670906562503188">Je staat op het punt om {passkey_count} toegangssleutels en de lijst met sites en apps waarvoor je hebt gekozen om nooit inloggegevens op te slaan, te verwijderen. Accounts die je voor sites en apps hebt gemaakt, worden niet verwijderd.</translation>
 <translation id="7958575506592576831">Paginabeveiligingsinfo</translation>
 <translation id="7961015016161918242">Nooit</translation>
@@ -1725,8 +1732,10 @@ Sites mogen cookies gebruiken om je browse-activiteit op verschillende sites te 
 <translation id="8307481894409578819">Dit bestand kan niet worden geüpload</translation>
 <translation id="8319076807703933069">Nieuwe zoekopdracht</translation>
 <translation id="8320212361750431956">Recente activiteit</translation>
+<translation id="8325455175867928593">Reviews op basis van je interesses verbergen</translation>
 <translation id="833647236762414178">Maak, bewaar en beheer je wachtwoorden en toegangssleutels om makkelijk in te loggen bij sites en apps. <ph name="BEGIN_LINK" />Meer informatie<ph name="END_LINK" /></translation>
 <translation id="8343993175958086504">Maak een back-up van je gegevens en gebruik deze op elk apparaat.</translation>
+<translation id="8348530355586151720">Tik op het menu met 3 stippen</translation>
 <translation id="8349305172487531364">Bookmarkbalk</translation>
 <translation id="8364563001733875155">Als je je pincode wilt wijzigen, stel je eerst een toegangscode in op je apparaat.</translation>
 <translation id="8366466717204352506">Check nooit uitgevoerd</translation>
@@ -1882,7 +1891,6 @@ Sites mogen cookies gebruiken om je browse-activiteit op verschillende sites te 
 <translation id="891282356902782456">Dit wachtwoord wordt alleen opgeslagen op dit apparaat. Als je het wachtwoord wilt gebruiken op je andere apparaten, sla je het op in je Google-account, <ph name="EMAIL" />.</translation>
 <translation id="8915916167043355778">Alles sluiten</translation>
 <translation id="892185197271200809">Iedereen raakt meteen de toegang tot de tabbladgroep <ph name="GROUP_NAME" /> kwijt en de groep wordt verwijderd van alle apparaten</translation>
-<translation id="8921902386312975525">Opties om pakketten te volgen</translation>
 <translation id="8923178205567790913">Wachtwoorden</translation>
 <translation id="892776311701544612">Meer informatie…</translation>
 <translation id="8928133177108699615">Desktop</translation>
@@ -1910,7 +1918,6 @@ Sites mogen cookies gebruiken om je browse-activiteit op verschillende sites te 
 <translation id="9013605037177245304">Meldingen aanzetten</translation>
 <translation id="9029650858822697271">Je bent uitgelogd</translation>
 <translation id="9032405509996909363">Browsegegevens verwijderen bevestigen</translation>
-<translation id="9034759925968272072">Je wordt niet uitgelogd van je Google-account. Voor je Google-account kunnen andere vormen van browsegeschiedenis beschikbaar zijn via <ph name="BEGIN_LINK" />history.google.com<ph name="END_LINK" />.</translation>
 <translation id="9039373489628511875">Bandbreedte</translation>
 <translation id="9042893549633094279">Privacy en beveiliging</translation>
 <translation id="9055580485132823283">Je staat op het punt om {password_count} wachtwoorden, {passkey_count} toegangssleutels en de lijst met sites en apps waarvoor je hebt gekozen om nooit inloggegevens op te slaan, te verwijderen. Accounts die je voor sites en apps hebt gemaakt, worden niet verwijderd.</translation>

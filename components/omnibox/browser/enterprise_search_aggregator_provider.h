@@ -34,6 +34,14 @@ class TemplateURLService;
 
 class EnterpriseSearchAggregatorProvider : public AutocompleteProvider {
  public:
+  // Relevance along with info for `AutocompleteMatch::additional_info`.
+  struct RelevanceData {
+    int relevance;
+    size_t strong_word_matches;
+    size_t weak_word_matches;
+    std::string rule;
+  };
+
   EnterpriseSearchAggregatorProvider(AutocompleteProviderClient* client,
                                      AutocompleteProviderListener* listener);
 
@@ -121,12 +129,19 @@ class EnterpriseSearchAggregatorProvider : public AutocompleteProvider {
   std::string GetMatchContents(const base::Value::Dict& result,
                                SuggestionType suggestion_type) const;
 
-  // Helper method to get user-readable (e.g. 'chromium is awesome document')
-  // fields that can be used to compare input similarity. Non-user-readable
-  // fields (e.g. 'doc_id=123/locations/global') should be excluded because the
-  // input matching that would be a coincidence and not a sign the user wanted
-  // this suggestion. Does not return fields already returned by
-  // `GetMatchDescription()` and `GetMatchContents()`.
+  // Helper method to get a localized metadata string depending on which of
+  // `update_time`, `owner`, and `file_type_description` exist.
+  std::u16string GetLocalizedContentMetadata(
+      const std::u16string& update_time,
+      const std::u16string& owner,
+      const std::u16string& file_type_description) const;
+
+  // Helper method to get user-readable (e.g. 'chromium is awesome
+  // document') fields that can be used to compare input similarity.
+  // Non-user-readable fields (e.g. 'doc_id=123/locations/global') should be
+  // excluded because the input matching that would be a coincidence and not
+  // a sign the user wanted this suggestion. Does not return fields already
+  // returned by `GetMatchDescription()` and `GetMatchContents()`.
   std::vector<std::string> GetAdditionalScoringFields(
       const base::Value::Dict& result,
       SuggestionType suggestion_type) const;
@@ -134,7 +149,7 @@ class EnterpriseSearchAggregatorProvider : public AutocompleteProvider {
   // Helper to create a match.
   AutocompleteMatch CreateMatch(SuggestionType suggestion_type,
                                 bool is_navigation,
-                                int relevance,
+                                RelevanceData relevance_data,
                                 const std::string& destination_url,
                                 const std::string& image_url,
                                 const std::string& icon_url,

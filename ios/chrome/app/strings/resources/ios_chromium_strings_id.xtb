@@ -95,7 +95,6 @@ Untuk setelan lainnya yang menggunakan data guna meningkatkan pengalaman Chromiu
 <translation id="328933489847748230">{count,plural, =1{Saat ini menampilkan 1 jendela Chromium}other{Saat ini menampilkan {count} jendela Chromium}}</translation>
 <translation id="3344973607274501920">Chromium tidak dapat memeriksa sandi Anda. Coba periksa koneksi internet Anda.</translation>
 <translation id="3366305173356742781">Data Chromium di akun Anda</translation>
-<translation id="33788334537425157">Aktifkan "Kunci tab Samaran saat Anda menutup Chromium"</translation>
 <translation id="3387107508582892610">{THRESHOLD,plural, =1{Hal ini terjadi jika Chromium tidak digunakan selama {THRESHOLD} menit. Data ini dapat mencakup histori dan isi otomatis.}other{Hal ini terjadi jika Chromium tidak digunakan selama {THRESHOLD} menit. Data ini dapat mencakup histori dan isi otomatis.}}</translation>
 <translation id="3410395242749598859">Beberapa data Chromium Anda belum disimpan di <ph name="EMAIL" />.
 Coba tunggu beberapa menit sebelum beralih akun. Jika Anda beralih akun sekarang, data ini akan dihapus.</translation>
@@ -208,7 +207,6 @@ Hal-hal yang perlu dipertimbangkan:
   • Jika Anda menyinkronkan histori ke Akun Google Anda, metrik juga dapat menyertakan info tentang URL yang Anda buka.<ph name="END_INDENT" /></translation>
 <translation id="5932787118589620366">Menghapus data penjelajahan di Chromium.</translation>
 <translation id="593808800391107017">Menerima notifikasi terkait masalah privasi atau keamanan apa pun yang otomatis dideteksi oleh Chromium untuk Anda.</translation>
-<translation id="5945387852661427312">Anda masuk dengan akun yang dikelola oleh <ph name="DOMAIN" /> dan memberikan kontrol data Chromium kepada administrator. Data Anda akan terikat dengan akun ini secara permanen. Bila Anda keluar dari Chromium, data akan dihapus dari perangkat ini, namun tetap disimpan di Akun Google.</translation>
 <translation id="5951593919357934226">Dapatkan manfaat optimal dari Chromium.</translation>
 <translation id="5985254578475526217">Untuk menerima notifikasi dari Chromium, aktifkan notifikasi di aplikasi Settings iOS Anda.</translation>
 <translation id="6104024151682120539">Buka di Chromium</translation>

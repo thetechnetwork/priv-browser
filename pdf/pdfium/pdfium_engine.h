@@ -260,7 +260,7 @@ class PDFiumEngine : public DocumentLoader::Client, public IFSDK_PAUSE {
   // Handles actions invoked by Accessibility clients.
   void HandleAccessibilityAction(const AccessibilityActionData& action_data);
 
-  std::string GetLinkAtPosition(const gfx::Point& point);
+  std::string GetLinkAtPosition(const gfx::PointF& point);
 
   // Checks the permissions associated with this document.
   virtual bool HasPermission(DocumentPermission permission) const;
@@ -623,6 +623,14 @@ class PDFiumEngine : public DocumentLoader::Client, public IFSDK_PAUSE {
     PDFiumPage::LinkTarget target_;
   };
 
+  struct PointData {
+    PDFiumPage::Area area = PDFiumPage::NONSELECTABLE_AREA;
+    int page_index = -1;
+    int char_index = -1;
+    int form_type = FPDF_FORMFIELD_UNKNOWN;
+    PDFiumPage::LinkTarget target;
+  };
+
   struct RegionData {
     RegionData(base::span<uint8_t> buffer, size_t stride);
     RegionData(RegionData&&) noexcept;
@@ -796,13 +804,8 @@ class PDFiumEngine : public DocumentLoader::Client, public IFSDK_PAUSE {
   // the plugin's text selection.
   void SetFormSelectedText(FPDF_FORMHANDLE form_handle, FPDF_PAGE page);
 
-  // Given `point`, returns which page and character location it's closest to,
-  // as well as extra information about objects at that point.
-  PDFiumPage::Area GetCharIndex(const gfx::Point& point,
-                                int* page_index,
-                                int* char_index,
-                                int* form_type,
-                                PDFiumPage::LinkTarget* target);
+  // Returns information about `point` and the objects at that point.
+  PointData GetPointData(const gfx::PointF& point);
 
   void OnSingleClick(int page_index, int char_index);
   void OnMultipleClick(int click_count, int page_index, int char_index);
@@ -877,13 +880,13 @@ class PDFiumEngine : public DocumentLoader::Client, public IFSDK_PAUSE {
   // Helper function to convert device coordinates to page coordinates.  If the
   // page is not yet loaded, `page_x` and `page_y` will be set to 0.
   void DeviceToPage(int page_index,
-                    const gfx::Point& device_point,
+                    const gfx::PointF& device_point,
                     double* page_x,
                     double* page_y);
 
   // Helper function to convert device coordinates to screen coordinates.
   // Normalizes `device_point` based on `position_` and `current_zoom_`.
-  gfx::Point DeviceToScreen(const gfx::Point& device_point) const;
+  gfx::Point DeviceToScreen(const gfx::PointF& device_point) const;
 
   // Helper function to get the index of a given FPDF_PAGE.  Returns -1 if not
   // found.
@@ -1106,7 +1109,7 @@ class PDFiumEngine : public DocumentLoader::Client, public IFSDK_PAUSE {
   bool mouse_middle_button_down_ = false;
 
   // Last known position while performing middle mouse button pan.
-  gfx::Point mouse_middle_button_last_position_;
+  gfx::PointF mouse_middle_button_last_position_;
 
   // The current text used for searching.
   std::u16string current_find_text_;

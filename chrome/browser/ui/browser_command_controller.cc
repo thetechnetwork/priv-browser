@@ -142,7 +142,10 @@
 
 #if BUILDFLAG(ENABLE_GLIC)
 #include "chrome/browser/glic/glic_enabling.h"
+#include "chrome/browser/glic/glic_enums.h"
+#include "chrome/browser/glic/glic_keyed_service_factory.h"
 #include "chrome/browser/glic/glic_pref_names.h"
+#include "chrome/browser/glic/glic_profile_manager.h"
 #endif
 
 using WebExposedIsolationLevel = content::WebExposedIsolationLevel;
@@ -1166,6 +1169,24 @@ bool BrowserCommandController::ExecuteCommandWithDisposition(
           !profile_prefs->GetBoolean(glic::prefs::kGlicPinnedToTabstrip));
       break;
     }
+    case IDC_OPEN_GLIC: {
+      auto* service =
+          glic::GlicKeyedServiceFactory::GetGlicKeyedService(profile());
+      if (service) {
+        glic::GlicKeyedServiceFactory::GetGlicKeyedService(profile())->ToggleUI(
+            browser_,
+            /*prevent_close=*/true,
+            glic::mojom::InvocationSource::kThreeDotsMenu);
+      }
+      break;
+    }
+    case IDC_GLIC_TOGGLE_FOCUS: {
+      if (auto* glic_keyed_service =
+              glic::GlicProfileManager::GetInstance()->GetLastActiveGlic()) {
+        glic_keyed_service->FocusUI();
+      }
+      break;
+    }
 #endif
     default:
       LOG(WARNING) << "Received Unimplemented Command: " << id;
@@ -1503,6 +1524,10 @@ void BrowserCommandController::InitCommandState() {
   // Glic commands.
   command_updater_.UpdateCommandEnabled(
       IDC_GLIC_TOGGLE_PIN, glic::GlicEnabling::IsProfileEligible(profile()));
+  command_updater_.UpdateCommandEnabled(
+      IDC_OPEN_GLIC, glic::GlicEnabling::IsProfileEligible(profile()));
+  command_updater_.UpdateCommandEnabled(
+      IDC_GLIC_TOGGLE_FOCUS, glic::GlicEnabling::IsProfileEligible(profile()));
 #endif
 
   // Initialize other commands whose state changes based on various conditions.
@@ -1571,9 +1596,7 @@ void BrowserCommandController::UpdateCommandsForIncognitoAvailability() {
   // be done in UpdateSharedCommandsForIncognitoAvailability as the method is
   // static to also handle states for NSApplication where no browser window are
   // open.
-  if (auto* incognito_action = actions::ActionManager::Get().FindAction(
-          kActionNewIncognitoWindow,
-          browser_->GetActions()->root_action_item())) {
+  if (auto* const incognito_action = FindAction(kActionNewIncognitoWindow)) {
     incognito_action->SetEnabled(
         IncognitoModePrefs::IsIncognitoAllowed(profile()));
   }

@@ -293,15 +293,15 @@ BASE_FEATURE(kDigitalGoodsApi,
 // behavior (database persistence, storage deletion) will be gated by params.
 BASE_FEATURE(kBtm, "DIPS", base::FEATURE_ENABLED_BY_DEFAULT);
 
-// Flag used to control |interaction_ttl| separately from the kBtm feature
-// flag.
+// Flag used to control the TTL for user interactions (separately from the
+// |kBtm| feature flag).
 BASE_FEATURE(kBtmTtl, "DIPSTtl", base::FEATURE_ENABLED_BY_DEFAULT);
 
-// Set whether DIPS persists its database to disk.
+// Set whether BTM persists its database to disk.
 const base::FeatureParam<bool> kBtmPersistedDatabaseEnabled{
     &kBtm, "persist_database", true};
 
-// Set whether DIPS performs deletion.
+// Set whether BTM performs deletion.
 const base::FeatureParam<bool> kBtmDeletionEnabled{&kBtm, "delete", true};
 
 // Set the time period that Chrome will wait for before clearing storage for a
@@ -315,12 +315,12 @@ const base::FeatureParam<base::TimeDelta> kBtmGracePeriod{&kBtm, "grace_period",
 const base::FeatureParam<base::TimeDelta> kBtmTimerDelay{&kBtm, "timer_delay",
                                                          base::Hours(1)};
 
-// Sets how long DIPS maintains interactions and Web Authn Assertions (WAA) for
+// Sets how long BTM maintains interactions and Web Authn Assertions (WAA) for
 // a site.
 //
-// If a site in the DIPS database has an interaction or WAA within the grace
-// period a DIPS-triggering action, then that action and all ensuing actions are
-// protected from DIPS clearing until the interaction and WAA "expire" as set
+// If a site in the BTM database has an interaction or WAA within the grace
+// period a BTM-triggering action, then that action and all ensuing actions are
+// protected from BTM clearing until the interaction and WAA "expire" as set
 // by this param.
 // NOTE: Updating this param name (to reflect WAA) is deemed unnecessary as far
 // as readability is concerned.
@@ -334,14 +334,11 @@ constexpr base::FeatureParam<content::BtmTriggeringAction>::Option
         {content::BtmTriggeringAction::kBounce, "bounce"},
         {content::BtmTriggeringAction::kStatefulBounce, "stateful_bounce"}};
 
-// Sets the actions which will trigger DIPS clearing for a site. The default is
-// to set to kBounce, but can be overridden by Finch experiment groups,
+// Sets the actions which will trigger BTM clearing for a site. The default is
+// to set to |kBounce|, but can be overridden by Finch experiment groups,
 // command-line flags, or chrome flags.
-//
-// Note: Maintain a matching nomenclature of the options with the feature flag
-// entries at about_flags.cc.
 const base::FeatureParam<content::BtmTriggeringAction> kBtmTriggeringAction{
-    &kBtm, "triggering_action", content::BtmTriggeringAction::kStatefulBounce,
+    &kBtm, "triggering_action", content::BtmTriggeringAction::kBounce,
     &kBtmTriggeringActionOptions};
 
 // Denotes the length of a time interval within which any client-side redirect
@@ -422,6 +419,12 @@ BASE_FEATURE(kFedCm, "FedCm", base::FEATURE_ENABLED_BY_DEFAULT);
 // log in to another IDP account, if the IDP opts in.
 BASE_FEATURE(kFedCmUseOtherAccount,
              "FedCmUseOtherAccount",
+             base::FEATURE_DISABLED_BY_DEFAULT);
+
+// Support usernames and phone numbers to identify users, instead of
+// (or in addition to) names and emails.
+BASE_FEATURE(kFedCmAlternativeIdentifiers,
+             "FedCmAlternativeIdentifiers",
              base::FEATURE_DISABLED_BY_DEFAULT);
 
 // Enables usage of the FedCM Authz API.
@@ -1043,7 +1046,7 @@ BASE_FEATURE(kWebLockScreenApi,
 // SiteInstanceGroup as the initiator.
 BASE_FEATURE(kSiteInstanceGroupsForDataUrls,
              "SiteInstanceGroupsForDataUrls",
-             base::FEATURE_DISABLED_BY_DEFAULT);
+             base::FEATURE_ENABLED_BY_DEFAULT);
 
 // When enabled, puts non-isolated sites in separate SiteInstances in a default
 // SiteInstanceGroup (per BrowsingInstance), rather than sharing a default

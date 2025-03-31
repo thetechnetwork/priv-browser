@@ -6,7 +6,6 @@
 <translation id="1143896152279775643">Dein Passwort wird im Google Passwortmanager für <ph name="EMAIL" /> gespeichert.</translation>
 <translation id="1146503048444965320">Neuen Tab in Chrome öffnen</translation>
 <translation id="1166460004393506534">Browserdaten in Chrome löschen</translation>
-<translation id="1171255741903316750">Aktiviere die Option „Inkognitotabs sperren, wenn Chrome geschlossen wird“</translation>
 <translation id="1179527450541388808">Über das Startbildschirm-Dock deines iPads kannst du schneller auf Chrome zugreifen.</translation>
 <translation id="1180362651362502943">Chrome-Daten in deinem Google-Konto weiterhin verwenden.</translation>
 <translation id="1200396280085622191">Du kannst Chrome jederzeit nutzen, wenn du in Nachrichten und anderen Apps auf Links tippst.</translation>
@@ -178,6 +177,7 @@ Warte einige Minuten, bevor du dich abmeldest. Wenn du dich jetzt abmeldest, wer
 <translation id="5716154293141027663">Chrome immer öffnen, wenn du auf Links in anderen Apps tippst</translation>
 <translation id="5752489513673657785">Ein personalisierter Feed, der von Google für dich erstellt wurde</translation>
 <translation id="5772407442571703917">Hier kannst du Chrome herunterladen.</translation>
+<translation id="5777468213129569553">Chrome öffnen</translation>
 <translation id="5779767936254214055">Du kannst Inkognitotabs sperren lassen, wenn du Chrome verlässt oder zu einer anderen App wechselst.</translation>
 <translation id="5808435672482059465">Chrome-Verlauf ansehen</translation>
 <translation id="5833027901704861726">Einige deiner Chrome-Daten wurden noch nicht in <ph name="EMAIL" /> gespeichert.
@@ -213,7 +213,6 @@ Deine Daten werden mit deiner Passphrase verschlüsselt. Gib sie ein, um Chrome-
 <translation id="6636941099779251629">Deine Organisation verlangt, dass du dich für die Verwendung von Chrome anmeldest. <ph name="BEGIN_LINK" />Weitere Informationen<ph name="END_LINK" /></translation>
 <translation id="6646696210740573446">Sendet einen verschleierten Teil der URL über einen Datenschutzserver, der deine IP-Adresse verbirgt, an Google. Wenn eine Website versucht, dein Passwort zu stehlen, oder wenn du eine schädliche Datei herunterlädst, kann Chrome auch URLs und Teile von Seiteninhalten an Google senden.</translation>
 <translation id="6647304104688527905">Öffnet einen neuen Tab in Chrome.</translation>
-<translation id="6648150602980899529">Du meldest dich mit einem von <ph name="DOMAIN" /> verwalteten Konto an und gibst dem Administrator der Domain Kontrolle über deine Chrome-Daten. Die Daten werden diesem Konto dauerhaft zugeordnet. Wenn du dich von Chrome abmeldest, werden deine Daten auf dem Gerät gelöscht, bleiben jedoch in deinem Google-Konto erhalten.</translation>
 <translation id="6684809838922667136">Chrome verbessern</translation>
 <translation id="6695698548122852044">{THRESHOLD,plural, =1{Das passiert, wenn Chrome {THRESHOLD} Minute lang nicht verwendet wird. Daten, die nur auf diesem Gerät gespeichert wurden, während du angemeldet warst, werden gelöscht. Dazu können beispielsweise der Verlauf und Passwörter gehören.}other{Das passiert, wenn Chrome {THRESHOLD} Minuten lang nicht verwendet wird. Daten, die nur auf diesem Gerät gespeichert wurden, während du angemeldet warst, werden gelöscht. Dazu können beispielsweise der Verlauf und Passwörter gehören.}}</translation>
 <translation id="6709398533399187136">Dein Passwort wurde durch eine Datenpanne preisgegeben. Der Google Passwortmanager empfiehlt, dieses Passwort jetzt zu ändern.</translation>
