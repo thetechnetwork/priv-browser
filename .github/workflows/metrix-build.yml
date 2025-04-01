@@ -303,6 +303,24 @@ jobs:
           gclient sync --no-history --with_branch_heads --with_tags -D
           gclient runhooks
 
+      - name: Checkout patch repo
+        uses: actions/checkout@v3
+        with:
+          repository: TheTechNetwork/priv-browser-patches
+          token: ${{ secrets.PRIV_BROWSER_PAT }}
+          path: priv-browser-patches
+
+      - name: Apply custom patches
+        shell: bash
+        run: |
+          echo "Applying patches from priv-browser-patches..."
+          cd src
+          for patch in ../priv-browser-patches/*.patch; do
+            echo "Applying $patch"
+            git apply "$patch" || { echo "Failed to apply $patch" && exit 1; }
+          done
+
+
       # New step: Configure memory settings for Linux build
       - name: Configure memory settings (Linux)
         if: contains(matrix.runner, 'linux')
