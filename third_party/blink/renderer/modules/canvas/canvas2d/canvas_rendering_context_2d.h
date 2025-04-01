@@ -36,7 +36,6 @@
 #include "cc/paint/paint_record.h"
 #include "third_party/blink/public/common/privacy_budget/identifiable_token.h"
 #include "third_party/blink/renderer/bindings/modules/v8/v8_typedefs.h"
-#include "third_party/blink/renderer/core/html/canvas/canvas_2d_color_params.h"
 #include "third_party/blink/renderer/core/html/canvas/canvas_context_creation_attributes_core.h"
 #include "third_party/blink/renderer/core/html/canvas/canvas_performance_monitor.h"
 #include "third_party/blink/renderer/core/html/canvas/canvas_rendering_context.h"
@@ -79,7 +78,6 @@ class PaintCanvas;
 namespace blink {
 
 class CanvasImageSource;
-class CanvasRenderingContext2DSettings;
 class ComputedStyle;
 class Element;
 class ExceptionState;
@@ -130,26 +128,15 @@ class MODULES_EXPORT CanvasRenderingContext2D final
   V8RenderingContext* AsV8RenderingContext() final;
 
   bool ShouldAntialias() const;
-  void SetShouldAntialias(bool) override;
-
-  void clearRect(double x, double y, double width, double height);
-  void ClearRect(double x, double y, double width, double height) override {
-    clearRect(x, y, width, height);
-  }
-
-  void Reset() override;
+  void SetShouldAntialias(bool);
 
   void setFontForTesting(const String& new_font) override;
-
-  CanvasRenderingContext2DSettings* getContextAttributes() const;
 
   void drawFocusIfNeeded(Element*);
   void drawFocusIfNeeded(Path2D*, Element*);
 
   void LoseContext(LostContextMode) override;
-  void RestoreProviderAndContextIfPossible() override;
-
-  void RestoreCanvasMatrixClipStack(cc::PaintCanvas*) const override;
+  void RestoreFromInvalidSizeIfNeeded() override;
 
   // TaskObserver implementation
   void DidProcessTask(const base::PendingTask&) final;
@@ -187,15 +174,6 @@ class MODULES_EXPORT CanvasRenderingContext2D final
   void WillDraw(const SkIRect& dirty_rect,
                 CanvasPerformanceMonitor::DrawType) final;
 
-  SkAlphaType GetAlphaType() const override {
-    return color_params_.GetAlphaType();
-  }
-  viz::SharedImageFormat GetSharedImageFormat() const override {
-    return color_params_.GetSharedImageFormat();
-  }
-  gfx::ColorSpace GetColorSpace() const override {
-    return color_params_.GetGfxColorSpace();
-  }
   scoped_refptr<StaticBitmapImage> GetImage(FlushReason) final;
 
   sk_sp<PaintFilter> StateGetFilter() final;
@@ -249,9 +227,6 @@ class MODULES_EXPORT CanvasRenderingContext2D final
   HTMLCanvasElement* HostAsHTMLCanvasElement() const final;
   UniqueFontSelector* GetFontSelector() const final;
 
-  PredefinedColorSpace GetDefaultImageDataColorSpace() const final {
-    return color_params_.ColorSpace();
-  }
   bool WritePixels(const SkImageInfo& orig_info,
                    const void* pixels,
                    size_t row_bytes,
@@ -306,8 +281,6 @@ class MODULES_EXPORT CanvasRenderingContext2D final
   HashMap<String, FontDescription> fonts_resolved_using_current_style_;
   bool should_prune_local_font_cache_;
   LinkedHashSet<String> font_lru_list_;
-
-  Canvas2DColorParams color_params_;
 
   // For privacy reasons we need to delay contextLost events until the page is
   // visible. In order to do this we will hold on to a bool here

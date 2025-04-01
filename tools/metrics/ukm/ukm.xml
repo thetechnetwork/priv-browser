@@ -3859,6 +3859,15 @@ be describing additional metrics about the same event.
       metric is recorded.
     </summary>
   </metric>
+  <metric name="CancelReason" enum="FedCmCancelReason">
+    <summary>
+      Records the reason that the FedCM dialog was closed (e.g. user clicked the
+      dialog close button). Recorded when the FedCM dialog is closed without the
+      user selecting an account. This includes instances where the close action
+      is less intentional such as the virtual keyboard showing triggering the
+      dialog close.
+    </summary>
+  </metric>
   <metric name="Disconnect.FrameType" enum="FedCmRequesterFrameType">
     <summary>
       Records the type of frame that invokes disconnect(). Records once for each
@@ -15259,6 +15268,12 @@ be describing additional metrics about the same event.
     happen multiple times within a navigation, and we may pass succeeding
     milestones after the last record.
   </summary>
+  <metric name="Category">
+    <summary>
+      An 8-bit integer that can be manually mapped to a specific URL param
+      &quot;category=&quot; value. Note that only the number is logged.
+    </summary>
+  </metric>
   <metric name="CommitReceivedTime">
     <summary>
       The time when the CommitNavigation IPC for the navigation is received in

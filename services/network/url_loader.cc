@@ -1698,8 +1698,16 @@ int URLLoader::ProcessAcceptCHFrameOnConnected(
   if (!hints.empty()) {
     // `accept_ch_frame_observer_` is owned by `this`, so passing in
     // `callback` is safe.
+    auto record = [](net::CompletionOnceCallback callback,
+                     base::TimeTicks call_time, int status) {
+      base::UmaHistogramMicrosecondsTimes(
+          "Net.URLLoader.AcceptCH.RoundTripTime",
+          base::TimeTicks::Now() - call_time);
+      std::move(callback).Run(status);
+    };
     accept_ch_frame_observer_->OnAcceptCHFrameReceived(
-        url::Origin::Create(url_request->url()), hints, std::move(callback));
+        url::Origin::Create(url_request->url()), hints,
+        base::BindOnce(record, std::move(callback), base::TimeTicks::Now()));
     return net::ERR_IO_PENDING;
   }
   return net::OK;
@@ -1890,6 +1898,8 @@ void URLLoader::OnReceivedRedirect(net::URLRequest* url_request,
 
   DCHECK_EQ(emitted_devtools_raw_request_, emitted_devtools_raw_response_);
   response->emitted_extra_info = emitted_devtools_raw_request_;
+
+  ad_auction_event_record_request_helper_.HandleResponse(*url_request_);
 
   ProcessInboundAttributionInterceptorOnReceivedRedirect(redirect_info,
                                                          std::move(response));

@@ -431,11 +431,6 @@ const char kForceStartupSigninPromoDescription[] =
     "If enabled, the full screen signin promo will be forced to show up at "
     "Chrome start-up.";
 
-#if BUILDFLAG(IS_CHROMEOS)
-const char kForestFeatureName[] = "Forest";
-const char kForestFeatureDescription[] = "Enable Forest experiment.";
-#endif
-
 const char kFontationsFontBackendName[] = "Enable Fontations font backend";
 const char kFontationsFontBackendDescription[] =
     "If enabled, the Fontations font backend will be used for web fonts where "
@@ -812,13 +807,6 @@ const char kAutofillPaymentsFieldSwappingDescription[] =
     "When enabled, swapping autofilled payment suggestions would result"
     "in overriding all of the payments fields with the swapped profile data";
 
-const char kAutofillRemovePaymentsButterDropdownName[] =
-    "Remove \"Show cards from your Google Account\" dropdown";
-const char kAutofillRemovePaymentsButterDropdownDescription[] =
-    "When enabled, the \"Show cards from your Google Account\" Autofill "
-    "suggestion will not be displayed, and Autofill will work as if it had "
-    "been selected.";
-
 const char kAutofillSharedStorageServerCardDataName[] =
     "Enable storing autofill server card data in the shared storage database";
 const char kAutofillSharedStorageServerCardDataDescription[] =
@@ -1122,6 +1110,13 @@ const char kCompressionDictionaryTransportRequireKnownRootCertDescription[] =
     "When this is enabled, Chromium can use stored shared dictionaries only "
     "when the connection is using a well known root cert or when the server is "
     "a localhost.";
+
+#if BUILDFLAG(IS_ANDROID)
+const char kContextMenuEmptySpaceName[] = "Context menu at empty space";
+const char kContextMenuEmptySpaceDescription[] =
+    "When this is enabled, on right click (or equivalent gestures) at empty "
+    "space, a context menu containing page-related items will be shown.";
+#endif  // BUILDFLAG(IS_ANDROID)
 
 #if BUILDFLAG(IS_LINUX) || BUILDFLAG(IS_MAC) || BUILDFLAG(IS_WIN)
 const char kContextualCueingName[] = "Contextual cueing";
@@ -4368,6 +4363,10 @@ const char kAndroidPdfAssistContentName[] = "Provide assist content for PDF";
 const char kAndroidPdfAssistContentDescription[] =
     "Provide assist content for PDF on Android.";
 
+const char kAndroidSurfaceColorUpdateName[] = "Android surface color update.";
+const char kAndroidSurfaceColorUpdateDescription[] =
+    "If enabled, updates the android surface colors.";
+
 const char kAndroidTabDeclutterName[] = "Android Tab Declutter";
 const char kAndroidTabDeclutterDescription[] =
     "Enables auto-archival and deletion of inactive tabs.";
@@ -4383,6 +4382,11 @@ const char kAndroidTabDeclutterArchiveDuplicateTabsName[] =
 const char kAndroidTabDeclutterArchiveDuplicateTabsDescription[] =
     "Enables auto-archival of all duplicate tabs except the most recently used "
     "copy.";
+
+const char kAndroidTabDeclutterArchiveTabGroupsName[] =
+    "Archive all inactive tab groups.";
+const char kAndroidTabDeclutterArchiveTabGroupsDescription[] =
+    "Enables auto-archival of inactive tab groups and their inactive tabs.";
 
 const char kAndroidThemeModuleName[] = "Android Theme Module";
 const char kAndroidThemeModuleDescription[] =
@@ -4578,6 +4582,10 @@ const char kTabClosureMethodRefactorName[] = "Tab closure method refactor";
 const char kTabClosureMethodRefactorDescription[] =
     "Enables the refactored changes for tab closure methods where existing "
     "methods usages are switched off and newly introduced are made active.";
+
+const char kGridTabSwitcherUpdateName[] = "Grid tab switcher update";
+const char kGridTabSwitcherUpdateDescription[] =
+    "Enables the visual changes in the grid tab switcher.";
 
 const char kDynamicSafeAreaInsetsName[] = "DynamicSafeAreaInsets";
 const char kDynamicSafeAreaInsetsDescription[] =
@@ -4789,6 +4797,12 @@ const char kPaymentLinkDetectionName[] = "Enable payment link detection";
 const char kPaymentLinkDetectionDescription[] =
     "Enables payment link detection in the DOM.";
 
+const char kProcessRankPolicyAndroidName[] =
+    "Enable performance manager rank policy for Android";
+const char kProcessRankPolicyAndroidDescription[] =
+    "Enables performance manager ranking policy to update memory priority of "
+    "renderer processes";
+
 const char kReadAloudName[] = "Read Aloud";
 const char kReadAloudDescription[] = "Controls the Read Aloud feature";
 
@@ -4863,11 +4877,6 @@ const char kSecurePaymentConfirmationAndroidName[] =
 const char kSecurePaymentConfirmationAndroidDescription[] =
     "Enables Secure Payment Confirmation on Android.";
 
-const char kSendTabToSelfV2Name[] = "Send tab to self 2.0";
-const char kSendTabToSelfV2Description[] =
-    "Enables new received tab "
-    "UI shown next to the profile icon instead of using system notifications.";
-
 const char kSetMarketUrlForTestingName[] = "Set market URL for testing";
 const char kSetMarketUrlForTestingDescription[] =
     "When enabled, sets the market URL for use in testing the update menu "
@@ -4935,10 +4944,6 @@ const char kTabGroupSyncDisableNetworkLayerName[] =
     "Tab Group Sync Disable Network Layer";
 const char kTabGroupSyncDisableNetworkLayerDescription[] =
     "Disables network layer of tab group sync.";
-
-const char kTabResumptionModuleAndroidName[] = "Tab Resumption Module";
-const char kTabResumptionModuleAndroidDescription[] =
-    "Enable showing tab suggestions on Android";
 
 const char kTabStripContextMenuAndroidName[] = "Tab Strip Context Menu Android";
 const char kTabStripContextMenuAndroidDescription[] =
@@ -7443,10 +7448,6 @@ const char kSysUiShouldHoldbackDriveIntegrationName[] =
     "Holdback for Drive Integration on chromeOS";
 const char kSysUiShouldHoldbackDriveIntegrationDescription[] =
     "Enables holdback for Drive Integration.";
-
-const char kSysUiShouldHoldbackForestName[] = "Holdback for Forest on chromeOS";
-const char kSysUiShouldHoldbackForestDescription[] =
-    "Enables holdback for Forest.";
 
 const char kSysUiShouldHoldbackTaskManagementName[] =
     "Holdback for Task Management on chromeOS";

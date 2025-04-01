@@ -73,7 +73,6 @@
 #include "third_party/blink/renderer/core/html/canvas/canvas_font_cache.h"
 #include "third_party/blink/renderer/core/html/canvas/canvas_performance_monitor.h"
 #include "third_party/blink/renderer/core/html/canvas/canvas_rendering_context.h"
-#include "third_party/blink/renderer/core/layout/geometry/physical_offset.h"
 #include "third_party/blink/renderer/core/layout/geometry/physical_rect.h"
 #include "third_party/blink/renderer/core/layout/layout_box.h"
 #include "third_party/blink/renderer/core/layout/layout_box_model_object.h"
@@ -91,6 +90,7 @@
 #include "third_party/blink/renderer/modules/canvas/htmlcanvas/canvas_context_creation_attributes_helpers.h"
 #include "third_party/blink/renderer/platform/fonts/font.h"
 #include "third_party/blink/renderer/platform/geometry/layout_unit.h"
+#include "third_party/blink/renderer/platform/geometry/physical_offset.h"
 #include "third_party/blink/renderer/platform/geometry/stroke_data.h"
 #include "third_party/blink/renderer/platform/graphics/canvas_deferred_paint_record.h"
 #include "third_party/blink/renderer/platform/graphics/canvas_hibernation_handler.h"
@@ -171,8 +171,7 @@ CanvasRenderingContext2D::CanvasRenderingContext2D(
           canvas,
           attrs,
           canvas->GetDocument().GetTaskRunner(TaskType::kInternalDefault)),
-      should_prune_local_font_cache_(false),
-      color_params_(attrs.color_space, attrs.pixel_format, attrs.alpha) {
+      should_prune_local_font_cache_(false) {
   identifiability_study_helper_.SetExecutionContext(
       canvas->GetTopExecutionContext());
   if (canvas->GetDocument().GetSettings() &&
@@ -222,9 +221,8 @@ void CanvasRenderingContext2D::LoseContext(LostContextMode lost_mode) {
   ResetInternal();
   HTMLCanvasElement* const element = canvas();
   if (element != nullptr) [[likely]] {
-    if (context_lost_mode_ == kSyntheticLostContext) {
-      element->DiscardResourceProvider();
-    }
+    element->DiscardResourceProvider();
+    element->DiscardResourceDispatcher();
 
     if (element->IsPageVisible()) {
       dispatch_context_lost_event_timer_.StartOneShot(base::TimeDelta(),
@@ -235,15 +233,15 @@ void CanvasRenderingContext2D::LoseContext(LostContextMode lost_mode) {
   needs_context_lost_event_ = true;
 }
 
-void CanvasRenderingContext2D::RestoreProviderAndContextIfPossible() {
-  if (!context_restorable_)
+void CanvasRenderingContext2D::RestoreFromInvalidSizeIfNeeded() {
+  HTMLCanvasElement* element = canvas();
+  if (!context_restorable_ || context_lost_mode_ != kInvalidCanvasSize ||
+      !element) {
     return;
-  // This code path is for restoring from an eviction
-  // Restoring from surface failure is handled internally
-  DCHECK(context_lost_mode_ != kNotLostContext &&
-         !canvas()->ResourceProvider());
+  }
+  DCHECK(!element->ResourceProvider());
 
-  if (CanCreateCanvas2dResourceProvider()) {
+  if (IsValidImageSize(element->Size())) {
     dispatch_context_restored_event_timer_.StartOneShot(base::TimeDelta(),
                                                         FROM_HERE);
   }
@@ -266,6 +264,8 @@ void CanvasRenderingContext2D::TryRestoreContextEvent(TimerBase* timer) {
 
   DCHECK(context_lost_mode_ != kWebGLLoseContextLostContext);
 
+  RestoreGuard context_is_being_restored(*this);
+
   // If lost mode is |kSyntheticLostContext| and |context_restorable_| is set to
   // true, it means context is forced to be lost for testing purpose. Restore
   // the context.
@@ -277,19 +277,7 @@ void CanvasRenderingContext2D::TryRestoreContextEvent(TimerBase* timer) {
     }
   }
 
-  // This code historically checked whether the bridge existed because it called
-  // into the bridge to restore the resource provider. However, it no longer
-  // does so, and there is no logical reason to guard restoring the resource
-  // provider by whether the bridge is present or not. Note that it doesn't make
-  // sense to call IsPaintable() here when IsPaintable() is returning whether
-  // the resource provider is present, since we are trying to restore the
-  // resource provider here :). Instead, just ensure that the canvas is present,
-  // since this method is called on a timer.
-  bool can_restore = CheckProviderInCanvas2DRenderingContextIsPaintable()
-                         ? canvas() != nullptr
-                         : IsPaintable();
-  if (context_lost_mode_ == kRealLostContext && can_restore && Restore()) {
-    Host()->set_context_lost(false);
+  if (context_lost_mode_ == kRealLostContext && Restore()) {
     try_restore_context_event_timer_.Stop();
     DispatchContextRestoredEvent(nullptr);
     return;
@@ -315,7 +303,6 @@ bool CanvasRenderingContext2D::Restore() {
     return false;
   }
 
-  CHECK(host->context_lost());
   DCHECK(!host->ResourceProvider());
 
   host->ClearLayerTexture();
@@ -325,7 +312,7 @@ bool CanvasRenderingContext2D::Restore() {
 
   if (!context_provider_wrapper->ContextProvider().IsContextLost()) {
     CanvasResourceProvider* resource_provider =
-        host->GetOrCreateCanvasResourceProviderImpl(RasterModeHint::kPreferGPU);
+        host->GetOrCreateResourceProviderWithCurrentRasterModeHint();
 
     // The current paradigm does not support switching from accelerated to
     // non-accelerated, which would be tricky due to changes to the layer tree,
@@ -336,8 +323,6 @@ bool CanvasRenderingContext2D::Restore() {
       // FIXME: draw sad canvas picture into new buffer crbug.com/243842
     }
   }
-
-  host->UpdateMemoryUsage();
 
   return host->ResourceProvider();
 }
@@ -387,16 +372,6 @@ bool CanvasRenderingContext2D::WritePixels(const SkImageInfo& orig_info,
 
   return host->ResourceProvider()->WritePixels(orig_info, pixels, row_bytes, x,
                                                y);
-}
-
-void CanvasRenderingContext2D::Reset() {
-  // This is a multiple inheritance bootstrap
-  BaseRenderingContext2D::ResetInternal();
-}
-
-void CanvasRenderingContext2D::RestoreCanvasMatrixClipStack(
-    cc::PaintCanvas* c) const {
-  RestoreMatrixClipStack(c);
 }
 
 bool CanvasRenderingContext2D::ShouldAntialias() const {
@@ -470,13 +445,6 @@ void CanvasRenderingContext2D::ScrollPathIntoViewInternal(const Path& path) {
           horizontal_scroll_mode, vertical_scroll_mode,
           mojom::blink::ScrollType::kProgrammatic, false,
           mojom::blink::ScrollBehavior::kAuto));
-}
-
-void CanvasRenderingContext2D::clearRect(double x,
-                                         double y,
-                                         double width,
-                                         double height) {
-  BaseRenderingContext2D::clearRect(x, y, width, height);
 }
 
 sk_sp<PaintFilter> CanvasRenderingContext2D::StateGetFilter() {
@@ -1022,11 +990,6 @@ cc::Layer* CanvasRenderingContext2D::CcLayer() const {
   }
 
   return canvas()->GetOrCreateCcLayerIfNeeded();
-}
-
-CanvasRenderingContext2DSettings*
-CanvasRenderingContext2D::getContextAttributes() const {
-  return ToCanvasRenderingContext2DSettings(CreationAttributes());
 }
 
 void CanvasRenderingContext2D::drawFocusIfNeeded(Element* element) {

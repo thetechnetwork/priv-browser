@@ -100,8 +100,7 @@ OffscreenCanvasRenderingContext2D::OffscreenCanvasRenderingContext2D(
     : BaseRenderingContext2D(canvas,
                              attrs,
                              canvas->GetTopExecutionContext()->GetTaskRunner(
-                                 TaskType::kInternalDefault)),
-      color_params_(attrs.color_space, attrs.pixel_format, attrs.alpha) {
+                                 TaskType::kInternalDefault)) {
   identifiability_study_helper_.SetExecutionContext(
       canvas->GetTopExecutionContext());
   is_valid_size_ = IsValidImageSize(Host()->Size());
@@ -139,11 +138,6 @@ void OffscreenCanvasRenderingContext2D::FinalizeFrame(FlushReason reason) {
   Host()->FlushRecording(reason);
 }
 
-CanvasRenderingContext2DSettings*
-OffscreenCanvasRenderingContext2D::getContextAttributes() const {
-  return ToCanvasRenderingContext2DSettings(CreationAttributes());
-}
-
 // BaseRenderingContext2D implementation
 bool OffscreenCanvasRenderingContext2D::OriginClean() const {
   return Host()->OriginClean();
@@ -177,7 +171,6 @@ OffscreenCanvasRenderingContext2D::GetOrCreateCanvasResourceProvider() const {
   if (host == nullptr) [[unlikely]] {
     return nullptr;
   }
-  host->CheckForGpuContextLost();
   return host->GetOrCreateResourceProvider();
 }
 
@@ -340,10 +333,9 @@ void OffscreenCanvasRenderingContext2D::LoseContext(LostContextMode lost_mode) {
   if (context_lost_mode_ != kNotLostContext)
     return;
   context_lost_mode_ = lost_mode;
-  if (CanvasRenderingContextHost* host = Host();
-      host != nullptr && context_lost_mode_ == kSyntheticLostContext)
-      [[unlikely]] {
+  if (CanvasRenderingContextHost* host = Host()) [[likely]] {
     host->DiscardResourceProvider();
+    host->DiscardResourceDispatcher();
   }
   uint32_t delay = base::RandInt(1, kMaxIframeContextLoseDelay);
   dispatch_context_lost_event_timer_.StartOneShot(base::Milliseconds(delay),
@@ -425,6 +417,8 @@ void OffscreenCanvasRenderingContext2D::TryRestoreContextEvent(
 
   DCHECK(context_lost_mode_ != kWebGLLoseContextLostContext);
 
+  RestoreGuard context_is_being_restored(*this);
+
   if (context_lost_mode_ == kSyntheticLostContext) {
     // If lost mode is |kSyntheticLostContext| and |context_restorable_| is set
     // to true, it means context is forced to be lost for testing purpose.
@@ -439,13 +433,7 @@ void OffscreenCanvasRenderingContext2D::TryRestoreContextEvent(
     // If lost mode is |kRealLostContext|, it means the context was not lost due
     // to surface failure but rather due to a an eviction, which means image
     // buffer exists.
-    OffscreenCanvas* const canvas = HostAsOffscreenCanvas();
-    CHECK(canvas != nullptr);
-    // Let the OffscreenCanvas know that it should attempt to recreate the
-    // resource dispatcher in order to restore the context.
-    canvas->SetRestoringGpuContext(true);
     CanvasResourceProvider* provider = GetOrCreateCanvasResourceProvider();
-    canvas->SetRestoringGpuContext(false);
     if (provider) {
       try_restore_context_event_timer_.Stop();
       DispatchContextRestoredEvent(nullptr);

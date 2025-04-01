@@ -6195,6 +6195,141 @@ TEST_F(BidderWorkletTest, GenerateBidWithInvalidSelectedReportingId) {
        "reporting id"});
 }
 
+TEST_F(BidderWorkletTest, GenerateBidWithTruncatedSelectableReportingIds) {
+  base::test::ScopedFeatureList scoped_feature_list;
+  scoped_feature_list.InitWithFeaturesAndParameters(
+      {{blink::features::kFledgeAuctionDealSupport, {}},
+       {blink::features::
+            kFledgeLimitSelectableBuyerAndSellerReportingIdsFetchedFromKAnon,
+        {
+            {"SelectableBuyerAndSellerReportingIdsFetchedFromKAnonLimit", "1"},
+        }},
+       {blink::features::
+            kFledgeTruncateSelectableBuyerAndSellerReportingIdsToKAnonLimit,
+        {}}},
+      {});
+
+  const char kScript[] = R"(
+    function generateBid(interestGroup) {
+      return {
+          ad: ["ad"],
+          bid: interestGroup.ads[0].selectableBuyerAndSellerReportingIds.length,
+          render: interestGroup.ads[0].renderURL,
+          selectedBuyerAndSellerReportingId:
+              interestGroup.ads[0].selectableBuyerAndSellerReportingIds[0],
+      };
+    }
+  )";
+
+  interest_group_ads_.clear();
+  interest_group_ads_.emplace_back(
+      GURL("https://response.test/"),
+      /*metadata=*/std::nullopt, /*size_group=*/std::nullopt,
+      /*buyer_reporting_id=*/std::nullopt,
+      /*buyer_and_seller_reporting_id=*/std::nullopt,
+      /*selectable_buyer_and_seller_reporting_ids=*/
+      std::vector<std::string>{"selected-id", "truncated-selected-id"});
+
+  std::vector<mojom::BidderWorkletBidPtr> expected;
+  expected.push_back(TestBidBuilder()
+                         .SetAd(R"(["ad"])")
+                         .SetBid(1)
+                         .SetSelectedBuyerAndSellerReportingId("selected-id")
+                         .Build());
+  RunGenerateBidWithJavascriptExpectingResult(kScript, std::move(expected));
+}
+
+TEST_F(BidderWorkletTest,
+       GenerateBidAttemptsToReturnTruncatedSelectedReportingId) {
+  base::test::ScopedFeatureList scoped_feature_list;
+  scoped_feature_list.InitWithFeaturesAndParameters(
+      {{blink::features::kFledgeAuctionDealSupport, {}},
+       {blink::features::
+            kFledgeLimitSelectableBuyerAndSellerReportingIdsFetchedFromKAnon,
+        {
+            {"SelectableBuyerAndSellerReportingIdsFetchedFromKAnonLimit", "1"},
+        }},
+       {blink::features::
+            kFledgeTruncateSelectableBuyerAndSellerReportingIdsToKAnonLimit,
+        {}}},
+      {});
+
+  const char kScript[] = R"(
+    function generateBid(interestGroup) {
+      return {
+          ad: ["ad"],
+          bid: interestGroup.ads[0].selectableBuyerAndSellerReportingIds.length,
+          render: interestGroup.ads[0].renderURL,
+          selectedBuyerAndSellerReportingId: "truncated-selected-id",
+      };
+    }
+  )";
+
+  interest_group_ads_.clear();
+  interest_group_ads_.emplace_back(
+      GURL("https://response.test/"),
+      /*metadata=*/std::nullopt, /*size_group=*/std::nullopt,
+      /*buyer_reporting_id=*/std::nullopt,
+      /*buyer_and_seller_reporting_id=*/std::nullopt,
+      /*selectable_buyer_and_seller_reporting_ids=*/
+      std::vector<std::string>{"selected-id", "truncated-selected-id"});
+
+  std::vector<mojom::BidderWorkletBidPtr> expected;
+  RunGenerateBidWithJavascriptExpectingResult(
+      kScript, std::move(expected),
+      /*expected_data_version=*/std::nullopt, /*expected_errors=*/
+      {"https://url.test/ generateBid() Invalid selected buyer and seller "
+       "reporting id"});
+}
+
+// This test has a larger limit than the number of
+// `selectable_buyer_and_seller_reporting_ids`, so nothing is truncated.
+TEST_F(BidderWorkletTest, GenerateBidWithUntruncatedSelectableReportingIds) {
+  base::test::ScopedFeatureList scoped_feature_list;
+  scoped_feature_list.InitWithFeaturesAndParameters(
+      {{blink::features::kFledgeAuctionDealSupport, {}},
+       {blink::features::
+            kFledgeLimitSelectableBuyerAndSellerReportingIdsFetchedFromKAnon,
+        {
+            {"SelectableBuyerAndSellerReportingIdsFetchedFromKAnonLimit", "3"},
+        }},
+       {blink::features::
+            kFledgeTruncateSelectableBuyerAndSellerReportingIdsToKAnonLimit,
+        {}}},
+      {});
+
+  const char kScript[] = R"(
+    function generateBid(interestGroup) {
+      return {
+          ad: ["ad"],
+          bid: interestGroup.ads[0].selectableBuyerAndSellerReportingIds.length,
+          render: interestGroup.ads[0].renderURL,
+          selectedBuyerAndSellerReportingId:
+              interestGroup.ads[0].selectableBuyerAndSellerReportingIds[
+                  interestGroup.ads[0].
+                      selectableBuyerAndSellerReportingIds.length - 1],
+      };
+    }
+  )";
+
+  interest_group_ads_.clear();
+  interest_group_ads_.emplace_back(
+      GURL("https://response.test/"),
+      /*metadata=*/std::nullopt, /*size_group=*/std::nullopt,
+      /*buyer_reporting_id=*/std::nullopt,
+      /*buyer_and_seller_reporting_id=*/std::nullopt,
+      /*selectable_buyer_and_seller_reporting_ids=*/
+      std::vector<std::string>{"selected-id-1", "selected-id-2"});
+
+  std::vector<mojom::BidderWorkletBidPtr> expected;
+  expected.push_back(TestBidBuilder()
+                         .SetAd(R"(["ad"])")
+                         .SetBid(2)
+                         .SetSelectedBuyerAndSellerReportingId("selected-id-2")
+                         .Build());
+  RunGenerateBidWithJavascriptExpectingResult(kScript, std::move(expected));
+}
+
 // Verify generateBid cannot see the reporting Ids when
 // `selectable_buyer_and_seller_reporting_ids` is not present.
 TEST_F(BidderWorkletTest, GenerateBidAdsWithoutReportingIds) {
@@ -11698,7 +11833,11 @@ TEST_F(BidderWorkletSharedStorageAPIEnabledTest,
 }
 
 TEST_F(BidderWorkletSharedStorageAPIEnabledTest,
-       SharedStorageBatchUpdate_Success) {
+       SharedStorageBatchUpdate_Legacy_Success) {
+  base::test::ScopedFeatureList feature_list;
+  feature_list.InitAndDisableFeature(
+      network::features::kSharedStorageTransactionalBatchUpdate);
+
   auction_worklet::TestAuctionSharedStorageHost test_shared_storage_host;
 
   mojo::Receiver<auction_worklet::mojom::AuctionSharedStorageHost> receiver(
@@ -11753,6 +11892,115 @@ TEST_F(BidderWorkletSharedStorageAPIEnabledTest,
           BatchRequest(std::move(batch_methods3),
                        /*with_lock=*/"lock3",
                        mojom::AuctionWorkletFunction::kBidderGenerateBid)));
+
+  v8_helpers_[0]->v8_runner()->PostTask(
+      FROM_HERE, base::BindOnce(
+                     [](scoped_refptr<AuctionV8Helper> v8_helper) {
+                       v8::Isolate::Scope isolate_scope{v8_helper->isolate()};
+                       v8_helper->isolate()->RequestGarbageCollectionForTesting(
+                           v8::Isolate::kFullGarbageCollection);
+                     },
+                     v8_helpers_[0]));
+  task_environment_.RunUntilIdle();
+}
+
+TEST_F(BidderWorkletSharedStorageAPIEnabledTest,
+       SharedStorageBatchUpdate_Transactional_Success) {
+  base::test::ScopedFeatureList feature_list;
+  feature_list.InitAndEnableFeature(
+      network::features::kSharedStorageTransactionalBatchUpdate);
+
+  auction_worklet::TestAuctionSharedStorageHost test_shared_storage_host;
+
+  mojo::Receiver<auction_worklet::mojom::AuctionSharedStorageHost> receiver(
+      &test_shared_storage_host);
+  shared_storage_hosts_[0] = receiver.BindNewPipeAndPassRemote();
+
+  RunGenerateBidWithJavascriptExpectingResult(
+      CreateGenerateBidScript(
+          R"({ad: "ad", bid:1, render:"https://response.test/" })",
+          /*extra_code=*/R"(
+          sharedStorage.batchUpdate([]);
+
+          sharedStorage.batchUpdate([]);
+
+          sharedStorage.batchUpdate([
+              new SharedStorageSetMethod('a', 'b'),
+              new SharedStorageAppendMethod('c', 'd'),
+              new SharedStorageDeleteMethod('e'),
+              new SharedStorageClearMethod()
+            ], {withLock: 'lock3'});
+        )"),
+      /*expected_bids=*/
+      TestBidBuilder().SetAd("\"ad\"").Build());
+
+  // Make sure the shared storage mojom methods are invoked as they use a
+  // dedicated pipe.
+  task_environment_.RunUntilIdle();
+
+  using BatchRequest =
+      auction_worklet::TestAuctionSharedStorageHost::BatchRequest;
+
+  std::vector<content::MethodWithOptionsPtr> batch_methods1;
+  std::vector<content::MethodWithOptionsPtr> batch_methods2;
+  std::vector<content::MethodWithOptionsPtr> batch_methods3;
+  batch_methods3.push_back(MojomSetMethod(/*key=*/u"a",
+                                          /*value=*/u"b",
+                                          /*ignore_if_present=*/false));
+  batch_methods3.push_back(MojomAppendMethod(/*key=*/u"c",
+                                             /*value=*/u"d"));
+  batch_methods3.push_back(MojomDeleteMethod(/*key=*/u"e"));
+  batch_methods3.push_back(MojomClearMethod());
+
+  EXPECT_THAT(
+      test_shared_storage_host.observed_batch_requests(),
+      testing::ElementsAre(
+          BatchRequest(std::move(batch_methods1),
+                       /*with_lock=*/std::nullopt,
+                       mojom::AuctionWorkletFunction::kBidderGenerateBid),
+          BatchRequest(std::move(batch_methods2),
+                       /*with_lock=*/std::nullopt,
+                       mojom::AuctionWorkletFunction::kBidderGenerateBid),
+          BatchRequest(std::move(batch_methods3),
+                       /*with_lock=*/"lock3",
+                       mojom::AuctionWorkletFunction::kBidderGenerateBid)));
+
+  v8_helpers_[0]->v8_runner()->PostTask(
+      FROM_HERE, base::BindOnce(
+                     [](scoped_refptr<AuctionV8Helper> v8_helper) {
+                       v8::Isolate::Scope isolate_scope{v8_helper->isolate()};
+                       v8_helper->isolate()->RequestGarbageCollectionForTesting(
+                           v8::Isolate::kFullGarbageCollection);
+                     },
+                     v8_helpers_[0]));
+  task_environment_.RunUntilIdle();
+}
+
+TEST_F(BidderWorkletSharedStorageAPIEnabledTest,
+       SharedStorageBatchUpdate_Transactional_HasInnerMethodLock_Failure) {
+  base::test::ScopedFeatureList feature_list;
+  feature_list.InitAndEnableFeature(
+      network::features::kSharedStorageTransactionalBatchUpdate);
+
+  auction_worklet::TestAuctionSharedStorageHost test_shared_storage_host;
+  mojo::Receiver<auction_worklet::mojom::AuctionSharedStorageHost> receiver(
+      &test_shared_storage_host);
+  shared_storage_hosts_[0] = receiver.BindNewPipeAndPassRemote();
+
+  RunGenerateBidWithJavascriptExpectingResult(
+      CreateGenerateBidScript(
+          R"({ad: "ad", bid:1, render:"https://response.test/" })",
+          /*extra_code=*/R"(
+          sharedStorage.batchUpdate([
+            new SharedStorageSetMethod("key0", "value0", {withLock: "lock1"})
+          ]);
+        )"),
+      /*expected_bids=*/nullptr,
+      /*expected_data_version=*/std::nullopt,
+      /*expected_errors=*/
+      {"https://url.test/:6 Uncaught TypeError: sharedStorage.batchUpdate(): "
+       "The 'withLock' option is not allowed for methods within "
+       "batchUpdate()."});
 
   v8_helpers_[0]->v8_runner()->PostTask(
       FROM_HERE, base::BindOnce(
