@@ -94,60 +94,22 @@ jobs:
         if: contains(matrix.runner, 'linux')
         shell: bash
         run: |
-          # Clean up any existing depot_tools
-          if [ -d "depot_tools" ]; then
-            rm -rf depot_tools
-          fi
-          
-          # Fresh clone
+          if [ -d "depot_tools" ]; then rm -rf depot_tools; fi
           git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
-          
-          # Set executable permissions
-          chmod +x depot_tools/gclient
-          chmod +x depot_tools/gclient.py
-          
-          # Set PATH for this step
-          export PATH="$(pwd)/depot_tools:$PATH"
-          
-          # Set PATH for future steps
+          chmod +x depot_tools/gclient depot_tools/gclient.py
           echo "PATH=$(pwd)/depot_tools:$PATH" >> $GITHUB_ENV
-          
-          # Verify installation
-          echo "Current directory: $(pwd)"
-          ls -la depot_tools
-          echo "PATH: $PATH"
-          which gclient || depot_tools/gclient --version
 
       - name: Install depot_tools (macOS)
         if: contains(matrix.runner, 'macos')
         shell: bash
         run: |
-          # Clean up any existing depot_tools
-          if [ -d "depot_tools" ]; then
-            rm -rf depot_tools
-          fi
-          
-          # Fresh clone
+          if [ -d "depot_tools" ]; then rm -rf depot_tools; fi
           git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
-          
-          # Set executable permissions
-          chmod +x depot_tools/gclient
-          chmod +x depot_tools/gclient.py
-          
-          # Set PATH for this step
-          export PATH="$(pwd)/depot_tools:$PATH"
-          
-          # Set PATH for future steps
+          chmod +x depot_tools/gclient depot_tools/gclient.py
           echo "PATH=$(pwd)/depot_tools:$PATH" >> $GITHUB_ENV
-          
-          # Verify installation
-          echo "Current directory: $(pwd)"
-          ls -la depot_tools
-          echo "PATH: $PATH"
-          which gclient || depot_tools/gclient --version
 
-      - name: Setup ccache (Linux)
-        if: contains(matrix.runner, 'linux')
+      - name: Setup ccache (Linux/macOS)
+        if: runner.os != 'Windows'
         shell: bash
         run: |
           mkdir -p ~/.ccache
@@ -156,83 +118,13 @@ jobs:
           echo "CC=ccache cc" >> $GITHUB_ENV
           echo "CXX=ccache c++" >> $GITHUB_ENV
 
-      - name: Setup ccache (macOS)
-        if: contains(matrix.runner, 'macos')
+      - name: Set fork details
         shell: bash
         run: |
-          mkdir -p ~/.ccache
-          echo "max_size = 50G" > ~/.ccache/ccache.conf
-          echo "CCACHE_DIR=$(pwd)/.ccache" >> $GITHUB_ENV
-          echo "CC=ccache cc" >> $GITHUB_ENV
-          echo "CXX=ccache c++" >> $GITHUB_ENV
+          echo "FORK_URL=https://github.com/TheTechNetwork/priv-browser.git" >> $GITHUB_ENV
+          echo "FORK_BRANCH=${{ github.event.inputs.fork_branch || 'main' }}" >> $GITHUB_ENV
 
-      - name: Set fork details (Linux)
-        if: contains(matrix.runner, 'linux')
-        shell: bash
-        run: |
-          FORK_URL="https://github.com/TheTechNetwork/priv-browser.git"
-          FORK_BRANCH="${{ github.event.inputs.fork_branch || 'main' }}"
-          echo "FORK_URL=$FORK_URL" >> $GITHUB_ENV
-          echo "FORK_BRANCH=$FORK_BRANCH" >> $GITHUB_ENV
-
-      - name: Set fork details (macOS)
-        if: contains(matrix.runner, 'macos')
-        shell: bash
-        run: |
-          FORK_URL="https://github.com/TheTechNetwork/priv-browser.git"
-          FORK_BRANCH="${{ github.event.inputs.fork_branch || 'main' }}"
-          echo "FORK_URL=$FORK_URL" >> $GITHUB_ENV
-          echo "FORK_BRANCH=$FORK_BRANCH" >> $GITHUB_ENV
-
-      - name: Set fork details (Windows)
-        if: runner.os == 'Windows'
-        shell: cmd
-        run: |
-          echo FORK_URL=https://github.com/TheTechNetwork/priv-browser.git>> %GITHUB_ENV%
-          if defined github_event_inputs_fork_branch (
-            echo FORK_BRANCH=%github_event_inputs_fork_branch%>> %GITHUB_ENV%
-          ) else (
-            echo FORK_BRANCH=main>> %GITHUB_ENV%
-          )
-
-      - name: Check Windows SDK
-        if: runner.os == 'Windows'
-        shell: cmd
-        run: |
-          dir "C:\Program Files (x86)\Windows Kits\10\include" || echo SDK directory not found
-
-      - name: Fetch Chromium source (Windows)
-        if: runner.os == 'Windows'
-        shell: cmd
-        run: |
-          echo solutions = [ > .gclient
-          echo   { >> .gclient
-          echo     "name": "src", >> .gclient
-          echo     "url": "%FORK_URL%", >> .gclient
-          echo     "deps_file": "DEPS", >> .gclient
-          echo     "managed": False, >> .gclient
-          echo     "custom_deps": {}, >> .gclient
-          echo     "custom_vars": {}, >> .gclient
-          echo   }, >> .gclient
-          echo ] >> .gclient
-
-          if exist src\.git (
-            cd src
-            git remote set-url origin %FORK_URL%
-            git fetch --prune
-            git checkout %FORK_BRANCH%
-            git pull
-            cd ..
-          ) else (
-            git clone %FORK_URL% src
-            cd src && git checkout %FORK_BRANCH% && cd ..
-          )
-
-          gclient sync --no-history --with_branch_heads --with_tags -D
-          gclient runhooks
-
-      - name: Fetch Chromium source (Linux)
-        if: contains(matrix.runner, 'linux')
+      - name: Fetch Chromium source
         shell: bash
         run: |
           cat > .gclient << EOF
@@ -248,58 +140,10 @@ jobs:
           ]
           EOF
           if [ -d src/.git ]; then
-            cd src
-            git remote set-url origin "$FORK_URL"
-            git fetch --prune
-            git checkout "$FORK_BRANCH"
-            git pull
-            cd ..
+            cd src && git remote set-url origin "$FORK_URL" && git fetch --prune && git checkout "$FORK_BRANCH" && git pull && cd ..
           else
-            git clone "$FORK_URL" src
-            cd src && git checkout "$FORK_BRANCH" && cd ..
+            git clone "$FORK_URL" src && cd src && git checkout "$FORK_BRANCH" && cd ..
           fi
-          
-          # Debug info
-          echo "Current directory: $(pwd)"
-          echo "PATH: $PATH"
-          which gclient
-          
-          gclient sync --no-history --with_branch_heads --with_tags -D
-          gclient runhooks
-
-      - name: Fetch Chromium source (macOS)
-        if: contains(matrix.runner, 'macos')
-        shell: bash
-        run: |
-          cat > .gclient << EOF
-          solutions = [
-            {
-              "name": "src",
-              "url": "$FORK_URL",
-              "deps_file": "DEPS",
-              "managed": False,
-              "custom_deps": {},
-              "custom_vars": {},
-            },
-          ]
-          EOF
-          if [ -d src/.git ]; then
-            cd src
-            git remote set-url origin "$FORK_URL"
-            git fetch --prune
-            git checkout "$FORK_BRANCH"
-            git pull
-            cd ..
-          else
-            git clone "$FORK_URL" src
-            cd src && git checkout "$FORK_BRANCH" && cd ..
-          fi
-          
-          # Debug info
-          echo "Current directory: $(pwd)"
-          echo "PATH: $PATH"
-          which gclient
-          
           gclient sync --no-history --with_branch_heads --with_tags -D
           gclient runhooks
 
@@ -320,94 +164,83 @@ jobs:
             git apply "$patch" || { echo "Failed to apply $patch" && exit 1; }
           done
 
-
-      # New step: Configure memory settings for Linux build
-      - name: Configure memory settings (Linux)
-        if: contains(matrix.runner, 'linux')
+      - name: Verify patch application
         shell: bash
         run: |
-          # Detect system memory and set appropriate job limit
-          MEM_GB=$(free -g | grep Mem | awk '{print $2}')
-          # Use roughly 1 job per 4GB of RAM, with minimum of 2
-          JOBS=$(( MEM_GB / 4 ))
-          if [ $JOBS -lt 2 ]; then
-            JOBS=2
-          fi
-          echo "System has ${MEM_GB}GB RAM, will use -j${JOBS} for build"
-          echo "BUILD_JOBS=$JOBS" >> $GITHUB_ENV
+          cd src
+          echo "Checking for whitespace errors in patch application..."
+          git diff --check || { echo "Patch introduced whitespace issues"; exit 1; }
 
-      - name: Configure Chromium build (Windows)
-        if: runner.os == 'Windows'
-        shell: cmd
-        env:
-          INCLUDE: ""
+          echo "Verifying no merge conflicts or broken state..."
+          if git status --porcelain | grep -qv '^??'; then
+            echo "❌ Unstaged or uncommitted changes detected"
+            git status
+            exit 1
+          fi
+          echo "✅ Patch verification passed"
+
+      - name: Generate build cache key
+        id: build_key
+        shell: bash
         run: |
           cd src
-          if not exist out\Release mkdir out\Release
-          gn gen out\Release --args="is_debug=false use_sysroot=false is_component_build=false symbol_level=0 windows_sdk_version=\"10.0.22621.0\""
+          CHROMIUM_COMMIT=$(git rev-parse HEAD)
+          PATCH_HASH=$(find ../priv-browser-patches -type f -name "*.patch" -exec sha1sum {} \; | sha1sum | awk '{print $1}')
+          echo "chromium_commit=$CHROMIUM_COMMIT" >> $GITHUB_OUTPUT
+          echo "patch_hash=$PATCH_HASH" >> $GITHUB_OUTPUT
+          echo "key=build-${CHROMIUM_COMMIT}-${PATCH_HASH}" >> $GITHUB_OUTPUT
 
-      - name: Configure Chromium build (Linux)
-        if: contains(matrix.runner, 'linux')
+      - name: Check for existing build
+        id: check_build
+        shell: bash
+        run: |
+          CACHE_DIR="$GITHUB_WORKSPACE/cached-builds/${{ steps.build_key.outputs.key }}"
+          if [ -d "$CACHE_DIR" ]; then
+            echo "cache-hit=true" >> $GITHUB_OUTPUT
+          else
+            echo "cache-hit=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Reuse cached build
+        if: steps.check_build.outputs.cache-hit == 'true'
+        shell: bash
+        run: |
+          echo "Reusing cached build from: ${{ steps.build_key.outputs.key }}"
+          mkdir -p src/out/Release
+          cp -r "$GITHUB_WORKSPACE/cached-builds/${{ steps.build_key.outputs.key }}/"* src/out/Release/
+
+      - name: Configure Chromium build
+        if: steps.check_build.outputs.cache-hit == 'false'
         shell: bash
         run: |
           cd src
           mkdir -p out/Release
-          # Disable V8 stress compilation to reduce likelihood of segfaults
           gn gen out/Release --args="is_debug=false use_sysroot=false is_component_build=false symbol_level=0 v8_enable_stress_compilation=false treat_warnings_as_errors=false"
 
-      - name: Configure Chromium build (macOS)
-        if: contains(matrix.runner, 'macos')
-        shell: bash
-        run: |
-          cd src
-          mkdir -p out/Release
-          gn gen out/Release --args="is_debug=false use_sysroot=false is_component_build=false symbol_level=0 treat_warnings_as_errors=false"
-
-      - name: Build Chromium (Windows)
-        if: runner.os == 'Windows'
-        shell: cmd
-        run: |
-          cd src
-          ninja -C out\Release chrome
-
-      # Modified Linux build step with clean build fallback
       - name: Build Chromium (Linux)
-        if: contains(matrix.runner, 'linux')
+        if: contains(matrix.runner, 'linux') && steps.check_build.outputs.cache-hit == 'false'
         shell: bash
         run: |
           cd src
           echo "Attempting incremental build with limited concurrency..."
           ninja -C out/Release chrome -j${BUILD_JOBS:-4}
-          
-          # If the build fails, try a clean build
           if [ $? -ne 0 ]; then
-            echo "Incremental build failed with return code $?. Trying clean build..."
-            
-            # Clean the build directory
-            echo "Cleaning build directory..."
+            echo "Incremental build failed. Trying clean build..."
             ninja -C out/Release -t clean
-            
-            # Specifically target and remove problematic V8 artifacts
-            echo "Removing V8 snapshot artifacts..."
             find out/Release -name "v8*" -type f -delete 2>/dev/null || true
-            find out/Release -name "*mksnapshot*" -type f -delete 2>/dev/null || true
             find out/Release -name "*snapshot*" -type f -delete 2>/dev/null || true
             find out/Release -name "*.S" -type f -delete 2>/dev/null || true
-            
-            # Try again with reduced job count
-            echo "Attempting clean build with further reduced concurrency..."
             REDUCED_JOBS=$(( ${BUILD_JOBS:-4} / 2 ))
             if [ $REDUCED_JOBS -lt 1 ]; then REDUCED_JOBS=1; fi
-            echo "Using -j$REDUCED_JOBS for clean build"
             ninja -C out/Release chrome -j$REDUCED_JOBS
           fi
 
-      - name: Build Chromium (macOS)
-        if: contains(matrix.runner, 'macos')
+      - name: Cache completed build
+        if: steps.check_build.outputs.cache-hit == 'false'
         shell: bash
         run: |
-          cd src
-          ninja -C out/Release chrome
+          mkdir -p "$GITHUB_WORKSPACE/cached-builds/${{ steps.build_key.outputs.key }}"
+          cp -r src/out/Release/* "$GITHUB_WORKSPACE/cached-builds/${{ steps.build_key.outputs.key }}/"
 
       # Fixed packaging step for Windows
       - name: Package Chromium build (Windows)
