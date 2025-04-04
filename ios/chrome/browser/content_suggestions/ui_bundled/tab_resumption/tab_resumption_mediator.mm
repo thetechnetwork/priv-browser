@@ -298,19 +298,11 @@ class TabResumptionMediatorProxy {
     _webStateList = _browser->GetWebStateList();
     _isOffTheRecord = _browser->GetProfile()->IsOffTheRecord();
 
-    if (IsHomeCustomizationEnabled()) {
-      _tabResumptionDisabled = [[PrefBackedBoolean alloc]
-          initWithPrefService:_profilePrefs
-                     prefName:
-                         prefs::
-                             kHomeCustomizationMagicStackTabResumptionEnabled];
-      [_tabResumptionDisabled setObserver:self];
-    } else {
-      _tabResumptionDisabled = [[PrefBackedBoolean alloc]
-          initWithPrefService:_profilePrefs
-                     prefName:tab_resumption_prefs::kTabResumptionDisabledPref];
-      [_tabResumptionDisabled setObserver:self];
-    }
+    _tabResumptionDisabled = [[PrefBackedBoolean alloc]
+        initWithPrefService:_profilePrefs
+                   prefName:
+                       prefs::kHomeCustomizationMagicStackTabResumptionEnabled];
+    [_tabResumptionDisabled setObserver:self];
 
     ProfileIOS* profile = _browser->GetProfile();
     _sessionSyncService = SessionSyncServiceFactory::GetForProfile(profile);
@@ -359,7 +351,8 @@ class TabResumptionMediatorProxy {
 #pragma mark - Public methods
 
 - (void)openTabResumptionItem:(TabResumptionItem*)item {
-  [self.contentSuggestionsMetricsRecorder recordTabResumptionTabOpened];
+  [self.contentSuggestionsMetricsRecorder
+      recordTabResumptionTabOpened:item.shopCardData];
   tab_resumption_prefs::SetTabResumptionLastOpenedTabURL(item.tabURL,
                                                          _profilePrefs);
   [self.delegate logMagicStackEngagementForType:ContentSuggestionsModuleType::
@@ -441,14 +434,17 @@ class TabResumptionMediatorProxy {
       [self.NTPActionsDelegate recentTabTileDisplayedAtIndex:index];
       break;
   }
+  [self.contentSuggestionsMetricsRecorder
+      recordTabResumptionImpressionWithCustomization:
+          static_cast<TabResumptionItem*>(magicStackModule).shopCardData
+                                             atIndex:index];
 }
 
 #pragma mark - Boolean Observer
 
 - (void)booleanDidChange:(id<ObservableBoolean>)observableBoolean {
   if (observableBoolean == _tabResumptionDisabled) {
-    if ((IsHomeCustomizationEnabled() && !observableBoolean.value) ||
-        (!IsHomeCustomizationEnabled() && observableBoolean.value)) {
+    if (!observableBoolean.value) {
       [self.delegate removeTabResumptionModule];
     }
   }

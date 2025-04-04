@@ -194,12 +194,6 @@ const char kAutomaticUsbDetachName[] =
 const char kAutomaticUsbDetachDescription[] =
     "Automatically detach kernel drivers when a USB interface is busy.";
 
-const char kAutomotiveFullscreenToolbarImprovementsName[] =
-    "Enable automotive fullscreen toolbar improvements.";
-const char kAutomotiveFullscreenToolbarImprovementsDescription[] =
-    "In automotive, hides the toolbar when entering fullscreen mode. Swipe on"
-    "edge to reshow the toolbar.";
-
 const char kAuxiliarySearchDonationName[] = "Auxiliary Search Donation";
 const char kAuxiliarySearchDonationDescription[] =
     "If enabled, override Auxiliary Search donation cap.";
@@ -560,11 +554,6 @@ const char kUseCustomMessagesDomainDescription[] =
 const char kUseDMSAAForTilesName[] = "Use DMSAA for tiles";
 const char kUseDMSAAForTilesDescription[] =
     "Switches skia to use DMSAA instead of MSAA for tile raster";
-
-const char kUseDnsHttpsSvcbAlpnName[] = "Use DNS https alpn";
-const char kUseDnsHttpsSvcbAlpnDescription[] =
-    "When enabled, Chrome may try QUIC on the first connection using the ALPN"
-    " information in the DNS HTTPS record.";
 
 const char kIsolatedSandboxedIframesName[] = "Isolated sandboxed iframes";
 const char kIsolatedSandboxedIframesDescription[] =
@@ -1175,6 +1164,10 @@ const char kDisableProcessReuseDescription[] =
     "Prevents out-of-process iframes from reusing compatible processes from "
     "unrelated tabs. This is an experimental mode that will result in more "
     "processes being created.";
+
+const char kDisableSystemBlur[] = "Disable system blur";
+const char kDisableSystemBlurDescription[] =
+    "Removes background blur from system UI";
 
 const char kDisallowDocWrittenScriptsUiName[] =
     "Block scripts loaded via document.write";
@@ -1891,6 +1884,11 @@ const char kExtensionAiDataCollectionDescription[] =
     "Enables an extension API to allow specific extensions to collect data "
     "from browser process. This data may contain profile specific information "
     " and may be otherwise unavailable to an extension.";
+const char kExtensionsCollapseMainMenuName[] = "Collapse Extensions Submenu";
+const char kExtensionsCollapseMainMenuDescription[] =
+    "Enables a mode where if the current profile has no extensions, the "
+    "extensions submenu in the application menu is replaced by a single item, "
+    "e.g. \"Explore Extensions\".";
 const char kExtensionsMenuAccessControlName[] =
     "Extensions Menu Access Control";
 const char kExtensionsMenuAccessControlDescription[] =
@@ -2505,6 +2503,11 @@ const char kLensOverlayLatencyOptimizationsName[] =
 const char kLensOverlayLatencyOptimizationsDescription[] =
     "Enables latency optimizations for the Lens overlay.";
 
+const char kLensSearchSidePanelNewFeedbackName[] =
+    "Lens side panel new feedback";
+const char kLensSearchSidePanelNewFeedbackDescription[] =
+    "Enables a new feedback entry point in the Lens side panel.";
+
 const char kLinkedServicesSettingName[] = "Linked Services Setting";
 const char kLinkedServicesSettingDescription[] =
     "Add Linked Services Setting to the Sync Settings page.";
@@ -2855,8 +2858,7 @@ const char kOmniboxStarterPackIPHDescription[] =
     "Enables an informational IPH message for the  Site search starter pack "
     "feature";
 
-const char kOmniboxSearchAggregatorName[] =
-    "Omnibox search aggregator";
+const char kOmniboxSearchAggregatorName[] = "Omnibox search aggregator";
 const char kOmniboxSearchAggregatorDescription[] =
     "Enables omnibox suggestions from the search aggregator provider";
 
@@ -3085,12 +3087,6 @@ const char kPasswordFormGroupedAffiliationsDescription[] =
     "Enables offering credentials coming from grouped domains for "
     "filling";
 
-const char kPasswordLeakToggleMoveName[] = "Password leak toggle move";
-const char kPasswordLeakToggleMoveDescription[] =
-    "Enables the new location of the password leak toggle option under "
-    "standard protection on chrome://settings/security to the advanced "
-    "section of the chrome://settings/security page.";
-
 const char kPasswordManagerShowSuggestionsOnAutofocusName[] =
     "Showing password suggestions on autofocused password forms";
 const char kPasswordManagerShowSuggestionsOnAutofocusDescription[] =
@@ -3297,6 +3293,12 @@ const char kRendererSideContentDecodingDescription[] =
     "Enables renderer-side content decoding (decompression). When enabled, the "
     "network service sends compressed HTTP response bodies to the renderer "
     "process.";
+
+const char kDeviceBoundSessionAccessObserverSharedRemoteName[] =
+    "Reduce device bound session access observer IPC";
+const char kDeviceBoundSessionAccessObserverSharedRemoteDescription[] =
+    "Enables the optimization of reducing unnecessary IPC for cloning "
+    "DeviceBoundSessionAccessObserver.";
 
 #if BUILDFLAG(SKIA_BUILD_RUST_PNG)
 const char kRustyPngName[] = "Rust-based PNG image handling";
@@ -3859,6 +3861,11 @@ const char kTranslateForceTriggerOnEnglishDescription[] =
     "with the selected language model active.";
 
 #if BUILDFLAG(IS_WIN) || BUILDFLAG(IS_MAC) || BUILDFLAG(IS_LINUX)
+const char kEnableHistorySyncOptinExpansionPillName[] =
+    "History Sync Opt-in Expansion Pill";
+const char kEnableHistorySyncOptinExpansionPillDescription[] =
+    "Enables the History Sync Opt-in expansion pill on Desktop platforms.";
+
 const char kEnableHistorySyncOptinName[] = "History Sync Opt-in";
 const char kEnableHistorySyncOptinDescription[] =
     "Enables the History Sync Opt-in screen on Desktop platforms. The screen "
@@ -4179,6 +4186,11 @@ const char kWebXrIncubationsDescription[] =
 const char kZeroCopyName[] = "Zero-copy rasterizer";
 const char kZeroCopyDescription[] =
     "Raster threads write directly to GPU memory associated with tiles.";
+
+const char kZeroCopyRBPPartialRasterWithGpuCompositorName[] =
+    "Zero-copy partial raster with GPU compositor";
+const char kZeroCopyRBPPartialRasterWithGpuCompositorDescription[] =
+    "Has zero-copy raster do partial raster when used with the GPU compositor";
 
 const char kEnableVulkanName[] = "Vulkan";
 const char kEnableVulkanDescription[] = "Use vulkan as the graphics backend.";
@@ -4675,6 +4687,9 @@ const char kFeedDynamicColorsName[] = "Enable dynamic colors in the feed";
 const char kFeedDynamicColorsDescription[] =
     "Allows feed to fully respect dynamic colors if supported by the client.";
 
+const char kFeedHeaderRemovalName[] = "Removing feed header";
+const char kFeedHeaderRemovalDescription[] = "Stops showing the feed header.";
+
 const char kFloatingSnackbarName[] = "FloatingSnackbar";
 const char kFloatingSnackbarDescription[] =
     "Enables the snackbar to float on top of the web content.";
@@ -4825,6 +4840,9 @@ const char kReadLaterDescription[] =
     "Allow users to save tabs for later. Enables a new button and menu for "
     "accessing tabs saved for later.";
 
+const char kReaderModeDevEntryPointName[] = "Reader Mode developer entry point";
+const char kReaderModeDevEntryPointDescription[] =
+    "Shows a button in the app overflow menu to force reader mode.";
 const char kReaderModeHeuristicsName[] = "Reader Mode triggering";
 const char kReaderModeHeuristicsDescription[] =
     "Determines what pages the Reader Mode infobar is shown on.";
@@ -4930,12 +4948,6 @@ const char kHistoryPaneAndroidName[] = "History Pane Android";
 const char kHistoryPaneAndroidDescription[] =
     "Enables showing a new pane in the hub that displays History.";
 
-const char kTabGroupPaneAndroidName[] = "Tab Group Pane Android";
-const char kTabGroupPaneAndroidDescription[] =
-    "Enables showing a new pane in the hub that displays and allows "
-    "interactions with tab groups. These groups may be currently opened in the "
-    "tab mode or currently hidden.";
-
 const char kTabGroupSyncAndroidName[] = "Tab Group Sync on Android";
 const char kTabGroupSyncAndroidDescription[] =
     "Enables syncing of tab groups on Android with other devices.";
@@ -4948,14 +4960,6 @@ const char kTabGroupSyncDisableNetworkLayerDescription[] =
 const char kTabStripContextMenuAndroidName[] = "Tab Strip Context Menu Android";
 const char kTabStripContextMenuAndroidDescription[] =
     "Enables context menus upon long-pressing on a tab on the tab strip.";
-
-const char kTabStripGroupCollapseAndroidName[] =
-    "Tab Strip Group Collapse Android";
-const char kTabStripGroupCollapseAndroidDescription[] =
-    "Enables tab strip group indicators to be clicked to collapse, temporarily "
-    "hiding the colored outline, the group title, and the grouped tabs. "
-    "Collapsed groups can be clicked again to expand. Synced tab groups will "
-    "immediately be collapsed.";
 
 const char kTabStripGroupDragDropAndroidName[] =
     "Tab Strip Group Drag Drop Android";
@@ -5763,6 +5767,13 @@ const char kAndroidWindowPopupLargeScreenDescription[] =
     "Open an actual new window instead of new tab on window.open() Javascript "
     "call and make moving windows with window.{move|resize}{By|To}() "
     "possible.";
+
+const char kAndroidWindowOcclusionName[] =
+    "Enable occlusion tracking on Android.";
+const char kAndroidWindowOcclusionDescription[] =
+    "Enables occlusion tracking on Android, which can save CPU and memory in "
+    "multi-window environments.";
+
 #endif  // BUILDFLAG(IS_ANDROID)
 
 // Windows, Mac and Android  --------------------------------------------------
@@ -8036,6 +8047,9 @@ const char kOidcAuthProfileManagementDescription[] =
 const char kGlicName[] = "Glic";
 const char kGlicDescription[] = "Enables glic";
 
+const char kGlicZOrderChangesName[] = "Glic Z Order Changes";
+const char kGlicZOrderChangesDescription[] = "Enables glic z order changing";
+
 const char kGlicUserResizeName[] = "Glic User Resize";
 const char kGlicUserResizeDescription[] =
     "Enables resizing the glic panel by dragging";
@@ -8168,12 +8182,6 @@ const char kSupervisedProfileSafeSearchName[] = "Supervised Profile SafeSearch";
 const char kSupervisedProfileSafeSearchDescription[] =
     "Enables SafeSearch in Google Search for supervised users in the pending "
     "state.";
-
-const char kSupervisedProfileReauthForYouTubeName[] =
-    "Supervised Profile YouTube reauth";
-const char kSupervisedProfileReauthForYouTubeDescription[] =
-    "Ask supervised users to re-authenticate when attempting to access YouTube "
-    "in the pending state.";
 
 const char kSupervisedProfileReauthForBlockedSiteName[] =
     "Supervised Profile blocked site reauth";

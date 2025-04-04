@@ -245,6 +245,8 @@ source_set("browser_sources") {
     "javascript_dialog_manager.cc",
     "javascript_dialog_manager.h",
     "k_anonymity_service_delegate.h",
+    "keep_alive_request_tracker.cc",
+    "keep_alive_request_tracker.h",
     "keyboard_event_processing_result.h",
     "legacy_tech_cookie_issue_details.cc",
     "legacy_tech_cookie_issue_details.h",
@@ -766,6 +768,9 @@ if (is_android) {
       "digital_identity_interstitial_type.h",
       "digital_identity_provider.h",
     ]
+  }
+  java_cpp_enum("transfer_input_to_viz_result_enum") {
+    sources = [ "android/transfer_input_to_viz_result.h" ]
   }
 }
 

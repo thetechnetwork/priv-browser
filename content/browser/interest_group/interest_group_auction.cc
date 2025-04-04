@@ -172,6 +172,22 @@ bool IsKAnon(const base::flat_set<std::string>& kanon_keys,
   return kanon_keys.contains(key);
 }
 
+bool IsBidKAnon(const InterestGroupAuction::Bid& bid) {
+  if (!IsKAnon(bid.bid_state->kanon_keys,
+               blink::HashedKAnonKeyForAdBid(*bid.interest_group,
+                                             bid.ad_descriptor))) {
+    return false;
+  }
+  for (const auto& component : bid.selected_ad_components) {
+    if (!IsKAnon(
+            bid.bid_state->kanon_keys,
+            blink::HashedKAnonKeyForAdComponentBid(component.ad_descriptor))) {
+      return false;
+    }
+  }
+  return true;
+}
+
 // Verifies that the `selectedBuyerAndSellerReportingId` is present within the
 // matching ad's `selectableBuyerAndSellerReportingIds` array.
 //
@@ -2223,9 +2239,6 @@ class InterestGroupAuction::BuyerHelper
   base::flat_set<std::string> ComputeKAnon(
       const SingleStorageInterestGroup& storage_interest_group,
       auction_worklet::mojom::KAnonymityBidMode kanon_mode) {
-    if (kanon_mode == auction_worklet::mojom::KAnonymityBidMode::kNone) {
-      return {};
-    }
 
     // k-anon cache is always checked against the same time, to avoid weird
     // behavior of validity changing in the middle of the auction.
@@ -3050,6 +3063,7 @@ InterestGroupAuction::InterestGroupAuction(
     const blink::AuctionConfig* config,
     const InterestGroupAuction* parent,
     AuctionMetricsRecorder* auction_metrics_recorder,
+    DwaAuctionMetricsManager* dwa_auction_metrics_manager,
     AuctionWorkletManager* auction_worklet_manager,
     AuctionNonceManager* auction_nonce_manager,
     InterestGroupManagerImpl* interest_group_manager,
@@ -3066,6 +3080,7 @@ InterestGroupAuction::InterestGroupAuction(
       main_frame_origin_(main_frame_origin),
       ip_address_space_(ip_address_space),
       auction_metrics_recorder_(auction_metrics_recorder),
+      dwa_auction_metrics_manager_(dwa_auction_metrics_manager),
       auction_worklet_manager_(auction_worklet_manager),
       auction_nonce_manager_(auction_nonce_manager),
       interest_group_manager_(interest_group_manager),
@@ -3110,15 +3125,15 @@ InterestGroupAuction::InterestGroupAuction(
     // Top-level server auctions are not supported.
     DCHECK(!is_server_auction_);
     component_auctions_.emplace(
-        child_pos,
-        std::make_unique<InterestGroupAuction>(
-            kanon_mode_, url_loader_factory_, main_frame_origin,
-            ip_address_space, &component_auction_config,
-            /*parent=*/this, auction_metrics_recorder_, auction_worklet_manager,
-            auction_nonce_manager, interest_group_manager,
-            get_data_decoder_callback_, auction_start_time_,
-            is_interest_group_api_allowed_callback_,
-            maybe_log_private_aggregation_web_features_callback_));
+        child_pos, std::make_unique<InterestGroupAuction>(
+                       kanon_mode_, url_loader_factory_, main_frame_origin,
+                       ip_address_space, &component_auction_config,
+                       /*parent=*/this, auction_metrics_recorder_,
+                       dwa_auction_metrics_manager_, auction_worklet_manager,
+                       auction_nonce_manager, interest_group_manager,
+                       get_data_decoder_callback_, auction_start_time_,
+                       is_interest_group_api_allowed_callback_,
+                       maybe_log_private_aggregation_web_features_callback_));
     ++child_pos;
   }
 
@@ -3145,7 +3160,11 @@ InterestGroupAuction::~InterestGroupAuction() {
   if (is_server_auction_) {
     uma_prefix = "Ads.InterestGroup.ServerAuction.";
   }
-
+  // Record DWA metrics for this auction (recording happens for both top-level
+  // and component auctions).
+  if (dwa_auction_metrics_) {
+    dwa_auction_metrics_->OnAuctionEnd(*final_auction_result_);
+  }
   // TODO(mmenke): Record histograms for component auctions.
   if (!parent_) {
     base::UmaHistogramEnumeration(
@@ -3213,7 +3232,14 @@ void InterestGroupAuction::StartLoadInterestGroupsPhase(
 
   load_interest_groups_phase_callback_ =
       std::move(load_interest_groups_phase_callback);
-
+  // Create DWA instance for this auction.
+  if (dwa_auction_metrics_manager_) {
+    dwa_auction_metrics_ =
+        dwa_auction_metrics_manager_->CreateDwaAuctionMetrics();
+  }
+  if (dwa_auction_metrics_) {
+    dwa_auction_metrics_->SetSellerInfo(config_->seller);
+  }
   // If the seller can't participate in the auction, fail the auction.
   if (!is_interest_group_api_allowed_callback_.Run(
           ContentBrowserClient::InterestGroupApiOperation::kSell,
@@ -3703,21 +3729,37 @@ InterestGroupAuction::CreateReporter(
 
   CollectBiddingAndScoringPhaseReports();
 
-  bool bid_is_kanon;
+  auction_worklet::mojom::KAnonymityStatus kanon_status;
   switch (kanon_mode_) {
     case auction_worklet::mojom::KAnonymityBidMode::kSimulate:
       // Check if the winner was k-anon, since we use the non-kanonymous winner
       // in simulate mode.
-      bid_is_kanon = NonKAnonWinnerIsKAnon();
+      if (NonKAnonWinnerIsKAnon()) {
+        kanon_status =
+            auction_worklet::mojom::KAnonymityStatus::kPassingNotEnforced;
+      } else {
+        kanon_status =
+            auction_worklet::mojom::KAnonymityStatus::kBelowThreshold;
+      }
       break;
     case auction_worklet::mojom::KAnonymityBidMode::kEnforce:
       // We always have a winner when we get here.
-      bid_is_kanon = true;
+      kanon_status =
+          auction_worklet::mojom::KAnonymityStatus::kPassingAndEnforced;
       break;
     case auction_worklet::mojom::KAnonymityBidMode::kNone:
-      // Set to false due to enforcement is completely off.
-      bid_is_kanon = false;
+      // Calculate k-anonymity since hasn't been calculated yet.
+      if (base::FeatureList::IsEnabled(features::kFledgeQueryKAnonymity)) {
+        kanon_status =
+            IsBidKAnon(*winner->bid)
+                ? auction_worklet::mojom::KAnonymityStatus::kPassingNotEnforced
+                : auction_worklet::mojom::KAnonymityStatus::kBelowThreshold;
+      } else {
+        kanon_status = auction_worklet::mojom::KAnonymityStatus::kUnknown;
+      }
       break;
+    default:
+      NOTREACHED();
   }
 
   auto result = std::make_unique<InterestGroupAuctionReporter>(
@@ -3726,9 +3768,8 @@ InterestGroupAuction::CreateReporter(
       maybe_log_private_aggregation_web_features_callback_,
       std::move(ad_auction_page_data_callback), std::move(auction_config),
       devtools_auction_id_, main_frame_origin, frame_origin,
-      std::move(client_security_state), url_loader_factory_, kanon_mode_,
-      bid_is_kanon, std::move(winning_bid_info),
-      std::move(top_level_seller_winning_bid_info),
+      std::move(client_security_state), url_loader_factory_, kanon_status,
+      std::move(winning_bid_info), std::move(top_level_seller_winning_bid_info),
       std::move(component_seller_winning_bid_info),
       std::move(interest_groups_that_bid), TakeDebugWinReportUrls(),
       TakeDebugLossReportUrls(), GetKAnonKeysToJoin(),

@@ -27,17 +27,6 @@ class FakeExternallyManagedAppManager : public ExternallyManagedAppManager {
                      ExternalInstallSource install_source,
                      const UninstallCallback& callback) override;
 
-  const std::vector<ExternalInstallOptions>& install_requests() const {
-    return install_requests_;
-  }
-  const std::vector<GURL>& uninstall_requests() const {
-    return uninstall_requests_;
-  }
-
-  void SetDropRequestsForTesting(bool drop_requests_for_testing) {
-    drop_requests_for_testing_ = drop_requests_for_testing;
-  }
-
   using HandleInstallRequestCallback =
       base::RepeatingCallback<ExternallyManagedAppManager::InstallResult(
           const ExternalInstallOptions&)>;
@@ -57,9 +46,6 @@ class FakeExternallyManagedAppManager : public ExternallyManagedAppManager {
       HandleUninstallRequestCallback callback);
 
  private:
-  std::vector<ExternalInstallOptions> install_requests_;
-  std::vector<GURL> uninstall_requests_;
-  bool drop_requests_for_testing_ = false;
   HandleInstallRequestCallback handle_install_request_callback_;
   HandleUninstallRequestCallback handle_uninstall_request_callback_;
 };

@@ -47,7 +47,7 @@ struct AXTreeUpdate;
 namespace tree_fixing {
 
 using MainNodeIdentificationCallback =
-    base::OnceCallback<void(std::pair<ui::AXTreeID, ui::AXNodeID>)>;
+    base::OnceCallback<void(ui::AXTreeID, ui::AXNodeID)>;
 
 // This class handles the communication between the browser process and any
 // downstream services used to fix the AXTree, such as: the optimization guide,
@@ -64,7 +64,8 @@ class AXTreeFixingServicesRouter
   class AXTreeFixingWebContentsObserver : public content::WebContentsObserver {
    public:
     explicit AXTreeFixingWebContentsObserver(
-        content::WebContents& web_contents);
+        content::WebContents& web_contents,
+        AXTreeFixingServicesRouter* router);
     AXTreeFixingWebContentsObserver(AXTreeFixingWebContentsObserver&&) = delete;
     AXTreeFixingWebContentsObserver(const AXTreeFixingWebContentsObserver&) =
         delete;
@@ -75,7 +76,14 @@ class AXTreeFixingServicesRouter
     ~AXTreeFixingWebContentsObserver() override;
 
     // content::WebContentsObserver:
-    void DidStopLoading() override;
+    void DocumentOnLoadCompletedInPrimaryMainFrame() override;
+
+   private:
+    void TryIdentifyMainNode();
+    void OnMainNodeIdentified(ui::AXTreeID tree_id, ui::AXNodeID node_id);
+
+    uint32_t retry_attempts_ = 0;
+    raw_ptr<AXTreeFixingServicesRouter> router_;
   };
 
   explicit AXTreeFixingServicesRouter(Profile* profile);
@@ -91,7 +99,8 @@ class AXTreeFixingServicesRouter
   // provided callback. The AXTreeUpdate that clients provide to this method
   // should represent a full AXTree for the page in order to accurately identify
   // a main node. The AXTree should not have an existing node with Role kMain.
-  void IdentifyMainNode(const ui::AXTreeUpdate& ax_tree,
+  // Returns true if the request was processed successfully, false otherwise.
+  bool IdentifyMainNode(const ui::AXTreeUpdate& ax_tree,
                         MainNodeIdentificationCallback callback);
 
 #if !BUILDFLAG(IS_CHROMEOS)

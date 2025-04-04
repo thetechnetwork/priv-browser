@@ -102,7 +102,7 @@ ci.thin_tester(
             target_platform = builder_config.target_platform.ANDROID,
         ),
         android_config = builder_config.android_config(
-            config = "main_builder_rel_mb",
+            config = "base_config",
         ),
         run_tests_serially = True,
     ),
@@ -140,8 +140,9 @@ ci.thin_tester(
             ],
         ),
         chromium_config = builder_config.chromium_config(
-            config = "arm64_builder_rel_mb",
+            config = "main_builder",
             apply_configs = [
+                "mb",
                 "download_xr_test_apks",
             ],
             build_config = builder_config.build_config.RELEASE,
@@ -150,7 +151,7 @@ ci.thin_tester(
             target_platform = builder_config.target_platform.ANDROID,
         ),
         android_config = builder_config.android_config(
-            config = "arm64_builder_rel_mb",
+            config = "base_config",
         ),
     ),
     targets = targets.bundle(
@@ -215,7 +216,7 @@ ci.thin_tester(
             target_platform = builder_config.target_platform.ANDROID,
         ),
         android_config = builder_config.android_config(
-            config = "main_builder_rel_mb",
+            config = "base_config",
         ),
     ),
     targets = targets.bundle(
@@ -275,7 +276,7 @@ ci.thin_tester(
             target_platform = builder_config.target_platform.ANDROID,
         ),
         android_config = builder_config.android_config(
-            config = "main_builder_rel_mb",
+            config = "base_config",
         ),
     ),
     targets = targets.bundle(
@@ -376,8 +377,9 @@ ci.thin_tester(
             ],
         ),
         chromium_config = builder_config.chromium_config(
-            config = "arm64_builder_rel_mb",
+            config = "main_builder",
             apply_configs = [
+                "mb",
                 "download_xr_test_apks",
             ],
             build_config = builder_config.build_config.RELEASE,
@@ -386,7 +388,7 @@ ci.thin_tester(
             target_platform = builder_config.target_platform.ANDROID,
         ),
         android_config = builder_config.android_config(
-            config = "arm64_builder_rel_mb",
+            config = "base_config",
         ),
         run_tests_serially = True,
     ),
@@ -440,8 +442,9 @@ ci.thin_tester(
             ],
         ),
         chromium_config = builder_config.chromium_config(
-            config = "arm64_builder_rel_mb",
+            config = "main_builder",
             apply_configs = [
+                "mb",
                 "download_xr_test_apks",
             ],
             build_config = builder_config.build_config.RELEASE,
@@ -450,7 +453,7 @@ ci.thin_tester(
             target_platform = builder_config.target_platform.ANDROID,
         ),
         android_config = builder_config.android_config(
-            config = "arm64_builder_rel_mb",
+            config = "base_config",
         ),
         run_tests_serially = True,
     ),
@@ -517,7 +520,7 @@ ci.thin_tester(
             target_platform = builder_config.target_platform.ANDROID,
         ),
         android_config = builder_config.android_config(
-            config = "main_builder_rel_mb",
+            config = "base_config",
         ),
         run_tests_serially = True,
     ),
@@ -570,7 +573,7 @@ ci.thin_tester(
             target_platform = builder_config.target_platform.ANDROID,
         ),
         android_config = builder_config.android_config(
-            config = "main_builder_rel_mb",
+            config = "base_config",
         ),
         run_tests_serially = True,
     ),
@@ -616,14 +619,15 @@ ci.thin_tester(
             ],
         ),
         chromium_config = builder_config.chromium_config(
-            config = "arm64_builder_rel_mb",
+            config = "main_builder",
+            apply_configs = ["mb"],
             build_config = builder_config.build_config.RELEASE,
             target_arch = builder_config.target_arch.ARM,
             target_bits = 64,
             target_platform = builder_config.target_platform.ANDROID,
         ),
         android_config = builder_config.android_config(
-            config = "arm64_builder_rel_mb",
+            config = "base_config",
         ),
         run_tests_serially = True,
     ),
@@ -850,13 +854,14 @@ ci.gpu.linux_builder(
             target_platform = builder_config.target_platform.ANDROID,
         ),
         android_config = builder_config.android_config(
-            config = "main_builder_rel_mb",
+            config = "base_config",
         ),
     ),
     gn_args = gn_args.config(
         configs = [
             "gpu_tests",
             "android_builder",
+            "android_fastbuild",
             "release_builder",
             "try_builder",
             "remoteexec",
@@ -884,8 +889,9 @@ ci.gpu.linux_builder(
             ],
         ),
         chromium_config = builder_config.chromium_config(
-            config = "arm64_builder_rel_mb",
+            config = "main_builder",
             apply_configs = [
+                "mb",
                 "download_xr_test_apks",
             ],
             build_config = builder_config.build_config.RELEASE,
@@ -894,13 +900,14 @@ ci.gpu.linux_builder(
             target_platform = builder_config.target_platform.ANDROID,
         ),
         android_config = builder_config.android_config(
-            config = "arm64_builder_rel_mb",
+            config = "base_config",
         ),
     ),
     gn_args = gn_args.config(
         configs = [
             "gpu_tests",
             "android_builder",
+            "android_fastbuild",
             "release_builder",
             "try_builder",
             "remoteexec",
@@ -1759,8 +1766,7 @@ ci.thin_tester(
         # 'gpu_fyi_only_mac_release_telemetry_tests' instead of
         # 'gpu_fyi_mac_release_telemetry_tests'.
         targets = [
-            "gpu_fyi_mac_release_gtests",
-            "gpu_fyi_only_mac_release_telemetry_tests",
+            "gpu_noop_sleep_telemetry_test",
         ],
         mixins = [
             "limited_capacity_bot",
@@ -1772,10 +1778,10 @@ ci.thin_tester(
         os_type = targets.os_type.MAC,
     ),
     # Uncomment this entry when this experimental tester is actually in use.
-    console_view_entry = consoles.console_view_entry(
-        category = "Mac|Intel",
-        short_name = "exp",
-    ),
+    #console_view_entry = consoles.console_view_entry(
+    #    category = "Mac|Intel",
+    #    short_name = "exp",
+    #),
     list_view = "chromium.gpu.experimental",
 )
 

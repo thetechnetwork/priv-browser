@@ -96,6 +96,7 @@
 <translation id="1377508275003315939">Gesla</translation>
 <translation id="1381022135873211423">{count,plural, =1{{position} od {count} naslova}one{{position} od {count} naslova}two{{position} od {count} naslovov}few{{position} od {count} naslovov}other{{position} od {count} naslovov}}</translation>
 <translation id="1383876407941801731">Išči</translation>
+<translation id="1385168997509105202">Takoj boste izgubili dostop do skupine zavihkov »<ph name="GROUP_NAME" />«, uporabnik <ph name="USER_NAME" /> (<ph name="USER_EMAIL" />) pa ne bo več mogel komunicirati z vami v Googlovih storitvah.</translation>
 <translation id="138618066238211776">Nadaljuj kot <ph name="USER_NAME" /></translation>
 <translation id="138692594145659985">Možnosti shranjevanja kartic</translation>
 <translation id="1396260204083880024">Prijavljeni ste kot <ph name="USER_NAME" />. <ph name="USER_EMAIL" />. Odprite meni računa.</translation>
@@ -105,6 +106,7 @@
 <translation id="1411386976162024013">Vizualno iskanje z Googlom Lens</translation>
 <translation id="1417474386970818917">Odjava in izbris</translation>
 <translation id="1426410128494586442">Da</translation>
+<translation id="1429187656584513419">Odprite gesla</translation>
 <translation id="1430915738399379752">Natisni</translation>
 <translation id="1436671784520050284">Nadaljuj nastavitev</translation>
 <translation id="143681031165817424">Naslov je shranjen samo v tej napravi</translation>
@@ -288,6 +290,7 @@
 <translation id="2164946989711475905">Prijava …</translation>
 <translation id="2175927920773552910">Koda QR</translation>
 <translation id="218350106843433823">Samodejno izpolnjevanje gesel in ključev za dostop</translation>
+<translation id="2184272387334793084">Prijavite se, da boste lahko dostopali do gesel in drugega v vseh napravah</translation>
 <translation id="2186206192313702726">Google Lens</translation>
 <translation id="219283042927675668">Zavihki v skupini</translation>
 <translation id="2194856509914051091">Kaj morate upoštevati</translation>
@@ -508,6 +511,7 @@ Oglejte si navodila iskalnika za brisanje zgodovine iskanja, če je na voljo.</t
 <translation id="3124568093781685165">Delite gesla z družinskimi člani</translation>
 <translation id="3130863904455712965">Zgodovina in drugo</translation>
 <translation id="313283613037595347">Ustvarjanje novega anonimnega zavihka</translation>
+<translation id="3136739222562075778">Ta kartica prikazuje znižanja cen za izdelke v odprtih zavihkih</translation>
 <translation id="3138611310073113613">Zavrzi izbiro</translation>
 <translation id="3140825265190223781">Shranjena gesla in ključi za dostop</translation>
 <translation id="3143515551205905069">Prekliči sinhronizacijo</translation>
@@ -590,6 +594,7 @@ Oglejte si navodila iskalnika za brisanje zgodovine iskanja, če je na voljo.</t
 <translation id="3530206579861815432">Hitro poiščite odprte in nedavno zaprte zavihke v sinhroniziranih napravah.</translation>
 <translation id="3530767473765895035">Upravljanje računov v tej napravi …</translation>
 <translation id="3533436815740441613">Nov zavihek</translation>
+<translation id="3533860663366814939">Odprite nastavitve za samodejno izpolnjevanje in gesla</translation>
 <translation id="3547356470684043247">Preberite ocene strank glede izdelkov, storitev ali izkušnje, da se boste lažje odločili glede mnenj</translation>
 <translation id="3557336313807607643">Dodaj med stike</translation>
 <translation id="355765753469272474">Razveljavi</translation>
@@ -979,6 +984,7 @@ Oglejte si navodila iskalnika za brisanje zgodovine iskanja, če je na voljo.</t
 <translation id="5197255632782567636">Internet</translation>
 <translation id="5200894869889836319">Možnosti za nastavitev dovoljenj</translation>
 <translation id="5203051773066903947">Vnesi</translation>
+<translation id="5205750905107419335">Uporabnik <ph name="USER_NAME" /> (<ph name="USER_EMAIL" />) bo takoj izgubil dostop do skupine zavihkov »<ph name="GROUP_NAME" />« in ne bo več mogel komunicirati z vami v Googlovih storitvah.</translation>
 <translation id="5206453674369664567">Odjava in brisanje podatkov</translation>
 <translation id="5210365745912300556">Zapri zavihek</translation>
 <translation id="5211488077761630279">Ali spletnemu mestu »<ph name="SITE_NAME" />« dovolite uporabo dovoljenja za <ph name="PERMISSION" />?</translation>
@@ -1060,6 +1066,7 @@ Handoff must also be enabled in the General section of Settings, and your device
 <translation id="5567439033041178034">VEČ O TEM</translation>
 <translation id="5572648434713976849">V naslovni vrstici boste prejemali izboljšane predloge.</translation>
 <translation id="5576885723883013398">Novo okno</translation>
+<translation id="5578543325423650885">Uporabnik <ph name="USER_NAME" /> (<ph name="USER_EMAIL" />) bo takoj izgubil dostop do skupine zavihkov »<ph name="GROUP_NAME" />«.</translation>
 <translation id="5578795271662203820">Za iskanje te slike uporabi <ph name="SEARCH_ENGINE" /></translation>
 <translation id="5579012242779565775">Skrij bralni seznam</translation>
 <translation id="5585019845078534178">Kartice</translation>
@@ -1512,6 +1519,7 @@ Ko uporabljate anonimni način, spletna mesta ne smejo uporabljati piškotkov za
 <translation id="7431851541687113774">Izklopite zaznavanje naslova</translation>
 <translation id="7431991332293347422">Nadziranje, kako se zgodovina brskanja uporabi za prilagajanje Iskanja Google in drugega</translation>
 <translation id="7435356471928173109">Izklopil skrbnik</translation>
+<translation id="7437712592381799950">Če želite videti več vsebine, prilagojene vam, povlecite navzgor.</translation>
 <translation id="7438481509621345350">Poslej bodo prikazane novice s spletnega mesta <ph name="CHANNEL_NAME" />, ko boste odprli nov zavihek.</translation>
 <translation id="7451023311965289370">{count,plural, =1{Zaznamek je shranjen v »{title}«}one{Zaznamki so shranjeni v »{title}«}two{Zaznamki so shranjeni v »{title}«}few{Zaznamki so shranjeni v »{title}«}other{Zaznamki so shranjeni v »{title}«}}</translation>
 <translation id="7451404862887877229">Dotaknite se »Zasebnost in varnost« in nato »Varno brskanje«</translation>
@@ -1610,10 +1618,12 @@ Ko uporabljate anonimni način, spletna mesta ne smejo uporabljati piškotkov za
 <translation id="7841180087127694526">Iskanje besedila, ki ste ga kopirali</translation>
 <translation id="7841418003178675048">Izberite, katere kartice naj bodo prikazane na strani »Nov zavihek«.</translation>
 <translation id="7846161022626028328">Prišlo je do napake. Poskusite znova.</translation>
+<translation id="784623644169604270">Ni nedavne dejavnosti</translation>
 <translation id="7846296061357476882">Googlove storitve</translation>
 <translation id="784934925303690534">Časovno obdobje</translation>
 <translation id="7851858861565204677">Druge naprave</translation>
 <translation id="7853202427316060426">Dejavnost</translation>
+<translation id="7854006015462979438">Odprite Splošno</translation>
 <translation id="7859988229622350291">Nikoli ne prevedi</translation>
 <translation id="7863211248337747225">Prenos aplikacije</translation>
 <translation id="7865127013871431856">Možnosti za Google Prevajalnik</translation>

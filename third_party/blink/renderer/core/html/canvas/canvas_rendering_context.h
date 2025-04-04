@@ -109,7 +109,6 @@ class CORE_EXPORT CanvasRenderingContext
 
   // TODO(crbug.com/40280152): Remove these methods once killswitch-guarded
   // behavior has shipped.
-  static bool CheckProviderInCanCreateCanvas2dResourceProvider();
   static bool CheckProviderInCanvas2DRenderingContextIsPaintable();
 
   // Correspond to CanvasRenderingAPI defined in
@@ -265,6 +264,9 @@ class CORE_EXPORT CanvasRenderingContext
 
     // Lost because an invalid canvas size was used.
     kInvalidCanvasSize,
+
+    // Lost because the canvas is being disposed.
+    kCanvasDisposed,
   };
   virtual void LoseContext(LostContextMode) {}
   virtual void SendContextLostEventIfNeeded() {}

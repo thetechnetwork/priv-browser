@@ -5,7 +5,10 @@
 #include "chrome/browser/privacy_sandbox/notice/notice_model.h"
 
 #include "components/privacy_sandbox/privacy_sandbox_notice_storage.h"
+
 namespace privacy_sandbox {
+
+using notice::mojom::PrivacySandboxNoticeEvent;
 
 // NoticeApi class definitions.
 NoticeApi::NoticeApi() = default;
@@ -56,9 +59,7 @@ bool NoticeApi::IsFulfilled() {
 }
 
 // Notice class definitions.
-Notice::Notice(NoticeId notice_id, const base::Feature* feature)
-    : notice_id_(notice_id), feature_(feature) {}
-Notice::Notice(const Notice& other) = default;
+Notice::Notice(NoticeId notice_id) : notice_id_(notice_id) {}
 Notice::~Notice() = default;
 
 const std::vector<raw_ptr<NoticeApi>>& Notice::GetTargetApis() {
@@ -67,6 +68,11 @@ const std::vector<raw_ptr<NoticeApi>>& Notice::GetTargetApis() {
 
 const std::vector<raw_ptr<NoticeApi>>& Notice::GetPreReqApis() {
   return pre_req_apis_;
+}
+
+Notice* Notice::SetFeature(const base::Feature* feature) {
+  feature_ = feature;
+  return this;
 }
 
 Notice* Notice::SetPreReqApis(const std::vector<NoticeApi*>& apis) {
@@ -98,9 +104,11 @@ bool Notice::WasFulfilled() {
   return false;
 }
 
-bool Notice::IsFulfillmentEvent(NoticeEvent event) {
-  const std::set<NoticeEvent>& enabled_set = EnablementFulfillEvents();
-  const std::set<NoticeEvent>& disabled_set = DisablementFulfillEvents();
+bool Notice::IsFulfillmentEvent(PrivacySandboxNoticeEvent event) {
+  const std::set<PrivacySandboxNoticeEvent>& enabled_set =
+      EnablementFulfillEvents();
+  const std::set<PrivacySandboxNoticeEvent>& disabled_set =
+      DisablementFulfillEvents();
   if (enabled_set.find(event) != enabled_set.end()) {
     return true;
   }
@@ -110,12 +118,14 @@ bool Notice::IsFulfillmentEvent(NoticeEvent event) {
   return false;
 }
 
-void Notice::UpdateTargetApiResults(NoticeEvent event) {
+void Notice::UpdateTargetApiResults(PrivacySandboxNoticeEvent event) {
   if (!IsFulfillmentEvent(event)) {
     return;
   }
-  const std::set<NoticeEvent>& enabled_set = EnablementFulfillEvents();
-  const std::set<NoticeEvent>& disabled_set = DisablementFulfillEvents();
+  const std::set<PrivacySandboxNoticeEvent>& enabled_set =
+      EnablementFulfillEvents();
+  const std::set<PrivacySandboxNoticeEvent>& disabled_set =
+      DisablementFulfillEvents();
   for (NoticeApi* api : target_apis_) {
     if (enabled_set.find(event) != enabled_set.end()) {
       api->UpdateResult(true);
@@ -132,34 +142,34 @@ NoticeType Notice::GetNoticeType() {
   return NoticeType::kNotice;
 }
 
-const std::set<NoticeEvent>& Notice::EnablementFulfillEvents() {
-  static base::NoDestructor<std::set<NoticeEvent>> enabled_set{
-      {NoticeEvent::kAck, NoticeEvent::kSettings}};
+const std::set<PrivacySandboxNoticeEvent>& Notice::EnablementFulfillEvents() {
+  static base::NoDestructor<std::set<PrivacySandboxNoticeEvent>> enabled_set{
+      {PrivacySandboxNoticeEvent::kAck, PrivacySandboxNoticeEvent::kSettings}};
   return *enabled_set;
 }
 
-const std::set<NoticeEvent>& Notice::DisablementFulfillEvents() {
-  static base::NoDestructor<std::set<NoticeEvent>> disabled_set{{}};
+const std::set<PrivacySandboxNoticeEvent>& Notice::DisablementFulfillEvents() {
+  static base::NoDestructor<std::set<PrivacySandboxNoticeEvent>> disabled_set{
+      {}};
   return *disabled_set;
 }
 
 // Consent class definitions.
-Consent::Consent(NoticeId notice_id, const base::Feature* feature)
-    : Notice(notice_id, feature) {}
+Consent::Consent(NoticeId notice_id) : Notice(notice_id) {}
 
 NoticeType Consent::GetNoticeType() {
   return NoticeType::kConsent;
 }
 
-const std::set<NoticeEvent>& Consent::EnablementFulfillEvents() {
-  static base::NoDestructor<std::set<NoticeEvent>> enabled_set{
-      {NoticeEvent::kOptIn}};
+const std::set<PrivacySandboxNoticeEvent>& Consent::EnablementFulfillEvents() {
+  static base::NoDestructor<std::set<PrivacySandboxNoticeEvent>> enabled_set{
+      {PrivacySandboxNoticeEvent::kOptIn}};
   return *enabled_set;
 }
 
-const std::set<NoticeEvent>& Consent::DisablementFulfillEvents() {
-  static base::NoDestructor<std::set<NoticeEvent>> disabled_set{
-      {NoticeEvent::kOptOut}};
+const std::set<PrivacySandboxNoticeEvent>& Consent::DisablementFulfillEvents() {
+  static base::NoDestructor<std::set<PrivacySandboxNoticeEvent>> disabled_set{
+      {PrivacySandboxNoticeEvent::kOptOut}};
   return *disabled_set;
 }
 
@@ -174,6 +184,27 @@ NoticeApi* NoticeCatalog::RegisterAndRetrieveNewApi() {
 
 const std::vector<std::unique_ptr<NoticeApi>>& NoticeCatalog::GetNoticeApis() {
   return apis_;
+}
+
+Notice* NoticeCatalog::RegisterAndRetrieveNewNotice(
+    std::unique_ptr<Notice> (*notice_creator)(NoticeId),
+    NoticeId notice_id) {
+  notices_.emplace(notice_id, notice_creator(notice_id));
+  return notices_[notice_id].get();
+}
+
+void NoticeCatalog::RegisterNoticeGroup(
+    std::unique_ptr<Notice> (*notice_creator)(NoticeId),
+    std::vector<std::pair<NoticeId, const base::Feature*>>&& notice_ids,
+    std::vector<NoticeApi*>&& target_apis,
+    std::vector<NoticeApi*>&& pre_req_apis) {
+  const std::vector<NoticeApi*>& pre_req_apis1 = pre_req_apis;
+  for (auto [notice_id, feature] : notice_ids) {
+    RegisterAndRetrieveNewNotice(notice_creator, notice_id)
+        ->SetFeature(feature)
+        ->SetTargetApis(target_apis)
+        ->SetPreReqApis(pre_req_apis1);
+  }
 }
 
 const NoticeMap& NoticeCatalog::GetNoticeMap() {

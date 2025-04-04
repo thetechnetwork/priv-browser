@@ -32,10 +32,6 @@ class GlicWindowAnimator : public gfx::AnimationDelegate {
                                 const gfx::Size& target_size,
                                 base::OnceClosure callback);
 
-  // Runs the detached open widget animation for the Glic widget.
-  void RunOpenDetachedAnimation(base::OnceClosure callback,
-                                int animate_down_distance);
-
   // Runs the attached close animation for the Glic widget.
   void RunCloseAnimation(GlicButton* glic_button, base::OnceClosure callback);
 
@@ -79,6 +75,9 @@ class GlicWindowAnimator : public gfx::AnimationDelegate {
   // the widget's current bounds.
   gfx::Rect GetCurrentTargetBounds();
 
+  // If there's a saved target size, start the resize animation for it.
+  void MaybeAnimateToTargetSize();
+
  private:
   // Sets target bounds for the widget (must exist) and creates a
   // GlicWindowResizeAnimation instance to begin a new animation. If a bounds
@@ -109,6 +108,11 @@ class GlicWindowAnimator : public gfx::AnimationDelegate {
 
   class GlicViewOpacityAnimation;
   std::unique_ptr<GlicViewOpacityAnimation> glic_view_opacity_animation_;
+
+ private:
+  // Last requested target size. Will be (0, 0) if there hasn't been a resize
+  // request or glic has already been resized to the target size.
+  gfx::Size last_target_size_;
 
   base::WeakPtrFactory<GlicWindowAnimator> weak_ptr_factory_{this};
 };

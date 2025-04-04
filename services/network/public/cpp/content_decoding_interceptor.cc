@@ -6,6 +6,7 @@
 
 #include "base/metrics/histogram_functions.h"
 #include "base/numerics/safe_conversions.h"
+#include "base/process/current_process.h"
 #include "base/task/sequenced_task_runner.h"
 #include "base/task/thread_pool.h"
 #include "base/types/pass_key.h"
@@ -18,6 +19,7 @@
 #include "services/network/public/cpp/loading_params.h"
 #include "services/network/public/cpp/source_stream_to_data_pipe.h"
 #include "services/network/public/mojom/early_hints.mojom.h"
+#include "services/network/public/mojom/network_service.mojom.h"
 #include "services/network/public/mojom/url_response_head.mojom.h"
 
 namespace network {
@@ -233,6 +235,10 @@ class Interceptor : public network::mojom::URLLoaderClient,
 bool ContentDecodingInterceptor::
     force_mojo_create_data_pipe_failure_for_testing_ = false;
 
+// static
+bool ContentDecodingInterceptor::
+    is_network_serice_runnning_in_the_current_process_ = false;
+
 void ContentDecodingInterceptor::Intercept(
     const std::vector<net::SourceStreamType>& types,
     network::mojom::URLLoaderClientEndpointsPtr& endpoints,
@@ -292,21 +298,105 @@ void ContentDecodingInterceptor::Intercept(
         network::URLLoaderCompletionStatus(net::ERR_INSUFFICIENT_RESOURCES));
     return;
   }
+  Intercept(types, std::move(pipe_consumer_handle),
+            std::move(pipe_producer_handle), std::move(endpoints->url_loader),
+            std::move(endpoints->url_loader_client),
+            std::move(url_loader_receiver), std::move(url_loader_client),
+            worker_task_runner);
+}
 
+// static
+void ContentDecodingInterceptor::Intercept(
+    const std::vector<net::SourceStreamType>& types,
+    mojo::ScopedDataPipeConsumerHandle source_body,
+    mojo::ScopedDataPipeProducerHandle dest_body,
+    mojo::PendingRemote<network::mojom::URLLoader> source_url_loader,
+    mojo::PendingReceiver<network::mojom::URLLoaderClient>
+        source_url_loader_client,
+    mojo::PendingReceiver<network::mojom::URLLoader> dest_url_loader,
+    mojo::PendingRemote<network::mojom::URLLoaderClient> dest_url_loader_client,
+    scoped_refptr<base::SequencedTaskRunner> worker_task_runner) {
+  CHECK(IsInContentDecodingAllowedProcess());
   // Post a task to create and start the `Interceptor` on the worker thread.
   worker_task_runner->PostTask(
       FROM_HERE,
-      base::BindOnce(
-          &Interceptor::CreateAndStart, types, std::move(pipe_consumer_handle),
-          std::move(pipe_producer_handle), std::move(endpoints->url_loader),
-          std::move(endpoints->url_loader_client), std::move(url_loader_client),
-          std::move(url_loader_receiver), worker_task_runner));
+      base::BindOnce(&Interceptor::CreateAndStart, types,
+                     std::move(source_body), std::move(dest_body),
+                     std::move(source_url_loader),
+                     std::move(source_url_loader_client),
+                     std::move(dest_url_loader_client),
+                     std::move(dest_url_loader), worker_task_runner));
+}
+
+// static
+void ContentDecodingInterceptor::InterceptOnNetworkService(
+    mojom::NetworkService& network_service,
+    const std::vector<net::SourceStreamType>& types,
+    network::mojom::URLLoaderClientEndpointsPtr& endpoints,
+    mojo::ScopedDataPipeConsumerHandle& body) {
+  mojo::ScopedDataPipeProducerHandle pipe_producer_handle;
+  mojo::ScopedDataPipeConsumerHandle pipe_consumer_handle;
+  const MojoCreateDataPipeOptions options{
+      .struct_size = sizeof(MojoCreateDataPipeOptions),
+      .flags = MOJO_CREATE_DATA_PIPE_FLAG_NONE,
+      .element_num_bytes = 1,
+      .capacity_num_bytes = network::GetDataPipeDefaultAllocationSize(
+          network::DataPipeAllocationSize::kLargerSizeIfPossible)};
+  const auto mojo_result = mojo::CreateDataPipe(&options, pipe_producer_handle,
+                                                pipe_consumer_handle);
+  base::UmaHistogramExactLinear(
+      "Network.ContentDecodingInterceptor.CreateDataPipe", mojo_result,
+      MOJO_RESULT_SHOULD_WAIT + 1);
+  if (mojo_result != MOJO_RESULT_OK ||
+      force_mojo_create_data_pipe_failure_for_testing_) {
+    mojo::PendingReceiver<network::mojom::URLLoaderClient> client_receiver;
+    mojo::Remote<network::mojom::URLLoaderClient> client_remote(
+        client_receiver.InitWithNewPipeAndPassRemote());
+    client_remote->OnComplete(
+        network::URLLoaderCompletionStatus(net::ERR_INSUFFICIENT_RESOURCES));
+    endpoints = network::mojom::URLLoaderClientEndpoints::New(
+        std::move(endpoints->url_loader), std::move(client_receiver));
+    return;
+  }
+
+  mojo::PendingRemote<network::mojom::URLLoader> new_url_loader;
+  mojo::PendingReceiver<network::mojom::URLLoaderClient> new_url_loader_client;
+  network_service.InterceptUrlLoaderForBodyDecoding(
+      types, std::move(body), std::move(pipe_producer_handle),
+      std::move(endpoints->url_loader), std::move(endpoints->url_loader_client),
+      new_url_loader.InitWithNewPipeAndPassReceiver(),
+      new_url_loader_client.InitWithNewPipeAndPassRemote());
+  body = std::move(pipe_consumer_handle);
+  endpoints = network::mojom::URLLoaderClientEndpoints::New(
+      std::move(new_url_loader), std::move(new_url_loader_client));
+}
+
+// static
+void ContentDecodingInterceptor::SetIsNetworkServiceRunningInTheCurrentProcess(
+    bool value,
+    SetIsNetworkServiceRunningInTheCurrentProcessKey) {
+  is_network_serice_runnning_in_the_current_process_ = value;
 }
 
 // static
 void ContentDecodingInterceptor::SetForceMojoCreateDataPipeFailureForTesting(
     bool value) {
   force_mojo_create_data_pipe_failure_for_testing_ = value;
+}
+
+// static
+bool ContentDecodingInterceptor::IsInContentDecodingAllowedProcess() {
+  // Allow if NetworkService runs in the current process.
+  if (is_network_serice_runnning_in_the_current_process_) {
+    return true;
+  }
+  // Otherwise, disallow only if this is the browser process.
+  if (base::CurrentProcess::GetInstance().GetType({}) ==
+      base::CurrentProcessType::PROCESS_BROWSER) {
+    return false;
+  }
+  // Allow in other process types (renderer, utility, etc.).
+  return true;
 }
 
 }  // namespace network

@@ -318,7 +318,7 @@
       name: "AIPromptAPI",
       public: true,
       status: "test",
-      implied_by: ["AIPromptAPIForWebPlatform", "AIPromptAPIMultimodalInput"],
+      implied_by: ["AIPromptAPIForWebPlatform", "AIPromptAPIMultimodalInput", "AIPromptAPIStructuredOutput"],
     },
     {
       name: "AIPromptAPIForExtension",
@@ -336,6 +336,11 @@
     },
     {
       name: "AIPromptAPIMultimodalInput",
+      public: true,
+      status: "test",
+    },
+    {
+      name: "AIPromptAPIStructuredOutput",
       public: true,
       status: "test",
     },
@@ -502,11 +507,6 @@
       name: "AudioVideoTracks",
       status: "experimental",
     },
-    // Killswitch.
-    {
-      name: "AuraScrollbarUsesNinePatchTrack",
-      status: "stable",
-    },
     {
       name: "AutoDarkMode",
       base_feature: "none",
@@ -653,11 +653,6 @@
         "LanguageDetectionAPI",
         "TranslationAPI",
       ]
-    },
-    {
-      // crbug.com/40681980
-      name: "ButtonNoAlignItems",
-      status: "stable",
     },
     {
       // Enables bypassing CSP checks when we consume a preload.
@@ -1278,17 +1273,20 @@
       depends_on: ["PseudoElementsFocusable"],
     },
     {
-      // TODO(crbug.com/40932006): Non-standard 'reading-flow' keyword
-      // for reading of grid and flexbox items.
+      // TODO(crbug.com/40932006): CSS 'reading-flow' property for reading order
+      // of grid, flexbox and block items.
       // https://drafts.csswg.org/css-display-4/#reading-flow
+      // This should ship in M137, and it can be removed after M139.
       name: "CSSReadingFlow",
-      status: "experimental",
+      status: "stable",
     },
     {
-      // TODO(crbug.com/393550130): Non-standard 'reading-order' keyword
-      // to overwrite reading-flow order.
+      // TODO(crbug.com/393550130): CSS 'reading-order' property to overwrite
+      // reading-flow order.
+      // https://drafts.csswg.org/css-display-4/#reading-order
+      // This should ship in M137, and it can be removed after M139.
       name: "CSSReadingOrder",
-      status: "experimental",
+      status: "stable",
       depends_on: ["CSSReadingFlow"],
     },
     {
@@ -1752,7 +1750,9 @@
     // IncludeJSCallStacksInCrashReports. https://chromestatus.com/feature/4731248572628992
     {
       name: "DocumentPolicyIncludeJSCallStacksInCrashReports",
-      status: "stable",
+      status: "experimental",
+      base_feature_status: "enabled",
+      copied_from_base_feature_if: "overridden",
     },
     {
       name: "DocumentPolicyNegotiation",
@@ -1896,11 +1896,6 @@
     // Kill switch.
     {
       name: "FastClearNeedsRepaint",
-      status: "stable",
-    },
-    // Kill switch.
-    {
-      name: "FastPathSingleSelectorExactMatch",
       status: "stable",
     },
     {
@@ -2426,6 +2421,10 @@
       status: "stable",
     },
     {
+      name: "IgnoreLetterSpacingInCursiveScripts",
+      status: "experimental",
+    },
+    {
       name: "ImageDataPixelFormat",
       status: "experimental",
     },
@@ -2541,6 +2540,7 @@
     {
       // Improved support for debugging CSSNestedDeclarations.
       name: "InspectorGhostRules",
+      status: "stable",
     },
     {
       name: "InstalledApp",
@@ -2697,10 +2697,17 @@
       status: "experimental",
     },
     {
-      // Add sourceLine and sourceColumn to PerformanceScriptTiming
+      // Enable retrieving sourceLine and sourceColumn in LoAF implementation.
       // https://issues.chromium.org/issues/391417815
       name: "LongAnimationFrameSourceLineColumn",
-      status: "experimental",
+      status: "test",
+      implied_by: ["LongAnimationFrameSourceLineColumnInterface"],
+    },
+    {
+      // Add sourceLine and sourceColumn to PerformanceScriptTiming
+      // https://issues.chromium.org/issues/391417815
+      name: "LongAnimationFrameSourceLineColumnInterface",
+      status: "test",
     },
     {
       // Long press on a link selects the link text instead of bringing up
@@ -2803,12 +2810,6 @@
     },
     {
       name: "MediaQueryNavigationControls",
-    },
-    {
-      // This uses media::VideoEncoder implementation in MediaRecorder API
-      // instead of using MediaRecorder own video encoder implementation.
-      name: "MediaRecorderUseMediaVideoEncoder",
-      status: "stable",
     },
     {
       name: "MediaSession",
@@ -2917,11 +2918,10 @@
     //  - Events disabled for the open web: M127 (July 23, 2024)
     //  - Reminder email sent to all Origin trial registrants: December 12, 2024
     //  - Origin trial disabled: M135 (April 1, 2025)
-    //  - Enterprise policy disabled: {not yet}
-    //  - Flag/code can be removed: {2 milestones after EP removal}
+    //  - Enterprise policy disabled: M137 (May 20, 2025)
+    //  - Flag/code can be removed: M139
     {
       name: "MutationEvents",
-      public: true,
     },
     {
       name: "NavigateEventCanTransition",
@@ -3340,6 +3340,11 @@
     {
       name: "PermissionsRequestRevoke",
       status: "experimental",
+    },
+    {
+      // crbug.com/398955086
+      name: "PlaceholderVisibility",
+      status: "stable",
     },
     {
       // crbug.com/389726691.
@@ -3873,11 +3878,12 @@
       name: "ScriptRunIteratorCombiningMarks",
       status: "stable",
     },
-    // Killswitch to be removed after M134 reaches stable.
-    // With it enabled, LocalFrameView uses an optimized iteration over just
-    // scrollable areas with scroll nodes.
+    // Killswitch added in M134, as two flags
+    // ScrollableAreasWithScrollNodeOptimization and UnifiedScrollableArea
+    // before M137. We are keeping this flag for new optimizations and as a
+    // finch holdback experiment feature.
     {
-      name: "ScrollableAreasWithScrollNodeOptimization",
+      name: "ScrollableAreaOptimization",
       status: "stable",
     },
     {
@@ -3992,10 +3998,13 @@
       depends_on: ["CustomizableSelect"],
     },
     {
-      // Implement Selection API across shadow DOM
-      // See https://w3c.github.io/selection-api/
+      // Implement Selection API across shadow DOM: direction and
+      // getComposedRanges().
+      // https://w3c.github.io/selection-api/#dom-selection-getcomposedranges
+      // https://w3c.github.io/selection-api/#dom-selection-direction
+      // This should ship in M137, and it can be removed after M139.
       name: "SelectionAcrossShadowDOM",
-      status: "experimental",
+      status: "stable",
     },
     {
       // See https://crbug.com/395544401
@@ -4245,7 +4254,7 @@
     },
     {
       name: "SpeculationRulesTag",
-      status: "experimental",
+      status: "stable",
     },
     {
       // Enables to run prerendering for new tabs (e.g., target="_blank").
@@ -4426,11 +4435,6 @@
     },
     {
       name: "TextAutoSizingDisabledOnFlexbox",
-      status: "stable",
-    },
-    {
-      // crbug.com/389726691
-      name: "TextCombineEmphasisNG",
       status: "stable",
     },
     {
@@ -4618,14 +4622,6 @@
     {
       name: "UnexposedTaskIds",
     },
-    // Killswitch to be removed after M133 or M134 reaches stable.
-    // With it enabled, LocalFrameView::ScrollableAreas() includes all
-    // scrollable areas in the frame's document, otherwise only user scrollable
-    // ones.
-    {
-      name: "UnifiedScrollableAreas",
-      status: "stable",
-    },
     {
       name: "UnrestrictedMeasureUserAgentSpecificMemory",
     },
@@ -4710,6 +4706,12 @@
       name: "V8IdleTasks",
       base_feature: "none",
       public: true,
+    },
+    {
+      // This is a performance improvement which has slight visual differences.
+      // Enabled in M137. http://crbug.com/334963179
+      name: "ValidationBubbleNoForcedLayout",
+      status: "stable",
     },
     {
       // Whether a video element should automatically play fullscreen unless
@@ -4798,10 +4800,7 @@
     },
     {
       name: "WebAppLaunchQueue",
-      // This is not going into origin trial, "origin_trial_feature_name" is
-      // required for using the "implied_by" behaviour.
-      origin_trial_feature_name: "WebAppLaunchQueue",
-      implied_by: ["FileHandling"],
+      status: {"Android": "test", "default": "stable"},
       base_feature: "none",
     },
     {
@@ -5061,12 +5060,6 @@
       status: "experimental",
       // Also enabled as part of all experimental WebGPU features.
       implied_by: ["WebGPUExperimentalFeatures"],
-    },
-    {
-      // Using subgroup related features in WebGPU.
-      // https://chromestatus.com/feature/5126409856221184
-      name: "WebGPUSubgroupsFeatures",
-      status: "stable",
     },
     {
       name: "WebHID",

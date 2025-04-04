@@ -4,6 +4,8 @@
 
 #include "chrome/browser/extensions/api/printing/printing_api_utils.h"
 
+#include "base/strings/stringprintf.h"
+#include "base/test/scoped_feature_list.h"
 #include "base/test/values_test_util.h"
 #include "chromeos/crosapi/mojom/local_printer.mojom.h"
 #include "chromeos/printing/printer_configuration.h"
@@ -11,6 +13,7 @@
 #include "printing/backend/print_backend_test_constants.h"
 #include "printing/mojom/print.mojom.h"
 #include "printing/print_settings.h"
+#include "printing/printing_features.h"
 #include "testing/gtest/include/gtest/gtest.h"
 
 namespace extensions {
@@ -71,6 +74,44 @@ constexpr char kCjt[] = R"(
         ],
         "collate": {
           "collate": false
+        },
+        "fit_to_page": {
+          "type": "FIT"
+        }
+      }
+    })";
+
+// Template for CJT with fit_to_page.
+constexpr char kCjtWithFitToPageTemplate[] = R"(
+    {
+      "version": "1.0",
+      "print": {
+        "color": {
+          "type": "STANDARD_MONOCHROME"
+        },
+        "duplex": {
+          "type": "NO_DUPLEX"
+        },
+        "page_orientation": {
+          "type": "LANDSCAPE"
+        },
+        "copies": {
+          "copies": 5
+        },
+        "dpi": {
+          "horizontal_dpi": 300,
+          "vertical_dpi": 400
+        },
+        "media_size": {
+          "width_microns": 210000,
+          "height_microns": 297000,
+          "vendor_id": "iso_a4_210x297mm"
+        },
+        "fit_to_page": {
+          "type": "%s"
+        },
+        "collate": {
+          "collate": false
         }
       }
     })";
@@ -128,6 +169,43 @@ constexpr char kIncompleteCjt[] = R"(
         "dpi": {
           "horizontal_dpi": 300,
           "vertical_dpi": 400
+        }
+      }
+    })";
+
+constexpr char kCjtNoFitToPage[] = R"(
+    {
+      "version": "1.0",
+      "print": {
+        "color": {
+          "type": "STANDARD_MONOCHROME"
+        },
+        "duplex": {
+          "type": "NO_DUPLEX"
+        },
+        "page_orientation": {
+          "type": "LANDSCAPE"
+        },
+        "copies": {
+          "copies": 5
+        },
+        "dpi": {
+          "horizontal_dpi": 300,
+          "vertical_dpi": 400
+        },
+        "media_size": {
+          "width_microns": 210000,
+          "height_microns": 297000,
+          "vendor_id": "iso_a4_210x297mm"
+        },
+        "vendor_ticket_item": [
+          {
+            "id": "finishings",
+            "value": "trim"
+          }
+        ],
+        "collate": {
+          "collate": false
         }
       }
     })";
@@ -247,6 +325,60 @@ TEST(PrintingApiUtilsTest, ParsePrintTicket) {
   EXPECT_FALSE(settings->collate());
   EXPECT_THAT(settings->advanced_settings(),
               Contains(Pair(kVendorItemId, kVendorItemValue)));
+  // When feature is disabled, no print-scaling should be applied.
+  EXPECT_EQ(printing::mojom::PrintScalingType::kUnknownPrintScalingType,
+            settings->print_scaling());
+
+  // When feature is enabled, print-scaling should be applied.
+  base::test::ScopedFeatureList feature_list(
+      printing::features::kApiPrintingMarginsAndScale);
+  settings = ParsePrintTicket(base::test::ParseJsonDict(kCjt));
+  ASSERT_TRUE(settings);
+  EXPECT_EQ(printing::mojom::PrintScalingType::kFit, settings->print_scaling());
+}
+
+// Test that parsing CJT with FitToPage values either succeeds or fails
+// if the value is unknown.
+TEST(PrintingApiUtilsTest, ParsePrintTicketFitToPage) {
+  base::test::ScopedFeatureList feature_list(
+      printing::features::kApiPrintingMarginsAndScale);
+
+  struct test_case {
+    std::string_view fit_to_page_type;
+    printing::mojom::PrintScalingType expected_print_scaling;
+  } constexpr kTestCases[] = {
+      {"AUTO", printing::mojom::PrintScalingType::kAuto},
+      {"AUTO_FIT", printing::mojom::PrintScalingType::kAutoFit},
+      {"FIT", printing::mojom::PrintScalingType::kFit},
+      {"FILL", printing::mojom::PrintScalingType::kFill},
+      {"NONE", printing::mojom::PrintScalingType::kNone},
+      {"random-value",
+       printing::mojom::PrintScalingType::kUnknownPrintScalingType},
+  };
+
+  for (const auto& test_case : kTestCases) {
+    const std::string cjt_json =
+        absl::StrFormat(kCjtWithFitToPageTemplate, test_case.fit_to_page_type);
+    base::Value::Dict cjt_ticket = base::test::ParseJsonDict(cjt_json);
+    std::unique_ptr<printing::PrintSettings> settings =
+        ParsePrintTicket(std::move(cjt_ticket));
+    ASSERT_TRUE(settings);
+    EXPECT_EQ(test_case.expected_print_scaling, settings->print_scaling());
+  }
+}
+
+TEST(PrintingApiUtilsTest, ParsePrintTicketNoFitToPage) {
+  base::test::ScopedFeatureList feature_list(
+      printing::features::kApiPrintingMarginsAndScale);
+
+  base::Value::Dict cjt_ticket = base::test::ParseJsonDict(kCjtNoFitToPage);
+  std::unique_ptr<printing::PrintSettings> settings =
+      ParsePrintTicket(std::move(cjt_ticket));
+
+  ASSERT_TRUE(settings);
+  // When print-scaling values are missing, no scaling should be applied.
+  EXPECT_EQ(printing::mojom::PrintScalingType::kUnknownPrintScalingType,
+            settings->print_scaling());
 }
 
 TEST(PrintingApiUtilsTest, ParsePrintTicketInvalidVendorItem) {
@@ -399,6 +531,80 @@ TEST(PrintingApiUtilsTest,
   settings->advanced_settings().emplace("finishings", 123);
   EXPECT_FALSE(
       CheckSettingsAndCapabilitiesCompatibility(*settings, capabilities));
+}
+
+TEST(PrintingApiUtilsTest,
+     CheckSettingsAndCapabilitiesCompatibility_PrintScaling) {
+  std::unique_ptr<printing::PrintSettings> settings = ConstructPrintSettings();
+  printing::PrinterSemanticCapsAndDefaults capabilities =
+      ConstructPrinterCapabilities();
+  capabilities.print_scaling_types.clear();
+
+  const std::vector<printing::mojom::PrintScalingType> kScalingTypes = {
+      printing::mojom::PrintScalingType::kUnknownPrintScalingType,
+      printing::mojom::PrintScalingType::kAuto,
+      printing::mojom::PrintScalingType::kAutoFit,
+      printing::mojom::PrintScalingType::kFit,
+      printing::mojom::PrintScalingType::kFill,
+      printing::mojom::PrintScalingType::kNone,
+  };
+
+  // Test with feature disabled - all types should pass as check is skipped.
+  for (const auto& scaling_type : kScalingTypes) {
+    settings->set_print_scaling(scaling_type);
+    EXPECT_TRUE(
+        CheckSettingsAndCapabilitiesCompatibility(*settings, capabilities));
+  }
+
+  // Re-enable feature for further tests.
+  base::test::ScopedFeatureList feature_list(
+      printing::features::kApiPrintingMarginsAndScale);
+
+  capabilities.print_scaling_types.clear();
+  // Capabilities have no print scaling types, so all types except unknown
+  // should fail.
+  for (const auto& scaling_type : kScalingTypes) {
+    settings->set_print_scaling(scaling_type);
+    if (scaling_type ==
+        printing::mojom::PrintScalingType::kUnknownPrintScalingType) {
+      EXPECT_TRUE(
+          CheckSettingsAndCapabilitiesCompatibility(*settings, capabilities));
+    } else {
+      EXPECT_FALSE(
+          CheckSettingsAndCapabilitiesCompatibility(*settings, capabilities));
+    }
+  }
+
+  // Add all scaling types to capabilities
+  capabilities.print_scaling_types = kScalingTypes;
+
+  // Now all types should pass
+  for (const auto& scaling_type : kScalingTypes) {
+    settings->set_print_scaling(scaling_type);
+    EXPECT_TRUE(
+        CheckSettingsAndCapabilitiesCompatibility(*settings, capabilities));
+  }
+
+  // Test selective support - only kFit and kAuto are supported
+  capabilities.print_scaling_types = {printing::mojom::PrintScalingType::kFit,
+                                      printing::mojom::PrintScalingType::kAuto};
+
+  // Test each scaling type against the selective support
+  for (const auto& scaling_type : kScalingTypes) {
+    settings->set_print_scaling(scaling_type);
+    // Unknown type and supported types should pass.
+    if (scaling_type == printing::mojom::PrintScalingType::kFit ||
+        scaling_type == printing::mojom::PrintScalingType::kAuto ||
+        scaling_type ==
+            printing::mojom::PrintScalingType::kUnknownPrintScalingType) {
+      EXPECT_TRUE(
+          CheckSettingsAndCapabilitiesCompatibility(*settings, capabilities));
+    } else {
+      // Other types should fail as they are not supported.
+      EXPECT_FALSE(
+          CheckSettingsAndCapabilitiesCompatibility(*settings, capabilities));
+    }
+  }
 }
 
 }  // namespace extensions

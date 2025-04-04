@@ -100,6 +100,7 @@
 #include "content/shell/browser/shell_browser_context.h"
 #include "content/test/content_browser_test_utils_internal.h"
 #include "media/media_buildflags.h"
+#include "net/base/features.h"
 #include "net/base/test_completion_callback.h"
 #include "net/cert/cert_status_flags.h"
 #include "net/dns/mock_host_resolver.h"
@@ -4227,12 +4228,9 @@ class ServiceWorkerBrowserTestWithStoragePartitioning
     : public base::test::WithFeatureOverride,
       public ServiceWorkerBrowserTest {
  public:
-  // Dedicated worker clients only exist with PlzDedicatedWorker enabled, so
-  // turn on that flag.
   ServiceWorkerBrowserTestWithStoragePartitioning()
       : base::test::WithFeatureOverride(
-            net::features::kThirdPartyStoragePartitioning),
-        scoped_feature_list_(blink::features::kPlzDedicatedWorker) {}
+            net::features::kThirdPartyStoragePartitioning) {}
   bool ThirdPartyStoragePartitioningEnabled() const {
     return IsParamFeatureEnabled();
   }
@@ -4371,9 +4369,6 @@ class ServiceWorkerBrowserTestWithStoragePartitioning
           testing::UnorderedElementsAre(child_url));
     }
   }
-
- private:
-  base::test::ScopedFeatureList scoped_feature_list_;
 };
 
 INSTANTIATE_FEATURE_OVERRIDE_TEST_SUITE(

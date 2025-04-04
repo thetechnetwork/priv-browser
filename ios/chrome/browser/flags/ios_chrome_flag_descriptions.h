@@ -135,6 +135,9 @@ extern const char kBreakpadNoDelayInitialUploadDescription[];
 extern const char kCollaborationMessagingName[];
 extern const char kCollaborationMessagingDescription[];
 
+extern const char kContainedTabGroupName[];
+extern const char kContainedTabGroupDescription[];
+
 extern const char kContentNotificationExperimentName[];
 extern const char kContentNotificationExperimentDescription[];
 
@@ -302,9 +305,6 @@ extern const char kFullscreenTransitionDescription[];
 
 extern const char kFullscreenSmoothScrollingName[];
 extern const char kFullscreenSmoothScrollingDescription[];
-
-extern const char kHomeCustomizationName[];
-extern const char kHomeCustomizationDescription[];
 
 extern const char kHomeMemoryImprovementsName[];
 extern const char kHomeMemoryImprovementsDescription[];

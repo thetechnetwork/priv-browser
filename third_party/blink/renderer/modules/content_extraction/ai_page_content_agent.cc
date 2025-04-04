@@ -54,12 +54,33 @@ namespace {
 constexpr MapCoordinatesFlags kMapCoordinatesFlags =
     kTraverseDocumentBoundaries | kApplyRemoteViewportTransform;
 constexpr VisualRectFlags kVisualRectFlags = static_cast<VisualRectFlags>(
-    kUseGeometryMapper | kVisualRectApplyRemoteViewportTransform);
+    kUseGeometryMapper | kVisualRectApplyRemoteViewportTransform |
+    kIgnoreFilters);
 
 constexpr float kHeading1FontSizeMultiplier = 2;
 constexpr float kHeading3FontSizeMultiplier = 1.17;
 constexpr float kHeading5FontSizeMultiplier = 0.83;
 constexpr float kHeading6FontSizeMultiplier = 0.67;
+
+ListBasedHitTestBehavior CollectHitTestNodes(std::vector<DOMNodeId>& hit_nodes,
+                                             const Node& node,
+                                             DOMNodeId dom_node_id) {
+  if (node.GetLayoutObject()) {
+    hit_nodes.push_back(dom_node_id);
+  }
+  return kContinueHitTesting;
+}
+
+gfx::Rect ComputeVisibleBoundingBox(const LayoutObject& object) {
+  gfx::RectF visible_bounding_box =
+      object.LocalBoundingBoxRectForAccessibility();
+
+  // TODO(khushalsagar): It might be more optimal to derive this from output of
+  // paint.
+  object.MapToVisualRectInAncestorSpace(nullptr, visible_bounding_box,
+                                        kVisualRectFlags);
+  return ToEnclosingRect(visible_bounding_box);
+}
 
 // TODO(crbug.com/383128653): This is duplicating logic from
 // UnsupportedTagTypeValueForNode, consider reusing it.
@@ -134,46 +155,6 @@ RGBA32 GetColor(const ComputedStyle& style) {
 
 const LayoutIFrame* GetIFrame(const LayoutObject& object) {
   return DynamicTo<LayoutIFrame>(object);
-}
-
-bool IsGenericContainer(
-    const LayoutObject& object,
-    const Vector<mojom::blink::AIPageContentAnnotatedRole>& annotated_roles,
-    const base::flat_set<DOMNodeId>& interactive_dom_node_ids) {
-  if (object.Style()->GetPosition() == EPosition::kFixed) {
-    return true;
-  }
-
-  if (object.Style()->GetPosition() == EPosition::kSticky) {
-    return true;
-  }
-
-  if (object.Style()->ScrollsOverflow()) {
-    return true;
-  }
-
-  if (object.IsInTopOrViewTransitionLayer()) {
-    return true;
-  }
-
-  if (const auto* element = DynamicTo<HTMLElement>(object.GetNode())) {
-    if (element->HasTagName(html_names::kFigureTag)) {
-      return true;
-    }
-  }
-
-  if (!annotated_roles.empty()) {
-    return true;
-  }
-
-  // Use `ExistingIdForNode` since an Id should have already been generated if
-  // this node is interactive.
-  if (interactive_dom_node_ids.contains(
-          DOMNodeIds::ExistingIdForNode(object.GetNode()))) {
-    return true;
-  }
-
-  return false;
 }
 
 std::optional<DOMNodeId> GetDomNodeId(const LayoutObject& object) {
@@ -676,6 +657,59 @@ void AIPageContentAgent::ContentBuilder::AddMetaData(
   }
 }
 
+bool AIPageContentAgent::ContentBuilder::IsGenericContainer(
+    const LayoutObject& object,
+    const mojom::blink::AIPageContentAttributes& attributes) const {
+  if (object.Style()->GetPosition() == EPosition::kFixed) {
+    return true;
+  }
+
+  if (object.Style()->GetPosition() == EPosition::kSticky) {
+    return true;
+  }
+
+  // This has some duplication with the scrollability in InteractionInfo but is
+  // still required for 2 reasons:
+  // 1. The interaction info is only computed when actionable elements are
+  //    requested.
+  // 2. The interaction info is meant to capture the current state (is the
+  //    element scrollable given the current content). This is a heuristic to
+  //    decide whether a node is likely to be a "container" based on the author
+  //    making it scrollable.
+  // TODO(khushalsagar): Consider removing this, no consumer relies on this
+  // behaviour.
+  if (object.Style()->ScrollsOverflow()) {
+    return true;
+  }
+
+  if (object.IsInTopOrViewTransitionLayer()) {
+    return true;
+  }
+
+  if (const auto* element = DynamicTo<HTMLElement>(object.GetNode())) {
+    if (element->HasTagName(html_names::kFigureTag)) {
+      return true;
+    }
+  }
+
+  if (!attributes.annotated_roles.empty()) {
+    return true;
+  }
+
+  if (attributes.node_interaction_info) {
+    return true;
+  }
+
+  // Use `ExistingIdForNode` since an Id should have already been generated if
+  // this node is interactive.
+  if (interactive_dom_node_ids_.contains(
+          DOMNodeIds::ExistingIdForNode(object.GetNode()))) {
+    return true;
+  }
+
+  return false;
+}
+
 void AIPageContentAgent::ContentBuilder::AddInteractiveNode(
     DOMNodeId dom_node_id) {
   CHECK_NE(dom_node_id, kInvalidDOMNodeId);
@@ -798,7 +832,11 @@ AIPageContentAgent::ContentBuilder::MaybeGenerateContentNode(
       mojom::blink::AIPageContentAttributes::New();
   mojom::blink::AIPageContentAttributes& attributes =
       *content_node->content_attributes;
+
+  // Compute state that is used to decide whether this node generates a
+  // ContentNode before making the decision below.
   AddAnnotatedRoles(object, attributes.annotated_roles);
+  AddNodeInteractionInfo(object, attributes);
 
   // Set the attribute type and add any special attributes if the attribute type
   // requires it.
@@ -860,8 +898,7 @@ AIPageContentAgent::ContentBuilder::MaybeGenerateContentNode(
                          element->HasTagName(html_names::kDdTag))) {
     attributes.attribute_type =
         mojom::blink::AIPageContentAttributeType::kListItem;
-  } else if (IsGenericContainer(object, attributes.annotated_roles,
-                                interactive_dom_node_ids_)) {
+  } else if (IsGenericContainer(object, attributes)) {
     // Be sure to set annotated roles before calling IsGenericContainer, as
     // IsGenericContainer will check for annotated roles.
     // Keep container at the bottom of the list as it is the least specific.
@@ -877,8 +914,6 @@ AIPageContentAgent::ContentBuilder::MaybeGenerateContentNode(
   }
 
   AddNodeGeometry(object, attributes);
-
-  AddNodeInteractionInfo(object, attributes);
 
   return content_node;
 }
@@ -953,15 +988,70 @@ void AIPageContentAgent::ContentBuilder::AddNodeGeometry(
   geometry.outer_bounding_box =
       object.AbsoluteBoundingBoxRect(kMapCoordinatesFlags);
 
-  gfx::RectF visible_bounding_box =
-      object.LocalBoundingBoxRectForAccessibility();
-  object.MapToVisualRectInAncestorSpace(nullptr, visible_bounding_box,
-                                        kVisualRectFlags);
-  geometry.visible_bounding_box = ToEnclosingRect(visible_bounding_box);
+  auto it = dom_node_to_visible_bounding_box_.find(attributes.dom_node_id);
+  if (it != dom_node_to_visible_bounding_box_.end()) {
+    geometry.visible_bounding_box = it->second;
+  } else {
+    geometry.visible_bounding_box = ComputeVisibleBoundingBox(object);
+  }
 
   geometry.is_fixed_or_sticky_position =
       object.Style()->GetPosition() == EPosition::kFixed ||
       object.Style()->GetPosition() == EPosition::kSticky;
+}
+
+void AIPageContentAgent::ContentBuilder::ComputeHitTestableNodesInViewport(
+    const LocalFrame& frame,
+    mojom::blink::AIPageContentFrameData& frame_data) {
+  if (!options_->include_geometry) {
+    return;
+  }
+
+  const Document& document = *frame.GetDocument();
+  if (!document.GetLayoutView()) {
+    return;
+  }
+
+  const auto viewport_rect =
+      ComputeVisibleBoundingBox(*document.GetLayoutView());
+  if (viewport_rect.IsEmpty()) {
+    return;
+  }
+
+  const auto local_visible_viewport_rect =
+      document.GetLayoutView()->AbsoluteToLocalRect(PhysicalRect(viewport_rect),
+                                                    kMapCoordinatesFlags);
+  HitTestLocation location(local_visible_viewport_rect);
+
+  std::vector<DOMNodeId> hit_nodes;
+  HitTestRequest::HitNodeCb hit_node_cb =
+      WTF::BindRepeating(&CollectHitTestNodes, std::ref(hit_nodes));
+  HitTestRequest request(
+      HitTestRequest::kReadOnly | HitTestRequest::kActive |
+          HitTestRequest::kListBased | HitTestRequest::kPenetratingList |
+          HitTestRequest::kAvoidCache | HitTestRequest::kHitNodeCbWithId,
+      nullptr, std::move(hit_node_cb));
+  HitTestResult result(request, location);
+  document.GetLayoutView()->HitTest(location, result);
+
+  std::for_each(hit_nodes.rbegin(), hit_nodes.rend(), [&](auto node_id) {
+    if (dom_node_to_visible_bounding_box_.contains(node_id)) {
+      return;
+    }
+
+    const auto visible_bounding_box = ComputeVisibleBoundingBox(
+        *DOMNodeIds::NodeForId(node_id)->GetLayoutObject());
+    dom_node_to_visible_bounding_box_[node_id] = visible_bounding_box;
+
+    if (visible_bounding_box.IsEmpty()) {
+      return;
+    }
+
+    auto hit_test_node = mojom::blink::AIPageContentHitTestNode::New();
+    hit_test_node->dom_node_id = node_id;
+    hit_test_node->visible_bounding_box = visible_bounding_box;
+    frame_data.hit_test_nodes_in_viewport.push_back(std::move(hit_test_node));
+  });
 }
 
 void AIPageContentAgent::ContentBuilder::AddPageInteractionInfo(
@@ -1010,6 +1100,8 @@ void AIPageContentAgent::ContentBuilder::AddFrameData(
       frame_data.contains_paid_content = true;
     }
   }
+
+  ComputeHitTestableNodesInViewport(frame, frame_data);
 }
 
 void AIPageContentAgent::ContentBuilder::AddFrameInteractionInfo(
@@ -1053,15 +1145,14 @@ void AIPageContentAgent::ContentBuilder::AddNodeInteractionInfo(
     return;
   }
 
-  attributes.node_interaction_info =
-      mojom::blink::AIPageContentNodeInteractionInfo::New();
-  mojom::blink::AIPageContentNodeInteractionInfo& node_interaction_info =
-      *attributes.node_interaction_info;
+  mojom::blink::AIPageContentNodeInteractionInfo node_interaction_info;
+
   const ComputedStyle& style = *object.Style();
   node_interaction_info.scrolls_overflow_x = style.ScrollsOverflowX();
   node_interaction_info.scrolls_overflow_y = style.ScrollsOverflowY();
-  bool is_selectable = object.IsSelectable();
-  node_interaction_info.is_selectable = is_selectable;
+
+  node_interaction_info.is_selectable =
+      style.UsedUserSelect() != EUserSelect::kNone;
 
   if (auto* node = object.GetNode()) {
     node_interaction_info.is_editable = IsEditable(*node);
@@ -1081,6 +1172,25 @@ void AIPageContentAgent::ContentBuilder::AddNodeInteractionInfo(
     node_interaction_info.is_focusable = element->IsFocusable();
     node_interaction_info.is_draggable = element->draggable();
     node_interaction_info.is_clickable = element->IsMaybeClickable();
+  }
+
+  const bool needs_interaction_info =
+      node_interaction_info.scrolls_overflow_x ||
+      node_interaction_info.scrolls_overflow_y ||
+      // The common case is for the content to be selectable. So assume that's
+      // the default and only force a ContentNode if we need to indicate some
+      // content is not selectable.
+      !node_interaction_info.is_selectable ||
+      node_interaction_info.is_editable ||
+      node_interaction_info.can_resize_horizontal ||
+      node_interaction_info.can_resize_vertical ||
+      node_interaction_info.is_focusable ||
+      node_interaction_info.is_draggable || node_interaction_info.is_clickable;
+
+  if (needs_interaction_info) {
+    attributes.node_interaction_info =
+        mojom::blink::AIPageContentNodeInteractionInfo::New();
+    *attributes.node_interaction_info = node_interaction_info;
   }
 }
 

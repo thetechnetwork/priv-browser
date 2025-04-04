@@ -134,9 +134,6 @@ extern const char kAriaElementReflectionDescription[];
 extern const char kAutomaticUsbDetachName[];
 extern const char kAutomaticUsbDetachDescription[];
 
-extern const char kAutomotiveFullscreenToolbarImprovementsName[];
-extern const char kAutomotiveFullscreenToolbarImprovementsDescription[];
-
 extern const char kAuxiliarySearchDonationName[];
 extern const char kAuxiliarySearchDonationDescription[];
 
@@ -614,6 +611,9 @@ extern const char kClipboardContentsIdDescription[];
 extern const char kDisableProcessReuse[];
 extern const char kDisableProcessReuseDescription[];
 
+extern const char kDisableSystemBlur[];
+extern const char kDisableSystemBlurDescription[];
+
 extern const char kDoubleBufferCompositingName[];
 extern const char kDoubleBufferCompositingDescription[];
 
@@ -1081,6 +1081,8 @@ extern const char kExperimentalOmniboxLabsName[];
 extern const char kExperimentalOmniboxLabsDescription[];
 extern const char kExtensionAiDataCollectionName[];
 extern const char kExtensionAiDataCollectionDescription[];
+extern const char kExtensionsCollapseMainMenuName[];
+extern const char kExtensionsCollapseMainMenuDescription[];
 extern const char kExtensionsMenuAccessControlName[];
 extern const char kExtensionsMenuAccessControlDescription[];
 extern const char kIPHExtensionsMenuFeatureName[];
@@ -1438,6 +1440,9 @@ extern const char kLensOverlayLatencyOptimizationsDescription[];
 extern const char kLensImageFormatOptimizationsName[];
 extern const char kLensImageFormatOptimizationsDescription[];
 
+extern const char kLensSearchSidePanelNewFeedbackName[];
+extern const char kLensSearchSidePanelNewFeedbackDescription[];
+
 extern const char kLinkedServicesSettingName[];
 extern const char kLinkedServicesSettingDescription[];
 
@@ -1773,9 +1778,6 @@ extern const char kPasswordFormClientsideClassifierDescription[];
 extern const char kPasswordFormGroupedAffiliationsName[];
 extern const char kPasswordFormGroupedAffiliationsDescription[];
 
-extern const char kPasswordLeakToggleMoveName[];
-extern const char kPasswordLeakToggleMoveDescription[];
-
 extern const char kPasswordManagerShowSuggestionsOnAutofocusName[];
 extern const char kPasswordManagerShowSuggestionsOnAutofocusDescription[];
 
@@ -1899,6 +1901,9 @@ extern const char kRenderDocumentDescription[];
 
 extern const char kRendererSideContentDecodingName[];
 extern const char kRendererSideContentDecodingDescription[];
+
+extern const char kDeviceBoundSessionAccessObserverSharedRemoteName[];
+extern const char kDeviceBoundSessionAccessObserverSharedRemoteDescription[];
 
 #if BUILDFLAG(SKIA_BUILD_RUST_PNG)
 extern const char kRustyPngName[];
@@ -2238,6 +2243,9 @@ extern const char kTranslateForceTriggerOnEnglishName[];
 extern const char kTranslateForceTriggerOnEnglishDescription[];
 
 #if BUILDFLAG(IS_WIN) || BUILDFLAG(IS_MAC) || BUILDFLAG(IS_LINUX)
+extern const char kEnableHistorySyncOptinExpansionPillName[];
+extern const char kEnableHistorySyncOptinExpansionPillDescription[];
+
 extern const char kEnableHistorySyncOptinName[];
 extern const char kEnableHistorySyncOptinDescription[];
 
@@ -2445,6 +2453,9 @@ extern const char kWebXrIncubationsDescription[];
 
 extern const char kZeroCopyName[];
 extern const char kZeroCopyDescription[];
+
+extern const char kZeroCopyRBPPartialRasterWithGpuCompositorName[];
+extern const char kZeroCopyRBPPartialRasterWithGpuCompositorDescription[];
 
 extern const char kEnableVulkanName[];
 extern const char kEnableVulkanDescription[];
@@ -2746,6 +2757,9 @@ extern const char kFeedDynamicColorsDescription[];
 extern const char kFeedDiscoFeedEndpointName[];
 extern const char kFeedDiscoFeedEndpointDescription[];
 
+extern const char kFeedHeaderRemovalName[];
+extern const char kFeedHeaderRemovalDescription[];
+
 extern const char kFloatingSnackbarName[];
 extern const char kFloatingSnackbarDescription[];
 
@@ -2834,6 +2848,10 @@ extern const char kReadAloudInCCTDescription[];
 extern const char kReadAloudTapToSeekName[];
 extern const char kReadAloudTapToSeekDescription[];
 
+extern const char kReadAloudTapToSeekName[];
+extern const char kReadAloudTapToSeekDescription[];
+extern const char kReaderModeDevEntryPointName[];
+extern const char kReaderModeDevEntryPointDescription[];
 extern const char kReaderModeHeuristicsName[];
 extern const char kReaderModeHeuristicsDescription[];
 extern const char kReaderModeHeuristicsMarkup[];
@@ -2896,9 +2914,6 @@ extern const char kCrossDeviceTabPaneAndroidDescription[];
 extern const char kHistoryPaneAndroidName[];
 extern const char kHistoryPaneAndroidDescription[];
 
-extern const char kTabGroupPaneAndroidName[];
-extern const char kTabGroupPaneAndroidDescription[];
-
 extern const char kTabGroupsForTabletsName[];
 extern const char kTabGroupsForTabletsDescription[];
 
@@ -2910,9 +2925,6 @@ extern const char kTabGroupSyncDisableNetworkLayerDescription[];
 
 extern const char kTabStripContextMenuAndroidName[];
 extern const char kTabStripContextMenuAndroidDescription[];
-
-extern const char kTabStripGroupCollapseAndroidName[];
-extern const char kTabStripGroupCollapseAndroidDescription[];
 
 extern const char kTabStripGroupDragDropAndroidName[];
 extern const char kTabStripGroupDragDropAndroidDescription[];
@@ -3377,6 +3389,9 @@ extern const char kAndroidMinimalUiLargeScreenDescription[];
 
 extern const char kAndroidWindowPopupLargeScreenName[];
 extern const char kAndroidWindowPopupLargeScreenDescription[];
+
+extern const char kAndroidWindowOcclusionName[];
+extern const char kAndroidWindowOcclusionDescription[];
 
 #endif  // BUILDFLAG(IS_ANDROID)
 
@@ -4745,6 +4760,9 @@ extern const char kOidcAuthProfileManagementDescription[];
 extern const char kGlicName[];
 extern const char kGlicDescription[];
 
+extern const char kGlicZOrderChangesName[];
+extern const char kGlicZOrderChangesDescription[];
+
 extern const char kGlicUserResizeName[];
 extern const char kGlicUserResizeDescription[];
 
@@ -4821,9 +4839,6 @@ extern const char kSupervisedProfileHideGuestDescription[];
 
 extern const char kSupervisedProfileSafeSearchName[];
 extern const char kSupervisedProfileSafeSearchDescription[];
-
-extern const char kSupervisedProfileReauthForYouTubeName[];
-extern const char kSupervisedProfileReauthForYouTubeDescription[];
 
 extern const char kSupervisedProfileReauthForBlockedSiteName[];
 extern const char kSupervisedProfileReauthForBlockedSiteDescription[];

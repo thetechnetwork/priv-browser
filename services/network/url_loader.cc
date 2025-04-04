@@ -44,6 +44,7 @@
 #include "mojo/public/cpp/system/simple_watcher.h"
 #include "net/base/completion_once_callback.h"
 #include "net/base/elements_upload_data_stream.h"
+#include "net/base/features.h"
 #include "net/base/isolation_info.h"
 #include "net/base/load_flags.h"
 #include "net/base/load_timing_info.h"
@@ -426,6 +427,21 @@ T* PtrOrFallback(const mojo::Remote<T>& remote, T* fallback) {
   return remote.is_bound() ? remote.get() : fallback;
 }
 
+scoped_refptr<RefCountedDeviceBoundSessionAccessObserverRemote>
+MaybeInitializeDeviceBoundSessionAccessObserverSharedRemote(
+    mojo::Remote<mojom::DeviceBoundSessionAccessObserver>& remote,
+    URLLoaderContext& context) {
+  if (!base::FeatureList::IsEnabled(
+          features::kDeviceBoundSessionAccessObserverSharedRemote)) {
+    return nullptr;
+  }
+  if (remote) {
+    return base::MakeRefCounted<
+        RefCountedDeviceBoundSessionAccessObserverRemote>(std::move(remote));
+  }
+  return context.GetDeviceBoundSessionAccessObserverSharedRemote();
+}
+
 // Retrieves the Cookie header from either `cors_exempt_headers` or `headers`.
 std::string GetCookiesFromHeaders(
     const net::HttpRequestHeaders& headers,
@@ -567,6 +583,10 @@ bool IncludesValidLoadField(const net::HttpResponseHeaders* headers) {
 
 mojo::SharedRemote<mojom::DeviceBoundSessionAccessObserver> Clone(
     mojom::DeviceBoundSessionAccessObserver& observer) {
+  TRACE_EVENT("loading", "CloneDeviceBoundSessionAccessObserver");
+  base::ScopedUmaHistogramTimer timer(
+      "NetworkService.URLLoader.CloneDeviceBoundSessionAccessObserver",
+      base::ScopedUmaHistogramTimer::ScopedHistogramTiming::kMicrosecondTimes);
   mojo::SharedRemote<mojom::DeviceBoundSessionAccessObserver> new_observer;
   observer.Clone(new_observer.BindNewPipeAndPassReceiver());
   return new_observer;
@@ -717,6 +737,10 @@ URLLoader::URLLoader(
       device_bound_session_observer_(
           PtrOrFallback(device_bound_session_observer_remote_,
                         context.GetDeviceBoundSessionAccessObserver())),
+      device_bound_session_observer_shared_remote_(
+          MaybeInitializeDeviceBoundSessionAccessObserverSharedRemote(
+              device_bound_session_observer_remote_,
+              context)),
       shared_storage_request_helper_(
           std::make_unique<SharedStorageRequestHelper>(
               shared_storage_writable_eligible,
@@ -740,7 +764,8 @@ URLLoader::URLLoader(
       include_load_timing_internal_info_with_response_(
           request.trusted_params.has_value()),
       provide_data_use_updates_(context.DataUseUpdatesEnabled()),
-      partial_decoder_decoding_buffer_size_(net::kMaxBytesToSniff) {
+      partial_decoder_decoding_buffer_size_(net::kMaxBytesToSniff),
+      permissions_policy_(request.permissions_policy) {
   DCHECK(delete_callback_);
 
   // crbug.com/387537990: Experiment with creating the mojo data pipe
@@ -1000,9 +1025,23 @@ void URLLoader::ConfigureRequest(
   }
 
   // Device bound session access can happen asynchronously as a result
-  // of this URLRequest. So create a separate Remote that will outlive
-  // this.
-  if (device_bound_session_observer_) {
+  // of this URLRequest. So pass a refcounted shared Remote that will outlive
+  // `this`.
+  if (device_bound_session_observer_shared_remote_) {
+    // Clear `device_bound_session_observer_` to avoid dangling ptr.
+    device_bound_session_observer_ = nullptr;
+    url_request_->SetDeviceBoundSessionAccessCallback(base::BindRepeating(
+        [](scoped_refptr<RefCountedDeviceBoundSessionAccessObserverRemote>
+               shared_remote,
+           const net::device_bound_sessions::SessionAccess& access) {
+          shared_remote.get()->data->OnDeviceBoundSessionAccessed(access);
+        },
+        device_bound_session_observer_shared_remote_));
+  } else if (device_bound_session_observer_) {
+    // This is just for the experiment to measure the impact on the
+    // DeviceBoundSessionAccessObserverSharedRemote feature.
+    // TODO(crbug.com/407680127): Remove this and when the feature is enabled
+    // and the feature flag is removed.
     url_request_->SetDeviceBoundSessionAccessCallback(base::BindRepeating(
         &mojom::DeviceBoundSessionAccessObserver::OnDeviceBoundSessionAccessed,
         Clone(*device_bound_session_observer_)));
@@ -1680,6 +1719,9 @@ int URLLoader::ProcessAcceptCHFrameOnConnected(
     const net::TransportInfo& info,
     net::URLRequest* url_request,
     net::CompletionOnceCallback callback) {
+  TRACE_EVENT("loading", "URLLoader::ProcessAcceptCHFrameOnConnected",
+              net::NetLogWithSourceToFlow(url_request->net_log()), "url",
+              url_request->url());
   if (!accept_ch_frame_observer_ || info.accept_ch_frame.empty() ||
       !base::FeatureList::IsEnabled(features::kAcceptCHFrame)) {
     return net::OK;
@@ -1699,15 +1741,22 @@ int URLLoader::ProcessAcceptCHFrameOnConnected(
     // `accept_ch_frame_observer_` is owned by `this`, so passing in
     // `callback` is safe.
     auto record = [](net::CompletionOnceCallback callback,
-                     base::TimeTicks call_time, int status) {
+                     base::TimeTicks call_time, uint64_t trace_id, int status) {
       base::UmaHistogramMicrosecondsTimes(
           "Net.URLLoader.AcceptCH.RoundTripTime",
           base::TimeTicks::Now() - call_time);
+      TRACE_EVENT_NESTABLE_ASYNC_END1(
+          "loading", "AcceptCHObserver::OnAcceptCHFrameReceived call",
+          TRACE_ID_LOCAL(trace_id), "status", status);
       std::move(callback).Run(status);
     };
+    TRACE_EVENT_NESTABLE_ASYNC_BEGIN1(
+        "loading", "AcceptCHObserver::OnAcceptCHFrameReceived call",
+        TRACE_ID_LOCAL(this), "url", url_request->url());
     accept_ch_frame_observer_->OnAcceptCHFrameReceived(
         url::Origin::Create(url_request->url()), hints,
-        base::BindOnce(record, std::move(callback), base::TimeTicks::Now()));
+        base::BindOnce(record, std::move(callback), base::TimeTicks::Now(),
+                       TRACE_ID_LOCAL(this).raw_id()));
     return net::ERR_IO_PENDING;
   }
   return net::OK;
@@ -2108,22 +2157,15 @@ void URLLoader::ProcessInboundSharedStorageInterceptorOnResponseStarted() {
 
 void URLLoader::ProcessInboundAttributionInterceptorOnResponseStarted() {
   if (!attribution_request_helper_) {
-    ProcessInboundAdAuctionEventRecordInterceptorOnResponseStarted();
+    ProcessInboundSharedStorageInterceptorOnResponseStarted();
     return;
   }
 
   attribution_request_helper_->Finalize(
       *response_,
       base::BindOnce(
-          &URLLoader::
-              ProcessInboundAdAuctionEventRecordInterceptorOnResponseStarted,
+          &URLLoader::ProcessInboundSharedStorageInterceptorOnResponseStarted,
           weak_ptr_factory_.GetWeakPtr()));
-}
-
-void URLLoader::
-    ProcessInboundAdAuctionEventRecordInterceptorOnResponseStarted() {
-  ad_auction_event_record_request_helper_.HandleResponse(*url_request_);
-  ProcessInboundSharedStorageInterceptorOnResponseStarted();
 }
 
 void URLLoader::OnResponseStarted(net::URLRequest* url_request, int net_error) {
@@ -2149,6 +2191,8 @@ void URLLoader::OnResponseStarted(net::URLRequest* url_request, int net_error) {
 
   response_ = BuildResponseHead();
   DispatchOnRawResponse();
+
+  ad_auction_event_record_request_helper_.HandleResponse(*url_request_);
 
   // Parse and remove the Trust Tokens response headers, if any are expected,
   // potentially failing the request if an error occurs.

@@ -19,7 +19,6 @@ namespace {
 
 constexpr static int kResizeAnimationDurationMs = 300;
 constexpr static int kAttachedWidgetOpacityDurationMs = 150;
-constexpr static int kDetachedWidgetOpacityDurationMs = 100;
 
 }  // namespace
 
@@ -127,20 +126,6 @@ void GlicWindowAnimator::RunOpenAttachedAnimation(GlicButton* glic_button,
                 std::move(callback));
 }
 
-void GlicWindowAnimator::RunOpenDetachedAnimation(base::OnceClosure callback,
-                                                  int animate_down_distance) {
-  gfx::Rect target_bounds =
-      window_controller_->GetGlicWidget()->GetWindowBoundsInScreen();
-  // Only set the detached Y position if there isn't a browser.
-  target_bounds.set_y(target_bounds.y() + animate_down_distance);
-
-  // Fade in widget while animating down.
-  AnimateWindowOpacity(0.0f, 1.0f,
-                       base::Milliseconds(kDetachedWidgetOpacityDurationMs));
-  AnimateBounds(target_bounds, base::Milliseconds(kResizeAnimationDurationMs),
-                std::move(callback));
-}
-
 void GlicWindowAnimator::RunCloseAnimation(GlicButton* glic_button,
                                            base::OnceClosure callback) {
   // The widget is going away so it's fine to replace any existing animation.
@@ -206,6 +191,7 @@ void GlicWindowAnimator::AnimateBounds(const gfx::Rect& target_bounds,
 void GlicWindowAnimator::AnimateSize(const gfx::Size& target_size,
                                      base::TimeDelta duration,
                                      base::OnceClosure callback) {
+  last_target_size_ = target_size;
   // Maintain the top-right corner whether there's an ongoing animation or not.
   gfx::Rect target_bounds = GetCurrentTargetBounds();
   int original_right = target_bounds.right();
@@ -229,6 +215,16 @@ gfx::Rect GlicWindowAnimator::GetCurrentTargetBounds() {
     return window_resize_animation_->target_bounds();
   } else {
     return window_controller_->GetGlicWidget()->GetWindowBoundsInScreen();
+  }
+}
+
+void GlicWindowAnimator::MaybeAnimateToTargetSize() {
+  if (!last_target_size_.IsEmpty() &&
+      last_target_size_ != window_controller_->GetGlicWidget()
+                               ->GetWindowBoundsInScreen()
+                               .size()) {
+    AnimateSize(last_target_size_, base::Milliseconds(300), base::DoNothing());
+    last_target_size_ = gfx::Size();
   }
 }
 

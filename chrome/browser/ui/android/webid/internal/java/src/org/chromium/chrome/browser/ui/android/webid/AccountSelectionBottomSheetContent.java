@@ -38,6 +38,8 @@ public class AccountSelectionBottomSheetContent implements BottomSheetContent {
 
     private static final float MAX_VISIBLE_ACCOUNTS_BUTTON_MODE = 3.5f;
 
+    private static final int MIN_NUM_ACCOUNTS_FOR_SCROLL = 3;
+
     private final View mContentView;
     private final BottomSheetController mBottomSheetController;
     private final Supplier<Integer> mScrollOffsetSupplier;
@@ -136,7 +138,8 @@ public class AccountSelectionBottomSheetContent implements BottomSheetContent {
     }
 
     /**
-     * Returns the height of the half state.
+     * Returns the height of the half state. Returns maxHeight if the number of rows is less than
+     * MIN_NUM_ACCOUNTS_FOR_SCROLL.
      *
      * @param maxVisibleRows The maximum number of accounts that are shown.
      * @param maxHeightPx The maximum height of the sheet.
@@ -150,6 +153,9 @@ public class AccountSelectionBottomSheetContent implements BottomSheetContent {
         // accounts and part of the next one are visible.
         RecyclerView sheetItemListView = sheetContainer.findViewById(R.id.sheet_item_list);
         int numAccounts = sheetItemListView.getAdapter().getItemCount();
+        if (numAccounts < MIN_NUM_ACCOUNTS_FOR_SCROLL) {
+            return maxHeightPx;
+        }
         if (numAccounts > maxVisibleRows) {
             sheetItemListView.measure(
                     View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
@@ -221,18 +227,12 @@ public class AccountSelectionBottomSheetContent implements BottomSheetContent {
 
     @Override
     public float getFullHeightRatio() {
-        if (mRpMode == RpMode.PASSIVE) {
-            if (!mIsMultipleIdps) {
-                computeAndUpdateAccountListHeightForPassiveSingleIdp();
-                return HeightMode.WRAP_CONTENT;
-            }
-            // In multi IDP passive mode, only let the container take half the viewport.
-            return Math.min(
-                            getMaximumSheetHeightPx(),
-                            mBottomSheetController.getContainerHeight() / 2)
-                    / (float) mBottomSheetController.getContainerHeight();
+        if (mRpMode == RpMode.PASSIVE && !mIsMultipleIdps) {
+            computeAndUpdateAccountListHeightForPassiveSingleIdp();
         }
-        // WRAP_CONTENT would be the right fit but this disables the HALF state.
+        // WRAP_CONTENT would be the right fit but this disables the HALF state and this does not
+        // work properly when we transition from a multi IDP UI to a single IDP UI, for unknown
+        // reasons.
         return Math.min(getMaximumSheetHeightPx(), mBottomSheetController.getContainerHeight())
                 / (float) mBottomSheetController.getContainerHeight();
     }

@@ -16,6 +16,7 @@ import("//components/lens/features.gni")
 import("//components/metrics/structured/buildflags/buildflags.gni")
 import("//components/nacl/features.gni")
 import("//components/offline_pages/buildflags/features.gni")
+import("//content/browser/devtools/features.gni")
 import("//crypto/features.gni")
 import("//device/vr/buildflags/buildflags.gni")
 import("//extensions/buildflags/buildflags.gni")
@@ -494,6 +495,8 @@ static_library("ui") {
     "//components/feedback/redaction_tool",
     "//components/find_in_page",
     "//components/fingerprinting_protection_filter/browser",
+    "//components/fingerprinting_protection_filter/interventions/browser",
+    "//components/fingerprinting_protection_filter/interventions/common:features",
     "//components/gcm_driver",
     "//components/google/core/common",
     "//components/heap_profiling/multi_process",
@@ -1989,7 +1992,7 @@ static_library("ui") {
     }
   }
 
-  if (!is_android || is_desktop_android) {
+  if (enable_devtools_frontend) {
     sources += [
       "webui/devtools/devtools_ui.cc",
       "webui/devtools/devtools_ui.h",

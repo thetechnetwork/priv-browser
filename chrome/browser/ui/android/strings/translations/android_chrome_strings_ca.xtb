@@ -17,6 +17,7 @@
 <translation id="1052842760770519282">No es pot accedir a algunes de les teves contrasenyes</translation>
 <translation id="1058669287135776095">No tens connexió. Comprova la connexió a Internet i torna-ho a provar.</translation>
 <translation id="10614374240317010">Contrasenyes que no es desen mai</translation>
+<translation id="1070689840697074178">Pots baixar els PDF aquí</translation>
 <translation id="107147699690128016">Si canvies l'extensió del fitxer, pot ser que el fitxer s'obri en una altra aplicació i pot arribar a ser perillós per al dispositiu.</translation>
 <translation id="1080365971383768617">Contrasenyes en tots els teus dispositius</translation>
 <translation id="1087176310396019910">Possible contingut brossa</translation>
@@ -732,7 +733,6 @@ Només les persones que sàpiguen la teva frase de contrasenya podran llegir les
 <translation id="4460861538906892109">{ITEMS_COUNT,plural, =1{1 adreça d'interès}other{# adreces d'interès}}</translation>
 <translation id="4478161224666880173">Pots utilitzar el teu compte de <ph name="IDENTITY_PROVIDER_ETLD_PLUS_ONE" /> en aquest lloc web. Per continuar, inicia la sessió a<ph name="IDENTITY_PROVIDER_ETLD_PLUS_ONE" />.</translation>
 <translation id="4479972344484327217">S'està instal·lant <ph name="MODULE" /> per a Chrome…</translation>
-<translation id="4481181637083926190">{BOOKMARK_COUNT,plural, =1{L'adreça d'interès s'ha desat a <ph name="FOLDER_NAME" />. Només es desa en aquest dispositiu.}other{Les adreces d'interès s'han desat a <ph name="FOLDER_NAME" />. Només es desen en aquest dispositiu.}}</translation>
 <translation id="4484496141267039529">No hi ha connexió. Torna-ho a provar més tard.</translation>
 <translation id="4487967297491345095">Totes les dades de les aplicacions de Chrome, com ara els fitxers, la configuració, els comptes o les bases de dades, entre d'altres, se suprimiran permanentment.</translation>
 <translation id="4494806687727322324">L'administrador ha activat l'opció de desar contrasenyes</translation>
@@ -955,6 +955,7 @@ Només les persones que sàpiguen la teva frase de contrasenya podran llegir les
 <translation id="5456381639095306749">Baixa la pàgina</translation>
 <translation id="5458366071038729214">Aquí veuràs els llocs web que segueixes</translation>
 <translation id="5468068603361015296">Vols baixar <ph name="FILE_NAME" /> igualment?</translation>
+<translation id="5471273988133666918">La pestanya <ph name="TAB_TITLE" /> no es pot moure</translation>
 <translation id="548278423535722844">Obre en una aplicació de mapes</translation>
 <translation id="5492637351392383067">Encriptació al dispositiu</translation>
 <translation id="549660026907543296">Uneix-me com a <ph name="MEMBER_FULL_NAME" /></translation>
@@ -1328,7 +1329,6 @@ Per exemple, és possible que alguns llocs web responguin a aquesta sol·licitud
 <translation id="7063006564040364415">No s'ha pogut connectar amb el servidor de sincronització.</translation>
 <translation id="7071521146534760487">Gestiona el compte</translation>
 <translation id="707155805709242880">Tria què vols sincronitzar a continuació</translation>
-<translation id="707702207692430409">{BOOKMARK_COUNT,plural, =1{L'adreça d'interès s'ha desat a <ph name="FOLDER_NAME" /> al teu compte, <ph name="ACCOUNT_EMAIL" />.}other{Les adreces d'interès s'han desat a <ph name="FOLDER_NAME" /> al teu compte, <ph name="ACCOUNT_EMAIL" />.}}</translation>
 <translation id="7077143737582773186">Targeta Secure Digital</translation>
 <translation id="7078916049958741685">Suprimeix també les teves dades de Chrome d'aquest dispositiu</translation>
 <translation id="7085332316435785646">Tria si vols incloure l'historial de Chrome per obtenir experiències més personalitzades als serveis de Google</translation>

@@ -18,7 +18,6 @@
 #include "base/sequence_checker.h"
 #include "base/time/time.h"
 #include "components/affiliations/core/browser/affiliation_fetch_throttler_delegate.h"
-#include "components/affiliations/core/browser/affiliation_fetcher_delegate.h"
 #include "components/affiliations/core/browser/affiliation_fetcher_manager.h"
 #include "components/affiliations/core/browser/affiliation_service.h"
 #include "components/affiliations/core/browser/affiliation_utils.h"
@@ -57,7 +56,6 @@ class FacetManager;
 // and then transfer it to the background thread for the rest of its life.
 // Initialize() must be called already on the final (background) thread.
 class AffiliationBackend : public FacetManagerHost,
-                           public AffiliationFetcherDelegate,
                            public AffiliationFetchThrottlerDelegate {
  public:
   using StrategyOnCacheMiss = AffiliationService::StrategyOnCacheMiss;
@@ -99,7 +97,7 @@ class AffiliationBackend : public FacetManagerHost,
       std::vector<FacetURI> facet_uris) const;
   std::vector<std::string> GetPSLExtensions() const;
   void UpdateAffiliationsAndBranding(const std::vector<FacetURI>& facets,
-                                     base::OnceClosure callback);
+                                     base::OnceClosure update_complete_closure);
 
   // Deletes the cache database file at |db_path|, and all auxiliary files. The
   // database must be closed before calling this.
@@ -147,12 +145,11 @@ class AffiliationBackend : public FacetManagerHost,
   void RequestNotificationAtTime(const FacetURI& facet_uri,
                                  base::Time time) override;
 
-  // AffiliationFetcherDelegate:
-  void OnFetchSucceeded(
-      AffiliationFetcherInterface* fetcher,
-      std::unique_ptr<AffiliationFetcherDelegate::Result> result) override;
-  void OnFetchFailed(AffiliationFetcherInterface* fetcher) override;
-  void OnMalformedResponse(AffiliationFetcherInterface* fetcher) override;
+  void OnFetchFinished(AffiliationFetcherInterface::FetchResult result);
+
+  void RetryRequestIfNeeded();
+  void ProcessSuccessfulFetch(
+      AffiliationFetcherInterface::ParsedFetchResponse result);
 
   // AffiliationFetchThrottlerDelegate:
   bool OnCanSendNetworkRequest() override;

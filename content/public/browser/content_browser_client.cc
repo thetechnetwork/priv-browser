@@ -1964,4 +1964,13 @@ bool ContentBrowserClient::ShouldPrioritizeForBackForwardCache(
   return false;
 }
 
+std::unique_ptr<KeepAliveRequestTracker>
+ContentBrowserClient::MaybeCreateKeepAliveRequestTracker(
+    const network::ResourceRequest& request,
+    std::optional<ukm::SourceId> ukm_source_id,
+    KeepAliveRequestTracker::IsContextDetachedCallback
+        is_context_detached_callback) {
+  return nullptr;
+}
+
 }  // namespace content

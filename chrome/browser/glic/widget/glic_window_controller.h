@@ -271,6 +271,8 @@ class GlicWindowController : public views::WidgetObserver,
   // Helper function to get the always detached flag.
   static bool AlwaysDetached();
 
+  bool IsDragging() { return in_move_loop_; }
+
  private:
   // ui::AcceleratorTarget
   bool AcceleratorPressed(const ui::Accelerator& accelerator) override;
@@ -278,7 +280,7 @@ class GlicWindowController : public views::WidgetObserver,
 
   void AddAccelerators();
 
-  gfx::Rect GetInitialDetachedBounds();
+  gfx::Rect GetInitialDetachedBounds(Browser* browser);
 
   // Get the default detached bounds relative to browser.
   gfx::Rect GetInitialDetachedBoundsFromBrowser(Browser* browser);

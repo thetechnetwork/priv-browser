@@ -19,6 +19,10 @@ NSString* const kTranslateModeMediumDetentIdentifier =
 // The identifier for the peak detent.
 NSString* const kPeakSheetDetentIdentifier = @"kPeakSheetDetentIdentifier";
 
+// The identifier for the info message state.
+NSString* const kInfoMessageSheetDetentIdentifier =
+    @"kInfoMessageSheetDetentIdentifier";
+
 // The detent height in points for the 'peak' state of the bottom sheet.
 const CGFloat kPeakDetentHeight = 100.0;
 
@@ -130,16 +134,17 @@ const CGFloat kTranslateSheetHeightRatio = 0.33;
     return SheetDimensionState::kConsent;
   }
 
+  if ([identifier isEqualToString:kInfoMessageSheetDetentIdentifier]) {
+    return SheetDimensionState::kInfoMessage;
+  }
+
   return SheetDimensionState::kHidden;
 }
 
 - (void)setPresentationStrategy:
     (SheetDetentPresentationStategy)presentationStrategy {
   _presentationStrategy = presentationStrategy;
-  if ([self isInMediumDetent] || [self isInLargeDetent]) {
-    // Refresh the detents presentation for the unrestricted state.
-    [self adjustDetentsForState:SheetDetentStateUnrestrictedMovement];
-  }
+  [self adjustDetentsForState:SheetDetentStateUnrestrictedMovement];
 }
 
 #pragma mark - Public methods
@@ -226,6 +231,11 @@ const CGFloat kTranslateSheetHeightRatio = 0.33;
       _sheet.largestUndimmedDetentIdentifier = kConsentSheetDetentIdentifier;
       _sheet.selectedDetentIdentifier = kConsentSheetDetentIdentifier;
       break;
+    case SheetDetentStateInfoMessage:
+      _sheet.detents = @[ [self infoMessageDetent] ];
+      _sheet.largestUndimmedDetentIdentifier =
+          kInfoMessageSheetDetentIdentifier;
+      _sheet.selectedDetentIdentifier = kInfoMessageSheetDetentIdentifier;
   }
 
   [self reportDimensionChangeIfNeeded:NO];
@@ -289,6 +299,17 @@ const CGFloat kTranslateSheetHeightRatio = 0.33;
   return [UISheetPresentationControllerDetent
       customDetentWithIdentifier:kPeakSheetDetentIdentifier
                         resolver:peakHeightResolver];
+}
+
+- (UISheetPresentationControllerDetent*)infoMessageDetent {
+  __weak __typeof(self) weakSelf = self;
+  auto infoMessageHeightResolver = ^CGFloat(
+      id<UISheetPresentationControllerDetentResolutionContext> context) {
+    return weakSelf.infoMessageHeight;
+  };
+  return [UISheetPresentationControllerDetent
+      customDetentWithIdentifier:kInfoMessageSheetDetentIdentifier
+                        resolver:infoMessageHeightResolver];
 }
 
 @end

@@ -1197,12 +1197,6 @@ BASE_FEATURE(kUnrestrictedSharedArrayBuffer,
              "UnrestrictedSharedArrayBuffer",
              base::FEATURE_DISABLED_BY_DEFAULT);
 
-// Enable using browser-calculated origins on navigations, instead of
-// renderer-calculated ones.
-BASE_FEATURE(kUseBrowserCalculatedOrigin,
-             "UseBrowserCalculatedOrigin",
-             base::FEATURE_ENABLED_BY_DEFAULT);
-
 #if BUILDFLAG(IS_ANDROID) && BUILDFLAG(INCLUDE_BOTH_V8_SNAPSHOTS)
 // If enabled, blink's context snapshot is used rather than the v8 snapshot.
 BASE_FEATURE(kUseContextSnapshot,
@@ -1376,6 +1370,11 @@ BASE_FEATURE(kAccessibilityManageBroadcastReceiverOnBackground,
 // Enable open PDF inline on Android.
 BASE_FEATURE(kAndroidOpenPdfInline,
              "AndroidOpenPdfInline",
+             base::FEATURE_DISABLED_BY_DEFAULT);
+
+// A feature to enable launch handler and file handler api for Chrome on Android
+BASE_FEATURE(kAndroidWebAppLaunchHandler,
+             "AndroidWebAppLaunchHandler",
              base::FEATURE_DISABLED_BY_DEFAULT);
 
 // Allows the use of "Smart Zoom", an alternative form of page zoom, and

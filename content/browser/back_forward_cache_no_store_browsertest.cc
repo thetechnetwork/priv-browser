@@ -20,6 +20,7 @@
 #include "content/public/test/content_browser_test_utils.h"
 #include "content/public/test/test_navigation_observer.h"
 #include "content/shell/browser/shell.h"
+#include "net/base/features.h"
 #include "net/device_bound_sessions/test_support.h"
 #include "net/net_buildflags.h"
 #include "net/test/embedded_test_server/controllable_http_response.h"
@@ -2035,9 +2036,17 @@ IN_PROC_BROWSER_TEST_F(
   ExpectRestored(FROM_HERE);
 }
 
+// TODO: crbug.com/408140463 - This test is flaky on Mac builders.
+#if BUILDFLAG(IS_MAC)
+#define MAYBE_CacheControlNoStoreSessionTerminated \
+  DISABLED_CacheControlNoStoreSessionTerminated
+#else
+#define MAYBE_CacheControlNoStoreSessionTerminated \
+  CacheControlNoStoreSessionTerminated
+#endif
 IN_PROC_BROWSER_TEST_F(
     BackForwardCacheBrowserTestRestoreUnlessDeviceBoundSessionTerminated,
-    CacheControlNoStoreSessionTerminated) {
+    MAYBE_CacheControlNoStoreSessionTerminated) {
   EXPECT_TRUE(embedded_test_server()->InitializeAndListen());
   embedded_test_server()->RegisterRequestHandler(
       net::device_bound_sessions::GetTestRequestHandler(
@@ -2111,9 +2120,17 @@ std::unique_ptr<net::test_server::HttpResponse> RedirectToUrl(
   return http_response;
 }
 
+// TODO: crbug.com/408140463 - This test is flaky on Mac builders.
+#if BUILDFLAG(IS_MAC)
+#define MAYBE_CacheControlNoStoreSessionTerminatedOnRedirectedPage \
+  DISABLED_CacheControlNoStoreSessionTerminatedOnRedirectedPage
+#else
+#define MAYBE_CacheControlNoStoreSessionTerminatedOnRedirectedPage \
+  CacheControlNoStoreSessionTerminatedOnRedirectedPage
+#endif
 IN_PROC_BROWSER_TEST_F(
     BackForwardCacheBrowserTestRestoreUnlessDeviceBoundSessionTerminated,
-    CacheControlNoStoreSessionTerminatedOnRedirectedPage) {
+    MAYBE_CacheControlNoStoreSessionTerminatedOnRedirectedPage) {
   EXPECT_TRUE(embedded_test_server()->InitializeAndListen());
   embedded_test_server()->RegisterRequestHandler(
       net::device_bound_sessions::GetTestRequestHandler(

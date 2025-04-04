@@ -12,6 +12,10 @@
 #include "components/privacy_sandbox/privacy_sandbox_notice.mojom.h"
 #include "components/privacy_sandbox/privacy_sandbox_notice_storage.h"
 
+#if !BUILDFLAG(IS_ANDROID)
+#include "chrome/browser/privacy_sandbox/notice/desktop_view_manager.h"
+#endif  // !BUILDFLAG(IS_ANDROID)
+
 namespace privacy_sandbox {
 
 // This class will:
@@ -28,12 +32,17 @@ class PrivacySandboxNoticeService : public KeyedService {
   std::vector<notice::mojom::PrivacySandboxNotice> GetRequiredNotices(
       SurfaceType surface);
 
-  void EventOccurred(NoticeId notice_id, NoticeEvent event);
+  void EventOccurred(NoticeId notice_id,
+                     notice::mojom::PrivacySandboxNoticeEvent event);
 
   // Service Accessors.
   PrivacySandboxNoticeStorage* GetNoticeStorage();
   PrefService* GetPrefService();
   NoticeCatalog* GetCatalog();
+
+#if !BUILDFLAG(IS_ANDROID)
+  DesktopViewManager* GetDesktopViewManager();
+#endif  // !BUILDFLAG(IS_ANDROID)
 
   // KeyedService:
   void Shutdown() override;
@@ -43,6 +52,9 @@ class PrivacySandboxNoticeService : public KeyedService {
   raw_ptr<Profile> profile_;
   std::unique_ptr<NoticeCatalog> catalog_;
   std::unique_ptr<PrivacySandboxNoticeStorage> notice_storage_;
+#if !BUILDFLAG(IS_ANDROID)
+  std::unique_ptr<DesktopViewManager> desktop_view_manager_;
+#endif  // !BUILDFLAG(IS_ANDROID)
 };
 
 }  // namespace privacy_sandbox

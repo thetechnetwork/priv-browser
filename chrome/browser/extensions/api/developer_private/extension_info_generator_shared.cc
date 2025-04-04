@@ -23,7 +23,6 @@
 #include "chrome/browser/extensions/extension_allowlist.h"
 #include "chrome/browser/extensions/extension_util.h"
 #include "chrome/browser/profiles/profile.h"
-#include "chrome/browser/ui/toolbar/toolbar_actions_model.h"
 #include "chrome/browser/ui/webui/extensions/extension_icon_source.h"
 #include "chrome/common/chrome_features.h"
 #include "chrome/common/extensions/manifest_handlers/app_launch_info.h"
@@ -588,8 +587,8 @@ void ExtensionInfoGeneratorShared::FillExtensionInfo(
 
   // User Scripts toggle.
   info.user_scripts_access.is_enabled =
-      UserScriptManager::CanExtensionUseUserScriptsAPI(extension);
-  const UserScriptManager* user_script_manager =
+      UserScriptManager::IsUserScriptsAPIPermissionAvailable(extension);
+  UserScriptManager* user_script_manager =
       ExtensionSystem::Get(browser_context_)->user_script_manager();
   if (user_script_manager) {  // Not created in some unit tests.
     info.user_scripts_access.is_active =
