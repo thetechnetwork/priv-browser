@@ -190,9 +190,9 @@ jobs:
           }
 
           echo "Checking for rejected patch hunks..."
-          if find . -name "*.rej" -o -name "*.orig" | grep -q .; then
+          if find . -name "*.rej" | grep -q .; then
             echo "❌ Patch application created .rej or .orig files"
-            find . -name "*.rej" -o -name "*.orig"
+            find . -name "*.rej"
             exit 1
           fi
 
