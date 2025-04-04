@@ -159,9 +159,23 @@ jobs:
         run: |
           echo "Applying patches from priv-browser-patches..."
           cd src
+
           for patch in ../priv-browser-patches/*.patch; do
-            echo "Applying $patch"
-            git apply "$patch" || { echo "Failed to apply $patch" && exit 1; }
+            echo "Checking and applying $patch"
+  
+            # Check if patch is already applied
+            if git apply --reverse --check "$patch" > /dev/null 2>&1; then
+              echo "Patch already applied, skipping: $patch"
+              continue
+            fi
+
+            # Attempt to apply patch
+            if git apply "$patch"; then
+              echo "✅ Applied: $patch"
+            else
+              echo "❌ Failed to apply: $patch"
+              exit 1
+            fi
           done
 
       - name: Verify patch application
