@@ -114,23 +114,25 @@ jobs:
       - name: Fetch Chromium source
         shell: bash
         run: |
-          # Initialize gclient config if not exists
-          if [ ! -f .gclient ]; then
-            cat > .gclient << 'EOT'
-            solutions = [
-              {
-                "name": "src",
-                "url": "$FORK_URL",
-                "deps_file": "DEPS",
-                "managed": False,
-                "custom_deps": {},
-                "custom_vars": {},
-              },
-            ]
-            EOT
-            # Replace placeholder with actual URL
-            sed -i "s|\$FORK_URL|$FORK_URL|g" .gclient
+          cat > .gclient << EOF
+          solutions = [
+            {
+              "name": "src",
+              "url": "$FORK_URL",
+              "deps_file": "DEPS",
+              "managed": False,
+              "custom_deps": {},
+              "custom_vars": {},
+            },
+          ]
+          EOF
+          if [ -d src/.git ]; then
+            cd src && git remote set-url origin "$FORK_URL" && git fetch --prune && git checkout "$FORK_BRANCH" && git pull && cd ..
+          else
+            git clone "$FORK_URL" src && cd src && git checkout "$FORK_BRANCH" && cd ..
           fi
+          gclient sync --no-history --with_branch_heads --with_tags -D
+          gclient runhooks
           
           # Handle existing checkout for incremental builds
           if [ -d src/.git ]; then
@@ -168,13 +170,13 @@ jobs:
         run: |
           echo "Applying patches from priv-browser-patches..."
           cd src
-          # Clean any previously applied patches
-          git reset --hard HEAD
-          # Apply patches in order
           for patch in ../priv-browser-patches/*.patch; do
             echo "Checking and applying $patch"
-            if git apply --check "$patch"; then
-              git apply "$patch"
+            if git apply --reverse --check "$patch" > /dev/null 2>&1; then
+              echo "Patch already applied, skipping: $patch"
+              continue
+            fi
+            if git apply "$patch"; then
               echo "✅ Applied: $patch"
             else
               echo "❌ Failed to apply: $patch"
