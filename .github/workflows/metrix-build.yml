@@ -172,6 +172,7 @@ jobs:
           repository: TheTechNetwork/priv-browser-patches
           token: ${{ secrets.PRIV_BROWSER_PAT }}
           path: priv-browser-patches
+          ref: main
 
       - name: Apply custom patches
         shell: bash
