@@ -78,29 +78,7 @@ jobs:
           where ninja || choco install ninja -y
           where ccache || choco install ccache -y
 
-      - name: Install depot_tools (Windows)
-        if: runner.os == 'Windows'
-        shell: cmd
-        run: |
-          if not exist depot_tools git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
-          pushd depot_tools
-          git checkout -B main origin/main
-          git fetch --prune --all
-          git pull origin main
-          popd
-          echo PATH=%cd%\depot_tools;%PATH%>> %GITHUB_ENV%
-
-      - name: Install depot_tools (Linux)
-        if: contains(matrix.runner, 'linux')
-        shell: bash
-        run: |
-          if [ -d "depot_tools" ]; then rm -rf depot_tools; fi
-          git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
-          chmod +x depot_tools/gclient depot_tools/gclient.py
-          echo "PATH=$(pwd)/depot_tools:$PATH" >> $GITHUB_ENV
-
-      - name: Install depot_tools (macOS)
-        if: contains(matrix.runner, 'macos')
+      - name: Install depot_tools
         shell: bash
         run: |
           if [ -d "depot_tools" ]; then rm -rf depot_tools; fi
@@ -159,17 +137,12 @@ jobs:
         run: |
           echo "Applying patches from priv-browser-patches..."
           cd src
-
           for patch in ../priv-browser-patches/*.patch; do
             echo "Checking and applying $patch"
-  
-            # Check if patch is already applied
             if git apply --reverse --check "$patch" > /dev/null 2>&1; then
               echo "Patch already applied, skipping: $patch"
               continue
             fi
-
-            # Attempt to apply patch
             if git apply "$patch"; then
               echo "✅ Applied: $patch"
             else
@@ -182,20 +155,14 @@ jobs:
         shell: bash
         run: |
           cd src
-
-          echo "Checking for whitespace errors in patch application..."
-          git diff --check || {
-            echo "❌ Patch introduced whitespace issues"
-            exit 1
-          }
-
-          echo "Checking for rejected patch hunks..."
+          echo "Checking for whitespace errors..."
+          git diff --check || { echo "❌ Whitespace issues"; exit 1; }
+          echo "Checking for rejected hunks..."
           if find . -name "*.rej" | grep -q .; then
-            echo "❌ Patch application created .rej or .orig files"
+            echo "❌ Found .rej files"
             find . -name "*.rej"
             exit 1
           fi
-
           echo "✅ Patch verification passed"
 
       - name: Generate build cache key
@@ -205,8 +172,6 @@ jobs:
           cd src
           CHROMIUM_COMMIT=$(git rev-parse HEAD)
           PATCH_HASH=$(find ../priv-browser-patches -type f -name "*.patch" -exec sha1sum {} \; | sha1sum | awk '{print $1}')
-          echo "chromium_commit=$CHROMIUM_COMMIT" >> $GITHUB_OUTPUT
-          echo "patch_hash=$PATCH_HASH" >> $GITHUB_OUTPUT
           echo "key=build-${CHROMIUM_COMMIT}-${PATCH_HASH}" >> $GITHUB_OUTPUT
 
       - name: Check for existing build
@@ -224,7 +189,7 @@ jobs:
         if: steps.check_build.outputs.cache-hit == 'true'
         shell: bash
         run: |
-          echo "Reusing cached build from: ${{ steps.build_key.outputs.key }}"
+          echo "Reusing cached build"
           mkdir -p src/out/Release
           cp -r "$GITHUB_WORKSPACE/cached-builds/${{ steps.build_key.outputs.key }}/"* src/out/Release/
 
@@ -234,41 +199,58 @@ jobs:
         run: |
           cd src
           mkdir -p out/Release
-          gn gen out/Release --args="is_debug=false use_sysroot=false is_component_build=false symbol_level=0 v8_enable_stress_compilation=false treat_warnings_as_errors=false"
+          gn gen out/Release --args="is_debug=false use_sysroot=false is_component_build=false symbol_level=0 treat_warnings_as_errors=false"
 
       - name: Build Chromium (Linux)
         if: contains(matrix.runner, 'linux') && steps.check_build.outputs.cache-hit == 'false'
         shell: bash
         run: |
           cd src
-          echo "Attempting incremental build with limited concurrency..."
-          ninja -C out/Release chrome -j${BUILD_JOBS:-4}
-          if [ $? -ne 0 ]; then
-            echo "Incremental build failed. Trying clean build..."
-            ninja -C out/Release -t clean
-            find out/Release -name "v8*" -type f -delete 2>/dev/null || true
-            find out/Release -name "*snapshot*" -type f -delete 2>/dev/null || true
-            find out/Release -name "*.S" -type f -delete 2>/dev/null || true
-            REDUCED_JOBS=$(( ${BUILD_JOBS:-4} / 2 ))
-            if [ $REDUCED_JOBS -lt 1 ]; then REDUCED_JOBS=1; fi
-            ninja -C out/Release chrome -j$REDUCED_JOBS
-          fi
+          ninja -C out/Release chrome -j$(nproc)
 
-      - name: Cache completed build
-        if: steps.check_build.outputs.cache-hit == 'false'
+      - name: Build Chromium (macOS)
+        if: contains(matrix.runner, 'macos') && steps.check_build.outputs.cache-hit == 'false'
+        shell: bash
+        run: |
+          cd src
+          ninja -C out/Release chrome
+
+      - name: Build Chromium (Windows)
+        if: runner.os == 'Windows' && steps.check_build.outputs.cache-hit == 'false'
+        shell: cmd
+        run: |
+          cd src
+          ninja -C out\Release chrome
+
+      - name: Cache completed build (Linux/macOS)
+        if: runner.os != 'Windows' && steps.check_build.outputs.cache-hit == 'false'
         shell: bash
         run: |
           mkdir -p "$GITHUB_WORKSPACE/cached-builds/${{ steps.build_key.outputs.key }}"
           cp -r src/out/Release/* "$GITHUB_WORKSPACE/cached-builds/${{ steps.build_key.outputs.key }}/"
 
-      # Fixed packaging step for Windows
+      - name: Cache completed build (Windows)
+        if: runner.os == 'Windows' && steps.check_build.outputs.cache-hit == 'false'
+        shell: cmd
+        run: |
+          set CACHE_DIR=%GITHUB_WORKSPACE%\cached-builds\${{ steps.build_key.outputs.key }}
+          mkdir %CACHE_DIR%
+          xcopy /E /I /Y src\out\Release\* %CACHE_DIR%\
+
+      - name: Package Chromium build (Linux/macOS)
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          mkdir -p artifacts
+          cd src/out/Release
+          tar -czf ../../../../artifacts/chromium-${{ matrix.runner }}.tar.gz chrome *.pak *.bin locales resources MEIPreload swiftshader icudtl.dat *.so || true
+
       - name: Package Chromium build (Windows)
         if: runner.os == 'Windows'
         shell: cmd
         run: |
           mkdir artifacts
           cd src\out\Release
-          
           mkdir temp_pkg
           copy chrome.exe temp_pkg\ || echo chrome.exe not found
           copy *.pak temp_pkg\ || echo No pak files found
@@ -279,67 +261,12 @@ jobs:
           xcopy /E /I /Y swiftshader temp_pkg\swiftshader || echo swiftshader folder not found
           copy icudtl.dat temp_pkg\ || echo icudtl.dat not found
           copy *.dll temp_pkg\ || echo No dll files found
-          
           cd ..\..\..
           powershell -Command "Compress-Archive -Path src\out\Release\temp_pkg\* -DestinationPath artifacts\chromium-${{ matrix.runner }}.zip -Force"
-          
           rmdir /S /Q src\out\Release\temp_pkg
-
-      - name: Package Chromium build (Linux)
-        if: contains(matrix.runner, 'linux')
-        shell: bash
-        run: |
-          mkdir -p artifacts
-          cd src/out/Release
-          tar -czf ../../../../artifacts/chromium-${{ matrix.runner }}.tar.gz chrome *.pak *.bin locales resources MEIPreload swiftshader icudtl.dat *.so || true
-
-      - name: Package Chromium build (macOS)
-        if: contains(matrix.runner, 'macos')
-        shell: bash
-        run: |
-          mkdir -p artifacts
-          cd src/out/Release
-          tar -czf ../../../../artifacts/chromium-${{ matrix.runner }}.tar.gz chrome *.pak *.bin locales resources MEIPreload swiftshader icudtl.dat *.so || true
-
-      - name: Store artifacts (Windows)
-        if: runner.os == 'Windows'
-        shell: cmd
-        run: |
-          set ARTIFACT_DIR=%GITHUB_WORKSPACE%\build-artifacts\${{ matrix.runner }}
-          mkdir %ARTIFACT_DIR%
-          xcopy /E /I /Y artifacts\* %ARTIFACT_DIR%\
-          echo Build date: %DATE% %TIME%> %ARTIFACT_DIR%\build-info.txt
-          echo Branch: %FORK_BRANCH%>> %ARTIFACT_DIR%\build-info.txt
-          cd src
-          for /f %%i in ('git rev-parse HEAD') do set COMMIT=%%i
-          cd ..
-          echo Commit: %COMMIT%>> %ARTIFACT_DIR%\build-info.txt
-          echo Runner: ${{ matrix.runner }}>> %ARTIFACT_DIR%\build-info.txt
-
-      - name: Store artifacts (Linux)
-        if: contains(matrix.runner, 'linux')
-        shell: bash
-        run: |
-          mkdir -p $GITHUB_WORKSPACE/build-artifacts/${{ matrix.runner }}
-          cp -r artifacts/* $GITHUB_WORKSPACE/build-artifacts/${{ matrix.runner }}/ || true
-          echo "Build date: $(date)" > $GITHUB_WORKSPACE/build-artifacts/${{ matrix.runner }}/build-info.txt
-          echo "Branch: $FORK_BRANCH" >> $GITHUB_WORKSPACE/build-artifacts/${{ matrix.runner }}/build-info.txt
-          echo "Commit: $(cd src && git rev-parse HEAD)" >> $GITHUB_WORKSPACE/build-artifacts/${{ matrix.runner }}/build-info.txt
-          echo "Runner: ${{ matrix.runner }}" >> $GITHUB_WORKSPACE/build-artifacts/${{ matrix.runner }}/build-info.txt
-
-      - name: Store artifacts (macOS)
-        if: contains(matrix.runner, 'macos')
-        shell: bash
-        run: |
-          mkdir -p $GITHUB_WORKSPACE/build-artifacts/${{ matrix.runner }}
-          cp -r artifacts/* $GITHUB_WORKSPACE/build-artifacts/${{ matrix.runner }}/ || true
-          echo "Build date: $(date)" > $GITHUB_WORKSPACE/build-artifacts/${{ matrix.runner }}/build-info.txt
-          echo "Branch: $FORK_BRANCH" >> $GITHUB_WORKSPACE/build-artifacts/${{ matrix.runner }}/build-info.txt
-          echo "Commit: $(cd src && git rev-parse HEAD)" >> $GITHUB_WORKSPACE/build-artifacts/${{ matrix.runner }}/build-info.txt
-          echo "Runner: ${{ matrix.runner }}" >> $GITHUB_WORKSPACE/build-artifacts/${{ matrix.runner }}/build-info.txt
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: chromium-${{ matrix.runner }}
-          path: ${{ github.workspace }}/build-artifacts/${{ matrix.runner }}
+          path: artifacts
