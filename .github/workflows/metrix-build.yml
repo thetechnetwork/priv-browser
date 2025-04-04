@@ -168,15 +168,21 @@ jobs:
         shell: bash
         run: |
           cd src
-          echo "Checking for whitespace errors in patch application..."
-          git diff --check || { echo "Patch introduced whitespace issues"; exit 1; }
 
-        # Check for rejected patch hunks
-          if find . -name \"*.rej\" -o -name \"*.orig\" | grep -q .; then
-            echo \"❌ Patch application created .rej or .orig files\"
+          echo "Checking for whitespace errors in patch application..."
+          git diff --check || {
+            echo "❌ Patch introduced whitespace issues"
+            exit 1
+          }
+
+          echo "Checking for rejected patch hunks..."
+          if find . -name "*.rej" -o -name "*.orig" | grep -q .; then
+            echo "❌ Patch application created .rej or .orig files"
+            find . -name "*.rej" -o -name "*.orig"
             exit 1
           fi
-            echo "✅ Patch verification passed"
+
+          echo "✅ Patch verification passed"
 
       - name: Generate build cache key
         id: build_key
