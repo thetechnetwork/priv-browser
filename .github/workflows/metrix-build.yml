@@ -81,8 +81,13 @@ jobs:
       - name: Install depot_tools
         shell: bash
         run: |
-          if [ -d "depot_tools" ]; then rm -rf depot_tools; fi
-          git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
+          if [ -d "depot_tools" ]; then
+            cd depot_tools
+            git pull
+            cd ..
+          else
+            git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
+          fi
           chmod +x depot_tools/gclient depot_tools/gclient.py
           echo "PATH=$(pwd)/depot_tools:$PATH" >> $GITHUB_ENV
 
@@ -102,26 +107,51 @@ jobs:
           echo "FORK_URL=https://github.com/TheTechNetwork/priv-browser.git" >> $GITHUB_ENV
           echo "FORK_BRANCH=${{ github.event.inputs.fork_branch || 'main' }}" >> $GITHUB_ENV
 
+      - name: Prepare cache directories 
+        shell: bash
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/cached-builds"
+
       - name: Fetch Chromium source
         shell: bash
         run: |
-          cat > .gclient << EOF
-          solutions = [
-            {
-              "name": "src",
-              "url": "$FORK_URL",
-              "deps_file": "DEPS",
-              "managed": False,
-              "custom_deps": {},
-              "custom_vars": {},
-            },
-          ]
-          EOF
-          if [ -d src/.git ]; then
-            cd src && git remote set-url origin "$FORK_URL" && git fetch --prune && git checkout "$FORK_BRANCH" && git pull && cd ..
-          else
-            git clone "$FORK_URL" src && cd src && git checkout "$FORK_BRANCH" && cd ..
+          # Initialize gclient config if not exists
+          if [ ! -f .gclient ]; then
+            cat > .gclient << EOF
+            solutions = [
+              {
+                "name": "src",
+                "url": "$FORK_URL",
+                "deps_file": "DEPS",
+                "managed": False,
+                "custom_deps": {},
+                "custom_vars": {},
+              },
+            ]
+            EOF
           fi
+          
+          # Handle existing checkout for incremental builds
+          if [ -d src/.git ]; then
+            cd src
+            # Save any local changes
+            git stash -u || true
+            # Update remote URL in case it changed
+            git remote set-url origin "$FORK_URL"
+            # Fetch latest changes
+            git fetch --prune
+            # Hard reset to target branch to avoid merge conflicts
+            git reset --hard origin/"$FORK_BRANCH"
+            cd ..
+          else
+            # Fresh clone if src doesn't exist
+            git clone "$FORK_URL" src
+            cd src
+            git checkout "$FORK_BRANCH"
+            cd ..
+          fi
+          
+          # Sync dependencies
           gclient sync --no-history --with_branch_heads --with_tags -D
           gclient runhooks
 
@@ -137,13 +167,13 @@ jobs:
         run: |
           echo "Applying patches from priv-browser-patches..."
           cd src
+          # Clean any previously applied patches
+          git reset --hard HEAD
+          # Apply patches in order
           for patch in ../priv-browser-patches/*.patch; do
             echo "Checking and applying $patch"
-            if git apply --reverse --check "$patch" > /dev/null 2>&1; then
-              echo "Patch already applied, skipping: $patch"
-              continue
-            fi
-            if git apply "$patch"; then
+            if git apply --check "$patch"; then
+              git apply "$patch"
               echo "✅ Applied: $patch"
             else
               echo "❌ Failed to apply: $patch"
@@ -171,41 +201,31 @@ jobs:
         run: |
           cd src
           CHROMIUM_COMMIT=$(git rev-parse HEAD)
-          PATCH_HASH=$(find ../priv-browser-patches -type f -name "*.patch" -exec sha1sum {} \; | sha1sum | awk '{print $1}')
-          echo "key=build-${CHROMIUM_COMMIT}-${PATCH_HASH}" >> $GITHUB_OUTPUT
+          PATCH_HASH=$(find ../priv-browser-patches -type f -name "*.patch" -exec sha1sum {} \; | sort | sha1sum | awk '{print $1}')
+          CACHE_KEY="build-${CHROMIUM_COMMIT}-${PATCH_HASH}"
+          echo "key=$CACHE_KEY" >> $GITHUB_OUTPUT
+          echo "CACHE_DIR=$GITHUB_WORKSPACE/cached-builds/$CACHE_KEY" >> $GITHUB_ENV
+          mkdir -p "$GITHUB_WORKSPACE/cached-builds/$CACHE_KEY"
 
-      - name: Check for existing build (Linux/macOS)
-        if: runner.os != 'Windows'
+      - name: Check for existing build
         id: check_build
         shell: bash
         run: |
-          CACHE_DIR="$GITHUB_WORKSPACE/cached-builds/${{ steps.build_key.outputs.key }}"
           echo "Checking cache in $CACHE_DIR for ${{ runner.os }}"
-          if [[ "${{ runner.os }}" == "Linux" && -f "$CACHE_DIR/chrome" && -f "$CACHE_DIR/icudtl.dat" ]]; then
+          
+          if [[ "${{ runner.os }}" == "Windows" ]]; then
+            CHROME_PATH="$CACHE_DIR/chrome.exe"
+          else
+            CHROME_PATH="$CACHE_DIR/chrome"
+          fi
+          
+          if [[ -f "$CHROME_PATH" && -f "$CACHE_DIR/icudtl.dat" ]]; then
             echo "cache-hit=true" >> $GITHUB_OUTPUT
-          elif [[ "${{ runner.os }}" == "macOS" && -f "$CACHE_DIR/chrome" && -f "$CACHE_DIR/icudtl.dat" ]]; then
-            echo "cache-hit=true" >> $GITHUB_OUTPUT
+            echo "✅ Found cached build"
           else
             echo "cache-hit=false" >> $GITHUB_OUTPUT
+            echo "❌ No cached build found"
           fi
-
-      - name: Check for existing build (Windows)
-        if: runner.os == 'Windows'
-        id: check_build-win
-        shell: cmd
-        run: |
-          set CACHE_DIR=%GITHUB_WORKSPACE%\cached-builds\${{ steps.build_key.outputs.key }}
-          echo Checking cache in %CACHE_DIR%
-          if exist "%CACHE_DIR%\chrome.exe" (
-            if exist "%CACHE_DIR%\icudtl.dat" (
-              echo cache-hit=true>> %GITHUB_OUTPUT%
-            ) else (
-              echo cache-hit=false>> %GITHUB_OUTPUT%
-            )
-          ) else (
-            echo cache-hit=false>> %GITHUB_OUTPUT%
-          )
-
 
       - name: Reuse cached build
         if: steps.check_build.outputs.cache-hit == 'true'
@@ -213,7 +233,7 @@ jobs:
         run: |
           echo "Reusing cached build"
           mkdir -p src/out/Release
-          cp -r "$GITHUB_WORKSPACE/cached-builds/${{ steps.build_key.outputs.key }}/"* src/out/Release/
+          cp -r "$CACHE_DIR/"* src/out/Release/
 
       - name: Configure Chromium build
         if: steps.check_build.outputs.cache-hit == 'false'
@@ -244,20 +264,19 @@ jobs:
           cd src
           ninja -C out\Release chrome
 
-      - name: Cache completed build (Linux/macOS)
-        if: runner.os != 'Windows' && steps.check_build.outputs.cache-hit == 'false'
+      - name: Cache completed build
+        if: steps.check_build.outputs.cache-hit == 'false'
         shell: bash
         run: |
-          mkdir -p "$GITHUB_WORKSPACE/cached-builds/${{ steps.build_key.outputs.key }}"
-          cp -r src/out/Release/* "$GITHUB_WORKSPACE/cached-builds/${{ steps.build_key.outputs.key }}/"
-
-      - name: Cache completed build (Windows)
-        if: runner.os == 'Windows' && steps.check_build.outputs.cache-hit == 'false'
-        shell: cmd
-        run: |
-          set CACHE_DIR=%GITHUB_WORKSPACE%\cached-builds\${{ steps.build_key.outputs.key }}
-          mkdir %CACHE_DIR%
-          xcopy /E /I /Y src\out\Release\* %CACHE_DIR%\
+          # Ensure the cache directory exists
+          mkdir -p "$CACHE_DIR"
+          
+          # Copy build artifacts to cache
+          if [[ "${{ runner.os }}" == "Windows" ]]; then
+            cp -r src/out/Release/* "$CACHE_DIR/"
+          else
+            cp -r src/out/Release/* "$CACHE_DIR/"
+          fi
 
       - name: Package Chromium build (Linux/macOS)
         if: runner.os != 'Windows'
@@ -265,7 +284,8 @@ jobs:
         run: |
           mkdir -p artifacts
           cd src/out/Release
-          tar -czf ../../../../artifacts/chromium-${{ matrix.runner }}.tar.gz chrome *.pak *.bin locales resources MEIPreload swiftshader icudtl.dat *.so || true
+          tar -czf "../../../../artifacts/chromium-${{ matrix.runner }}.tar.gz" \
+            chrome *.pak *.bin locales resources MEIPreload swiftshader icudtl.dat *.so || true
 
       - name: Package Chromium build (Windows)
         if: runner.os == 'Windows'
@@ -283,9 +303,11 @@ jobs:
           xcopy /E /I /Y swiftshader temp_pkg\swiftshader || echo swiftshader folder not found
           copy icudtl.dat temp_pkg\ || echo icudtl.dat not found
           copy *.dll temp_pkg\ || echo No dll files found
-          cd ..\..\..
-          powershell -Command "Compress-Archive -Path src\out\Release\temp_pkg\* -DestinationPath artifacts\chromium-${{ matrix.runner }}.zip -Force"
-          rmdir /S /Q src\out\Release\temp_pkg
+          
+          cd temp_pkg
+          tar -a -cf ..\..\..\..\artifacts\chromium-${{ matrix.runner }}.zip *
+          cd ..
+          rmdir /S /Q temp_pkg
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
