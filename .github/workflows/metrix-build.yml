@@ -116,7 +116,7 @@ jobs:
         run: |
           # Initialize gclient config if not exists
           if [ ! -f .gclient ]; then
-            cat > .gclient << EOF
+            cat > .gclient << 'EOT'
             solutions = [
               {
                 "name": "src",
@@ -127,7 +127,9 @@ jobs:
                 "custom_vars": {},
               },
             ]
-            EOF
+            EOT
+            # Replace placeholder with actual URL
+            sed -i "s|\$FORK_URL|$FORK_URL|g" .gclient
           fi
           
           # Handle existing checkout for incremental builds
