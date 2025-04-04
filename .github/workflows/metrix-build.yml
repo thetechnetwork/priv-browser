@@ -191,7 +191,7 @@ jobs:
 
       - name: Check for existing build (Windows)
         if: runner.os == 'Windows'
-        id: check_build
+        id: check_build-win
         shell: cmd
         run: |
           set CACHE_DIR=%GITHUB_WORKSPACE%\cached-builds\${{ steps.build_key.outputs.key }}
