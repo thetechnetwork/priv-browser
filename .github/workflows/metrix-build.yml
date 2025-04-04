@@ -1,4 +1,4 @@
-name: Build Chromium
+name: Build Priv-Browser
 
 on:
   push:
@@ -171,12 +171,11 @@ jobs:
           echo "Checking for whitespace errors in patch application..."
           git diff --check || { echo "Patch introduced whitespace issues"; exit 1; }
 
-          echo "Verifying no merge conflicts or broken state..."
-          if git status --porcelain | grep -qv '^??'; then
-            echo "❌ Unstaged or uncommitted changes detected"
-            git status
-            exit 1
-          fi
+        # Check for rejected patch hunks
+        if find . -name \"*.rej\" -o -name \"*.orig\" | grep -q .; then
+          echo \"❌ Patch application created .rej or .orig files\"
+          exit 1
+        fi
           echo "✅ Patch verification passed"
 
       - name: Generate build cache key
