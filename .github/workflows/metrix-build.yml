@@ -174,16 +174,38 @@ jobs:
           PATCH_HASH=$(find ../priv-browser-patches -type f -name "*.patch" -exec sha1sum {} \; | sha1sum | awk '{print $1}')
           echo "key=build-${CHROMIUM_COMMIT}-${PATCH_HASH}" >> $GITHUB_OUTPUT
 
-      - name: Check for existing build
+      - name: Check for existing build (Linux/macOS)
+        if: runner.os != 'Windows'
         id: check_build
         shell: bash
         run: |
           CACHE_DIR="$GITHUB_WORKSPACE/cached-builds/${{ steps.build_key.outputs.key }}"
-          if [ -d "$CACHE_DIR" ]; then
+          echo "Checking cache in $CACHE_DIR for ${{ runner.os }}"
+          if [[ "${{ runner.os }}" == "Linux" && -f "$CACHE_DIR/chrome" && -f "$CACHE_DIR/icudtl.dat" ]]; then
+            echo "cache-hit=true" >> $GITHUB_OUTPUT
+          elif [[ "${{ runner.os }}" == "macOS" && -f "$CACHE_DIR/chrome" && -f "$CACHE_DIR/icudtl.dat" ]]; then
             echo "cache-hit=true" >> $GITHUB_OUTPUT
           else
             echo "cache-hit=false" >> $GITHUB_OUTPUT
           fi
+
+      - name: Check for existing build (Windows)
+          if: runner.os == 'Windows'
+          id: check_build
+          shell: cmd
+          run: |
+            set CACHE_DIR=%GITHUB_WORKSPACE%\cached-builds\${{ steps.build_key.outputs.key }}
+            echo Checking cache in %CACHE_DIR%
+            if exist "%CACHE_DIR%\chrome.exe" (
+              if exist "%CACHE_DIR%\icudtl.dat" (
+                echo cache-hit=true>> %GITHUB_OUTPUT%
+              ) else (
+                echo cache-hit=false>> %GITHUB_OUTPUT%
+              )
+            ) else (
+                echo cache-hit=false>> %GITHUB_OUTPUT%
+            )
+
 
       - name: Reuse cached build
         if: steps.check_build.outputs.cache-hit == 'true'
