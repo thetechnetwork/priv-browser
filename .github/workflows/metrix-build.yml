@@ -127,7 +127,15 @@ jobs:
           ]
           EOF
           if [ -d src/.git ]; then
-            cd src && git remote set-url origin "$FORK_URL" && git fetch --prune && git checkout "$FORK_BRANCH" && git pull && cd ..
+            cd src
+            # Reset any changes or stash them to allow clean operations
+            git reset --hard HEAD
+            git clean -fd
+            git remote set-url origin "$FORK_URL" 
+            git fetch --prune
+            git checkout -f "$FORK_BRANCH"
+            git reset --hard origin/"$FORK_BRANCH"
+            cd ..
           else
             git clone "$FORK_URL" src && cd src && git checkout "$FORK_BRANCH" && cd ..
           fi
