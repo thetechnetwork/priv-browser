@@ -172,11 +172,11 @@ jobs:
           git diff --check || { echo "Patch introduced whitespace issues"; exit 1; }
 
         # Check for rejected patch hunks
-        if find . -name \"*.rej\" -o -name \"*.orig\" | grep -q .; then
-          echo \"❌ Patch application created .rej or .orig files\"
-          exit 1
-        fi
-          echo "✅ Patch verification passed"
+          if find . -name \"*.rej\" -o -name \"*.orig\" | grep -q .; then
+            echo \"❌ Patch application created .rej or .orig files\"
+            exit 1
+          fi
+            echo "✅ Patch verification passed"
 
       - name: Generate build cache key
         id: build_key
