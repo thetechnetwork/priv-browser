@@ -11,6 +11,11 @@ on:
         description: 'Branch to build (defaults to main)'
         required: false
         default: 'main'
+      clean_build:
+        description: 'Force clean build and reset cached builds'
+        type: boolean
+        required: false
+        default: false
 
 jobs:
   build:
@@ -110,6 +115,13 @@ jobs:
         shell: bash
         run: |
           mkdir -p "$GITHUB_WORKSPACE/cached-builds"
+          # Clear cached builds if clean_build is requested
+          if [[ "${{ github.event.inputs.clean_build }}" == "true" ]]; then
+            echo "🧹 Cleaning all cached builds as requested"
+            rm -rf "$GITHUB_WORKSPACE/cached-builds"/*
+            rm -rf src/out
+            mkdir -p "$GITHUB_WORKSPACE/cached-builds"
+          fi
 
       - name: Fetch Chromium source
         shell: bash
@@ -172,7 +184,6 @@ jobs:
           repository: TheTechNetwork/priv-browser-patches
           token: ${{ secrets.PRIV_BROWSER_PAT }}
           path: priv-browser-patches
-          ref: main
 
       - name: Apply custom patches
         shell: bash
@@ -225,6 +236,12 @@ jobs:
         run: |
           echo "Checking cache in $CACHE_DIR for ${{ runner.os }}"
           
+          if [[ "${{ github.event.inputs.clean_build }}" == "true" ]]; then
+            echo "🧹 Skipping cache check as clean build was requested"
+            echo "cache-hit=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          
           if [[ "${{ runner.os }}" == "Windows" ]]; then
             CHROME_PATH="$CACHE_DIR/chrome.exe"
           else
@@ -252,8 +269,16 @@ jobs:
         shell: bash
         run: |
           cd src
+          rm -rf out/Release || true
           mkdir -p out/Release
-          gn gen out/Release --args="is_debug=false use_sysroot=false is_component_build=false symbol_level=0 treat_warnings_as_errors=false"
+          # Different GN args for different platforms
+          if [[ "${{ runner.os }}" == "macOS" ]]; then
+            gn gen out/Release --args="is_debug=false use_sysroot=false is_component_build=false symbol_level=0 treat_warnings_as_errors=false is_clang=true"
+          elif [[ "${{ runner.os }}" == "Windows" ]]; then
+            gn gen out/Release --args="is_debug=false use_sysroot=false is_component_build=false symbol_level=0 treat_warnings_as_errors=false is_clang=false"
+          else
+            gn gen out/Release --args="is_debug=false use_sysroot=false is_component_build=false symbol_level=0 treat_warnings_as_errors=false"
+          fi
 
       - name: Build Chromium (Linux)
         if: contains(matrix.runner, 'linux') && steps.check_build.outputs.cache-hit == 'false'
