@@ -265,7 +265,8 @@ jobs:
           if [[ "${{ runner.os }}" == "macOS" ]]; then
             gn gen out/Release --args="is_debug=false use_sysroot=false is_component_build=false symbol_level=0 treat_warnings_as_errors=false is_clang=true"
           elif [[ "${{ runner.os }}" == "Windows" ]]; then
-            gn gen out/Release --args="is_debug=false use_sysroot=false is_component_build=false symbol_level=0 treat_warnings_as_errors=false is_clang=false"
+            # Windows requires clang, see https://crbug.com/988071
+            gn gen out/Release --args="is_debug=false use_sysroot=false is_component_build=false symbol_level=0 treat_warnings_as_errors=false is_clang=true"
           else
             gn gen out/Release --args="is_debug=false use_sysroot=false is_component_build=false symbol_level=0 treat_warnings_as_errors=false"
           fi
