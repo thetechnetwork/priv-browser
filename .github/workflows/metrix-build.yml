@@ -280,7 +280,7 @@ jobs:
         shell: bash
         run: |
           cd src
-          ninja -C out/Release chrome -j$(nproc)
+          ninja -C out/Release chrome -j8
 
       - name: Build Chromium (macOS)
         if: contains(matrix.runner, 'macos') && steps.check_build.outputs.cache-hit == 'false'
