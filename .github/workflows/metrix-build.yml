@@ -168,11 +168,12 @@ jobs:
           gclient runhooks
 
       - name: Checkout patch repo
-        uses: actions/checkout@v3
-        with:
-          repository: TheTechNetwork/priv-browser-patches
-          token: ${{ secrets.PRIV_BROWSER_PAT }}
-          path: priv-browser-patches
+        shell: bash
+        run: |
+          echo "Cloning patch repository..."
+          rm -rf priv-browser-patches
+          git clone --depth=1 https://${{ secrets.PRIV_BROWSER_PAT }}@github.com/TheTechNetwork/priv-browser-patches.git priv-browser-patches
+          echo "✅ Patch repository cloned successfully"
 
       - name: Apply custom patches
         shell: bash
