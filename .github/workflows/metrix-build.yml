@@ -95,6 +95,10 @@ jobs:
         run: |
           where ninja || choco install ninja -y
           where ccache || choco install ccache -y
+          echo Adding ninja to PATH...
+          for /f "tokens=*" %%i in ('where ninja') do set NINJA_PATH=%%i
+          echo %NINJA_PATH% >> %GITHUB_PATH%
+          echo %NINJA_PATH% was added to PATH
 
       - name: Install depot_tools
         shell: bash
@@ -289,8 +293,9 @@ jobs:
         if: runner.os == 'Windows' && steps.check_build.outputs.cache-hit == 'false'
         shell: cmd
         run: |
+          echo Current PATH is %PATH%
           cd src
-          ninja -C out\Release chrome
+          C:\ProgramData\chocolatey\bin\ninja.exe -C out\Release chrome
 
       - name: Cache completed build
         if: steps.check_build.outputs.cache-hit == 'false'
