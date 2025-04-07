@@ -309,17 +309,22 @@ jobs:
         if: runner.os != 'Windows'
         shell: bash
         run: |
-          mkdir -p artifacts
+          mkdir -p "$GITHUB_WORKSPACE/artifacts"
           cd src/out/Release
-          tar -czf "../../../../artifacts/chromium-${{ matrix.runner }}.tar.gz" \
-            chrome *.pak *.bin locales resources MEIPreload swiftshader icudtl.dat *.so || true
+          echo "Packaging build artifacts..."
+          ls -la
+          tar -czf "$GITHUB_WORKSPACE/artifacts/chromium-${{ matrix.runner }}.tar.gz" \
+            chrome *.pak *.bin locales resources MEIPreload swiftshader icudtl.dat *.so || echo "Some files not found, but continuing"
+          echo "✅ Package created at $GITHUB_WORKSPACE/artifacts/chromium-${{ matrix.runner }}.tar.gz"
+          ls -la "$GITHUB_WORKSPACE/artifacts"
 
       - name: Package Chromium build (Windows)
         if: runner.os == 'Windows'
         shell: cmd
         run: |
-          mkdir artifacts
+          mkdir %GITHUB_WORKSPACE%\artifacts
           cd src\out\Release
+          echo Creating package directory...
           mkdir temp_pkg
           copy chrome.exe temp_pkg\ || echo chrome.exe not found
           copy *.pak temp_pkg\ || echo No pak files found
@@ -332,12 +337,15 @@ jobs:
           copy *.dll temp_pkg\ || echo No dll files found
           
           cd temp_pkg
-          tar -a -cf ..\..\..\..\artifacts\chromium-${{ matrix.runner }}.zip *
+          echo Creating zip archive...
+          tar -a -cf %GITHUB_WORKSPACE%\artifacts\chromium-%RUNNER_OS%.zip *
           cd ..
           rmdir /S /Q temp_pkg
+          dir %GITHUB_WORKSPACE%\artifacts
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: chromium-${{ matrix.runner }}
-          path: artifacts
+          path: "${{ github.workspace }}/artifacts"
+          if-no-files-found: warn
