@@ -1,10 +1,4 @@
-- name: Full reset check
-        if: github.event.inputs.full_reset == 'true'
-        shell: bash
-        run: |
-          echo "🧨 FULL RESET requested - removing all source code and cached builds"
-          rm -rf depot_tools src .gclient .gclient_entries "$GITHUB_WORKSPACE/cached-builds"/*
-          echo "✅ Reset complete - will perform fresh clone and build"name: Build Priv-Browser
+name: Build Priv-Browser
 
 on:
   push:
@@ -43,6 +37,14 @@ jobs:
         with:
           path: bootstrap
           fetch-depth: 1
+
+      - name: Full reset check
+        if: github.event.inputs.full_reset == 'true'
+        shell: bash
+        run: |
+          echo "🧨 FULL RESET requested - removing all source code and cached builds"
+          rm -rf depot_tools src .gclient .gclient_entries "$GITHUB_WORKSPACE/cached-builds"/*
+          echo "✅ Reset complete - will perform fresh clone and build"
 
       - name: Set up Python 3.10
         uses: actions/setup-python@v5
@@ -162,30 +164,6 @@ jobs:
           else
             git clone "$FORK_URL" src && cd src && git checkout "$FORK_BRANCH" && cd ..
           fi
-          gclient sync --no-history --with_branch_heads --with_tags -D
-          gclient runhooks
-          
-          # Handle existing checkout for incremental builds
-          if [ -d src/.git ]; then
-            cd src
-            # Save any local changes
-            git stash -u || true
-            # Update remote URL in case it changed
-            git remote set-url origin "$FORK_URL"
-            # Fetch latest changes
-            git fetch --prune
-            # Hard reset to target branch to avoid merge conflicts
-            git reset --hard origin/"$FORK_BRANCH"
-            cd ..
-          else
-            # Fresh clone if src doesn't exist
-            git clone "$FORK_URL" src
-            cd src
-            git checkout "$FORK_BRANCH"
-            cd ..
-          fi
-          
-          # Sync dependencies
           gclient sync --no-history --with_branch_heads --with_tags -D
           gclient runhooks
 
