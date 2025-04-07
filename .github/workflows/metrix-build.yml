@@ -1,4 +1,10 @@
-name: Build Priv-Browser
+- name: Full reset check
+        if: github.event.inputs.full_reset == 'true'
+        shell: bash
+        run: |
+          echo "🧨 FULL RESET requested - removing all source code and cached builds"
+          rm -rf depot_tools src .gclient .gclient_entries "$GITHUB_WORKSPACE/cached-builds"/*
+          echo "✅ Reset complete - will perform fresh clone and build"name: Build Priv-Browser
 
 on:
   push:
@@ -13,6 +19,11 @@ on:
         default: 'main'
       clean_build:
         description: 'Force clean build and reset cached builds'
+        type: boolean
+        required: false
+        default: false
+      full_reset:
+        description: 'Complete reset (delete and re-clone everything)'
         type: boolean
         required: false
         default: false
@@ -236,8 +247,8 @@ jobs:
         run: |
           echo "Checking cache in $CACHE_DIR for ${{ runner.os }}"
           
-          if [[ "${{ github.event.inputs.clean_build }}" == "true" ]]; then
-            echo "🧹 Skipping cache check as clean build was requested"
+          if [[ "${{ github.event.inputs.clean_build }}" == "true" || "${{ github.event.inputs.full_reset }}" == "true" ]]; then
+            echo "🧹 Skipping cache check as clean build or full reset was requested"
             echo "cache-hit=false" >> $GITHUB_OUTPUT
             exit 0
           fi
