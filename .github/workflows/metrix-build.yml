@@ -21,11 +21,16 @@ on:
         type: boolean
         required: false
         default: false
+      parallel_jobs:
+        description: 'Number of parallel build jobs (default: auto)'
+        required: false
+        default: 'auto'
 
 jobs:
   build:
     name: Build Chromium
     runs-on: ${{ matrix.runner }}
+    timeout-minutes: 480  # 8 hour timeout
     strategy:
       matrix:
         runner: [self-hosted-linux, self-hosted-windows, self-hosted-macos]
@@ -37,6 +42,37 @@ jobs:
         with:
           path: bootstrap
           fetch-depth: 1
+
+      - name: Set build parameters
+        id: build_params
+        shell: bash
+        run: |
+          # Set parallel jobs based on input or system capabilities
+          if [[ "${{ github.event.inputs.parallel_jobs }}" == "auto" ]]; then
+            if [[ "${{ runner.os }}" == "Linux" ]]; then
+              CORES=$(nproc)
+              JOBS=$(( CORES / 2 ))  # Use half of available cores
+            elif [[ "${{ runner.os }}" == "macOS" ]]; then
+              CORES=$(sysctl -n hw.ncpu)
+              JOBS=$(( CORES / 2 ))  # Use half of available cores
+            elif [[ "${{ runner.os }}" == "Windows" ]]; then
+              CORES=$NUMBER_OF_PROCESSORS
+              JOBS=$(( CORES / 2 ))  # Use half of available cores
+            else
+              JOBS=4  # Default fallback
+            fi
+          else
+            JOBS="${{ github.event.inputs.parallel_jobs }}"
+          fi
+          
+          # Make sure it's at least 1
+          if [[ $JOBS -lt 1 ]]; then
+            JOBS=1
+          fi
+          
+          echo "PARALLEL_JOBS=$JOBS" >> $GITHUB_ENV
+          echo "parallel_jobs=$JOBS" >> $GITHUB_OUTPUT
+          echo "Will use $JOBS parallel build jobs"
 
       - name: Full reset check
         if: github.event.inputs.full_reset == 'true'
@@ -95,10 +131,6 @@ jobs:
         run: |
           where ninja || choco install ninja -y
           where ccache || choco install ccache -y
-          echo Adding ninja to PATH...
-          for /f "tokens=*" %%i in ('where ninja') do set NINJA_PATH=%%i
-          echo %NINJA_PATH% >> %GITHUB_PATH%
-          echo %NINJA_PATH% was added to PATH
 
       - name: Install depot_tools
         shell: bash
@@ -155,7 +187,9 @@ jobs:
             },
           ]
           EOF
+          
           if [ -d src/.git ]; then
+            echo "Updating existing checkout..."
             cd src
             # Reset any changes or stash them to allow clean operations
             git reset --hard HEAD
@@ -166,9 +200,14 @@ jobs:
             git reset --hard origin/"$FORK_BRANCH"
             cd ..
           else
+            echo "Performing fresh clone..."
             git clone "$FORK_URL" src && cd src && git checkout "$FORK_BRANCH" && cd ..
           fi
+          
+          echo "Running gclient sync..."
           gclient sync --no-history --with_branch_heads --with_tags -D
+          
+          echo "Running gclient runhooks..."
           gclient runhooks
 
       - name: Checkout patch repo
@@ -178,6 +217,7 @@ jobs:
           rm -rf priv-browser-patches
           git clone --depth=1 https://${{ secrets.PRIV_BROWSER_PAT }}@github.com/TheTechNetwork/priv-browser-patches.git priv-browser-patches
           echo "✅ Patch repository cloned successfully"
+          ls -la priv-browser-patches
 
       - name: Apply custom patches
         shell: bash
@@ -265,29 +305,129 @@ jobs:
           cd src
           rm -rf out/Release || true
           mkdir -p out/Release
+          
+          # Common GN args
+          GN_ARGS="is_debug=false use_sysroot=false is_component_build=false symbol_level=0 treat_warnings_as_errors=false"
+          
+          # Additional optimization flags to reduce build time and memory usage
+          GN_ARGS="$GN_ARGS v8_enable_slow_dchecks=false v8_optimized_debug=false"
+          
           # Different GN args for different platforms
           if [[ "${{ runner.os }}" == "macOS" ]]; then
-            gn gen out/Release --args="is_debug=false use_sysroot=false is_component_build=false symbol_level=0 treat_warnings_as_errors=false is_clang=true"
+            gn gen out/Release --args="$GN_ARGS is_clang=true"
           elif [[ "${{ runner.os }}" == "Windows" ]]; then
             # Windows requires clang, see https://crbug.com/988071
-            gn gen out/Release --args="is_debug=false use_sysroot=false is_component_build=false symbol_level=0 treat_warnings_as_errors=false is_clang=true"
+            gn gen out/Release --args="$GN_ARGS is_clang=true"
           else
-            gn gen out/Release --args="is_debug=false use_sysroot=false is_component_build=false symbol_level=0 treat_warnings_as_errors=false"
+            gn gen out/Release --args="$GN_ARGS"
           fi
+          
+          echo "Build configured with args: $GN_ARGS"
 
       - name: Build Chromium (Linux)
         if: contains(matrix.runner, 'linux') && steps.check_build.outputs.cache-hit == 'false'
         shell: bash
         run: |
           cd src
-          ninja -C out/Release chrome -j8
+          echo "Starting Chromium build with controlled parallelism..."
+          echo "Using $PARALLEL_JOBS parallel jobs"
+          echo "Available CPU cores: $(nproc)"
+          echo "Available memory: $(free -h)"
+          echo "Disk space: $(df -h .)"
+          
+          # First attempt with progress monitoring
+          ATTEMPT=1
+          MAX_ATTEMPTS=3
+          BUILD_SUCCESS=false
+          
+          while [ $ATTEMPT -le $MAX_ATTEMPTS ] && [ "$BUILD_SUCCESS" = "false" ]; do
+            echo "Build attempt $ATTEMPT of $MAX_ATTEMPTS"
+            
+            # Start the build with timeout
+            timeout 90m ninja -C out/Release chrome -j$PARALLEL_JOBS
+            
+            if [ $? -eq 0 ]; then
+              BUILD_SUCCESS=true
+              echo "✅ Build completed successfully on attempt $ATTEMPT"
+            elif [ $? -eq 124 ]; then
+              echo "⚠️ Build timed out after 90 minutes on attempt $ATTEMPT"
+              echo "Cleaning up stuck processes..."
+              killall -9 clang++ || true
+              sleep 10
+              
+              # Reduce parallelism for next attempt
+              PARALLEL_JOBS=$(( PARALLEL_JOBS / 2 ))
+              if [ $PARALLEL_JOBS -lt 1 ]; then PARALLEL_JOBS=1; fi
+              echo "Reduced parallelism to $PARALLEL_JOBS for next attempt"
+            else
+              echo "❌ Build failed with error code $? on attempt $ATTEMPT"
+              echo "Build output directory contents:"
+              find out/Release -type f -name "chrome" -o -name "*.so" | sort
+            fi
+            
+            ATTEMPT=$(( ATTEMPT + 1 ))
+          done
+          
+          if [ "$BUILD_SUCCESS" = "true" ]; then
+            echo "Final build successful!"
+            ls -la out/Release/chrome
+          else
+            echo "Failed to build after $MAX_ATTEMPTS attempts"
+            exit 1
+          fi
 
       - name: Build Chromium (macOS)
         if: contains(matrix.runner, 'macos') && steps.check_build.outputs.cache-hit == 'false'
         shell: bash
         run: |
           cd src
-          ninja -C out/Release chrome
+          echo "Starting Chromium build with controlled parallelism..."
+          echo "Using $PARALLEL_JOBS parallel jobs"
+          echo "Available CPU cores: $(sysctl -n hw.ncpu)"
+          echo "Available memory: $(vm_stat | grep 'Pages free')"
+          echo "Disk space: $(df -h .)"
+          
+          # First attempt with progress monitoring
+          ATTEMPT=1
+          MAX_ATTEMPTS=3
+          BUILD_SUCCESS=false
+          
+          while [ $ATTEMPT -le $MAX_ATTEMPTS ] && [ "$BUILD_SUCCESS" = "false" ]; do
+            echo "Build attempt $ATTEMPT of $MAX_ATTEMPTS"
+            
+            # Start the build with timeout
+            gtimeout 90m ninja -C out/Release chrome -j$PARALLEL_JOBS || \
+            timeout 90m ninja -C out/Release chrome -j$PARALLEL_JOBS
+            
+            if [ $? -eq 0 ]; then
+              BUILD_SUCCESS=true
+              echo "✅ Build completed successfully on attempt $ATTEMPT"
+            elif [ $? -eq 124 ]; then
+              echo "⚠️ Build timed out after 90 minutes on attempt $ATTEMPT"
+              echo "Cleaning up stuck processes..."
+              killall -9 clang++ || true
+              sleep 10
+              
+              # Reduce parallelism for next attempt
+              PARALLEL_JOBS=$(( PARALLEL_JOBS / 2 ))
+              if [ $PARALLEL_JOBS -lt 1 ]; then PARALLEL_JOBS=1; fi
+              echo "Reduced parallelism to $PARALLEL_JOBS for next attempt"
+            else
+              echo "❌ Build failed with error code $? on attempt $ATTEMPT"
+              echo "Build output directory contents:"
+              find out/Release -type f -name "chrome" | sort
+            fi
+            
+            ATTEMPT=$(( ATTEMPT + 1 ))
+          done
+          
+          if [ "$BUILD_SUCCESS" = "true" ]; then
+            echo "Final build successful!"
+            ls -la out/Release/chrome
+          else
+            echo "Failed to build after $MAX_ATTEMPTS attempts"
+            exit 1
+          fi
 
       - name: Build Chromium (Windows)
         if: runner.os == 'Windows' && steps.check_build.outputs.cache-hit == 'false'
@@ -295,7 +435,30 @@ jobs:
         run: |
           echo Current PATH is %PATH%
           cd src
-          C:\ProgramData\chocolatey\bin\ninja.exe -C out\Release chrome
+          
+          echo Starting build with %PARALLEL_JOBS% jobs...
+          
+          REM First build attempt
+          C:\ProgramData\chocolatey\bin\ninja.exe -C out\Release chrome -j%PARALLEL_JOBS%
+          
+          if %ERRORLEVEL% EQU 0 (
+            echo Build succeeded!
+          ) else (
+            echo First build attempt failed with error code %ERRORLEVEL%
+            echo Killing any stuck processes and trying again...
+            taskkill /F /IM clang.exe /T
+            taskkill /F /IM clang++.exe /T
+            timeout /t 10
+            
+            REM Try again with reduced parallelism
+            set /a REDUCED_JOBS=%PARALLEL_JOBS%/2
+            if %REDUCED_JOBS% LSS 1 set REDUCED_JOBS=1
+            echo Retrying with %REDUCED_JOBS% jobs...
+            C:\ProgramData\chocolatey\bin\ninja.exe -C out\Release chrome -j%REDUCED_JOBS%
+          )
+          
+          echo Build complete, checking for chrome.exe...
+          dir out\Release\chrome.exe
 
       - name: Cache completed build
         if: steps.check_build.outputs.cache-hit == 'false'
@@ -304,12 +467,17 @@ jobs:
           # Ensure the cache directory exists
           mkdir -p "$CACHE_DIR"
           
+          echo "Caching build output to $CACHE_DIR"
+          
           # Copy build artifacts to cache
           if [[ "${{ runner.os }}" == "Windows" ]]; then
             cp -r src/out/Release/* "$CACHE_DIR/"
           else
             cp -r src/out/Release/* "$CACHE_DIR/"
           fi
+          
+          echo "Build cached successfully"
+          ls -la "$CACHE_DIR"
 
       - name: Package Chromium build (Linux/macOS)
         if: runner.os != 'Windows'
@@ -318,9 +486,14 @@ jobs:
           mkdir -p "$GITHUB_WORKSPACE/artifacts"
           cd src/out/Release
           echo "Packaging build artifacts..."
+          echo "Files in build directory:"
           ls -la
+          
+          echo "Creating archive..."
           tar -czf "$GITHUB_WORKSPACE/artifacts/chromium-${{ matrix.runner }}.tar.gz" \
-            chrome *.pak *.bin locales resources MEIPreload swiftshader icudtl.dat *.so || echo "Some files not found, but continuing"
+            chrome *.pak *.bin locales resources MEIPreload swiftshader icudtl.dat *.so || \
+            echo "Some files not found, but continuing"
+          
           echo "✅ Package created at $GITHUB_WORKSPACE/artifacts/chromium-${{ matrix.runner }}.tar.gz"
           ls -la "$GITHUB_WORKSPACE/artifacts"
 
@@ -328,25 +501,46 @@ jobs:
         if: runner.os == 'Windows'
         shell: cmd
         run: |
-          mkdir %GITHUB_WORKSPACE%\artifacts
+          mkdir %GITHUB_WORKSPACE%\artifacts 2>nul
           cd src\out\Release
-          echo Creating package directory...
-          mkdir temp_pkg
-          copy chrome.exe temp_pkg\ || echo chrome.exe not found
-          copy *.pak temp_pkg\ || echo No pak files found
-          copy *.bin temp_pkg\ || echo No bin files found
-          xcopy /E /I /Y locales temp_pkg\locales || echo locales folder not found
-          xcopy /E /I /Y resources temp_pkg\resources || echo resources folder not found
-          xcopy /E /I /Y MEIPreload temp_pkg\MEIPreload || echo MEIPreload folder not found
-          xcopy /E /I /Y swiftshader temp_pkg\swiftshader || echo swiftshader folder not found
-          copy icudtl.dat temp_pkg\ || echo icudtl.dat not found
-          copy *.dll temp_pkg\ || echo No dll files found
           
-          cd temp_pkg
+          echo Checking for chrome.exe...
+          dir chrome.exe
+          
+          echo Creating package directory...
+          mkdir temp_pkg 2>nul
+          
+          echo Copying main executable...
+          copy chrome.exe temp_pkg\ || echo chrome.exe not found
+          
+          echo Copying PAK files...
+          for %%f in (*.pak) do copy %%f temp_pkg\ || echo No pak files found
+          
+          echo Copying BIN files...
+          for %%f in (*.bin) do copy %%f temp_pkg\ || echo No bin files found
+          
+          echo Copying DLL files...
+          for %%f in (*.dll) do copy %%f temp_pkg\ || echo No dll files found
+          
+          echo Copying icudtl.dat...
+          copy icudtl.dat temp_pkg\ || echo icudtl.dat not found
+          
+          echo Copying folders...
+          if exist locales xcopy /E /I /Y locales temp_pkg\locales || echo locales folder not found
+          if exist resources xcopy /E /I /Y resources temp_pkg\resources || echo resources folder not found
+          if exist MEIPreload xcopy /E /I /Y MEIPreload temp_pkg\MEIPreload || echo MEIPreload folder not found
+          if exist swiftshader xcopy /E /I /Y swiftshader temp_pkg\swiftshader || echo swiftshader folder not found
+          
+          echo Listing files in temp_pkg directory...
+          dir /s temp_pkg
+          
           echo Creating zip archive...
+          cd temp_pkg
           tar -a -cf %GITHUB_WORKSPACE%\artifacts\chromium-%RUNNER_OS%.zip *
           cd ..
           rmdir /S /Q temp_pkg
+          
+          echo Archive created:
           dir %GITHUB_WORKSPACE%\artifacts
 
       - name: Upload build artifacts
