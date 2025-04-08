@@ -395,15 +395,15 @@ jobs:
           while [ $ATTEMPT -le $MAX_ATTEMPTS ] && [ "$BUILD_SUCCESS" = "false" ]; do
             echo "Build attempt $ATTEMPT of $MAX_ATTEMPTS"
             
-            # Start the build with timeout
-            gtimeout 90m ninja -C out/Release chrome -j$PARALLEL_JOBS || \
-            timeout 90m ninja -C out/Release chrome -j$PARALLEL_JOBS
+            # Start the build without timeout (macOS doesn't have timeout command)
+            ninja -C out/Release chrome -j$PARALLEL_JOBS
+            BUILD_RESULT=$?
             
-            if [ $? -eq 0 ]; then
+            if [ $BUILD_RESULT -eq 0 ]; then
               BUILD_SUCCESS=true
               echo "✅ Build completed successfully on attempt $ATTEMPT"
-            elif [ $? -eq 124 ]; then
-              echo "⚠️ Build timed out after 90 minutes on attempt $ATTEMPT"
+            else
+              echo "❌ Build failed with error code $BUILD_RESULT on attempt $ATTEMPT"
               echo "Cleaning up stuck processes..."
               killall -9 clang++ || true
               sleep 10
@@ -412,8 +412,7 @@ jobs:
               PARALLEL_JOBS=$(( PARALLEL_JOBS / 2 ))
               if [ $PARALLEL_JOBS -lt 1 ]; then PARALLEL_JOBS=1; fi
               echo "Reduced parallelism to $PARALLEL_JOBS for next attempt"
-            else
-              echo "❌ Build failed with error code $? on attempt $ATTEMPT"
+              
               echo "Build output directory contents:"
               find out/Release -type f -name "chrome" | sort
             fi
